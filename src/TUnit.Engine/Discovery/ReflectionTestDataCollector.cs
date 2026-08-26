@@ -1914,21 +1914,37 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             }
                             else
                             {
-                                // Single non-array argument - wrap in array
-                                var singleElementArray = Array.CreateInstance(paramsElementType, 1);
-                                if (paramsElementType.IsAssignableFrom(singleArg.GetType()))
+                                // Mirrors CastHelper.ToTrailingArray used by source-generated invokers.
+                                var singleArgType = singleArg.GetType();
+                                if (paramsElementType.IsAssignableFrom(singleArgType) || IsCovariantCompatible(paramsElementType, singleArgType))
                                 {
+                                    // A single element of the array's type - wrap (C# params expansion).
+                                    // Checked before the Array branch so `params object[]` still
+                                    // receives an int[] as one element, like C#.
+                                    var singleElementArray = Array.CreateInstance(paramsElementType, 1);
                                     singleElementArray.SetValue(singleArg, 0);
+                                    castedArgs[regularParamsCount] = singleElementArray;
                                 }
-                                else if (IsCovariantCompatible(paramsElementType, singleArg.GetType()))
+                                else if (singleArg is Array { Rank: 1 } sourceArray)
                                 {
-                                    singleElementArray.SetValue(singleArg, 0);
+                                    // An array whose runtime type isn't the parameter's (e.g. an object[]
+                                    // from a MatrixAttribute subclass for a MyEnum[] parameter, issue #6678):
+                                    // convert element-wise rather than forcing it into a single element.
+                                    var sourceLowerBound = sourceArray.GetLowerBound(0);
+                                    var convertedArray = Array.CreateInstance(paramsElementType, sourceArray.Length);
+                                    for (var i = 0; i < sourceArray.Length; i++)
+                                    {
+                                        convertedArray.SetValue(CastHelper.Cast(paramsElementType, sourceArray.GetValue(sourceLowerBound + i)), i);
+                                    }
+                                    castedArgs[regularParamsCount] = convertedArray;
                                 }
                                 else
                                 {
+                                    // Single scalar needing conversion - convert, then wrap in array
+                                    var singleElementArray = Array.CreateInstance(paramsElementType, 1);
                                     singleElementArray.SetValue(CastHelper.Cast(paramsElementType, singleArg), 0);
+                                    castedArgs[regularParamsCount] = singleElementArray;
                                 }
-                                castedArgs[regularParamsCount] = singleElementArray;
                             }
                         }
                         else

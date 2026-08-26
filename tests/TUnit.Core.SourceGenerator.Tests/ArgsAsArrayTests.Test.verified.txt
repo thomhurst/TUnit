@@ -56,6 +56,22 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", new global::TUnit.Core.ConcreteType(typeof(string[])), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("NonParamsStringArray_BeyondStaticCaseCap", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0])
 });
+    private static readonly global::TUnit.Core.MethodMetadata __mm_9 = global::TUnit.Core.MethodMetadataFactory.Create("TrailingArray_ObjectArrayFromMatrix", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.ConfigKind[]), "configs", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConfigKind[])), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("TrailingArray_ObjectArrayFromMatrix", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ConfigKind[]) }, null)!.GetParameters()[0])
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_10 = global::TUnit.Core.MethodMetadataFactory.Create("TrailingParamsArray_ObjectArrayFromMatrix", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.ConfigKind[]), "configs", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConfigKind[])), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("TrailingParamsArray_ObjectArrayFromMatrix", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ConfigKind[]) }, null)!.GetParameters()[0])
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_11 = global::TUnit.Core.MethodMetadataFactory.Create("TrailingArray_NonZeroLowerBoundArrayFromMatrix", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.ConfigKind[]), "configs", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConfigKind[])), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("TrailingArray_NonZeroLowerBoundArrayFromMatrix", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ConfigKind[]) }, null)!.GetParameters()[0])
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_12 = global::TUnit.Core.MethodMetadataFactory.Create("ParamsObjectArray_ArrayArgumentStaysSingleElement", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object[]), "values", new global::TUnit.Core.ConcreteType(typeof(object[])), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("ParamsObjectArray_ArrayArgumentStaysSingleElement", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object[]) }, null)!.GetParameters()[0])
+});
     private static global::TUnit.TestProject.ArgsAsArrayTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.ArgsAsArrayTests();
@@ -77,7 +93,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
                             }
                         case 1:
                             {
-                                instance.Params((args[0] is null ? null : args[0] is string[] arr ? arr : new string[] { global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) }));
+                                instance.Params((args[0] is null ? null : args[0] is string[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<string>(args[0])));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 2:
@@ -128,7 +144,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
                             }
                         case 1:
                             {
-                                instance.ParamsEnumerable((args[0] is null ? null : args[0] is global::System.Collections.Generic.IEnumerable<string> arr ? arr : new string[] { global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) }));
+                                instance.ParamsEnumerable((args[0] is null ? null : args[0] is global::System.Collections.Generic.IEnumerable<string> arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<string>(args[0])));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 2:
@@ -179,7 +195,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
                             }
                         case 2:
                             {
-                                instance.Following_Non_Params(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is global::System.Collections.Generic.IEnumerable<string> arr ? arr : new string[] { global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]) }));
+                                instance.Following_Non_Params(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is global::System.Collections.Generic.IEnumerable<string> arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<string>(args[1])));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 3:
@@ -233,7 +249,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
                             }
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.NonParamsStringArray((args[0] is null ? null : args[0] is string[] arr ? arr : new string[] { global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) })));
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonParamsStringArray((args[0] is null ? null : args[0] is string[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<string>(args[0]))));
                             }
                         case 2:
                             {
@@ -276,7 +292,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
                             }
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.NonParamsStringArray_SingleValue((args[0] is null ? null : args[0] is string[] arr ? arr : new string[] { global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) })));
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonParamsStringArray_SingleValue((args[0] is null ? null : args[0] is string[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<string>(args[0]))));
                             }
                         case 2:
                             {
@@ -319,7 +335,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
                             }
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.NonParamsStringArray_MultipleValues((args[0] is null ? null : args[0] is string[] arr ? arr : new string[] { global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) })));
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonParamsStringArray_MultipleValues((args[0] is null ? null : args[0] is string[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<string>(args[0]))));
                             }
                         case 2:
                             {
@@ -362,7 +378,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
                             }
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.NonParamsIntArray((args[0] is null ? null : args[0] is int[] arr ? arr : new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]) })));
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonParamsIntArray((args[0] is null ? null : args[0] is int[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(args[0]))));
                             }
                         case 2:
                             {
@@ -405,7 +421,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
                             }
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.GenericStringArray((args[0] is null ? null : args[0] is string[] arr ? arr : new string[] { global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) })));
+                                return new global::System.Threading.Tasks.ValueTask(instance.GenericStringArray((args[0] is null ? null : args[0] is string[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<string>(args[0]))));
                             }
                         case 2:
                             {
@@ -448,7 +464,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
                             }
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.NonParamsStringArray_BeyondStaticCaseCap((args[0] is null ? null : args[0] is string[] arr ? arr : new string[] { global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) })));
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonParamsStringArray_BeyondStaticCaseCap((args[0] is null ? null : args[0] is string[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<string>(args[0]))));
                             }
                         case 2:
                             {
@@ -472,6 +488,178 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
                             }
                         default:
                             return new global::System.Threading.Tasks.ValueTask(instance.NonParamsStringArray_BeyondStaticCaseCap((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[i]))) : global::System.Array.Empty<string>())));
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
+            }
+            case 9:
+            {
+                try
+                {
+                    switch (args.Length)
+                    {
+                        case 0:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_ObjectArrayFromMatrix(global::System.Array.Empty<global::TUnit.TestProject.ConfigKind>()));
+                            }
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_ObjectArrayFromMatrix((args[0] is null ? null : args[0] is global::TUnit.TestProject.ConfigKind[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<global::TUnit.TestProject.ConfigKind>(args[0]))));
+                            }
+                        case 2:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_ObjectArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]) }));
+                            }
+                        case 3:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_ObjectArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[2]) }));
+                            }
+                        case 4:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_ObjectArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[3]) }));
+                            }
+                        case 5:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_ObjectArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[4]) }));
+                            }
+                        case 6:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_ObjectArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[5]) }));
+                            }
+                        default:
+                            return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_ObjectArrayFromMatrix((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[i]))) : global::System.Array.Empty<global::TUnit.TestProject.ConfigKind>())));
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
+            }
+            case 10:
+            {
+                try
+                {
+                    switch (args.Length)
+                    {
+                        case 0:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingParamsArray_ObjectArrayFromMatrix(global::System.Array.Empty<global::TUnit.TestProject.ConfigKind>()));
+                            }
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingParamsArray_ObjectArrayFromMatrix((args[0] is null ? null : args[0] is global::TUnit.TestProject.ConfigKind[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<global::TUnit.TestProject.ConfigKind>(args[0]))));
+                            }
+                        case 2:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingParamsArray_ObjectArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]) }));
+                            }
+                        case 3:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingParamsArray_ObjectArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[2]) }));
+                            }
+                        case 4:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingParamsArray_ObjectArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[3]) }));
+                            }
+                        case 5:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingParamsArray_ObjectArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[4]) }));
+                            }
+                        case 6:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingParamsArray_ObjectArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[5]) }));
+                            }
+                        default:
+                            return new global::System.Threading.Tasks.ValueTask(instance.TrailingParamsArray_ObjectArrayFromMatrix((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[i]))) : global::System.Array.Empty<global::TUnit.TestProject.ConfigKind>())));
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
+            }
+            case 11:
+            {
+                try
+                {
+                    switch (args.Length)
+                    {
+                        case 0:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_NonZeroLowerBoundArrayFromMatrix(global::System.Array.Empty<global::TUnit.TestProject.ConfigKind>()));
+                            }
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_NonZeroLowerBoundArrayFromMatrix((args[0] is null ? null : args[0] is global::TUnit.TestProject.ConfigKind[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<global::TUnit.TestProject.ConfigKind>(args[0]))));
+                            }
+                        case 2:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_NonZeroLowerBoundArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]) }));
+                            }
+                        case 3:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_NonZeroLowerBoundArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[2]) }));
+                            }
+                        case 4:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_NonZeroLowerBoundArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[3]) }));
+                            }
+                        case 5:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_NonZeroLowerBoundArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[4]) }));
+                            }
+                        case 6:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_NonZeroLowerBoundArrayFromMatrix(new global::TUnit.TestProject.ConfigKind[] { global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[5]) }));
+                            }
+                        default:
+                            return new global::System.Threading.Tasks.ValueTask(instance.TrailingArray_NonZeroLowerBoundArrayFromMatrix((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ConfigKind>(args[i]))) : global::System.Array.Empty<global::TUnit.TestProject.ConfigKind>())));
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
+            }
+            case 12:
+            {
+                try
+                {
+                    switch (args.Length)
+                    {
+                        case 0:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.ParamsObjectArray_ArrayArgumentStaysSingleElement(global::System.Array.Empty<object>()));
+                            }
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.ParamsObjectArray_ArrayArgumentStaysSingleElement((args[0] is null ? null : args[0] is object[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<object>(args[0]))));
+                            }
+                        case 2:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.ParamsObjectArray_ArrayArgumentStaysSingleElement(new object[] { global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[1]) }));
+                            }
+                        case 3:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.ParamsObjectArray_ArrayArgumentStaysSingleElement(new object[] { global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[2]) }));
+                            }
+                        case 4:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.ParamsObjectArray_ArrayArgumentStaysSingleElement(new object[] { global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[3]) }));
+                            }
+                        case 5:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.ParamsObjectArray_ArrayArgumentStaysSingleElement(new object[] { global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[4]) }));
+                            }
+                        case 6:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.ParamsObjectArray_ArrayArgumentStaysSingleElement(new object[] { global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[5]) }));
+                            }
+                        default:
+                            return new global::System.Threading.Tasks.ValueTask(instance.ParamsObjectArray_ArrayArgumentStaysSingleElement((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[i]))) : global::System.Array.Empty<object>())));
                     }
                 }
                 catch (global::System.Exception ex)
@@ -504,7 +692,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
             methodName: "Params",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.Params",
             filePath: "",
-            lineNumber: 5,
+            lineNumber: 7,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -520,7 +708,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
             methodName: "ParamsEnumerable",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable",
             filePath: "",
-            lineNumber: 15,
+            lineNumber: 17,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -536,7 +724,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
             methodName: "Following_Non_Params",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.Following_Non_Params",
             filePath: "",
-            lineNumber: 25,
+            lineNumber: 27,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -552,7 +740,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
             methodName: "NonParamsStringArray",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.NonParamsStringArray",
             filePath: "",
-            lineNumber: 38,
+            lineNumber: 40,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -569,7 +757,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
             methodName: "NonParamsStringArray_SingleValue",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.NonParamsStringArray_SingleValue",
             filePath: "",
-            lineNumber: 47,
+            lineNumber: 49,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -585,7 +773,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
             methodName: "NonParamsStringArray_MultipleValues",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.NonParamsStringArray_MultipleValues",
             filePath: "",
-            lineNumber: 54,
+            lineNumber: 56,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -601,7 +789,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
             methodName: "NonParamsIntArray",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.NonParamsIntArray",
             filePath: "",
-            lineNumber: 61,
+            lineNumber: 63,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -617,7 +805,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
             methodName: "GenericStringArray",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.GenericStringArray",
             filePath: "",
-            lineNumber: 69,
+            lineNumber: 71,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -633,7 +821,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
             methodName: "NonParamsStringArray_BeyondStaticCaseCap",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.NonParamsStringArray_BeyondStaticCaseCap",
             filePath: "",
-            lineNumber: 78,
+            lineNumber: 80,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -643,6 +831,70 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
             createInstance: __CreateInstance,
             invokeBody: __Invoke,
             methodIndex: 8,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+            methodName: "TrailingArray_ObjectArrayFromMatrix",
+            fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.TrailingArray_ObjectArrayFromMatrix",
+            filePath: "",
+            lineNumber: 90,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MatrixDataSourceAttribute(),
+},
+            methodMetadata: __mm_9,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 9,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+            methodName: "TrailingParamsArray_ObjectArrayFromMatrix",
+            fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.TrailingParamsArray_ObjectArrayFromMatrix",
+            filePath: "",
+            lineNumber: 103,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MatrixDataSourceAttribute(),
+},
+            methodMetadata: __mm_10,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 10,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+            methodName: "TrailingArray_NonZeroLowerBoundArrayFromMatrix",
+            fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.TrailingArray_NonZeroLowerBoundArrayFromMatrix",
+            filePath: "",
+            lineNumber: 113,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MatrixDataSourceAttribute(),
+},
+            methodMetadata: __mm_11,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 11,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+            methodName: "ParamsObjectArray_ArrayArgumentStaysSingleElement",
+            fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.ParamsObjectArray_ArrayArgumentStaysSingleElement",
+            filePath: "",
+            lineNumber: 124,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(new int[] { 1, 2 }),
+},
+            methodMetadata: __mm_12,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 12,
             createAttributes: __Attributes,
             attributeGroupIndex: 0),
     };

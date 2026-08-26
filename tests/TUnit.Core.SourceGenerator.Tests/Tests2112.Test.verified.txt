@@ -50,7 +50,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
                             }
                         case 2:
                             {
-                                instance.Test(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is long[] arr ? arr : new long[] { global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) }));
+                                instance.Test(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is long[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<long>(args[1])));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 3:
@@ -105,7 +105,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
                             }
                         case 2:
                             {
-                                instance.Test2(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is long[] arr ? arr : new long[] { global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) }));
+                                instance.Test2(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is long[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<long>(args[1])));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 3:

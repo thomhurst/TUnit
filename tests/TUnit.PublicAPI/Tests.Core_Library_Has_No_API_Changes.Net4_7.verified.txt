@@ -2152,6 +2152,7 @@ namespace .Helpers
         public static object? Cast( type, object? value) { }
         public static T? Cast<T>(object? value) { }
         public static object? CastIfNeeded( type, object? value) { }
+        public static T[] ToTrailingArray<T>(object value) { }
     }
     public static class ClassConstructorHelper
     {

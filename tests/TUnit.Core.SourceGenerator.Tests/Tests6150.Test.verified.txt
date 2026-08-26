@@ -43,7 +43,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte[][]), "data", new
                             }
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.JaggedArray((args[0] is null ? null : args[0] is byte[][] arr ? arr : new byte[][] { global::TUnit.Core.Helpers.CastHelper.Cast<byte[]>(args[0]) })));
+                                return new global::System.Threading.Tasks.ValueTask(instance.JaggedArray((args[0] is null ? null : args[0] is byte[][] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<byte[]>(args[0]))));
                             }
                         case 2:
                             {
