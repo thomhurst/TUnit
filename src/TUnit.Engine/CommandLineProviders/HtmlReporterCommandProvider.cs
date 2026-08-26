@@ -6,8 +6,7 @@ namespace TUnit.Engine.CommandLineProviders;
 
 internal class HtmlReporterCommandProvider(IExtension extension) : ICommandLineOptionsProvider
 {
-    public const string ReportHtml = "report-html";
-    public const string ReportHtmlFilename = "report-html-filename";
+    public const string TUnitReportHtmlFilename = "tunit-report-html-filename";
 
     public Task<bool> IsEnabledAsync() => extension.IsEnabledAsync();
 
@@ -24,12 +23,7 @@ internal class HtmlReporterCommandProvider(IExtension extension) : ICommandLineO
         return
         [
             new CommandLineOption(
-                ReportHtml,
-                "Generate an HTML test report",
-                ArgumentArity.Zero,
-                false),
-            new CommandLineOption(
-                ReportHtmlFilename,
+                TUnitReportHtmlFilename,
                 "Path for the HTML test report file (default: TestResults/{AssemblyName}-report.html)",
                 ArgumentArity.ExactlyOne,
                 false)
@@ -40,7 +34,7 @@ internal class HtmlReporterCommandProvider(IExtension extension) : ICommandLineO
         CommandLineOption commandOption,
         string[] arguments)
     {
-        if (commandOption.Name == ReportHtmlFilename && arguments.Length != 1)
+        if (commandOption.Name == TUnitReportHtmlFilename && arguments.Length != 1)
         {
             return ValidationResult.InvalidTask("A single output path must be provided for the HTML report");
         }

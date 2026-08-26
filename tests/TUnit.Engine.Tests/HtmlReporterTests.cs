@@ -3,11 +3,14 @@
 using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using Shouldly;
 using TUnit.Core;
 using TUnit.Core.Enums;
+using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Reporters;
 using TUnit.Engine.Reporters.Html;
 
@@ -15,6 +18,47 @@ namespace TUnit.Engine.Tests;
 
 public class HtmlReporterTests
 {
+    [Test]
+    public void CommandProvider_Exposes_Only_TUnitSpecific_Filename_Option()
+    {
+        var provider = new HtmlReporterCommandProvider(new MockExtension());
+
+        var options = provider.GetCommandLineOptions();
+
+        options.Count.ShouldBe(1);
+        var option = options.Single();
+        option.Name.ShouldBe("tunit-report-html-filename");
+        option.Arity.ShouldBe(ArgumentArity.ExactlyOne);
+        options.Select(x => x.Name).ShouldNotContain("report-html");
+        options.Select(x => x.Name).ShouldNotContain("report-html-filename");
+    }
+
+    [Test]
+    public async Task CommandProvider_Accepts_One_Filename_Argument()
+    {
+        var provider = new HtmlReporterCommandProvider(new MockExtension());
+        var option = provider.GetCommandLineOptions().Single();
+
+        var result = await provider.ValidateOptionArgumentsAsync(option, ["report.html"]);
+
+        result.IsValid.ShouldBeTrue();
+    }
+
+    [Test]
+    [Arguments(0)]
+    [Arguments(2)]
+    public async Task CommandProvider_Rejects_Filename_Argument_Count_Other_Than_One(int argumentCount)
+    {
+        var provider = new HtmlReporterCommandProvider(new MockExtension());
+        var option = provider.GetCommandLineOptions().Single();
+        var arguments = Enumerable.Repeat("report.html", argumentCount).ToArray();
+
+        var result = await provider.ValidateOptionArgumentsAsync(option, arguments);
+
+        result.IsValid.ShouldBeFalse();
+        result.ErrorMessage.ShouldBe("A single output path must be provided for the HTML report");
+    }
+
     [Test]
     public void HtmlReporter_Implements_IDataProducer()
     {
