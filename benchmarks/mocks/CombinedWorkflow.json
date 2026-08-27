@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-26T02:57:20.474Z",
+  "timestamp": "2026-08-27T04:05:27.840Z",
   "category": "CombinedWorkflow",
   "description": "Full workflow: create → setup → invoke → verify",
   "environment": {
@@ -10,8 +10,8 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "2.005 μs",
-      "Error": "0.0324 μs",
+      "Mean": "1.965 μs",
+      "Error": "0.0307 μs",
       "StdDev": "0.0287 μs",
       "Gen0": "0.3777",
       "Gen1": "0.0038",
@@ -19,48 +19,48 @@
     },
     {
       "Method": "Imposter",
-      "Mean": "2.783 μs",
-      "Error": "0.0556 μs",
-      "StdDev": "0.1002 μs",
+      "Mean": "2.966 μs",
+      "Error": "0.0440 μs",
+      "StdDev": "0.0412 μs",
       "Gen0": "0.9613",
       "Gen1": "0.0458",
       "Allocated": "15.71 KB"
     },
     {
       "Method": "Mockolate",
-      "Mean": "1.790 μs",
-      "Error": "0.0342 μs",
-      "StdDev": "0.0380 μs",
+      "Mean": "1.774 μs",
+      "Error": "0.0343 μs",
+      "StdDev": "0.0321 μs",
       "Gen0": "0.4501",
       "Gen1": "0.0076",
       "Allocated": "7.36 KB"
     },
     {
       "Method": "Moq",
-      "Mean": "303.325 μs",
-      "Error": "3.7601 μs",
-      "StdDev": "3.3332 μs",
+      "Mean": "405.519 μs",
+      "Error": "1.5824 μs",
+      "StdDev": "1.3214 μs",
       "Gen0": "1.9531",
       "Gen1": "0.9766",
-      "Allocated": "36.3 KB"
+      "Allocated": "36.35 KB"
     },
     {
       "Method": "NSubstitute",
-      "Mean": "18.320 μs",
-      "Error": "0.1262 μs",
-      "StdDev": "0.1180 μs",
-      "Gen0": "1.6174",
-      "Gen1": "0.0305",
+      "Mean": "19.296 μs",
+      "Error": "0.1318 μs",
+      "StdDev": "0.1169 μs",
+      "Gen0": "1.5869",
+      "Gen1": "-",
       "Allocated": "26.72 KB"
     },
     {
       "Method": "FakeItEasy",
-      "Mean": "16.434 μs",
-      "Error": "0.2877 μs",
-      "StdDev": "0.2550 μs",
+      "Mean": "18.956 μs",
+      "Error": "0.1987 μs",
+      "StdDev": "0.1551 μs",
       "Gen0": "1.4648",
       "Gen1": "0.1221",
-      "Allocated": "25.52 KB"
+      "Allocated": "25.6 KB"
     }
   ]
 }
