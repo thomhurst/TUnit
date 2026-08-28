@@ -39,6 +39,16 @@ Running many test projects and want **one combined report instead of one per pro
 
 ### Custom Output Path
 
+When TUnit is the only HTML report provider, the existing option remains available:
+
+```bash
+dotnet run -- --report-html-filename my-custom-report.html
+```
+
+When the `Microsoft.Testing.Extensions.HtmlReport` package is referenced, Microsoft owns the
+`--report-html` and `--report-html-filename` options. TUnit automatically switches to its
+namespaced filename option:
+
 ```bash
 dotnet run -- --tunit-report-html-filename my-custom-report.html
 ```
@@ -53,9 +63,17 @@ export TUNIT_DISABLE_HTML_REPORTER=true
 
 Accepts: `true`, `1`, `yes` (case-insensitive).
 
-### Automatic Report Generation
+For version-controlled project configuration, set `context.Settings.Reporting.HtmlReportEnabled = false` in a `[Before(HookType.TestDiscovery)]` hook instead.
 
-The deprecated `--report-html` enable flag has been removed because the report is generated automatically. Use `TUNIT_DISABLE_HTML_REPORTER=true` when you need to disable report generation.
+### Deprecated: `--report-html` Flag
+
+Without `Microsoft.Testing.Extensions.HtmlReport`, TUnit continues to accept the deprecated
+`--report-html` flag for compatibility. TUnit's report is generated automatically, so the flag
+has no effect beyond displaying a deprecation warning. Use `TUNIT_DISABLE_HTML_REPORTER=true`
+when you need to disable TUnit's report generation.
+
+When `Microsoft.Testing.Extensions.HtmlReport` is referenced, TUnit does not register either
+legacy option; their behavior is provided by the Microsoft extension.
 
 ## GitHub Actions Integration
 

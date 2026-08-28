@@ -1,12 +1,19 @@
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
+using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.CommandLineProviders;
 
-internal class HtmlReporterCommandProvider(IExtension extension) : ICommandLineOptionsProvider
+internal class HtmlReporterCommandProvider(IExtension extension, HtmlCliMode htmlCliMode = HtmlCliMode.Default) : ICommandLineOptionsProvider
 {
+    public const string ReportHtml = "report-html";
+    public const string ReportHtmlFilename = "report-html-filename";
     public const string TUnitReportHtmlFilename = "tunit-report-html-filename";
+
+    public string ReportHtmlFilenameOption => htmlCliMode == HtmlCliMode.Namespaced
+        ? TUnitReportHtmlFilename
+        : ReportHtmlFilename;
 
     public Task<bool> IsEnabledAsync() => extension.IsEnabledAsync();
 
@@ -20,13 +27,30 @@ internal class HtmlReporterCommandProvider(IExtension extension) : ICommandLineO
 
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {
+        if (htmlCliMode == HtmlCliMode.Namespaced)
+        {
+            return
+            [
+                new CommandLineOption(
+                    TUnitReportHtmlFilename,
+                    "Path for the HTML test report file (default: TestResults/{AssemblyName}-report.html)",
+                    ArgumentArity.ExactlyOne,
+                    false),
+            ];
+        }
+
         return
         [
             new CommandLineOption(
-                TUnitReportHtmlFilename,
+                ReportHtml,
+                "Generate an HTML test report",
+                ArgumentArity.Zero,
+                false),
+            new CommandLineOption(
+                ReportHtmlFilename,
                 "Path for the HTML test report file (default: TestResults/{AssemblyName}-report.html)",
                 ArgumentArity.ExactlyOne,
-                false)
+                false),
         ];
     }
 
@@ -34,7 +58,7 @@ internal class HtmlReporterCommandProvider(IExtension extension) : ICommandLineO
         CommandLineOption commandOption,
         string[] arguments)
     {
-        if (commandOption.Name == TUnitReportHtmlFilename && arguments.Length != 1)
+        if (commandOption.Name == ReportHtmlFilenameOption && arguments.Length != 1)
         {
             return ValidationResult.InvalidTask("A single output path must be provided for the HTML report");
         }

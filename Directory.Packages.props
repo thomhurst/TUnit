@@ -54,6 +54,7 @@
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.10.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.4.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.4.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.HtmlReport" Version="2.4.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="2.4.0" />
     <!-- 2.4.0's controller-backed TRX path kills the test host on Ctrl+C instead of allowing hook cleanup. -->
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.3.3" />

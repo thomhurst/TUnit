@@ -11,6 +11,7 @@ using Shouldly;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Reporters;
 using TUnit.Engine.Reporters.Html;
 
@@ -19,16 +20,28 @@ namespace TUnit.Engine.Tests;
 public class HtmlReporterTests
 {
     [Test]
-    public void CommandProvider_Exposes_Only_TUnitSpecific_Filename_Option()
+    public void CommandProvider_DefaultMode_Exposes_Legacy_Options()
     {
         var provider = new HtmlReporterCommandProvider(new MockExtension());
 
         var options = provider.GetCommandLineOptions();
 
+        options.Count.ShouldBe(2);
+        options.Single(x => x.Name == "report-html").Arity.ShouldBe(ArgumentArity.Zero);
+        options.Single(x => x.Name == "report-html-filename").Arity.ShouldBe(ArgumentArity.ExactlyOne);
+        options.Select(x => x.Name).ShouldNotContain("tunit-report-html-filename");
+    }
+
+    [Test]
+    public void CommandProvider_NamespacedMode_Exposes_Only_TUnitSpecific_Filename_Option()
+    {
+        var provider = new HtmlReporterCommandProvider(new MockExtension(), HtmlCliMode.Namespaced);
+
+        var options = provider.GetCommandLineOptions();
+
         options.Count.ShouldBe(1);
-        var option = options.Single();
-        option.Name.ShouldBe("tunit-report-html-filename");
-        option.Arity.ShouldBe(ArgumentArity.ExactlyOne);
+        options.Single().Name.ShouldBe("tunit-report-html-filename");
+        options.Single().Arity.ShouldBe(ArgumentArity.ExactlyOne);
         options.Select(x => x.Name).ShouldNotContain("report-html");
         options.Select(x => x.Name).ShouldNotContain("report-html-filename");
     }
@@ -36,12 +49,15 @@ public class HtmlReporterTests
     [Test]
     public async Task CommandProvider_Accepts_One_Filename_Argument()
     {
-        var provider = new HtmlReporterCommandProvider(new MockExtension());
-        var option = provider.GetCommandLineOptions().Single();
+        foreach (var mode in Enum.GetValues<HtmlCliMode>())
+        {
+            var provider = new HtmlReporterCommandProvider(new MockExtension(), mode);
+            var option = provider.GetCommandLineOptions().Single(x => x.Arity == ArgumentArity.ExactlyOne);
 
-        var result = await provider.ValidateOptionArgumentsAsync(option, ["report.html"]);
+            var result = await provider.ValidateOptionArgumentsAsync(option, ["report.html"]);
 
-        result.IsValid.ShouldBeTrue();
+            result.IsValid.ShouldBeTrue();
+        }
     }
 
     [Test]
@@ -49,14 +65,17 @@ public class HtmlReporterTests
     [Arguments(2)]
     public async Task CommandProvider_Rejects_Filename_Argument_Count_Other_Than_One(int argumentCount)
     {
-        var provider = new HtmlReporterCommandProvider(new MockExtension());
-        var option = provider.GetCommandLineOptions().Single();
-        var arguments = Enumerable.Repeat("report.html", argumentCount).ToArray();
+        foreach (var mode in Enum.GetValues<HtmlCliMode>())
+        {
+            var provider = new HtmlReporterCommandProvider(new MockExtension(), mode);
+            var option = provider.GetCommandLineOptions().Single(x => x.Arity == ArgumentArity.ExactlyOne);
+            var arguments = Enumerable.Repeat("report.html", argumentCount).ToArray();
 
-        var result = await provider.ValidateOptionArgumentsAsync(option, arguments);
+            var result = await provider.ValidateOptionArgumentsAsync(option, arguments);
 
-        result.IsValid.ShouldBeFalse();
-        result.ErrorMessage.ShouldBe("A single output path must be provided for the HTML report");
+            result.IsValid.ShouldBeFalse();
+            result.ErrorMessage.ShouldBe("A single output path must be provided for the HTML report");
+        }
     }
 
     [Test]
