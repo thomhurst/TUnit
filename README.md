@@ -1,6 +1,5 @@
 ![TUnit](assets/banner.png)
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # TUnit
 
@@ -17,7 +16,6 @@ A modern .NET testing framework. Tests are discovered at compile time via source
 
 ## What it looks like
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 [Arguments("GOLD", 100.00, 80.00)]
@@ -97,7 +95,6 @@ dotnet add package TUnit
 
 ### Data-driven tests
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 [Arguments("user1@test.com", "ValidPassword123")]
@@ -118,7 +115,6 @@ Need more? `[MethodDataSource]` pulls rows from a method, and custom `DataSource
 
 Assertions are async, chainable, and produce the focused failure messages shown above:
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK)
     .Because("the health endpoint should always be up");
@@ -167,7 +163,6 @@ Property injection keeps base test classes clean — subclasses inherit the fixt
 
 Everything runs in parallel by default. Opt out or sequence tests where it matters:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Register_User() { ... }
@@ -184,7 +179,6 @@ public async Task Migrates_Schema() { ... }
 
 ### Lifecycle hooks at every scope
 
-<!-- doc-test-contextual -->
 ```csharp
 [Before(Test)]        // also: Class, Assembly, TestSession
 public async Task SetUp() { ... }
@@ -197,13 +191,13 @@ public static async Task TearDownDatabase(ClassHookContext context) { ... }
 
 `TUnit.Mocks` is a source-generated, Native AOT-compatible mocking library — no runtime proxies, no `Castle.Core`. It works with any test framework:
 
-<!-- doc-test-contextual -->
 ```csharp
 var gateway = IPaymentGateway.Mock();   // or Mock.Of<IPaymentGateway>()
 
 gateway.ChargeAsync(Any<decimal>()).Returns(new ChargeResult(Success: true));
 
 var checkout = new CheckoutService(gateway.Object);
+var cart = new Cart(99.99m);
 await checkout.CompleteAsync(cart);
 
 gateway.ChargeAsync(99.99m).WasCalled(Times.Once);
@@ -211,7 +205,6 @@ gateway.ChargeAsync(99.99m).WasCalled(Times.Once);
 
 Companion packages mock the annoying stuff for you:
 
-<!-- doc-test-contextual -->
 ```csharp
 // TUnit.Mocks.Http — a real HttpClient backed by a scriptable handler
 using var client = Mock.HttpClient("https://api.example.com");
@@ -219,14 +212,13 @@ client.Handler.OnGet("/users/1").RespondWithJson("""{ "id": 1 }""");
 
 // TUnit.Mocks.Logging — capture and verify ILogger output
 var logger = Mock.Logger<CheckoutService>();
-logger.VerifyLog().AtLevel(LogLevel.Warning).ContainingMessage("retrying").WasCalled(Times.Once);
+logger.VerifyLog().AtLevel(Microsoft.Extensions.Logging.LogLevel.Warning).ContainingMessage("retrying").WasCalled(Times.Once);
 ```
 
 ### Custom attributes
 
 Extend built-in base classes to create your own skip conditions, retry logic, and more:
 
-<!-- doc-test-contextual -->
 ```csharp
 public class WindowsOnlyAttribute : SkipAttribute
 {
@@ -265,7 +257,6 @@ public class HealthCheckTests(ApiFactory factory)
 
 Spin up your whole distributed app once per test session, with resource log forwarding and OpenTelemetry capture built in:
 
-<!-- doc-test-ignore: Aspire sample depends on the generated Projects.MyApp_AppHost type. -->
 ```csharp
 public class AppFixture : AspireFixture<Projects.MyApp_AppHost>;
 
@@ -302,7 +293,6 @@ public class HomePageTests : PageTest
 
 ### Property-based testing (FsCheck)
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test, FsCheckProperty]
 public bool Reversing_Twice_Returns_Original(int[] array) =>

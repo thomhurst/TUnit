@@ -7,29 +7,37 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>false</IsTestProject>
     <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <RunAnalyzers>false</RunAnalyzers>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn></NoWarn>
+    <ImplicitUsings>false</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="TUnit" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.AspNetCore" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.Aspire" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.Aspire.Core" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.Assertions" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.Assertions.Should" VersionOverride="$(TUnitAssertionsShouldPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.FsCheck" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.Logging.Microsoft" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.Mocks" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.Mocks.Assertions" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.Mocks.Http" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.Mocks.Logging" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.OpenTelemetry" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.Playwright" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.AspNetCore" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.Aspire" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.Aspire.Core" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.Assertions" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.Assertions.Should" VersionOverride="$(TUnitAssertionsShouldPackageVersion)" />
+    <PackageReference Include="TUnit.FsCheck" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.Logging.Microsoft" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.Mocks" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.Mocks.Assertions" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.Mocks.Http" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.Mocks.Logging" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.OpenTelemetry" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.Playwright" VersionOverride="$(TUnitPackageVersion)" />
 
     <PackageReference Include="Aspire.Hosting.Testing" />
+    <PackageReference Include="AutoFixture" />
+    <PackageReference Include="Grpc.Core.Api" />
+    <PackageReference Include="MassTransit" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="BenchmarkDotNet" />
+    <PackageReference Include="bunit" />
+    <PackageReference Include="CliWrap" />
     <PackageReference Include="FsCheck" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
@@ -37,18 +45,29 @@
     <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Playwright" />
+    <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="NSubstitute" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Serilog.Sinks.Seq" />
     <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" />
+    <PackageReference Include="OpenTelemetry.Exporter.Zipkin" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
     <PackageReference Include="StackExchange.Redis" />
+    <PackageReference Include="System.Reactive" />
     <PackageReference Include="Testcontainers.Kafka" />
     <PackageReference Include="Testcontainers.PostgreSql" />
     <PackageReference Include="Testcontainers.Redis" />
+    <PackageReference Include="xunit.v3" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="GlobalUsings.cs" />
+    <Compile Include="SupportTypes.cs" />
     <Compile Include="$(GeneratedSnippetsDirectory)/Snippet*.g.cs" Link="Generated/%(Filename)%(Extension)" />
   </ItemGroup>
 

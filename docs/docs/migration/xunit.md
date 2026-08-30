@@ -1,4 +1,3 @@
-<!-- doc-test-ignore-file: Comparisons require an isolated xUnit compilation and application fixtures. -->
 
 # Migrating from xUnit.net
 
@@ -345,6 +344,7 @@ public class MyTests
     [ClassData(typeof(TestDataGenerator))]
     public void TestWithClassData(int number, string text)
     {
+        Assert.True(number > 0);
         Assert.NotNull(text);
     }
 }
@@ -358,6 +358,7 @@ public class MyTests
     [MethodDataSource(nameof(TestDataGenerator.GetTestData))]
     public async Task TestWithClassData(int number, string text)
     {
+        await Assert.That(number).IsGreaterThan(0);
         await Assert.That(text).IsNotNull();
     }
 }
@@ -481,20 +482,22 @@ public class AsyncSetupTests : IAsyncLifetime
 {
     private HttpClient _client = null!;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         _client = new HttpClient();
-        await _client.GetAsync("https://api.example.com/warm-up");
+        await _client.GetAsync("https://api.example.com/warm-up", Xunit.TestContext.Current.CancellationToken);
     }
 
     [Fact]
     public async Task FetchData_ReturnsSuccess()
     {
-        var response = await _client.GetAsync("https://api.example.com/data");
+        var response = await _client.GetAsync(
+            "https://api.example.com/data",
+            Xunit.TestContext.Current.CancellationToken);
         Assert.True(response.IsSuccessStatusCode);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         _client?.Dispose();
         await Task.CompletedTask;
@@ -708,7 +711,7 @@ public class UserTests(DatabaseFixture fixture)
     [Test]
     public async Task CreateUser_Succeeds()
     {
-        // Test using fixture.Connection
+        _ = fixture.Connection;
     }
 }
 
@@ -718,7 +721,7 @@ public class ProductTests(DatabaseFixture fixture)
     [Test]
     public async Task CreateProduct_Succeeds()
     {
-        // Test using fixture.Connection
+        _ = fixture.Connection;
     }
 }
 ```
@@ -782,7 +785,7 @@ public class LoggingTests
     {
         _output.WriteLine("Starting test");
 
-        var result = PerformOperation();
+        var result = CalculateResult();
 
         _output.WriteLine($"Result: {result}");
         Assert.True(result > 0);
@@ -799,7 +802,7 @@ public class LoggingTests
     {
         context.Output.WriteLine("Starting test");
 
-        var result = PerformOperation();
+        var result = CalculateResult();
 
         context.Output.WriteLine($"Result: {result}");
         await Assert.That(result).IsGreaterThan(0);
@@ -832,10 +835,9 @@ public class TestWithAttachments
     {
         // Test logic
         var logPath = "test-log.txt";
-        await File.WriteAllTextAsync(logPath, "test logs");
+        await File.WriteAllTextAsync(logPath, "test logs", Xunit.TestContext.Current.CancellationToken);
         
-        _testContextAccessor.Current!.Attachments.Add(
-            new FileAttachment(logPath, "Test Log"));
+        Xunit.TestContext.Current.AddAttachment(logPath, "Test Log");
     }
 }
 ```
@@ -1058,13 +1060,13 @@ public class UserServiceTests : IClassFixture<DatabaseFixture>, IAsyncLifetime
         _output = output;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         _userService = new UserService(_dbFixture.Connection);
         await _userService.InitializeAsync();
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     [Theory]
     [InlineData("john@example.com", "John")]

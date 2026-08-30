@@ -4,7 +4,6 @@ description: How TUnit's performance benchmarks are measured and compared
 sidebar_position: 2
 ---
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Benchmark Methodology
 
@@ -41,7 +40,6 @@ All benchmarks use [BenchmarkDotNet](https://benchmarkdotnet.org/), the industry
 **Purpose**: Measure parameterized test performance
 
 **What's tested**:
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 [Arguments(1, 2, 3)]
@@ -61,7 +59,6 @@ public async Task TestAddition(int a, int b, int expected)
 **Purpose**: Measure async/await pattern performance
 
 **What's tested**:
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task TestAsyncOperation()
@@ -91,7 +88,6 @@ public async Task TestAsyncOperation()
 **Purpose**: Measure combinatorial test generation
 
 **What's tested**:
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 [MatrixDataSource]
@@ -160,7 +156,6 @@ dotnet build -c Release -p:TestFramework=MSTEST
 ```
 
 ### 2. Execution Phase
-<!-- doc-test-contextual -->
 ```csharp
 using BenchmarkDotNet.Attributes;
 

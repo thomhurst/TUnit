@@ -110,13 +110,23 @@ dotnet test --treenode-filter "/*/*/*/*[Category=Integration][Priority=High]"
 
 If you see trim warnings or "source generator did not generate" errors, make sure you're using AOT-compatible data sources:
 
-<!-- doc-test-ignore: Attribute comparison omits the target test method and application DataClass. -->
-```csharp
-// Reflection-based — may cause AOT issues
-[MethodDataSource(typeof(DataClass), "GetData")]
+Replace reflection-based `MethodDataSource(typeof(DataClass), "GetData")` usage with the generic form:
 
-// AOT-friendly generic version
-[MethodDataSource<DataClass>(nameof(DataClass.GetData))]
+```csharp
+public sealed class DataClass
+{
+    public static IEnumerable<int> GetData() => [1, 2, 3];
+}
+
+public class DataSourceTests
+{
+    [Test]
+    [MethodDataSource<DataClass>(nameof(DataClass.GetData))]
+    public void ReceivesData(int value)
+    {
+        Console.WriteLine(value);
+    }
+}
 ```
 
 ## InstanceMethodDataSource Returns No Tests
@@ -125,7 +135,6 @@ If you're using `InstanceMethodDataSource` with a `ClassDataSource` fixture that
 
 The fix is to return predefined identifiers that don't depend on initialisation:
 
-<!-- doc-test-ignore: Fixture initialization calls the application's Docker startup helper. -->
 ```csharp
 public class Fixture : IAsyncInitializer
 {
@@ -137,22 +146,23 @@ public class Fixture : IAsyncInitializer
     }
 
     public IEnumerable<string> GetTestCaseIds() => TestCaseIds;
+
+    private static Task StartDockerContainerAsync() => Task.CompletedTask;
 }
 ```
 
 ## Hooks Not Running
 
-Class-level and assembly-level hooks must be static:
+Class-level and assembly-level hooks must be static. An instance declaration such as `public void ClassSetup()` is invalid:
 
-<!-- doc-test-ignore: Example intentionally contrasts an invalid instance class hook with the corrected static hook. -->
 ```csharp
-// Won't work — instance method
-[Before(Class)]
-public void IncorrectClassSetup() { }
-
-// Works
-[Before(Class)]
-public static void ClassSetup() { }
+public class HookExamples
+{
+    [Before(Class)]
+    public static void ClassSetup()
+    {
+    }
+}
 ```
 
 Test-level hooks (`[Before(Test)]` / `[After(Test)]`) can be instance methods.

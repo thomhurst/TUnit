@@ -1,4 +1,3 @@
-<!-- doc-test-ignore-file: Tutorial builds a custom identifier attribute across dependent snippets and uses an application database. -->
 
 # Instrumenting: Global Test IDs
 
@@ -44,7 +43,6 @@ static class TestContextExtensions
 
 Assign unique identifiers to all tests in the assembly by decorating in `AssemblyInfo.cs`:
 
-<!-- doc-test-ignore: Assembly attribute depends on AssignTestIdentifiersAttribute from the preceding snippet. -->
 ```csharp
 [assembly: AssignTestIdentifiers]
 ```
@@ -90,3 +88,4 @@ class MyTestClassThatNeedsUniqueTestIds
 
 The test identifier for each test is assigned in the order that TUnit discovers the tests. The test identifier is unique for each test and is guaranteed to be assigned before the test starts. For other uses cases, you would need to adjust the implementation of `AssignTestIdentifiersAttribute` to suit your needs. For example, you could choose to use GUIDs instead of integers. We've only used integers to match the Redis database number example.
 
+<!-- doc-test-shared -->

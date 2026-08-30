@@ -2,7 +2,6 @@
 sidebar_position: 9
 ---
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Type Assertions
 
@@ -14,7 +13,6 @@ TUnit provides comprehensive assertions for testing types and type properties. T
 
 Tests that a value is exactly of a specific type:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Value_Is_Type()
@@ -27,7 +25,6 @@ public async Task Value_Is_Type()
 
 Works with all types:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Various_Types()
@@ -43,7 +40,6 @@ public async Task Various_Types()
 
 Tests that a type can be assigned to a target type (inheritance/interface):
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Type_Is_Assignable()
@@ -58,7 +54,6 @@ public async Task Type_Is_Assignable()
 
 With inheritance:
 
-<!-- doc-test-contextual -->
 ```csharp
 public class Animal { }
 public class Dog : Animal { }
@@ -78,7 +73,6 @@ public async Task Inheritance_Assignability()
 
 Tests that a type cannot be assigned to a target type:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Type_Not_Assignable()
@@ -94,7 +88,6 @@ public async Task Type_Not_Assignable()
 
 All the following assertions work on `Type` objects directly:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Type_Object_Assertions()
@@ -110,7 +103,6 @@ public async Task Type_Object_Assertions()
 
 #### IsClass / IsNotClass
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_Class()
@@ -126,7 +118,6 @@ public async Task Is_Class()
 
 #### IsInterface / IsNotInterface
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_Interface()
@@ -142,7 +133,6 @@ public async Task Is_Interface()
 
 #### IsAbstract / IsNotAbstract
 
-<!-- doc-test-contextual -->
 ```csharp
 public abstract class AbstractBase { }
 public class Concrete : AbstractBase { }
@@ -157,7 +147,6 @@ public async Task Is_Abstract()
 
 #### IsSealed / IsNotSealed
 
-<!-- doc-test-contextual -->
 ```csharp
 public sealed class SealedClass { }
 public class OpenClass { }
@@ -175,7 +164,6 @@ public async Task Is_Sealed()
 
 #### IsValueType / IsNotValueType
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_Value_Type()
@@ -191,7 +179,6 @@ public async Task Is_Value_Type()
 
 #### IsEnum / IsNotEnum
 
-<!-- doc-test-contextual -->
 ```csharp
 public enum Color { Red, Green, Blue }
 
@@ -207,7 +194,6 @@ public async Task Is_Enum()
 
 #### IsPrimitive / IsNotPrimitive
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_Primitive()
@@ -227,7 +213,6 @@ public async Task Is_Primitive()
 
 #### IsPublic / IsNotPublic
 
-<!-- doc-test-contextual -->
 ```csharp
 public class PublicClass { }
 internal class InternalClass { }
@@ -246,7 +231,6 @@ public async Task Is_Public()
 
 #### IsGenericType / IsNotGenericType
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_Generic_Type()
@@ -260,7 +244,6 @@ public async Task Is_Generic_Type()
 
 #### IsGenericTypeDefinition / IsNotGenericTypeDefinition
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_Generic_Type_Definition()
@@ -276,7 +259,6 @@ public async Task Is_Generic_Type_Definition()
 
 #### IsConstructedGenericType / IsNotConstructedGenericType
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_Constructed_Generic_Type()
@@ -291,7 +273,6 @@ public async Task Is_Constructed_Generic_Type()
 
 #### ContainsGenericParameters / DoesNotContainGenericParameters
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Contains_Generic_Parameters()
@@ -307,7 +288,6 @@ public async Task Contains_Generic_Parameters()
 
 #### IsArray / IsNotArray
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_Array()
@@ -322,7 +302,6 @@ public async Task Is_Array()
 
 #### IsByRef / IsNotByRef
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_By_Ref()
@@ -337,7 +316,6 @@ public async Task Is_By_Ref()
 
 #### IsByRefLike / IsNotByRefLike (.NET 5+)
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_By_Ref_Like()
@@ -351,17 +329,17 @@ public async Task Is_By_Ref_Like()
 
 #### IsPointer / IsNotPointer
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_Pointer()
 {
+    Type intPtr;
     unsafe
     {
-        var intPtr = typeof(int*);
-        await Assert.That(intPtr).IsPointer();
+        intPtr = typeof(int*);
     }
 
+    await Assert.That(intPtr).IsPointer();
     await Assert.That(typeof(int)).IsNotPointer();
 }
 ```
@@ -370,7 +348,6 @@ public async Task Is_Pointer()
 
 #### IsNested / IsNotNested
 
-<!-- doc-test-contextual -->
 ```csharp
 public class Outer
 {
@@ -387,7 +364,6 @@ public async Task Is_Nested()
 
 #### IsNestedPublic / IsNotNestedPublic
 
-<!-- doc-test-contextual -->
 ```csharp
 public class Container
 {
@@ -404,7 +380,6 @@ public async Task Is_Nested_Public()
 
 #### IsNestedPrivate / IsNotNestedPrivate
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_Nested_Private()
@@ -428,7 +403,6 @@ For protected nested types.
 
 #### IsVisible / IsNotVisible
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_Visible()
@@ -437,7 +411,7 @@ public async Task Is_Visible()
     await Assert.That(typeof(List<int>)).IsVisible();
 
     // Internal types are not visible
-    var internalType = Assembly.GetExecutingAssembly()
+    var internalType = System.Reflection.Assembly.GetExecutingAssembly()
         .GetTypes()
         .FirstOrDefault(t => !t.IsPublic && !t.IsNested);
 
@@ -452,7 +426,6 @@ public async Task Is_Visible()
 
 #### IsCOMObject / IsNotCOMObject
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_COM_Object()
@@ -466,7 +439,6 @@ public async Task Is_COM_Object()
 
 ### Dependency Injection Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Service_Implements_Interface()
@@ -480,7 +452,6 @@ public async Task Service_Implements_Interface()
 
 ### Plugin System
 
-<!-- doc-test-contextual -->
 ```csharp
 public interface IPlugin { }
 
@@ -497,7 +468,6 @@ public async Task Plugin_Implements_Interface()
 
 ### Reflection Testing
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Type_Has_Expected_Properties()
@@ -513,7 +483,6 @@ public async Task Type_Has_Expected_Properties()
 
 ### Generic Constraints
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_Generic_Constraints()
@@ -527,7 +496,6 @@ public async Task Validate_Generic_Constraints()
 
 ### Enum Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Type_Is_Enum()
@@ -541,7 +509,6 @@ public async Task Type_Is_Enum()
 
 ### Abstract Class Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Base_Class_Is_Abstract()
@@ -555,7 +522,6 @@ public async Task Base_Class_Is_Abstract()
 
 ## Chaining Type Assertions
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Chained_Type_Assertions()
@@ -572,7 +538,6 @@ public async Task Chained_Type_Assertions()
 
 ## Type Comparison
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Compare_Types()
@@ -588,7 +553,6 @@ public async Task Compare_Types()
 
 ## Working with Base Types
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Check_Base_Type()
@@ -602,7 +566,6 @@ public async Task Check_Base_Type()
 
 ## Interface Implementation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Implements_Multiple_Interfaces()
@@ -619,12 +582,11 @@ public async Task Implements_Multiple_Interfaces()
 
 ### Factory Pattern Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Factory_Returns_Correct_Type()
 {
-    var instance = Factory.Create("user-service");
+    var instance = new ExampleFactory().Create("user-service");
 
     await Assert.That(instance).IsTypeOf<UserService>();
     await Assert.That(instance).IsAssignableTo<IService>();
@@ -633,7 +595,6 @@ public async Task Factory_Returns_Correct_Type()
 
 ### ORM Entity Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Entity_Is_Properly_Configured()
@@ -651,7 +612,6 @@ public async Task Entity_Is_Properly_Configured()
 
 ### Serialization Requirements
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Type_Is_Serializable()
@@ -669,7 +629,6 @@ public async Task Type_Is_Serializable()
 
 ### Test Double Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Mock_Implements_Interface()
@@ -683,7 +642,6 @@ public async Task Mock_Implements_Interface()
 
 ## Struct Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 public struct Point
 {
@@ -704,7 +662,6 @@ public async Task Struct_Properties()
 
 ## Record Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 public record Person(string Name, int Age);
 

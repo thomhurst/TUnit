@@ -2,7 +2,6 @@
 sidebar_position: 5.5
 ---
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # String Assertions
 
@@ -14,7 +13,6 @@ TUnit provides rich assertions for testing strings, including substring matching
 
 Tests that a string contains a substring:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task String_Contains()
@@ -29,7 +27,6 @@ public async Task String_Contains()
 
 #### Case-Insensitive Contains
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Contains_Ignoring_Case()
@@ -48,7 +45,6 @@ public async Task Contains_Ignoring_Case()
 
 #### With String Comparison
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Contains_With_Comparison()
@@ -63,7 +59,6 @@ public async Task Contains_With_Comparison()
 
 #### With Trimming
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Contains_With_Trimming()
@@ -78,7 +73,6 @@ public async Task Contains_With_Trimming()
 
 #### Ignoring Whitespace
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Contains_Ignoring_Whitespace()
@@ -95,7 +89,6 @@ public async Task Contains_Ignoring_Whitespace()
 
 Tests that a string does not contain a substring:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task String_Does_Not_Contain()
@@ -109,7 +102,6 @@ public async Task String_Does_Not_Contain()
 
 All modifiers work with `DoesNotContain`:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Does_Not_Contain_Ignoring_Case()
@@ -126,7 +118,6 @@ public async Task Does_Not_Contain_Ignoring_Case()
 
 Tests that a string starts with a specific prefix:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task String_Starts_With()
@@ -142,7 +133,6 @@ public async Task String_Starts_With()
 
 With case-insensitive comparison:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Starts_With_Ignoring_Case()
@@ -159,7 +149,6 @@ public async Task Starts_With_Ignoring_Case()
 
 Tests that a string ends with a specific suffix:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task String_Ends_With()
@@ -175,7 +164,6 @@ public async Task String_Ends_With()
 
 With case-insensitive comparison:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Ends_With_Ignoring_Case()
@@ -194,7 +182,6 @@ public async Task Ends_With_Ignoring_Case()
 
 Tests that a string matches a regular expression pattern:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task String_Matches_Pattern()
@@ -207,7 +194,6 @@ public async Task String_Matches_Pattern()
 
 With a compiled `Regex`:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Matches_With_Regex()
@@ -221,7 +207,6 @@ public async Task Matches_With_Regex()
 
 #### Case-Insensitive Matching
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Matches_Ignoring_Case()
@@ -236,7 +221,6 @@ public async Task Matches_Ignoring_Case()
 
 #### With Regex Options
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Matches_With_Options()
@@ -253,7 +237,6 @@ public async Task Matches_With_Options()
 
 Tests that a string does not match a pattern:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task String_Does_Not_Match()
@@ -270,7 +253,6 @@ public async Task String_Does_Not_Match()
 
 Tests that a string is empty (`""`):
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task String_Is_Empty()
@@ -283,7 +265,6 @@ public async Task String_Is_Empty()
 
 Note: This checks for an empty string, not `null`:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Empty_vs_Null()
@@ -301,7 +282,6 @@ public async Task Empty_vs_Null()
 
 Tests that a string is not empty:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task String_Is_Not_Empty()
@@ -316,7 +296,6 @@ public async Task String_Is_Not_Empty()
 
 Tests that a string has a specific length:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task String_Has_Length()
@@ -329,22 +308,19 @@ public async Task String_Has_Length()
 
 With chained comparison:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Length_With_Comparison()
 {
     var username = "alice";
 
-    await Assert.That(username)
-        .Length().IsGreaterThan(3)
-        .And.Length().IsLessThan(20);
+    await Assert.That(username).Length().IsGreaterThan(3);
+    await Assert.That(username).Length().IsLessThan(20);
 }
 ```
 
 Using `IsBetween`:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Length_Range()
@@ -361,7 +337,6 @@ public async Task Length_Range()
 
 String equality with various comparison options:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task String_Equality()
@@ -375,7 +350,6 @@ public async Task String_Equality()
 
 #### Ignoring Case
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Equality_Ignoring_Case()
@@ -391,7 +365,6 @@ public async Task Equality_Ignoring_Case()
 
 #### With String Comparison
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Equality_With_Comparison()
@@ -409,7 +382,6 @@ public async Task Equality_With_Comparison()
 
 You can parse strings to other types and assert on the result:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Parse_String_To_Int()
@@ -421,7 +393,6 @@ public async Task Parse_String_To_Int()
 }
 ```
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Parse_String_To_DateTime()
@@ -437,23 +408,19 @@ public async Task Parse_String_To_DateTime()
 
 ### Email Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_Email()
 {
     var email = "user@example.com";
 
-    await Assert.That(email)
-        .Contains("@")
-        .And.Matches(@"^[\w\.-]+@[\w\.-]+\.\w+$")
-        .And.DoesNotContain(" ");
+    await Assert.That(email).Contains("@").And.DoesNotContain(" ");
+    await Assert.That(email).Matches(@"^[\w\.-]+@[\w\.-]+\.\w+$");
 }
 ```
 
 ### URL Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_URL()
@@ -469,7 +436,6 @@ public async Task Validate_URL()
 
 ### File Extension Check
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Check_File_Extension()
@@ -484,42 +450,37 @@ public async Task Check_File_Extension()
 
 ### Username Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_Username()
 {
     var username = "alice_123";
 
-    await Assert.That(username)
-        .Length().IsGreaterThanOrEqualTo(3)
-        .And.Length().IsLessThanOrEqualTo(20)
-        .And.Matches(@"^[a-zA-Z0-9_]+$")
-        .And.DoesNotContain(" ");
+    await Assert.That(username).Length().IsGreaterThanOrEqualTo(3);
+    await Assert.That(username).Length().IsLessThanOrEqualTo(20);
+    await Assert.That(username).Matches(@"^[a-zA-Z0-9_]+$");
+    await Assert.That(username).DoesNotContain(" ");
 }
 ```
 
 ### Password Requirements
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_Password()
 {
     var password = "SecureP@ss123";
 
-    await Assert.That(password)
-        .Length().IsGreaterThanOrEqualTo(8)
-        .And.Matches(@"[A-Z]")  // Has uppercase
-        .And.Matches(@"[a-z]")  // Has lowercase
-        .And.Matches(@"\d")     // Has digit
-        .And.Matches(@"[@$!%*?&]"); // Has special char
+    await Assert.That(password).Length().IsGreaterThanOrEqualTo(8);
+    await Assert.That(password).Matches(@"[A-Z]"); // Has uppercase
+    await Assert.That(password).Matches(@"[a-z]"); // Has lowercase
+    await Assert.That(password).Matches(@"\d"); // Has digit
+    await Assert.That(password).Matches(@"[@$!%*?&]"); // Has special char
 }
 ```
 
 ### JSON String Content
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Check_JSON_Content()
@@ -536,7 +497,6 @@ public async Task Check_JSON_Content()
 
 ### SQL Query Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_SQL_Query()
@@ -554,7 +514,6 @@ public async Task Validate_SQL_Query()
 
 ### IsNullOrEmpty Equivalent
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Check_Null_Or_Empty()
@@ -576,7 +535,6 @@ public async Task Check_Null_Or_Empty()
 
 ### IsNullOrWhiteSpace Equivalent
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Check_Null_Or_Whitespace()
@@ -589,7 +547,6 @@ public async Task Check_Null_Or_Whitespace()
 
 Better with trimming:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Require_Non_Whitespace()
@@ -609,7 +566,6 @@ public async Task Require_Non_Whitespace()
 
 TUnit also supports assertions on `StringBuilder`:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task StringBuilder_Tests()
@@ -628,7 +584,6 @@ public async Task StringBuilder_Tests()
 
 ## Chaining String Assertions
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Chained_String_Assertions()
@@ -647,7 +602,6 @@ public async Task Chained_String_Assertions()
 
 ## Case Sensitivity Patterns
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Case_Sensitivity()
@@ -671,7 +625,6 @@ public async Task Case_Sensitivity()
 
 ## String Formatting Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Formatted_String()
@@ -689,7 +642,6 @@ public async Task Formatted_String()
 
 ## Multi-line Strings
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Multiline_String()
@@ -709,7 +661,6 @@ public async Task Multiline_String()
 
 ## Common String Comparison Options
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task String_Comparison_Options()
@@ -735,7 +686,6 @@ public async Task String_Comparison_Options()
 
 ## Path Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task File_Path_Validation()
@@ -751,7 +701,6 @@ public async Task File_Path_Validation()
 
 Unix path:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Unix_Path_Validation()
@@ -769,7 +718,6 @@ public async Task Unix_Path_Validation()
 
 ### Trim and Assert
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Trim_Before_Assert()
@@ -783,7 +731,6 @@ public async Task Trim_Before_Assert()
 
 ### Case Normalization
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Normalize_Case()
@@ -797,7 +744,6 @@ public async Task Normalize_Case()
 
 ### Substring Extraction
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Extract_Substring()

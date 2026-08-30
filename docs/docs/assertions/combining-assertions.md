@@ -2,7 +2,6 @@
 sidebar_position: 11
 ---
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Combining Assertions
 
@@ -12,7 +11,6 @@ TUnit provides several ways to combine multiple assertions within a single test:
 
 Use the `.And` property to chain multiple conditions on the same value. Every condition must pass for the assertion to succeed. This reads naturally and avoids repeating `Assert.That(...)` for each check.
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MyTest()
@@ -20,8 +18,7 @@ public async Task MyTest()
     var result = Add(1, 2);
 
     await Assert.That(result)
-        .IsNotNull()
-        .And.IsPositive()
+        .IsPositive()
         .And.IsEqualTo(3);
 }
 ```
@@ -30,7 +27,6 @@ public async Task MyTest()
 
 Use the `.Or` property when at least one condition must pass. This is useful for values that are valid across a known set of outcomes.
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MyTest()
@@ -47,7 +43,6 @@ public async Task MyTest()
 :::warning Mixing And/Or is not supported
 `.And` and `.Or` cannot be mixed in a single chain. Attempting to use `.Or` after `.And` (or vice versa) throws `MixedAndOrAssertionsException` at runtime. If you need both kinds of logic, split the chain across multiple `Assert.That(...)` calls, or combine the conditions into a single boolean expression beforehand.
 
-<!-- doc-test-contextual -->
 ```csharp
 // NOT supported - throws MixedAndOrAssertionsException at runtime
 await Assert.That(result)
@@ -68,7 +63,6 @@ By default, a failing assertion throws immediately and stops the test. `Assert.M
 
 Implicit scope (covers the rest of the method):
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MyTest()
@@ -84,7 +78,6 @@ public async Task MyTest()
 
 Explicit scope (covers only the block):
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MyTest()

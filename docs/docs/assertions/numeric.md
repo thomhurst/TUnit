@@ -2,7 +2,6 @@
 sidebar_position: 4.5
 ---
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Numeric Assertions
 
@@ -14,7 +13,6 @@ TUnit provides comprehensive assertions for testing numeric values, including sp
 
 Tests that a numeric value is greater than zero:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Positive_Values()
@@ -32,7 +30,6 @@ public async Task Positive_Values()
 
 Works with all numeric types:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task All_Numeric_Types()
@@ -54,7 +51,6 @@ public async Task All_Numeric_Types()
 
 Tests that a numeric value is less than zero:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Negative_Values()
@@ -72,7 +68,6 @@ public async Task Negative_Values()
 
 ### Zero is Neither Positive Nor Negative
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Zero_Checks()
@@ -94,7 +89,6 @@ All comparison operators work with numeric types. See [Equality and Comparison](
 
 ### Quick Reference
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Numeric_Comparisons()
@@ -115,7 +109,6 @@ Floating-point arithmetic can introduce rounding errors. Use tolerance for safe 
 
 ### Double Tolerance
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Double_Tolerance()
@@ -133,7 +126,6 @@ public async Task Double_Tolerance()
 
 ### Float Tolerance
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Float_Tolerance()
@@ -149,7 +141,6 @@ public async Task Float_Tolerance()
 
 Useful for monetary calculations:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Decimal_Tolerance()
@@ -165,7 +156,6 @@ public async Task Decimal_Tolerance()
 
 For timestamp or large number comparisons:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Long_Tolerance()
@@ -183,7 +173,6 @@ public async Task Long_Tolerance()
 
 ### Financial Calculations
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Calculate_Total_Price()
@@ -203,7 +192,6 @@ public async Task Calculate_Total_Price()
 
 ### Temperature Conversions
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Celsius_To_Fahrenheit()
@@ -218,7 +206,6 @@ public async Task Celsius_To_Fahrenheit()
 
 ### Percentage Calculations
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Calculate_Percentage()
@@ -235,7 +222,6 @@ public async Task Calculate_Percentage()
 
 ### Statistical Calculations
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Calculate_Average()
@@ -253,7 +239,6 @@ public async Task Calculate_Average()
 
 ### Valid Range Checks
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_Age()
@@ -267,7 +252,6 @@ public async Task Validate_Age()
 
 ### Percentage Range
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_Percentage()
@@ -281,7 +265,6 @@ public async Task Validate_Percentage()
 
 ### Score Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_Score()
@@ -297,7 +280,6 @@ public async Task Validate_Score()
 
 ## Chaining Numeric Assertions
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Chained_Numeric_Assertions()
@@ -314,7 +296,6 @@ public async Task Chained_Numeric_Assertions()
 
 ## Nullable Numeric Types
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Nullable_Numerics()
@@ -339,7 +320,6 @@ public async Task Nullable_Null()
 
 ### Infinity
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Infinity_Checks()
@@ -354,7 +334,6 @@ public async Task Infinity_Checks()
 
 ### NaN (Not a Number)
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task NaN_Checks()
@@ -371,7 +350,6 @@ public async Task NaN_Checks()
 
 ## Performance Metrics
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Response_Time_Check()
@@ -391,7 +369,6 @@ public async Task Response_Time_Check()
 
 ### Boundary Testing
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Boundary_Values()
@@ -407,7 +384,6 @@ public async Task Boundary_Values()
 
 ### Growth Rate Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Growth_Rate()
@@ -423,7 +399,6 @@ public async Task Growth_Rate()
 
 ### Ratio Calculations
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Success_Ratio()

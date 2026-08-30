@@ -1,4 +1,3 @@
-<!-- doc-test-ignore-file: Examples use application-specific containers, resources, and benchmark fixtures. -->
 
 # Performance Best Practices
 
@@ -36,7 +35,7 @@ Benefits:
 
 ```csharp
 // ❌ Bad: Heavy computation during discovery
-public static IEnumerable<User> GetTestUsers()
+public static IEnumerable<User> GetTestUsersWithDatabaseQuery()
 {
     // This runs during test discovery!
     var users = DatabaseQuery.GetAllUsers();
@@ -44,7 +43,7 @@ public static IEnumerable<User> GetTestUsers()
 }
 
 // ✅ Good: Lightweight data generation
-public static IEnumerable<User> GetTestUsers()
+public static IEnumerable<User> GetLightweightTestUsers()
 {
     yield return new User { Id = 1, Name = "Test User 1" };
     yield return new User { Id = 2, Name = "Test User 2" };
@@ -84,7 +83,7 @@ Remember that each `[Arguments(...)]` attribute produces exactly **one** test ca
 // ❌ Bad: Combinatorial explosion via [Matrix]
 [Test]
 [MatrixDataSource]
-public void Process(
+public void ProcessAllCombinations(
     [Matrix(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)] int count,
     [Matrix("a", "b", "c", "d", "e")] string label,
     [Matrix(true, false)] bool flag)
@@ -97,7 +96,7 @@ public void Process(
 [Arguments(1, "a", true)]
 [Arguments(5, "c", false)]
 [Arguments(10, "e", true)]
-public void Process(int count, string label, bool flag)
+public void ProcessTargetedCases(int count, string label, bool flag)
 {
     // Only 3 specific test cases — each [Arguments] attribute is one test
 }
@@ -189,8 +188,8 @@ public class ExpensiveTests
     [Before(Test)]
     public async Task SetupEachTest()
     {
-        await StartDatabaseContainer();
-        await MigrateDatabase();
+        await DatabaseInfrastructure.StartDatabaseContainer();
+        await DatabaseInfrastructure.MigrateDatabase();
     }
 }
 
@@ -202,8 +201,8 @@ public class EfficientTests
     [Before(Class)]
     public static async Task SetupOnce()
     {
-        _container = await StartDatabaseContainer();
-        await MigrateDatabase();
+        _container = await DatabaseInfrastructure.StartDatabaseContainer();
+        await DatabaseInfrastructure.MigrateDatabase();
     }
     
     [After(Class)]
@@ -214,6 +213,19 @@ public class EfficientTests
             await _container.DisposeAsync();
         }
     }
+}
+
+public sealed class DatabaseContainer : IAsyncDisposable
+{
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+}
+
+public static class DatabaseInfrastructure
+{
+    public static Task<DatabaseContainer> StartDatabaseContainer()
+        => Task.FromResult(new DatabaseContainer());
+
+    public static Task MigrateDatabase() => Task.CompletedTask;
 }
 ```
 
@@ -231,6 +243,11 @@ public class PerformantTests
         var resource = _resource.Value; // Only created on first access
         await resource.DoSomethingAsync();
     }
+}
+
+public sealed class ExpensiveResource
+{
+    public Task DoSomethingAsync() => Task.CompletedTask;
 }
 ```
 

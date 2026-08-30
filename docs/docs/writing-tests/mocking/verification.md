@@ -2,7 +2,6 @@
 sidebar_position: 3
 ---
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Verification
 
@@ -10,7 +9,6 @@ Verification uses the same methods as setup — the chain method (`.WasCalled()`
 
 ## Basic Verification
 
-<!-- doc-test-contextual -->
 ```csharp
 // Verify a method was called at least once
 mock.GetUser(42).WasCalled();
@@ -36,7 +34,6 @@ mock.Delete(Any()).WasNeverCalled();
 
 ### Custom Failure Messages
 
-<!-- doc-test-contextual -->
 ```csharp
 mock.GetUser(42).WasCalled(Times.Once, "GetUser should be called once during initialization");
 mock.Delete(Any()).WasNeverCalled("Delete should not be called in read-only mode");
@@ -46,11 +43,9 @@ mock.Delete(Any()).WasNeverCalled("Delete should not be called in read-only mode
 
 Property verification mirrors the setup API — defaults to the **getter**:
 
-<!-- doc-test-contextual -->
 ```csharp
 // Getter verification
 mock.Name.WasCalled(Times.Once);           // getter called once
-mock.Name.Getter.WasCalled(Times.Once);    // explicit — same as above
 mock.Name.WasNeverCalled();                 // getter never accessed
 
 // Setter verification — any value
@@ -59,14 +54,13 @@ mock.Count.Setter.WasNeverCalled();
 
 // Setter verification — specific value
 mock.Count.Set(42).WasCalled(Times.Once);
-mock.Count.Set(v => v > 0).WasCalled(Times.AtLeast(1));
+mock.Count.Set(Is<int>(v => v > 0)).WasCalled(Times.AtLeast(1));
 ```
 
 ## Argument Matching in Verification
 
 Verification uses the same `Arg<T>` matchers as setup:
 
-<!-- doc-test-contextual -->
 ```csharp
 // Exact value
 mock.GetUser(42).WasCalled(Times.Once);
@@ -84,7 +78,6 @@ See [Argument Matchers](argument-matchers) for the full list of matchers.
 
 Verify calls occurred in a specific order **across one or more mocks**:
 
-<!-- doc-test-contextual -->
 ```csharp
 Mock.VerifyInOrder(() =>
 {
@@ -104,7 +97,6 @@ If calls occurred out of order, `VerifyInOrder` throws with a message showing th
 
 Verify that **every setup** was invoked at least once:
 
-<!-- doc-test-contextual -->
 ```csharp
 mock.GetUser(Any()).Returns(new User("Alice"));
 mock.Delete(Any());
@@ -121,7 +113,6 @@ If any setup was never called, `VerifyAll` throws listing the uninvoked setups.
 
 Verify that all recorded calls have been explicitly verified:
 
-<!-- doc-test-contextual -->
 ```csharp
 svc.GetUser(1);
 svc.Delete(2);
@@ -138,7 +129,6 @@ If there are unverified calls, `VerifyNoOtherCalls` throws listing them.
 
 Use TUnit's `Assert.That` pipeline for assertion-style verification with better error messages:
 
-<!-- doc-test-contextual -->
 ```csharp
 using TUnit.Mocks.Assertions;
 
@@ -155,7 +145,6 @@ This integrates with TUnit's assertion engine — failures appear as assertion e
 
 Access the raw call history for custom inspection:
 
-<!-- doc-test-contextual -->
 ```csharp
 var calls = mock.Invocations;
 

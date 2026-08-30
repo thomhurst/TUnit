@@ -1,4 +1,3 @@
-<!-- doc-test-ignore-file: Examples depend on application-specific executors, attributes, fixtures, and services. -->
 
 # Extension Points
 
@@ -37,7 +36,7 @@ public class TimingTestExecutor : ITestExecutor
         finally
         {
             stopwatch.Stop();
-            context.WriteLine($"Test execution took: {stopwatch.ElapsedMilliseconds}ms");
+            context.Output.WriteLine($"Test execution took: {stopwatch.ElapsedMilliseconds}ms");
 
             // You could also send this to telemetry
             TelemetryClient.TrackMetric("TestDuration", stopwatch.ElapsedMilliseconds);
@@ -52,13 +51,15 @@ To use your custom test executor, apply the `TestExecutorAttribute` at the assem
 
 ```csharp
 // Assembly-level (applies to all tests in the assembly)
-[assembly: TestExecutor<TimingTestExecutor>]
+[assembly: TestExecutor<RegistrationTimingTestExecutor>]
 
-// Or use the non-generic version
-[assembly: TestExecutor(typeof(TimingTestExecutor))]
+public sealed class RegistrationTimingTestExecutor : ITestExecutor
+{
+    public ValueTask ExecuteTest(TestContext context, Func<ValueTask> action) => action();
+}
 
 // Class-level (applies to all tests in the class)
-[TestExecutor<TimingTestExecutor>]
+[TestExecutor<RegistrationTimingTestExecutor>]
 public class MyTestClass
 {
     [Test]
@@ -68,12 +69,15 @@ public class MyTestClass
     }
 }
 
-// Method-level (applies to specific test)
-[Test]
-[TestExecutor<TimingTestExecutor>]
-public async Task MyTest()
+public class MethodLevelExecutorTests
 {
-    // Test logic here
+    // Method-level (applies to specific test)
+    [Test]
+    [TestExecutor<RegistrationTimingTestExecutor>]
+    public async Task MyTest()
+    {
+        // Test logic here
+    }
 }
 ```
 
@@ -232,10 +236,15 @@ You can also apply it at the class or assembly level to affect all hooks in that
 
 ```csharp
 // Assembly-level (applies to all hooks in the assembly)
-[assembly: HookExecutor<LoggingHookExecutor>]
+[assembly: HookExecutor<AssemblyLoggingHookExecutor>]
+
+public sealed class AssemblyLoggingHookExecutor : GenericAbstractExecutor
+{
+    protected override ValueTask ExecuteAsync(Func<ValueTask> action) => action();
+}
 
 // Class-level (applies to all hooks in the class)
-[HookExecutor<LoggingHookExecutor>]
+[HookExecutor<AssemblyLoggingHookExecutor>]
 public class MyTestClass
 {
     [Before(Test)]
@@ -258,9 +267,8 @@ public class DispatchAttribute : Attribute, ITestRegisteredEventReceiver
 
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
-        var executor = new MyCustomExecutor();
-        context.SetTestExecutor(executor);
-        context.SetHookExecutor(executor);
+        context.SetTestExecutor(new TimingTestExecutor());
+        context.SetHookExecutor(new LoggingHookExecutor());
         return default;
     }
 }
@@ -355,7 +363,7 @@ public class TestReporterAttribute : Attribute, ITestStartEventReceiver, ITestEn
     public async ValueTask OnTestStart(TestContext context)
     {
         await ReportingService.ReportTestStarted(
-            context.GetDisplayName(),
+            context.Metadata.DisplayName,
             context.Metadata.TestDetails.ClassType.FullName,
             context.Metadata.TestDetails.TestMethodArguments
         );
@@ -364,7 +372,7 @@ public class TestReporterAttribute : Attribute, ITestStartEventReceiver, ITestEn
     public async ValueTask OnTestEnd(TestContext context)
     {
         await ReportingService.ReportTestCompleted(
-            context.GetDisplayName(),
+            context.Metadata.DisplayName,
             context.Execution.Result?.State,
             context.Execution.Result?.Duration,
             context.Execution.Result?.Exception?.Message
@@ -378,6 +386,9 @@ public class TestReporterAttribute : Attribute, ITestStartEventReceiver, ITestEn
 Event receivers are registered by implementing the interfaces in an attribute class, then applying that attribute at the assembly, class, or method level:
 
 ```csharp
+// Apply at assembly level
+[assembly: CustomEventReceiver]
+
 // Create an attribute that implements the event receiver interfaces
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
 public class CustomEventReceiverAttribute : Attribute, ITestStartEventReceiver, ITestEndEventReceiver
@@ -386,19 +397,16 @@ public class CustomEventReceiverAttribute : Attribute, ITestStartEventReceiver, 
     
     public ValueTask OnTestStart(TestContext context)
     {
-        Console.WriteLine($"Test starting: {context.GetDisplayName()}");
+        Console.WriteLine($"Test starting: {context.Metadata.DisplayName}");
         return default;
     }
     
     public ValueTask OnTestEnd(TestContext context)
     {
-        Console.WriteLine($"Test ended: {context.GetDisplayName()} - {context.Execution.Result?.State}");
+        Console.WriteLine($"Test ended: {context.Metadata.DisplayName} - {context.Execution.Result?.State}");
         return default;
     }
 }
-
-// Apply at assembly level
-[assembly: CustomEventReceiver]
 
 // Or at class level
 [CustomEventReceiver]
@@ -408,10 +416,13 @@ public class MyTestClass
     public async Task MyTest() { }
 }
 
-// Or at method level
-[Test]
-[CustomEventReceiver]
-public async Task MyTest() { }
+public class MethodEventReceiverTests
+{
+    // Or at method level
+    [Test]
+    [CustomEventReceiver]
+    public Task MyTest() => Task.CompletedTask;
+}
 ```
 
 ## Parallel Execution Control
@@ -516,7 +527,7 @@ Example:
 ```csharp
 public class DatabaseTests : IAsyncInitializer
 {
-    private DatabaseConnection _connection;
+    private DatabaseConnection _connection = null!;
 
     public async Task InitializeAsync()
     {
@@ -565,7 +576,7 @@ public class TestCaseFixture : IAsyncDiscoveryInitializer, IAsyncDisposable
     public async Task InitializeAsync()
     {
         // This runs during DISCOVERY, not just execution
-        _testCases = await LoadTestCasesFromDatabaseAsync();
+        _testCases = [.. await LoadTestCasesFromDatabaseAsync()];
     }
 
     public IEnumerable<string> GetTestCases() => _testCases;
@@ -639,7 +650,7 @@ public class TransactionalTestExecutor : ITestExecutor
     public async ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
     {
         // Get the database connection from DI
-        var dbContext = context.GetService<ApplicationDbContext>();
+        var dbContext = new ApplicationDbContext();
 
         using var transaction = await dbContext.Database.BeginTransactionAsync();
 

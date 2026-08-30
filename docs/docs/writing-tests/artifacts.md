@@ -1,4 +1,3 @@
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Test Artifacts
 
@@ -18,7 +17,6 @@ Use `TestContext.ResultsDirectory` to place generated files alongside reports an
 artifacts. The property returns the absolute directory selected by Microsoft.Testing.Platform,
 including any `--results-directory` override.
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task CaptureLog()
@@ -34,7 +32,6 @@ public async Task CaptureLog()
 
 The simplest way to attach an artifact is by providing just the file path:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MyIntegrationTest()
@@ -58,7 +55,6 @@ public async Task MyIntegrationTest()
 
 For more control, you can create an `Artifact` object directly:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MyIntegrationTest()
@@ -113,7 +109,6 @@ public class MyTests
 
 You can attach multiple artifacts to a single test:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ComplexIntegrationTest()
@@ -153,7 +148,6 @@ Attach files to the entire test session using `TestSessionContext.Current.AddArt
 
 ### Basic Usage
 
-<!-- doc-test-contextual -->
 ```csharp
 [Before(TestSession)]
 public static void SetupTestSession()
@@ -176,7 +170,6 @@ public static void SetupTestSession()
 
 Attach configuration files to document the test environment:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Before(TestSession)]
 public static void DocumentTestEnvironment()
@@ -206,7 +199,6 @@ public static void DocumentTestEnvironment()
 
 Generate and attach performance reports for the entire test session:
 
-<!-- doc-test-contextual -->
 ```csharp
 [After(TestSession)]
 public static void GeneratePerformanceReport()
@@ -247,7 +239,6 @@ public class Artifact
 
 Consider cleaning up temporary artifact files after test execution to avoid accumulating files:
 
-<!-- doc-test-contextual -->
 ```csharp
 [After(TestSession)]
 public static void CleanupArtifacts()
@@ -264,7 +255,6 @@ public static void CleanupArtifacts()
 
 Create a unique directory for each test's artifacts:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Before(Test)]
 public void SetupTestArtifactDirectory()
@@ -280,7 +270,8 @@ public void SetupTestArtifactDirectory()
 [Test]
 public void MyTest()
 {
-    var artifactDir = (string)TestContext.Current!.StateBag["ArtifactDir"];
+    var artifactDir = TestContext.Current!.StateBag["ArtifactDir"] as string
+        ?? throw new InvalidOperationException("ArtifactDir was not initialized");
     var logPath = Path.Combine(artifactDir, "test.log");
     
     // ... test logic ...
@@ -297,12 +288,12 @@ public void MyTest()
 
 For large artifacts (videos, extensive logs), consider only attaching them when tests fail:
 
-<!-- doc-test-contextual -->
 ```csharp
 [After(Test)]
 public async Task ConditionalArtifactAttachment()
 {
-    var testContext = TestContext.Current;
+    var testContext = TestContext.Current
+        ?? throw new InvalidOperationException("No active test context.");
     
     if (testContext?.Execution.Result?.State is TestState.Failed or TestState.Timeout)
     {
@@ -323,7 +314,6 @@ public async Task ConditionalArtifactAttachment()
 
 Provide clear, descriptive names and descriptions for your artifacts:
 
-<!-- doc-test-contextual -->
 ```csharp
 // ❌ Not descriptive
 TestContext.Current!.Output.AttachArtifact(new Artifact
@@ -345,7 +335,6 @@ TestContext.Current!.Output.AttachArtifact(new Artifact
 
 Always ensure the file exists before attaching:
 
-<!-- doc-test-contextual -->
 ```csharp
 var logPath = "path/to/logfile.log";
 
@@ -367,14 +356,14 @@ else
 
 ### Browser Testing with Playwright
 
-<!-- doc-test-contextual -->
 ```csharp
 [After(Test)]
 public async Task CapturePlaywrightArtifacts()
 {
-    var testContext = TestContext.Current;
+    var testContext = TestContext.Current
+        ?? throw new InvalidOperationException("No active test context.");
     
-    if (testContext?.Execution.Result?.State != TestState.Passed)
+    if (testContext.Execution.Result?.State != TestState.Passed)
     {
         // Capture screenshot
         var screenshotPath = $"artifacts/screenshot-{testContext.Id}.png";
@@ -387,7 +376,7 @@ public async Task CapturePlaywrightArtifacts()
         });
         
         // Capture video if enabled
-        if (_browserContext.Options?.RecordVideo != null)
+        if (_page.Video is not null)
         {
             await _page.CloseAsync();
             var videoPath = await _page.Video!.PathAsync();
@@ -404,7 +393,6 @@ public async Task CapturePlaywrightArtifacts()
 
 ### API Testing
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ApiIntegrationTest()
@@ -440,7 +428,6 @@ public async Task ApiIntegrationTest()
 
 ### Database Testing
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DatabaseIntegrationTest()

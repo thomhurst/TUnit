@@ -2,7 +2,6 @@
 sidebar_position: 12
 ---
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Specialized Type Assertions
 
@@ -14,7 +13,6 @@ TUnit provides assertions for many specialized .NET types beyond the common prim
 
 Tests whether a GUID is empty (`Guid.Empty`):
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task GUID_Is_Empty()
@@ -29,7 +27,6 @@ public async Task GUID_Is_Empty()
 
 Practical usage:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Entity_Has_Valid_ID()
@@ -47,7 +44,6 @@ public async Task Entity_Has_Valid_ID()
 
 Tests for 2xx success status codes:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task HTTP_Success_Status()
@@ -60,7 +56,6 @@ public async Task HTTP_Success_Status()
 
 Works with all 2xx codes:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Various_Success_Codes()
@@ -74,7 +69,6 @@ public async Task Various_Success_Codes()
 
 ### IsNotSuccess
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task HTTP_Not_Success()
@@ -88,7 +82,6 @@ public async Task HTTP_Not_Success()
 
 Tests for 4xx client error status codes:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task HTTP_Client_Error()
@@ -104,7 +97,6 @@ public async Task HTTP_Client_Error()
 
 Tests for 5xx server error status codes:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task HTTP_Server_Error()
@@ -119,7 +111,6 @@ public async Task HTTP_Server_Error()
 
 Tests for 3xx redirection status codes:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task HTTP_Redirection()
@@ -134,7 +125,6 @@ public async Task HTTP_Redirection()
 
 ### IsCancellationRequested / IsNotCancellationRequested
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task CancellationToken_Is_Requested()
@@ -156,7 +146,6 @@ public async Task CancellationToken_Not_Requested()
 
 ### CanBeCanceled / CannotBeCanceled
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Token_Can_Be_Canceled()
@@ -179,7 +168,6 @@ public async Task Default_Token_Cannot_Be_Canceled()
 
 ### IsLetter / IsNotLetter
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Char_Is_Letter()
@@ -194,7 +182,6 @@ public async Task Char_Is_Letter()
 
 ### IsDigit / IsNotDigit
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Char_Is_Digit()
@@ -208,7 +195,6 @@ public async Task Char_Is_Digit()
 
 ### IsWhiteSpace / IsNotWhiteSpace
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Char_Is_WhiteSpace()
@@ -223,7 +209,6 @@ public async Task Char_Is_WhiteSpace()
 
 ### IsUpper / IsNotUpper
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Char_Is_Upper()
@@ -237,7 +222,6 @@ public async Task Char_Is_Upper()
 
 ### IsLower / IsNotLower
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Char_Is_Lower()
@@ -251,7 +235,6 @@ public async Task Char_Is_Lower()
 
 ### IsPunctuation / IsNotPunctuation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Char_Is_Punctuation()
@@ -270,7 +253,6 @@ public async Task Char_Is_Punctuation()
 
 #### Exists / DoesNotExist
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Directory_Exists()
@@ -291,7 +273,6 @@ public async Task Directory_Does_Not_Exist()
 
 #### HasFiles / IsEmpty
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Directory_Has_Files()
@@ -316,14 +297,13 @@ public async Task Directory_Is_Empty()
 
 #### HasSubdirectories / HasNoSubdirectories
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Directory_Has_Subdirectories()
 {
     var windowsDir = new DirectoryInfo(@"C:\Windows");
 
-    await Assert.That(windowsDir).HasSubdirectories();
+    await Assert.That(windowsDir.EnumerateDirectories().Any()).IsTrue();
 }
 ```
 
@@ -331,7 +311,6 @@ public async Task Directory_Has_Subdirectories()
 
 #### Exists / DoesNotExist
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task File_Exists()
@@ -356,7 +335,6 @@ public async Task File_Does_Not_Exist()
 
 #### IsReadOnly / IsNotReadOnly
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task File_Is_ReadOnly()
@@ -377,7 +355,6 @@ public async Task File_Is_ReadOnly()
 
 #### IsHidden / IsNotHidden
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task File_Is_Hidden()
@@ -396,7 +373,6 @@ public async Task File_Is_Hidden()
 
 #### IsSystem / IsNotSystem
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task File_Is_System()
@@ -406,14 +382,13 @@ public async Task File_Is_System()
 
     if (systemFile.Exists)
     {
-        await Assert.That(systemFile).IsSystem();
+        await Assert.That(systemFile.Attributes.HasFlag(FileAttributes.System)).IsTrue();
     }
 }
 ```
 
 #### IsExecutable / IsNotExecutable
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task File_Is_Executable()
@@ -422,7 +397,7 @@ public async Task File_Is_Executable()
 
     if (exeFile.Exists)
     {
-        await Assert.That(exeFile).IsExecutable();
+        await Assert.That(exeFile.Extension).IsEqualTo(".exe");
     }
 }
 ```
@@ -431,14 +406,13 @@ public async Task File_Is_Executable()
 
 ### IsIPv4 / IsNotIPv4
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task IP_Is_IPv4()
 {
     var ipv4 = IPAddress.Parse("192.168.1.1");
 
-    await Assert.That(ipv4).IsIPv4();
+    await Assert.That(ipv4.AddressFamily).IsEqualTo(AddressFamily.InterNetwork);
 }
 
 [Test]
@@ -446,20 +420,19 @@ public async Task IP_Not_IPv4()
 {
     var ipv6 = IPAddress.Parse("::1");
 
-    await Assert.That(ipv6).IsNotIPv4();
+    await Assert.That(ipv6.AddressFamily).IsNotEqualTo(AddressFamily.InterNetwork);
 }
 ```
 
 ### IsIPv6 / IsNotIPv6
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task IP_Is_IPv6()
 {
     var ipv6 = IPAddress.Parse("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
 
-    await Assert.That(ipv6).IsIPv6();
+    await Assert.That(ipv6.AddressFamily).IsEqualTo(AddressFamily.InterNetworkV6);
 }
 
 [Test]
@@ -467,7 +440,7 @@ public async Task IP_Not_IPv6()
 {
     var ipv4 = IPAddress.Parse("127.0.0.1");
 
-    await Assert.That(ipv4).IsNotIPv6();
+    await Assert.That(ipv4.AddressFamily).IsNotEqualTo(AddressFamily.InterNetworkV6);
 }
 ```
 
@@ -475,14 +448,13 @@ public async Task IP_Not_IPv6()
 
 ### IsValueCreated / IsNotValueCreated
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Lazy_Value_Not_Created()
 {
     var lazy = new Lazy<int>(() => 42);
 
-    await Assert.That(lazy).IsNotValueCreated();
+    await Assert.That(lazy.IsValueCreated).IsFalse();
 
     var value = lazy.Value;
 
@@ -495,27 +467,25 @@ public async Task Lazy_Value_Not_Created()
 
 ### CanRead / CannotRead
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Stream_Can_Read()
 {
     using var stream = new MemoryStream();
 
-    await Assert.That(stream).CanRead();
+    await Assert.That((Stream) stream).CanRead();
 }
 ```
 
 ### CanWrite / CannotWrite
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Stream_Can_Write()
 {
     using var stream = new MemoryStream();
 
-    await Assert.That(stream).CanWrite();
+    await Assert.That((Stream) stream).CanWrite();
 }
 
 [Test]
@@ -523,26 +493,24 @@ public async Task Stream_Cannot_Write()
 {
     var readOnlyStream = new MemoryStream(new byte[10], writable: false);
 
-    await Assert.That(readOnlyStream).CannotWrite();
+    await Assert.That((Stream) readOnlyStream).CannotWrite();
 }
 ```
 
 ### CanSeek / CannotSeek
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Stream_Can_Seek()
 {
     using var stream = new MemoryStream();
 
-    await Assert.That(stream).CanSeek();
+    await Assert.That((Stream) stream).CanSeek();
 }
 ```
 
 ### CanTimeout / CannotTimeout
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Network_Stream_Can_Timeout()
@@ -557,7 +525,6 @@ public async Task Network_Stream_Can_Timeout()
 
 ### HasExited / HasNotExited
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Process_Has_Not_Exited()
@@ -575,14 +542,13 @@ public async Task Process_Has_Not_Exited()
 
 ### IsResponding / IsNotResponding
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Process_Is_Responding()
 {
     var process = Process.GetCurrentProcess();
 
-    await Assert.That(process).IsResponding();
+    await Assert.That(process.Responding).IsTrue();
 }
 ```
 
@@ -590,7 +556,6 @@ public async Task Process_Is_Responding()
 
 ### IsAlive / IsNotAlive
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Thread_Is_Alive()
@@ -607,7 +572,6 @@ public async Task Thread_Is_Alive()
 
 ### IsBackground / IsNotBackground
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Thread_Is_Background()
@@ -621,7 +585,6 @@ public async Task Thread_Is_Background()
 
 ### IsThreadPoolThread / IsNotThreadPoolThread
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Check_ThreadPool_Thread()
@@ -637,7 +600,6 @@ public async Task Check_ThreadPool_Thread()
 
 ### IsAlive / IsNotAlive
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task WeakReference_Is_Alive()
@@ -659,7 +621,6 @@ public async Task WeakReference_Is_Alive()
 
 ### IsAbsoluteUri / IsNotAbsoluteUri
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task URI_Is_Absolute()
@@ -682,14 +643,13 @@ public async Task URI_Is_Relative()
 
 ### IsUtf8 / IsNotUtf8
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Encoding_Is_UTF8()
 {
     var encoding = Encoding.UTF8;
 
-    await Assert.That(encoding).IsUtf8();
+    await Assert.That(encoding.WebName).IsEqualTo(Encoding.UTF8.WebName);
 }
 
 [Test]
@@ -697,7 +657,7 @@ public async Task Encoding_Not_UTF8()
 {
     var encoding = Encoding.ASCII;
 
-    await Assert.That(encoding).IsNotUtf8();
+    await Assert.That(encoding.WebName).IsNotEqualTo(Encoding.UTF8.WebName);
 }
 ```
 
@@ -705,7 +665,6 @@ public async Task Encoding_Not_UTF8()
 
 Version comparisons using standard comparison operators:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Version_Comparison()
@@ -722,7 +681,6 @@ public async Task Version_Comparison()
 
 ### IsWeekend / IsNotWeekend
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Day_Is_Weekend()
@@ -734,7 +692,6 @@ public async Task Day_Is_Weekend()
 
 ### IsWeekday / IsNotWeekday
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Day_Is_Weekday()
@@ -751,7 +708,6 @@ public async Task Day_Is_Weekday()
 
 ### API Testing
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task API_Returns_Success()
@@ -765,7 +721,6 @@ public async Task API_Returns_Success()
 
 ### File Upload Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Uploaded_File_Validation()
@@ -780,7 +735,6 @@ public async Task Uploaded_File_Validation()
 
 ### Configuration Directory Check
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Config_Directory_Setup()
@@ -794,14 +748,13 @@ public async Task Config_Directory_Setup()
 
 ### Network Validation
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Server_IP_Is_Valid()
 {
-    var serverIp = IPAddress.Parse(Configuration["ServerIP"]);
+    var serverIp = IPAddress.Parse(Configuration["ServerIP"] ?? "127.0.0.1");
 
-    await Assert.That(serverIp).IsIPv4();
+    await Assert.That(serverIp.AddressFamily).IsEqualTo(AddressFamily.InterNetwork);
 }
 ```
 

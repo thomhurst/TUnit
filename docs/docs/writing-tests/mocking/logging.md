@@ -2,7 +2,6 @@
 sidebar_position: 7
 ---
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Logging
 
@@ -18,7 +17,6 @@ Unlike `TUnit.Mocks`, the logging helpers are plain classes — no source genera
 
 ## Getting Started
 
-<!-- doc-test-contextual -->
 ```csharp
 using TUnit.Mocks;
 using Microsoft.Extensions.Logging;
@@ -34,36 +32,34 @@ public async Task Service_Logs_On_Startup()
     service.Start();
 
     // Assert
-    logger.VerifyLog(LogLevel.Information, "started", Times.Once);
+    logger.VerifyLog(Microsoft.Extensions.Logging.LogLevel.Information, "started", Times.Once);
 }
 ```
 
 ## Creating a Logger
 
-<!-- doc-test-contextual -->
 ```csharp
 // Untyped logger
-var logger = Mock.Logger();
-ILogger iLogger = logger;
+var untypedLogger = Mock.Logger();
+Microsoft.Extensions.Logging.ILogger untypedILogger = untypedLogger;
 
 // With category name
-var logger = Mock.Logger("MyApp.Services");
+var categoryLogger = Mock.Logger("MyApp.Services");
 
 // Generic typed logger (implements ILogger<T>)
-var logger = Mock.Logger<MyService>();
-ILogger<MyService> iLogger = logger;
+var typedLogger = Mock.Logger<MyService>();
+Microsoft.Extensions.Logging.ILogger<MyService> typedILogger = typedLogger;
 ```
 
 ## Inspecting Entries
 
-<!-- doc-test-contextual -->
 ```csharp
 logger.LogInformation("User {UserId} logged in", 42);
 logger.LogWarning("Disk space low");
 
 // All entries
 await Assert.That(logger.Entries).Count().IsEqualTo(2);
-await Assert.That(logger.Entries[0].LogLevel).IsEqualTo(LogLevel.Information);
+await Assert.That(logger.Entries[0].LogLevel).IsEqualTo(Microsoft.Extensions.Logging.LogLevel.Information);
 await Assert.That(logger.Entries[0].Message).Contains("42");
 
 // Most recent entry
@@ -88,10 +84,9 @@ Each `LogEntry` provides:
 
 Build verification queries with filters:
 
-<!-- doc-test-contextual -->
 ```csharp
 // By level
-logger.VerifyLog().AtLevel(LogLevel.Error).WasCalled(Times.Once);
+logger.VerifyLog().AtLevel(Microsoft.Extensions.Logging.LogLevel.Error).WasCalled(Times.Once);
 
 // By message content (contains)
 logger.VerifyLog().ContainingMessage("failed").WasCalled(Times.Once);
@@ -104,7 +99,7 @@ logger.VerifyLog().WithException<InvalidOperationException>().WasCalled(Times.On
 
 // Combined filters
 logger.VerifyLog()
-    .AtLevel(LogLevel.Error)
+    .AtLevel(Microsoft.Extensions.Logging.LogLevel.Error)
     .WithException<InvalidOperationException>()
     .ContainingMessage("database")
     .WasCalled(Times.Once);
@@ -112,16 +107,15 @@ logger.VerifyLog()
 
 ### Shorthand Methods
 
-<!-- doc-test-contextual -->
 ```csharp
 // Verify message at level (at least once)
-logger.VerifyLog(LogLevel.Error, "connection failed");
+logger.VerifyLog(Microsoft.Extensions.Logging.LogLevel.Error, "connection failed");
 
 // Verify message at level with count
-logger.VerifyLog(LogLevel.Warning, "retry", Times.Exactly(3));
+logger.VerifyLog(Microsoft.Extensions.Logging.LogLevel.Warning, "retry", Times.Exactly(3));
 
 // Verify nothing logged at a level
-logger.VerifyNoLog(LogLevel.Error);
+logger.VerifyNoLog(Microsoft.Extensions.Logging.LogLevel.Error);
 
 // Verify nothing logged at all
 logger.VerifyNoLogs();
@@ -129,33 +123,30 @@ logger.VerifyNoLogs();
 
 ### Never Called
 
-<!-- doc-test-contextual -->
 ```csharp
-logger.VerifyLog().AtLevel(LogLevel.Error).WasNeverCalled();
+logger.VerifyLog().AtLevel(Microsoft.Extensions.Logging.LogLevel.Error).WasNeverCalled();
 ```
 
 ## Filtering Entries
 
 Retrieve entries matching specific criteria:
 
-<!-- doc-test-contextual -->
 ```csharp
 // By level
-var errors = logger.GetLogs(LogLevel.Error);
+var errors = logger.GetLogs(Microsoft.Extensions.Logging.LogLevel.Error);
 
 // By message content
 var retryLogs = logger.GetLogs("retry");
 
 // Using the fluent API
 var matching = logger.VerifyLog()
-    .AtLevel(LogLevel.Warning)
+    .AtLevel(Microsoft.Extensions.Logging.LogLevel.Warning)
     .ContainingMessage("timeout")
     .GetMatchingEntries();
 ```
 
 ## Reset
 
-<!-- doc-test-contextual -->
 ```csharp
 logger.Clear(); // removes all captured entries
 ```
@@ -164,7 +155,6 @@ logger.Clear(); // removes all captured entries
 
 Pass `Mock.Logger<T>()` anywhere `ILogger<T>` is expected:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task OrderService_Logs_Errors()
@@ -172,10 +162,10 @@ public async Task OrderService_Logs_Errors()
     var logger = Mock.Logger<OrderService>();
     var service = new OrderService(logger);
 
-    await service.ProcessOrder(invalidOrder);
+    service.ProcessOrder(invalidOrder);
 
     logger.VerifyLog()
-        .AtLevel(LogLevel.Error)
+        .AtLevel(Microsoft.Extensions.Logging.LogLevel.Error)
         .ContainingMessage("validation failed")
         .WasCalled(Times.Once);
 }

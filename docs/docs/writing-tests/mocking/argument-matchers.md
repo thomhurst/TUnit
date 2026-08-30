@@ -2,7 +2,6 @@
 sidebar_position: 4
 ---
 
-<!-- doc-test-ignore-file: Matcher examples are contextual continuations of application mock setup. -->
 
 # Argument Matchers
 

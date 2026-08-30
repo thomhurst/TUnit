@@ -2,7 +2,6 @@
 sidebar_position: 1
 ---
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Getting Started with Assertions
 
@@ -12,7 +11,6 @@ TUnit provides a comprehensive, fluent assertion library that makes your tests r
 
 All assertions in TUnit follow a consistent pattern using the `Assert.That()` method:
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(actualValue).IsEqualTo(expectedValue);
 ```
@@ -26,8 +24,7 @@ The basic flow is:
 
 TUnit assertions must be awaited — they won't execute without `await`, and the test will pass silently:
 
-<!-- doc-test-contextual -->
-```csharp
+```text
 // ✅ Correct - awaited
 await Assert.That(result).IsEqualTo(42);
 
@@ -45,7 +42,6 @@ TUnit provides assertions for all common scenarios:
 
 ### Equality & Comparison
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(actual).IsEqualTo(expected);
 await Assert.That(value).IsNotEqualTo(other);
@@ -56,7 +52,6 @@ await Assert.That(temperature).IsBetween(20, 30);
 
 ### Strings
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(message).Contains("Hello");
 await Assert.That(filename).StartsWith("test_");
@@ -66,7 +61,6 @@ await Assert.That(input).IsNotEmpty();
 
 ### Collections
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(numbers).Contains(42);
 await Assert.That(items).Count().IsEqualTo(5);
@@ -76,16 +70,14 @@ await Assert.That(values).All(x => x > 0);
 
 ### Booleans & Null
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(isValid).IsTrue();
-await Assert.That(result).IsNotNull();
+await Assert.That(obj).IsNotNull();
 await Assert.That(optional).IsDefault();
 ```
 
 ### Exceptions
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(() => DivideByZero())
     .Throws<DivideByZeroException>()
@@ -94,7 +86,6 @@ await Assert.That(() => DivideByZero())
 
 ### Type Checking
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(obj).IsTypeOf<MyClass>();
 await Assert.That(typeof(Dog)).IsAssignableTo<Animal>();
@@ -104,18 +95,14 @@ await Assert.That(typeof(Dog)).IsAssignableTo<Animal>();
 
 Combine multiple assertions on the same value using `.And`:
 
-<!-- doc-test-contextual -->
 ```csharp
-await Assert.That(username)
-    .IsNotNull()
-    .And.IsNotEmpty()
-    .And.Length().IsGreaterThan(3)
-    .And.Length().IsLessThan(20);
+await Assert.That(username).IsNotNull().And.IsNotEmpty();
+await Assert.That(username).Length().IsGreaterThan(3);
+await Assert.That(username).Length().IsLessThan(20);
 ```
 
 Use `.Or` when any condition can be true:
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(statusCode)
     .IsEqualTo(200)
@@ -127,7 +114,6 @@ await Assert.That(statusCode)
 
 Group related assertions together so all failures are reported:
 
-<!-- doc-test-contextual -->
 ```csharp
 using (Assert.Multiple())
 {
@@ -144,7 +130,6 @@ Instead of stopping at the first failure, `Assert.Multiple()` runs all assertion
 
 Assert on object properties using `.Member()`:
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(person)
     .Member(p => p.Name, name => name.IsEqualTo("Alice"))
@@ -153,7 +138,6 @@ await Assert.That(person)
 
 This works with nested properties too:
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(order)
     .Member(o => o.Customer.Address.City, city => city.IsEqualTo("Seattle"));
@@ -163,7 +147,6 @@ await Assert.That(order)
 
 Collections have rich assertion support:
 
-<!-- doc-test-contextual -->
 ```csharp
 var numbers = new[] { 1, 2, 3, 4, 5 };
 
@@ -190,7 +173,6 @@ await Assert.That(numbers).IsEquivalentTo(new[] { 5, 4, 3, 2, 1 });
 
 Some assertions return the value being tested, allowing you to continue working with it:
 
-<!-- doc-test-contextual -->
 ```csharp
 // HasSingleItem returns the single item
 var user = await Assert.That(users).HasSingleItem();
@@ -205,24 +187,21 @@ await Assert.That(admin.Permissions).IsNotEmpty();
 
 Use `.Satisfies()` for custom conditions:
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(value).Satisfies(v => v % 2 == 0, "Value must be even");
 ```
 
 Or map to a different value before asserting:
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(order)
-    .Satisfies(o => o.Total, total => total > 100);
+    .Member(o => o.Total, total => total.IsGreaterThan(100));
 ```
 
 ## Common Patterns
 
 ### Testing Numeric Ranges
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(score).IsBetween(0, 100);
 await Assert.That(temperature).IsGreaterThanOrEqualTo(32);
@@ -232,14 +211,12 @@ await Assert.That(temperature).IsGreaterThanOrEqualTo(32);
 
 For floating-point comparisons:
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(3.14159).IsEqualTo(Math.PI).Within(0.001);
 ```
 
 ### Testing Async Operations
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(async () => await FetchDataAsync())
     .Throws<HttpRequestException>();
@@ -249,11 +226,10 @@ await Assert.That(longRunningTask).CompletesWithin(TimeSpan.FromSeconds(5));
 
 ### Testing Multiple Conditions
 
-<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(username)
     .IsNotNull()
-    .And.Satisfies(name => name.Length >= 3 && name.Length <= 20,
+    .And.Satisfies(name => name!.Length >= 3 && name.Length <= 20,
                    "Username must be 3-20 characters");
 ```
 
@@ -261,10 +237,10 @@ await Assert.That(username)
 
 TUnit's assertions are strongly typed and catch type mismatches at compile time:
 
-<!-- doc-test-contextual -->
 ```csharp
 int number = 42;
 string text = "42";
+_ = text;
 
 // ✅ This works - both are ints
 await Assert.That(number).IsEqualTo(42);

@@ -2,7 +2,6 @@
 sidebar_position: 11
 ---
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Task and Async Assertions
 
@@ -14,7 +13,6 @@ TUnit provides specialized assertions for testing `Task` and `Task<T>` objects, 
 
 Tests whether a task has completed (successfully, faulted, or canceled):
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_Is_Completed()
@@ -31,7 +29,6 @@ public async Task Task_Is_Completed()
 
 Tests whether a task was canceled:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_Is_Canceled()
@@ -54,7 +51,6 @@ public async Task Task_Is_Canceled()
 }
 ```
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_Not_Canceled()
@@ -69,7 +65,6 @@ public async Task Task_Not_Canceled()
 
 Tests whether a task ended in a faulted state (threw an exception):
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_Is_Faulted()
@@ -89,7 +84,6 @@ public async Task Task_Is_Faulted()
 }
 ```
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_Not_Faulted()
@@ -104,7 +98,6 @@ public async Task Task_Not_Faulted()
 
 Tests whether a task completed successfully (not faulted or canceled):
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_Completed_Successfully()
@@ -115,7 +108,6 @@ public async Task Task_Completed_Successfully()
 }
 ```
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_Not_Completed_Successfully()
@@ -134,7 +126,6 @@ public async Task Task_Not_Completed_Successfully()
 
 Tests that a task completes within a specified time:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_Completes_Within_Timeout()
@@ -147,7 +138,6 @@ public async Task Task_Completes_Within_Timeout()
 
 Fails if timeout exceeded:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_Exceeds_Timeout()
@@ -163,7 +153,6 @@ public async Task Task_Exceeds_Timeout()
 
 Polls a value source until a nested assertion passes or the timeout expires. `WaitsFor` takes an assertion-builder lambda (not a bool predicate), so you write the same fluent assertions you would elsewhere:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Wait_For_Condition()
@@ -187,14 +176,13 @@ public async Task Wait_For_Condition()
 
 ### API Call Timeout
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task API_Call_Completes_In_Time()
 {
     var apiTask = _httpClient.GetAsync("https://api.example.com/data");
 
-    await Assert.That(apiTask).CompletesWithin(TimeSpan.FromSeconds(5));
+    await Assert.That((Func<Task>)(async () => { await apiTask; })).CompletesWithin(TimeSpan.FromSeconds(5));
 
     var response = await apiTask;
     await Assert.That(response.IsSuccessStatusCode).IsTrue();
@@ -203,7 +191,6 @@ public async Task API_Call_Completes_In_Time()
 
 ### Background Task Completion
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Background_Processing_Completes()
@@ -217,7 +204,6 @@ public async Task Background_Processing_Completes()
 
 ### Cancellation Token Handling
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Operation_Respects_Cancellation()
@@ -244,7 +230,6 @@ public async Task Operation_Respects_Cancellation()
 
 For testing exceptions in async code, use exception assertions:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Async_Method_Throws_Exception()
@@ -258,7 +243,6 @@ public async Task Async_Method_Throws_Exception()
 
 For `Task<T>`, await the task first, then assert on the result:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_Returns_Expected_Result()
@@ -266,7 +250,7 @@ public async Task Task_Returns_Expected_Result()
     var task = GetValueAsync();
 
     // Ensure it completes in time
-    await Assert.That(task).CompletesWithin(TimeSpan.FromSeconds(1));
+    await Assert.That((Func<Task>)(async () => { await task; })).CompletesWithin(TimeSpan.FromSeconds(1));
 
     // Get the result
     var result = await task;
@@ -278,7 +262,6 @@ public async Task Task_Returns_Expected_Result()
 
 ### Parallel Task Execution
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Parallel_Tasks_Complete()
@@ -296,7 +279,6 @@ public async Task Parallel_Tasks_Complete()
 
 ### Task State Transitions
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_State_Progression()
@@ -321,7 +303,6 @@ public async Task Task_State_Progression()
 
 ### Failed Task
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_Fails_With_Exception()
@@ -338,7 +319,6 @@ public async Task Task_Fails_With_Exception()
 
 ### Canceled Task
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Task_Can_Be_Canceled()
@@ -357,7 +337,6 @@ public async Task Task_Can_Be_Canceled()
 
 ### WhenAll Completion
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task All_Tasks_Complete()
@@ -374,7 +353,6 @@ public async Task All_Tasks_Complete()
 
 ### WhenAny Completion
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Any_Task_Completes()
@@ -384,7 +362,7 @@ public async Task Any_Task_Completes()
 
     var firstCompleted = Task.WhenAny(fastTask, slowTask);
 
-    await Assert.That(firstCompleted).CompletesWithin(TimeSpan.FromMilliseconds(500));
+    await Assert.That((Func<Task>)(async () => { await firstCompleted; })).CompletesWithin(TimeSpan.FromMilliseconds(500));
 
     var completed = await firstCompleted;
     await Assert.That(completed).IsSameReferenceAs(fastTask);
@@ -395,7 +373,6 @@ public async Task Any_Task_Completes()
 
 `ValueTask` and `ValueTask<T>` work similarly:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ValueTask_Completion()
@@ -415,14 +392,13 @@ async ValueTask<int> GetValueTaskAsync()
 
 ## Chaining Task Assertions
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Chained_Task_Assertions()
 {
     var task = GetDataAsync();
 
-    await Assert.That(task)
+    await Assert.That((Func<Task>)(async () => { await task; }))
         .CompletesWithin(TimeSpan.FromSeconds(5));
 
     await Assert.That(task)
@@ -437,7 +413,6 @@ public async Task Chained_Task_Assertions()
 
 ### Retry Logic Testing
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Retry_Eventually_Succeeds()
@@ -452,7 +427,7 @@ public async Task Retry_Eventually_Succeeds()
         return "Success";
     }, maxRetries: 5);
 
-    await Assert.That(task).CompletesWithin(TimeSpan.FromSeconds(10));
+    await Assert.That((Func<Task>)(async () => { await task; })).CompletesWithin(TimeSpan.FromSeconds(10));
     var result = await task;
     await Assert.That(result).IsEqualTo("Success");
 }
@@ -460,7 +435,6 @@ public async Task Retry_Eventually_Succeeds()
 
 ### Debounce Testing
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Debounced_Operation()
@@ -473,14 +447,13 @@ public async Task Debounced_Operation()
 
     trigger.OnNext("value");
 
-    await Assert.That(debouncedTask)
+    await Assert.That((Func<Task>)(async () => { await debouncedTask; }))
         .CompletesWithin(TimeSpan.FromSeconds(1));
 }
 ```
 
 ### Circuit Breaker Testing
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Circuit_Breaker_Opens()
@@ -507,7 +480,6 @@ public async Task Circuit_Breaker_Opens()
 
 ### Producer-Consumer Testing
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Producer_Consumer_Processes_Items()
@@ -524,7 +496,6 @@ public async Task Producer_Consumer_Processes_Items()
 
 ### Rate Limiting
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Rate_Limiter_Delays_Requests()
@@ -546,7 +517,6 @@ public async Task Rate_Limiter_Delays_Requests()
 
 ## Testing Async Disposal
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Async_Disposable_Cleanup()

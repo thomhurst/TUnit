@@ -2,7 +2,6 @@
 sidebar_position: 1
 ---
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Awaiting
 
@@ -17,7 +16,6 @@ If you forget to `await`, your assertion will not actually be executed, and your
 
 This will error:
 
-<!-- doc-test-contextual -->
 ```csharp
     [Test]
     public void MyTest()
@@ -30,7 +28,6 @@ This will error:
 
 This won't: 
 
-<!-- doc-test-contextual -->
 ```csharp
     [Test]
     public async Task MyTest()
@@ -50,7 +47,6 @@ When you `await` an assertion in TUnit, it returns a reference to the subject th
 
 ### Type Casting with Confidence
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task CastAndUseSpecificType()
@@ -61,7 +57,7 @@ public async Task CastAndUseSpecificType()
     var circle = await Assert.That(shape).IsTypeOf<Circle>();
     
     // Now you can use circle-specific properties without casting
-    await Assert.That(circle.Radius).IsEqualTo(5.0);
+    await Assert.That(circle!.Radius).IsEqualTo(5.0);
     
     var area = Math.PI * circle.Radius * circle.Radius;
     await Assert.That(area).IsEqualTo(Math.PI * 25).Within(0.0001);
@@ -74,7 +70,6 @@ public async Task CastAndUseSpecificType()
 
 You can chain multiple assertions together for more complex validations:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ComplexObjectValidation()
@@ -92,7 +87,6 @@ public async Task ComplexObjectValidation()
 
 ### Collection Assertions with Complex Conditions
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ComplexCollectionAssertions()
@@ -116,7 +110,6 @@ public async Task ComplexCollectionAssertions()
 
 ### Async Operation Assertions
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task AsyncOperationAssertions()
@@ -138,7 +131,6 @@ public async Task AsyncOperationAssertions()
 
 ### Exception Assertions with Details
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DetailedExceptionAssertions()
@@ -151,7 +143,7 @@ public async Task DetailedExceptionAssertions()
         .WithMessage("Validation failed");
 
     // Assert ArgumentException with parameter name
-    await Assert.That(() => ProcessInvalidData(null))
+    await Assert.That(() => ProcessInvalidData((object?)null))
         .Throws<ArgumentException>()
         .WithParameterName("data");
 
@@ -159,14 +151,13 @@ public async Task DetailedExceptionAssertions()
     var exception = await Assert.That(() => ParallelOperationAsync())
         .Throws<AggregateException>();
 
-    await Assert.That(exception.InnerExceptions).Count().IsEqualTo(3);
+    await Assert.That(exception!.InnerExceptions).Count().IsEqualTo(3);
     await Assert.That(exception.InnerExceptions).All(e => e is TaskCanceledException);
 }
 ```
 
 ### Custom Assertion Conditions
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task CustomAssertionConditions()
@@ -176,8 +167,8 @@ public async Task CustomAssertionConditions()
     // Use custom conditions for complex validations
     await Assert.That(measurements)
         .Satisfies(m => {
-            var average = m.Average();
-            var stdDev = CalculateStandardDeviation(m);
+            var average = m!.Average();
+            var stdDev = CalculateStandardDeviation(m!);
             return stdDev < average * 0.1; // Less than 10% deviation
         }, "Measurements should have low standard deviation");
     
@@ -191,7 +182,6 @@ public async Task CustomAssertionConditions()
 
 ### Combining Or and And Conditions
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ComplexLogicalConditions()

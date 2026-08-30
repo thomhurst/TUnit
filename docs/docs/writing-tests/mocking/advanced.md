@@ -2,7 +2,6 @@
 sidebar_position: 5
 ---
 
-<!-- doc-test-ignore-file: Advanced examples depend on application interfaces and build on prior mock setup. -->
 
 # Advanced Features
 
@@ -36,7 +35,7 @@ Trigger an event automatically when a method is called using the typed `.Raises{
 
 ```csharp
 mock.SendMessage(Any())
-    .RaisesOnMessage("echo");
+    .RaisesOnMessage(mock.Object, "echo");
 
 mock.Object.SendMessage("test");
 // OnMessage event fires with "echo"
@@ -150,6 +149,12 @@ cannot even write the type name:
 // Inside the Azure Functions Worker SDK — not your code:
 //   features.Get<IFunctionBindingsFeature>()   // IFunctionBindingsFeature is internal to the SDK
 
+public interface IInvocationFeatures
+{
+    T? Get<T>();
+}
+
+// Usage
 var features = IInvocationFeatures.Mock();
 
 // The SDK's internal Get<T>() call receives a functional runtime stub instead of null.
@@ -188,15 +193,15 @@ Manage multiple mocks with shared behavior and batch operations:
 var repo = new MockRepository(MockBehavior.Strict);
 
 var serviceMock = repo.Of<IService>();
-var loggerMock = repo.Of<ILogger>();
+var greeterMock = repo.Of<IGreeter>();
 
 // Configure each mock individually
-serviceMock.GetData(Any()).Returns("result");
-loggerMock.Log(Any());
+serviceMock.GetUser(Any()).Returns(user);
+greeterMock.Greet(Any()).Returns("hello");
 
 // Exercise code
-serviceMock.Object.GetData(1);
-loggerMock.Object.Log("hello");
+_ = serviceMock.Object.GetUser(1);
+_ = greeterMock.Object.Greet("Alice");
 
 // Batch verification
 repo.VerifyAll();            // all setups invoked across all mocks
@@ -224,6 +229,9 @@ repo.Reset();                // clear all mocks
 Get a diagnostic report of setup coverage and call matching:
 
 ```csharp
+var mock = Mock.Of<IUniversalService>();
+var svc = mock.Object;
+
 mock.GetUser(Any()).Returns(new User("Alice"));
 mock.Delete(Any());
 
@@ -231,10 +239,10 @@ svc.GetUser(1);
 // Delete was never called
 
 var diag = mock.GetDiagnostics();
-diag.TotalSetups;       // 2
-diag.ExercisedSetups;   // 1
-diag.UnusedSetups;      // [Delete(Any())]
-diag.UnmatchedCalls;    // [] (all calls matched a setup)
+_ = diag.TotalSetups;       // 2
+_ = diag.ExercisedSetups;   // 1
+_ = diag.UnusedSetups;      // [Delete(Any())]
+_ = diag.UnmatchedCalls;    // [] (all calls matched a setup)
 ```
 
 Useful for debugging why a mock isn't behaving as expected, or for finding dead setups.
@@ -277,7 +285,7 @@ svc.GetUser(1);
 mock.Reset();
 
 svc.GetUser(1); // returns default (setup cleared)
-mock.Invocations.Count; // 0 (history cleared)
+_ = mock.Invocations.Count; // 0 (history cleared)
 ```
 
 The `SetupAllProperties()` flag is preserved across resets.
@@ -308,6 +316,8 @@ nameable, source-generator mocked, with fully typed setups, matchers, and verifi
 `InternalsVisibleTo` is required from the target assembly:
 
 ```csharp
+var features = IInvocationFeatures.Mock();
+var myResult = new object();
 var bindings = IFunctionBindingsFeature.Mock();          // internal to the SDK
 bindings.InvocationResult.Returns(myResult);
 
