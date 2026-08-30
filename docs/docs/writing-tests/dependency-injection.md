@@ -1,4 +1,5 @@
-<!-- doc-test-ignore-file: Examples depend on application services and custom DI attributes declared outside each snippet. -->
+
+<!-- doc-test-shared -->
 
 # Dependency Injection
 
@@ -29,6 +30,7 @@ public class MyTestClass(SomeDependency dep)
     public async Task MyTest()
     {
         // dep was provided by CustomConstructor.Create()
+        await Assert.That(dep).IsNotNull();
     }
 }
 ```

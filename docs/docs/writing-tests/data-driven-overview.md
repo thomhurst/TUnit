@@ -45,7 +45,6 @@ public static IEnumerable<string> GetCases() => ["hello", "world"];
 
 ### Class data source (shared fixture)
 
-<!-- doc-test-ignore: Example uses an application-specific DatabaseFixture. -->
 ```csharp
 [ClassDataSource<DatabaseFixture>(Shared = SharedType.PerTestSession)]
 public class MyTests(DatabaseFixture db)

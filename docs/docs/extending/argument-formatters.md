@@ -1,4 +1,3 @@
-<!-- doc-test-ignore-file: Tutorial splits fictional SomeClass and formatter declarations across snippets. -->
 
 # Argument Formatters
 
@@ -15,8 +14,10 @@ For example:
     [ArgumentDisplayFormatter<MyFormatter>]
     public async Task Test(SomeClass someClass)
     {
-        await Assert.That(TestContext.Current!.GetDisplayName()).IsEqualTo("A super important test!");
+        await Assert.That(TestContext.Current!.Metadata.DisplayName).IsEqualTo("A super important test!");
     }
+
+    public static IEnumerable<SomeClass> SomeMethod() => [new SomeClass()];
 ```
 
 ```csharp
@@ -29,7 +30,11 @@ public class MyFormatter : ArgumentDisplayFormatter
 
     public override string FormatValue(object? value)
     {
-        var someClass = (SomeClass)value;
+        if (value is not SomeClass someClass)
+        {
+            throw new ArgumentException("Value must be a SomeClass instance.", nameof(value));
+        }
+
         return $"One: {someClass.One} | Two: {someClass.Two}";
     }
 }
@@ -39,3 +44,4 @@ public class MyFormatter : ArgumentDisplayFormatter
 You can apply multiple `[ArgumentDisplayFormatter<T>]` attributes if you have different types to format.  
 The first formatter whose `CanHandle` returns true will be used.
 :::
+<!-- doc-test-shared -->

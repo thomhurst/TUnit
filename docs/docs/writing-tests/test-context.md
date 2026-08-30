@@ -230,7 +230,7 @@ public static IEnumerable<object[]> TestData()
 public void MyTest(string value)
 {
     // Access the data stored during generation
-    var generatedAt = TestContext.Current.StateBag["DataGeneratedAt"];
+    var generatedAt = TestContext.Current!.StateBag["DataGeneratedAt"];
     var version = TestContext.Current.StateBag["GeneratorVersion"];
     
     Console.WriteLine($"Data was generated at: {generatedAt}");

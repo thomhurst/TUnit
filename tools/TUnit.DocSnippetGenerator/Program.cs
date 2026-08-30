@@ -24,11 +24,6 @@ var documents = new[] { Path.Combine(repositoryRoot, "README.md") }
 
 var snippets = new List<Snippet>();
 var documentedPackages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-var contextualSnippets = 0;
-var contextualFiles = new HashSet<string>(StringComparer.Ordinal);
-var excludedSnippets = 0;
-var excludedFiles = 0;
-
 foreach (var document in documents)
 {
     ReadDocument(document);
@@ -39,18 +34,57 @@ foreach (var oldFile in Directory.EnumerateFiles(outputDirectory, "Snippet*.g.cs
 {
     File.Delete(oldFile);
 }
+var isolatedDirectory = Path.Combine(outputDirectory, "isolated");
+if (Directory.Exists(isolatedDirectory))
+{
+    Directory.Delete(isolatedDirectory, recursive: true);
+}
 
-var emittedAssemblyAttributes = new HashSet<string>(StringComparer.Ordinal);
+var isolatedSharedDocuments = snippets
+    .Where(snippet => snippet.SharedDocumentId is not null && RequiresIsolatedCompilation(snippet.Prelude + snippet.Source))
+    .Select(snippet => snippet.SharedDocumentId!)
+    .ToHashSet(StringComparer.Ordinal);
+var sharedSources = snippets
+    .Where(snippet => snippet.SharedDocumentId is not null)
+    .GroupBy(snippet => snippet.SharedDocumentId!, StringComparer.Ordinal)
+    .ToDictionary(
+        group => group.Key,
+        group => string.Join('\n', group.Select(snippet => snippet.Source)),
+        StringComparer.Ordinal);
+var emittedAssemblyAttributes = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+var isolatedSnippets = 0;
 for (var index = 0; index < snippets.Count; index++)
 {
+    var snippet = snippets[index];
+    var requiresIsolation = RequiresIsolatedCompilation(snippet.Prelude + snippet.Source) ||
+                            snippet.SharedDocumentId is not null && isolatedSharedDocuments.Contains(snippet.SharedDocumentId);
+    var isolatedGroupName = snippet.SharedDocumentId is null ? $"Snippet{index}" : $"Shared_{snippet.SharedDocumentId}";
+    var snippetOutputDirectory = requiresIsolation
+        ? Path.Combine(isolatedDirectory, isolatedGroupName)
+        : outputDirectory;
+    if (snippetOutputDirectory != outputDirectory)
+    {
+        isolatedSnippets++;
+        Directory.CreateDirectory(snippetOutputDirectory);
+    }
+
+    if (!emittedAssemblyAttributes.TryGetValue(snippetOutputDirectory, out var assemblyAttributes))
+    {
+        assemblyAttributes = new HashSet<string>(StringComparer.Ordinal);
+        emittedAssemblyAttributes[snippetOutputDirectory] = assemblyAttributes;
+    }
+
     File.WriteAllText(
-        Path.Combine(outputDirectory, $"Snippet{index}.g.cs"),
-        GenerateSource(snippets[index], index, emittedAssemblyAttributes),
+        Path.Combine(snippetOutputDirectory, $"Snippet{index}.g.cs"),
+        GenerateSource(
+            snippet,
+            index,
+            assemblyAttributes,
+            snippet.SharedDocumentId is not null ? sharedSources[snippet.SharedDocumentId] : snippet.Source),
         new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
 }
 
-Console.WriteLine($"Generated {snippets.Count} C# documentation snippets.");
-Console.WriteLine($"Skipped {contextualSnippets} explicitly contextual snippets declared by {contextualFiles.Count} files, {excludedSnippets} explicit snippets, and {excludedFiles} files.");
+Console.WriteLine($"Generated {snippets.Count} C# documentation snippets ({isolatedSnippets} require isolated compilation). ");
 Console.WriteLine($"Documented TUnit packages: {string.Join(", ", documentedPackages.Order())}");
 return 0;
 
@@ -58,28 +92,21 @@ void ReadDocument(string documentPath)
 {
     var relativePath = Path.GetRelativePath(repositoryRoot, documentPath).Replace('\\', '/');
     var lines = File.ReadAllLines(documentPath);
+    var sharedDocumentId = lines.Any(line => line.Trim() == "<!-- doc-test-shared -->")
+        ? Regex.Replace(relativePath, "[^A-Za-z0-9_]", "_")
+        : null;
     ReadDocumentedPackages(lines);
-    var fileIgnoreDirective = lines
-        .Select(line => Regex.Match(line.Trim(), "^<!--\\s*doc-test-ignore-file:\\s*(.+?)\\s*-->$"))
-        .FirstOrDefault(match => match.Success);
-    if (fileIgnoreDirective?.Success == true)
-    {
-        excludedFiles++;
-        Console.WriteLine($"EXCLUDED {relativePath} ({fileIgnoreDirective.Groups[1].Value})");
-        return;
-    }
-
-    var contextualFileDirective = lines
-        .Select(line => Regex.Match(line.Trim(), "^<!--\\s*doc-test-contextual-file:\\s*(.+?)\\s*-->$"))
-        .FirstOrDefault(match => match.Success);
-    if (lines.Any(line => line.Trim().StartsWith("<!-- doc-test-contextual-file", StringComparison.Ordinal)) &&
-        contextualFileDirective?.Success != true)
+    var maskingDirective = lines.FirstOrDefault(line =>
+        line.Trim().StartsWith("<!-- doc-test-ignore", StringComparison.Ordinal) ||
+        line.Trim().StartsWith("<!-- doc-test-contextual", StringComparison.Ordinal));
+    if (maskingDirective is not null)
     {
         throw new InvalidOperationException(
-            $"Malformed doc-test-contextual-file directive in {relativePath}. Include a non-empty reason.");
+            $"Failure-masking documentation directive is not supported in {relativePath}: {maskingDirective.Trim()}");
     }
 
     var csharpOrdinal = 0;
+    var localSetups = new Dictionary<string, string>(StringComparer.Ordinal);
 
     for (var lineIndex = 0; lineIndex < lines.Length; lineIndex++)
     {
@@ -102,85 +129,126 @@ void ReadDocument(string documentPath)
                 throw new InvalidOperationException($"Unclosed C# fence at {relativePath}:{startLine}.");
             }
 
-            var directive = startLine >= 3 ? lines[startLine - 3].Trim() : string.Empty;
-            var ignoreMatch = Regex.Match(directive, "^<!--\\s*doc-test-ignore:\\s*(.+?)\\s*-->$");
-            if (directive.StartsWith("<!-- doc-test-ignore", StringComparison.Ordinal) && !ignoreMatch.Success)
+            var rawSource = string.Join('\n', body);
+            if (Regex.IsMatch(
+                    rawSource,
+                    @"(?im)^\s*#(?:pragma\s+warning\s+disable|nullable\s+disable|if\s+false)\b|\b(?:Unconditional)?SuppressMessage\b"))
             {
                 throw new InvalidOperationException(
-                    $"Malformed doc-test-ignore directive before {relativePath}:{startLine}. Include a non-empty reason.");
+                    $"Failure-masking C# is not supported in {relativePath}:{startLine}.");
             }
 
-            if (ignoreMatch.Success)
+            foreach (var (sectionSource, currentStartLine) in SplitFrameworkSections(rawSource, startLine))
             {
-                excludedSnippets++;
-                Console.WriteLine($"EXCLUDED {relativePath}#{csharpOrdinal} ({ignoreMatch.Groups[1].Value})");
-                continue;
+                var directive = currentStartLine == startLine && startLine >= 3
+                    ? lines[startLine - 3].Trim()
+                    : string.Empty;
+                var source = sectionSource;
+                source = Regex.Replace(source, "(?m)^\\s*#:[^\\r\\n]*$", string.Empty);
+                source = Regex.Replace(source, "(?m)^([ \\t]*)(?:\\.\\.\\.|…)\\s*;?\\s*$", string.Empty);
+                source = Regex.Replace(source, "\\{\\s*(?:\\.\\.\\.|…)\\s*\\}", "{ }");
+                var sourceWithoutComments = Regex.Replace(source, "(?s)/\\*.*?\\*/", string.Empty);
+                sourceWithoutComments = Regex.Replace(sourceWithoutComments, "(?m)//.*$", string.Empty);
+                if (Regex.IsMatch(sourceWithoutComments, "(?:=>|=)\\s*(?:\\.\\.\\.|…)\\s*;"))
+                {
+                    throw new InvalidOperationException(
+                        $"Incomplete C# at {relativePath}:{currentStartLine} is not compilable.");
+                }
+
+                var explicitMode = Regex.Match(directive, "^<!--\\s*doc-test-(declaration|member|statements)\\s*-->$");
+                var splitMode = Regex.Match(directive, "^<!--\\s*doc-test-(declaration|member):\\s*split-before=(.+?)\\s*-->$");
+                if (directive.StartsWith("<!-- doc-test-", StringComparison.Ordinal) &&
+                    !explicitMode.Success &&
+                    !splitMode.Success)
+                {
+                    throw new InvalidOperationException(
+                        $"Unknown or malformed doc-test directive before {relativePath}:{currentStartLine}.");
+                }
+
+                var (usings, sourceWithoutUsings) = ExtractUsings(source);
+                string? splitBefore = splitMode.Success ? splitMode.Groups[2].Value : null;
+                SnippetMode mode;
+                if (splitMode.Success)
+                {
+                    mode = Enum.Parse<SnippetMode>(splitMode.Groups[1].Value, ignoreCase: true);
+                }
+                else if (explicitMode.Success)
+                {
+                    mode = Enum.Parse<SnippetMode>(explicitMode.Groups[1].Value, ignoreCase: true);
+                }
+                else
+                {
+                    mode = ClassifyWithUsageSplit(sourceWithoutUsings, relativePath, csharpOrdinal, out splitBefore);
+                }
+
+                var prelude = string.Empty;
+                if (mode == SnippetMode.Statements)
+                {
+                    var localDeclarations = GetLocalDeclarations(sourceWithoutUsings);
+                    var declaredLocals = localDeclarations.Keys.ToHashSet(StringComparer.Ordinal);
+                    var requiredSetups = ExpandRequiredSetups(sourceWithoutUsings, localSetups, declaredLocals);
+                    prelude = string.Join('\n', requiredSetups);
+
+                    foreach (var local in declaredLocals)
+                    {
+                        localSetups[local] = localDeclarations[local];
+                    }
+                }
+
+                snippets.Add(new Snippet(
+                    documentPath.Replace('\\', '/'),
+                    sharedDocumentId,
+                    currentStartLine,
+                    usings,
+                    prelude,
+                    sourceWithoutUsings,
+                    mode,
+                    splitBefore));
             }
 
-            var source = string.Join('\n', body);
-            source = Regex.Replace(source, "(?m)^\\s*#:[^\\r\\n]*$", string.Empty);
-            source = Regex.Replace(source, "(?m)^([ \\t]*)(?:\\.\\.\\.|…)\\s*;?\\s*$", string.Empty);
-            source = Regex.Replace(source, "\\{\\s*(?:\\.\\.\\.|…)\\s*\\}", "{ }");
-            var sourceWithoutComments = Regex.Replace(source, "(?s)/\\*.*?\\*/", string.Empty);
-            sourceWithoutComments = Regex.Replace(sourceWithoutComments, "(?m)//.*$", string.Empty);
-            if (Regex.IsMatch(sourceWithoutComments, "(?:=>|=)\\s*(?:\\.\\.\\.|…)\\s*;"))
-            {
-                throw new InvalidOperationException(
-                    $"Incomplete C# at {relativePath}#{csharpOrdinal} must have a doc-test-ignore directive with a reason.");
-            }
-
-            var explicitMode = Regex.Match(directive, "^<!--\\s*doc-test-(declaration|member|statements)\\s*-->$");
-            var splitMode = Regex.Match(directive, "^<!--\\s*doc-test-(declaration|member):\\s*split-before=(.+?)\\s*-->$");
-            var contextualMode = Regex.IsMatch(directive, "^<!--\\s*doc-test-contextual\\s*-->$");
-            if (directive.StartsWith("<!-- doc-test-", StringComparison.Ordinal) &&
-                !explicitMode.Success &&
-                !splitMode.Success &&
-                !contextualMode)
-            {
-                throw new InvalidOperationException(
-                    $"Unknown or malformed doc-test directive before {relativePath}:{startLine}.");
-            }
-
-            if (contextualMode && contextualFileDirective?.Success != true)
-            {
-                throw new InvalidOperationException(
-                    $"Contextual C# fence {relativePath}#{csharpOrdinal} requires a doc-test-contextual-file directive with a reason.");
-            }
-
-            var (usings, sourceWithoutUsings) = ExtractUsings(source);
-            string? splitBefore = splitMode.Success ? splitMode.Groups[2].Value : null;
-            SnippetMode mode;
-            if (splitMode.Success)
-            {
-                mode = Enum.Parse<SnippetMode>(splitMode.Groups[1].Value, ignoreCase: true);
-            }
-            else if (explicitMode.Success)
-            {
-                mode = Enum.Parse<SnippetMode>(explicitMode.Groups[1].Value, ignoreCase: true);
-            }
-            else
-            {
-                mode = ClassifyWithUsageSplit(sourceWithoutUsings, relativePath, csharpOrdinal, out splitBefore);
-            }
-
-            if (contextualMode)
-            {
-                contextualSnippets++;
-                contextualFiles.Add(relativePath);
-                continue;
-            }
-
-            snippets.Add(new Snippet(
-                documentPath.Replace('\\', '/'),
-                startLine,
-                usings,
-                sourceWithoutUsings,
-                mode,
-                splitBefore));
             continue;
         }
-
     }
+}
+
+static IReadOnlyList<string> ExpandRequiredSetups(
+    string source,
+    IReadOnlyDictionary<string, string> localSetups,
+    ISet<string> declaredLocals)
+{
+    var result = new List<string>();
+    var added = new HashSet<string>(StringComparer.Ordinal);
+    var visiting = new HashSet<string>(StringComparer.Ordinal);
+
+    void Add(string name)
+    {
+        if (declaredLocals.Contains(name) || added.Contains(name) || !localSetups.TryGetValue(name, out var declaration) || !visiting.Add(name))
+        {
+            return;
+        }
+
+        foreach (var dependency in localSetups.Keys)
+        {
+            if (dependency != name && Regex.IsMatch(declaration, $@"\b{Regex.Escape(dependency)}\b"))
+            {
+                Add(dependency);
+            }
+        }
+
+        visiting.Remove(name);
+        added.Add(name);
+        result.Add(declaration);
+    }
+
+    foreach (var name in localSetups.Keys)
+    {
+        if (Regex.IsMatch(source, $@"\b{Regex.Escape(name)}\b"))
+        {
+            Add(name);
+        }
+    }
+
+    return result;
 }
 
 void ReadDocumentedPackages(IReadOnlyList<string> lines)
@@ -272,6 +340,17 @@ static SnippetMode Classify(string source, string path, int ordinal)
 
 static SnippetMode ClassifyWithUsageSplit(string source, string path, int ordinal, out string? splitBefore)
 {
+    var usageMarker = Regex.Match(
+        source,
+        "(?m)^//\\s*(?:Usage(?: in tests)?|Example usage|Using the assertion|In tests?):?\\s*$",
+        RegexOptions.IgnoreCase);
+    if (usageMarker.Success)
+    {
+        var declarationOrMemberSource = source[..usageMarker.Index].TrimEnd();
+        splitBefore = usageMarker.Value;
+        return Classify(declarationOrMemberSource, path, ordinal);
+    }
+
     try
     {
         splitBefore = null;
@@ -289,27 +368,30 @@ static SnippetMode ClassifyWithUsageSplit(string source, string path, int ordina
             return Classify(declarationSource, path, ordinal);
         }
 
-        var usageMarker = Regex.Match(
-            source,
-            "(?m)^//\\s*(?:Usage(?: in tests)?|Example usage|Using the assertion|In tests?):?\\s*$",
-            RegexOptions.IgnoreCase);
-        if (!usageMarker.Success)
-        {
-            throw;
-        }
-
-        var declarationOrMemberSource = source[..usageMarker.Index].TrimEnd();
-        splitBefore = usageMarker.Value;
-        return Classify(declarationOrMemberSource, path, ordinal);
+        throw;
     }
 }
 
-static string GenerateSource(Snippet snippet, int index, ISet<string> emittedAssemblyAttributes)
+static string GenerateSource(
+    Snippet snippet,
+    int index,
+    ISet<string> emittedAssemblyAttributes,
+    string locallyDeclaredSource)
 {
-    var generatedNamespace = $"TUnit.DocTests.Snippets.Snippet{index}";
+    var generatedNamespace = $"TUnit.DocTests.Snippets.{snippet.SharedDocumentId ?? $"Snippet{index}"}";
+    var wrapperName = $"DocumentationSnippet{index}";
+    var wrapperAccessibility = Regex.IsMatch(snippet.Source, @"\[(?:Fact|Theory)\b") ? "public" : "internal";
     var builder = new StringBuilder()
         .AppendLine("// <auto-generated />")
-        .AppendLine("#pragma warning disable");
+        .AppendLine("#nullable enable");
+
+    AppendFrameworkAliases(builder, snippet);
+
+    if (snippet.Source.Contains("EditorBrowsable", StringComparison.Ordinal) &&
+        !snippet.Usings.Any(usingDirective => usingDirective.Contains("System.ComponentModel", StringComparison.Ordinal)))
+    {
+        builder.AppendLine("using System.ComponentModel;");
+    }
 
     foreach (var usingDirective in snippet.Usings)
     {
@@ -322,7 +404,7 @@ static string GenerateSource(Snippet snippet, int index, ISet<string> emittedAss
         var assemblyAttribute = new Regex("(?m)^\\s*\\[assembly:\\s*[^\\r\\n]+\\]\\s*$");
         foreach (Match match in assemblyAttribute.Matches(source))
         {
-            var attribute = QualifyLocallyDeclaredAttributeTypes(match.Value.Trim(), source, generatedNamespace);
+            var attribute = QualifyLocallyDeclaredAttributeTypes(match.Value.Trim(), locallyDeclaredSource, generatedNamespace);
             if (emittedAssemblyAttributes.Add(attribute))
             {
                 builder.AppendLine(attribute);
@@ -360,17 +442,33 @@ static string GenerateSource(Snippet snippet, int index, ISet<string> emittedAss
             .AppendLine(source);
         if (declarationTailSource is not null)
         {
-            builder.AppendLine("internal sealed class DocumentationSnippet : global::TUnit.DocTests.SnippetContext")
-                .AppendLine("{")
-                .AppendLine("    public static async Task CompileAsync()")
-                .AppendLine("    {")
-                .AppendLine($"#line {statementLine} \"{snippet.SourcePath}\"");
-            foreach (var line in declarationTailSource.Split('\n'))
+            var tailMode = Classify(declarationTailSource, snippet.SourcePath, index + 1);
+            if (tailMode == SnippetMode.Declaration)
             {
-                builder.Append("        ").AppendLine(line);
+                builder.AppendLine($"#line {statementLine} \"{snippet.SourcePath}\"")
+                    .AppendLine(declarationTailSource);
             }
-            builder.AppendLine("    }")
-                .AppendLine("}");
+            else
+            {
+                builder.AppendLine($"{wrapperAccessibility} sealed class {wrapperName} : global::TUnit.DocTests.SnippetContext")
+                    .AppendLine("{");
+                if (tailMode == SnippetMode.Statements)
+                {
+                    builder.AppendLine("    public async Task CompileAsync()")
+                        .AppendLine("    {");
+                }
+                builder.AppendLine($"#line {statementLine} \"{snippet.SourcePath}\"");
+                var indentation = tailMode == SnippetMode.Statements ? "        " : "    ";
+                foreach (var line in declarationTailSource.Split('\n'))
+                {
+                    builder.Append(indentation).AppendLine(line);
+                }
+                if (tailMode == SnippetMode.Statements)
+                {
+                    builder.AppendLine("    }");
+                }
+                builder.AppendLine("}");
+            }
         }
         return builder.ToString();
     }
@@ -409,7 +507,7 @@ static string GenerateSource(Snippet snippet, int index, ISet<string> emittedAss
 
     if (containsExtensionMethod)
     {
-        builder.AppendLine("internal static class DocumentationMembers")
+        builder.AppendLine($"internal static class DocumentationMembers{index}")
             .AppendLine("{")
             .AppendLine($"#line {snippet.Line} \"{snippet.SourcePath}\"");
         foreach (var line in memberSource.Split('\n'))
@@ -423,19 +521,27 @@ static string GenerateSource(Snippet snippet, int index, ISet<string> emittedAss
             return builder.ToString();
         }
 
-        builder.AppendLine("internal sealed class DocumentationSnippet : global::TUnit.DocTests.SnippetContext")
+        builder.AppendLine($"{wrapperAccessibility} sealed class {wrapperName} : global::TUnit.DocTests.SnippetContext")
             .AppendLine("{");
     }
     else
     {
-        builder.AppendLine("internal sealed class DocumentationSnippet : global::TUnit.DocTests.SnippetContext")
+        builder.AppendLine($"{wrapperAccessibility} sealed class {wrapperName} : global::TUnit.DocTests.SnippetContext")
             .AppendLine("{");
     }
 
     if (snippet.Mode == SnippetMode.Statements)
     {
-        builder.AppendLine("    public static async Task CompileAsync()")
+        builder.AppendLine("    public async Task CompileAsync()")
             .AppendLine("    {");
+        if (!string.IsNullOrWhiteSpace(snippet.Prelude))
+        {
+            builder.AppendLine("#line hidden");
+            foreach (var line in snippet.Prelude.Split('\n'))
+            {
+                builder.Append("        ").AppendLine(line);
+            }
+        }
     }
 
     if (!containsExtensionMethod)
@@ -468,6 +574,123 @@ static string GenerateSource(Snippet snippet, int index, ISet<string> emittedAss
     return builder.AppendLine("}").ToString();
 }
 
+static IReadOnlyList<(string Source, int Line)> SplitFrameworkSections(string source, int startLine)
+{
+    var markers = Regex.Matches(source, @"(?m)^//\s*(?:MSTest|NUnit|xUnit|TUnit)\s*$");
+    if (markers.Count < 2)
+    {
+        return [(source, startLine)];
+    }
+
+    var sections = new List<(string Source, int Line)>();
+    if (!string.IsNullOrWhiteSpace(source[..markers[0].Index]))
+    {
+        sections.Add((source[..markers[0].Index], startLine));
+    }
+
+    for (var index = 0; index < markers.Count; index++)
+    {
+        var marker = markers[index];
+        var end = index + 1 < markers.Count ? markers[index + 1].Index : source.Length;
+        var line = startLine + source[..marker.Index].Count(character => character == '\n');
+        sections.Add((source[marker.Index..end].TrimEnd(), line));
+    }
+
+    return sections;
+}
+
+static Dictionary<string, string> GetLocalDeclarations(string source)
+{
+    var wrappedSource = $"class DocumentationSnippet {{ async Task CompileAsync() {{ {source} }} }}";
+    var root = CSharpSyntaxTree.ParseText(wrappedSource, new CSharpParseOptions(LanguageVersion.Preview))
+        .GetCompilationUnitRoot();
+    var declarations = new Dictionary<string, string>(StringComparer.Ordinal);
+    foreach (var statement in root.DescendantNodes().OfType<LocalDeclarationStatementSyntax>())
+    {
+        foreach (var variable in statement.Declaration.Variables)
+        {
+            declarations[variable.Identifier.ValueText] = statement.ToFullString().Trim();
+        }
+    }
+
+    return declarations;
+}
+
+static bool RequiresIsolatedCompilation(string source)
+    => Regex.IsMatch(
+        source,
+        @"\[assembly:|\[(?:GenerateAssertion|AssertionFrom|AssertionExtension|ShouldName|GenerateMock)(?:Attribute)?(?:<|\(|\])|\.Mock\(\)|\bMock\.Of<");
+
+static void AppendFrameworkAliases(StringBuilder builder, Snippet snippet)
+{
+    if (snippet.SourcePath.EndsWith("/migration/xunit.md", StringComparison.OrdinalIgnoreCase) &&
+        Regex.IsMatch(snippet.Source, @"//\s*xUnit|\[(?:Fact|Theory|InlineData|MemberData|ClassData|Trait|Collection)\b|\bI(?:Class|Collection)Fixture<|\bIAsyncLifetime\b|\bITestOutputHelper\b"))
+    {
+        builder.AppendLine("using Assert = global::Xunit.Assert;")
+            .AppendLine("using FactAttribute = global::Xunit.FactAttribute;")
+            .AppendLine("using TheoryAttribute = global::Xunit.TheoryAttribute;")
+            .AppendLine("using InlineDataAttribute = global::Xunit.InlineDataAttribute;")
+            .AppendLine("using MemberDataAttribute = global::Xunit.MemberDataAttribute;")
+            .AppendLine("using ClassDataAttribute = global::Xunit.ClassDataAttribute;")
+            .AppendLine("using TraitAttribute = global::Xunit.TraitAttribute;")
+            .AppendLine("using CollectionAttribute = global::Xunit.CollectionAttribute;")
+            .AppendLine("using CollectionDefinitionAttribute = global::Xunit.CollectionDefinitionAttribute;")
+            .AppendLine("using Xunit;");
+    }
+
+    if (snippet.SourcePath.EndsWith("/migration/nunit.md", StringComparison.OrdinalIgnoreCase) &&
+        Regex.IsMatch(snippet.Source, @"//\s*NUnit|\[(?:TestFixture|TestCase|TestCaseSource|SetUp|TearDown|OneTimeSetUp|OneTimeTearDown|SetUpFixture|Values|Range)|NUnit\.Framework|\b(?:CollectionAssert|StringAssert|Is|Does|Has)\.|\bAssert\.(?:AreEqual|Greater|IsNull|IsTrue)|\bTestContext\.(?:CurrentContext|WriteLine|Out)"))
+    {
+        builder.AppendLine(snippet.Source.Contains("Assert.That", StringComparison.Ordinal)
+                ? "using Assert = global::NUnit.Framework.Assert;"
+                : "using Assert = global::NUnit.Framework.Legacy.ClassicAssert;")
+            .AppendLine("using TestAttribute = global::NUnit.Framework.TestAttribute;")
+            .AppendLine("using TestFixtureAttribute = global::NUnit.Framework.TestFixtureAttribute;")
+            .AppendLine("using TestCaseAttribute = global::NUnit.Framework.TestCaseAttribute;")
+            .AppendLine("using TestCaseSourceAttribute = global::NUnit.Framework.TestCaseSourceAttribute;")
+            .AppendLine("using SetUpAttribute = global::NUnit.Framework.SetUpAttribute;")
+            .AppendLine("using TearDownAttribute = global::NUnit.Framework.TearDownAttribute;")
+            .AppendLine("using OneTimeSetUpAttribute = global::NUnit.Framework.OneTimeSetUpAttribute;")
+            .AppendLine("using OneTimeTearDownAttribute = global::NUnit.Framework.OneTimeTearDownAttribute;")
+            .AppendLine("using SetUpFixtureAttribute = global::NUnit.Framework.SetUpFixtureAttribute;")
+            .AppendLine("using ValuesAttribute = global::NUnit.Framework.ValuesAttribute;")
+            .AppendLine("using RangeAttribute = global::NUnit.Framework.RangeAttribute;")
+            .AppendLine("using TestContext = global::NUnit.Framework.TestContext;")
+            .AppendLine("using CollectionAssert = global::NUnit.Framework.Legacy.CollectionAssert;")
+            .AppendLine("using StringAssert = global::NUnit.Framework.Legacy.StringAssert;")
+            .AppendLine("using Is = global::NUnit.Framework.Is;")
+            .AppendLine("using Does = global::NUnit.Framework.Does;")
+            .AppendLine("using Has = global::NUnit.Framework.Has;");
+    }
+
+    if (snippet.SourcePath.EndsWith("/migration/mstest.md", StringComparison.OrdinalIgnoreCase) &&
+        Regex.IsMatch(snippet.Source, @"//\s*MSTest|\[(?:TestClass|TestMethod|DataTestMethod|DataRow|DynamicData|TestInitialize|TestCleanup|ClassInitialize|ClassCleanup|AssemblyInitialize|AssemblyCleanup|ExpectedException|DeploymentItem|Owner|Priority|TestCategory|TestProperty)|Microsoft\.VisualStudio\.TestTools"))
+    {
+        builder.AppendLine("using Assert = global::Microsoft.VisualStudio.TestTools.UnitTesting.Assert;")
+            .AppendLine("using TestContext = global::Microsoft.VisualStudio.TestTools.UnitTesting.TestContext;")
+            .AppendLine("using CollectionAssert = global::Microsoft.VisualStudio.TestTools.UnitTesting.CollectionAssert;")
+            .AppendLine("using StringAssert = global::Microsoft.VisualStudio.TestTools.UnitTesting.StringAssert;")
+            .AppendLine("using TestClassAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.TestClassAttribute;")
+            .AppendLine("using TestMethodAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute;")
+            .AppendLine("using DataTestMethodAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.DataTestMethodAttribute;")
+            .AppendLine("using DataRowAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.DataRowAttribute;")
+            .AppendLine("using DynamicDataAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.DynamicDataAttribute;")
+            .AppendLine("using DynamicDataSourceType = global::Microsoft.VisualStudio.TestTools.UnitTesting.DynamicDataSourceType;")
+            .AppendLine("using TestInitializeAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.TestInitializeAttribute;")
+            .AppendLine("using TestCleanupAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.TestCleanupAttribute;")
+            .AppendLine("using ClassInitializeAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.ClassInitializeAttribute;")
+            .AppendLine("using ClassCleanupAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.ClassCleanupAttribute;")
+            .AppendLine("using AssemblyInitializeAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.AssemblyInitializeAttribute;")
+            .AppendLine("using AssemblyCleanupAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.AssemblyCleanupAttribute;")
+            .AppendLine("using DeploymentItemAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.DeploymentItemAttribute;")
+            .AppendLine("using OwnerAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.OwnerAttribute;")
+            .AppendLine("using PriorityAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.PriorityAttribute;")
+            .AppendLine("using TestCategoryAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.TestCategoryAttribute;")
+            .AppendLine("using TestPropertyAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute;");
+        builder.AppendLine("using IgnoreAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.IgnoreAttribute;");
+    }
+}
+
 static string QualifyLocallyDeclaredAttributeTypes(string attribute, string source, string generatedNamespace)
 {
     var declaredTypes = Regex.Matches(
@@ -478,6 +701,17 @@ static string QualifyLocallyDeclaredAttributeTypes(string attribute, string sour
 
     foreach (var declaredType in declaredTypes)
     {
+        var attributeNames = declaredType.EndsWith("Attribute", StringComparison.Ordinal)
+            ? new[] { declaredType, declaredType[..^"Attribute".Length] }
+            : new[] { declaredType };
+        foreach (var attributeName in attributeNames)
+        {
+            attribute = Regex.Replace(
+                attribute,
+                $@"(\[assembly:\s*){Regex.Escape(attributeName)}(?=\s*(?:\(|\]))",
+                $"$1{generatedNamespace}.{declaredType}");
+        }
+
         attribute = Regex.Replace(
             attribute,
             $"(?<=<){Regex.Escape(declaredType)}(?=>)",
@@ -493,8 +727,10 @@ static string QualifyLocallyDeclaredAttributeTypes(string attribute, string sour
 
 internal sealed record Snippet(
     string SourcePath,
+    string? SharedDocumentId,
     int Line,
     IReadOnlyList<string> Usings,
+    string Prelude,
     string Source,
     SnippetMode Mode,
     string? SplitBefore);

@@ -2,7 +2,6 @@
 sidebar_position: 4
 ---
 
-<!-- doc-test-ignore-file: Tutorial builds one custom assertion across multiple dependent snippets. -->
 
 # Returning Data via `await`
 
@@ -101,7 +100,7 @@ You can now use the assertion and get the found item:
 
 ```csharp
 // Returns the first item with price < 0.99
-Product cheapProduct = await Assert.That(products).Contains(p => p.Price < 0.99);
+Product cheapProduct = await Assert.That(products).Contains(p => p.Price < 0.99m);
 
 // Use the returned value in further assertions
 await Assert.That(cheapProduct.Name).IsNotNull();
@@ -115,3 +114,4 @@ TUnit includes several built-in examples of assertions that return values:
 - `Contains(predicate)` - Returns the first item matching the predicate
 - `WhenParsedInto<T>()` - Returns the parsed value (e.g., `int value = await Assert.That("123").WhenParsedInto<int>()`)
 - `IsTypeOf<T>()` - Returns the casted value (e.g., `StringBuilder sb = await Assert.That(obj).IsTypeOf<StringBuilder>()`)
+<!-- doc-test-shared -->

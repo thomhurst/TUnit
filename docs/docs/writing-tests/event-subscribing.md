@@ -1,4 +1,3 @@
-<!-- doc-test-ignore-file: Examples depend on application databases, metrics, and fixture classes. -->
 
 # Event Subscribing
 
@@ -57,14 +56,14 @@ Use `EventReceiverStage.Late` (the default) when your event receiver needs to:
 ```csharp
 public class DatabaseConnectionAttribute : Attribute, ITestStartEventReceiver
 {
-    private IDbConnection? _connection;
+    private DbConnection? _connection;
 
     // Execute before [Before(Test)] hooks so the connection is available to them
     public EventReceiverStage Stage => EventReceiverStage.Early;
 
     public async ValueTask OnTestStart(TestContext context)
     {
-        _connection = new SqlConnection(connectionString);
+        _connection = new NpgsqlConnection(connectionString);
         await _connection.OpenAsync();
 
         // Store connection in test context for use by hooks and test

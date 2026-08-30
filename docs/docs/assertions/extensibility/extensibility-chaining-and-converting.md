@@ -2,7 +2,6 @@
 sidebar_position: 3
 ---
 
-<!-- doc-test-ignore-file: Examples depend on custom application assertions and HTTP response models defined across separate snippets. -->
 
 # Chaining and Converting
 
@@ -13,16 +12,22 @@ Chaining is especially helpful when you want to perform multiple assertions on a
 
 For example:
 
-<!-- doc-test-ignore: Depends on an application-provided HTTP response and custom assertions defined below. -->
 ```csharp
-        HttpResponseMessage response = ...;
+using var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+{
+    Content = JsonContent.Create(new ProblemDetails
+    {
+        Title = "Invalid Authentication Token",
+        Detail = "No token provided"
+    })
+};
 
-        await Assert.That(response)
-            .IsProblemDetails()
-            .And
-            .HasTitle("Invalid Authentication Token")
-            .And
-            .HasDetail("No token provided");
+await Assert.That(response)
+    .IsProblemDetails()
+    .And
+    .HasTitle("Invalid Authentication Token")
+    .And
+    .HasDetail("No token provided");
 ```
 
 The `response` object initially passed in is a `HttpResponseMessage`, but then after we assert it's a `ProblemDetails` object, the chain has changed to that type so that we can further assert with methods specific to `ProblemDetails` instead of `HttpResponseMessage`.
@@ -43,7 +48,7 @@ public class IsProblemDetailsAssertion : Assertion<ProblemDetails>
     public IsProblemDetailsAssertion(AssertionContext<HttpResponseMessage> context)
         : base(context.Map<ProblemDetails>(async response =>
         {
-            var content = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+            var content = await response!.Content.ReadFromJsonAsync<ProblemDetails>();
 
             if (content is null)
             {
@@ -193,3 +198,4 @@ TUnit includes several built-in examples of type conversion assertions:
 
 - `WhenParsedInto<T>()` - Converts a string to a parsed type (e.g., `await Assert.That("123").WhenParsedInto<int>().IsEqualTo(123)`)
 - `IsTypeOf<T>()` - Converts to a specific type (e.g., `await Assert.That(obj).IsTypeOf<StringBuilder>().Length().IsEqualTo(5)`)
+<!-- doc-test-shared -->

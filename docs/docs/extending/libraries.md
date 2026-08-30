@@ -1,4 +1,3 @@
-<!-- doc-test-ignore-file: Consumer example depends on the fictional MyCompany.Testing library and its application services. -->
 
 # Libraries
 
@@ -85,7 +84,7 @@ public class OrderTests : DatabaseTestBase
     {
         var order = await OrderService.CreateAsync("item-1");
 
-        await Assert.That(order.Id).IsNotNull();
+        await Assert.That(order.Id).IsNotEqualTo(Guid.Empty);
     }
 }
 ```

@@ -1,4 +1,3 @@
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Test Parameters
 
@@ -51,7 +50,6 @@ public class MyTests
 
 ### Environment-specific configuration
 
-<!-- doc-test-contextual -->
 ```csharp
 [Before(Test)]
 public void SetupEnvironment()
@@ -65,14 +63,13 @@ public void SetupEnvironment()
 
 ### Conditional test logic
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task IntegrationTest()
 {
     if (!TestContext.Parameters.ContainsKey("run-integration"))
     {
-        Assert.Skip("Integration tests require --test-parameter run-integration=true");
+        Skip.Test("Integration tests require --test-parameter run-integration=true");
     }
 
     // Run the integration test...
@@ -81,17 +78,17 @@ public async Task IntegrationTest()
 
 ### Passing secrets or connection strings
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DatabaseTest()
 {
     if (!TestContext.Parameters.TryGetValue("connection-string", out var connectionStrings))
     {
-        Assert.Skip("Requires --test-parameter connection-string=...");
+        Skip.Test("Requires --test-parameter connection-string=...");
     }
 
-    using var connection = new SqlConnection(connectionStrings.First());
+    await using var connection = new NpgsqlConnection(
+        connectionStrings.FirstOrDefault() ?? throw new InvalidOperationException("Missing connection string"));
     // ...
 }
 ```

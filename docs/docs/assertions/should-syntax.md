@@ -4,7 +4,6 @@ title: Should Syntax (Optional)
 description: FluentAssertions-style value.Should().BeEqualTo() syntax via the optional TUnit.Assertions.Should NuGet package.
 ---
 
-<!-- doc-test-ignore-file: Examples require the optional Should source generator and build on contextual values. -->
 
 # Should Syntax
 
@@ -56,24 +55,22 @@ The `Does*` strip rule reads naturally for verbs (`DoesMatch` → `Match`, `Does
 
 For irregulars or when the conjugation produces an unwanted name, decorate the assertion class with `[ShouldName("...")]`. The override is consulted before the conjugation rules:
 
-<!-- doc-test-ignore: Illustrative declaration omits the abstract assertion implementation. -->
 ```csharp
 [AssertionExtension("IsOdd")]
 [ShouldName("BeAnOddNumber")]
-public class OddAssertion : Assertion<int> { … }
+public abstract class OddAssertion(AssertionContext<int> context) : Assertion<int>(context) { }
 ```
 
 `[AssertionExtension(NegatedMethodName = "...")]` produces a second extension method for the negated form, which the Should generator picks up and conjugates independently — `Contains` → `Contain` and `DoesNotContain` → `NotContain` come out automatically without any `[ShouldName]`. When TUnit's pattern uses **separate classes** for positive and negated forms (e.g. `EqualsAssertion` + `NotEqualsAssertion`), place a separate `[ShouldName]` on each:
 
-<!-- doc-test-ignore: Illustrative declarations omit the abstract assertion implementations. -->
 ```csharp
 [AssertionExtension("IsBetween")]
 [ShouldName("BeWithinRange")]
-public class BetweenAssertion<TValue> : Assertion<TValue> { … }
+public abstract class BetweenAssertion<TValue>(AssertionContext<TValue> context) : Assertion<TValue>(context) { }
 
 [AssertionExtension("IsNotBetween")]
 [ShouldName("NotBeWithinRange")]
-public class NotBetweenAssertion<TValue> : Assertion<TValue> { … }
+public abstract class NotBetweenAssertion<TValue>(AssertionContext<TValue> context) : Assertion<TValue>(context) { }
 ```
 
 ## Entry Points
@@ -84,7 +81,7 @@ Each entry overload returns a wrapper appropriate to the source type:
 // Value entry — returns ShouldSource<T>
 await 42.Should().BeEqualTo(42);
 await "hello".Should().Contain("ell");
-await someObject.Should().BeOfType<MyClass>();
+await someObject.Should().BeOfType(typeof(MyClass));
 
 // Collection entry — returns ShouldCollectionSource<TItem>
 //   exposes element-typed instance methods (BeInOrder, All, Any,
@@ -113,7 +110,7 @@ await value
     .And.NotBeEqualTo(7)
     .And.BeBetween(1, 10);
 
-await statusCode
+await ((int) statusCode)
     .Should().BeEqualTo(200)
     .Or.BeEqualTo(201)
     .Or.BeEqualTo(204);

@@ -2,7 +2,6 @@
 sidebar_position: 1
 ---
 
-<!-- doc-test-ignore-file: Tutorial builds one custom assertion across multiple dependent snippets. -->
 
 # Custom Assertions
 
@@ -110,3 +109,4 @@ await Assert.That("Hello World")
 - **Context sharing**: Pass `source.Context` to your assertion constructor (it contains the evaluation context and expression builder)
 - **CheckAsync parameter**: Use `EvaluationMetadata<TValue> metadata` which contains both `Value` and `Exception` properties
 - **CallerArgumentExpression**: Use this attribute to capture parameter expressions for better error messages
+<!-- doc-test-shared -->

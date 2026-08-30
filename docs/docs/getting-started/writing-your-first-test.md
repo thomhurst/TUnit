@@ -1,4 +1,3 @@
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Writing your first test
 
@@ -81,7 +80,6 @@ Tests will pass if they execute successfully without any exceptions.
 
 Test methods can be either synchronous or asynchronous:
 
-<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public void SynchronousTest()  // ✅ Valid - synchronous test

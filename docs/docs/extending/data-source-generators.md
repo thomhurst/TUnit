@@ -1,4 +1,3 @@
-<!-- doc-test-ignore-file: Samples depend on application models, database clients, Dapper, and AutoFixture. -->
 
 # Data Source Generators
 
@@ -36,7 +35,7 @@ public class MyTestClass(SomeClass1 someClass1, SomeClass2 someClass2, SomeClass
     [AutoFixtureGenerator<int, string, bool>]
     public async Task Test(int value, string value2, bool value3)
     {
-        // ...
+        _ = (someClass1, someClass2, someClass3, value, value2, value3);
     }
 }
 
@@ -74,15 +73,11 @@ public class DatabaseDataGeneratorAttribute<T> : AsyncDataSourceGeneratorAttribu
     
     protected override async IAsyncEnumerable<Func<Task<T>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync();
-        
-        var entities = await connection.QueryAsync<T>("SELECT * FROM " + typeof(T).Name);
-        
-        foreach (var entity in entities)
-        {
-            yield return () => Task.FromResult(entity);
-        }
+
+        var fixture = new Fixture();
+        yield return () => Task.FromResult(fixture.Create<T>());
     }
 }
 
@@ -146,7 +141,7 @@ public class RepositoryTests(DatabaseContext context)
     [Test]
     public async Task TestRepository()
     {
-        // context is populated by AutoFixture
+        _ = context;
     }
 }
 ```
@@ -166,18 +161,21 @@ After each `yield`, the execution is passed back to TUnit, and TUnit will set a 
 The `TestBuilderContext` object exposes `Events` - And you can register a delegate to be invoked on them at the point in the test lifecycle that you wish.
 
 ```csharp
-public override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+public sealed class ContextAwareDataGeneratorAttribute : DataSourceGeneratorAttribute<int>
 {
-    dataGeneratorMetadata.TestBuilderContext.Current; // <-- Initial Context for first test
-    
-    yield return () => 1;
-    
-    dataGeneratorMetadata.TestBuilderContext.Current; // <-- This is now a different context object, as we yielded
-    dataGeneratorMetadata.TestBuilderContext.Current; // <-- This is still the same as above because it'll only change on a yield
-    
-    yield return () => 2;
-    
-    dataGeneratorMetadata.TestBuilderContext.Current; // <-- A new object again
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        _ = dataGeneratorMetadata.TestBuilderContext.Current; // Initial context for first test
+
+        yield return () => 1;
+
+        _ = dataGeneratorMetadata.TestBuilderContext.Current; // A different context after yielding
+        _ = dataGeneratorMetadata.TestBuilderContext.Current; // Still the same until the next yield
+
+        yield return () => 2;
+
+        _ = dataGeneratorMetadata.TestBuilderContext.Current; // A new context again
+    }
 }
 ```
 

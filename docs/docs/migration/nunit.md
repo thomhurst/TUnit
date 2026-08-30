@@ -1,4 +1,3 @@
-<!-- doc-test-ignore-file: Comparisons require an isolated NUnit compilation and application fixtures. -->
 
 # Migrating from NUnit
 
@@ -245,15 +244,15 @@ await Assert.That(value1).IsGreaterThan(value2);
 ```csharp
 // NUnit
 Assert.That(actual, Is.EqualTo(expected));
-Assert.That(value, Is.True);
-Assert.That(value, Is.Null);
+Assert.That(condition, Is.True);
+Assert.That(optional, Is.Null);
 Assert.That(text, Does.Contain("substring"));
 Assert.That(collection, Has.Count.EqualTo(5));
 
 // TUnit
 await Assert.That(actual).IsEqualTo(expected);
-await Assert.That(value).IsTrue();
-await Assert.That(value).IsNull();
+await Assert.That(condition).IsTrue();
+await Assert.That(optional).IsNull();
 await Assert.That(text).Contains("substring");
 await Assert.That(collection).Count().IsEqualTo(5);
 ```
@@ -262,12 +261,12 @@ await Assert.That(collection).Count().IsEqualTo(5);
 
 ```csharp
 // NUnit
-CollectionAssert.AreEqual(expected, actual);
+CollectionAssert.AreEqual(values, numbers);
 CollectionAssert.Contains(collection, item);
 CollectionAssert.IsEmpty(collection);
 
 // TUnit
-await Assert.That(actual).IsEquivalentTo(expected);
+await Assert.That(numbers).IsEquivalentTo(values);
 await Assert.That(collection).Contains(item);
 await Assert.That(collection).IsEmpty();
 ```
@@ -294,7 +293,7 @@ Assert.Throws<InvalidOperationException>(() => DoSomething());
 Assert.ThrowsAsync<InvalidOperationException>(async () => await DoSomethingAsync());
 
 // TUnit
-await Assert.ThrowsAsync<InvalidOperationException>(() => DoSomething());
+Assert.Throws<InvalidOperationException>(() => DoSomething());
 await Assert.ThrowsAsync<InvalidOperationException>(async () => await DoSomethingAsync());
 ```
 
@@ -303,26 +302,26 @@ await Assert.ThrowsAsync<InvalidOperationException>(async () => await DoSomethin
 #### TestCaseSource
 ```csharp
 // NUnit
-[TestCaseSource(nameof(TestData))]
-public void TestMethod(int value, string text)
+[TestCaseSource(nameof(NUnitData))]
+public void NUnitMethod(int value, string text)
 {
     // Test implementation
 }
 
-private static IEnumerable TestData()
+private static IEnumerable NUnitData()
 {
     yield return new object[] { 1, "one" };
     yield return new object[] { 2, "two" };
 }
 
 // TUnit
-[MethodDataSource(nameof(TestData))]
-public async Task TestMethod(int value, string text)
+[MethodDataSource(nameof(TUnitData))]
+public async Task TUnitMethod(int value, string text)
 {
     // Test implementation
 }
 
-private static IEnumerable<(int, string)> TestData()
+public static IEnumerable<(int, string)> TUnitData()
 {
     yield return (1, "one");
     yield return (2, "two");
@@ -335,7 +334,7 @@ private static IEnumerable<(int, string)> TestData()
 // NUnit
 [TestCase(1, 2, 3)]
 [TestCase(10, 20, 30)]
-public void AdditionTest(int a, int b, int expected)
+public void NUnitAdditionTest(int a, int b, int expected)
 {
     Assert.AreEqual(expected, a + b);
 }
@@ -344,7 +343,7 @@ public void AdditionTest(int a, int b, int expected)
 [Test]
 [Arguments(1, 2, 3)]
 [Arguments(10, 20, 30)]
-public async Task AdditionTest(int a, int b, int expected)
+public async Task TUnitAdditionTest(int a, int b, int expected)
 {
     await Assert.That(a + b).IsEqualTo(expected);
 }
@@ -373,7 +372,7 @@ public void TUnitTest(TUnit.Core.TestContext context)
 ```csharp
 // NUnit
 [Test]
-public void TestWithAttachment()
+public void NUnitTestWithAttachment()
 {
     // Test logic
     var logPath = "test-log.txt";
@@ -384,7 +383,7 @@ public void TestWithAttachment()
 
 // TUnit
 [Test]
-public async Task TestWithAttachment()
+public async Task TUnitTestWithAttachment()
 {
     // Test logic
     var logPath = "test-log.txt";
@@ -497,8 +496,8 @@ public class EnvironmentTests(string environment)
 [TestFixture]
 public class ProductServiceTests
 {
-    private IDatabase _database;
-    private ProductService _productService;
+    private ITestDatabase _database = null!;
+    private ProductService _productService = null!;
 
     [OneTimeSetUp]
     public void OneTimeSetup()
@@ -547,7 +546,7 @@ public class ProductServiceTests
     {
         yield return new object[] { "", 10.00 };
         yield return new object[] { "Product", -5.00 };
-        yield return new object[] { null, 10.00 };
+        yield return new object[] { null!, 10.00 };
     }
 
     [TearDown]
@@ -570,11 +569,11 @@ public class ProductServiceTests
 ```csharp
 public class ProductServiceTests
 {
-    private IDatabase _database = null!;
-    private ProductService _productService = null!;
+    private static ITestDatabase _database = null!;
+    private static ProductService _productService = null!;
 
     [Before(Class)]
-    public async Task ClassSetup()
+    public static async Task ClassSetup()
     {
         // Runs once before all tests in the class
         _database = new InMemoryDatabase();
@@ -613,11 +612,11 @@ public class ProductServiceTests
     [MethodDataSource(nameof(InvalidProductData))]
     public async Task CreateProduct_WithInvalidData_ThrowsException(string name, decimal price)
     {
-        await Assert.ThrowsAsync<ArgumentException>(
+        Assert.Throws<ArgumentException>(
             () => _productService.CreateProduct(name, price));
     }
 
-    private static IEnumerable<(string name, decimal price)> InvalidProductData()
+    public static IEnumerable<(string name, decimal price)> InvalidProductData()
     {
         yield return ("", 10.00m);
         yield return ("Product", -5.00m);
@@ -632,7 +631,7 @@ public class ProductServiceTests
     }
 
     [After(Class)]
-    public async Task ClassCleanup()
+    public static async Task ClassCleanup()
     {
         // Runs once after all tests in the class
         _database?.Dispose();
@@ -672,7 +671,7 @@ public async Task ProcessValue_WithRange(int value)
     await Assert.That(result).IsGreaterThan(0);
 }
 
-private static IEnumerable<int> GetRange()
+public static IEnumerable<int> GetRange()
 {
     return Enumerable.Range(1, 10);
 }
@@ -802,14 +801,14 @@ public class AssemblySetup
 ```csharp
 public static class AssemblyHooks
 {
-    [Before(Assembly)]
+    [Before(HookType.Assembly)]
     public static async Task AssemblySetup()
     {
         // Initialize resources needed by all tests
         Console.WriteLine("Assembly setup running");
     }
 
-    [After(Assembly)]
+    [After(HookType.Assembly)]
     public static async Task AssemblyCleanup()
     {
         // Cleanup resources

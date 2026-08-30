@@ -141,11 +141,13 @@ Use a directive immediately before a fence when its context needs to be explicit
 <!-- doc-test-declaration -->
 <!-- doc-test-member -->
 <!-- doc-test-statements -->
-<!-- doc-test-contextual -->
-<!-- doc-test-ignore: Reason this fence cannot compile independently. -->
 ```
 
-Use `<!-- doc-test-contextual -->` on each fence that depends on surrounding prose. Its page must declare `<!-- doc-test-contextual-file: Reason. -->`, so unmarked fences still compile and cannot be silently excluded by page-level configuration. Use `<!-- doc-test-ignore-file: Reason. -->` when no snippets on a page can compile independently. File directives require a reason.
+Every C# fence must compile with warnings as errors. Failure-masking ignore/contextual directives,
+warning pragmas, nullable disabling, `#if false`, and suppression attributes are rejected. The verifier
+also fails unless `NoWarn` and `WarningsNotAsErrors` are empty.
+
+Use `<!-- doc-test-shared -->` once on tutorial pages whose fences intentionally share declarations. Every fence still compiles; generated snippets use one page-scoped namespace.
 
 For a fence that mixes declarations or members with usage, split it explicitly at an exact marker:
 

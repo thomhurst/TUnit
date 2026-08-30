@@ -17,6 +17,27 @@ $nugetConfigPath = Join-Path $generatedDirectory 'NuGet.config'
 $generatorProjectPath = Join-Path $repositoryRoot 'tools/TUnit.DocSnippetGenerator/TUnit.DocSnippetGenerator.csproj'
 $consumerProjectPath = Join-Path $repositoryRoot 'tests/TUnit.DocTests/TUnit.DocTests.csproj'
 
+function Assert-StrictWarningPolicy([string]$projectPath)
+{
+    $propertyOutput = & dotnet msbuild $projectPath -nologo `
+        '-getProperty:NoWarn;TreatWarningsAsErrors;WarningsNotAsErrors'
+    if ($LASTEXITCODE -ne 0)
+    {
+        throw "Could not evaluate warning policy for '$projectPath'."
+    }
+
+    $properties = ($propertyOutput | Out-String | ConvertFrom-Json).Properties
+    if ($properties.TreatWarningsAsErrors -ne 'true' -or
+        $properties.NoWarn -or
+        $properties.WarningsNotAsErrors)
+    {
+        throw "Documentation builds require TreatWarningsAsErrors=true with empty NoWarn and WarningsNotAsErrors. Project: '$projectPath'."
+    }
+}
+
+Assert-StrictWarningPolicy $generatorProjectPath
+Assert-StrictWarningPolicy $consumerProjectPath
+
 $requiredPackages = @(
     'TUnit'
     'TUnit.AspNetCore'
@@ -94,4 +115,17 @@ if ($LASTEXITCODE -ne 0)
 if ($LASTEXITCODE -ne 0)
 {
     throw "Documentation snippet build failed with exit code $LASTEXITCODE."
+}
+
+$isolatedDirectory = Join-Path $generatedDirectory 'isolated'
+foreach ($snippetDirectory in Get-ChildItem -LiteralPath $isolatedDirectory -Directory)
+{
+    & dotnet build $consumerProjectPath -c Release --no-restore --nologo '-clp:ErrorsOnly' `
+        "-p:TUnitPackageVersion=$Version" `
+        "-p:TUnitAssertionsShouldPackageVersion=$Version-beta" `
+        "-p:GeneratedSnippetsDirectory=$($snippetDirectory.FullName)"
+    if ($LASTEXITCODE -ne 0)
+    {
+        throw "Documentation snippet build failed for $($snippetDirectory.Name) with exit code $LASTEXITCODE."
+    }
 }

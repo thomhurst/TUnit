@@ -1,4 +1,3 @@
-<!-- doc-test-ignore-file: Custom skip examples depend on application availability checks and operations. -->
 
 # Skipping Tests
 
@@ -35,7 +34,6 @@ public class WindowsOnlyAttribute() : SkipAttribute("This test is only supported
 }
 ```
 
-<!-- doc-test-ignore: Usage depends on WindowsOnlyAttribute from the preceding snippet. -->
 ```csharp
 using TUnit.Core;
 

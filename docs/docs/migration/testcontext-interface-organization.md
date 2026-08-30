@@ -1,4 +1,3 @@
-<!-- doc-test-ignore-file: Fragments intentionally compare old and new contextual member access. -->
 
 # TestContext Interface Organization Migration Guide
 
@@ -15,25 +14,20 @@ This migration guide helps you update code that directly accesses `TestContext` 
 `TestContext` now exposes its API through focused interface properties:
 
 ```csharp
-public partial class TestContext :
-    ITestExecution,
-    ITestParallelization,
-    ITestOutput,
-    ITestMetadata,
-    ITestDependencies,
-    ITestStateBag,
-    ITestEvents
+public static class TestContextInterfaceExample
 {
-    // Organized API access through interface properties
-    public ITestExecution Execution => this;
-    public ITestParallelization Parallelism => this;
-    public ITestOutput Output => this;
-    public ITestMetadata Metadata => this;
-    public ITestDependencies Dependencies => this;
-    public ITestStateBag StateBag => this;
-    public ITestEvents Events => this;
+    public static void ShowInterfaces(TestContext context)
+    {
+        ITestExecution execution = context.Execution;
+        ITestParallelization parallelism = context.Parallelism;
+        ITestOutput output = context.Output;
+        ITestMetadata metadata = context.Metadata;
+        ITestDependencies dependencies = context.Dependencies;
+        ITestStateBag stateBag = context.StateBag;
+        ITestEvents events = context.Events;
 
-    // Note: Services property is internal - use dependency injection instead
+        Console.WriteLine($"{execution}, {parallelism}, {output}, {metadata}, {dependencies}, {stateBag}, {events}");
+    }
 }
 ```
 
@@ -93,7 +87,7 @@ If you were directly accessing properties on `TestContext`, they now need to be 
 #### Execution-Related Properties
 
 **Before:**
-```csharp
+```text
 // ❌ Old - Direct access
 var customExecutor = TestContext.Current.CustomHookExecutor;
 TestContext.Current.ReportResult = false;
@@ -103,15 +97,15 @@ TestContext.Current.AddLinkedCancellationToken(externalToken);
 **After:**
 ```csharp
 // ✅ New - Through Execution interface
-var customExecutor = TestContext.Current.Execution.CustomHookExecutor;
-TestContext.Current.Execution.ReportResult = false;
-TestContext.Current.Execution.AddLinkedCancellationToken(externalToken);
+var customExecutor = TestContext.Current!.Execution.CustomHookExecutor;
+TestContext.Current!.Execution.ReportResult = false;
+TestContext.Current!.Execution.AddLinkedCancellationToken(externalToken);
 ```
 
 #### Metadata-Related Properties
 
 **Before:**
-```csharp
+```text
 // ❌ Old - Direct access
 var formatter = TestContext.Current.DisplayNameFormatter;
 TestContext.Current.DisplayNameFormatter = typeof(MyFormatter);
@@ -120,8 +114,8 @@ TestContext.Current.DisplayNameFormatter = typeof(MyFormatter);
 **After:**
 ```csharp
 // ✅ New - Through Metadata interface
-var formatter = TestContext.Current.Metadata.DisplayNameFormatter;
-TestContext.Current.Metadata.DisplayNameFormatter = typeof(MyFormatter);
+var formatter = TestContext.Current!.Metadata.DisplayNameFormatter;
+TestContext.Current!.Metadata.DisplayNameFormatter = typeof(MyFormatter);
 ```
 
 #### Event Access
@@ -129,7 +123,7 @@ TestContext.Current.Metadata.DisplayNameFormatter = typeof(MyFormatter);
 Events are now accessed directly through the `Events` interface property, and all events are nullable for lazy initialization:
 
 **Before:**
-```csharp
+```text
 // ❌ Old - Accessing through a nested Events property
 TestContext.Current.Events.OnTestStart += handler;
 ```
@@ -137,13 +131,9 @@ TestContext.Current.Events.OnTestStart += handler;
 **After:**
 ```csharp
 // ✅ New - Direct access to nullable event properties
-TestContext.Current.Events.OnTestStart += handler;
+TestContext.Current!.Events.OnTestStart?.Add(eventHandler, 0);
 
-// Events are nullable and lazily initialized
-if (TestContext.Current.Events.OnTestStart != null)
-{
-    await TestContext.Current.Events.OnTestStart.InvokeAsync(testContext, testContext);
-}
+// TUnit invokes registered handlers when the event occurs.
 ```
 
 ### Custom Hook Executors
@@ -151,10 +141,10 @@ if (TestContext.Current.Events.OnTestStart != null)
 If you're implementing custom hook executors that access these properties:
 
 **Before:**
-```csharp
-public class MyHookExecutor : IHookExecutor
+```text
+public static class LegacyHookExecutorExample
 {
-    public async Task ExecuteAsync(TestContext context, Func<Task> hookBody)
+    public static async Task ExecuteAsync(TestContext context, Func<Task> hookBody)
     {
         // ❌ Old - Direct property access
         if (context.ReportResult)
@@ -167,9 +157,9 @@ public class MyHookExecutor : IHookExecutor
 
 **After:**
 ```csharp
-public class MyHookExecutor : IHookExecutor
+public static class HookExecutorExample
 {
-    public async Task ExecuteAsync(TestContext context, Func<Task> hookBody)
+    public static async Task ExecuteAsync(TestContext context, Func<Task> hookBody)
     {
         // ✅ New - Through Execution interface
         if (context.Execution.ReportResult)
@@ -185,7 +175,7 @@ public class MyHookExecutor : IHookExecutor
 If you're setting custom hook executors during test registration:
 
 **Before:**
-```csharp
+```text
 public class CustomTestBuilder
 {
     public void ConfigureTest(TestContext context)
@@ -213,7 +203,7 @@ public class CustomTestBuilder
 ### Cancellation Token Linking
 
 **Before:**
-```csharp
+```text
 [Before(Test)]
 public void Setup()
 {
@@ -232,7 +222,7 @@ public void Setup()
     var externalCts = new CancellationTokenSource();
 
     // ✅ New - Through Execution interface
-    TestContext.Current.Execution.AddLinkedCancellationToken(externalCts.Token);
+    TestContext.Current!.Execution.AddLinkedCancellationToken(externalCts.Token);
 }
 ```
 
@@ -242,11 +232,13 @@ public void Setup()
 
 IntelliSense now groups related functionality together, making it easier to find what you need:
 
-<!-- doc-test-ignore: Trailing dots intentionally illustrate IntelliSense member discovery. -->
 ```csharp
-TestContext.Current.Execution.  // Shows only execution-related members
-TestContext.Current.Metadata.   // Shows only metadata-related members
-TestContext.Current.Output.     // Shows only output-related members
+var current = TestContext.Current!;
+ITestExecution execution = current.Execution;
+ITestMetadata metadata = current.Metadata;
+ITestOutput output = current.Output;
+
+Console.WriteLine($"{execution}, {metadata}, {output}");
 ```
 
 ### 2. Clearer Intent
@@ -270,7 +262,7 @@ Consumers can depend on specific interfaces instead of the full `TestContext`:
 
 ```csharp
 // Before: Depends on entire TestContext
-public class MyService
+public class FocusedService
 {
     public void ProcessTest(TestContext context) { }
 }
@@ -391,11 +383,13 @@ public interface ITestParallelization
 **Important:** The `Limiter` property is **read-only** on the public interface. To set the parallel limiter, use the phase-specific `TestRegisteredContext.SetParallelLimiter()` method during test registration:
 
 ```csharp
-[TestRegistered]
-public static void OnTestRegistered(TestRegisteredContext context)
+public sealed class ParallelLimitAttribute : Attribute, ITestRegisteredEventReceiver
 {
-    // ✅ Correct - Use phase-specific context
-    context.SetParallelLimiter(new ParallelLimit3());
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
+    {
+        context.SetParallelLimiter(new TUnit.Core.Helpers.ProcessorCountParallelLimit());
+        return ValueTask.CompletedTask;
+    }
 }
 ```
 

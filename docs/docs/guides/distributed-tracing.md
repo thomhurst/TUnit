@@ -2,7 +2,6 @@
 sidebar_position: 20
 ---
 
-<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
 
 # Distributed Tracing
 
@@ -55,14 +54,15 @@ Install [`TUnit.OpenTelemetry`](/docs/examples/opentelemetry#option-a-zero-confi
 
 Point the OTLP exporter at Seq's ingestion endpoint:
 
-<!-- doc-test-ignore: Fluent fragment continues the OpenTelemetry builder configured above. -->
 ```csharp
-.AddOtlpExporter(opts =>
-{
-    opts.Endpoint = new Uri("http://localhost:5341/ingest/otlp/v1/traces");
-    opts.Protocol = OtlpExportProtocol.HttpProtobuf;
-    opts.Headers = "X-Seq-ApiKey=your-key";
-})
+using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+    .AddOtlpExporter(opts =>
+    {
+        opts.Endpoint = new Uri("http://localhost:5341/ingest/otlp/v1/traces");
+        opts.Protocol = OtlpExportProtocol.HttpProtobuf;
+        opts.Headers = "X-Seq-ApiKey=your-key";
+    })
+    .Build();
 ```
 
 Useful Seq queries:
@@ -76,9 +76,10 @@ test.case.result.status = 'fail'           -- only failures
 
 ### Jaeger or Tempo
 
-<!-- doc-test-ignore: Fluent fragment continues the OpenTelemetry builder configured above. -->
 ```csharp
-.AddOtlpExporter(opts => opts.Endpoint = new Uri("http://localhost:4317"))
+using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+    .AddOtlpExporter(opts => opts.Endpoint = new Uri("http://localhost:4317"))
+    .Build();
 ```
 
 Jaeger groups by trace ID, so each test appears as a separate trace. Use the tag search box (`tunit.session.id="<id>"`) to find all traces from one run.
@@ -113,7 +114,6 @@ TUnit handles this automatically: a module initializer in `TUnit.Core` replaces 
 
 For the SUT side, if it shares the test process (e.g. `TestWebApplicationFactory<T>`), alignment flows automatically. For out-of-process SUTs that don't reference `TUnit.Core`, align the propagator yourself on startup — either match `DistributedContextPropagator.Current` or, if you use the OpenTelemetry SDK:
 
-<!-- doc-test-contextual -->
 ```csharp
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
@@ -148,7 +148,6 @@ Use [`TestWebApplicationFactory<T>`](/docs/examples/aspnet) or wrap with `Traced
 
 Opt out per-test when the SUT already instruments its own outbound HTTP (for example via the OpenTelemetry HttpClient instrumentation) by setting `WebApplicationTestOptions.AutoPropagateHttpClientFactory = false`:
 
-<!-- doc-test-ignore: Override is a fragment from a TestWebApplicationFactory subclass. -->
 ```csharp
 protected override void ConfigureTestOptions(WebApplicationTestOptions options)
 {
@@ -172,22 +171,19 @@ Install [`TUnit.OpenTelemetry`](/docs/examples/opentelemetry#option-a-zero-confi
 
 Read the endpoint from `AutoReceiver.Endpoint` and plumb it into the SUT:
 
-<!-- doc-test-contextual -->
 ```csharp
 using TUnit.OpenTelemetry;
 
 var endpoint = AutoReceiver.Endpoint;    // e.g. "http://127.0.0.1:41234"
+using var process = new Process { StartInfo = new ProcessStartInfo("dotnet") };
 process.StartInfo.EnvironmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = endpoint;
 process.StartInfo.EnvironmentVariables["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/protobuf";
 ```
 
 For the receiver to associate incoming spans with the right test, register the SUT's trace ID before it runs:
 
-<!-- doc-test-contextual -->
 ```csharp
-using TUnit.Engine.Reporters.Html;
-
-ActivityCollector.Current?.RegisterExternalTrace(Activity.Current!.TraceId.ToString());
+TestContext.Current!.RegisterTrace(Activity.Current!.TraceId);
 ```
 
 Spans arriving on a trace ID that wasn't registered are dropped (protects the report from unrelated traffic on shared runners). Each registered trace is capped at 100 external spans.

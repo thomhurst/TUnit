@@ -1,4 +1,3 @@
-<!-- doc-test-ignore-file: Comparisons require an isolated MSTest compilation and application fixtures. -->
 
 # Migrating from MSTest
 
@@ -262,16 +261,16 @@ Assert.AreEqual(expected, actual);
 Assert.AreNotEqual(expected, actual);
 Assert.IsTrue(condition);
 Assert.IsFalse(condition);
-Assert.IsNull(value);
-Assert.IsNotNull(value);
+Assert.IsNull(optional);
+Assert.IsNotNull(obj);
 
 // TUnit
 await Assert.That(actual).IsEqualTo(expected);
 await Assert.That(actual).IsNotEqualTo(expected);
 await Assert.That(condition).IsTrue();
 await Assert.That(condition).IsFalse();
-await Assert.That(value).IsNull();
-await Assert.That(value).IsNotNull();
+await Assert.That(optional).IsNull();
+await Assert.That(obj).IsNotNull();
 ```
 
 #### Reference Assertions
@@ -300,18 +299,18 @@ await Assert.That(value).IsNotAssignableTo<int>();
 
 ```csharp
 // MSTest
-CollectionAssert.AreEqual(expected, actual);
-CollectionAssert.AreNotEqual(expected, actual);
+CollectionAssert.AreEqual(values, numbers);
+CollectionAssert.AreNotEqual(values, otherNumbers);
 CollectionAssert.Contains(collection, item);
 CollectionAssert.DoesNotContain(collection, item);
-CollectionAssert.AllItemsAreNotNull(collection);
+CollectionAssert.AllItemsAreNotNull(objects);
 
 // TUnit
-await Assert.That(actual).IsEquivalentTo(expected);
-await Assert.That(actual).IsNotEquivalentTo(expected);
+await Assert.That(numbers).IsEquivalentTo(values);
+await Assert.That(otherNumbers).IsNotEquivalentTo(values);
 await Assert.That(collection).Contains(item);
 await Assert.That(collection).DoesNotContain(item);
-await Assert.That(collection).All().Satisfy(item => item.IsNotNull());
+await Assert.That(objects).All().Satisfy(item => item.IsNotNull());
 ```
 
 ### String Assertions
@@ -321,7 +320,7 @@ await Assert.That(collection).All().Satisfy(item => item.IsNotNull());
 StringAssert.Contains(text, substring);
 StringAssert.StartsWith(text, prefix);
 StringAssert.EndsWith(text, suffix);
-StringAssert.Matches(text, pattern);
+StringAssert.Matches(text, new Regex(pattern));
 
 // TUnit
 await Assert.That(text).Contains(substring);
@@ -334,11 +333,11 @@ await Assert.That(text).Matches(pattern);
 
 ```csharp
 // MSTest
-Assert.ThrowsException<InvalidOperationException>(() => DoSomething());
-await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => DoSomethingAsync());
+Assert.Throws<InvalidOperationException>(() => DoSomething());
+await Assert.ThrowsAsync<InvalidOperationException>(() => DoSomethingAsync());
 
 // TUnit
-await Assert.ThrowsAsync<InvalidOperationException>(() => DoSomething());
+Assert.Throws<InvalidOperationException>(() => DoSomething());
 await Assert.ThrowsAsync<InvalidOperationException>(() => DoSomethingAsync());
 ```
 
@@ -350,7 +349,7 @@ await Assert.ThrowsAsync<InvalidOperationException>(() => DoSomethingAsync());
 [TestMethod]
 [DataRow(1, 2, 3)]
 [DataRow(10, 20, 30)]
-public void AdditionTest(int a, int b, int expected)
+public void MSTestAdditionTest(int a, int b, int expected)
 {
     Assert.AreEqual(expected, a + b);
 }
@@ -359,7 +358,7 @@ public void AdditionTest(int a, int b, int expected)
 [Test]
 [Arguments(1, 2, 3)]
 [Arguments(10, 20, 30)]
-public async Task AdditionTest(int a, int b, int expected)
+public async Task TUnitAdditionTest(int a, int b, int expected)
 {
     await Assert.That(a + b).IsEqualTo(expected);
 }
@@ -369,13 +368,13 @@ public async Task AdditionTest(int a, int b, int expected)
 ```csharp
 // MSTest
 [TestMethod]
-[DynamicData(nameof(TestData), DynamicDataSourceType.Method)]
-public void TestMethod(int value, string text)
+[DynamicData(nameof(MSTestData), DynamicDataSourceType.Method)]
+public void MSTestMethod(int value, string text)
 {
     // Test implementation
 }
 
-private static IEnumerable<object[]> TestData()
+private static IEnumerable<object[]> MSTestData()
 {
     yield return new object[] { 1, "one" };
     yield return new object[] { 2, "two" };
@@ -383,13 +382,13 @@ private static IEnumerable<object[]> TestData()
 
 // TUnit
 [Test]
-[MethodDataSource(nameof(TestData))]
-public async Task TestMethod(int value, string text)
+[MethodDataSource(nameof(TUnitData))]
+public async Task TUnitMethod(int value, string text)
 {
     // Test implementation
 }
 
-private static IEnumerable<(int, string)> TestData()
+public static IEnumerable<(int, string)> TUnitData()
 {
     yield return (1, "one");
     yield return (2, "two");
@@ -401,9 +400,9 @@ private static IEnumerable<(int, string)> TestData()
 ```csharp
 // MSTest
 [TestClass]
-public class MyTests
+public class MSTestContextTests
 {
-    public TestContext TestContext { get; set; }
+    public TestContext TestContext { get; set; } = null!;
     
     [TestMethod]
     public void MyTest()
@@ -419,7 +418,7 @@ public class MyTests
 }
 
 // TUnit
-public class MyTests
+public class TUnitContextTests
 {
     [Test]
     public async Task MyTest(TestContext context)
@@ -440,18 +439,18 @@ public class MyTests
 ```csharp
 // MSTest
 [TestMethod]
-public void TestWithAttachment()
+public void MSTestWithAttachment(TestContext testContext)
 {
     // Test logic
     var logPath = "test-log.txt";
     File.WriteAllText(logPath, "test logs");
     
-    TestContext.AddResultFile(logPath);
+    testContext.AddResultFile(logPath);
 }
 
 // TUnit
 [Test]
-public async Task TestWithAttachment()
+public async Task TUnitWithAttachment()
 {
     // Test logic
     var logPath = "test-log.txt";
@@ -495,10 +494,10 @@ Skip.Test("Test is inconclusive");
 [TestClass]
 public class OrderServiceTests
 {
-    private static IDatabase _sharedDatabase;
-    private IOrderService _orderService;
+    private static ITestDatabase _sharedDatabase = null!;
+    private IOrderService _orderService = null!;
 
-    public TestContext TestContext { get; set; }
+    public TestContext TestContext { get; set; } = null!;
 
     [AssemblyInitialize]
     public static void AssemblyInit(TestContext context)
@@ -543,7 +542,7 @@ public class OrderServiceTests
     [DynamicData(nameof(GetInvalidOrders), DynamicDataSourceType.Method)]
     public void CreateOrder_WithInvalidData_ThrowsException(int productId, string productName, double price)
     {
-        Assert.ThrowsException<ArgumentException>(() =>
+        Assert.Throws<ArgumentException>(() =>
             _orderService.CreateOrder(productId, productName, (decimal)price));
     }
 
@@ -589,10 +588,10 @@ public class OrderServiceTests
 ```csharp
 public class OrderServiceTests
 {
-    private static IDatabase _sharedDatabase = null!;
+    private static ITestDatabase _sharedDatabase = null!;
     private IOrderService _orderService = null!;
 
-    [Before(Assembly)]
+    [Before(HookType.Assembly)]
     public static async Task AssemblyInit()
     {
         // Runs once per assembly
@@ -635,11 +634,11 @@ public class OrderServiceTests
     [MethodDataSource(nameof(GetInvalidOrders))]
     public async Task CreateOrder_WithInvalidData_ThrowsException(int productId, string productName, double price)
     {
-        await Assert.ThrowsAsync<ArgumentException>(() =>
+        Assert.Throws<ArgumentException>(() =>
             _orderService.CreateOrder(productId, productName, (decimal)price));
     }
 
-    private static IEnumerable<(int productId, string productName, double price)> GetInvalidOrders()
+    public static IEnumerable<(int productId, string productName, double price)> GetInvalidOrders()
     {
         yield return (0, "Product", 10.00);
         yield return (1, "", 10.00);
@@ -668,7 +667,7 @@ public class OrderServiceTests
         _sharedDatabase?.Dispose();
     }
 
-    [After(Assembly)]
+    [After(HookType.Assembly)]
     public static async Task AssemblyCleanup()
     {
         // Runs once after all tests in assembly
@@ -753,7 +752,7 @@ public class CalculatorTests
         await Assert.That(result).IsEqualTo(expected);
     }
 
-    private static IEnumerable<(int a, int b, int expected)> GetMultiplicationData()
+public static IEnumerable<(int a, int b, int expected)> GetMultiplicationData()
     {
         yield return (2, 3, 6);
         yield return (4, 5, 20);
@@ -774,7 +773,6 @@ public class TimeoutTests
     public async Task LongRunningOperation_CompletesInTime()
     {
         await Task.Delay(2000);
-        Assert.IsTrue(true);
     }
 }
 ```
@@ -800,7 +798,7 @@ public class TimeoutTests
 ### Expected Exception (Obsolete Pattern)
 
 **MSTest Code (Old Style):**
-```csharp
+```text
 [TestClass]
 public class ValidationTests
 {
@@ -818,10 +816,10 @@ public class ValidationTests
 public class ValidationTests
 {
     [Test]
-    public async Task ValidateInput_NullInput_ThrowsException()
+    public void ValidateInput_NullInput_ThrowsException()
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            Validator.ValidateInput(null));
+        Assert.Throws<ArgumentNullException>(() =>
+            ValidateInput(null));
     }
 }
 ```
@@ -839,12 +837,12 @@ public class ValidationTests
 [DeploymentItem("testdata.json")]
 public class FileBasedTests
 {
-    public TestContext TestContext { get; set; }
+    public TestContext TestContext { get; set; } = null!;
 
     [TestMethod]
     public void LoadTestData_ValidFile_Succeeds()
     {
-        var filePath = Path.Combine(TestContext.DeploymentDirectory, "testdata.json");
+        var filePath = Path.Combine(TestContext.DeploymentDirectory ?? Directory.GetCurrentDirectory(), "testdata.json");
         var data = File.ReadAllText(filePath);
         Assert.IsNotNull(data);
     }
@@ -988,7 +986,7 @@ public async Task AdvancedAssertions_Examples()
     await Assert.That(value).IsNotEqualTo(0);
 
     // String assertions with custom messages
-    await Assert.That(text).Contains("World").WithMessage("Should contain 'World'");
+    await Assert.That(text).Contains("World");
     await Assert.That(text).StartsWith("Hello");
     await Assert.That(text).EndsWith("!");
     await Assert.That(text).Matches(@"^\w+");
@@ -1017,7 +1015,7 @@ public async Task AdvancedAssertions_Examples()
 [TestClass]
 public class ContextTests
 {
-    public TestContext TestContext { get; set; }
+    public TestContext TestContext { get; set; } = null!;
 
     [TestMethod]
     public void UsingTestContext_AllProperties()
@@ -1033,7 +1031,6 @@ public class ContextTests
         TestContext.Properties["CustomKey"] = "CustomValue";
         var customValue = TestContext.Properties["CustomKey"];
 
-        Assert.IsTrue(true);
     }
 
     [TestMethod]
@@ -1062,7 +1059,7 @@ public class ContextTests
 
         // Accessing test details
         context.Output.WriteLine($"Class: {context.Metadata.TestDetails.ClassType.Name}");
-        context.Output.WriteLine($"Method: {context.Metadata.TestDetails.MethodInfo.Name}");
+        context.Output.WriteLine($"Method: {context.Metadata.TestDetails.MethodName}");
 
         // Accessing attributes and properties
         var properties = context.Metadata.TestDetails.GetAttributes<PropertyAttribute>();
@@ -1071,7 +1068,7 @@ public class ContextTests
             context.Output.WriteLine($"{prop.Name}: {prop.Value}");
         }
 
-        await Assert.That(true).IsTrue();
+        await Assert.That(context).IsNotNull();
     }
 
     [Test]

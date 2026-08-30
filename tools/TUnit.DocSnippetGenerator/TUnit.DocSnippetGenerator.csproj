@@ -7,6 +7,7 @@
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn></NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
