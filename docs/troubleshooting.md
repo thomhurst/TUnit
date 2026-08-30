@@ -137,16 +137,36 @@ dotnet test --treenode-filter "/*/*/*/*[Category=Integration][Priority=High]"
 
 If you see trim warnings or "source generator did not generate" errors, make sure you're using AOT-compatible data sources:
 
+Replace reflection-based `MethodDataSource(typeof(DataClass), "GetData")` usage with the generic form:
+
 ```
-// Reflection-based — may cause AOT issues
+public sealed class DataClass
 
-[MethodDataSource(typeof(DataClass), "GetData")]
+{
+
+    public static IEnumerable<int> GetData() => [1, 2, 3];
+
+}
 
 
 
-// AOT-friendly generic version
+public class DataSourceTests
 
-[MethodDataSource<DataClass>(nameof(DataClass.GetData))]
+{
+
+    [Test]
+
+    [MethodDataSource<DataClass>(nameof(DataClass.GetData))]
+
+    public void ReceivesData(int value)
+
+    {
+
+        Console.WriteLine(value);
+
+    }
+
+}
 ```
 
 ## InstanceMethodDataSource Returns No Tests[​](#instancemethoddatasource-returns-no-tests "Direct link to InstanceMethodDataSource Returns No Tests")
@@ -176,27 +196,31 @@ public class Fixture : IAsyncInitializer
 
     public IEnumerable<string> GetTestCaseIds() => TestCaseIds;
 
+
+
+    private static Task StartDockerContainerAsync() => Task.CompletedTask;
+
 }
 ```
 
 ## Hooks Not Running[​](#hooks-not-running "Direct link to Hooks Not Running")
 
-Class-level and assembly-level hooks must be static:
+Class-level and assembly-level hooks must be static. An instance declaration such as `public void ClassSetup()` is invalid:
 
 ```
-// Won't work — instance method
+public class HookExamples
 
-[Before(Class)]
+{
 
-public void IncorrectClassSetup() { }
+    [Before(Class)]
 
+    public static void ClassSetup()
 
+    {
 
-// Works
+    }
 
-[Before(Class)]
-
-public static void ClassSetup() { }
+}
 ```
 
 Test-level hooks (`[Before(Test)]` / `[After(Test)]`) can be instance methods.

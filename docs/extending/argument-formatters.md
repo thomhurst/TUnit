@@ -17,9 +17,13 @@ For example:
 
     {
 
-        await Assert.That(TestContext.Current!.GetDisplayName()).IsEqualTo("A super important test!");
+        await Assert.That(TestContext.Current!.Metadata.DisplayName).IsEqualTo("A super important test!");
 
     }
+
+
+
+    public static IEnumerable<SomeClass> SomeMethod() => [new SomeClass()];
 ```
 
 ```
@@ -41,7 +45,15 @@ public class MyFormatter : ArgumentDisplayFormatter
 
     {
 
-        var someClass = (SomeClass)value;
+        if (value is not SomeClass someClass)
+
+        {
+
+            throw new ArgumentException("Value must be a SomeClass instance.", nameof(value));
+
+        }
+
+
 
         return $"One: {someClass.One} | Two: {someClass.Two}";
 

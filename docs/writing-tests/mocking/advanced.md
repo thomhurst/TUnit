@@ -45,7 +45,7 @@ Trigger an event automatically when a method is called using the typed `.Raises{
 ```
 mock.SendMessage(Any())
 
-    .RaisesOnMessage("echo");
+    .RaisesOnMessage(mock.Object, "echo");
 
 
 
@@ -222,6 +222,18 @@ Source-generated auto-mocks cover every interface the generator can name at comp
 
 
 
+public interface IInvocationFeatures
+
+{
+
+    T? Get<T>();
+
+}
+
+
+
+// Usage
+
 var features = IInvocationFeatures.Mock();
 
 
@@ -252,23 +264,23 @@ var repo = new MockRepository(MockBehavior.Strict);
 
 var serviceMock = repo.Of<IService>();
 
-var loggerMock = repo.Of<ILogger>();
+var greeterMock = repo.Of<IGreeter>();
 
 
 
 // Configure each mock individually
 
-serviceMock.GetData(Any()).Returns("result");
+serviceMock.GetUser(Any()).Returns(user);
 
-loggerMock.Log(Any());
+greeterMock.Greet(Any()).Returns("hello");
 
 
 
 // Exercise code
 
-serviceMock.Object.GetData(1);
+_ = serviceMock.Object.GetUser(1);
 
-loggerMock.Object.Log("hello");
+_ = greeterMock.Object.Greet("Alice");
 
 
 
@@ -303,6 +315,12 @@ repo.Reset();                // clear all mocks
 Get a diagnostic report of setup coverage and call matching:
 
 ```
+var mock = Mock.Of<IUniversalService>();
+
+var svc = mock.Object;
+
+
+
 mock.GetUser(Any()).Returns(new User("Alice"));
 
 mock.Delete(Any());
@@ -317,13 +335,13 @@ svc.GetUser(1);
 
 var diag = mock.GetDiagnostics();
 
-diag.TotalSetups;       // 2
+_ = diag.TotalSetups;       // 2
 
-diag.ExercisedSetups;   // 1
+_ = diag.ExercisedSetups;   // 1
 
-diag.UnusedSetups;      // [Delete(Any())]
+_ = diag.UnusedSetups;      // [Delete(Any())]
 
-diag.UnmatchedCalls;    // [] (all calls matched a setup)
+_ = diag.UnmatchedCalls;    // [] (all calls matched a setup)
 ```
 
 Useful for debugging why a mock isn't behaving as expected, or for finding dead setups.
@@ -389,7 +407,7 @@ mock.Reset();
 
 svc.GetUser(1); // returns default (setup cleared)
 
-mock.Invocations.Count; // 0 (history cleared)
+_ = mock.Invocations.Count; // 0 (history cleared)
 ```
 
 The `SetupAllProperties()` flag is preserved across resets.
@@ -421,6 +439,10 @@ TUnit.Mocks can, behind an experimental opt-in:
 Internal types of the listed assemblies then behave like public ones in your test project — nameable, source-generator mocked, with fully typed setups, matchers, and verification. No `InternalsVisibleTo` is required from the target assembly:
 
 ```
+var features = IInvocationFeatures.Mock();
+
+var myResult = new object();
+
 var bindings = IFunctionBindingsFeature.Mock();          // internal to the SDK
 
 bindings.InvocationResult.Returns(myResult);

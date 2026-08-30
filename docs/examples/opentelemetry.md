@@ -305,18 +305,16 @@ dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol
 ```
 
 ```
-.AddOtlpExporter(opts => opts.Endpoint = new Uri("http://localhost:4317"))
+using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+
+    .AddOtlpExporter(opts => opts.Endpoint = new Uri("http://localhost:4317"))
+
+    .Build();
 ```
 
 ### Zipkin[​](#zipkin "Direct link to Zipkin")
 
-```
-dotnet add package OpenTelemetry.Exporter.Zipkin
-```
-
-```
-.AddZipkinExporter(opts => opts.Endpoint = new Uri("http://localhost:9411/api/v2/spans"))
-```
+The Zipkin exporter is obsolete. Export with OTLP to an OpenTelemetry Collector configured with a Zipkin exporter instead.
 
 ### ASP.NET Core Integration Tests[​](#aspnet-core-integration-tests "Direct link to ASP.NET Core Integration Tests")
 
@@ -401,16 +399,6 @@ using OpenTelemetry;
 
 
 
-// Usage:
-
-using var tracerProvider = Sdk.CreateTracerProviderBuilder()
-
-    .AddProcessor(new TUnitTagProcessor())
-
-    .Build();
-
-
-
 public sealed class TUnitTagProcessor : BaseProcessor<Activity>
 
 {
@@ -432,6 +420,16 @@ public sealed class TUnitTagProcessor : BaseProcessor<Activity>
     }
 
 }
+
+
+
+// Usage:
+
+using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+
+    .AddProcessor(new TUnitTagProcessor())
+
+    .Build();
 ```
 
 Register the correlation processor **before** any synchronous exporter (`SimpleExportProcessor`-based). The built-in `TUnitTestCorrelationProcessor` tags at both `OnStart` and `OnEnd`, and a `SimpleExport`-wrapped exporter that runs first would serialize the activity before the tag is applied. `BatchExportProcessor` (the default for OTLP/Jaeger/Zipkin) defers serialization, so order doesn't matter there.

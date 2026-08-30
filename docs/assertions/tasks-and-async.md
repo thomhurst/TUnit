@@ -275,7 +275,7 @@ public async Task API_Call_Completes_In_Time()
 
 
 
-    await Assert.That(apiTask).CompletesWithin(TimeSpan.FromSeconds(5));
+    await Assert.That((Func<Task>)(async () => { await apiTask; })).CompletesWithin(TimeSpan.FromSeconds(5));
 
 
 
@@ -383,7 +383,7 @@ public async Task Task_Returns_Expected_Result()
 
     // Ensure it completes in time
 
-    await Assert.That(task).CompletesWithin(TimeSpan.FromSeconds(1));
+    await Assert.That((Func<Task>)(async () => { await task; })).CompletesWithin(TimeSpan.FromSeconds(1));
 
 
 
@@ -569,7 +569,7 @@ public async Task Any_Task_Completes()
 
 
 
-    await Assert.That(firstCompleted).CompletesWithin(TimeSpan.FromMilliseconds(500));
+    await Assert.That((Func<Task>)(async () => { await firstCompleted; })).CompletesWithin(TimeSpan.FromMilliseconds(500));
 
 
 
@@ -627,7 +627,7 @@ public async Task Chained_Task_Assertions()
 
 
 
-    await Assert.That(task)
+    await Assert.That((Func<Task>)(async () => { await task; }))
 
         .CompletesWithin(TimeSpan.FromSeconds(5));
 
@@ -677,7 +677,7 @@ public async Task Retry_Eventually_Succeeds()
 
 
 
-    await Assert.That(task).CompletesWithin(TimeSpan.FromSeconds(10));
+    await Assert.That((Func<Task>)(async () => { await task; })).CompletesWithin(TimeSpan.FromSeconds(10));
 
     var result = await task;
 
@@ -711,7 +711,7 @@ public async Task Debounced_Operation()
 
 
 
-    await Assert.That(debouncedTask)
+    await Assert.That((Func<Task>)(async () => { await debouncedTask; }))
 
         .CompletesWithin(TimeSpan.FromSeconds(1));
 

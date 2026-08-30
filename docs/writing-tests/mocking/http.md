@@ -51,15 +51,17 @@ public async Task Fetches_Users_From_Api()
 ```
 // With base address (most common)
 
-using var client = Mock.HttpClient("https://api.example.com");
+using var clientWithBaseAddress = Mock.HttpClient("https://api.example.com");
+
+_ = clientWithBaseAddress;
 
 
 
 // Without base address
 
-using var client = Mock.HttpClient();
+using var clientWithoutBaseAddress = Mock.HttpClient();
 
-client.BaseAddress = new Uri("https://api.example.com");
+clientWithoutBaseAddress.BaseAddress = new Uri("https://api.example.com");
 
 
 
@@ -67,7 +69,9 @@ client.BaseAddress = new Uri("https://api.example.com");
 
 var handler = Mock.HttpHandler();
 
-using var client = handler.CreateClient("https://api.example.com");
+using var handlerClient = handler.CreateClient("https://api.example.com");
+
+_ = handlerClient;
 ```
 
 `MockHttpClient` **is** an `HttpClient` — pass it anywhere `HttpClient` is expected. Use `.Handler` for all setup and verification:

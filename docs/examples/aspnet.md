@@ -404,7 +404,7 @@ public class InMemoryDatabase : IAsyncInitializer, IAsyncDisposable
 
 {
 
-    public PostgreSqlContainer Container { get; } = new PostgreSqlBuilder()
+    public PostgreSqlContainer Container { get; } = new PostgreSqlBuilder("postgres:18")
 
         .WithImage("postgres:16-alpine")
 
@@ -538,7 +538,11 @@ public class TodoDbContext : DbContext
 
     // constructing standalone (e.g. in SetupAsync for EnsureCreatedAsync).
 
-    public TodoDbContext(DbContextOptions<TodoDbContext> options, IConfiguration? config = null)
+    public TodoDbContext(
+
+        DbContextOptions<TodoDbContext> options,
+
+        Microsoft.Extensions.Configuration.IConfiguration? config = null)
 
         : base(options)
 
@@ -711,13 +715,13 @@ public class CaptureTests : TestsBase
 
 {
 
-    protected override WebApplicationTestOptions Options => new()
+    protected override void ConfigureTestOptions(WebApplicationTestOptions options)
 
     {
 
-        EnableHttpExchangeCapture = true
+        options.EnableHttpExchangeCapture = true;
 
-    };
+    }
 
 
 
@@ -759,13 +763,13 @@ public class CaptureTests : TestsBase
 
 {
 
-    protected override WebApplicationTestOptions Options => new()
+    protected override void ConfigureTestOptions(WebApplicationTestOptions options)
 
     {
 
-        EnableHttpExchangeCapture = true
+        options.EnableHttpExchangeCapture = true;
 
-    };
+    }
 
 
 
@@ -919,13 +923,13 @@ using TUnit.Logging.Microsoft;
 
 // Via ILoggingBuilder
 
-builder.Logging.AddTUnit(TestContext.Current!);
+TUnit.Logging.Microsoft.LoggingBuilderExtensions.AddTUnit(builder.Logging, TestContext.Current!);
 
 
 
 // Or via IServiceCollection
 
-services.AddTUnitLogging(TestContext.Current!);
+TUnit.Logging.Microsoft.ServiceCollectionExtensions.AddTUnitLogging(services, TestContext.Current!);
 ```
 
 All log output is routed through TUnit's console interceptor and sink pipeline, so logs appear in test output, IDE test explorers, and the console (when using `--output Detailed`).
@@ -939,49 +943,69 @@ Golden Rule
 If a resource is shared (database, queue, cache), each test must use its own isolated instance of that resource.
 
 ```
-// ❌ BAD: All tests share the same table - will cause flaky failures
-
-protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+public class SharedTableTests : TestsBase
 
 {
 
-    config.AddInMemoryCollection(new Dictionary<string, string?>
+    // ❌ BAD: All tests share the same table - will cause flaky failures
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
 
     {
 
-        { "Database:TableName", "todos" }  // Shared = flaky!
+        config.AddInMemoryCollection(new Dictionary<string, string?>
 
-    });
+        {
+
+            { "Database:TableName", "todos" }  // Shared = flaky!
+
+        });
+
+    }
 
 }
 
 
 
-// ✅ GOOD: Each test gets its own table
-
-protected override async Task SetupAsync()
+public class IsolatedTableTests : TestsBase
 
 {
 
-    TableName = GetIsolatedName("todos");  // "Test_42_todos"
-
-    await CreateTableAsync(TableName);
-
-}
+    private string TableName { get; set; } = null!;
 
 
 
-protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+    // ✅ GOOD: Each test gets its own table
 
-{
-
-    config.AddInMemoryCollection(new Dictionary<string, string?>
+    protected override async Task SetupAsync()
 
     {
 
-        { "Database:TableName", TableName }  // Isolated = reliable!
+        TableName = GetIsolatedName("todos");  // "Test_42_todos"
 
-    });
+        await CreateTableAsync(TableName);
+
+    }
+
+
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+
+    {
+
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+
+        {
+
+            { "Database:TableName", TableName }  // Isolated = reliable!
+
+        });
+
+    }
+
+
+
+    private static Task CreateTableAsync(string tableName) => Task.CompletedTask;
 
 }
 ```
@@ -1055,15 +1079,31 @@ public async Task Cleanup()
 ### 4. Inject Containers at Factory Level[​](#4-inject-containers-at-factory-level "Direct link to 4. Inject Containers at Factory Level")
 
 ```
+public sealed class PostgresContainerFixture : IAsyncInitializer, IAsyncDisposable
+
+{
+
+    public PostgreSqlContainer Container { get; } = new PostgreSqlBuilder("postgres:18").Build();
+
+
+
+    public Task InitializeAsync() => Container.StartAsync();
+
+    public ValueTask DisposeAsync() => Container.DisposeAsync();
+
+}
+
+
+
 public class WebApplicationFactory : TestWebApplicationFactory<Program>
 
 {
 
     // Shared across all tests
 
-    [ClassDataSource<PostgresContainer>(Shared = SharedType.PerTestSession)]
+    [ClassDataSource<PostgresContainerFixture>(Shared = SharedType.PerTestSession)]
 
-    public PostgresContainer Postgres { get; init; } = null!;
+    public PostgresContainerFixture Postgres { get; init; } = null!;
 
 
 
@@ -1083,7 +1123,7 @@ public class InMemoryPostgres : IAsyncInitializer, IAsyncDisposable
 
 {
 
-    public PostgreSqlContainer Container { get; } = new PostgreSqlBuilder().Build();
+    public PostgreSqlContainer Container { get; } = new PostgreSqlBuilder("postgres:18").Build();
 
     public async Task InitializeAsync() => await Container.StartAsync();
 
@@ -1320,13 +1360,45 @@ The key benefits:
 3. You're not accidentally reading from a different source (e.g., `appsettings.json`)
 
 ```
-// Factory sets default
-
-protected override void ConfigureWebHost(IWebHostBuilder builder)
+public class DefaultConfigurationFactory : TestWebApplicationFactory<Program>
 
 {
 
-    builder.ConfigureAppConfiguration((_, config) =>
+    // Factory sets default
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+
+    {
+
+        builder.ConfigureAppConfiguration((_, config) =>
+
+        {
+
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+
+            {
+
+                { "Database:ConnectionString", "factory-default" }
+
+            });
+
+        });
+
+    }
+
+}
+
+
+
+public class OverrideConfigurationTests
+
+    : WebApplicationTest<DefaultConfigurationFactory, Program>
+
+{
+
+    // Test overrides - this WILL work because it runs after
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
 
     {
 
@@ -1334,29 +1406,11 @@ protected override void ConfigureWebHost(IWebHostBuilder builder)
 
         {
 
-            { "Database:ConnectionString", "factory-default" }
+            { "Database:ConnectionString", "test-specific-value" }  // This wins!
 
         });
 
-    });
-
-}
-
-
-
-// Test overrides - this WILL work because it runs after
-
-protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
-
-{
-
-    config.AddInMemoryCollection(new Dictionary<string, string?>
-
-    {
-
-        { "Database:ConnectionString", "test-specific-value" }  // This wins!
-
-    });
+    }
 
 }
 ```
@@ -1379,13 +1433,15 @@ protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
 ```
 // BAD: All parallel tests share the same table
 
-var tableName = "todos";
+var sharedTableName = "todos";
 
 
 
 // GOOD: Each test gets its own table
 
-var tableName = GetIsolatedName("todos");  // "Test_42_todos", "Test_43_todos", etc.
+var isolatedTableName = GetIsolatedName("todos");  // "Test_42_todos", "Test_43_todos", etc.
+
+TestContext.Current!.Output.WriteLine($"{sharedTableName} -> {isolatedTableName}");
 ```
 
 ### Can I have different factory configurations for different test classes?[​](#can-i-have-different-factory-configurations-for-different-test-classes "Direct link to Can I have different factory configurations for different test classes?")
@@ -1614,45 +1670,63 @@ public class MyTest : TestsBase
 **Problem:** You set configuration values in `ConfigureWebHost` using `ConfigureAppConfiguration`, but your app's `Program.cs` doesn't see them during startup. Your breakpoint in Program.cs hits **before** the `ConfigureAppConfiguration` callback.
 
 ```
-// Factory - this approach has a timing issue!
-
-protected override void ConfigureWebHost(IWebHostBuilder builder)
+public class DeferredConfigurationFactory : TestWebApplicationFactory<Program>
 
 {
 
-    Console.WriteLine("ConfigureWebHost called");  // This runs first...
+    // Factory - this approach has a timing issue!
 
-
-
-    builder.ConfigureAppConfiguration((_, config) =>
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
 
     {
 
-        Console.WriteLine("ConfigureAppConfiguration callback");  // ...but THIS runs AFTER Program.cs!
+        Console.WriteLine("ConfigureWebHost called");  // This runs first...
 
-        config.AddInMemoryCollection(new Dictionary<string, string?>
+
+
+        builder.ConfigureAppConfiguration((_, config) =>
 
         {
 
-            { "SomeKey", "SomeValue" }
+            Console.WriteLine("ConfigureAppConfiguration callback");  // ...but THIS runs AFTER Program.cs!
+
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+
+            {
+
+                { "SomeKey", "SomeValue" }
+
+            });
 
         });
 
-    });
+    }
 
 }
 
 
 
-// Program.cs - this runs BEFORE ConfigureAppConfiguration callback!
-
-var builder = WebApplication.CreateBuilder(args);
-
-if (builder.Configuration["SomeKey"] != "SomeValue")
+public static class ApplicationStartup
 
 {
 
-    throw new InvalidOperationException("SomeKey not found!");  // This throws!
+    public static void Configure(string[] args)
+
+    {
+
+        // Program.cs - this runs BEFORE ConfigureAppConfiguration callback!
+
+        var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
+
+        if (builder.Configuration["SomeKey"] != "SomeValue")
+
+        {
+
+            throw new InvalidOperationException("SomeKey not found!");  // This throws!
+
+        }
+
+    }
 
 }
 ```

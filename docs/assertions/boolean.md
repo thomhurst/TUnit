@@ -45,7 +45,7 @@ public async Task Value_Is_False()
 
 
 
-    var isEmpty = list.Count == 0;
+    var isEmpty = list.Length == 0;
 
     await Assert.That(isEmpty).IsFalse();
 
@@ -195,13 +195,13 @@ public async Task Email_Validation()
 
 {
 
-    var isValid = EmailValidator.Validate("test@example.com");
+    var isValid = ValidateEmail("test@example.com");
 
     await Assert.That(isValid).IsTrue();
 
 
 
-    var isInvalid = EmailValidator.Validate("not-an-email");
+    var isInvalid = ValidateEmail("not-an-email");
 
     await Assert.That(isInvalid).IsFalse();
 
@@ -239,7 +239,7 @@ public async Task Service_State()
 
 {
 
-    var service = new BackgroundService();
+    var service = new ExampleBackgroundService();
 
 
 

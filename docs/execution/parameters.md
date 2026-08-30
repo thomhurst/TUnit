@@ -99,7 +99,7 @@ public async Task IntegrationTest()
 
     {
 
-        Assert.Skip("Integration tests require --test-parameter run-integration=true");
+        Skip.Test("Integration tests require --test-parameter run-integration=true");
 
     }
 
@@ -123,13 +123,15 @@ public async Task DatabaseTest()
 
     {
 
-        Assert.Skip("Requires --test-parameter connection-string=...");
+        Skip.Test("Requires --test-parameter connection-string=...");
 
     }
 
 
 
-    using var connection = new SqlConnection(connectionStrings.First());
+    await using var connection = new NpgsqlConnection(
+
+        connectionStrings.FirstOrDefault() ?? throw new InvalidOperationException("Missing connection string"));
 
     // ...
 

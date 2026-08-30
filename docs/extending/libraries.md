@@ -132,7 +132,7 @@ public class OrderTests : DatabaseTestBase
 
 
 
-        await Assert.That(order.Id).IsNotNull();
+        await Assert.That(order.Id).IsNotEqualTo(Guid.Empty);
 
     }
 

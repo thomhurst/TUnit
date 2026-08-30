@@ -7,21 +7,35 @@ Chaining is especially helpful when you want to perform multiple assertions on a
 For example:
 
 ```
-        HttpResponseMessage response = ...;
+using var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+
+{
+
+    Content = JsonContent.Create(new ProblemDetails
+
+    {
+
+        Title = "Invalid Authentication Token",
+
+        Detail = "No token provided"
+
+    })
+
+};
 
 
 
-        await Assert.That(response)
+await Assert.That(response)
 
-            .IsProblemDetails()
+    .IsProblemDetails()
 
-            .And
+    .And
 
-            .HasTitle("Invalid Authentication Token")
+    .HasTitle("Invalid Authentication Token")
 
-            .And
+    .And
 
-            .HasDetail("No token provided");
+    .HasDetail("No token provided");
 ```
 
 The `response` object initially passed in is a `HttpResponseMessage`, but then after we assert it's a `ProblemDetails` object, the chain has changed to that type so that we can further assert with methods specific to `ProblemDetails` instead of `HttpResponseMessage`.
@@ -47,7 +61,7 @@ public class IsProblemDetailsAssertion : Assertion<ProblemDetails>
 
         {
 
-            var content = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+            var content = await response!.Content.ReadFromJsonAsync<ProblemDetails>();
 
 
 

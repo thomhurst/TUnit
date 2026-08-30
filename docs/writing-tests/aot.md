@@ -105,6 +105,8 @@ public class GenericTestClass<T>
 
         await Assert.That(input).IsEqualTo("test data");
 
+        await Assert.That(value).IsEqualTo(default(T));
+
         // Can use both generic type T and regular parameters
 
     }
@@ -446,25 +448,9 @@ AOT mode provides helpful compile-time diagnostics for common issues:
 
 ### Generic Test Diagnostics[​](#generic-test-diagnostics "Direct link to Generic Test Diagnostics")
 
+Omitting `[GenerateGenericTest]` produces diagnostic `TUnit0058`. Supply each concrete type explicitly:
+
 ```
-// ❌ This will generate TUnit0058 error
-
-[Test]
-
-public async Task GenericTest<T>() // Missing [GenerateGenericTest]
-
-{
-
-    var value = default(T);
-
-    await Assert.That(value).IsNotNull().Or.IsNull();
-
-}
-
-
-
-// ✅ Correct usage
-
 [Test]
 
 [GenerateGenericTest(typeof(int))]
@@ -477,7 +463,7 @@ public async Task GenericTest<T>()
 
     var value = default(T);
 
-    await Assert.That(value).IsNotNull().Or.IsNull();
+    await Assert.That(value).IsEqualTo(default(T));
 
 }
 ```
@@ -511,7 +497,11 @@ public class DataSourceDiagnostics
 
         // This method uses reflection internally - not AOT compatible
 
-        return SomeReflectionBasedDataGenerator.GetData();
+        return System.Reflection.Assembly.GetExecutingAssembly()
+
+            .GetTypes()
+
+            .Select(type => new object[] { type });
 
     }
 

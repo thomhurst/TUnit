@@ -45,6 +45,8 @@ public class MyTestClass(SomeDependency dep)
 
         // dep was provided by CustomConstructor.Create()
 
+        await Assert.That(dep).IsNotNull();
+
     }
 
 }

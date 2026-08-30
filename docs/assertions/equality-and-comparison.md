@@ -529,7 +529,7 @@ public async Task Custom_Equality_Predicate()
 
         .IsEquivalentTo(people2)
 
-        .Using((p1, p2) => string.Equals(p1.Name, p2.Name,
+        .Using((p1, p2) => string.Equals(p1!.Name, p2!.Name,
 
                           StringComparison.OrdinalIgnoreCase));
 

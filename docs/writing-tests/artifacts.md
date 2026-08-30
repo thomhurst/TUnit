@@ -434,7 +434,9 @@ public void MyTest()
 
 {
 
-    var artifactDir = (string)TestContext.Current!.StateBag["ArtifactDir"];
+    var artifactDir = TestContext.Current!.StateBag["ArtifactDir"] as string
+
+        ?? throw new InvalidOperationException("ArtifactDir was not initialized");
 
     var logPath = Path.Combine(artifactDir, "test.log");
 
@@ -468,7 +470,9 @@ public async Task ConditionalArtifactAttachment()
 
 {
 
-    var testContext = TestContext.Current;
+    var testContext = TestContext.Current
+
+        ?? throw new InvalidOperationException("No active test context.");
 
     
 
@@ -578,11 +582,13 @@ public async Task CapturePlaywrightArtifacts()
 
 {
 
-    var testContext = TestContext.Current;
+    var testContext = TestContext.Current
+
+        ?? throw new InvalidOperationException("No active test context.");
 
     
 
-    if (testContext?.Execution.Result?.State != TestState.Passed)
+    if (testContext.Execution.Result?.State != TestState.Passed)
 
     {
 
@@ -608,7 +614,7 @@ public async Task CapturePlaywrightArtifacts()
 
         // Capture video if enabled
 
-        if (_browserContext.Options?.RecordVideo != null)
+        if (_page.Video is not null)
 
         {
 

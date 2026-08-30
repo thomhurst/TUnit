@@ -276,9 +276,9 @@ await Assert.That(value1).IsGreaterThan(value2);
 
 Assert.That(actual, Is.EqualTo(expected));
 
-Assert.That(value, Is.True);
+Assert.That(condition, Is.True);
 
-Assert.That(value, Is.Null);
+Assert.That(optional, Is.Null);
 
 Assert.That(text, Does.Contain("substring"));
 
@@ -290,9 +290,9 @@ Assert.That(collection, Has.Count.EqualTo(5));
 
 await Assert.That(actual).IsEqualTo(expected);
 
-await Assert.That(value).IsTrue();
+await Assert.That(condition).IsTrue();
 
-await Assert.That(value).IsNull();
+await Assert.That(optional).IsNull();
 
 await Assert.That(text).Contains("substring");
 
@@ -304,7 +304,7 @@ await Assert.That(collection).Count().IsEqualTo(5);
 ```
 // NUnit
 
-CollectionAssert.AreEqual(expected, actual);
+CollectionAssert.AreEqual(values, numbers);
 
 CollectionAssert.Contains(collection, item);
 
@@ -314,7 +314,7 @@ CollectionAssert.IsEmpty(collection);
 
 // TUnit
 
-await Assert.That(actual).IsEquivalentTo(expected);
+await Assert.That(numbers).IsEquivalentTo(values);
 
 await Assert.That(collection).Contains(item);
 
@@ -356,7 +356,7 @@ Assert.ThrowsAsync<InvalidOperationException>(async () => await DoSomethingAsync
 
 // TUnit
 
-await Assert.ThrowsAsync<InvalidOperationException>(() => DoSomething());
+Assert.Throws<InvalidOperationException>(() => DoSomething());
 
 await Assert.ThrowsAsync<InvalidOperationException>(async () => await DoSomethingAsync());
 ```
@@ -368,9 +368,9 @@ await Assert.ThrowsAsync<InvalidOperationException>(async () => await DoSomethin
 ```
 // NUnit
 
-[TestCaseSource(nameof(TestData))]
+[TestCaseSource(nameof(NUnitData))]
 
-public void TestMethod(int value, string text)
+public void NUnitMethod(int value, string text)
 
 {
 
@@ -380,7 +380,7 @@ public void TestMethod(int value, string text)
 
 
 
-private static IEnumerable TestData()
+private static IEnumerable NUnitData()
 
 {
 
@@ -394,9 +394,9 @@ private static IEnumerable TestData()
 
 // TUnit
 
-[MethodDataSource(nameof(TestData))]
+[MethodDataSource(nameof(TUnitData))]
 
-public async Task TestMethod(int value, string text)
+public async Task TUnitMethod(int value, string text)
 
 {
 
@@ -406,7 +406,7 @@ public async Task TestMethod(int value, string text)
 
 
 
-private static IEnumerable<(int, string)> TestData()
+public static IEnumerable<(int, string)> TUnitData()
 
 {
 
@@ -426,7 +426,7 @@ private static IEnumerable<(int, string)> TestData()
 
 [TestCase(10, 20, 30)]
 
-public void AdditionTest(int a, int b, int expected)
+public void NUnitAdditionTest(int a, int b, int expected)
 
 {
 
@@ -444,7 +444,7 @@ public void AdditionTest(int a, int b, int expected)
 
 [Arguments(10, 20, 30)]
 
-public async Task AdditionTest(int a, int b, int expected)
+public async Task TUnitAdditionTest(int a, int b, int expected)
 
 {
 
@@ -490,7 +490,7 @@ public void TUnitTest(TUnit.Core.TestContext context)
 
 [Test]
 
-public void TestWithAttachment()
+public void NUnitTestWithAttachment()
 
 {
 
@@ -512,7 +512,7 @@ public void TestWithAttachment()
 
 [Test]
 
-public async Task TestWithAttachment()
+public async Task TUnitTestWithAttachment()
 
 {
 
@@ -698,9 +698,9 @@ public class ProductServiceTests
 
 {
 
-    private IDatabase _database;
+    private ITestDatabase _database = null!;
 
-    private ProductService _productService;
+    private ProductService _productService = null!;
 
 
 
@@ -798,7 +798,7 @@ public class ProductServiceTests
 
         yield return new object[] { "Product", -5.00 };
 
-        yield return new object[] { null, 10.00 };
+        yield return new object[] { null!, 10.00 };
 
     }
 
@@ -840,15 +840,15 @@ public class ProductServiceTests
 
 {
 
-    private IDatabase _database = null!;
+    private static ITestDatabase _database = null!;
 
-    private ProductService _productService = null!;
+    private static ProductService _productService = null!;
 
 
 
     [Before(Class)]
 
-    public async Task ClassSetup()
+    public static async Task ClassSetup()
 
     {
 
@@ -926,7 +926,7 @@ public class ProductServiceTests
 
     {
 
-        await Assert.ThrowsAsync<ArgumentException>(
+        Assert.Throws<ArgumentException>(
 
             () => _productService.CreateProduct(name, price));
 
@@ -934,7 +934,7 @@ public class ProductServiceTests
 
 
 
-    private static IEnumerable<(string name, decimal price)> InvalidProductData()
+    public static IEnumerable<(string name, decimal price)> InvalidProductData()
 
     {
 
@@ -964,7 +964,7 @@ public class ProductServiceTests
 
     [After(Class)]
 
-    public async Task ClassCleanup()
+    public static async Task ClassCleanup()
 
     {
 
@@ -1025,7 +1025,7 @@ public async Task ProcessValue_WithRange(int value)
 
 
 
-private static IEnumerable<int> GetRange()
+public static IEnumerable<int> GetRange()
 
 {
 
@@ -1255,7 +1255,7 @@ public static class AssemblyHooks
 
 {
 
-    [Before(Assembly)]
+    [Before(HookType.Assembly)]
 
     public static async Task AssemblySetup()
 
@@ -1269,7 +1269,7 @@ public static class AssemblyHooks
 
 
 
-    [After(Assembly)]
+    [After(HookType.Assembly)]
 
     public static async Task AssemblyCleanup()
 

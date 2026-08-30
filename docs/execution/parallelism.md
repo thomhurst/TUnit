@@ -163,7 +163,7 @@ public class OrderRepositoryTests
 
         var order = await OrderRepository.CreateAsync("item-1");
 
-        await Assert.That(order.Id).IsNotNull();
+        await Assert.That(order.Id).IsNotEmptyGuid();
 
     }
 
@@ -257,7 +257,17 @@ With a limit of `2`, at most two of these 20 test invocations execute at the sam
 ### Assembly-Level Limiter[​](#assembly-level-limiter "Direct link to Assembly-Level Limiter")
 
 ```
-[assembly: ParallelLimiter<MyParallelLimit>]
+[assembly: ParallelLimiter<MyAssemblyParallelLimit>]
+
+
+
+public record MyAssemblyParallelLimit : IParallelLimit
+
+{
+
+    public int Limit => 2;
+
+}
 ```
 
 More specific attributes override less specific ones. Precedence: Method > Class > Assembly.

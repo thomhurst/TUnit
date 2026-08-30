@@ -19,9 +19,7 @@ public async Task MyTest()
 
     await Assert.That(result)
 
-        .IsNotNull()
-
-        .And.IsPositive()
+        .IsPositive()
 
         .And.IsEqualTo(3);
 

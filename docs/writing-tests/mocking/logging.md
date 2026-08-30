@@ -41,7 +41,7 @@ public async Task Service_Logs_On_Startup()
 
     // Assert
 
-    logger.VerifyLog(LogLevel.Information, "started", Times.Once);
+    logger.VerifyLog(Microsoft.Extensions.Logging.LogLevel.Information, "started", Times.Once);
 
 }
 ```
@@ -51,23 +51,23 @@ public async Task Service_Logs_On_Startup()
 ```
 // Untyped logger
 
-var logger = Mock.Logger();
+var untypedLogger = Mock.Logger();
 
-ILogger iLogger = logger;
+Microsoft.Extensions.Logging.ILogger untypedILogger = untypedLogger;
 
 
 
 // With category name
 
-var logger = Mock.Logger("MyApp.Services");
+var categoryLogger = Mock.Logger("MyApp.Services");
 
 
 
 // Generic typed logger (implements ILogger<T>)
 
-var logger = Mock.Logger<MyService>();
+var typedLogger = Mock.Logger<MyService>();
 
-ILogger<MyService> iLogger = logger;
+Microsoft.Extensions.Logging.ILogger<MyService> typedILogger = typedLogger;
 ```
 
 ## Inspecting Entries[​](#inspecting-entries "Direct link to Inspecting Entries")
@@ -83,7 +83,7 @@ logger.LogWarning("Disk space low");
 
 await Assert.That(logger.Entries).Count().IsEqualTo(2);
 
-await Assert.That(logger.Entries[0].LogLevel).IsEqualTo(LogLevel.Information);
+await Assert.That(logger.Entries[0].LogLevel).IsEqualTo(Microsoft.Extensions.Logging.LogLevel.Information);
 
 await Assert.That(logger.Entries[0].Message).Contains("42");
 
@@ -116,7 +116,7 @@ Build verification queries with filters:
 ```
 // By level
 
-logger.VerifyLog().AtLevel(LogLevel.Error).WasCalled(Times.Once);
+logger.VerifyLog().AtLevel(Microsoft.Extensions.Logging.LogLevel.Error).WasCalled(Times.Once);
 
 
 
@@ -142,7 +142,7 @@ logger.VerifyLog().WithException<InvalidOperationException>().WasCalled(Times.On
 
 logger.VerifyLog()
 
-    .AtLevel(LogLevel.Error)
+    .AtLevel(Microsoft.Extensions.Logging.LogLevel.Error)
 
     .WithException<InvalidOperationException>()
 
@@ -156,19 +156,19 @@ logger.VerifyLog()
 ```
 // Verify message at level (at least once)
 
-logger.VerifyLog(LogLevel.Error, "connection failed");
+logger.VerifyLog(Microsoft.Extensions.Logging.LogLevel.Error, "connection failed");
 
 
 
 // Verify message at level with count
 
-logger.VerifyLog(LogLevel.Warning, "retry", Times.Exactly(3));
+logger.VerifyLog(Microsoft.Extensions.Logging.LogLevel.Warning, "retry", Times.Exactly(3));
 
 
 
 // Verify nothing logged at a level
 
-logger.VerifyNoLog(LogLevel.Error);
+logger.VerifyNoLog(Microsoft.Extensions.Logging.LogLevel.Error);
 
 
 
@@ -180,7 +180,7 @@ logger.VerifyNoLogs();
 ### Never Called[​](#never-called "Direct link to Never Called")
 
 ```
-logger.VerifyLog().AtLevel(LogLevel.Error).WasNeverCalled();
+logger.VerifyLog().AtLevel(Microsoft.Extensions.Logging.LogLevel.Error).WasNeverCalled();
 ```
 
 ## Filtering Entries[​](#filtering-entries "Direct link to Filtering Entries")
@@ -190,7 +190,7 @@ Retrieve entries matching specific criteria:
 ```
 // By level
 
-var errors = logger.GetLogs(LogLevel.Error);
+var errors = logger.GetLogs(Microsoft.Extensions.Logging.LogLevel.Error);
 
 
 
@@ -204,7 +204,7 @@ var retryLogs = logger.GetLogs("retry");
 
 var matching = logger.VerifyLog()
 
-    .AtLevel(LogLevel.Warning)
+    .AtLevel(Microsoft.Extensions.Logging.LogLevel.Warning)
 
     .ContainingMessage("timeout")
 
@@ -234,13 +234,13 @@ public async Task OrderService_Logs_Errors()
 
 
 
-    await service.ProcessOrder(invalidOrder);
+    service.ProcessOrder(invalidOrder);
 
 
 
     logger.VerifyLog()
 
-        .AtLevel(LogLevel.Error)
+        .AtLevel(Microsoft.Extensions.Logging.LogLevel.Error)
 
         .ContainingMessage("validation failed")
 

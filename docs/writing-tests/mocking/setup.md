@@ -47,7 +47,7 @@ mock.Delete(Any()).Throws(new ArgumentException("bad id"));
 
 var callCount = 0;
 
-mock.Process(Any())
+mock.Process(Any<string>())
 
     .Callback(() => callCount++);
 
@@ -55,9 +55,9 @@ mock.Process(Any())
 
 // Callback with access to arguments
 
-mock.Process(Any())
+mock.Process(Any<string>())
 
-    .Callback((object?[] args) => Console.WriteLine($"Called with: {args[0]}"));
+    .Callback(() => Console.WriteLine("Called with an argument"));
 ```
 
 ### Sequential Behaviors[​](#sequential-behaviors "Direct link to Sequential Behaviors")
@@ -193,6 +193,10 @@ Explicit setups take precedence over auto-tracked values.
 **Out parameters** are excluded from setup signatures. Use the generated strongly-typed `.SetsOut{Name}()` methods to assign their values:
 
 ```
+IEntity svc = mock.Object;
+
+
+
 // Strongly-typed — named after the parameter, compile-time safe
 
 mock.TryGet("key")
@@ -211,6 +215,10 @@ bool found = svc.TryGet("key", out var value);
 **Ref parameters** are included in setup signatures and participate in argument matching. Use `.SetsRef{Name}()` to assign output values:
 
 ```
+IEntity svc = mock.Object;
+
+
+
 mock.Swap(Any())
 
     .SetsRefValue(99);
@@ -273,13 +281,15 @@ using TUnit.Mocks;
 
 
 
-[assembly: GenerateMock(typeof(IMyParseable))]
+[assembly: GenerateMock(typeof(IMyService))]
 
 
 
-public interface IMyParseable : IParsable<IMyParseable>
+public interface IMyService
 
 {
+
+    static abstract string CreateDefaultName();
 
     string Format();
 
@@ -289,7 +299,7 @@ public interface IMyParseable : IParsable<IMyParseable>
 
 // In your test — use the generated bridge type:
 
-var mock = Mock.Of<TUnit_Mocks_Tests_IMyParseable_Mockable>();
+var mock = IMyServiceMockable.Mock();
 
 mock.Format().Returns("formatted");
 ```
@@ -341,13 +351,13 @@ mock.Object.DoWork(); // calls realService.DoWork()
 Create a single mock that implements multiple interfaces:
 
 ```
-var mock = Mock.Of<ILogger, IDisposable>();
+var mock = Mock.Of<IGreeter, IDisposable>();
 
 
 
-mock.Log(Any()); // ILogger method
+mock.Greet(Any()).Returns("Hello!"); // IGreeter method
 
-mock.Object.Log("test");
+_ = mock.Object.Greet("Alice");
 
 
 
@@ -359,27 +369,47 @@ Supports up to 4 interfaces: `Mock.Of<T1, T2, T3, T4>()`.
 Members of the secondary interfaces appear directly on the mock, just like the primary's — setup, verify, and event raising all work the same way:
 
 ```
-var mock = Mock.Of<ILogger, IDisposable>();
+var mock = Mock.Of<IGreeter, IEntity>();
 
 
 
-mock.IsDisposed.Returns(true);      // IDisposable property setup
+mock.Name.Returns("Alice");         // IEntity property setup
 
-mock.Dispose().WasCalled();         // IDisposable verification
+mock.Name.WasCalled();              // IEntity property verification
 ```
 
 When a secondary member's name collides with a member of another interface on the mock, it is exposed with a short interface prefix instead (e.g. `mock.IDisposable_Tag`).
 
-The primary type can also be a concrete class — useful for types like EF Core's `DbContext` that implement infrastructure interfaces explicitly:
+The primary type can also be a concrete class:
 
 ```
-var mock = Mock.Of<DbContext, IInfrastructure<IServiceProvider>>();
+public class ConcreteService
 
-mock.Instance.Returns(serviceProvider);
+{
+
+    public virtual string GetName() => "real";
+
+}
 
 
 
-((IInfrastructure<IServiceProvider>)mock.Object).Instance; // serviceProvider
+public interface IExtra
+
+{
+
+    string Tag { get; }
+
+}
+
+
+
+var mock = Mock.Of<ConcreteService, IExtra>();
+
+mock.Tag.Returns("test");
+
+
+
+_ = ((IExtra)mock.Object).Tag; // "test"
 ```
 
 Constructor arguments for class primaries are supported: `Mock.Of<MyService, IExtra>(arg1, arg2)`.
@@ -389,6 +419,20 @@ Constructor arguments for class primaries are supported: `Mock.Of<MyService, IEx
 Setup methods return chain objects that support additional behaviors:
 
 ```
+public interface IProcessor
+
+{
+
+    event EventHandler? ProcessCompleted;
+
+    bool Process(string input);
+
+}
+
+
+
+var mock = Mock.Of<IProcessor>();
+
 mock.Process(Any())
 
     .Returns(true)

@@ -275,7 +275,7 @@ public class MyTestClass
 
     {
 
-        await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current.Metadata.TestName}");
+        await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current!.Metadata.TestName}");
 
     }
 

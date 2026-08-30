@@ -53,7 +53,7 @@ For irregulars or when the conjugation produces an unwanted name, decorate the a
 
 [ShouldName("BeAnOddNumber")]
 
-public class OddAssertion : Assertion<int> { … }
+public abstract class OddAssertion(AssertionContext<int> context) : Assertion<int>(context) { }
 ```
 
 `[AssertionExtension(NegatedMethodName = "...")]` produces a second extension method for the negated form, which the Should generator picks up and conjugates independently — `Contains` → `Contain` and `DoesNotContain` → `NotContain` come out automatically without any `[ShouldName]`. When TUnit's pattern uses **separate classes** for positive and negated forms (e.g. `EqualsAssertion` + `NotEqualsAssertion`), place a separate `[ShouldName]` on each:
@@ -63,7 +63,7 @@ public class OddAssertion : Assertion<int> { … }
 
 [ShouldName("BeWithinRange")]
 
-public class BetweenAssertion<TValue> : Assertion<TValue> { … }
+public abstract class BetweenAssertion<TValue>(AssertionContext<TValue> context) : Assertion<TValue>(context) { }
 
 
 
@@ -71,7 +71,7 @@ public class BetweenAssertion<TValue> : Assertion<TValue> { … }
 
 [ShouldName("NotBeWithinRange")]
 
-public class NotBetweenAssertion<TValue> : Assertion<TValue> { … }
+public abstract class NotBetweenAssertion<TValue>(AssertionContext<TValue> context) : Assertion<TValue>(context) { }
 ```
 
 ## Entry Points[​](#entry-points "Direct link to Entry Points")
@@ -85,7 +85,7 @@ await 42.Should().BeEqualTo(42);
 
 await "hello".Should().Contain("ell");
 
-await someObject.Should().BeOfType<MyClass>();
+await someObject.Should().BeOfType(typeof(MyClass));
 
 
 
@@ -135,7 +135,7 @@ await value
 
 
 
-await statusCode
+await ((int) statusCode)
 
     .Should().BeEqualTo(200)
 

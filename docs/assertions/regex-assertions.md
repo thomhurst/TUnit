@@ -245,7 +245,7 @@ public async Task ProductCodeValidation()
 
         .And.Group("price", price => price.Contains(".99"))
 
-        .And.Group("stock", stock => stock.Length().IsEqualTo(2));
+        .And.Group("stock", stock => stock.Satisfies(value => Regex.IsMatch(value!, @"^\d{2}$")));
 
 }
 ```
@@ -425,7 +425,7 @@ public async Task CompleteEmailValidation()
 
         .And.Group("domain", domain => domain.IsEqualTo("example"))
 
-        .And.Group("tld", tld => tld.Length().IsEqualTo(3));
+        .And.Group("tld", tld => tld.Satisfies(value => Regex.IsMatch(value!, @"^\w{3}$")));
 
 
 

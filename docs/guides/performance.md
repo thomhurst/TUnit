@@ -39,7 +39,7 @@ Benefits:
 ```
 // ❌ Bad: Heavy computation during discovery
 
-public static IEnumerable<User> GetTestUsers()
+public static IEnumerable<User> GetTestUsersWithDatabaseQuery()
 
 {
 
@@ -55,7 +55,7 @@ public static IEnumerable<User> GetTestUsers()
 
 // ✅ Good: Lightweight data generation
 
-public static IEnumerable<User> GetTestUsers()
+public static IEnumerable<User> GetLightweightTestUsers()
 
 {
 
@@ -121,7 +121,7 @@ Remember that each `[Arguments(...)]` attribute produces exactly **one** test ca
 
 [MatrixDataSource]
 
-public void Process(
+public void ProcessAllCombinations(
 
     [Matrix(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)] int count,
 
@@ -147,7 +147,7 @@ public void Process(
 
 [Arguments(10, "e", true)]
 
-public void Process(int count, string label, bool flag)
+public void ProcessTargetedCases(int count, string label, bool flag)
 
 {
 
@@ -283,9 +283,9 @@ public class ExpensiveTests
 
     {
 
-        await StartDatabaseContainer();
+        await DatabaseInfrastructure.StartDatabaseContainer();
 
-        await MigrateDatabase();
+        await DatabaseInfrastructure.MigrateDatabase();
 
     }
 
@@ -309,9 +309,9 @@ public class EfficientTests
 
     {
 
-        _container = await StartDatabaseContainer();
+        _container = await DatabaseInfrastructure.StartDatabaseContainer();
 
-        await MigrateDatabase();
+        await DatabaseInfrastructure.MigrateDatabase();
 
     }
 
@@ -332,6 +332,32 @@ public class EfficientTests
         }
 
     }
+
+}
+
+
+
+public sealed class DatabaseContainer : IAsyncDisposable
+
+{
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+
+}
+
+
+
+public static class DatabaseInfrastructure
+
+{
+
+    public static Task<DatabaseContainer> StartDatabaseContainer()
+
+        => Task.FromResult(new DatabaseContainer());
+
+
+
+    public static Task MigrateDatabase() => Task.CompletedTask;
 
 }
 ```
@@ -360,6 +386,16 @@ public class PerformantTests
         await resource.DoSomethingAsync();
 
     }
+
+}
+
+
+
+public sealed class ExpensiveResource
+
+{
+
+    public Task DoSomethingAsync() => Task.CompletedTask;
 
 }
 ```

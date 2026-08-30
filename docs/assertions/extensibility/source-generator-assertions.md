@@ -156,7 +156,7 @@ public static bool IsBetween(this int value, int min, int max)
 
 [GenerateAssertion(ExpectationMessage = "to be even")]
 
-public static bool IsEven(this int value)
+public static bool HasEvenValue(this int value)
 
 {
 
@@ -168,9 +168,9 @@ public static bool IsEven(this int value)
 
 // Usage:
 
-await Assert.That(4).IsEven();  // ✅ Passes
+await Assert.That(4).HasEvenValue();  // ✅ Passes
 
-await Assert.That(3).IsEven();  // ❌ Fails: "Expected to be even but found 3"
+await Assert.That(3).HasEvenValue();  // ❌ Fails: "Expected to be even but found 3"
 ```
 
 ### 2. `AssertionResult` - Custom Messages[​](#2-assertionresult---custom-messages "Direct link to 2-assertionresult---custom-messages")
@@ -224,17 +224,21 @@ await Assert.That(15).IsPrime();  // ❌ Fails: "Expected to be prime but 15 is 
 
 [GenerateAssertion(ExpectationMessage = "to exist in database")]
 
-public static async Task<bool> ExistsInDatabaseAsync(this int userId, DbContext db)
+public static async Task<bool> ExistsInDatabaseAsync(this int userId, ApplicationDbContext db)
 
 {
 
-    return await db.Users.AnyAsync(u => u.Id == userId);
+    return await db.Users.AnyAsync(u => Equals(u.Id, userId));
 
 }
 
 
 
 // Usage:
+
+var userId = 123;
+
+await using var dbContext = new ApplicationDbContext();
 
 await Assert.That(userId).ExistsInDatabaseAsync(dbContext);
 
@@ -248,7 +252,7 @@ await Assert.That(userId).ExistsInDatabaseAsync(dbContext);
 
 [GenerateAssertion(ExpectationMessage = "to have valid email")]
 
-public static async Task<AssertionResult> HasValidEmailAsync(this int userId, DbContext db)
+public static async Task<AssertionResult> HasValidEmailAsync(this int userId, ApplicationDbContext db)
 
 {
 
@@ -275,6 +279,8 @@ public static async Task<AssertionResult> HasValidEmailAsync(this int userId, Db
 
 
 // Usage:
+
+await using var dbContext = new ApplicationDbContext();
 
 await Assert.That(123).HasValidEmailAsync(dbContext);
 
@@ -349,11 +355,11 @@ using TUnit.Assertions.Attributes;
 
 
 
-[AssertionFrom<string>(nameof(string.IsNullOrEmpty), ExpectationMessage = "to be null or empty")]
+[AssertionFrom<string>(nameof(string.IsNullOrEmpty), CustomName = "IsBlank", ExpectationMessage = "to be null or empty")]
 
-[AssertionFrom<string>(nameof(string.StartsWith), ExpectationMessage = "to start with {value}")]
+[AssertionFrom<string>(nameof(string.StartsWith), CustomName = "BeginsWithText", ExpectationMessage = "to start with {value}")]
 
-[AssertionFrom<string>(nameof(string.EndsWith), ExpectationMessage = "to end with {value}")]
+[AssertionFrom<string>(nameof(string.EndsWith), CustomName = "EndsWithText", ExpectationMessage = "to end with {value}")]
 
 public static partial class StringAssertionExtensions
 
@@ -365,13 +371,13 @@ public static partial class StringAssertionExtensions
 
 // Usage:
 
-await Assert.That(myString).IsNullOrEmpty();
+await Assert.That("").IsBlank();
 
 // If fails: "Expected to be null or empty but found 'test'"
 
 
 
-await Assert.That("hello").StartsWith("he");
+await Assert.That("hello").BeginsWithText("he");
 
 // If fails: "Expected to start with 'he' but found 'hello'"
 ```
@@ -401,7 +407,7 @@ await Assert.That("hello").Has("world");        // ❌ Fails: "Expected to have 
 For `bool`-returning methods, you can generate negated versions:
 
 ```
-[AssertionFrom<string>(nameof(string.Contains), CustomName = "DoesNotContain", NegateLogic = true, ExpectationMessage = "to not contain '{value}'")]
+[AssertionFrom<string>(nameof(string.Contains), CustomName = "LacksText", NegateLogic = true, ExpectationMessage = "to not contain '{value}'")]
 
 public static partial class StringAssertionExtensions
 
@@ -413,9 +419,9 @@ public static partial class StringAssertionExtensions
 
 // Usage:
 
-await Assert.That("hello").DoesNotContain("xyz");  // ✅ Passes
+await Assert.That("hello").LacksText("xyz");  // ✅ Passes
 
-await Assert.That("hello").DoesNotContain("ell");  // ❌ Fails: "Expected to not contain 'ell' but found 'hello'"
+await Assert.That("hello").LacksText("ell");  // ❌ Fails: "Expected to not contain 'ell' but found 'hello'"
 ```
 
 **Note:** Negation only works with `bool`-returning methods. `AssertionResult` methods determine their own pass/fail logic.
@@ -483,13 +489,13 @@ file static class BoolAssertions
 
     [GenerateAssertion(ExpectationMessage = "to be true", InlineMethodBody = true)]
 
-    public static bool IsTrue(this bool value) => value == true;
+    public static bool HasTrueValue(this bool value) => value == true;
 
 
 
     [GenerateAssertion(ExpectationMessage = "to be false", InlineMethodBody = true)]
 
-    public static bool IsFalse(this bool value) => value == false;
+    public static bool HasFalseValue(this bool value) => value == false;
 
 }
 
@@ -497,7 +503,9 @@ file static class BoolAssertions
 
 // Usage in tests:
 
-await Assert.That(myBool).IsTrue();   // ✅ Clean API, no IntelliSense pollution
+var myBool = true;
+
+await Assert.That(myBool).HasTrueValue(); // ✅ Clean API, no IntelliSense pollution
 ```
 
 ### What Gets Generated with Inlining[​](#what-gets-generated-with-inlining "Direct link to What Gets Generated with Inlining")
@@ -623,7 +631,7 @@ public static partial class StringAssertionExtensions
 
     [GenerateAssertion]
 
-    public static bool IsEmptyString(this string value) => value.Length == 0;
+    public static bool IsEmptyStringVisible(this string value) => value.Length == 0;
 
 }
 ```
@@ -670,7 +678,7 @@ public static bool IsPositive(this int value) => value > 0;
 
 [GenerateAssertion(ExpectationMessage = "to be even")]
 
-public static bool IsEven(this int value) => value % 2 == 0;
+public static bool HasEvenValue(this int value) => value % 2 == 0;
 
 
 
@@ -680,15 +688,17 @@ await Assert.That(10)
 
     .IsPositive()
 
-    .And.IsEven();
+    .And.HasEvenValue();
 
 
 
 // Or:
 
+var number = 2;
+
 await Assert.That(number)
 
-    .IsEven()
+    .HasEvenValue()
 
     .Or.IsPositive();
 ```
@@ -722,7 +732,7 @@ public static partial class UserAssertionExtensions
 
     {
 
-        return user.Id > 0;
+        return user.Id is int id && id > 0;
 
     }
 
@@ -778,11 +788,11 @@ public static partial class UserAssertionExtensions
 
     [GenerateAssertion(ExpectationMessage = "to exist in database")]
 
-    public static async Task<bool> ExistsInDatabaseAsync(this User user, DbContext db)
+    public static async Task<bool> ExistsInDatabaseAsync(this User user, ApplicationDbContext db)
 
     {
 
-        return await db.Users.AnyAsync(u => u.Id == user.Id);
+        return await db.Users.AnyAsync(u => Equals(u.Id, user.Id));
 
     }
 
@@ -799,6 +809,8 @@ public async Task ValidateUser()
 {
 
     var user = new User { Id = 1, Email = "test@example.com", Roles = ["Admin"] };
+
+    await using var dbContext = new ApplicationDbContext();
 
 
 

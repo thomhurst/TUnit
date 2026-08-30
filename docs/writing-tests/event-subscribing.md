@@ -63,7 +63,7 @@ public class DatabaseConnectionAttribute : Attribute, ITestStartEventReceiver
 
 {
 
-    private IDbConnection? _connection;
+    private DbConnection? _connection;
 
 
 
@@ -77,7 +77,7 @@ public class DatabaseConnectionAttribute : Attribute, ITestStartEventReceiver
 
     {
 
-        _connection = new SqlConnection(connectionString);
+        _connection = new NpgsqlConnection(connectionString);
 
         await _connection.OpenAsync();
 

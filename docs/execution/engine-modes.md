@@ -60,6 +60,10 @@ This is the recommended approach when you need reflection mode for a specific te
 **Example: bUnit Test Project**
 
 ```
+using Bunit;
+
+
+
 // Add this to enable reflection mode for your bUnit tests
 
 [assembly: ReflectionMode]
@@ -70,21 +74,21 @@ namespace MyApp.Tests;
 
 
 
-public class CounterComponentTests : TestContext
+public class CounterComponentTests : BunitContext
 
 {
 
     [Test]
 
-    public void CounterStartsAtZero()
+    public async Task CounterStartsAtZero()
 
     {
 
         // Test Razor components that are source-generated at compile time
 
-        var cut = RenderComponent<Counter>();
+        var cut = Render<Counter>();
 
-        cut.Find("p").TextContent.ShouldBe("Current count: 0");
+        await Assert.That(cut.Find("p").TextContent).IsEqualTo("Current count: 0");
 
     }
 
@@ -156,7 +160,7 @@ Add this MSBuild property to your test project file (`.csproj`):
 
   <ItemGroup>
 
-    <PackageReference Include="bunit" Version="1.x.x" />
+    <PackageReference Include="bunit" Version="2.x.x" />
 
     <PackageReference Include="TUnit" Version="1.x.x" />
 
@@ -168,6 +172,10 @@ Add this MSBuild property to your test project file (`.csproj`):
 Then in your code:
 
 ```
+using Bunit;
+
+
+
 // Enable reflection mode for Razor component testing
 
 [assembly: ReflectionMode]
@@ -178,19 +186,19 @@ namespace MyApp.Tests;
 
 
 
-public class CounterComponentTests : TestContext
+public class CounterComponentTests : BunitContext
 
 {
 
     [Test]
 
-    public void CounterStartsAtZero()
+    public async Task CounterStartsAtZero()
 
     {
 
-        var cut = RenderComponent<Counter>();
+        var cut = Render<Counter>();
 
-        cut.Find("p").TextContent.ShouldBe("Current count: 0");
+        await Assert.That(cut.Find("p").TextContent).IsEqualTo("Current count: 0");
 
     }
 

@@ -51,8 +51,6 @@ Property verification mirrors the setup API — defaults to the **getter**:
 
 mock.Name.WasCalled(Times.Once);           // getter called once
 
-mock.Name.Getter.WasCalled(Times.Once);    // explicit — same as above
-
 mock.Name.WasNeverCalled();                 // getter never accessed
 
 
@@ -69,7 +67,7 @@ mock.Count.Setter.WasNeverCalled();
 
 mock.Count.Set(42).WasCalled(Times.Once);
 
-mock.Count.Set(v => v > 0).WasCalled(Times.AtLeast(1));
+mock.Count.Set(Is<int>(v => v > 0)).WasCalled(Times.AtLeast(1));
 ```
 
 ## Argument Matching in Verification[​](#argument-matching-in-verification "Direct link to Argument Matching in Verification")

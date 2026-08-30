@@ -44,11 +44,13 @@ In TUnit, you can inject a `TestContext` into your teardown method, or call `Tes
 xUnit assertions have the classic problem of unclear argument order:
 
 ```
-var one = 2;
+var one = 1;
 
-Assert.Equal(1, one);   // is 1 the expected or actual?
+var anotherOne = 1;
 
-Assert.Equal(one, 1);   // ...or is it this way round?
+Xunit.Assert.Equal(one, anotherOne);   // which variable is expected?
+
+Xunit.Assert.Equal(anotherOne, one);   // ...or is it this way round?
 ```
 
 TUnit uses a fluent syntax that reads naturally: `await Assert.That(one).IsEqualTo(1);`

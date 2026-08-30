@@ -13,43 +13,33 @@ This migration guide helps you update code that directly accesses `TestContext` 
 `TestContext` now exposes its API through focused interface properties:
 
 ```
-public partial class TestContext :
-
-    ITestExecution,
-
-    ITestParallelization,
-
-    ITestOutput,
-
-    ITestMetadata,
-
-    ITestDependencies,
-
-    ITestStateBag,
-
-    ITestEvents
+public static class TestContextInterfaceExample
 
 {
 
-    // Organized API access through interface properties
+    public static void ShowInterfaces(TestContext context)
 
-    public ITestExecution Execution => this;
+    {
 
-    public ITestParallelization Parallelism => this;
+        ITestExecution execution = context.Execution;
 
-    public ITestOutput Output => this;
+        ITestParallelization parallelism = context.Parallelism;
 
-    public ITestMetadata Metadata => this;
+        ITestOutput output = context.Output;
 
-    public ITestDependencies Dependencies => this;
+        ITestMetadata metadata = context.Metadata;
 
-    public ITestStateBag StateBag => this;
+        ITestDependencies dependencies = context.Dependencies;
 
-    public ITestEvents Events => this;
+        ITestStateBag stateBag = context.StateBag;
+
+        ITestEvents events = context.Events;
 
 
 
-    // Note: Services property is internal - use dependency injection instead
+        Console.WriteLine($"{execution}, {parallelism}, {output}, {metadata}, {dependencies}, {stateBag}, {events}");
+
+    }
 
 }
 ```
@@ -131,11 +121,11 @@ TestContext.Current.AddLinkedCancellationToken(externalToken);
 ```
 // ✅ New - Through Execution interface
 
-var customExecutor = TestContext.Current.Execution.CustomHookExecutor;
+var customExecutor = TestContext.Current!.Execution.CustomHookExecutor;
 
-TestContext.Current.Execution.ReportResult = false;
+TestContext.Current!.Execution.ReportResult = false;
 
-TestContext.Current.Execution.AddLinkedCancellationToken(externalToken);
+TestContext.Current!.Execution.AddLinkedCancellationToken(externalToken);
 ```
 
 #### Metadata-Related Properties[​](#metadata-related-properties "Direct link to Metadata-Related Properties")
@@ -155,9 +145,9 @@ TestContext.Current.DisplayNameFormatter = typeof(MyFormatter);
 ```
 // ✅ New - Through Metadata interface
 
-var formatter = TestContext.Current.Metadata.DisplayNameFormatter;
+var formatter = TestContext.Current!.Metadata.DisplayNameFormatter;
 
-TestContext.Current.Metadata.DisplayNameFormatter = typeof(MyFormatter);
+TestContext.Current!.Metadata.DisplayNameFormatter = typeof(MyFormatter);
 ```
 
 #### Event Access[​](#event-access "Direct link to Event Access")
@@ -177,19 +167,11 @@ TestContext.Current.Events.OnTestStart += handler;
 ```
 // ✅ New - Direct access to nullable event properties
 
-TestContext.Current.Events.OnTestStart += handler;
+TestContext.Current!.Events.OnTestStart?.Add(eventHandler, 0);
 
 
 
-// Events are nullable and lazily initialized
-
-if (TestContext.Current.Events.OnTestStart != null)
-
-{
-
-    await TestContext.Current.Events.OnTestStart.InvokeAsync(testContext, testContext);
-
-}
+// TUnit invokes registered handlers when the event occurs.
 ```
 
 ### Custom Hook Executors[​](#custom-hook-executors "Direct link to Custom Hook Executors")
@@ -199,11 +181,11 @@ If you're implementing custom hook executors that access these properties:
 **Before:**
 
 ```
-public class MyHookExecutor : IHookExecutor
+public static class LegacyHookExecutorExample
 
 {
 
-    public async Task ExecuteAsync(TestContext context, Func<Task> hookBody)
+    public static async Task ExecuteAsync(TestContext context, Func<Task> hookBody)
 
     {
 
@@ -225,11 +207,11 @@ public class MyHookExecutor : IHookExecutor
 **After:**
 
 ```
-public class MyHookExecutor : IHookExecutor
+public static class HookExecutorExample
 
 {
 
-    public async Task ExecuteAsync(TestContext context, Func<Task> hookBody)
+    public static async Task ExecuteAsync(TestContext context, Func<Task> hookBody)
 
     {
 
@@ -333,7 +315,7 @@ public void Setup()
 
     // ✅ New - Through Execution interface
 
-    TestContext.Current.Execution.AddLinkedCancellationToken(externalCts.Token);
+    TestContext.Current!.Execution.AddLinkedCancellationToken(externalCts.Token);
 
 }
 ```
@@ -345,11 +327,17 @@ public void Setup()
 IntelliSense now groups related functionality together, making it easier to find what you need:
 
 ```
-TestContext.Current.Execution.  // Shows only execution-related members
+var current = TestContext.Current!;
 
-TestContext.Current.Metadata.   // Shows only metadata-related members
+ITestExecution execution = current.Execution;
 
-TestContext.Current.Output.     // Shows only output-related members
+ITestMetadata metadata = current.Metadata;
+
+ITestOutput output = current.Output;
+
+
+
+Console.WriteLine($"{execution}, {metadata}, {output}");
 ```
 
 ### 2. Clearer Intent[​](#2-clearer-intent "Direct link to 2. Clearer Intent")
@@ -381,7 +369,7 @@ Consumers can depend on specific interfaces instead of the full `TestContext`:
 ```
 // Before: Depends on entire TestContext
 
-public class MyService
+public class FocusedService
 
 {
 
@@ -563,15 +551,19 @@ public interface ITestParallelization
 **Important:** The `Limiter` property is **read-only** on the public interface. To set the parallel limiter, use the phase-specific `TestRegisteredContext.SetParallelLimiter()` method during test registration:
 
 ```
-[TestRegistered]
-
-public static void OnTestRegistered(TestRegisteredContext context)
+public sealed class ParallelLimitAttribute : Attribute, ITestRegisteredEventReceiver
 
 {
 
-    // ✅ Correct - Use phase-specific context
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
 
-    context.SetParallelLimiter(new ParallelLimit3());
+    {
+
+        context.SetParallelLimiter(new TUnit.Core.Helpers.ProcessorCountParallelLimit());
+
+        return ValueTask.CompletedTask;
+
+    }
 
 }
 ```

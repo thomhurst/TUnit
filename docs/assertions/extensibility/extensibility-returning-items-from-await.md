@@ -150,7 +150,7 @@ You can now use the assertion and get the found item:
 ```
 // Returns the first item with price < 0.99
 
-Product cheapProduct = await Assert.That(products).Contains(p => p.Price < 0.99);
+Product cheapProduct = await Assert.That(products).Contains(p => p.Price < 0.99m);
 
 
 

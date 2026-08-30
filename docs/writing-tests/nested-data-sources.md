@@ -50,7 +50,7 @@ public class RedisTestContainer : IAsyncInitializer, IAsyncDisposable
 
     {
 
-        _container = new RedisBuilder()
+        _container = new RedisBuilder("redis:8.2")
 
             .WithImage("redis:7-alpine")
 
@@ -101,6 +101,10 @@ public class TestApplication : IAsyncInitializer, IAsyncDisposable
     
 
     public HttpClient Client { get; private set; } = null!;
+
+    public IServiceProvider Services => _factory?.Services
+
+        ?? throw new InvalidOperationException("The application has not been initialized.");
 
     
 
@@ -186,7 +190,7 @@ public class UserApiTests
 
         // Verify the user was cached in Redis
 
-        var services = app.Client.Services;
+        var services = app.Services;
 
         var redis = services.GetRequiredService<IConnectionMultiplexer>();
 
@@ -282,7 +286,39 @@ public class CompleteTestEnvironment : IAsyncInitializer, IAsyncDisposable
 
     // ... configuration methods
 
+
+
+    private static void ConfigureRedis(IServiceCollection services) { }
+
+    private static void ConfigureDatabase(IServiceCollection services) { }
+
+    private static void ConfigureAwsServices(IServiceCollection services) { }
+
+    private static Task SeedTestData() => Task.CompletedTask;
+
+
+
+    public async ValueTask DisposeAsync()
+
+    {
+
+        if (_factory is not null)
+
+        {
+
+            await _factory.DisposeAsync();
+
+        }
+
+    }
+
 }
+
+
+
+public sealed class PostgresTestContainer { }
+
+public sealed class LocalStackContainer { }
 ```
 
 ## Sharing Resources[​](#sharing-resources "Direct link to Sharing Resources")
@@ -326,7 +362,7 @@ public class OrderApiTests
 
 // Or share with a specific key for fine-grained control across multiple test classes
 
-public class UserApiTests
+public class SharedUserApiTests
 
 {
 
@@ -391,7 +427,7 @@ public async Task InitializeAsync()
 
     using var connection = new NpgsqlConnection(ConnectionString);
 
-    await connection.ExecuteAsync(@"
+    await using var command = new NpgsqlCommand(@"
 
         CREATE TABLE IF NOT EXISTS users (
 
@@ -399,7 +435,9 @@ public async Task InitializeAsync()
 
             email VARCHAR(255) UNIQUE NOT NULL
 
-        )");
+        )", connection);
+
+    await command.ExecuteNonQueryAsync();
 
 }
 ```

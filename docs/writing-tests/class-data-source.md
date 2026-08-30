@@ -67,7 +67,23 @@ If you are using an overload that supports injecting multiple classes at once (e
 E.g.
 
 ```
-[Test]
+public sealed record Value1;
+
+public sealed record Value2;
+
+public sealed record Value3;
+
+public sealed record Value4;
+
+public sealed record Value5;
+
+
+
+public class MyType
+
+{
+
+    [Test]
 
     [ClassDataSource<Value1, Value2, Value3, Value4, Value5>
 
@@ -89,11 +105,13 @@ E.g.
 
         )]
 
-    public class MyType(Value1 value1, Value2 value2, Value3 value3, Value4 value4, Value5 value5)
+    public void Test(Value1 value1, Value2 value2, Value3 value3, Value4 value4, Value5 value5)
 
     {
 
-
+        Console.WriteLine($"{value1}, {value2}, {value3}, {value4}, {value5}");
 
     }
+
+}
 ```

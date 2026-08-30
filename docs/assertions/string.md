@@ -469,11 +469,9 @@ public async Task Length_With_Comparison()
 
 
 
-    await Assert.That(username)
+    await Assert.That(username).Length().IsGreaterThan(3);
 
-        .Length().IsGreaterThan(3)
-
-        .And.Length().IsLessThan(20);
+    await Assert.That(username).Length().IsLessThan(20);
 
 }
 ```
@@ -623,13 +621,9 @@ public async Task Validate_Email()
 
 
 
-    await Assert.That(email)
+    await Assert.That(email).Contains("@").And.DoesNotContain(" ");
 
-        .Contains("@")
-
-        .And.Matches(@"^[\w\.-]+@[\w\.-]+\.\w+$")
-
-        .And.DoesNotContain(" ");
+    await Assert.That(email).Matches(@"^[\w\.-]+@[\w\.-]+\.\w+$");
 
 }
 ```
@@ -693,15 +687,13 @@ public async Task Validate_Username()
 
 
 
-    await Assert.That(username)
+    await Assert.That(username).Length().IsGreaterThanOrEqualTo(3);
 
-        .Length().IsGreaterThanOrEqualTo(3)
+    await Assert.That(username).Length().IsLessThanOrEqualTo(20);
 
-        .And.Length().IsLessThanOrEqualTo(20)
+    await Assert.That(username).Matches(@"^[a-zA-Z0-9_]+$");
 
-        .And.Matches(@"^[a-zA-Z0-9_]+$")
-
-        .And.DoesNotContain(" ");
+    await Assert.That(username).DoesNotContain(" ");
 
 }
 ```
@@ -719,17 +711,15 @@ public async Task Validate_Password()
 
 
 
-    await Assert.That(password)
+    await Assert.That(password).Length().IsGreaterThanOrEqualTo(8);
 
-        .Length().IsGreaterThanOrEqualTo(8)
+    await Assert.That(password).Matches(@"[A-Z]"); // Has uppercase
 
-        .And.Matches(@"[A-Z]")  // Has uppercase
+    await Assert.That(password).Matches(@"[a-z]"); // Has lowercase
 
-        .And.Matches(@"[a-z]")  // Has lowercase
+    await Assert.That(password).Matches(@"\d"); // Has digit
 
-        .And.Matches(@"\d")     // Has digit
-
-        .And.Matches(@"[@$!%*?&]"); // Has special char
+    await Assert.That(password).Matches(@"[@$!%*?&]"); // Has special char
 
 }
 ```

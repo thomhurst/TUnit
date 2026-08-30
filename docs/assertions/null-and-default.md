@@ -15,7 +15,7 @@ public async Task Null_Value()
 
 {
 
-    string? result = GetOptionalValue();
+    string? result = GetOptionalString();
 
     await Assert.That(result).IsNull();
 
@@ -457,9 +457,9 @@ public async Task Required_Fields_With_Chaining()
 
         .IsNotNull()
 
-        .And.Member(c => c.Server).IsNotNull()
+        .And.Member(c => c.Server, server => server.IsNotNull())
 
-        .And.Member(c => c.Database).IsNotNull();
+        .And.Member(c => c.Database, database => database.IsNotNull());
 
 }
 ```

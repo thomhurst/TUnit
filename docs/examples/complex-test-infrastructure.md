@@ -51,7 +51,7 @@ public class InMemoryKafka : IAsyncInitializer, IAsyncDisposable
 
 
 
-    public KafkaContainer Container => field ??= new KafkaBuilder()
+    public KafkaContainer Container => field ??= new KafkaBuilder("confluentinc/cp-kafka:8.2.0")
 
         .WithNetwork(DockerNetwork.Instance)  // Uses the injected network
 
@@ -89,7 +89,7 @@ public class KafkaUI : IAsyncInitializer, IAsyncDisposable
 
 
 
-    public IContainer Container => field ??= new ContainerBuilder()
+    public IContainer Container => field ??= new ContainerBuilder("confluentinc/cp-enterprise-control-center:8.2.0")
 
         .WithNetwork(DockerNetwork.Instance)
 
@@ -194,6 +194,20 @@ public class WebApplicationFactory : WebApplicationFactory<Program>, IAsyncIniti
     }
 
 }
+
+
+
+public class InMemoryRedis : IAsyncInitializer, IAsyncDisposable
+
+{
+
+    public RedisContainer Container { get; } = new RedisBuilder("redis:8.2").Build();
+
+    public Task InitializeAsync() => Container.StartAsync();
+
+    public ValueTask DisposeAsync() => Container.DisposeAsync();
+
+}
 ```
 
 ## Writing Clean Tests[​](#writing-clean-tests "Direct link to Writing Clean Tests")
@@ -201,7 +215,7 @@ public class WebApplicationFactory : WebApplicationFactory<Program>, IAsyncIniti
 Your actual test code remains clean and focused:
 
 ```
-public class Tests : TestsBase
+public class Tests
 
 {
 
@@ -289,7 +303,7 @@ public class InMemoryPostgreSqlDatabase : IAsyncInitializer, IAsyncDisposable
 
 
 
-    public PostgreSqlContainer Container => field ??= new PostgreSqlBuilder()
+    public PostgreSqlContainer Container => field ??= new PostgreSqlBuilder("postgres:18")
 
         .WithUsername("User")
 
@@ -339,6 +353,10 @@ See the full pattern with `IModelCacheKeyFactory`, `EnsureCreatedAsync()`, and s
 ### Without TUnit (Traditional Approach)[​](#without-tunit-traditional-approach "Direct link to Without TUnit (Traditional Approach)")
 
 ```
+using Xunit;
+
+
+
 public class TestFixture : IAsyncLifetime
 
 {
@@ -351,7 +369,7 @@ public class TestFixture : IAsyncLifetime
 
 
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
 
     {
 
@@ -363,7 +381,7 @@ public class TestFixture : IAsyncLifetime
 
 
 
-        _kafka = new KafkaBuilder()
+        _kafka = new KafkaBuilder("confluentinc/cp-kafka:8.2.0")
 
             .WithNetwork(_network)
 
@@ -373,7 +391,7 @@ public class TestFixture : IAsyncLifetime
 
 
 
-        _kafkaUi = new ContainerBuilder()
+        _kafkaUi = new ContainerBuilder("provectuslabs/kafka-ui:latest")
 
             .WithNetwork(_network)
 
@@ -389,7 +407,7 @@ public class TestFixture : IAsyncLifetime
 
 
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
 
     {
 

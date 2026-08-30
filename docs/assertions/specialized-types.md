@@ -461,7 +461,7 @@ public async Task Directory_Has_Subdirectories()
 
 
 
-    await Assert.That(windowsDir).HasSubdirectories();
+    await Assert.That(windowsDir.EnumerateDirectories().Any()).IsTrue();
 
 }
 ```
@@ -593,7 +593,7 @@ public async Task File_Is_System()
 
     {
 
-        await Assert.That(systemFile).IsSystem();
+        await Assert.That(systemFile.Attributes.HasFlag(FileAttributes.System)).IsTrue();
 
     }
 
@@ -617,7 +617,7 @@ public async Task File_Is_Executable()
 
     {
 
-        await Assert.That(exeFile).IsExecutable();
+        await Assert.That(exeFile.Extension).IsEqualTo(".exe");
 
     }
 
@@ -639,7 +639,7 @@ public async Task IP_Is_IPv4()
 
 
 
-    await Assert.That(ipv4).IsIPv4();
+    await Assert.That(ipv4.AddressFamily).IsEqualTo(AddressFamily.InterNetwork);
 
 }
 
@@ -655,7 +655,7 @@ public async Task IP_Not_IPv4()
 
 
 
-    await Assert.That(ipv6).IsNotIPv4();
+    await Assert.That(ipv6.AddressFamily).IsNotEqualTo(AddressFamily.InterNetwork);
 
 }
 ```
@@ -673,7 +673,7 @@ public async Task IP_Is_IPv6()
 
 
 
-    await Assert.That(ipv6).IsIPv6();
+    await Assert.That(ipv6.AddressFamily).IsEqualTo(AddressFamily.InterNetworkV6);
 
 }
 
@@ -689,7 +689,7 @@ public async Task IP_Not_IPv6()
 
 
 
-    await Assert.That(ipv4).IsNotIPv6();
+    await Assert.That(ipv4.AddressFamily).IsNotEqualTo(AddressFamily.InterNetworkV6);
 
 }
 ```
@@ -709,7 +709,7 @@ public async Task Lazy_Value_Not_Created()
 
 
 
-    await Assert.That(lazy).IsNotValueCreated();
+    await Assert.That(lazy.IsValueCreated).IsFalse();
 
 
 
@@ -739,7 +739,7 @@ public async Task Stream_Can_Read()
 
 
 
-    await Assert.That(stream).CanRead();
+    await Assert.That((Stream) stream).CanRead();
 
 }
 ```
@@ -757,7 +757,7 @@ public async Task Stream_Can_Write()
 
 
 
-    await Assert.That(stream).CanWrite();
+    await Assert.That((Stream) stream).CanWrite();
 
 }
 
@@ -773,7 +773,7 @@ public async Task Stream_Cannot_Write()
 
 
 
-    await Assert.That(readOnlyStream).CannotWrite();
+    await Assert.That((Stream) readOnlyStream).CannotWrite();
 
 }
 ```
@@ -791,7 +791,7 @@ public async Task Stream_Can_Seek()
 
 
 
-    await Assert.That(stream).CanSeek();
+    await Assert.That((Stream) stream).CanSeek();
 
 }
 ```
@@ -857,7 +857,7 @@ public async Task Process_Is_Responding()
 
 
 
-    await Assert.That(process).IsResponding();
+    await Assert.That(process.Responding).IsTrue();
 
 }
 ```
@@ -1015,7 +1015,7 @@ public async Task Encoding_Is_UTF8()
 
 
 
-    await Assert.That(encoding).IsUtf8();
+    await Assert.That(encoding.WebName).IsEqualTo(Encoding.UTF8.WebName);
 
 }
 
@@ -1031,7 +1031,7 @@ public async Task Encoding_Not_UTF8()
 
 
 
-    await Assert.That(encoding).IsNotUtf8();
+    await Assert.That(encoding.WebName).IsNotEqualTo(Encoding.UTF8.WebName);
 
 }
 ```
@@ -1173,11 +1173,11 @@ public async Task Server_IP_Is_Valid()
 
 {
 
-    var serverIp = IPAddress.Parse(Configuration["ServerIP"]);
+    var serverIp = IPAddress.Parse(Configuration["ServerIP"] ?? "127.0.0.1");
 
 
 
-    await Assert.That(serverIp).IsIPv4();
+    await Assert.That(serverIp.AddressFamily).IsEqualTo(AddressFamily.InterNetwork);
 
 }
 ```

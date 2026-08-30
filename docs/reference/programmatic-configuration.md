@@ -105,7 +105,13 @@ When the same setting is configured in multiple places, the following priority o
 Your test project sets a conservative parallelism limit in code:
 
 ```
-context.Settings.Parallelism.MaximumParallelTests = 1;
+public static void Configure(BeforeTestDiscoveryContext context)
+
+{
+
+    context.Settings.Parallelism.MaximumParallelTests = 1;
+
+}
 ```
 
 A developer on a powerful machine can override this for a local run without changing code:

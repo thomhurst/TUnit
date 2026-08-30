@@ -277,7 +277,7 @@ public async Task Configuration_Has_Required_Keys()
 
 {
 
-    var config = LoadConfiguration();
+    var config = GetConfigurationValues();
 
 
 
@@ -761,7 +761,7 @@ public async Task All_Required_Keys_Present()
 
 {
 
-    var config = LoadConfiguration();
+    var config = GetConfigurationValues();
 
     var requiredKeys = new[] { "ApiKey", "Database", "Environment" };
 
@@ -787,7 +787,7 @@ public async Task All_Required_Keys_Present_Multiple()
 
 {
 
-    var config = LoadConfiguration();
+    var config = GetConfigurationValues();
 
     var requiredKeys = new[] { "ApiKey", "Database", "Environment" };
 

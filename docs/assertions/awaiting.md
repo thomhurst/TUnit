@@ -72,7 +72,7 @@ public async Task CastAndUseSpecificType()
 
     // Now you can use circle-specific properties without casting
 
-    await Assert.That(circle.Radius).IsEqualTo(5.0);
+    await Assert.That(circle!.Radius).IsEqualTo(5.0);
 
     
 
@@ -216,7 +216,7 @@ public async Task DetailedExceptionAssertions()
 
     // Assert ArgumentException with parameter name
 
-    await Assert.That(() => ProcessInvalidData(null))
+    await Assert.That(() => ProcessInvalidData((object?)null))
 
         .Throws<ArgumentException>()
 
@@ -232,7 +232,7 @@ public async Task DetailedExceptionAssertions()
 
 
 
-    await Assert.That(exception.InnerExceptions).Count().IsEqualTo(3);
+    await Assert.That(exception!.InnerExceptions).Count().IsEqualTo(3);
 
     await Assert.That(exception.InnerExceptions).All(e => e is TaskCanceledException);
 
@@ -258,9 +258,9 @@ public async Task CustomAssertionConditions()
 
         .Satisfies(m => {
 
-            var average = m.Average();
+            var average = m!.Average();
 
-            var stdDev = CalculateStandardDeviation(m);
+            var stdDev = CalculateStandardDeviation(m!);
 
             return stdDev < average * 0.1; // Less than 10% deviation
 

@@ -165,7 +165,7 @@ mock.GetUser(Any()).Returns(user);           // setup — .Returns() makes it a 
 
 mock.GetUser(42).WasCalled(Times.Once);      // verify — .WasCalled() makes it a check
 
-mock.RaiseOnMessage("hi");                   // raise events — Raise{EventName}()
+mock.RaiseOnMessage(mock.Object, "hi");      // raise events — Raise{EventName}()
 
 _ = mock.Object;                            // the T instance (also available via direct cast)
 ```
@@ -176,6 +176,8 @@ For interfaces, `IMyInterface.Mock()` (a C# 14 static extension member) returns 
 
 ```
 var mock = IGreeter.Mock();
+
+static void AcceptGreeter(IGreeter greeter) { }
 
 
 
@@ -250,13 +252,13 @@ mock.GetUser(42).Returns(alice);
 
 mock.GetUser(id => id > 0).Returns(validUser);
 
-mock.GetByRole(role => role == "admin").Returns(admins);
+mock.GetByRole(role => role == "admin").Returns(users);
 
 
 
 // Mix lambdas with Any() or raw values
 
-mock.Search(name => name.StartsWith("A"), Any()).Returns(results);
+mock.Search(name => name.StartsWith("A"), Any()).Returns(users);
 
 
 

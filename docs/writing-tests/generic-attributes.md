@@ -41,7 +41,7 @@ public class CalculatorTests
 
     {
 
-        var result = Calculator.Add(a, b);
+        var result = new Calculator().Add(a, b);
 
         await Assert.That(result).IsEqualTo(expected);
 
@@ -88,6 +88,24 @@ public class DatabaseFixture : IAsyncInitializer, IAsyncDisposable
         await Connection.DisposeAsync();
 
     }
+
+
+
+    private static Task<DbConnection> OpenConnectionAsync() =>
+
+        throw new NotImplementedException();
+
+}
+
+
+
+public static class DatabaseQueryExtensions
+
+{
+
+    public static Task<User> QueryUserAsync(this DbConnection connection, int id) =>
+
+        Task.FromResult(new User { Id = id, Name = "Alice" });
 
 }
 
@@ -147,7 +165,7 @@ public class UserTests
 
     {
 
-        var isValid = await UserValidator.ValidateAsync(user);
+        var isValid = await Task.FromResult(!string.IsNullOrEmpty(user.Name));
 
         await Assert.That(isValid).IsTrue();
 
@@ -337,6 +355,34 @@ public class DatabaseUsersAttribute : AsyncDataSourceGeneratorAttribute<User>
 
 
 
+public sealed class DatabaseContext : IDisposable
+
+{
+
+    public IQueryable<User> Users => Array.Empty<User>().AsQueryable();
+
+
+
+    public void Dispose()
+
+    {
+
+    }
+
+}
+
+
+
+public enum Permission
+
+{
+
+    FullAccess
+
+}
+
+
+
 // Usage
 
 [Test]
@@ -347,7 +393,7 @@ public async Task AdminUser_ShouldHaveFullPermissions(User adminUser)
 
 {
 
-    var permissions = await GetUserPermissions(adminUser);
+    var permissions = await Task.FromResult(new[] { Permission.FullAccess });
 
     await Assert.That(permissions).Contains(Permission.FullAccess);
 
@@ -407,9 +453,9 @@ public interface ITestScenario<TInput, TExpected>
 
 {
 
-    TInput Input { get; }
+    TInput Input { get; set; }
 
-    TExpected Expected { get; }
+    TExpected Expected { get; set; }
 
 }
 
@@ -433,13 +479,17 @@ public class ScenarioDataSource<TScenario> : TypedDataSourceAttribute<TScenario>
 
 {
 
-    public override IEnumerable<TScenario> GetData()
+    public override async IAsyncEnumerable<Func<Task<TScenario>>> GetTypedDataRowsAsync(
+
+        DataGeneratorMetadata dataGeneratorMetadata)
 
     {
 
-        yield return new TScenario { Input = (1, 2), Expected = 3 };
+        yield return () => Task.FromResult(new TScenario { Input = (1, 2), Expected = 3 });
 
-        yield return new TScenario { Input = (5, 5), Expected = 10 };
+        yield return () => Task.FromResult(new TScenario { Input = (5, 5), Expected = 10 });
+
+        await Task.CompletedTask;
 
     }
 
@@ -457,7 +507,7 @@ public async Task TestCalculation(CalculationScenario scenario)
 
     var (a, b) = scenario.Input;
 
-    var result = Calculator.Add(a, b);
+    var result = new Calculator().Add(a, b);
 
     await Assert.That(result).IsEqualTo(scenario.Expected);
 
@@ -504,6 +554,10 @@ public abstract class EntityTestBase<TEntity, TId>
     protected abstract TEntity CreateEntity(TId id);
 
     protected abstract Task<TEntity> GetEntityAsync(TId id);
+
+
+
+    protected virtual Task SaveEntityAsync(TEntity entity) => Task.CompletedTask;
 
 
 
@@ -599,6 +653,10 @@ public abstract class EntityTestBase<TEntity, TId>
 
 
 
+    protected virtual Task SaveEntityAsync(TEntity entity) => Task.CompletedTask;
+
+
+
     protected async Task Entity_ShouldBeRetrievable(TId id)
 
     {
@@ -619,17 +677,15 @@ public abstract class EntityTestBase<TEntity, TId>
 
 
 
-// Concrete base class for Guid-based entities
+// Concrete base class for User entities
 
-public abstract class GuidEntityTestBase<TEntity> : EntityTestBase<TEntity, Guid>
-
-    where TEntity : IEntity<Guid>
+public abstract class UserEntityTestBase : EntityTestBase<User, Guid>
 
 {
 
     [Test]
 
-    [MethodDataSource<GuidEntityTestBase<TEntity>>(nameof(GetTestIds))]
+    [MethodDataSource<UserEntityTestBase>(nameof(GetTestIds))]
 
     public async Task TestEntity(Guid id)
 
@@ -657,7 +713,7 @@ public abstract class GuidEntityTestBase<TEntity> : EntityTestBase<TEntity, Guid
 
 // Your test class
 
-public class UserEntityTests : GuidEntityTestBase<User>
+public class UserEntityTests : UserEntityTestBase
 
 {
 
@@ -669,7 +725,7 @@ public class UserEntityTests : GuidEntityTestBase<User>
 
     protected override Task<User> GetEntityAsync(Guid id) =>
 
-        UserRepository.GetByIdAsync(id);
+        Task.FromResult(new User { Id = id, Name = "Test User" });
 
 }
 ```
@@ -693,7 +749,9 @@ public class ReflectiveDataSource<[DynamicallyAccessedMembers(
 
 {
 
-    public override IEnumerable<T> GetData()
+    public override async IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(
+
+        DataGeneratorMetadata dataGeneratorMetadata)
 
     {
 
@@ -713,9 +771,13 @@ public class ReflectiveDataSource<[DynamicallyAccessedMembers(
 
             // Set property values...
 
-            yield return instance;
+            yield return () => Task.FromResult(instance);
 
         }
+
+
+
+        await Task.CompletedTask;
 
     }
 
@@ -726,16 +788,36 @@ public class ReflectiveDataSource<[DynamicallyAccessedMembers(
 
 ### 1. Use Generic Attributes for Type Safety[​](#1-use-generic-attributes-for-type-safety "Direct link to 1. Use Generic Attributes for Type Safety")
 
+Prefer `[MethodDataSource<DataProvider>(nameof(DataProvider.GetData))]` over the reflection-based non-generic form:
+
 ```
-// ❌ Non-generic - prone to errors
+public sealed class DataProvider
 
-[MethodDataSource(typeof(DataProvider), "GetData")]
+{
+
+    public static IEnumerable<int> GetData() => [1, 2, 3];
+
+}
 
 
 
-// ✅ Generic - compile-time safety
+public class GenericDataSourceTests
 
-[MethodDataSource<DataProvider>(nameof(DataProvider.GetData))]
+{
+
+    [Test]
+
+    [MethodDataSource<DataProvider>(nameof(DataProvider.GetData))]
+
+    public void ReceivesData(int value)
+
+    {
+
+        Console.WriteLine(value);
+
+    }
+
+}
 ```
 
 ### 2. Leverage Constraints[​](#2-leverage-constraints "Direct link to 2. Leverage Constraints")
@@ -747,15 +829,29 @@ public class ValidatableDataSource<T> : TypedDataSourceAttribute<T>
 
 {
 
-    public override IEnumerable<T> GetData()
+    public override async IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(
+
+        DataGeneratorMetadata dataGeneratorMetadata)
 
     {
 
-        // Only return valid instances
+        foreach (var instance in GenerateInstances().Where(x => x.IsValid()))
 
-        return GenerateInstances().Where(x => x.IsValid());
+        {
+
+            yield return () => Task.FromResult(instance);
+
+        }
+
+
+
+        await Task.CompletedTask;
 
     }
+
+
+
+    private static IEnumerable<T> GenerateInstances() => [];
 
 }
 ```
@@ -771,15 +867,25 @@ public abstract class JsonFileDataSource<T> : TypedDataSourceAttribute<T>
 
     
 
-    public override IEnumerable<T> GetData()
+    public override async IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(
+
+        DataGeneratorMetadata dataGeneratorMetadata)
 
     {
 
         var json = File.ReadAllText(FilePath);
 
-        return JsonSerializer.Deserialize<List<T>>(json) 
+        foreach (var item in JsonSerializer.Deserialize<List<T>>(json) ?? [])
 
-            ?? Enumerable.Empty<T>();
+        {
+
+            yield return () => Task.FromResult(item);
+
+        }
+
+
+
+        await Task.CompletedTask;
 
     }
 
@@ -809,7 +915,7 @@ public class UserJsonDataSource : JsonFileDataSource<User>
 
 /// Must have a parameterless constructor.</typeparam>
 
-public class CsvDataSource<T> : TypedDataSourceAttribute<T> 
+public abstract class CsvDataSource<T> : TypedDataSourceAttribute<T>
 
     where T : new()
 

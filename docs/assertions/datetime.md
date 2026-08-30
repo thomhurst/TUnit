@@ -245,7 +245,7 @@ public async Task Weekend_Check()
 
     await Assert.That(monday).IsOnWeekday();
 
-    await Assert.That(monday).IsNotOnWeekend();
+    await Assert.That(monday.DayOfWeek is not DayOfWeek.Saturday and not DayOfWeek.Sunday).IsTrue();
 
 }
 ```

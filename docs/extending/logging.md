@@ -7,6 +7,10 @@ TUnit provides a flexible logging system that captures all test output and route
 By default, TUnit intercepts any logs to `Console.WriteLine()` and correlates them to the test that triggered the log using the current async context.
 
 ```
+using TUnit.Core.Logging;
+
+
+
 [Test]
 
 public async Task MyTest()
@@ -23,6 +27,10 @@ public async Task MyTest()
 For more control, use `TestContext.Current.GetDefaultLogger()` to get a logger instance:
 
 ```
+using TUnit.Core.Logging;
+
+
+
 [Test]
 
 public async Task MyTest()
@@ -331,6 +339,10 @@ using TUnit.Core;
 
 using TUnit.Core.Logging;
 
+using Serilog;
+
+using LogLevel = TUnit.Core.Logging.LogLevel;
+
 
 
 public class FileLogSink : ILogSink, IAsyncDisposable
@@ -435,13 +447,13 @@ public class TestSetup
 
         // Register by instance (for sinks needing configuration)
 
-        TUnitLoggerFactory.AddSink(new FileLogSink("test-output.log"));
+        TUnit.Core.Logging.TUnitLoggerFactory.AddSink(new FileLogSink("test-output.log"));
 
 
 
         // Or register by type (for simple sinks)
 
-        TUnitLoggerFactory.AddSink<DebugLogSink>();
+        TUnit.Core.Logging.TUnitLoggerFactory.AddSink<DebugLogSink>();
 
     }
 
@@ -455,6 +467,10 @@ Sinks that implement `IDisposable` or `IAsyncDisposable` are automatically dispo
 The `context` parameter provides information about where the log originated:
 
 ```
+using LogLevel = TUnit.Core.Logging.LogLevel;
+
+
+
 public void Log(LogLevel level, string message, Exception? exception, Context? context)
 
 {
@@ -511,6 +527,14 @@ public void Log(LogLevel level, string message, Exception? exception, Context? c
 Here's an example sink that sends logs to Seq:
 
 ```
+using TUnit.Core.Logging;
+
+using Serilog;
+
+using LogLevel = TUnit.Core.Logging.LogLevel;
+
+
+
 public class SeqLogSink : ILogSink, IDisposable
 
 {
@@ -523,7 +547,7 @@ public class SeqLogSink : ILogSink, IDisposable
 
     {
 
-        _logger = new LoggerConfiguration()
+        _logger = new Serilog.LoggerConfiguration()
 
             .WriteTo.Seq(seqUrl)
 
@@ -635,7 +659,7 @@ var host = Host.CreateDefaultBuilder()
 
     {
 
-        logging.AddTUnit(TestContext.Current!);
+        TUnit.Logging.Microsoft.LoggingBuilderExtensions.AddTUnit(logging, TestContext.Current!);
 
     })
 
@@ -645,7 +669,7 @@ var host = Host.CreateDefaultBuilder()
 Or via `IServiceCollection`:
 
 ```
-services.AddTUnitLogging(TestContext.Current!);
+TUnit.Logging.Microsoft.ServiceCollectionExtensions.AddTUnitLogging(services, TestContext.Current!);
 ```
 
 All `ILogger` output is routed through TUnit's console interceptor and sink pipeline, appearing in test output, IDE test explorers, and the console.
@@ -672,6 +696,12 @@ Available levels (from least to most severe):
 You can also create custom loggers by inheriting from `DefaultLogger`:
 
 ```
+using TUnit.Core.Logging;
+
+using LogLevel = TUnit.Core.Logging.LogLevel;
+
+
+
 public class TestHeaderLogger : DefaultLogger
 
 {

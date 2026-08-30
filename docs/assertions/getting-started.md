@@ -83,7 +83,7 @@ await Assert.That(values).All(x => x > 0);
 ```
 await Assert.That(isValid).IsTrue();
 
-await Assert.That(result).IsNotNull();
+await Assert.That(obj).IsNotNull();
 
 await Assert.That(optional).IsDefault();
 ```
@@ -111,15 +111,11 @@ await Assert.That(typeof(Dog)).IsAssignableTo<Animal>();
 Combine multiple assertions on the same value using `.And`:
 
 ```
-await Assert.That(username)
+await Assert.That(username).IsNotNull().And.IsNotEmpty();
 
-    .IsNotNull()
+await Assert.That(username).Length().IsGreaterThan(3);
 
-    .And.IsNotEmpty()
-
-    .And.Length().IsGreaterThan(3)
-
-    .And.Length().IsLessThan(20);
+await Assert.That(username).Length().IsLessThan(20);
 ```
 
 Use `.Or` when any condition can be true:
@@ -253,7 +249,7 @@ Or map to a different value before asserting:
 ```
 await Assert.That(order)
 
-    .Satisfies(o => o.Total, total => total > 100);
+    .Member(o => o.Total, total => total.IsGreaterThan(100));
 ```
 
 ## Common Patterns[​](#common-patterns "Direct link to Common Patterns")
@@ -293,7 +289,7 @@ await Assert.That(username)
 
     .IsNotNull()
 
-    .And.Satisfies(name => name.Length >= 3 && name.Length <= 20,
+    .And.Satisfies(name => name!.Length >= 3 && name.Length <= 20,
 
                    "Username must be 3-20 characters");
 ```
@@ -306,6 +302,8 @@ TUnit's assertions are strongly typed and catch type mismatches at compile time:
 int number = 42;
 
 string text = "42";
+
+_ = text;
 
 
 

@@ -295,11 +295,9 @@ public async Task Count_With_Chaining()
 
     var names = new[] { "Alice", "Bob", "Charlie" };
 
-    await Assert.That(names)
+    await Assert.That(names).Count().IsEqualTo(3);
 
-        .Count(c => c.IsEqualTo(3))
-
-        .And.Contains("Bob");
+    await Assert.That(names).Contains("Bob");
 
 }
 ```
@@ -373,11 +371,9 @@ public async Task Collection_Has_Single_Item()
 Use `.Item` to continue assertions directly against the single item:
 
 ```
-await Assert.That(users)
+var user = await Assert.That(users).HasSingleItem();
 
-    .HasSingleItem()
-
-    .Item.Member(user => user.Name, name => name.IsEqualTo("Alice"));
+await Assert.That(user.Name).IsEqualTo("Alice");
 ```
 
 ## Ordering Assertions[​](#ordering-assertions "Direct link to Ordering Assertions")
@@ -717,7 +713,7 @@ public async Task Equivalent_With_Predicate()
 
         .IsEquivalentTo(users2)
 
-        .Using((u1, u2) => u1.Name == u2.Name && u1.Age == u2.Age);
+        .Using((u1, u2) => u1!.Name == u2!.Name && u1.Age == u2.Age);
 
 }
 ```
@@ -1145,7 +1141,7 @@ public async Task API_Returns_Expected_Items()
 
         .IsNotEmpty()
 
-        .And.All(u => u.Id > 0)
+        .And.All(u => u.Id is int id && id > 0)
 
         .And.All(u => !string.IsNullOrEmpty(u.Name));
 

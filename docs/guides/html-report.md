@@ -203,15 +203,15 @@ public async Task ProcessOrder_SendsNotification()
 
 {
 
-    // Start some external work that creates its own trace
+    // Obtain this from the external service's trace response or diagnostics.
 
-    var externalActivity = MyExternalService.StartProcessing(orderId);
+    var externalTraceId = ActivityTraceId.CreateRandom();
 
 
 
     // Link that trace to this test so it appears in the HTML report
 
-    TestContext.Current!.RegisterTrace(externalActivity.Context.TraceId);
+    TestContext.Current!.RegisterTrace(externalTraceId);
 
 
 

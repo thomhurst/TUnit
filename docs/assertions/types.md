@@ -503,17 +503,19 @@ public async Task Is_Pointer()
 
 {
 
+    Type intPtr;
+
     unsafe
 
     {
 
-        var intPtr = typeof(int*);
-
-        await Assert.That(intPtr).IsPointer();
+        intPtr = typeof(int*);
 
     }
 
 
+
+    await Assert.That(intPtr).IsPointer();
 
     await Assert.That(typeof(int)).IsNotPointer();
 
@@ -621,7 +623,7 @@ public async Task Is_Visible()
 
     // Internal types are not visible
 
-    var internalType = Assembly.GetExecutingAssembly()
+    var internalType = System.Reflection.Assembly.GetExecutingAssembly()
 
         .GetTypes()
 
@@ -893,7 +895,7 @@ public async Task Factory_Returns_Correct_Type()
 
 {
 
-    var instance = Factory.Create("user-service");
+    var instance = new ExampleFactory().Create("user-service");
 
 
 

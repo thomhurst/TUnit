@@ -460,6 +460,8 @@ public class MyTests
 
     {
 
+        Assert.True(number > 0);
+
         Assert.NotNull(text);
 
     }
@@ -481,6 +483,8 @@ public class MyTests
     public async Task TestWithClassData(int number, string text)
 
     {
+
+        await Assert.That(number).IsGreaterThan(0);
 
         await Assert.That(text).IsNotNull();
 
@@ -697,13 +701,13 @@ public class AsyncSetupTests : IAsyncLifetime
 
 
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
 
     {
 
         _client = new HttpClient();
 
-        await _client.GetAsync("https://api.example.com/warm-up");
+        await _client.GetAsync("https://api.example.com/warm-up", Xunit.TestContext.Current.CancellationToken);
 
     }
 
@@ -715,7 +719,11 @@ public class AsyncSetupTests : IAsyncLifetime
 
     {
 
-        var response = await _client.GetAsync("https://api.example.com/data");
+        var response = await _client.GetAsync(
+
+            "https://api.example.com/data",
+
+            Xunit.TestContext.Current.CancellationToken);
 
         Assert.True(response.IsSuccessStatusCode);
 
@@ -723,7 +731,7 @@ public class AsyncSetupTests : IAsyncLifetime
 
 
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
 
     {
 
@@ -1117,7 +1125,7 @@ public class UserTests(DatabaseFixture fixture)
 
     {
 
-        // Test using fixture.Connection
+        _ = fixture.Connection;
 
     }
 
@@ -1137,7 +1145,7 @@ public class ProductTests(DatabaseFixture fixture)
 
     {
 
-        // Test using fixture.Connection
+        _ = fixture.Connection;
 
     }
 
@@ -1245,7 +1253,7 @@ public class LoggingTests
 
 
 
-        var result = PerformOperation();
+        var result = CalculateResult();
 
 
 
@@ -1275,7 +1283,7 @@ public class LoggingTests
 
 
 
-        var result = PerformOperation();
+        var result = CalculateResult();
 
 
 
@@ -1329,13 +1337,11 @@ public class TestWithAttachments
 
         var logPath = "test-log.txt";
 
-        await File.WriteAllTextAsync(logPath, "test logs");
+        await File.WriteAllTextAsync(logPath, "test logs", Xunit.TestContext.Current.CancellationToken);
 
         
 
-        _testContextAccessor.Current!.Attachments.Add(
-
-            new FileAttachment(logPath, "Test Log"));
+        Xunit.TestContext.Current.AddAttachment(logPath, "Test Log");
 
     }
 
@@ -1708,7 +1714,7 @@ public class UserServiceTests : IClassFixture<DatabaseFixture>, IAsyncLifetime
 
 
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
 
     {
 
@@ -1720,7 +1726,7 @@ public class UserServiceTests : IClassFixture<DatabaseFixture>, IAsyncLifetime
 
 
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
 
 

@@ -233,9 +233,7 @@ public async Task Message_Contains_Ignoring_Case()
 
         .Throws<Exception>()
 
-        .WithMessageContaining("error")
-
-        .IgnoringCase();
+        .WithMessageContaining("error", StringComparison.OrdinalIgnoreCase);
 
 }
 ```
@@ -289,7 +287,7 @@ public async Task Message_Matches_With_Matcher()
 
 {
 
-    var matcher = new StringMatcher("Error * occurred", caseSensitive: false);
+    var matcher = StringMatcher.AsWildcard("Error * occurred").IgnoringCase();
 
 
 
@@ -345,13 +343,13 @@ public async Task ArgumentException_Parameter_And_Message()
 
 {
 
-    await Assert.That(() => SetAge(-1))
+    var exception = await Assert.That(() => SetAge(-1))
 
-        .Throws<ArgumentOutOfRangeException>()
+        .Throws<ArgumentOutOfRangeException>();
 
-        .WithParameterName("age")
+    await Assert.That(exception!.ParamName).IsEqualTo("age");
 
-        .WithMessageContaining("must be positive");
+    await Assert.That(exception.Message).Contains("must be positive");
 
 }
 
@@ -421,9 +419,7 @@ public async Task Inner_Exception_Type()
 
         .Throws<InvalidOperationException>()
 
-        .WithInnerException()
-
-        .Throws<FormatException>();
+        .WithInnerException<FormatException>();
 
 }
 
@@ -463,13 +459,13 @@ public async Task Validate_Email_Throws()
 
 {
 
-    await Assert.That(() => ValidateEmail("invalid-email"))
+    var exception = await Assert.That(() => ValidateEmail("invalid-email"))
 
-        .Throws<ArgumentException>()
+        .Throws<ArgumentException>();
 
-        .WithParameterName("email")
+    await Assert.That(exception!.ParamName).IsEqualTo("email");
 
-        .WithMessageContaining("valid email");
+    await Assert.That(exception.Message).Contains("valid email");
 
 }
 ```
@@ -483,7 +479,7 @@ public async Task Null_Argument_Throws()
 
 {
 
-    await Assert.That(() => ProcessData(null!))
+    await Assert.That(() => ProcessData((object?) null))
 
         .Throws<ArgumentNullException>()
 
@@ -649,7 +645,7 @@ public async Task Custom_Exception_With_Properties()
 
     // Can't directly assert on exception properties yet, but you can access them
 
-    await Assert.That(exception.RuleCode).IsEqualTo("BR001");
+    await Assert.That(exception!.RuleCode).IsEqualTo("BR001");
 
     await Assert.That(exception.Message).Contains("Business rule");
 
@@ -775,15 +771,15 @@ public async Task Chained_Exception_Assertions()
 
 {
 
-    await Assert.That(() => ValidateInput(""))
+    var exception = await Assert.That(() => ValidateInput(""))
 
-        .Throws<ArgumentException>()
+        .Throws<ArgumentException>();
 
-        .WithParameterName("input")
+    await Assert.That(exception!.ParamName).IsEqualTo("input");
 
-        .WithMessageContaining("cannot be empty")
+    await Assert.That(exception.Message).Contains("cannot be empty");
 
-        .WithMessageNotContaining("null");
+    await Assert.That(exception.Message).DoesNotContain("null");
 
 }
 ```

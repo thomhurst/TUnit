@@ -215,13 +215,13 @@ public async Task NestedObjectAssertions()
 
         .And.Member(c => c.Address.City, city => city.IsEqualTo("Seattle"))
 
-        .And.Member(c => c.Address.ZipCode, zip => zip.Matches(@"^\d{5}$"))
+        .And.Member(c => c.Address.ZipCode, zip => zip.Matches(@"^\d{5}$"));
 
-        .And.Member(c => c.Employees, employees => employees
 
-            .Count().IsBetween(100, 500)
 
-            .And.All(e => e.Email.EndsWith("@techcorp.com")));
+    await Assert.That(company.Employees.Length).IsBetween(1, 500);
+
+    await Assert.That(company.Employees).All(e => e.Email.EndsWith("@example.com"));
 
 }
 ```
