@@ -113,6 +113,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             if (_githubReporter is not null)
             {
                 _githubReporter.SuppressPerSuiteSummary = false;
+                _githubReporter.ArtifactUrl = null;
+                _githubReporter.ShowArtifactUploadTip = false;
             }
             Volatile.Write(ref _htmlReportEnabledAfterDiscovery, HtmlReportEnabledUnresolved);
 #if NET
@@ -146,8 +148,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 await DeleteSidecarsAndRefreshAggregateAsync(
                     GetAssemblyName(),
                     disabledOutputPath,
-                    aggregator,
-                    testSessionContext?.CancellationToken ?? CancellationToken.None);
+                    aggregator);
                 return;
             }
 
@@ -218,7 +219,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         if (!IsJsonReportEnabled())
         {
-            await DeleteSidecarsAndRefreshAggregateAsync(reportData.AssemblyName, htmlOutputPath, aggregator, cancellationToken);
+            await DeleteSidecarsAndRefreshAggregateAsync(reportData.AssemblyName, htmlOutputPath, aggregator);
             return;
         }
 
@@ -275,8 +276,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     private async Task DeleteSidecarsAndRefreshAggregateAsync(
         string assemblyName,
         string htmlOutputPath,
-        ReportAggregator? aggregator,
-        CancellationToken cancellationToken)
+        ReportAggregator? aggregator)
     {
         TryDeleteReportFile(() => File.Delete(GetSidecarPath(htmlOutputPath)));
 
@@ -287,7 +287,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            // Cleanup must survive session cancellation or stale enabled-run sidecars can
+            // re-enter a sibling's aggregate. Lock acquisition remains time-bounded.
+            using var aggregationLock = await aggregator.AcquireLockAsync(CancellationToken.None);
             if (aggregationLock is null)
             {
                 return;

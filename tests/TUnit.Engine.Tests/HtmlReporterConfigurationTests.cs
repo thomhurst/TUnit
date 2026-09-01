@@ -169,7 +169,7 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
-    public async Task GitHub_Summary_Suppression_Is_Reset_Between_Sessions(CancellationToken cancellationToken)
+    public async Task GitHub_Report_State_Is_Reset_Between_Sessions(CancellationToken cancellationToken)
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
         Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_REPORTS", "true");
@@ -187,10 +187,14 @@ public class HtmlReporterConfigurationTests
                 Path.Combine(tempDirectory, "suite-report.html"),
                 cancellationToken);
             githubReporter.SuppressPerSuiteSummary.ShouldBeTrue();
+            githubReporter.ArtifactUrl = "https://example.com/old-artifact";
+            githubReporter.ShowArtifactUploadTip = true;
 
             await reporter.OnTestSessionStartingAsync(null!);
 
             githubReporter.SuppressPerSuiteSummary.ShouldBeFalse();
+            githubReporter.ArtifactUrl.ShouldBeNull();
+            githubReporter.ShowArtifactUploadTip.ShouldBeFalse();
         }
         finally
         {
@@ -249,6 +253,40 @@ public class HtmlReporterConfigurationTests
             File.Exists(HtmlReporter.GetSidecarPath(remainingHtmlPath)).ShouldBeFalse();
             Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").ShouldBeEmpty();
             File.Exists(mergedReportPath).ShouldBeFalse();
+        }
+        finally
+        {
+            if (Directory.Exists(tempDirectory))
+            {
+                Directory.Delete(tempDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Test]
+    public async Task Cancelled_Session_Still_Removes_Disabled_Report_Sidecars(CancellationToken cancellationToken)
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
+        var aggregationDirectory = Path.Combine(tempDirectory, "aggregate");
+        var htmlPath = Path.Combine(tempDirectory, "cancelled-report.html");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_REPORTS", "true");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_DIR", aggregationDirectory);
+
+        try
+        {
+            Directory.CreateDirectory(tempDirectory);
+            using var reporter = new HtmlReporter(new MockExtension());
+
+            TUnitSettings.Default.Reporting.JsonReportEnabled = true;
+            await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancellationToken);
+
+            using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cancelled.Cancel();
+            TUnitSettings.Default.Reporting.JsonReportEnabled = false;
+            await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancelled.Token);
+
+            File.Exists(HtmlReporter.GetSidecarPath(htmlPath)).ShouldBeFalse();
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").ShouldBeEmpty();
         }
         finally
         {
