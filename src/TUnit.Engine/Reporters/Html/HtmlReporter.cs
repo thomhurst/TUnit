@@ -28,6 +28,8 @@ namespace TUnit.Engine.Reporters.Html;
 
 internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataProducer, ITestHostApplicationLifetime, ITestSessionLifetimeHandler, IFilterReceiver, IDisposable
 {
+    private const int HtmlReportEnabledUnresolved = -1;
+
     // System.Text.Json's Utf8JsonWriter limits a single string token to int.MaxValue / 6 characters.
     // Truncate large outputs early so report generation never fails for test suites with excessive logging.
     internal const int MaxOutputLength = 1 * 1024 * 1024; // 1 MB
@@ -37,6 +39,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     private string _resultsDirectory = "TestResults";
     private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _updates = [];
     private GitHubReporter? _githubReporter;
+    private int _htmlReportEnabledAfterDiscovery = HtmlReportEnabledUnresolved;
 
 #if NET
     private ActivityCollector? _activityCollector;
@@ -62,9 +65,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
-        // IsEnabledAsync runs before user discovery hooks. Read this setting again here so
-        // context.Settings changes made by those hooks still suppress collection and output.
-        if (!IsHtmlReportEnabled())
+        if (!IsHtmlReportEnabledForRun())
         {
             return Task.CompletedTask;
         }
@@ -118,10 +119,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         try
         {
 #if NET
-            _activityCollector?.Stop();
+            StopActivityCollection();
 #endif
 
-            if (!IsHtmlReportEnabled())
+            if (!IsHtmlReportEnabledForRun())
             {
 #if NET
                 TraceRegistry.Clear();
@@ -185,21 +186,23 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
     }
 
-    private async Task TryWriteSidecarAndAggregateAsync(ReportData reportData, string htmlOutputPath, CancellationToken cancellationToken)
+    internal async Task TryWriteSidecarAndAggregateAsync(ReportData reportData, string htmlOutputPath, CancellationToken cancellationToken)
     {
+        if (!IsJsonReportEnabled())
+        {
+            return;
+        }
+
         // Serialized once; the same bytes back both the local sidecar and the shared copy.
         var sidecarBytes = ReportDataJson.SerializeToBytes(reportData);
 
-        if (IsJsonReportEnabled())
+        try
         {
-            try
-            {
-                AtomicFile.WriteAllBytes(GetSidecarPath(htmlOutputPath), sidecarBytes);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Warning: Failed to write JSON report sidecar: {ex.Message}");
-            }
+            AtomicFile.WriteAllBytes(GetSidecarPath(htmlOutputPath), sidecarBytes);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to write JSON report sidecar: {ex.Message}");
         }
 
         var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
@@ -270,6 +273,36 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableArtifactUpload))
            && TUnitSettings.Default.Reporting.ArtifactUploadEnabled;
 
+    private bool IsHtmlReportEnabledForRun()
+    {
+        var resolved = Volatile.Read(ref _htmlReportEnabledAfterDiscovery);
+        if (resolved != HtmlReportEnabledUnresolved)
+        {
+            return resolved == 1;
+        }
+
+        var enabled = IsHtmlReportEnabled();
+        resolved = Interlocked.CompareExchange(
+            ref _htmlReportEnabledAfterDiscovery,
+            enabled ? 1 : 0,
+            HtmlReportEnabledUnresolved);
+
+        if (resolved != HtmlReportEnabledUnresolved)
+        {
+            return resolved == 1;
+        }
+
+#if NET
+        if (!enabled)
+        {
+            StopActivityCollection();
+            TraceRegistry.Clear();
+        }
+#endif
+
+        return enabled;
+    }
+
     // Default HTML report is "{name}-{os}-{tfm}-report.html"; the sidecar drops the
     // "-report" stem so the default pair reads "{name}-{os}-{tfm}.tunit-report.json".
     internal static string GetSidecarPath(string htmlOutputPath)
@@ -285,7 +318,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     internal async Task PublishArtifactAsync(string outputPath, SessionUid sessionUid, CancellationToken cancellationToken)
     {
-        if (_messageBus is null)
+        if (_messageBus is null || !IsArtifactUploadEnabled())
         {
             return;
         }
@@ -302,9 +335,19 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     public void Dispose()
     {
 #if NET
-        _activityCollector?.Dispose();
+        StopActivityCollection();
 #endif
     }
+
+#if NET
+    internal bool IsActivityCollectionActive => _activityCollector is not null;
+
+    private void StopActivityCollection()
+    {
+        _activityCollector?.Dispose();
+        _activityCollector = null;
+    }
+#endif
 
     public string? Filter { get; set; }
 
