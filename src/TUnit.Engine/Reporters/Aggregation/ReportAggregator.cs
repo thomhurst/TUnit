@@ -40,8 +40,9 @@ internal sealed class ReportAggregator
     private const string LockFileName = ".tunit-aggregate.lock";
 
     // Lock contention is expected (N processes finishing together, each holding the lock
-    // for a full merge), so wait far longer than the file-write retry defaults.
-    private const int LockMaxAttempts = 60;
+    // for a full merge). Warn after prolonged contention, but keep waiting: abandoning the
+    // final merge would leave a completed suite absent from aggregate outputs.
+    private const int LockContentionWarningAttempt = 60;
     private const int LockRetryDelayMs = 250;
 
     internal AggregationMode Mode { get; }
@@ -181,37 +182,31 @@ internal sealed class ReportAggregator
 
     /// <summary>
     /// Acquires the cross-process aggregation lock. Every writer performs its whole
-    /// read-merge-write cycle under this lock, so merges never interleave. Returns
-    /// <see langword="null"/> when the lock cannot be acquired within the timeout;
-    /// callers should then skip merging (a later sibling will produce a fresher merge).
+    /// read-merge-write cycle under this lock, so merges never interleave. Waits until
+    /// acquisition or cancellation because skipping the final merge loses results.
     /// </summary>
-    internal async Task<IDisposable?> AcquireLockAsync(CancellationToken cancellationToken)
+    internal async Task<IDisposable> AcquireLockAsync(CancellationToken cancellationToken)
     {
         System.IO.Directory.CreateDirectory(Directory);
         var lockPath = Path.Combine(Directory, LockFileName);
 
-        for (var attempt = 1; attempt <= LockMaxAttempts; attempt++)
+        for (var attempt = 1; ; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
                 return new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            catch (IOException)
             {
-                // Contention (or a permissions hiccup) on the final attempt must still fall
-                // through to the graceful "skip this merge" path, never escape as a throw.
-                if (attempt == LockMaxAttempts)
+                if (attempt == LockContentionWarningAttempt)
                 {
-                    break;
+                    Console.WriteLine("Warning: Report aggregation lock is still unavailable; waiting to preserve complete merged results.");
                 }
 
                 await Task.Delay(LockRetryDelayMs + Random.Shared.Next(0, 100), cancellationToken);
             }
         }
-
-        Console.WriteLine("Warning: Could not acquire the report aggregation lock; skipping merge for this process.");
-        return null;
     }
 
     /// <summary>

@@ -246,27 +246,20 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             // disabled cleanup may have removed.
             var sharedSidecarPath = aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
 
-            // Aggregation is committed for this suite: whatever happens below, the classic
-            // per-suite block must not be appended on top of the aggregated one. (If we
-            // fail past this point, a sibling that merges after us still renders this
-            // suite's results from the sidecar just written.)
-            if (_githubReporter is not null)
-            {
-                _githubReporter.SuppressPerSuiteSummary = true;
-            }
-
             using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
             if (!File.Exists(sharedSidecarPath))
             {
                 aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
             }
 
-            if (aggregationLock is null)
-            {
-                return;
-            }
-
             RefreshAggregatedOutputs(aggregator);
+
+            // Suppress the classic summary only after this suite is present in refreshed
+            // aggregate outputs. Acquisition cancellation or I/O failure falls back to it.
+            if (_githubReporter is not null)
+            {
+                _githubReporter.SuppressPerSuiteSummary = true;
+            }
         }
         catch (Exception ex)
         {
@@ -290,11 +283,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         try
         {
             using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
-            if (aggregationLock is null)
-            {
-                return;
-            }
-
             TryDeleteReportFile(() => aggregator.DeleteSidecar(assemblyName, htmlOutputPath));
             RefreshAggregatedOutputs(aggregator);
         }

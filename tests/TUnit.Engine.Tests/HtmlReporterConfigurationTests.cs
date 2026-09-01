@@ -314,10 +314,9 @@ public class HtmlReporterConfigurationTests
             using var reporter = new HtmlReporter(new MockExtension());
             var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
             var aggregationLock = await aggregator!.AcquireLockAsync(cancellationToken);
-            aggregationLock.ShouldNotBeNull();
 
             Task writeTask;
-            using (aggregationLock!)
+            using (aggregationLock)
             {
                 writeTask = reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancellationToken);
 
