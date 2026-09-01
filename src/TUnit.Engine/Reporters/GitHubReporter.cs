@@ -494,6 +494,14 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         GitHubSummaryRegion.ReplaceOrAppend(_outputSummaryFilePath, content, MaxFileSizeInBytes);
     }
 
+    internal void ClearAggregatedSummary()
+    {
+        if (_outputSummaryFilePath is not null)
+        {
+            GitHubSummaryRegion.ReplaceOrAppend(_outputSummaryFilePath, string.Empty, MaxFileSizeInBytes);
+        }
+    }
+
     private async Task WriteFile(string contents)
     {
         var fileInfo = new FileInfo(_outputSummaryFilePath);

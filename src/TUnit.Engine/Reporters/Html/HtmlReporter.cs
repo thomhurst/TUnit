@@ -202,7 +202,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         if (!IsJsonReportEnabled())
         {
-            DeleteSidecars(reportData, htmlOutputPath, aggregator);
+            await DeleteSidecarsAndRefreshAggregateAsync(reportData, htmlOutputPath, aggregator, cancellationToken);
             return;
         }
 
@@ -244,21 +244,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 return;
             }
 
-            var suites = aggregator.ReadAllSidecars();
-            if (suites.Count == 0)
-            {
-                return;
-            }
-
-            aggregator.WriteMergedHtml(suites);
-            Console.WriteLine($"Merged HTML test report ({suites.Count} {(suites.Count == 1 ? "suite" : "suites")} so far) written to: {aggregator.MergedReportPath}");
-
-            // The step summary is rewritten in the same lock cycle: one env parse, one
-            // lock acquisition and one sidecar scan per process for both merged outputs.
-            if (aggregator.Mode == AggregationMode.Cooperative)
-            {
-                _githubReporter?.WriteAggregatedSummary(suites, aggregator.MergedReportPath);
-            }
+            RefreshAggregatedOutputs(aggregator);
         }
         catch (Exception ex)
         {
@@ -266,25 +252,70 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
     }
 
-    private static void DeleteSidecars(ReportData reportData, string htmlOutputPath, ReportAggregator? aggregator)
+    private async Task DeleteSidecarsAndRefreshAggregateAsync(
+        ReportData reportData,
+        string htmlOutputPath,
+        ReportAggregator? aggregator,
+        CancellationToken cancellationToken)
     {
-        TryDeleteSidecar(() => File.Delete(GetSidecarPath(htmlOutputPath)));
+        TryDeleteReportFile(() => File.Delete(GetSidecarPath(htmlOutputPath)));
 
-        if (aggregator is not null)
+        if (aggregator is null)
         {
-            TryDeleteSidecar(() => aggregator.DeleteSidecar(reportData.AssemblyName, htmlOutputPath));
+            return;
+        }
+
+        try
+        {
+            using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            if (aggregationLock is null)
+            {
+                return;
+            }
+
+            TryDeleteReportFile(() => aggregator.DeleteSidecar(reportData.AssemblyName, htmlOutputPath));
+            RefreshAggregatedOutputs(aggregator);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            Console.WriteLine($"Warning: Report aggregation cleanup failed: {ex.Message}");
         }
     }
 
-    private static void TryDeleteSidecar(Action deleteSidecar)
+    private void RefreshAggregatedOutputs(ReportAggregator aggregator)
+    {
+        var suites = aggregator.ReadAllSidecars();
+        if (suites.Count == 0)
+        {
+            TryDeleteReportFile(() => File.Delete(aggregator.MergedReportPath));
+            if (aggregator.Mode == AggregationMode.Cooperative)
+            {
+                _githubReporter?.ClearAggregatedSummary();
+            }
+
+            return;
+        }
+
+        aggregator.WriteMergedHtml(suites);
+        Console.WriteLine($"Merged HTML test report ({suites.Count} {(suites.Count == 1 ? "suite" : "suites")} so far) written to: {aggregator.MergedReportPath}");
+
+        // The step summary is rewritten in the same lock cycle: one env parse, one
+        // lock acquisition and one sidecar scan per process for both merged outputs.
+        if (aggregator.Mode == AggregationMode.Cooperative)
+        {
+            _githubReporter?.WriteAggregatedSummary(suites, aggregator.MergedReportPath);
+        }
+    }
+
+    private static void TryDeleteReportFile(Action deleteFile)
     {
         try
         {
-            deleteSidecar();
+            deleteFile();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to remove disabled JSON report sidecar: {ex.Message}");
+            Console.WriteLine($"Warning: Failed to remove disabled report file: {ex.Message}");
         }
     }
 

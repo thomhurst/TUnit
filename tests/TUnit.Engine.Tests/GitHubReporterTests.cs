@@ -3,6 +3,7 @@ using Microsoft.Testing.Platform.TestHost;
 using Shouldly;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Reporters;
+using TUnit.Engine.Reporters.Aggregation;
 
 namespace TUnit.Engine.Tests;
 
@@ -112,6 +113,17 @@ public class GitHubReporterTests
 
         // Assert
         result.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task ClearAggregatedSummary_Removes_Stale_Content()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+        GitHubSummaryRegion.ReplaceOrAppend(outputFile, "stale aggregate");
+
+        reporter.ClearAggregatedSummary();
+
+        File.ReadAllText(outputFile).ShouldNotContain("stale aggregate");
     }
 
     [Test]
