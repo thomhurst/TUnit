@@ -39,10 +39,9 @@ internal sealed class ReportAggregator
     private const string SidecarSearchPattern = "*" + ReportDataJson.SidecarExtension;
     private const string LockFileName = ".tunit-aggregate.lock";
 
-    // Lock contention is expected (N processes finishing together, each holding the lock
-    // for a full merge). Warn after prolonged contention, but keep waiting: abandoning the
-    // final merge would leave a completed suite absent from aggregate outputs.
-    private const int LockContentionWarningAttempt = 60;
+    // Bound lock contention to roughly ten seconds. Reporting must never hang test-suite
+    // completion; timed-out writers leave their sidecar for a later aggregate refresh.
+    private const int LockMaxAttempts = 30;
     private const int LockRetryDelayMs = 250;
 
     internal AggregationMode Mode { get; }
@@ -182,15 +181,15 @@ internal sealed class ReportAggregator
 
     /// <summary>
     /// Acquires the cross-process aggregation lock. Every writer performs its whole
-    /// read-merge-write cycle under this lock, so merges never interleave. Waits until
-    /// acquisition or cancellation because skipping the final merge loses results.
+    /// read-merge-write cycle under this lock, so merges never interleave. Returns
+    /// <see langword="null"/> after a bounded wait so reporting cannot hang the run.
     /// </summary>
-    internal async Task<IDisposable> AcquireLockAsync(CancellationToken cancellationToken)
+    internal async Task<IDisposable?> AcquireLockAsync(CancellationToken cancellationToken)
     {
         System.IO.Directory.CreateDirectory(Directory);
         var lockPath = Path.Combine(Directory, LockFileName);
 
-        for (var attempt = 1; ; attempt++)
+        for (var attempt = 1; attempt <= LockMaxAttempts; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             try
@@ -199,14 +198,17 @@ internal sealed class ReportAggregator
             }
             catch (IOException)
             {
-                if (attempt == LockContentionWarningAttempt)
+                if (attempt == LockMaxAttempts)
                 {
-                    Console.WriteLine("Warning: Report aggregation lock is still unavailable; waiting to preserve complete merged results.");
+                    break;
                 }
 
                 await Task.Delay(LockRetryDelayMs + Random.Shared.Next(0, 100), cancellationToken);
             }
         }
+
+        Console.WriteLine("Warning: Report aggregation lock timed out; keeping per-suite reports and deferring aggregate refresh.");
+        return null;
     }
 
     /// <summary>

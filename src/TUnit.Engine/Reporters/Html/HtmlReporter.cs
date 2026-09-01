@@ -252,6 +252,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
             }
 
+            if (aggregationLock is null)
+            {
+                return;
+            }
+
             RefreshAggregatedOutputs(aggregator);
 
             // Suppress the classic summary only after this suite is present in refreshed
@@ -283,6 +288,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         try
         {
             using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            if (aggregationLock is null)
+            {
+                return;
+            }
+
             TryDeleteReportFile(() => aggregator.DeleteSidecar(assemblyName, htmlOutputPath));
             RefreshAggregatedOutputs(aggregator);
         }
