@@ -110,6 +110,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         lock (_htmlReportStateLock)
         {
             _updates.Clear();
+            if (_githubReporter is not null)
+            {
+                _githubReporter.SuppressPerSuiteSummary = false;
+            }
             Volatile.Write(ref _htmlReportEnabledAfterDiscovery, HtmlReportEnabledUnresolved);
 #if NET
             DisposeActivityCollection();
@@ -237,16 +241,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            // Serialize shared sidecar mutation and merged-output regeneration as one
-            // transaction. A disabled sibling can otherwise delete this sidecar after
-            // it is written but before this process acquires the aggregation lock.
-            using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
-            if (aggregationLock is null)
-            {
-                return;
-            }
-
-            aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+            // Publish before waiting so lock timeout cannot drop this suite from a later
+            // sibling's merge. Once the wait ends, restore a sidecar that concurrent
+            // disabled cleanup may have removed.
+            var sharedSidecarPath = aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
 
             // Aggregation is committed for this suite: whatever happens below, the classic
             // per-suite block must not be appended on top of the aggregated one. (If we
@@ -255,6 +253,17 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             if (_githubReporter is not null)
             {
                 _githubReporter.SuppressPerSuiteSummary = true;
+            }
+
+            using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            if (!File.Exists(sharedSidecarPath))
+            {
+                aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+            }
+
+            if (aggregationLock is null)
+            {
+                return;
             }
 
             RefreshAggregatedOutputs(aggregator);

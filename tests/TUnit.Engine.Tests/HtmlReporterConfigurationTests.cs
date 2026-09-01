@@ -169,6 +169,39 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
+    public async Task GitHub_Summary_Suppression_Is_Reset_Between_Sessions(CancellationToken cancellationToken)
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_REPORTS", "true");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_DIR", Path.Combine(tempDirectory, "aggregate"));
+
+        try
+        {
+            Directory.CreateDirectory(tempDirectory);
+            using var reporter = new HtmlReporter(new MockExtension());
+            var githubReporter = new GitHubReporter(new MockExtension());
+            reporter.SetGitHubReporter(githubReporter);
+
+            await reporter.TryWriteSidecarAndAggregateAsync(
+                CreateReportData(),
+                Path.Combine(tempDirectory, "suite-report.html"),
+                cancellationToken);
+            githubReporter.SuppressPerSuiteSummary.ShouldBeTrue();
+
+            await reporter.OnTestSessionStartingAsync(null!);
+
+            githubReporter.SuppressPerSuiteSummary.ShouldBeFalse();
+        }
+        finally
+        {
+            if (Directory.Exists(tempDirectory))
+            {
+                Directory.Delete(tempDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Test]
     public async Task Disabled_Artifact_Upload_Does_Not_Publish_Session_File_Artifact(CancellationToken cancellationToken)
     {
         TUnitSettings.Default.Reporting.ArtifactUploadEnabled = false;
@@ -267,7 +300,7 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
-    public async Task Shared_Sidecar_Write_Waits_For_Aggregation_Lock(CancellationToken cancellationToken)
+    public async Task Shared_Sidecar_Is_Published_While_Waiting_And_Restored_After_Cleanup(CancellationToken cancellationToken)
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
         var aggregationDirectory = Path.Combine(tempDirectory, "aggregate");
@@ -289,12 +322,14 @@ public class HtmlReporterConfigurationTests
                 writeTask = reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancellationToken);
 
                 File.Exists(HtmlReporter.GetSidecarPath(htmlPath)).ShouldBeTrue();
-                Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").ShouldBeEmpty();
+                var sharedSidecarPath = Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Single();
+                File.Delete(sharedSidecarPath);
             }
 
             await writeTask;
 
             Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(1);
+            File.ReadAllText(Path.Combine(aggregationDirectory, ReportDataJson.MergedReportFileName)).ShouldContain("Tests");
         }
         finally
         {
