@@ -113,6 +113,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public Task OnTestSessionStartingAsync(ITestSessionContext testSessionContext)
     {
+        _updates.Clear();
         Volatile.Write(ref _htmlReportEnabledAfterDiscovery, HtmlReportEnabledUnresolved);
         return Task.CompletedTask;
     }
@@ -197,8 +198,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     internal async Task TryWriteSidecarAndAggregateAsync(ReportData reportData, string htmlOutputPath, CancellationToken cancellationToken)
     {
+        var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
+
         if (!IsJsonReportEnabled())
         {
+            DeleteSidecars(reportData, htmlOutputPath, aggregator);
             return;
         }
 
@@ -214,7 +218,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             Console.WriteLine($"Warning: Failed to write JSON report sidecar: {ex.Message}");
         }
 
-        var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
         if (aggregator is null)
         {
             return;
@@ -260,6 +263,28 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         catch (Exception ex)
         {
             Console.WriteLine($"Warning: Report aggregation failed: {ex.Message}");
+        }
+    }
+
+    private static void DeleteSidecars(ReportData reportData, string htmlOutputPath, ReportAggregator? aggregator)
+    {
+        TryDeleteSidecar(() => File.Delete(GetSidecarPath(htmlOutputPath)));
+
+        if (aggregator is not null)
+        {
+            TryDeleteSidecar(() => aggregator.DeleteSidecar(reportData.AssemblyName, htmlOutputPath));
+        }
+    }
+
+    private static void TryDeleteSidecar(Action deleteSidecar)
+    {
+        try
+        {
+            deleteSidecar();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to remove disabled JSON report sidecar: {ex.Message}");
         }
     }
 

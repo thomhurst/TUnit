@@ -1,6 +1,8 @@
+using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using Shouldly;
 using TUnit.Core.Settings;
+using TUnit.Engine.Reporters.Aggregation;
 using TUnit.Engine.Reporters.Html;
 
 namespace TUnit.Engine.Tests;
@@ -87,17 +89,34 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
-    public async Task Html_Report_Setting_Is_Resolved_Per_Session()
+    public async Task Html_Report_Setting_Is_Resolved_Per_Session(CancellationToken cancellationToken)
     {
         using var reporter = new HtmlReporter(new MockExtension());
 
+        cancellationToken.ThrowIfCancellationRequested();
         await reporter.OnTestSessionStartingAsync(null!);
         TUnitSettings.Default.Reporting.HtmlReportEnabled = false;
         reporter.IsHtmlReportEnabledForRun().ShouldBeFalse();
 
+        cancellationToken.ThrowIfCancellationRequested();
         await reporter.OnTestSessionStartingAsync(null!);
         TUnitSettings.Default.Reporting.HtmlReportEnabled = true;
         reporter.IsHtmlReportEnabledForRun().ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task Test_Updates_Are_Cleared_Between_Sessions(CancellationToken cancellationToken)
+    {
+        using var reporter = new HtmlReporter(new MockExtension());
+
+        await reporter.OnTestSessionStartingAsync(null!);
+        await reporter.ConsumeAsync(reporter, CreatePassedUpdate("first"), cancellationToken);
+        reporter.BuildReportData().Groups.SelectMany(x => x.Tests).Single().Id.ShouldBe("first");
+
+        await reporter.OnTestSessionStartingAsync(null!);
+        await reporter.ConsumeAsync(reporter, CreatePassedUpdate("second"), cancellationToken);
+
+        reporter.BuildReportData().Groups.SelectMany(x => x.Tests).Single().Id.ShouldBe("second");
     }
 
     [Test]
@@ -116,7 +135,6 @@ public class HtmlReporterConfigurationTests
     [Test]
     public async Task Disabled_Json_Report_Does_Not_Write_Local_Or_Aggregation_Sidecars(CancellationToken cancellationToken)
     {
-        TUnitSettings.Default.Reporting.JsonReportEnabled = false;
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
         var aggregationDirectory = Path.Combine(tempDirectory, "aggregate");
         var htmlPath = Path.Combine(tempDirectory, "report.html");
@@ -127,10 +145,17 @@ public class HtmlReporterConfigurationTests
         {
             Directory.CreateDirectory(tempDirectory);
             var reporter = new HtmlReporter(new MockExtension());
+
+            TUnitSettings.Default.Reporting.JsonReportEnabled = true;
+            await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancellationToken);
+            File.Exists(HtmlReporter.GetSidecarPath(htmlPath)).ShouldBeTrue();
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").ShouldNotBeEmpty();
+
+            TUnitSettings.Default.Reporting.JsonReportEnabled = false;
             await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancellationToken);
 
             File.Exists(HtmlReporter.GetSidecarPath(htmlPath)).ShouldBeFalse();
-            Directory.Exists(aggregationDirectory).ShouldBeFalse();
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").ShouldBeEmpty();
         }
         finally
         {
@@ -152,4 +177,13 @@ public class HtmlReporterConfigurationTests
         Summary = new ReportSummary(),
         Groups = [],
     };
+
+    private static TestNodeUpdateMessage CreatePassedUpdate(string id) => new(
+        new SessionUid("session"),
+        new TestNode
+        {
+            Uid = new TestNodeUid(id),
+            DisplayName = id,
+            Properties = new PropertyBag(PassedTestNodeStateProperty.CachedInstance),
+        });
 }

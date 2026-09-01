@@ -130,11 +130,13 @@ internal sealed class ReportAggregator
     {
         System.IO.Directory.CreateDirectory(Directory);
 
-        var fileName = $"{PathValidator.SanitizeFileName(assemblyName)}-{ShortHash(suiteSalt)}{ReportDataJson.SidecarExtension}";
-        var path = Path.Combine(Directory, fileName);
+        var path = GetSidecarPath(assemblyName, suiteSalt);
         AtomicFile.WriteAllBytes(path, sidecarUtf8Json);
         return path;
     }
+
+    internal void DeleteSidecar(string assemblyName, string suiteSalt)
+        => File.Delete(GetSidecarPath(assemblyName, suiteSalt));
 
     /// <summary>
     /// Reads every sidecar currently present in the shared directory. Unreadable or
@@ -230,5 +232,11 @@ internal sealed class ReportAggregator
         using var sha = SHA256.Create();
         var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(value));
         return BitConverter.ToString(hash, 0, 4).Replace("-", "").ToLowerInvariant();
+    }
+
+    private string GetSidecarPath(string assemblyName, string suiteSalt)
+    {
+        var fileName = $"{PathValidator.SanitizeFileName(assemblyName)}-{ShortHash(suiteSalt)}{ReportDataJson.SidecarExtension}";
+        return Path.Combine(Directory, fileName);
     }
 }
