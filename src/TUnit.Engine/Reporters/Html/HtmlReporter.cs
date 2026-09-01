@@ -113,10 +113,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             Volatile.Write(ref _htmlReportEnabledAfterDiscovery, HtmlReportEnabledUnresolved);
 #if NET
             DisposeActivityCollection();
-            if (IsHtmlReportEnabled())
-            {
-                StartActivityCollection();
-            }
+            // Discovery hooks may re-enable reporting for this session. Start before
+            // discovery so those early spans are retained, then resolve the setting
+            // on the first post-discovery update.
+            StartActivityCollection();
 #endif
         }
 
@@ -137,6 +137,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 TraceRegistry.Clear();
 #endif
                 _updates.Clear();
+                var disabledOutputPath = _outputPath ?? GetDefaultOutputPath();
+                var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
+                await DeleteSidecarsAndRefreshAggregateAsync(
+                    GetAssemblyName(),
+                    disabledOutputPath,
+                    aggregator,
+                    testSessionContext?.CancellationToken ?? CancellationToken.None);
                 return;
             }
 
@@ -207,7 +214,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         if (!IsJsonReportEnabled())
         {
-            await DeleteSidecarsAndRefreshAggregateAsync(reportData, htmlOutputPath, aggregator, cancellationToken);
+            await DeleteSidecarsAndRefreshAggregateAsync(reportData.AssemblyName, htmlOutputPath, aggregator, cancellationToken);
             return;
         }
 
@@ -230,6 +237,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
+            // Serialize shared sidecar mutation and merged-output regeneration as one
+            // transaction. A disabled sibling can otherwise delete this sidecar after
+            // it is written but before this process acquires the aggregation lock.
+            using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            if (aggregationLock is null)
+            {
+                return;
+            }
+
             aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
 
             // Aggregation is committed for this suite: whatever happens below, the classic
@@ -241,14 +257,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 _githubReporter.SuppressPerSuiteSummary = true;
             }
 
-            // Every finishing process regenerates the merged outputs from all sidecars
-            // present so far; the last one to finish leaves the complete aggregate.
-            using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
-            if (aggregationLock is null)
-            {
-                return;
-            }
-
             RefreshAggregatedOutputs(aggregator);
         }
         catch (Exception ex)
@@ -258,7 +266,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     }
 
     private async Task DeleteSidecarsAndRefreshAggregateAsync(
-        ReportData reportData,
+        string assemblyName,
         string htmlOutputPath,
         ReportAggregator? aggregator,
         CancellationToken cancellationToken)
@@ -278,7 +286,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 return;
             }
 
-            TryDeleteReportFile(() => aggregator.DeleteSidecar(reportData.AssemblyName, htmlOutputPath));
+            TryDeleteReportFile(() => aggregator.DeleteSidecar(assemblyName, htmlOutputPath));
             RefreshAggregatedOutputs(aggregator);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -471,7 +479,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     internal ReportData BuildReportData()
     {
-        var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
+        var assemblyName = GetAssemblyName();
         var tunitVersion = typeof(HtmlReporter).Assembly.GetName().Version?.ToString() ?? "unknown";
 
         // Get the last update with a final state for each test
@@ -911,12 +919,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     private string GetDefaultOutputPath()
     {
-        var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
+        var assemblyName = GetAssemblyName();
         var sanitizedName = PathValidator.SanitizeFileName(assemblyName);
         var os = GetShortOsName();
         var tfm = GetShortFrameworkName();
         return Path.GetFullPath(Path.Combine(_resultsDirectory, $"{sanitizedName}-{os}-{tfm}-report.html"));
     }
+
+    private static string GetAssemblyName()
+        => Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
 
     private static string GetShortOsName()
     {
