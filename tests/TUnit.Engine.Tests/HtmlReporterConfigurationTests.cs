@@ -78,12 +78,12 @@ public class HtmlReporterConfigurationTests
     {
         using var reporter = new HtmlReporter(new MockExtension());
         await reporter.BeforeRunAsync(CancellationToken.None);
-        reporter.IsActivityCollectionActive.ShouldBeTrue();
+        reporter.HasActivityCollector.ShouldBeTrue();
 
         TUnitSettings.Default.Reporting.HtmlReportEnabled = false;
         await reporter.ConsumeAsync(reporter, null!, CancellationToken.None);
 
-        reporter.IsActivityCollectionActive.ShouldBeFalse();
+        reporter.HasActivityCollector.ShouldBeFalse();
     }
 
     [Test]

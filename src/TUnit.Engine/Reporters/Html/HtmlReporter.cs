@@ -184,6 +184,12 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         {
             Console.WriteLine($"Warning: HTML report generation failed: {ex.Message}");
         }
+        finally
+        {
+#if NET
+            DisposeActivityCollection();
+#endif
+        }
     }
 
     internal async Task TryWriteSidecarAndAggregateAsync(ReportData reportData, string htmlOutputPath, CancellationToken cancellationToken)
@@ -295,7 +301,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 #if NET
         if (!enabled)
         {
-            StopActivityCollection();
+            DisposeActivityCollection();
             TraceRegistry.Clear();
         }
 #endif
@@ -335,14 +341,17 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     public void Dispose()
     {
 #if NET
-        StopActivityCollection();
+        DisposeActivityCollection();
 #endif
     }
 
 #if NET
-    internal bool IsActivityCollectionActive => _activityCollector is not null;
+    internal bool HasActivityCollector => _activityCollector is not null;
 
-    private void StopActivityCollection()
+    internal void StopActivityCollection()
+        => _activityCollector?.Stop();
+
+    private void DisposeActivityCollection()
     {
         _activityCollector?.Dispose();
         _activityCollector = null;
