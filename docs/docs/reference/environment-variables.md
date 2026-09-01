@@ -60,9 +60,11 @@ Accepts truthy values: `true`, `1`, `yes` (case-insensitive).
 
 **Use case:** When you don't need the HTML report or want to reduce disk I/O. The report is written to `TestResults/{AssemblyName}-report.html` by default.
 
+**Programmatic equivalent:** `context.Settings.Reporting.HtmlReportEnabled = false`
+
 ### TUNIT_DISABLE_ARTIFACT_UPLOAD
 
-Skips the autmoatic upload of the html report but still generates the files.
+Skips automatic upload of the HTML report but still generates the files.
 
 ```bash
 export TUNIT_DISABLE_ARTIFACT_UPLOAD=true
@@ -76,6 +78,20 @@ CI Systems like [forgejo-actions](https://forgejo.org/docs/next/user/actions/ref
 GitHub changed the server-side behaviour of `upload-artifacts` since v4 and hasn't updated updated ghes since that.
 Forgejo and gitea don't implement this new artifact endpoint but the runners set `GITHUB_ACTIONS=true`.
 In this case it attempts to upload the report a few times until it eventually backs off after 30s.
+
+**Programmatic equivalent:** `context.Settings.Reporting.ArtifactUploadEnabled = false`
+
+### TUNIT_DISABLE_JSON_REPORT
+
+Disables the machine-readable JSON sidecar written alongside the HTML report.
+
+```bash
+export TUNIT_DISABLE_JSON_REPORT=true
+```
+
+Accepts truthy values: `true`, `1`, `yes` (case-insensitive).
+
+**Programmatic equivalent:** `context.Settings.Reporting.JsonReportEnabled = false`
 
 ### TUNIT_DISABLE_JUNIT_REPORTER
 
@@ -284,8 +300,9 @@ When the same setting is configured in multiple places, TUnit follows this prior
 | `TUNIT_DISABLE_GITHUB_REPORTER` | - | Disables GitHub reporter |
 | `TUNIT_DISABLE_JUNIT_REPORTER` | - | Disables JUnit reporter |
 | `TUNIT_ENABLE_JUNIT_REPORTER` | - | Enables JUnit reporter |
-| `TUNIT_DISABLE_HTML_REPORTER` | - | Disables HTML report generation |
-| `TUNIT_DISABLE_ARTIFACT_UPLOAD` | - | Keeps the HTML report file but skips the GitHub Actions artifact upload |
+| `TUNIT_DISABLE_HTML_REPORTER` | - | Disables HTML report generation (`context.Settings.Reporting.HtmlReportEnabled = false`) |
+| `TUNIT_DISABLE_JSON_REPORT` | - | Disables the machine-readable JSON sidecar (`context.Settings.Reporting.JsonReportEnabled = false`) |
+| `TUNIT_DISABLE_ARTIFACT_UPLOAD` | - | Keeps the HTML report file but skips the GitHub Actions artifact upload (`context.Settings.Reporting.ArtifactUploadEnabled = false`) |
 | `JUNIT_XML_OUTPUT_PATH` | - | JUnit output path |
 | `TUNIT_MAX_PARALLEL_TESTS` | `--maximum-parallel-tests` | Max parallel tests |
 | `TUNIT_EXECUTION_MODE` | `--reflection` | Selects source-generation (`sourcegeneration`/`aot`) or `reflection` execution mode |

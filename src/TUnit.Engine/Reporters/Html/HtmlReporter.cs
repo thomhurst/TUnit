@@ -12,6 +12,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Services;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Settings;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
 using TUnit.Engine.Exceptions;
@@ -43,7 +44,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public async Task<bool> IsEnabledAsync()
     {
-        if (IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableHtmlReporter)))
+        if (!IsHtmlReportEnabled())
         {
             return false;
         }
@@ -61,6 +62,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
+        // IsEnabledAsync runs before user discovery hooks. Read this setting again here so
+        // context.Settings changes made by those hooks still suppress collection and output.
+        if (!IsHtmlReportEnabled())
+        {
+            return Task.CompletedTask;
+        }
+
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
         // Keep only the update we'll report per test: a final-state update always wins over a
         // non-final one, otherwise the latest wins. The engine emits a single final update per
@@ -90,8 +98,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     public Task BeforeRunAsync(CancellationToken cancellationToken)
     {
 #if NET
-        _activityCollector = new ActivityCollector();
-        _activityCollector.Start();
+        if (IsHtmlReportEnabled())
+        {
+            _activityCollector = new ActivityCollector();
+            _activityCollector.Start();
+        }
 #endif
         return Task.CompletedTask;
     }
@@ -109,6 +120,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 #if NET
             _activityCollector?.Stop();
 #endif
+
+            if (!IsHtmlReportEnabled())
+            {
+#if NET
+                TraceRegistry.Clear();
+#endif
+                _updates.Clear();
+                return;
+            }
 
             if (_updates.Count == 0)
             {
@@ -170,7 +190,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         // Serialized once; the same bytes back both the local sidecar and the shared copy.
         var sidecarBytes = ReportDataJson.SerializeToBytes(reportData);
 
-        if (!IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableJsonReport)))
+        if (IsJsonReportEnabled())
         {
             try
             {
@@ -237,6 +257,18 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
            (value.Equals("true", StringComparison.OrdinalIgnoreCase) ||
             value.Equals("1", StringComparison.Ordinal) ||
             value.Equals("yes", StringComparison.OrdinalIgnoreCase));
+
+    internal static bool IsHtmlReportEnabled()
+        => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableHtmlReporter))
+           && TUnitSettings.Default.Reporting.HtmlReportEnabled;
+
+    internal static bool IsJsonReportEnabled()
+        => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableJsonReport))
+           && TUnitSettings.Default.Reporting.JsonReportEnabled;
+
+    internal static bool IsArtifactUploadEnabled()
+        => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableArtifactUpload))
+           && TUnitSettings.Default.Reporting.ArtifactUploadEnabled;
 
     // Default HTML report is "{name}-{os}-{tfm}-report.html"; the sidecar drops the
     // "-report" stem so the default pair reads "{name}-{os}-{tfm}.tunit-report.json".
@@ -857,7 +889,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             return null;
         }
 
-        if (IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableArtifactUpload)))
+        if (!IsArtifactUploadEnabled())
         {
             return null;
         }
