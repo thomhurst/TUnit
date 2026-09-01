@@ -470,6 +470,16 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     /// </summary>
     internal bool SuppressPerSuiteSummary { get; set; }
 
+    internal void ResetSessionState()
+    {
+        _latestUpdates.Clear();
+        _terminalStateCounts.Clear();
+        ArtifactUrl = null;
+        ShowArtifactUploadTip = false;
+        SuppressPerSuiteSummary = false;
+        _runStopwatch = Stopwatch.StartNew();
+    }
+
     /// <summary>
     /// Renders the aggregated block and rewrites the marked summary region. Called by
     /// HtmlReporter inside the aggregation lock, so the whole merge is one lock cycle.

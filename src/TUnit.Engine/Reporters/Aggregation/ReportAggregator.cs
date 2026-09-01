@@ -38,6 +38,7 @@ internal sealed class ReportAggregator
 {
     private const string SidecarSearchPattern = "*" + ReportDataJson.SidecarExtension;
     private const string LockFileName = ".tunit-aggregate.lock";
+    private const string DisabledMarkerExtension = ".disabled";
 
     // Bound lock contention to roughly ten seconds. Reporting must never hang test-suite
     // completion; timed-out writers leave their sidecar for a later aggregate refresh.
@@ -140,6 +141,17 @@ internal sealed class ReportAggregator
         File.Delete(GetSidecarPath(assemblyName, suiteSalt));
     }
 
+    internal void MarkSidecarDisabled(string assemblyName, string suiteSalt)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        AtomicFile.WriteAllBytes(GetDisabledMarkerPath(assemblyName, suiteSalt), []);
+    }
+
+    internal void ClearDisabledMarker(string assemblyName, string suiteSalt)
+    {
+        File.Delete(GetDisabledMarkerPath(assemblyName, suiteSalt));
+    }
+
     /// <summary>
     /// Reads every sidecar currently present in the shared directory. Unreadable or
     /// foreign files are skipped — a crashed sibling must not break the merge.
@@ -162,6 +174,11 @@ internal sealed class ReportAggregator
         {
             try
             {
+                if (File.Exists(file + DisabledMarkerExtension))
+                {
+                    continue;
+                }
+
                 var bytes = File.ReadAllBytes(file);
                 if (seenDigests.Add(Convert.ToBase64String(sha.ComputeHash(bytes)))
                     && ReportDataJson.TryDeserialize((ReadOnlyMemory<byte>)bytes) is { } data)
@@ -231,6 +248,11 @@ internal sealed class ReportAggregator
         using var sha = SHA256.Create();
         var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(value));
         return BitConverter.ToString(hash, 0, 4).Replace("-", "").ToLowerInvariant();
+    }
+
+    private string GetDisabledMarkerPath(string assemblyName, string suiteSalt)
+    {
+        return GetSidecarPath(assemblyName, suiteSalt) + DisabledMarkerExtension;
     }
 
     private string GetSidecarPath(string assemblyName, string suiteSalt)

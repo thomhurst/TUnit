@@ -298,6 +298,35 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
+    public async Task Disabled_Marker_Excludes_Stale_Shared_Sidecar(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_REPORTS", "true");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_DIR", tempDirectory);
+
+        try
+        {
+            var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
+            var reportData = CreateReportData("DisabledSuiteMarker");
+            aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(reportData), reportData.AssemblyName, "suite");
+
+            aggregator.MarkSidecarDisabled(reportData.AssemblyName, "suite");
+            aggregator.ReadAllSidecars().ShouldBeEmpty();
+
+            aggregator.ClearDisabledMarker(reportData.AssemblyName, "suite");
+            aggregator.ReadAllSidecars().Single().AssemblyName.ShouldBe("DisabledSuiteMarker");
+        }
+        finally
+        {
+            if (Directory.Exists(tempDirectory))
+            {
+                Directory.Delete(tempDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Test]
     public async Task Disabled_Html_Report_Removes_Stale_Aggregation_Outputs(CancellationToken cancellationToken)
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
@@ -338,7 +367,7 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
-    public async Task Shared_Sidecar_Is_Published_While_Waiting_And_Restored_After_Cleanup(CancellationToken cancellationToken)
+    public async Task Shared_Sidecar_Is_Published_Only_After_Aggregation_Lock(CancellationToken cancellationToken)
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
         var aggregationDirectory = Path.Combine(tempDirectory, "aggregate");
@@ -360,8 +389,7 @@ public class HtmlReporterConfigurationTests
                 writeTask = reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancellationToken);
 
                 File.Exists(HtmlReporter.GetSidecarPath(htmlPath)).ShouldBeTrue();
-                var sharedSidecarPath = Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Single();
-                File.Delete(sharedSidecarPath);
+                Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").ShouldBeEmpty();
             }
 
             await writeTask;

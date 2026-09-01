@@ -127,6 +127,31 @@ public class GitHubReporterTests
     }
 
     [Test]
+    public async Task ResetSessionState_Clears_Test_And_Presentation_State()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+        await FeedTestMessages(reporter,
+            CreatePassedTestMessage("retry", "CurrentTest", "Tests"),
+            CreatePassedTestMessage("retry", "CurrentTest", "Tests"),
+            CreatePassedTestMessage("stale", "StaleTest", "Tests"));
+        reporter.ArtifactUrl = "https://example.com/old-artifact";
+        reporter.ShowArtifactUploadTip = true;
+        reporter.SuppressPerSuiteSummary = true;
+
+        reporter.ResetSessionState();
+        await FeedTestMessages(reporter, CreatePassedTestMessage("retry", "CurrentTest", "Tests"));
+        await reporter.AfterRunAsync(0, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("**1 tests**");
+        output.ShouldNotContain("StaleTest");
+        output.ShouldNotContain("flaky");
+        reporter.ArtifactUrl.ShouldBeNull();
+        reporter.ShowArtifactUploadTip.ShouldBeFalse();
+        reporter.SuppressPerSuiteSummary.ShouldBeFalse();
+    }
+
+    [Test]
     public async Task AfterRunAsync_Groups_Failures_By_Exception_Type()
     {
         var (reporter, outputFile) = await SetupReporter();

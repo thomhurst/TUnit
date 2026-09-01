@@ -110,12 +110,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         lock (_htmlReportStateLock)
         {
             _updates.Clear();
-            if (_githubReporter is not null)
-            {
-                _githubReporter.SuppressPerSuiteSummary = false;
-                _githubReporter.ArtifactUrl = null;
-                _githubReporter.ShowArtifactUploadTip = false;
-            }
+            _githubReporter?.ResetSessionState();
             Volatile.Write(ref _htmlReportEnabledAfterDiscovery, HtmlReportEnabledUnresolved);
 #if NET
             DisposeActivityCollection();
@@ -242,30 +237,23 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            // Publish before waiting so lock timeout cannot drop this suite from a later
-            // sibling's merge. Once the wait ends, restore a sidecar that concurrent
-            // disabled cleanup may have removed.
-            var sharedSidecarPath = aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
-
             using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
-            if (!File.Exists(sharedSidecarPath))
-            {
-                aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
-            }
-
             if (aggregationLock is null)
             {
                 return;
             }
 
-            RefreshAggregatedOutputs(aggregator);
+            aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+            aggregator.ClearDisabledMarker(reportData.AssemblyName, htmlOutputPath);
 
-            // Suppress the classic summary only after this suite is present in refreshed
-            // aggregate outputs. Acquisition cancellation or I/O failure falls back to it.
+            // Once the shared sidecar is durable and enabled, later sibling refreshes own
+            // the summary even if this process fails while refreshing it.
             if (_githubReporter is not null)
             {
                 _githubReporter.SuppressPerSuiteSummary = true;
             }
+
+            RefreshAggregatedOutputs(aggregator);
         }
         catch (Exception ex)
         {
@@ -287,16 +275,24 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
+            // Durable marker prevents every later merge from reading stale suite data even
+            // when this process cannot acquire the lock to delete it immediately.
+            aggregator.MarkSidecarDisabled(assemblyName, htmlOutputPath);
+
             // Cleanup must survive session cancellation or stale enabled-run sidecars can
             // re-enter a sibling's aggregate. Lock acquisition remains time-bounded.
             using var aggregationLock = await aggregator.AcquireLockAsync(CancellationToken.None);
             if (aggregationLock is null)
             {
+                // An enabled writer may have cleared the first marker while holding the
+                // lock. Reassert disabled state because this cleanup completed later.
+                aggregator.MarkSidecarDisabled(assemblyName, htmlOutputPath);
                 return;
             }
 
-            TryDeleteReportFile(() => aggregator.DeleteSidecar(assemblyName, htmlOutputPath));
+            aggregator.DeleteSidecar(assemblyName, htmlOutputPath);
             RefreshAggregatedOutputs(aggregator);
+            aggregator.ClearDisabledMarker(assemblyName, htmlOutputPath);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
