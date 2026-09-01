@@ -25,6 +25,7 @@ internal static class ReportDataJson
 
     /// <summary>File extension shared by every sidecar so aggregators can discover them.</summary>
     internal const string SidecarExtension = ".tunit-report.json";
+    internal const string SidecarExclusionExtension = ".excluded";
 
     /// <summary>Merged HTML report filename, shared by the engine and the tool's default output.</summary>
     internal const string MergedReportFileName = "merged-report.html";

@@ -155,6 +155,11 @@ internal static class Program
         var enumeration = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true };
         foreach (var file in Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, enumeration))
         {
+            if (File.Exists(file + ReportDataJson.SidecarExclusionExtension))
+            {
+                continue;
+            }
+
             byte[] bytes;
             try
             {

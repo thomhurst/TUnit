@@ -237,23 +237,47 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
-            if (aggregationLock is null)
+            // Keep the sidecar invisible while lock ownership is unresolved. If the wait
+            // times out, the bytes still exist for a later/deferred merge without letting
+            // a concurrent merge race summary-suppression state.
+            aggregator.ExcludeSidecar(reportData.AssemblyName, htmlOutputPath);
+            var sharedSidecarPath = aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+
+            IDisposable? aggregationLock;
+            try
             {
-                return;
+                aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                // Publication already started. Complete the timeout-style handoff so the
+                // durable sidecar is not left permanently excluded.
+                aggregationLock = null;
             }
 
-            aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
-            aggregator.ClearDisabledMarker(reportData.AssemblyName, htmlOutputPath);
-
-            // Once the shared sidecar is durable and enabled, later sibling refreshes own
-            // the summary even if this process fails while refreshing it.
-            if (_githubReporter is not null)
+            using (aggregationLock)
             {
-                _githubReporter.SuppressPerSuiteSummary = true;
-            }
+                if (!File.Exists(sharedSidecarPath))
+                {
+                    aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+                }
 
-            RefreshAggregatedOutputs(aggregator);
+                // Suppress before making the sidecar visible: a sibling can merge it as soon
+                // as the exclusion marker disappears.
+                if (_githubReporter is not null)
+                {
+                    _githubReporter.SuppressPerSuiteSummary = true;
+                }
+
+                aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
+
+                if (aggregationLock is null)
+                {
+                    return;
+                }
+
+                RefreshAggregatedOutputs(aggregator);
+            }
         }
         catch (Exception ex)
         {
@@ -277,7 +301,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         {
             // Durable marker prevents every later merge from reading stale suite data even
             // when this process cannot acquire the lock to delete it immediately.
-            aggregator.MarkSidecarDisabled(assemblyName, htmlOutputPath);
+            aggregator.ExcludeSidecar(assemblyName, htmlOutputPath);
 
             // Cleanup must survive session cancellation or stale enabled-run sidecars can
             // re-enter a sibling's aggregate. Lock acquisition remains time-bounded.
@@ -286,13 +310,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             {
                 // An enabled writer may have cleared the first marker while holding the
                 // lock. Reassert disabled state because this cleanup completed later.
-                aggregator.MarkSidecarDisabled(assemblyName, htmlOutputPath);
+                aggregator.ExcludeSidecar(assemblyName, htmlOutputPath);
                 return;
             }
 
             aggregator.DeleteSidecar(assemblyName, htmlOutputPath);
             RefreshAggregatedOutputs(aggregator);
-            aggregator.ClearDisabledMarker(assemblyName, htmlOutputPath);
+            aggregator.IncludeSidecar(assemblyName, htmlOutputPath);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

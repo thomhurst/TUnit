@@ -38,7 +38,6 @@ internal sealed class ReportAggregator
 {
     private const string SidecarSearchPattern = "*" + ReportDataJson.SidecarExtension;
     private const string LockFileName = ".tunit-aggregate.lock";
-    private const string DisabledMarkerExtension = ".disabled";
 
     // Bound lock contention to roughly ten seconds. Reporting must never hang test-suite
     // completion; timed-out writers leave their sidecar for a later aggregate refresh.
@@ -141,15 +140,15 @@ internal sealed class ReportAggregator
         File.Delete(GetSidecarPath(assemblyName, suiteSalt));
     }
 
-    internal void MarkSidecarDisabled(string assemblyName, string suiteSalt)
+    internal void ExcludeSidecar(string assemblyName, string suiteSalt)
     {
         System.IO.Directory.CreateDirectory(Directory);
-        AtomicFile.WriteAllBytes(GetDisabledMarkerPath(assemblyName, suiteSalt), []);
+        AtomicFile.WriteAllBytes(GetExclusionMarkerPath(assemblyName, suiteSalt), []);
     }
 
-    internal void ClearDisabledMarker(string assemblyName, string suiteSalt)
+    internal void IncludeSidecar(string assemblyName, string suiteSalt)
     {
-        File.Delete(GetDisabledMarkerPath(assemblyName, suiteSalt));
+        File.Delete(GetExclusionMarkerPath(assemblyName, suiteSalt));
     }
 
     /// <summary>
@@ -174,7 +173,7 @@ internal sealed class ReportAggregator
         {
             try
             {
-                if (File.Exists(file + DisabledMarkerExtension))
+                if (File.Exists(file + ReportDataJson.SidecarExclusionExtension))
                 {
                     continue;
                 }
@@ -250,9 +249,9 @@ internal sealed class ReportAggregator
         return BitConverter.ToString(hash, 0, 4).Replace("-", "").ToLowerInvariant();
     }
 
-    private string GetDisabledMarkerPath(string assemblyName, string suiteSalt)
+    private string GetExclusionMarkerPath(string assemblyName, string suiteSalt)
     {
-        return GetSidecarPath(assemblyName, suiteSalt) + DisabledMarkerExtension;
+        return GetSidecarPath(assemblyName, suiteSalt) + ReportDataJson.SidecarExclusionExtension;
     }
 
     private string GetSidecarPath(string assemblyName, string suiteSalt)
