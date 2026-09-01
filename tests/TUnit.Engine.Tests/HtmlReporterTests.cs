@@ -31,10 +31,10 @@ public class HtmlReporterTests
     }
 
     [Test]
-    public async Task Stopping_Activity_Collection_Preserves_Spans_For_Report_Data()
+    public async Task Stopping_Activity_Collection_Preserves_Spans_For_Report_Data(CancellationToken cancellationToken)
     {
         using var reporter = new HtmlReporter(new MockExtension());
-        await reporter.BeforeRunAsync(CancellationToken.None);
+        await reporter.BeforeRunAsync(cancellationToken);
 
         var activity = TUnitActivitySource.StartLifecycleActivity(TUnitActivitySource.SpanTestSession);
         TUnitActivitySource.StopActivity(activity);

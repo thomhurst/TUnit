@@ -74,33 +74,47 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
-    public async Task Disabled_Html_Report_Stops_Activity_Collection_After_Discovery()
+    public async Task Disabled_Html_Report_Stops_Activity_Collection_After_Discovery(CancellationToken cancellationToken)
     {
         using var reporter = new HtmlReporter(new MockExtension());
-        await reporter.BeforeRunAsync(CancellationToken.None);
+        await reporter.BeforeRunAsync(cancellationToken);
         reporter.HasActivityCollector.ShouldBeTrue();
 
         TUnitSettings.Default.Reporting.HtmlReportEnabled = false;
-        await reporter.ConsumeAsync(reporter, null!, CancellationToken.None);
+        await reporter.ConsumeAsync(reporter, null!, cancellationToken);
 
         reporter.HasActivityCollector.ShouldBeFalse();
     }
 
     [Test]
-    public async Task Disabled_Artifact_Upload_Does_Not_Publish_Session_File_Artifact()
+    public async Task Html_Report_Setting_Is_Resolved_Per_Session()
+    {
+        using var reporter = new HtmlReporter(new MockExtension());
+
+        await reporter.OnTestSessionStartingAsync(null!);
+        TUnitSettings.Default.Reporting.HtmlReportEnabled = false;
+        reporter.IsHtmlReportEnabledForRun().ShouldBeFalse();
+
+        await reporter.OnTestSessionStartingAsync(null!);
+        TUnitSettings.Default.Reporting.HtmlReportEnabled = true;
+        reporter.IsHtmlReportEnabledForRun().ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task Disabled_Artifact_Upload_Does_Not_Publish_Session_File_Artifact(CancellationToken cancellationToken)
     {
         TUnitSettings.Default.Reporting.ArtifactUploadEnabled = false;
         var reporter = new HtmlReporter(new MockExtension());
         var messageBus = new CapturingMessageBus();
         reporter.SetMessageBus(messageBus);
 
-        await reporter.PublishArtifactAsync("report.html", new SessionUid("session"), CancellationToken.None);
+        await reporter.PublishArtifactAsync("report.html", new SessionUid("session"), cancellationToken);
 
         messageBus.Published.ShouldBeEmpty();
     }
 
     [Test]
-    public async Task Disabled_Json_Report_Does_Not_Write_Local_Or_Aggregation_Sidecars()
+    public async Task Disabled_Json_Report_Does_Not_Write_Local_Or_Aggregation_Sidecars(CancellationToken cancellationToken)
     {
         TUnitSettings.Default.Reporting.JsonReportEnabled = false;
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
@@ -111,8 +125,9 @@ public class HtmlReporterConfigurationTests
 
         try
         {
+            Directory.CreateDirectory(tempDirectory);
             var reporter = new HtmlReporter(new MockExtension());
-            await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, CancellationToken.None);
+            await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancellationToken);
 
             File.Exists(HtmlReporter.GetSidecarPath(htmlPath)).ShouldBeFalse();
             Directory.Exists(aggregationDirectory).ShouldBeFalse();

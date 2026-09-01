@@ -5,8 +5,10 @@ public static class ReportingSettingsHooks
     internal const string DisableReportingEnvironmentVariable = "TUNIT_TEST_DISABLE_REPORTING_FROM_DISCOVERY_HOOK";
 
     [Before(TestDiscovery)]
-    public static void ConfigureReporting(BeforeTestDiscoveryContext context)
+    public static void ConfigureReporting(BeforeTestDiscoveryContext context, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (Environment.GetEnvironmentVariable(DisableReportingEnvironmentVariable) is not "true")
         {
             return;
@@ -21,5 +23,6 @@ public static class ReportingSettingsHooks
 public class ReportingSettingsTests
 {
     [Test]
-    public void Test() { }
+    public void Test(CancellationToken cancellationToken)
+        => cancellationToken.ThrowIfCancellationRequested();
 }

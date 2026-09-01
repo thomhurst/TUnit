@@ -112,7 +112,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         => Task.CompletedTask; // All work happens in OnTestSessionFinishingAsync.
 
     public Task OnTestSessionStartingAsync(ITestSessionContext testSessionContext)
-        => Task.CompletedTask;
+    {
+        Volatile.Write(ref _htmlReportEnabledAfterDiscovery, HtmlReportEnabledUnresolved);
+        return Task.CompletedTask;
+    }
 
     public async Task OnTestSessionFinishingAsync(ITestSessionContext testSessionContext)
     {
@@ -279,7 +282,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableArtifactUpload))
            && TUnitSettings.Default.Reporting.ArtifactUploadEnabled;
 
-    private bool IsHtmlReportEnabledForRun()
+    internal bool IsHtmlReportEnabledForRun()
     {
         var resolved = Volatile.Read(ref _htmlReportEnabledAfterDiscovery);
         if (resolved != HtmlReportEnabledUnresolved)
