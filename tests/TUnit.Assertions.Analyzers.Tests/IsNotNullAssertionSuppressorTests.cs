@@ -54,6 +54,156 @@ public class IsNotNullAssertionSuppressorTests
     }
 
     [Test]
+    public async Task Suppresses_CS8602_After_Should_NotBeNull_Assertion()
+    {
+        const string code = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using TUnit.Assertions.Should;
+            using TUnit.Assertions.Should.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    string? nullableString = GetNullableString();
+
+                    await nullableString.Should().NotBeNull();
+
+                    var length = {|#0:nullableString|}.Length;
+                }
+
+                private string? GetNullableString() => "test";
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Does_Not_Suppress_CS8602_After_Should_Assertion_Without_NotBeNull()
+    {
+        const string code = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using TUnit.Assertions.Should;
+            using TUnit.Assertions.Should.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    string? nullableString = GetNullableString();
+
+                    await nullableString.Should().BeNull();
+
+                    var length = {|#0:nullableString|}.Length;
+                }
+
+                private string? GetNullableString() => "test";
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(false))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Does_Not_Suppress_CS8602_After_Unrelated_Should_NotBeNull_Assertion()
+    {
+        const string code = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using OtherLibrary;
+
+            namespace OtherLibrary
+            {
+                public sealed class Wrapper
+                {
+                    public Task NotBeNull() => Task.CompletedTask;
+                }
+
+                public static class ShouldExtensions
+                {
+                    public static Wrapper Should(this string? value) => new();
+                }
+            }
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    string? nullableString = GetNullableString();
+
+                    await nullableString.Should().NotBeNull();
+
+                    var length = {|#0:nullableString|}.Length;
+                }
+
+                private string? GetNullableString() => "test";
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(false))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Suppresses_CS8602_After_Should_NotBeNull_In_Assertion_Chains()
+    {
+        const string code = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using TUnit.Assertions.Should;
+            using TUnit.Assertions.Should.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    string? notBeNullFirst = GetNullableString();
+                    string? notBeNullLast = GetNullableString();
+
+                    await notBeNullFirst.Should().NotBeNull().And.Contain("test");
+                    await notBeNullLast.Should().Contain("test").And.NotBeNull();
+
+                    var firstLength = {|#0:notBeNullFirst|}.Length;
+                    var lastLength = {|#1:notBeNullLast|}.Length;
+                }
+
+                private string? GetNullableString() => "test";
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(
+                CS8602.WithLocation(0).WithIsSuppressed(true),
+                CS8602.WithLocation(1).WithIsSuppressed(true)
+            )
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
     public async Task Suppresses_CS8604_After_IsNotNull_Assertion()
     {
         const string code = """
