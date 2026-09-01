@@ -34,7 +34,8 @@ public class HtmlReporterTests
     public async Task Stopping_Activity_Collection_Preserves_Spans_For_Report_Data(CancellationToken cancellationToken)
     {
         using var reporter = new HtmlReporter(new MockExtension());
-        await reporter.BeforeRunAsync(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        await reporter.OnTestSessionStartingAsync(null!);
 
         var activity = TUnitActivitySource.StartLifecycleActivity(TUnitActivitySource.SpanTestSession);
         TUnitActivitySource.StopActivity(activity);

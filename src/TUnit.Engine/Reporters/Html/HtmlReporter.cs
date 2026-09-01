@@ -38,6 +38,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     private IMessageBus? _messageBus;
     private string _resultsDirectory = "TestResults";
     private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _updates = [];
+    private readonly object _htmlReportStateLock = new();
     private GitHubReporter? _githubReporter;
     private int _htmlReportEnabledAfterDiscovery = HtmlReportEnabledUnresolved;
 
@@ -98,13 +99,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public Task BeforeRunAsync(CancellationToken cancellationToken)
     {
-#if NET
-        if (IsHtmlReportEnabled())
-        {
-            _activityCollector = new ActivityCollector();
-            _activityCollector.Start();
-        }
-#endif
         return Task.CompletedTask;
     }
 
@@ -113,8 +107,19 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public Task OnTestSessionStartingAsync(ITestSessionContext testSessionContext)
     {
-        _updates.Clear();
-        Volatile.Write(ref _htmlReportEnabledAfterDiscovery, HtmlReportEnabledUnresolved);
+        lock (_htmlReportStateLock)
+        {
+            _updates.Clear();
+            Volatile.Write(ref _htmlReportEnabledAfterDiscovery, HtmlReportEnabledUnresolved);
+#if NET
+            DisposeActivityCollection();
+            if (IsHtmlReportEnabled())
+            {
+                StartActivityCollection();
+            }
+#endif
+        }
+
         return Task.CompletedTask;
     }
 
@@ -346,26 +351,31 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             return resolved == 1;
         }
 
-        var enabled = IsHtmlReportEnabled();
-        resolved = Interlocked.CompareExchange(
-            ref _htmlReportEnabledAfterDiscovery,
-            enabled ? 1 : 0,
-            HtmlReportEnabledUnresolved);
-
-        if (resolved != HtmlReportEnabledUnresolved)
+        lock (_htmlReportStateLock)
         {
-            return resolved == 1;
-        }
+            resolved = Volatile.Read(ref _htmlReportEnabledAfterDiscovery);
+            if (resolved != HtmlReportEnabledUnresolved)
+            {
+                return resolved == 1;
+            }
+
+            var enabled = IsHtmlReportEnabled();
 
 #if NET
-        if (!enabled)
-        {
-            DisposeActivityCollection();
-            TraceRegistry.Clear();
-        }
+            if (enabled)
+            {
+                StartActivityCollection();
+            }
+            else
+            {
+                DisposeActivityCollection();
+                TraceRegistry.Clear();
+            }
 #endif
 
-        return enabled;
+            Volatile.Write(ref _htmlReportEnabledAfterDiscovery, enabled ? 1 : 0);
+            return enabled;
+        }
     }
 
     // Default HTML report is "{name}-{os}-{tfm}-report.html"; the sidecar drops the
@@ -406,6 +416,17 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
 #if NET
     internal bool HasActivityCollector => _activityCollector is not null;
+
+    private void StartActivityCollection()
+    {
+        if (_activityCollector is not null)
+        {
+            return;
+        }
+
+        _activityCollector = new ActivityCollector();
+        _activityCollector.Start();
+    }
 
     internal void StopActivityCollection()
         => _activityCollector?.Stop();

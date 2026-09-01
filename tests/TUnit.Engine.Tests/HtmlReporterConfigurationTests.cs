@@ -2,6 +2,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using Shouldly;
 using TUnit.Core.Settings;
+using TUnit.Engine.Reporters;
 using TUnit.Engine.Reporters.Aggregation;
 using TUnit.Engine.Reporters.Html;
 
@@ -79,7 +80,8 @@ public class HtmlReporterConfigurationTests
     public async Task Disabled_Html_Report_Stops_Activity_Collection_After_Discovery(CancellationToken cancellationToken)
     {
         using var reporter = new HtmlReporter(new MockExtension());
-        await reporter.BeforeRunAsync(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        await reporter.OnTestSessionStartingAsync(null!);
         reporter.HasActivityCollector.ShouldBeTrue();
 
         TUnitSettings.Default.Reporting.HtmlReportEnabled = false;
@@ -102,6 +104,32 @@ public class HtmlReporterConfigurationTests
         await reporter.OnTestSessionStartingAsync(null!);
         TUnitSettings.Default.Reporting.HtmlReportEnabled = true;
         reporter.IsHtmlReportEnabledForRun().ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task Activity_Collection_Is_Recreated_Between_Sessions(CancellationToken cancellationToken)
+    {
+        TUnitSettings.Default.Reporting.HtmlReportEnabled = true;
+        using var reporter = new HtmlReporter(new MockExtension());
+
+        cancellationToken.ThrowIfCancellationRequested();
+        await reporter.OnTestSessionStartingAsync(null!);
+        reporter.HasActivityCollector.ShouldBeTrue();
+
+        cancellationToken.ThrowIfCancellationRequested();
+        await reporter.OnTestSessionFinishingAsync(null!);
+        reporter.HasActivityCollector.ShouldBeFalse();
+
+        cancellationToken.ThrowIfCancellationRequested();
+        await reporter.OnTestSessionStartingAsync(null!);
+        reporter.HasActivityCollector.ShouldBeTrue();
+
+        var activity = TUnitActivitySource.StartLifecycleActivity(TUnitActivitySource.SpanTestSession);
+        TUnitActivitySource.StopActivity(activity);
+        reporter.StopActivityCollection();
+        var spans = reporter.BuildReportData().Spans;
+        spans.ShouldNotBeNull();
+        spans.ShouldContain(span => span.SpanType == TUnitActivitySource.SpanTestSession);
     }
 
     [Test]

@@ -136,7 +136,9 @@ internal sealed class ReportAggregator
     }
 
     internal void DeleteSidecar(string assemblyName, string suiteSalt)
-        => File.Delete(GetSidecarPath(assemblyName, suiteSalt));
+    {
+        File.Delete(GetSidecarPath(assemblyName, suiteSalt));
+    }
 
     /// <summary>
     /// Reads every sidecar currently present in the shared directory. Unreadable or
