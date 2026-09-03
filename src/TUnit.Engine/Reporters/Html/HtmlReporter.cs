@@ -334,6 +334,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             // writes a new generation, so this cleanup cannot hide its replacement.
             aggregator.ExcludeSidecar(assemblyName, htmlOutputPath);
 
+            // The exclusion is durable and generation-scoped, so do not hold the per-suite
+            // lock during the bounded aggregate-lock wait. A staged enabled publication
+            // must be able to acquire it and clear the exclusion before either wait expires.
+            publicationMarker.Dispose();
+
             // Cleanup must survive session cancellation or stale enabled-run sidecars can
             // re-enter a sibling's aggregate. Lock acquisition remains time-bounded.
             using var aggregationLock = await aggregator.AcquireLockAsync(CancellationToken.None);
@@ -342,7 +347,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 return;
             }
 
-            publicationMarker.Dispose();
             RefreshAggregatedOutputs(aggregator);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
