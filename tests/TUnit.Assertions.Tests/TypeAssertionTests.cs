@@ -1,5 +1,6 @@
+using TUnit.Assertions.Core;
 using TUnit.Assertions.Extensions;
-using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Sources;
 
 namespace TUnit.Assertions.Tests;
 
@@ -476,6 +477,15 @@ public class TypeAssertionTests
         await Assert.That(typeof(Dog))
             .IsAssignableTo<Animal>()
             .And.IsClass();
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableTo_GenericSource_RetainsRuntimeTypeSemantics()
+    {
+        IAssertionSource<Type> source = new TypeValueAssertion(typeof(Dog), null);
+
+        await Assert.That(async () => await source.IsAssignableTo<Animal>())
+            .Throws<AssertionException>();
     }
 
     [Test]
