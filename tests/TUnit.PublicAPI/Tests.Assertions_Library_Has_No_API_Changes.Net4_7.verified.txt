@@ -6518,7 +6518,10 @@ namespace .Sources
     public sealed class TypeValueAssertion : .<>
     {
         public TypeValueAssertion(? value, string? expression) { }
+        public new .<TSource, > IsAssignableFrom<TSource>() { }
         public new .<TTarget> IsAssignableTo<TTarget>() { }
+        public new .<TSource, > IsNotAssignableFrom<TSource>() { }
+        public new .<TTarget, > IsNotAssignableTo<TTarget>() { }
     }
     public class ValueAssertion<TValue> : ., .<TValue>
     {

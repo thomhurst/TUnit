@@ -499,6 +499,26 @@ public class TypeAssertionTests
     }
 
     [Test]
+    public async Task Test_Type_OtherGenericSources_RetainRuntimeTypeSemantics()
+    {
+        IAssertionSource<Type> source = new TypeValueAssertion(typeof(Animal), null);
+
+        await source.IsNotAssignableTo<Animal>();
+        await Assert.That(async () => await source.IsAssignableFrom<Dog>())
+            .Throws<AssertionException>();
+        await source.IsNotAssignableFrom<Dog>();
+    }
+
+    [Test]
+    public async Task Test_Type_DirectGenericAssertions_UseRepresentedType()
+    {
+        await Assert.That(typeof(Animal)).IsNotAssignableTo<Type>();
+        await Assert.That(typeof(Animal)).IsAssignableFrom<Dog>();
+        await Assert.That(async () => await Assert.That(typeof(Animal)).IsNotAssignableFrom<Dog>())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
     public async Task Test_Type_IsAssignableFrom_Generic_UsesRepresentedType()
     {
         await Assert.That(typeof(Animal)).IsAssignableFrom<Dog>();
