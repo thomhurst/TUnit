@@ -151,6 +151,9 @@ internal sealed class ReportAggregator
         File.Delete(GetExclusionMarkerPath(assemblyName, suiteSalt));
     }
 
+    internal bool IsSidecarExcluded(string assemblyName, string suiteSalt) =>
+        File.Exists(GetExclusionMarkerPath(assemblyName, suiteSalt));
+
     internal IDisposable BeginSidecarPublication(string assemblyName, string suiteSalt)
     {
         System.IO.Directory.CreateDirectory(Directory);

@@ -247,10 +247,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            // Atomic bytes stay hidden while publication ownership is active. A later
-            // process can recover the marker immediately if this publisher terminates.
+            // Shared publication is serialized with cleanup. A later process can
+            // recover the marker immediately if this publisher terminates.
             using var publicationMarker = aggregator.BeginSidecarPublication(reportData.AssemblyName, htmlOutputPath);
-            var sharedSidecarPath = aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
 
             IDisposable? aggregationLock;
             try
@@ -262,23 +261,19 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 aggregationLock = null;
             }
 
+            if (aggregationLock is null)
+            {
+                return;
+            }
+
             using (aggregationLock)
             {
-                if (!File.Exists(sharedSidecarPath))
-                {
-                    aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
-                }
-
                 // A disabled predecessor may have left a durable exclusion after its
-                // cleanup timed out. The new bytes become authoritative when this
-                // publication is exposed, even if aggregate refresh was cancelled.
+                // cleanup timed out. Publish and expose the replacement atomically
+                // with respect to cleanup so that predecessor cannot delete it.
+                aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
                 aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
                 publicationMarker.Dispose();
-
-                if (aggregationLock is null)
-                {
-                    return;
-                }
 
                 RefreshAggregatedOutputs(aggregator);
                 if (_githubReporter is not null)
@@ -327,7 +322,12 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 return;
             }
 
-            aggregator.DeleteSidecar(assemblyName, htmlOutputPath);
+            // An enabled publisher that acquired the lock first clears this marker.
+            // In that case its fresh sidecar supersedes this older cleanup request.
+            if (aggregator.IsSidecarExcluded(assemblyName, htmlOutputPath))
+            {
+                aggregator.DeleteSidecar(assemblyName, htmlOutputPath);
+            }
             RefreshAggregatedOutputs(aggregator);
             aggregator.IncludeSidecar(assemblyName, htmlOutputPath);
         }

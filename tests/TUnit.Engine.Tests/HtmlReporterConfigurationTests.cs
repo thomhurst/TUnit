@@ -389,7 +389,8 @@ public class HtmlReporterConfigurationTests
                 writeTask = reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancellationToken);
 
                 File.Exists(HtmlReporter.GetSidecarPath(htmlPath)).ShouldBeTrue();
-                Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(1);
+                Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").ShouldBeEmpty();
+                Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarPublishingExtension}").Length.ShouldBe(1);
                 aggregator.ReadAllSidecars().ShouldBeEmpty();
             }
 
@@ -475,8 +476,9 @@ public class HtmlReporterConfigurationTests
     public async Task Cancelled_Lock_Wait_Keeps_Per_Suite_Summary(CancellationToken cancellationToken)
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
+        var aggregationDirectory = Path.Combine(tempDirectory, "aggregate");
         Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_REPORTS", "true");
-        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_DIR", tempDirectory);
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_DIR", aggregationDirectory);
 
         try
         {
@@ -496,7 +498,37 @@ public class HtmlReporterConfigurationTests
                 cancelled.Token);
 
             githubReporter.SuppressPerSuiteSummary.ShouldBeFalse();
+            aggregator.ReadAllSidecars().ShouldBeEmpty();
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExclusionExtension}").Length.ShouldBe(1);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDirectory))
+            {
+                Directory.Delete(tempDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Test]
+    public async Task Enabled_Publication_Clears_Stale_Exclusion(CancellationToken cancellationToken)
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
+        var aggregationDirectory = Path.Combine(tempDirectory, "aggregate");
+        var htmlPath = Path.Combine(tempDirectory, "suite-report.html");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_REPORTS", "true");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_DIR", aggregationDirectory);
+
+        try
+        {
+            using var reporter = new HtmlReporter(new MockExtension());
+            var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
+            aggregator.ExcludeSidecar("Tests", htmlPath);
+
+            await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancellationToken);
+
             aggregator.ReadAllSidecars().Single().AssemblyName.ShouldBe("Tests");
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExclusionExtension}").ShouldBeEmpty();
         }
         finally
         {
