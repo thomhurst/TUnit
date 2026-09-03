@@ -261,6 +261,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
             aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
             aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
+            if (aggregator.Mode == AggregationMode.Defer && _githubReporter is not null)
+            {
+                _githubReporter.SuppressPerSuiteSummary = true;
+            }
 
             IDisposable? aggregationLock;
             try
@@ -319,7 +323,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 CancellationToken.None);
             if (publicationMarker is null)
             {
-                aggregator.ExcludeSidecar(assemblyName, htmlOutputPath);
                 return;
             }
 
