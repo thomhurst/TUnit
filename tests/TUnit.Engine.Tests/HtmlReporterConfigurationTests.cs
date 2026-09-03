@@ -315,7 +315,7 @@ public class HtmlReporterConfigurationTests
             var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
             var reportData = CreateReportData("DisabledSuiteMarker");
             aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(reportData), reportData.AssemblyName, "suite");
-            var staleGeneration = aggregator.ReadSidecarGeneration(reportData.AssemblyName, "suite");
+            var staleGeneration = aggregator.ReadEffectiveSidecarGeneration(reportData.AssemblyName, "suite");
 
             var replacement = CreateReportData(reportData.AssemblyName, "replacement-machine");
             aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(replacement), replacement.AssemblyName, "suite");
@@ -625,17 +625,25 @@ public class HtmlReporterConfigurationTests
         {
             using var reporter = new HtmlReporter(new MockExtension());
             var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
-            var reportData = CreateReportData("ContendedSuiteMarker");
+            var reportData = CreateReportData("ContendedSuiteMarker", "timeout-publisher");
 
             using (aggregator.BeginSidecarPublication(reportData.AssemblyName, htmlPath))
             {
+                var activeReport = CreateReportData(reportData.AssemblyName, "active-publisher");
+                aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(activeReport), activeReport.AssemblyName, htmlPath);
                 await reporter.TryWriteSidecarAndAggregateAsync(reportData, htmlPath, cancellationToken);
 
-                Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(1);
-                aggregator.ReadAllSidecars().ShouldBeEmpty();
+                Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(2);
+                aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("timeout-publisher");
+                File.Exists(Path.Combine(aggregationDirectory, ReportDataJson.MergedReportFileName)).ShouldBeTrue();
             }
 
-            aggregator.ReadAllSidecars().Single().AssemblyName.ShouldBe("ContendedSuiteMarker");
+            aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("timeout-publisher");
+
+            var newerReport = CreateReportData(reportData.AssemblyName, "newer-publisher");
+            await reporter.TryWriteSidecarAndAggregateAsync(newerReport, htmlPath, cancellationToken);
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(1);
+            aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("newer-publisher");
         }
         finally
         {

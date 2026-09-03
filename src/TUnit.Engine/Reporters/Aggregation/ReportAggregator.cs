@@ -132,27 +132,45 @@ internal sealed class ReportAggregator
 
         var path = GetSidecarPath(assemblyName, suiteSalt);
         AtomicFile.WriteAllBytes(path, sidecarUtf8Json);
-        AtomicFile.WriteAllBytes(GetGenerationMarkerPath(assemblyName, suiteSalt), Guid.NewGuid().ToByteArray());
+        AtomicFile.WriteAllBytes(GetGenerationMarkerPath(path), Guid.NewGuid().ToByteArray());
         return path;
     }
 
-    internal byte[]? ReadSidecarGeneration(string assemblyName, string suiteSalt)
+    internal void WritePendingSidecar(byte[] sidecarUtf8Json, string assemblyName, string suiteSalt)
     {
-        var generationPath = GetGenerationMarkerPath(assemblyName, suiteSalt);
+        System.IO.Directory.CreateDirectory(Directory);
+        var path = GetPendingSidecarPath(assemblyName, suiteSalt);
+        AtomicFile.WriteAllBytes(path, sidecarUtf8Json);
+        AtomicFile.WriteAllBytes(GetGenerationMarkerPath(path), Guid.NewGuid().ToByteArray());
+    }
+
+    internal void DeletePendingSidecar(string assemblyName, string suiteSalt)
+    {
+        var path = GetPendingSidecarPath(assemblyName, suiteSalt);
+        File.Delete(path);
+        File.Delete(GetGenerationMarkerPath(path));
+    }
+
+    internal byte[]? ReadEffectiveSidecarGeneration(string assemblyName, string suiteSalt)
+    {
+        var pendingPath = GetPendingSidecarPath(assemblyName, suiteSalt);
+        var generationPath = File.Exists(pendingPath)
+            ? GetGenerationMarkerPath(pendingPath)
+            : GetGenerationMarkerPath(GetSidecarPath(assemblyName, suiteSalt));
         return File.Exists(generationPath) ? File.ReadAllBytes(generationPath) : null;
     }
 
     internal void ExcludeSidecar(string assemblyName, string suiteSalt)
     {
         System.IO.Directory.CreateDirectory(Directory);
-        var currentGeneration = ReadSidecarGeneration(assemblyName, suiteSalt);
+        var currentGeneration = ReadEffectiveSidecarGeneration(assemblyName, suiteSalt);
         AtomicFile.WriteAllBytes(GetExclusionMarkerPath(assemblyName, suiteSalt), currentGeneration ?? []);
     }
 
     internal void ExcludeSidecarIfGenerationMatches(string assemblyName, string suiteSalt, byte[]? expectedGeneration)
     {
         System.IO.Directory.CreateDirectory(Directory);
-        var currentGeneration = ReadSidecarGeneration(assemblyName, suiteSalt);
+        var currentGeneration = ReadEffectiveSidecarGeneration(assemblyName, suiteSalt);
         if (expectedGeneration is null
             ? currentGeneration is not null
             : currentGeneration is null || !expectedGeneration.AsSpan().SequenceEqual(currentGeneration))
@@ -207,9 +225,12 @@ internal sealed class ReportAggregator
         }
 
         var sidecarPath = GetSidecarPath(assemblyName, suiteSalt);
+        var pendingPath = GetPendingSidecarPath(assemblyName, suiteSalt);
         return File.Exists(sidecarPath)
+               || File.Exists(pendingPath)
                || File.Exists(sidecarPath + ReportDataJson.SidecarExclusionExtension)
-               || File.Exists(sidecarPath + ReportDataJson.SidecarGenerationExtension)
+               || File.Exists(GetGenerationMarkerPath(sidecarPath))
+               || File.Exists(GetGenerationMarkerPath(pendingPath))
                || File.Exists(sidecarPath + ReportDataJson.SidecarPublishingExtension);
     }
 
@@ -231,7 +252,9 @@ internal sealed class ReportAggregator
         // as the tunit-report tool does.
         var seenDigests = new HashSet<string>(StringComparer.Ordinal);
         using var sha = SHA256.Create();
-        foreach (var file in System.IO.Directory.GetFiles(Directory, SidecarSearchPattern))
+        var effectiveSidecars = ReportDataJson.SelectEffectiveSidecars(
+            System.IO.Directory.GetFiles(Directory, SidecarSearchPattern));
+        foreach (var file in effectiveSidecars)
         {
             try
             {
@@ -330,10 +353,11 @@ internal sealed class ReportAggregator
         return GetSidecarPath(assemblyName, suiteSalt) + ReportDataJson.SidecarPublishingExtension;
     }
 
-    private string GetGenerationMarkerPath(string assemblyName, string suiteSalt)
-    {
-        return GetSidecarPath(assemblyName, suiteSalt) + ReportDataJson.SidecarGenerationExtension;
-    }
+    private static string GetGenerationMarkerPath(string sidecarPath)
+        => sidecarPath + ReportDataJson.SidecarGenerationExtension;
+
+    private string GetPendingSidecarPath(string assemblyName, string suiteSalt)
+        => ReportDataJson.GetPendingSidecarPath(GetSidecarPath(assemblyName, suiteSalt));
 
     private string GetSidecarPath(string assemblyName, string suiteSalt)
     {

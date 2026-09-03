@@ -256,15 +256,19 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             if (publicationMarker is null)
             {
                 // Publication-lock contention must not discard completed suite results.
-                // Persist atomically after the bounded wait; generation-aware exclusions
-                // make this replacement visible when the current publisher releases it.
+                // A separate pending slot cannot overwrite the active publisher's canonical
+                // generation and remains available to this or any later aggregate refresh.
+                aggregator.WritePendingSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+            }
+            else
+            {
+                // Owning the lock makes it safe for a newer normal publication to replace
+                // any pending timeout result left by an earlier publisher.
+                aggregator.DeletePendingSidecar(reportData.AssemblyName, htmlOutputPath);
                 aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
                 aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
-                return;
             }
 
-            aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
-            aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
             if (aggregator.Mode == AggregationMode.Defer && _githubReporter is not null)
             {
                 _githubReporter.SuppressPerSuiteSummary = true;
@@ -287,7 +291,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
             using (aggregationLock)
             {
-                publicationMarker.Dispose();
+                publicationMarker?.Dispose();
 
                 RefreshAggregatedOutputs(aggregator);
                 if (_githubReporter is not null)
@@ -321,7 +325,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            var expectedGeneration = aggregator.ReadSidecarGeneration(assemblyName, htmlOutputPath);
+            var expectedGeneration = aggregator.ReadEffectiveSidecarGeneration(assemblyName, htmlOutputPath);
             using var publicationMarker = aggregator.TryAcquireSidecarPublication(assemblyName, htmlOutputPath);
             if (publicationMarker is null)
             {

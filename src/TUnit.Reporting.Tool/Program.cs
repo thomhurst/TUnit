@@ -153,7 +153,9 @@ internal static class Program
         // abort the walk — SearchOption.AllDirectories would throw mid-enumeration, before
         // the per-file guard below ever ran.
         var enumeration = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true };
-        foreach (var file in Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, enumeration))
+        var effectiveSidecars = ReportDataJson.SelectEffectiveSidecars(
+            Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, enumeration));
+        foreach (var file in effectiveSidecars)
         {
             // This command is the designated final merge, so no publisher should still
             // be active. Skip any suite whose stable publication lock is still held.

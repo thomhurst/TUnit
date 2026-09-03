@@ -25,6 +25,7 @@ internal static class ReportDataJson
 
     /// <summary>File extension shared by every sidecar so aggregators can discover them.</summary>
     internal const string SidecarExtension = ".tunit-report.json";
+    internal const string SidecarPendingSegment = ".pending";
     internal const string SidecarExclusionExtension = ".excluded";
     internal const string SidecarGenerationExtension = ".generation";
     internal const string SidecarPublishingExtension = ".publishing";
@@ -34,7 +35,8 @@ internal static class ReportDataJson
 
     internal static bool ShouldSkipSidecar(string sidecarPath)
     {
-        var exclusionPath = sidecarPath + SidecarExclusionExtension;
+        var canonicalPath = GetCanonicalSidecarPath(sidecarPath);
+        var exclusionPath = canonicalPath + SidecarExclusionExtension;
         if (File.Exists(exclusionPath))
         {
             var generationPath = sidecarPath + SidecarGenerationExtension;
@@ -56,7 +58,14 @@ internal static class ReportDataJson
             }
         }
 
-        var publicationLockPath = sidecarPath + SidecarPublishingExtension;
+        // Pending sidecars are complete atomic files written only after a publisher's
+        // per-suite lock wait expires. The canonical publisher cannot mutate them.
+        if (IsPendingSidecar(sidecarPath))
+        {
+            return false;
+        }
+
+        var publicationLockPath = canonicalPath + SidecarPublishingExtension;
         if (!File.Exists(publicationLockPath))
         {
             return false;
@@ -76,6 +85,22 @@ internal static class ReportDataJson
             return true;
         }
     }
+
+    internal static bool IsPendingSidecar(string sidecarPath)
+        => sidecarPath.EndsWith(SidecarPendingSegment + SidecarExtension, StringComparison.Ordinal);
+
+    internal static string GetCanonicalSidecarPath(string sidecarPath)
+        => IsPendingSidecar(sidecarPath)
+            ? sidecarPath[..^(SidecarPendingSegment.Length + SidecarExtension.Length)] + SidecarExtension
+            : sidecarPath;
+
+    internal static string GetPendingSidecarPath(string canonicalSidecarPath)
+        => canonicalSidecarPath[..^SidecarExtension.Length] + SidecarPendingSegment + SidecarExtension;
+
+    internal static IEnumerable<string> SelectEffectiveSidecars(IEnumerable<string> sidecarPaths)
+        => sidecarPaths
+            .GroupBy(GetCanonicalSidecarPath, StringComparer.Ordinal)
+            .Select(group => group.FirstOrDefault(IsPendingSidecar) ?? group.First());
 
     /// <summary>
     /// Serializes straight to UTF-8 bytes — callers write the same payload to more than one
