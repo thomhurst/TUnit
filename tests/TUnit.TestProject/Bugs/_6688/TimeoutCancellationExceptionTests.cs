@@ -36,4 +36,23 @@ public class TimeoutCancellationExceptionTests
             throw new InvalidOperationException("Custom non-cancellation diagnostic");
         }
     }
+
+    [Test]
+    [Timeout(50)]
+    [EngineTest(ExpectedResult.Failure)]
+    public async Task Custom_Task_Cancellation_Message(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+        }
+        catch (OperationCanceledException ex)
+        {
+            await Task.Delay(50);
+            throw new TaskCanceledException(
+                "Custom task cancellation diagnostic",
+                new InvalidOperationException("Inner diagnostic"),
+                ex.CancellationToken);
+        }
+    }
 }

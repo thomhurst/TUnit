@@ -155,9 +155,9 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         {
             var explanation = $"[{categoryLabel}] Test timed out after {testContext.Metadata.TestDetails.Timeout.Value.TotalMilliseconds}ms";
             var diagnosticException = unwrapped.InnerException
-                ?? (unwrapped is OperationCanceledException ? unwrapped : null);
+                ?? (unwrapped is OperationCanceledException and not TaskCanceledException ? unwrapped : null);
 
-            if (diagnosticException is not null and not TaskCanceledException)
+            if (diagnosticException is not null)
             {
                 explanation = $"{explanation}{Environment.NewLine}{diagnosticException.Message}";
             }

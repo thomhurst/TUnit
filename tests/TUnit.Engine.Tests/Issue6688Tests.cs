@@ -30,4 +30,17 @@ public class Issue6688Tests(TestMode testMode) : InvokableTestBase(testMode)
             ],
             new RunOptions().WithArgument("--detailed-stacktrace"));
     }
+
+    [Test]
+    public async Task Timeout_Preserves_Custom_Task_Cancellation_Message()
+    {
+        await RunTestsWithFilter(
+            "/*/*/TimeoutCancellationExceptionTests/Custom_Task_Cancellation_Message",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Timeout.ShouldBe(1),
+                result => result.Results.Single().Output?.ErrorInfo?.Message.ShouldContain("Custom task cancellation diagnostic"),
+            ],
+            new RunOptions().WithArgument("--detailed-stacktrace"));
+    }
 }
