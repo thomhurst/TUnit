@@ -330,8 +330,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 return;
             }
 
-            // Durable marker prevents every later merge from reading stale suite data even
-            // when this process cannot acquire the lock to delete it immediately.
+            // The marker records the generation being disabled. A concurrent enabled run
+            // writes a new generation, so this cleanup cannot hide its replacement.
             aggregator.ExcludeSidecar(assemblyName, htmlOutputPath);
 
             // Cleanup must survive session cancellation or stale enabled-run sidecars can
@@ -342,9 +342,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 return;
             }
 
-            aggregator.DeleteSidecar(assemblyName, htmlOutputPath);
+            publicationMarker.Dispose();
             RefreshAggregatedOutputs(aggregator);
-            aggregator.IncludeSidecar(assemblyName, htmlOutputPath);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

@@ -233,6 +233,7 @@ public class HtmlReporterConfigurationTests
         {
             Directory.CreateDirectory(tempDirectory);
             var reporter = new HtmlReporter(new MockExtension());
+            var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
 
             TUnitSettings.Default.Reporting.JsonReportEnabled = true;
             await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData("RemovedSuiteMarker"), removedHtmlPath, cancellationToken);
@@ -243,7 +244,8 @@ public class HtmlReporterConfigurationTests
             await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData("RemovedSuiteMarker"), removedHtmlPath, cancellationToken);
 
             File.Exists(HtmlReporter.GetSidecarPath(removedHtmlPath)).ShouldBeFalse();
-            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(1);
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(2);
+            aggregator.ReadAllSidecars().Single().AssemblyName.ShouldBe("RemainingSuiteMarker");
             var mergedReport = File.ReadAllText(mergedReportPath);
             mergedReport.ShouldNotContain("RemovedSuiteMarker");
             mergedReport.ShouldContain("RemainingSuiteMarker");
@@ -251,7 +253,8 @@ public class HtmlReporterConfigurationTests
             await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData("RemainingSuiteMarker"), remainingHtmlPath, cancellationToken);
 
             File.Exists(HtmlReporter.GetSidecarPath(remainingHtmlPath)).ShouldBeFalse();
-            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").ShouldBeEmpty();
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(2);
+            aggregator.ReadAllSidecars().ShouldBeEmpty();
             File.Exists(mergedReportPath).ShouldBeFalse();
         }
         finally
@@ -276,6 +279,7 @@ public class HtmlReporterConfigurationTests
         {
             Directory.CreateDirectory(tempDirectory);
             using var reporter = new HtmlReporter(new MockExtension());
+            var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
 
             TUnitSettings.Default.Reporting.JsonReportEnabled = true;
             await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancellationToken);
@@ -286,7 +290,8 @@ public class HtmlReporterConfigurationTests
             await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancelled.Token);
 
             File.Exists(HtmlReporter.GetSidecarPath(htmlPath)).ShouldBeFalse();
-            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").ShouldBeEmpty();
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(1);
+            aggregator.ReadAllSidecars().ShouldBeEmpty();
         }
         finally
         {
@@ -314,8 +319,12 @@ public class HtmlReporterConfigurationTests
             aggregator.ExcludeSidecar(reportData.AssemblyName, "suite");
             aggregator.ReadAllSidecars().ShouldBeEmpty();
 
+            var replacement = CreateReportData(reportData.AssemblyName, "replacement-machine");
+            aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(replacement), replacement.AssemblyName, "suite");
+            aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("replacement-machine");
+
             aggregator.IncludeSidecar(reportData.AssemblyName, "suite");
-            aggregator.ReadAllSidecars().Single().AssemblyName.ShouldBe("DisabledSuiteMarker");
+            aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("replacement-machine");
         }
         finally
         {
@@ -341,6 +350,7 @@ public class HtmlReporterConfigurationTests
         {
             Directory.CreateDirectory(tempDirectory);
             using var reporter = new HtmlReporter(new MockExtension());
+            var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
             reporter.SetOutputPath(disabledHtmlPath);
             var disabledAssemblyName = reporter.BuildReportData().AssemblyName;
 
@@ -352,7 +362,8 @@ public class HtmlReporterConfigurationTests
             await reporter.OnTestSessionFinishingAsync(null!);
 
             File.Exists(HtmlReporter.GetSidecarPath(disabledHtmlPath)).ShouldBeFalse();
-            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(1);
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(2);
+            aggregator.ReadAllSidecars().Single().AssemblyName.ShouldBe("RemainingSuiteMarker");
             var mergedReport = File.ReadAllText(mergedReportPath);
             mergedReport.ShouldNotContain(disabledAssemblyName);
             mergedReport.ShouldContain("RemainingSuiteMarker");
@@ -421,6 +432,7 @@ public class HtmlReporterConfigurationTests
         {
             Directory.CreateDirectory(tempDirectory);
             using var reporter = new HtmlReporter(new MockExtension());
+            var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
             reporter.SetOutputPath(htmlPath);
             var assemblyName = reporter.BuildReportData().AssemblyName;
 
@@ -430,7 +442,8 @@ public class HtmlReporterConfigurationTests
             await reporter.OnTestSessionFinishingAsync(null!);
 
             File.Exists(HtmlReporter.GetSidecarPath(htmlPath)).ShouldBeFalse();
-            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").ShouldBeEmpty();
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(1);
+            aggregator.ReadAllSidecars().ShouldBeEmpty();
         }
         finally
         {
@@ -625,6 +638,55 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
+    [Timeout(30_000)]
+    public async Task Enabled_Publication_Supersedes_In_Flight_Disabled_Cleanup(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
+        var aggregationDirectory = Path.Combine(tempDirectory, "aggregate");
+        var htmlPath = Path.Combine(tempDirectory, "suite-report.html");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_REPORTS", "true");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_DIR", aggregationDirectory);
+
+        try
+        {
+            Directory.CreateDirectory(tempDirectory);
+            using var reporter = new HtmlReporter(new MockExtension());
+            var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
+            var oldReport = CreateReportData(machineName: "old-machine");
+            await reporter.TryWriteSidecarAndAggregateAsync(oldReport, htmlPath, cancellationToken);
+
+            var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            aggregationLock.ShouldNotBeNull();
+            Task cleanupTask;
+            Task publicationTask;
+            using (aggregationLock!)
+            {
+                TUnitSettings.Default.Reporting.JsonReportEnabled = false;
+                cleanupTask = reporter.TryWriteSidecarAndAggregateAsync(oldReport, htmlPath, cancellationToken);
+                Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExclusionExtension}").Length.ShouldBe(1);
+
+                TUnitSettings.Default.Reporting.JsonReportEnabled = true;
+                var newReport = CreateReportData(machineName: "new-machine");
+                publicationTask = reporter.TryWriteSidecarAndAggregateAsync(newReport, htmlPath, cancellationToken);
+            }
+
+            await Task.WhenAll(cleanupTask, publicationTask);
+
+            var publishedReport = aggregator.ReadAllSidecars().Single();
+            publishedReport.MachineName.ShouldBe("new-machine");
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExclusionExtension}").ShouldBeEmpty();
+        }
+        finally
+        {
+            if (Directory.Exists(tempDirectory))
+            {
+                Directory.Delete(tempDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Test]
     public async Task Enabled_Publication_Clears_Stale_Exclusion(CancellationToken cancellationToken)
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
@@ -653,10 +715,10 @@ public class HtmlReporterConfigurationTests
         }
     }
 
-    private static ReportData CreateReportData(string assemblyName = "Tests") => new()
+    private static ReportData CreateReportData(string assemblyName = "Tests", string machineName = "machine") => new()
     {
         AssemblyName = assemblyName,
-        MachineName = "machine",
+        MachineName = machineName,
         Timestamp = DateTimeOffset.UtcNow.ToString("O"),
         TUnitVersion = "1.0.0",
         OperatingSystem = "test",

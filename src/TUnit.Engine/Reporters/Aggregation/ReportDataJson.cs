@@ -26,6 +26,7 @@ internal static class ReportDataJson
     /// <summary>File extension shared by every sidecar so aggregators can discover them.</summary>
     internal const string SidecarExtension = ".tunit-report.json";
     internal const string SidecarExclusionExtension = ".excluded";
+    internal const string SidecarGenerationExtension = ".generation";
     internal const string SidecarPublishingExtension = ".publishing";
 
     /// <summary>Merged HTML report filename, shared by the engine and the tool's default output.</summary>
@@ -33,9 +34,26 @@ internal static class ReportDataJson
 
     internal static bool ShouldSkipSidecar(string sidecarPath)
     {
-        if (File.Exists(sidecarPath + SidecarExclusionExtension))
+        var exclusionPath = sidecarPath + SidecarExclusionExtension;
+        if (File.Exists(exclusionPath))
         {
-            return true;
+            var generationPath = sidecarPath + SidecarGenerationExtension;
+            if (!File.Exists(generationPath))
+            {
+                // Exclusions written before generation tracking apply to their legacy
+                // sidecar. A later publication writes a generation and supersedes them.
+                return true;
+            }
+
+            try
+            {
+                return File.ReadAllBytes(exclusionPath).AsSpan()
+                    .SequenceEqual(File.ReadAllBytes(generationPath));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                return true;
+            }
         }
 
         var publicationLockPath = sidecarPath + SidecarPublishingExtension;
