@@ -589,6 +589,42 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
+    [Timeout(30_000)]
+    public async Task Enabled_Publication_Contention_Preserves_Shared_Sidecar(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
+        var aggregationDirectory = Path.Combine(tempDirectory, "aggregate");
+        var htmlPath = Path.Combine(tempDirectory, "suite-report.html");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_REPORTS", "true");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_DIR", aggregationDirectory);
+
+        try
+        {
+            using var reporter = new HtmlReporter(new MockExtension());
+            var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
+            var reportData = CreateReportData("ContendedSuiteMarker");
+
+            using (aggregator.BeginSidecarPublication(reportData.AssemblyName, htmlPath))
+            {
+                await reporter.TryWriteSidecarAndAggregateAsync(reportData, htmlPath, cancellationToken);
+
+                Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(1);
+                aggregator.ReadAllSidecars().ShouldBeEmpty();
+            }
+
+            aggregator.ReadAllSidecars().Single().AssemblyName.ShouldBe("ContendedSuiteMarker");
+        }
+        finally
+        {
+            if (Directory.Exists(tempDirectory))
+            {
+                Directory.Delete(tempDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Test]
     public async Task Enabled_Publication_Clears_Stale_Exclusion(CancellationToken cancellationToken)
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");

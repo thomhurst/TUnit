@@ -163,26 +163,11 @@ internal sealed class ReportAggregator
         string suiteSalt,
         CancellationToken cancellationToken)
     {
-        for (var attempt = 1; attempt <= LockMaxAttempts; attempt++)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            try
-            {
-                return BeginSidecarPublication(assemblyName, suiteSalt);
-            }
-            catch (IOException)
-            {
-                if (attempt == LockMaxAttempts)
-                {
-                    break;
-                }
-
-                await Task.Delay(LockRetryDelayMs + Random.Shared.Next(0, 100), cancellationToken);
-            }
-        }
-
-        Console.WriteLine("Warning: Report sidecar publication lock timed out; keeping the local per-suite report.");
-        return null;
+        System.IO.Directory.CreateDirectory(Directory);
+        return await AcquireFileLockAsync(
+            GetPublishingMarkerPath(assemblyName, suiteSalt),
+            cancellationToken,
+            "Warning: Report sidecar publication lock timed out; keeping the local per-suite report.");
     }
 
     internal bool HasSidecarState(string assemblyName, string suiteSalt)
@@ -250,8 +235,17 @@ internal sealed class ReportAggregator
     internal async Task<IDisposable?> AcquireLockAsync(CancellationToken cancellationToken)
     {
         System.IO.Directory.CreateDirectory(Directory);
-        var lockPath = Path.Combine(Directory, LockFileName);
+        return await AcquireFileLockAsync(
+            Path.Combine(Directory, LockFileName),
+            cancellationToken,
+            "Warning: Report aggregation lock timed out; keeping per-suite reports and deferring aggregate refresh.");
+    }
 
+    private static async Task<IDisposable?> AcquireFileLockAsync(
+        string lockPath,
+        CancellationToken cancellationToken,
+        string timeoutWarning)
+    {
         for (var attempt = 1; attempt <= LockMaxAttempts; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -259,7 +253,7 @@ internal sealed class ReportAggregator
             {
                 return new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
             }
-            catch (IOException)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
                 if (attempt == LockMaxAttempts)
                 {
@@ -270,7 +264,7 @@ internal sealed class ReportAggregator
             }
         }
 
-        Console.WriteLine("Warning: Report aggregation lock timed out; keeping per-suite reports and deferring aggregate refresh.");
+        Console.WriteLine(timeoutWarning);
         return null;
     }
 

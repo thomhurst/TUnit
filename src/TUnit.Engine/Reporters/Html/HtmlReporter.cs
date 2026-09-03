@@ -247,9 +247,14 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            // Serialize shared publication with cleanup. Persist and expose the latest
-            // sidecar before waiting for the aggregate lock, so a cancelled or timed-out
-            // refresh still leaves evidence for a later merge.
+            // Persist atomically before waiting for the publication lock. Its marker keeps
+            // readers away during a concurrent mutation, while a lock timeout still leaves
+            // durable data that becomes visible when the current publisher releases it.
+            aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+
+            // Serialize exclusion changes with cleanup. Expose the latest sidecar before
+            // waiting for the aggregate lock, so a cancelled or timed-out refresh still
+            // leaves evidence for a later merge.
             using var publicationMarker = await aggregator.AcquireSidecarPublicationAsync(
                 reportData.AssemblyName,
                 htmlOutputPath,
@@ -259,7 +264,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 return;
             }
 
-            aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
             aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
             if (aggregator.Mode == AggregationMode.Defer && _githubReporter is not null)
             {
