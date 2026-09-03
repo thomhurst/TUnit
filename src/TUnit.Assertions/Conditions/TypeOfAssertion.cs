@@ -148,17 +148,60 @@ public class IsAssignableToAssertion<TTarget, TValue> : Assertion<TTarget>
 }
 
 /// <summary>
+/// Asserts that a represented <see cref="Type"/> is assignable to a target type while
+/// retaining the represented type as the assertion value.
+/// </summary>
+public sealed class TypeIsAssignableToAssertion<TTarget> : Assertion<Type>
+{
+    private readonly Type _targetType = typeof(TTarget);
+
+    public TypeIsAssignableToAssertion(AssertionContext<Type> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Type> metadata)
+    {
+        if (metadata.Exception is { } exception)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
+        }
+
+        if (metadata.Value is not { } representedType)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        return _targetType.IsAssignableFrom(representedType)
+            ? AssertionResult._passedTask
+            : Task.FromResult(AssertionResult.Failed(
+                $"type {representedType.Name} is not assignable to {_targetType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to be assignable to {_targetType.Name}";
+}
+
+/// <summary>
 /// Asserts that a value's type is NOT assignable to a specific type.
 /// Works with both direct value assertions and exception assertions (via .And after Throws).
 /// </summary>
 public class IsNotAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
 {
+    private readonly bool _useRepresentedType;
     private readonly Type _targetType;
 
     public IsNotAssignableToAssertion(
         AssertionContext<TValue> context)
+        : this(context, useRepresentedType: false)
+    {
+    }
+
+    internal IsNotAssignableToAssertion(
+        AssertionContext<TValue> context,
+        bool useRepresentedType)
         : base(context)
     {
+        _useRepresentedType = useRepresentedType;
         _targetType = typeof(TTarget);
     }
 
@@ -184,7 +227,9 @@ public class IsNotAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed("value was null"));
         }
 
-        var actualType = objectToCheck.GetType();
+        var actualType = _useRepresentedType && objectToCheck is Type representedType
+            ? representedType
+            : objectToCheck.GetType();
 
         if (!_targetType.IsAssignableFrom(actualType))
         {
@@ -204,12 +249,21 @@ public class IsNotAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
 /// </summary>
 public class IsAssignableFromAssertion<TSource, TValue> : Assertion<TValue>
 {
+    private readonly bool _useRepresentedType;
     private readonly Type _sourceType;
 
     public IsAssignableFromAssertion(
         AssertionContext<TValue> context)
+        : this(context, useRepresentedType: false)
+    {
+    }
+
+    internal IsAssignableFromAssertion(
+        AssertionContext<TValue> context,
+        bool useRepresentedType)
         : base(context)
     {
+        _useRepresentedType = useRepresentedType;
         _sourceType = typeof(TSource);
     }
 
@@ -233,7 +287,9 @@ public class IsAssignableFromAssertion<TSource, TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed("value was null"));
         }
 
-        var actualType = objectToCheck.GetType();
+        var actualType = _useRepresentedType && objectToCheck is Type representedType
+            ? representedType
+            : objectToCheck.GetType();
 
         if (actualType.IsAssignableFrom(_sourceType))
         {
@@ -252,12 +308,21 @@ public class IsAssignableFromAssertion<TSource, TValue> : Assertion<TValue>
 /// </summary>
 public class IsNotAssignableFromAssertion<TSource, TValue> : Assertion<TValue>
 {
+    private readonly bool _useRepresentedType;
     private readonly Type _sourceType;
 
     public IsNotAssignableFromAssertion(
         AssertionContext<TValue> context)
+        : this(context, useRepresentedType: false)
+    {
+    }
+
+    internal IsNotAssignableFromAssertion(
+        AssertionContext<TValue> context,
+        bool useRepresentedType)
         : base(context)
     {
+        _useRepresentedType = useRepresentedType;
         _sourceType = typeof(TSource);
     }
 
@@ -281,7 +346,9 @@ public class IsNotAssignableFromAssertion<TSource, TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed("value was null"));
         }
 
-        var actualType = objectToCheck.GetType();
+        var actualType = _useRepresentedType && objectToCheck is Type representedType
+            ? representedType
+            : objectToCheck.GetType();
 
         if (!actualType.IsAssignableFrom(_sourceType))
         {

@@ -1,10 +1,15 @@
+using System.Reflection;
+using TUnit.Assertions.Core;
 using TUnit.Assertions.Extensions;
-using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Sources;
 
 namespace TUnit.Assertions.Tests;
 
 public class TypeAssertionTests
 {
+    private class Animal { }
+    private class Dog : Animal { }
+
     // Test types for various scenarios
     private class TestClass { }
     private interface ITestInterface { }
@@ -457,6 +462,109 @@ public class TypeAssertionTests
     {
         var type = typeof(TestClass);
         await Assert.That(type).IsNotCOMObject();
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableTo_Generic_UsesRepresentedType()
+    {
+        Type? result = await Assert.That(typeof(Dog)).IsAssignableTo<Animal>();
+
+        await Assert.That(result).IsSameReferenceAs(typeof(Dog));
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableTo_Generic_RetainsTypeForChaining()
+    {
+        await Assert.That(typeof(Dog))
+            .IsAssignableTo<Animal>()
+            .And.IsClass();
+    }
+
+    [Test]
+    public async Task Test_TypeInfo_GenericAssignability_UsesRepresentedType()
+    {
+        System.Reflection.TypeInfo animalType = typeof(Animal).GetTypeInfo();
+        System.Reflection.TypeInfo dogType = typeof(Dog).GetTypeInfo();
+
+        await Assert.That(dogType).IsAssignableTo<Animal>();
+        await Assert.That(dogType).IsNotAssignableTo<Type>();
+        await Assert.That(animalType).IsAssignableFrom<Dog>();
+        await Assert.That(dogType).IsNotAssignableFrom<Animal>();
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableTo_GenericSource_RetainsRuntimeTypeSemantics()
+    {
+        IAssertionSource<Type> source = new TypeValueAssertion(typeof(Dog), null);
+
+        await Assert.That(async () => await source.IsAssignableTo<Animal>())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableTo_AfterAnd_RetainsRuntimeTypeSemantics()
+    {
+        var action = async () => await Assert.That(typeof(Dog))
+            .IsClass()
+            .And.IsAssignableTo<Animal>();
+
+        await Assert.That(action).Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Test_Type_OtherGenericSources_RetainRuntimeTypeSemantics()
+    {
+        IAssertionSource<Type> source = new TypeValueAssertion(typeof(Animal), null);
+
+        await source.IsNotAssignableTo<Animal>();
+        await Assert.That(async () => await source.IsAssignableFrom<Dog>())
+            .Throws<AssertionException>();
+        await source.IsNotAssignableFrom<Dog>();
+    }
+
+    [Test]
+    public async Task Test_Type_DirectGenericAssertions_UseRepresentedType()
+    {
+        await Assert.That(typeof(Animal)).IsNotAssignableTo<Type>();
+        await Assert.That(typeof(Animal)).IsAssignableFrom<Dog>();
+        await Assert.That(async () => await Assert.That(typeof(Animal)).IsNotAssignableFrom<Dog>())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableFrom_Generic_UsesRepresentedType()
+    {
+        await Assert.That(typeof(Animal)).IsAssignableFrom<Dog>();
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableTo_RuntimeTypeOverload_Passes()
+    {
+        await Assert.That(typeof(Dog)).IsAssignableTo(typeof(Animal));
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableFrom_RuntimeTypeOverload_Passes()
+    {
+        await Assert.That(typeof(Animal)).IsAssignableFrom(typeof(Dog));
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableTo_NullRuntimeType_FailsAssertion()
+    {
+        var action = async () => await Assert.That(typeof(Dog)).IsAssignableTo(null!);
+
+        var exception = await Assert.That(action).Throws<AssertionException>();
+        await Assert.That(exception.Message).Contains("expected type was null");
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableFrom_NullRuntimeType_FailsAssertion()
+    {
+        var action = async () => await Assert.That(typeof(Animal)).IsAssignableFrom(null!);
+
+        var exception = await Assert.That(action).Throws<AssertionException>();
+        await Assert.That(exception.Message).Contains("source type was null");
     }
 
 #if NET5_0_OR_GREATER
