@@ -247,23 +247,23 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            // Persist atomically before waiting for the publication lock. Its marker keeps
-            // readers away during a concurrent mutation, while a lock timeout still leaves
-            // durable data that becomes visible when the current publisher releases it.
-            aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
-
-            // Serialize exclusion changes with cleanup. Expose the latest sidecar before
-            // waiting for the aggregate lock, so a cancelled or timed-out refresh still
-            // leaves evidence for a later merge.
+            // Serialize the shared write with cleanup so cleanup cannot mistake an in-flight
+            // enabled generation for the stale generation it intended to remove.
             using var publicationMarker = await aggregator.AcquireSidecarPublicationAsync(
                 reportData.AssemblyName,
                 htmlOutputPath,
                 CancellationToken.None);
             if (publicationMarker is null)
             {
+                // Publication-lock contention must not discard completed suite results.
+                // Persist atomically after the bounded wait; generation-aware exclusions
+                // make this replacement visible when the current publisher releases it.
+                aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+                aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
                 return;
             }
 
+            aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
             aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
             if (aggregator.Mode == AggregationMode.Defer && _githubReporter is not null)
             {
@@ -321,18 +321,18 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            using var publicationMarker = await aggregator.AcquireSidecarPublicationAsync(
-                assemblyName,
-                htmlOutputPath,
-                CancellationToken.None);
+            var expectedGeneration = aggregator.ReadSidecarGeneration(assemblyName, htmlOutputPath);
+            using var publicationMarker = aggregator.TryAcquireSidecarPublication(assemblyName, htmlOutputPath);
             if (publicationMarker is null)
             {
+                // An enabled publication may already have installed its generation while
+                // holding this lock. Cleanup must not wait, acquire next, and hide it.
                 return;
             }
 
-            // The marker records the generation being disabled. A concurrent enabled run
-            // writes a new generation, so this cleanup cannot hide its replacement.
-            aggregator.ExcludeSidecar(assemblyName, htmlOutputPath);
+            // Exclude only the generation observed before the lock attempt. A publisher that
+            // won the per-suite lock in the meantime installed a newer generation and survives.
+            aggregator.ExcludeSidecarIfGenerationMatches(assemblyName, htmlOutputPath, expectedGeneration);
 
             // The exclusion is durable and generation-scoped, so do not hold the per-suite
             // lock during the bounded aggregate-lock wait. A staged enabled publication

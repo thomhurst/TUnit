@@ -136,12 +136,31 @@ internal sealed class ReportAggregator
         return path;
     }
 
+    internal byte[]? ReadSidecarGeneration(string assemblyName, string suiteSalt)
+    {
+        var generationPath = GetGenerationMarkerPath(assemblyName, suiteSalt);
+        return File.Exists(generationPath) ? File.ReadAllBytes(generationPath) : null;
+    }
+
     internal void ExcludeSidecar(string assemblyName, string suiteSalt)
     {
         System.IO.Directory.CreateDirectory(Directory);
-        var generationPath = GetGenerationMarkerPath(assemblyName, suiteSalt);
-        var generation = File.Exists(generationPath) ? File.ReadAllBytes(generationPath) : [];
-        AtomicFile.WriteAllBytes(GetExclusionMarkerPath(assemblyName, suiteSalt), generation);
+        var currentGeneration = ReadSidecarGeneration(assemblyName, suiteSalt);
+        AtomicFile.WriteAllBytes(GetExclusionMarkerPath(assemblyName, suiteSalt), currentGeneration ?? []);
+    }
+
+    internal void ExcludeSidecarIfGenerationMatches(string assemblyName, string suiteSalt, byte[]? expectedGeneration)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        var currentGeneration = ReadSidecarGeneration(assemblyName, suiteSalt);
+        if (expectedGeneration is null
+            ? currentGeneration is not null
+            : currentGeneration is null || !expectedGeneration.AsSpan().SequenceEqual(currentGeneration))
+        {
+            return;
+        }
+
+        AtomicFile.WriteAllBytes(GetExclusionMarkerPath(assemblyName, suiteSalt), currentGeneration ?? []);
     }
 
     internal void IncludeSidecar(string assemblyName, string suiteSalt)
@@ -154,6 +173,18 @@ internal sealed class ReportAggregator
         System.IO.Directory.CreateDirectory(Directory);
         var lockPath = GetPublishingMarkerPath(assemblyName, suiteSalt);
         return new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+    }
+
+    internal IDisposable? TryAcquireSidecarPublication(string assemblyName, string suiteSalt)
+    {
+        try
+        {
+            return BeginSidecarPublication(assemblyName, suiteSalt);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
     }
 
     internal async Task<IDisposable?> AcquireSidecarPublicationAsync(

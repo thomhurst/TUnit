@@ -315,16 +315,23 @@ public class HtmlReporterConfigurationTests
             var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
             var reportData = CreateReportData("DisabledSuiteMarker");
             aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(reportData), reportData.AssemblyName, "suite");
+            var staleGeneration = aggregator.ReadSidecarGeneration(reportData.AssemblyName, "suite");
+
+            var replacement = CreateReportData(reportData.AssemblyName, "replacement-machine");
+            aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(replacement), replacement.AssemblyName, "suite");
+            aggregator.ExcludeSidecarIfGenerationMatches(reportData.AssemblyName, "suite", staleGeneration);
+            Directory.GetFiles(tempDirectory, $"*{ReportDataJson.SidecarExclusionExtension}").ShouldBeEmpty();
+            aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("replacement-machine");
 
             aggregator.ExcludeSidecar(reportData.AssemblyName, "suite");
             aggregator.ReadAllSidecars().ShouldBeEmpty();
 
-            var replacement = CreateReportData(reportData.AssemblyName, "replacement-machine");
-            aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(replacement), replacement.AssemblyName, "suite");
-            aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("replacement-machine");
+            var latest = CreateReportData(reportData.AssemblyName, "latest-machine");
+            aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(latest), latest.AssemblyName, "suite");
+            aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("latest-machine");
 
             aggregator.IncludeSidecar(reportData.AssemblyName, "suite");
-            aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("replacement-machine");
+            aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("latest-machine");
         }
         finally
         {
@@ -567,7 +574,7 @@ public class HtmlReporterConfigurationTests
 
     [Test]
     [Timeout(30_000)]
-    public async Task Disabled_Cleanup_Does_Not_Exclude_Without_Publication_Lock(CancellationToken cancellationToken)
+    public async Task Disabled_Cleanup_Does_Not_Exclude_Active_Publication(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
@@ -586,10 +593,12 @@ public class HtmlReporterConfigurationTests
 
             using (aggregator.BeginSidecarPublication(reportData.AssemblyName, htmlPath))
             {
+                var replacement = CreateReportData(reportData.AssemblyName, "active-publisher");
+                aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(replacement), replacement.AssemblyName, htmlPath);
                 await reporter.TryWriteSidecarAndAggregateAsync(reportData, htmlPath, cancellationToken);
             }
 
-            aggregator.ReadAllSidecars().Single().AssemblyName.ShouldBe("Tests");
+            aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("active-publisher");
             Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExclusionExtension}").ShouldBeEmpty();
         }
         finally
