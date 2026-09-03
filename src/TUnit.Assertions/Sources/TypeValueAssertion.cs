@@ -17,6 +17,10 @@ public sealed class TypeValueAssertion : ValueAssertion<Type>
     /// Asserts that the represented type is assignable to <typeparamref name="TTarget"/>.
     /// The assertion retains the represented <see cref="Type"/> for awaiting and chaining.
     /// </summary>
+    /// <remarks>
+    /// Represented-type semantics apply only when this is the first assertion after <c>Assert.That(type)</c>.
+    /// After <c>.And</c> or <c>.Or</c>, assignability assertions inspect the runtime type instead.
+    /// </remarks>
     public new TypeIsAssignableToAssertion<TTarget> IsAssignableTo<TTarget>()
     {
         Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
@@ -26,6 +30,10 @@ public sealed class TypeValueAssertion : ValueAssertion<Type>
     /// <summary>
     /// Asserts that the represented type is not assignable to <typeparamref name="TTarget"/>.
     /// </summary>
+    /// <remarks>
+    /// Represented-type semantics apply only when this is the first assertion after <c>Assert.That(type)</c>.
+    /// After <c>.And</c> or <c>.Or</c>, assignability assertions inspect the runtime type instead.
+    /// </remarks>
     public new IsNotAssignableToAssertion<TTarget, Type> IsNotAssignableTo<TTarget>()
     {
         Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
@@ -35,6 +43,10 @@ public sealed class TypeValueAssertion : ValueAssertion<Type>
     /// <summary>
     /// Asserts that <typeparamref name="TSource"/> is assignable to the represented type.
     /// </summary>
+    /// <remarks>
+    /// Represented-type semantics apply only when this is the first assertion after <c>Assert.That(type)</c>.
+    /// After <c>.And</c> or <c>.Or</c>, assignability assertions inspect the runtime type instead.
+    /// </remarks>
     public new IsAssignableFromAssertion<TSource, Type> IsAssignableFrom<TSource>()
     {
         Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TSource).Name}>()");
@@ -44,6 +56,10 @@ public sealed class TypeValueAssertion : ValueAssertion<Type>
     /// <summary>
     /// Asserts that <typeparamref name="TSource"/> is not assignable to the represented type.
     /// </summary>
+    /// <remarks>
+    /// Represented-type semantics apply only when this is the first assertion after <c>Assert.That(type)</c>.
+    /// After <c>.And</c> or <c>.Or</c>, assignability assertions inspect the runtime type instead.
+    /// </remarks>
     public new IsNotAssignableFromAssertion<TSource, Type> IsNotAssignableFrom<TSource>()
     {
         Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TSource).Name}>()");

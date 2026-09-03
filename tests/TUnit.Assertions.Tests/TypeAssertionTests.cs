@@ -1,3 +1,4 @@
+using System.Reflection;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Sources;
@@ -477,6 +478,18 @@ public class TypeAssertionTests
         await Assert.That(typeof(Dog))
             .IsAssignableTo<Animal>()
             .And.IsClass();
+    }
+
+    [Test]
+    public async Task Test_TypeInfo_GenericAssignability_UsesRepresentedType()
+    {
+        System.Reflection.TypeInfo animalType = typeof(Animal).GetTypeInfo();
+        System.Reflection.TypeInfo dogType = typeof(Dog).GetTypeInfo();
+
+        await Assert.That(dogType).IsAssignableTo<Animal>();
+        await Assert.That(dogType).IsNotAssignableTo<Type>();
+        await Assert.That(animalType).IsAssignableFrom<Dog>();
+        await Assert.That(dogType).IsNotAssignableFrom<Animal>();
     }
 
     [Test]

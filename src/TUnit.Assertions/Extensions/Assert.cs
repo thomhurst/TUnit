@@ -257,6 +257,7 @@ public static class Assert
     /// <summary>
     /// Creates an assertion for a represented <see cref="Type"/>.
     /// </summary>
+    [OverloadResolutionPriority(1)]
     public static TypeValueAssertion That(
         Type? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)

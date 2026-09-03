@@ -188,6 +188,7 @@ namespace
         public static .<object?> That(.IEnumerable value, [.("value")] string? expression = null) { }
         public static . That(<.> action, [.("action")] string? expression = null) { }
         public static . That(. task, [.("task")] string? expression = null) { }
+        [.(1)]
         public static . That(? value, [.("value")] string? expression = null) { }
         [.(2)]
         public static .<string> That(.StringValue value, [.("value")] string? expression = null) { }
