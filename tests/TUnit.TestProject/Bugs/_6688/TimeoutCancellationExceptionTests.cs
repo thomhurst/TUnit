@@ -20,4 +20,20 @@ public class TimeoutCancellationExceptionTests
             throw new OperationCanceledException("Failed due to XYZ", ex.CancellationToken);
         }
     }
+
+    [Test]
+    [Timeout(50)]
+    [EngineTest(ExpectedResult.Failure)]
+    public async Task Custom_Non_Cancellation_Exception_Message(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            await Task.Delay(50);
+            throw new InvalidOperationException("Custom non-cancellation diagnostic");
+        }
+    }
 }

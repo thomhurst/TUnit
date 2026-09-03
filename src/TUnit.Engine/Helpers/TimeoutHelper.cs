@@ -89,9 +89,11 @@ internal static class TimeoutHelper
             // Timeout occurred - give the execution task a brief grace period to clean up
             var executionException = await ObserveExceptionDuringGracePeriodAsync(executionTask).ConfigureAwait(false);
 
-            // Routine Task cancellation adds no useful context; preserve exceptions explicitly
+            // Routine cancellation adds no useful context; preserve exceptions explicitly
             // thrown while handling cancellation, such as Aspire's diagnostic exception.
-            var exceptionToPreserve = executionException is TaskCanceledException ? null : executionException;
+            var exceptionToPreserve = IsRoutineCancellation(executionException, timeoutCts.Token)
+                ? null
+                : executionException;
 
             // Even if task completed during grace period, timeout already elapsed so we throw
             var baseMessage = timeoutMessage ?? $"Operation timed out after {timeout}";
@@ -100,6 +102,22 @@ internal static class TimeoutHelper
         }
 
         await executionTask.ConfigureAwait(false);
+    }
+
+    private static bool IsRoutineCancellation(Exception? exception, CancellationToken timeoutToken)
+    {
+        if (exception is TaskCanceledException)
+        {
+            return true;
+        }
+
+        return exception is OperationCanceledException
+        {
+            InnerException: null
+        } operationCanceledException
+            && operationCanceledException.GetType() == typeof(OperationCanceledException)
+            && operationCanceledException.CancellationToken == timeoutToken
+            && operationCanceledException.Message == new OperationCanceledException(timeoutToken).Message;
     }
 
     private static async Task<Exception?> ObserveExceptionDuringGracePeriodAsync(Task executionTask)

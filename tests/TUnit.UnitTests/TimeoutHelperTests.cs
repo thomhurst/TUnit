@@ -19,7 +19,8 @@ public class TimeoutHelperTests
                     }
                     catch (OperationCanceledException ex)
                     {
-                        // Ensure timeout detection wins before cancellation diagnostics finish.
+                        // Keep execution incomplete long enough for timeout detection to win before
+                        // cancellation diagnostics finish, matching the Aspire failure in #6688.
                         await Task.Delay(50);
                         throw new OperationCanceledException(cancellationMessage, ex.CancellationToken);
                     }
@@ -31,5 +32,29 @@ public class TimeoutHelperTests
         await Assert.That(exception!.Message).Contains(cancellationMessage);
         await Assert.That(exception.InnerException).IsTypeOf<OperationCanceledException>();
         await Assert.That(exception.InnerException!.Message).IsEqualTo(cancellationMessage);
+    }
+
+    [Test]
+    public async Task Timeout_Does_Not_Preserve_Routine_Operation_Cancellation()
+    {
+        var exception = await Assert.That(async () =>
+            await TimeoutHelper.ExecuteWithTimeoutAsync(
+                async cancellationToken =>
+                {
+                    try
+                    {
+                        await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+                },
+                TimeSpan.FromMilliseconds(50),
+                CancellationToken.None))
+            .ThrowsExactly<TimeoutException>();
+
+        await Assert.That(exception!.InnerException).IsNull();
+        await Assert.That(exception.Message).DoesNotContain(nameof(OperationCanceledException));
     }
 }
