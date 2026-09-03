@@ -154,9 +154,8 @@ internal sealed class ReportAggregator
     internal IDisposable BeginSidecarPublication(string assemblyName, string suiteSalt)
     {
         System.IO.Directory.CreateDirectory(Directory);
-        var markerPath = GetPublishingMarkerPath(assemblyName, suiteSalt);
-        var stream = new FileStream(markerPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-        return new PublicationMarker(stream, markerPath);
+        var lockPath = GetPublishingMarkerPath(assemblyName, suiteSalt);
+        return new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
     }
 
     internal async Task<IDisposable?> AcquireSidecarPublicationAsync(
@@ -241,30 +240,6 @@ internal sealed class ReportAggregator
         }
 
         return results;
-    }
-
-    private sealed class PublicationMarker(FileStream stream, string path) : IDisposable
-    {
-        private FileStream? _stream = stream;
-
-        public void Dispose()
-        {
-            var ownedStream = Interlocked.Exchange(ref _stream, null);
-            if (ownedStream is null)
-            {
-                return;
-            }
-
-            ownedStream.Dispose();
-            try
-            {
-                File.Delete(path);
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
-                // A reader can recover the unlocked marker after this best-effort delete.
-            }
-        }
     }
 
     /// <summary>

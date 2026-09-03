@@ -442,7 +442,7 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
-    public async Task Abandoned_Publication_Marker_Is_Recovered(CancellationToken cancellationToken)
+    public async Task Publication_Lock_File_Is_Stable_And_Reused(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
@@ -453,15 +453,19 @@ public class HtmlReporterConfigurationTests
         {
             var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
             var reportData = CreateReportData();
-            using var publicationMarker = aggregator.BeginSidecarPublication(reportData.AssemblyName, "suite");
+            using var publicationLock = aggregator.BeginSidecarPublication(reportData.AssemblyName, "suite");
             var sidecarPath = aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(reportData), reportData.AssemblyName, "suite");
 
             aggregator.ReadAllSidecars().ShouldBeEmpty();
-            publicationMarker.Dispose();
-            File.WriteAllBytes(sidecarPath + ReportDataJson.SidecarPublishingExtension, []);
+            publicationLock.Dispose();
 
             aggregator.ReadAllSidecars().Single().AssemblyName.ShouldBe("Tests");
-            File.Exists(sidecarPath + ReportDataJson.SidecarPublishingExtension).ShouldBeFalse();
+            File.Exists(sidecarPath + ReportDataJson.SidecarPublishingExtension).ShouldBeTrue();
+
+            using (aggregator.BeginSidecarPublication(reportData.AssemblyName, "suite"))
+            {
+                aggregator.ReadAllSidecars().ShouldBeEmpty();
+            }
         }
         finally
         {

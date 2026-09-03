@@ -38,18 +38,19 @@ internal static class ReportDataJson
             return true;
         }
 
-        var publishingMarkerPath = sidecarPath + SidecarPublishingExtension;
-        if (!File.Exists(publishingMarkerPath))
+        var publicationLockPath = sidecarPath + SidecarPublishingExtension;
+        if (!File.Exists(publicationLockPath))
         {
             return false;
         }
 
         try
         {
-            using (new FileStream(publishingMarkerPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            // Lock file is stable: deleting it after releasing the handle lets another
+            // process lock the old inode while a third process creates and locks a new one.
+            using (new FileStream(publicationLockPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
             {
             }
-            File.Delete(publishingMarkerPath);
             return false;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

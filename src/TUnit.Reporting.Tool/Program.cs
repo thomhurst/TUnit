@@ -156,7 +156,7 @@ internal static class Program
         foreach (var file in Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, enumeration))
         {
             // This command is the designated final merge, so no publisher should still
-            // be active. Recover any publication marker left by a terminated process.
+            // be active. Skip any suite whose stable publication lock is still held.
             if (ReportDataJson.ShouldSkipSidecar(file))
             {
                 continue;
