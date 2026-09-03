@@ -22,7 +22,7 @@
     <ProjectReference Include="..\..\..\src\TUnit\TUnit.csproj" />
     <ProjectReference Include="..\..\..\src\TUnit.Aspire\TUnit.Aspire.csproj" />
     <ProjectReference Include="..\..\..\src\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.3.3" />
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.4.0" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="StackExchange.Redis" Version="3.1.31" />
     <PackageReference Include="RabbitMQ.Client" Version="7.2.2" />
