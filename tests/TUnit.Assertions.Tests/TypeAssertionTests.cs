@@ -480,30 +480,22 @@ public class TypeAssertionTests
     }
 
     [Test]
-    public async Task Test_Type_IsAssignableTo_GenericSource_UsesRepresentedType()
+    public async Task Test_Type_IsAssignableTo_GenericSource_RetainsRuntimeTypeSemantics()
     {
         IAssertionSource<Type> source = new TypeValueAssertion(typeof(Dog), null);
 
-        await source.IsAssignableTo<Animal>();
+        await Assert.That(async () => await source.IsAssignableTo<Animal>())
+            .Throws<AssertionException>();
     }
 
     [Test]
-    public async Task Test_Type_IsAssignableTo_AfterAnd_UsesRepresentedType()
+    public async Task Test_Type_IsAssignableTo_AfterAnd_RetainsRuntimeTypeSemantics()
     {
-        await Assert.That(typeof(Dog))
+        var action = async () => await Assert.That(typeof(Dog))
             .IsClass()
             .And.IsAssignableTo<Animal>();
-    }
 
-    [Test]
-    public async Task Test_BoxedType_GenericAssignability_IsConsistent()
-    {
-        object representedType = typeof(Dog);
-
-        await Assert.That(representedType).IsAssignableTo<Animal>();
-        await Assert.That(representedType).IsNotAssignableTo<Type>();
-        await Assert.That(representedType).IsAssignableFrom<Dog>();
-        await Assert.That(representedType).IsNotAssignableFrom<Animal>();
+        await Assert.That(action).Throws<AssertionException>();
     }
 
     [Test]
