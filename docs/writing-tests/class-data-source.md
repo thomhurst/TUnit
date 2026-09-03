@@ -4,6 +4,84 @@ The `ClassDataSource` attribute is used to instantiate and inject in new classes
 
 The attribute takes a generic type argument, which is the type of data you want to inject into your test.
 
+The type created by `ClassDataSource<T>` must have a public parameterless constructor. Constructor injection is supported on the test class receiving the data source, but not on the data source type itself.
+
+For nested dependencies, use property injection on the data source type:
+
+```
+[ClassDataSource<ApplicationFixture>(Shared = SharedType.PerTestSession)]
+
+public class ApplicationTests(ApplicationFixture fixture)
+
+{
+
+    [Test]
+
+    public async Task Application_Is_Available()
+
+    {
+
+        await Assert.That(fixture.IsAvailable).IsTrue();
+
+    }
+
+}
+
+
+
+public class ApplicationFixture : IAsyncInitializer
+
+{
+
+    [ClassDataSource<DatabaseFixture>(Shared = SharedType.PerTestSession)]
+
+    public required DatabaseFixture Database { get; init; }
+
+
+
+    public bool IsAvailable { get; private set; }
+
+
+
+    public Task InitializeAsync()
+
+    {
+
+        // Database has already been initialized.
+
+        IsAvailable = Database.IsAvailable;
+
+        return Task.CompletedTask;
+
+    }
+
+}
+
+
+
+public class DatabaseFixture : IAsyncInitializer
+
+{
+
+    public bool IsAvailable { get; private set; }
+
+
+
+    public Task InitializeAsync()
+
+    {
+
+        IsAvailable = true;
+
+        return Task.CompletedTask;
+
+    }
+
+}
+```
+
+See [Nested Property Injection](/docs/writing-tests/property-injection.md#nested-property-injection) for dependency chains and lifecycle details.
+
 It also takes an optional `Shared` argument, controlling whether you want to share the instance among other tests. This is useful when it is expensive to create an object and you want to reuse the same instance across many tests.
 
 Avoid mutating the state of shared objects within tests. Because tests run concurrently, the execution order is unpredictable, and shared mutable state leads to flaky tests.
