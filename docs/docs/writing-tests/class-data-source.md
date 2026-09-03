@@ -4,7 +4,7 @@ The `ClassDataSource` attribute is used to instantiate and inject in new classes
 
 The attribute takes a generic type argument, which is the type of data you want to inject into your test.
 
-The type created by `ClassDataSource<T>` must have an accessible parameterless constructor. Constructor injection is supported on the test class receiving the data source, but not on the data source type itself.
+The type created by `ClassDataSource<T>` must have a public parameterless constructor. Constructor injection is supported on the test class receiving the data source, but not on the data source type itself.
 
 For nested dependencies, use property injection on the data source type:
 

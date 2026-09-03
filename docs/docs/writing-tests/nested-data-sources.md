@@ -23,7 +23,7 @@ This typically leads to complex setup code with manual initialization chains.
 
 TUnit automatically initializes nested data sources in the correct order using any data source attribute that implements `IDataSourceAttribute` (such as `[ClassDataSource<T>]`).
 
-Declare nested data sources on properties. Constructor-injected dependencies inside a data source type are not currently supported because `ClassDataSource<T>` requires that type to have an accessible parameterless constructor.
+Declare nested data sources on properties. Constructor-injected dependencies inside a data source type are not currently supported because `ClassDataSource<T>` requires that type to have a public parameterless constructor.
 
 ## Basic Example
 

@@ -157,7 +157,7 @@ public class OrderRepositoryTests
 }
 ```
 
-Property injection keeps base test classes clean — subclasses inherit the fixture without re-threading constructor parameters. Prefer a constructor parameter on the test class? That works too. Types created by `ClassDataSource<T>` require an accessible parameterless constructor; use property injection for their nested dependencies. Disposal is reference-counted, so shared fixtures are torn down exactly when the last test using them finishes.
+Property injection keeps base test classes clean — subclasses inherit the fixture without re-threading constructor parameters. Prefer a constructor parameter on the test class? That works too. Types created by `ClassDataSource<T>` require a public parameterless constructor; use property injection for their nested dependencies. Disposal is reference-counted, so shared fixtures are torn down exactly when the last test using them finishes.
 
 ### Parallelism you control
 
