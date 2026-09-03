@@ -134,7 +134,7 @@ public class IsAssignableToAssertion<TTarget, TValue> : Assertion<TTarget>
             return AssertionResult.Failed("value was null");
         }
 
-        var actualType = objectToCheck.GetType();
+        var actualType = objectToCheck is Type typeToCheck ? typeToCheck : objectToCheck.GetType();
 
         if (_targetType.IsAssignableFrom(actualType))
         {
@@ -184,7 +184,7 @@ public class IsNotAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed("value was null"));
         }
 
-        var actualType = objectToCheck.GetType();
+        var actualType = objectToCheck is Type typeToCheck ? typeToCheck : objectToCheck.GetType();
 
         if (!_targetType.IsAssignableFrom(actualType))
         {
@@ -233,7 +233,7 @@ public class IsAssignableFromAssertion<TSource, TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed("value was null"));
         }
 
-        var actualType = objectToCheck.GetType();
+        var actualType = objectToCheck is Type typeToCheck ? typeToCheck : objectToCheck.GetType();
 
         if (actualType.IsAssignableFrom(_sourceType))
         {
@@ -281,7 +281,7 @@ public class IsNotAssignableFromAssertion<TSource, TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed("value was null"));
         }
 
-        var actualType = objectToCheck.GetType();
+        var actualType = objectToCheck is Type typeToCheck ? typeToCheck : objectToCheck.GetType();
 
         if (!actualType.IsAssignableFrom(_sourceType))
         {

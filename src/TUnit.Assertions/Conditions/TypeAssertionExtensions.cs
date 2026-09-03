@@ -1,4 +1,5 @@
 using TUnit.Assertions.Attributes;
+using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
@@ -83,4 +84,15 @@ namespace TUnit.Assertions.Conditions;
 [AssertionFrom<Type>(nameof(Type.IsCOMObject), CustomName = "IsNotCOMObject", NegateLogic = true, ExpectationMessage = "be a COM object")]
 public static partial class TypeAssertionExtensions
 {
+    [GenerateAssertion(ExpectationMessage = "be assignable to {expectedType}", InlineMethodBody = true)]
+    public static AssertionResult IsAssignableTo(this Type value, Type expectedType)
+        => expectedType.IsAssignableFrom(value)
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"type {value.Name} is not assignable to {expectedType.Name}");
+
+    [GenerateAssertion(ExpectationMessage = "be assignable from {sourceType}", InlineMethodBody = true)]
+    public static AssertionResult IsAssignableFrom(this Type value, Type sourceType)
+        => value.IsAssignableFrom(sourceType)
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"type {value.Name} is not assignable from {sourceType.Name}");
 }

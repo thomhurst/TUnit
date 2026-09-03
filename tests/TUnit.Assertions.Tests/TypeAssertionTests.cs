@@ -5,6 +5,9 @@ namespace TUnit.Assertions.Tests;
 
 public class TypeAssertionTests
 {
+    private class Animal { }
+    private class Dog : Animal { }
+
     // Test types for various scenarios
     private class TestClass { }
     private interface ITestInterface { }
@@ -457,6 +460,30 @@ public class TypeAssertionTests
     {
         var type = typeof(TestClass);
         await Assert.That(type).IsNotCOMObject();
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableTo_Generic_UsesRepresentedType()
+    {
+        await Assert.That(typeof(Dog)).IsAssignableTo<Animal>();
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableFrom_Generic_UsesRepresentedType()
+    {
+        await Assert.That(typeof(Animal)).IsAssignableFrom<Dog>();
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableTo_RuntimeTypeOverload_Passes()
+    {
+        await Assert.That(typeof(Dog)).IsAssignableTo(typeof(Animal));
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableFrom_RuntimeTypeOverload_Passes()
+    {
+        await Assert.That(typeof(Animal)).IsAssignableFrom(typeof(Dog));
     }
 
 #if NET5_0_OR_GREATER
