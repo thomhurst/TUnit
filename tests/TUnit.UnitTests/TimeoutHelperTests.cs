@@ -57,4 +57,33 @@ public class TimeoutHelperTests
         await Assert.That(exception!.InnerException).IsNull();
         await Assert.That(exception.Message).DoesNotContain(nameof(OperationCanceledException));
     }
+
+    [Test]
+    public async Task Timeout_Preserves_Custom_Task_Cancellation()
+    {
+        const string cancellationMessage = "Custom task cancellation diagnostic";
+        var diagnosticException = new InvalidOperationException("Inner diagnostic");
+
+        var exception = await Assert.That(async () =>
+            await TimeoutHelper.ExecuteWithTimeoutAsync(
+                async cancellationToken =>
+                {
+                    try
+                    {
+                        await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        await Task.Delay(50);
+                        throw new TaskCanceledException(cancellationMessage, diagnosticException, cancellationToken);
+                    }
+                },
+                TimeSpan.FromMilliseconds(50),
+                CancellationToken.None))
+            .ThrowsExactly<TimeoutException>();
+
+        var taskCanceledException = await Assert.That(exception!.InnerException).IsTypeOf<TaskCanceledException>();
+        await Assert.That(taskCanceledException!.Message).IsEqualTo(cancellationMessage);
+        await Assert.That(taskCanceledException.InnerException).IsSameReferenceAs(diagnosticException);
+    }
 }

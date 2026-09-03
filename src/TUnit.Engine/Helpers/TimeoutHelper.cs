@@ -106,18 +106,24 @@ internal static class TimeoutHelper
 
     private static bool IsRoutineCancellation(Exception? exception, CancellationToken timeoutToken)
     {
-        if (exception is TaskCanceledException)
+        if (exception is not OperationCanceledException
+            {
+                InnerException: null
+            } operationCanceledException
+            || operationCanceledException.CancellationToken != timeoutToken)
         {
-            return true;
+            return false;
         }
 
-        return exception is OperationCanceledException
+        return operationCanceledException switch
         {
-            InnerException: null
-        } operationCanceledException
-            && operationCanceledException.GetType() == typeof(OperationCanceledException)
-            && operationCanceledException.CancellationToken == timeoutToken
-            && operationCanceledException.Message == new OperationCanceledException(timeoutToken).Message;
+            TaskCanceledException taskCanceledException
+                when taskCanceledException.GetType() == typeof(TaskCanceledException) =>
+                taskCanceledException.Message == new TaskCanceledException().Message,
+            { } when operationCanceledException.GetType() == typeof(OperationCanceledException) =>
+                operationCanceledException.Message == new OperationCanceledException(timeoutToken).Message,
+            _ => false
+        };
     }
 
     private static async Task<Exception?> ObserveExceptionDuringGracePeriodAsync(Task executionTask)
