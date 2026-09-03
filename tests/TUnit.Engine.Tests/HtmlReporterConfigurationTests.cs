@@ -367,7 +367,7 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
-    public async Task Shared_Sidecar_Remains_Excluded_Until_Lock_Wait_Completes(CancellationToken cancellationToken)
+    public async Task Shared_Sidecar_Stays_Hidden_Until_Lock_Wait_Completes(CancellationToken cancellationToken)
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
         var aggregationDirectory = Path.Combine(tempDirectory, "aggregate");
@@ -389,7 +389,7 @@ public class HtmlReporterConfigurationTests
                 writeTask = reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(), htmlPath, cancellationToken);
 
                 File.Exists(HtmlReporter.GetSidecarPath(htmlPath)).ShouldBeTrue();
-                Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").ShouldBeEmpty();
+                Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(1);
                 Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarPublishingExtension}").Length.ShouldBe(1);
                 aggregator.ReadAllSidecars().ShouldBeEmpty();
             }
@@ -498,8 +498,9 @@ public class HtmlReporterConfigurationTests
                 cancelled.Token);
 
             githubReporter.SuppressPerSuiteSummary.ShouldBeFalse();
-            aggregator.ReadAllSidecars().ShouldBeEmpty();
-            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExclusionExtension}").Length.ShouldBe(1);
+            aggregator.ReadAllSidecars().Single().AssemblyName.ShouldBe("Tests");
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExclusionExtension}").ShouldBeEmpty();
+            File.Exists(Path.Combine(aggregationDirectory, ReportDataJson.MergedReportFileName)).ShouldBeFalse();
         }
         finally
         {

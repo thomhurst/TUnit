@@ -247,9 +247,20 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            // Shared publication is serialized with cleanup. A later process can
-            // recover the marker immediately if this publisher terminates.
-            using var publicationMarker = aggregator.BeginSidecarPublication(reportData.AssemblyName, htmlOutputPath);
+            // Serialize shared publication with cleanup. Persist and expose the latest
+            // sidecar before waiting for the aggregate lock, so a cancelled or timed-out
+            // refresh still leaves evidence for a later merge.
+            using var publicationMarker = await aggregator.AcquireSidecarPublicationAsync(
+                reportData.AssemblyName,
+                htmlOutputPath,
+                CancellationToken.None);
+            if (publicationMarker is null)
+            {
+                return;
+            }
+
+            aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+            aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
 
             IDisposable? aggregationLock;
             try
@@ -268,11 +279,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
             using (aggregationLock)
             {
-                // A disabled predecessor may have left a durable exclusion after its
-                // cleanup timed out. Publish and expose the replacement atomically
-                // with respect to cleanup so that predecessor cannot delete it.
-                aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
-                aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
                 publicationMarker.Dispose();
 
                 RefreshAggregatedOutputs(aggregator);
@@ -307,6 +313,16 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
+            using var publicationMarker = await aggregator.AcquireSidecarPublicationAsync(
+                assemblyName,
+                htmlOutputPath,
+                CancellationToken.None);
+            if (publicationMarker is null)
+            {
+                aggregator.ExcludeSidecar(assemblyName, htmlOutputPath);
+                return;
+            }
+
             // Durable marker prevents every later merge from reading stale suite data even
             // when this process cannot acquire the lock to delete it immediately.
             aggregator.ExcludeSidecar(assemblyName, htmlOutputPath);
@@ -316,18 +332,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             using var aggregationLock = await aggregator.AcquireLockAsync(CancellationToken.None);
             if (aggregationLock is null)
             {
-                // An enabled writer may have cleared the first marker while holding the
-                // lock. Reassert disabled state because this cleanup completed later.
-                aggregator.ExcludeSidecar(assemblyName, htmlOutputPath);
                 return;
             }
 
-            // An enabled publisher that acquired the lock first clears this marker.
-            // In that case its fresh sidecar supersedes this older cleanup request.
-            if (aggregator.IsSidecarExcluded(assemblyName, htmlOutputPath))
-            {
-                aggregator.DeleteSidecar(assemblyName, htmlOutputPath);
-            }
+            aggregator.DeleteSidecar(assemblyName, htmlOutputPath);
             RefreshAggregatedOutputs(aggregator);
             aggregator.IncludeSidecar(assemblyName, htmlOutputPath);
         }

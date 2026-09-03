@@ -151,15 +151,39 @@ internal sealed class ReportAggregator
         File.Delete(GetExclusionMarkerPath(assemblyName, suiteSalt));
     }
 
-    internal bool IsSidecarExcluded(string assemblyName, string suiteSalt) =>
-        File.Exists(GetExclusionMarkerPath(assemblyName, suiteSalt));
-
     internal IDisposable BeginSidecarPublication(string assemblyName, string suiteSalt)
     {
         System.IO.Directory.CreateDirectory(Directory);
         var markerPath = GetPublishingMarkerPath(assemblyName, suiteSalt);
         var stream = new FileStream(markerPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
         return new PublicationMarker(stream, markerPath);
+    }
+
+    internal async Task<IDisposable?> AcquireSidecarPublicationAsync(
+        string assemblyName,
+        string suiteSalt,
+        CancellationToken cancellationToken)
+    {
+        for (var attempt = 1; attempt <= LockMaxAttempts; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                return BeginSidecarPublication(assemblyName, suiteSalt);
+            }
+            catch (IOException)
+            {
+                if (attempt == LockMaxAttempts)
+                {
+                    break;
+                }
+
+                await Task.Delay(LockRetryDelayMs + Random.Shared.Next(0, 100), cancellationToken);
+            }
+        }
+
+        Console.WriteLine("Warning: Report sidecar publication lock timed out; keeping the local per-suite report.");
+        return null;
     }
 
     internal bool HasSidecarState(string assemblyName, string suiteSalt)
