@@ -269,6 +269,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                     aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
                 }
 
+                // A disabled predecessor may have left a durable exclusion after its
+                // cleanup timed out. The new bytes become authoritative when this
+                // publication is exposed, even if aggregate refresh was cancelled.
+                aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
                 publicationMarker.Dispose();
 
                 if (aggregationLock is null)

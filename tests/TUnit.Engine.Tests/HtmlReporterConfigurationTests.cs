@@ -487,10 +487,12 @@ public class HtmlReporterConfigurationTests
             using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
             using var cancelled = new CancellationTokenSource();
             cancelled.Cancel();
+            var htmlPath = Path.Combine(tempDirectory, "suite-report.html");
+            aggregator.ExcludeSidecar("Tests", htmlPath);
 
             await reporter.TryWriteSidecarAndAggregateAsync(
                 CreateReportData(),
-                Path.Combine(tempDirectory, "suite-report.html"),
+                htmlPath,
                 cancelled.Token);
 
             githubReporter.SuppressPerSuiteSummary.ShouldBeFalse();
