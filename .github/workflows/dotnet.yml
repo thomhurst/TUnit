@@ -31,14 +31,14 @@ jobs:
       id-token: write
 
     steps:
-      - name: Configure Ubuntu mirror fallback
+      - name: Configure Ubuntu APT retries
         if: matrix.os == 'ubuntu-latest'
         run: |
-          printf '%s\tpriority:%s\n' \
-            'http://archive.ubuntu.com/ubuntu/' '1' \
-            'http://azure.archive.ubuntu.com/ubuntu/' '2' \
-            'https://security.ubuntu.com/ubuntu/' '3' |
-            sudo tee /etc/apt/apt-mirrors.txt > /dev/null
+          sudo tee /etc/apt/apt.conf.d/80-tunit-retries > /dev/null <<'EOF'
+          Acquire::Retries "3";
+          Acquire::http::Timeout "30";
+          Acquire::https::Timeout "30";
+          EOF
 
       - name: Free Disk Space (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
