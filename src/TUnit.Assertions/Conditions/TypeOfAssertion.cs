@@ -148,6 +148,40 @@ public class IsAssignableToAssertion<TTarget, TValue> : Assertion<TTarget>
 }
 
 /// <summary>
+/// Asserts that a represented <see cref="Type"/> is assignable to a target type while
+/// retaining the represented type as the assertion value.
+/// </summary>
+public sealed class TypeIsAssignableToAssertion<TTarget> : Assertion<Type>
+{
+    private readonly Type _targetType = typeof(TTarget);
+
+    public TypeIsAssignableToAssertion(AssertionContext<Type> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Type> metadata)
+    {
+        if (metadata.Exception is { } exception)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
+        }
+
+        if (metadata.Value is not { } representedType)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        return _targetType.IsAssignableFrom(representedType)
+            ? AssertionResult._passedTask
+            : Task.FromResult(AssertionResult.Failed(
+                $"type {representedType.Name} is not assignable to {_targetType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to be assignable to {_targetType.Name}";
+}
+
+/// <summary>
 /// Asserts that a value's type is NOT assignable to a specific type.
 /// Works with both direct value assertions and exception assertions (via .And after Throws).
 /// </summary>

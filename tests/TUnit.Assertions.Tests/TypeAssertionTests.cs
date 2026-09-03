@@ -465,7 +465,17 @@ public class TypeAssertionTests
     [Test]
     public async Task Test_Type_IsAssignableTo_Generic_UsesRepresentedType()
     {
-        await Assert.That(typeof(Dog)).IsAssignableTo<Animal>();
+        Type? result = await Assert.That(typeof(Dog)).IsAssignableTo<Animal>();
+
+        await Assert.That(result).IsSameReferenceAs(typeof(Dog));
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableTo_Generic_RetainsTypeForChaining()
+    {
+        await Assert.That(typeof(Dog))
+            .IsAssignableTo<Animal>()
+            .And.IsClass();
     }
 
     [Test]

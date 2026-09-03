@@ -151,6 +151,7 @@ namespace
         public static .<object?> That(.IEnumerable value, [.("value")] string? expression = null) { }
         public static . That(<.> action, [.("action")] string? expression = null) { }
         public static . That(. task, [.("task")] string? expression = null) { }
+        public static . That(? value, [.("value")] string? expression = null) { }
         public static .<string> That(.StringValue value, [.("value")] string? expression = null) { }
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
@@ -2039,7 +2040,19 @@ namespace .Conditions
     [.<>("IsValueType", ExpectationMessage="be a value type")]
     [.<>("IsVisible", CustomName="IsNotVisible", ExpectationMessage="be visible", NegateLogic=true)]
     [.<>("IsVisible", ExpectationMessage="be visible")]
-    public static class TypeAssertionExtensions { }
+    public static class TypeAssertionExtensions
+    {
+        [.(ExpectationMessage="be assignable from {sourceType}", InlineMethodBody=true)]
+        public static . IsAssignableFrom(this  value,  sourceType) { }
+        [.(ExpectationMessage="be assignable to {expectedType}", InlineMethodBody=true)]
+        public static . IsAssignableTo(this  value,  expectedType) { }
+    }
+    public sealed class TypeIsAssignableToAssertion<TTarget> : .<>
+    {
+        public TypeIsAssignableToAssertion(.<> context) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public class TypeOfAssertion<TFrom, TTo> : .<TTo>
     {
         public TypeOfAssertion(.<TFrom> parentContext) { }
@@ -5722,6 +5735,10 @@ namespace .Extensions
         public static . DoesNotContainGenericParameters(this .<> source) { }
         public static . IsAbstract(this .<> source) { }
         public static . IsArray(this .<> source) { }
+        public static ._IsAssignableFrom_Type_Assertion IsAssignableFrom<TActual>(this .<TActual> source,  sourceType, [.("sourceType")] string? sourceTypeExpression = null)
+            where TActual :  { }
+        public static ._IsAssignableTo_Type_Assertion IsAssignableTo<TActual>(this .<TActual> source,  expectedType, [.("expectedType")] string? expectedTypeExpression = null)
+            where TActual :  { }
         public static . IsByRef(this .<> source) { }
         public static . IsCOMObject(this .<> source) { }
         public static . IsClass(this .<> source) { }
@@ -5900,6 +5917,18 @@ namespace .Extensions
     public class TypeIsVisibleAssertion : .<>
     {
         public TypeIsVisibleAssertion(.<> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Type_IsAssignableFrom_Type_Assertion : .<>
+    {
+        public Type_IsAssignableFrom_Type_Assertion(.<> context,  sourceType) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Type_IsAssignableTo_Type_Assertion : .<>
+    {
+        public Type_IsAssignableTo_Type_Assertion(.<> context,  expectedType) { }
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -6485,6 +6514,11 @@ namespace .Sources
             where TException :  { }
         public .<TException> ThrowsExactly<TException>()
             where TException :  { }
+    }
+    public sealed class TypeValueAssertion : .<>
+    {
+        public TypeValueAssertion(? value, string? expression) { }
+        public new .<TTarget> IsAssignableTo<TTarget>() { }
     }
     public class ValueAssertion<TValue> : ., .<TValue>
     {
