@@ -132,7 +132,6 @@ internal sealed class ReportAggregator
 
         var path = GetSidecarPath(assemblyName, suiteSalt);
         AtomicFile.WriteAllBytes(path, sidecarUtf8Json);
-        AtomicFile.WriteAllBytes(GetGenerationMarkerPath(path), Guid.NewGuid().ToByteArray());
         return path;
     }
 
@@ -141,44 +140,44 @@ internal sealed class ReportAggregator
         System.IO.Directory.CreateDirectory(Directory);
         var path = GetPendingSidecarPath(assemblyName, suiteSalt);
         AtomicFile.WriteAllBytes(path, sidecarUtf8Json);
-        AtomicFile.WriteAllBytes(GetGenerationMarkerPath(path), Guid.NewGuid().ToByteArray());
     }
 
     internal void DeletePendingSidecar(string assemblyName, string suiteSalt)
     {
         var path = GetPendingSidecarPath(assemblyName, suiteSalt);
         File.Delete(path);
-        File.Delete(GetGenerationMarkerPath(path));
     }
 
-    internal byte[]? ReadEffectiveSidecarGeneration(string assemblyName, string suiteSalt)
+    internal string? ReadEffectiveSidecarGeneration(string assemblyName, string suiteSalt)
     {
         var pendingPath = GetPendingSidecarPath(assemblyName, suiteSalt);
-        var generationPath = File.Exists(pendingPath)
-            ? GetGenerationMarkerPath(pendingPath)
-            : GetGenerationMarkerPath(GetSidecarPath(assemblyName, suiteSalt));
-        return File.Exists(generationPath) ? File.ReadAllBytes(generationPath) : null;
+        var sidecarPath = File.Exists(pendingPath)
+            ? pendingPath
+            : GetSidecarPath(assemblyName, suiteSalt);
+        return File.Exists(sidecarPath)
+            ? ReportDataJson.GetPublicationGeneration(File.ReadAllBytes(sidecarPath))
+            : null;
     }
 
     internal void ExcludeSidecar(string assemblyName, string suiteSalt)
     {
         System.IO.Directory.CreateDirectory(Directory);
         var currentGeneration = ReadEffectiveSidecarGeneration(assemblyName, suiteSalt);
-        AtomicFile.WriteAllBytes(GetExclusionMarkerPath(assemblyName, suiteSalt), currentGeneration ?? []);
+        AtomicFile.WriteAllText(GetExclusionMarkerPath(assemblyName, suiteSalt), currentGeneration ?? "");
     }
 
-    internal void ExcludeSidecarIfGenerationMatches(string assemblyName, string suiteSalt, byte[]? expectedGeneration)
+    internal void ExcludeSidecarIfGenerationMatches(string assemblyName, string suiteSalt, string? expectedGeneration)
     {
         System.IO.Directory.CreateDirectory(Directory);
         var currentGeneration = ReadEffectiveSidecarGeneration(assemblyName, suiteSalt);
         if (expectedGeneration is null
             ? currentGeneration is not null
-            : currentGeneration is null || !expectedGeneration.AsSpan().SequenceEqual(currentGeneration))
+            : !expectedGeneration.Equals(currentGeneration, StringComparison.Ordinal))
         {
             return;
         }
 
-        AtomicFile.WriteAllBytes(GetExclusionMarkerPath(assemblyName, suiteSalt), currentGeneration ?? []);
+        AtomicFile.WriteAllText(GetExclusionMarkerPath(assemblyName, suiteSalt), currentGeneration ?? "");
     }
 
     internal void IncludeSidecar(string assemblyName, string suiteSalt)
@@ -229,8 +228,6 @@ internal sealed class ReportAggregator
         return File.Exists(sidecarPath)
                || File.Exists(pendingPath)
                || File.Exists(sidecarPath + ReportDataJson.SidecarExclusionExtension)
-               || File.Exists(GetGenerationMarkerPath(sidecarPath))
-               || File.Exists(GetGenerationMarkerPath(pendingPath))
                || File.Exists(sidecarPath + ReportDataJson.SidecarPublishingExtension);
     }
 
@@ -258,13 +255,14 @@ internal sealed class ReportAggregator
         {
             try
             {
-                if (ReportDataJson.ShouldSkipSidecar(file))
+                if (ReportDataJson.IsSidecarPublicationInProgress(file))
                 {
                     continue;
                 }
 
                 var bytes = File.ReadAllBytes(file);
-                if (seenDigests.Add(Convert.ToBase64String(sha.ComputeHash(bytes)))
+                if (!ReportDataJson.IsSidecarExcluded(file, bytes)
+                    && seenDigests.Add(Convert.ToBase64String(sha.ComputeHash(bytes)))
                     && ReportDataJson.TryDeserialize((ReadOnlyMemory<byte>)bytes) is { } data)
                 {
                     results.Add(data);
@@ -352,9 +350,6 @@ internal sealed class ReportAggregator
     {
         return GetSidecarPath(assemblyName, suiteSalt) + ReportDataJson.SidecarPublishingExtension;
     }
-
-    private static string GetGenerationMarkerPath(string sidecarPath)
-        => sidecarPath + ReportDataJson.SidecarGenerationExtension;
 
     private string GetPendingSidecarPath(string assemblyName, string suiteSalt)
         => ReportDataJson.GetPendingSidecarPath(GetSidecarPath(assemblyName, suiteSalt));

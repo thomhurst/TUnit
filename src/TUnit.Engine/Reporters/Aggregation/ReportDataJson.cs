@@ -27,37 +27,39 @@ internal static class ReportDataJson
     internal const string SidecarExtension = ".tunit-report.json";
     internal const string SidecarPendingSegment = ".pending";
     internal const string SidecarExclusionExtension = ".excluded";
-    internal const string SidecarGenerationExtension = ".generation";
     internal const string SidecarPublishingExtension = ".publishing";
 
     /// <summary>Merged HTML report filename, shared by the engine and the tool's default output.</summary>
     internal const string MergedReportFileName = "merged-report.html";
 
-    internal static bool ShouldSkipSidecar(string sidecarPath)
+    internal static bool IsSidecarExcluded(string sidecarPath, ReadOnlySpan<byte> sidecarUtf8Json)
     {
         var canonicalPath = GetCanonicalSidecarPath(sidecarPath);
         var exclusionPath = canonicalPath + SidecarExclusionExtension;
-        if (File.Exists(exclusionPath))
+        if (!File.Exists(exclusionPath))
         {
-            var generationPath = sidecarPath + SidecarGenerationExtension;
-            if (!File.Exists(generationPath))
-            {
-                // Exclusions written before generation tracking apply to their legacy
-                // sidecar. A later publication writes a generation and supersedes them.
-                return true;
-            }
-
-            try
-            {
-                return File.ReadAllBytes(exclusionPath).AsSpan()
-                    .SequenceEqual(File.ReadAllBytes(generationPath));
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
-                return true;
-            }
+            return false;
         }
 
+        var generation = GetPublicationGeneration(sidecarUtf8Json);
+        if (generation is null)
+        {
+            // Exclusions created for sidecars from before generation tracking remain valid.
+            return true;
+        }
+
+        try
+        {
+            return File.ReadAllText(exclusionPath).Equals(generation, StringComparison.Ordinal);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return true;
+        }
+    }
+
+    internal static bool IsSidecarPublicationInProgress(string sidecarPath)
+    {
         // Pending sidecars are complete atomic files written only after a publisher's
         // per-suite lock wait expires. The canonical publisher cannot mutate them.
         if (IsPendingSidecar(sidecarPath))
@@ -65,7 +67,7 @@ internal static class ReportDataJson
             return false;
         }
 
-        var publicationLockPath = canonicalPath + SidecarPublishingExtension;
+        var publicationLockPath = sidecarPath + SidecarPublishingExtension;
         if (!File.Exists(publicationLockPath))
         {
             return false;
@@ -84,6 +86,29 @@ internal static class ReportDataJson
         {
             return true;
         }
+    }
+
+    internal static string? GetPublicationGeneration(ReadOnlySpan<byte> sidecarUtf8Json)
+    {
+        try
+        {
+            var reader = new Utf8JsonReader(sidecarUtf8Json);
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.PropertyName
+                    && reader.ValueTextEquals("publicationGeneration")
+                    && reader.Read()
+                    && reader.TokenType == JsonTokenType.String)
+                {
+                    return reader.GetString();
+                }
+            }
+        }
+        catch (JsonException)
+        {
+        }
+
+        return null;
     }
 
     internal static bool IsPendingSidecar(string sidecarPath)
@@ -123,6 +148,7 @@ internal static class ReportDataJson
     {
         w.WriteStartObject();
         w.WriteNumber("schemaVersion", SchemaVersion);
+        w.WriteString("publicationGeneration", data.PublicationGeneration ?? Guid.NewGuid().ToString("N"));
         w.WriteString("assemblyName", data.AssemblyName);
         w.WriteString("machineName", data.MachineName);
         w.WriteString("timestamp", data.Timestamp);
@@ -395,6 +421,7 @@ internal static class ReportDataJson
         return new ReportData
         {
             AssemblyName = GetString(root, "assemblyName") ?? "Unknown",
+            PublicationGeneration = GetString(root, "publicationGeneration"),
             MachineName = GetString(root, "machineName") ?? "",
             Timestamp = GetString(root, "timestamp") ?? "",
             TUnitVersion = GetString(root, "tunitVersion") ?? "",

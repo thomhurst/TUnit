@@ -17,6 +17,7 @@ public class ReportDataJsonTests
 
         await Assert.That(restored).IsNotNull();
         await Assert.That(restored!.AssemblyName).IsEqualTo("My.Tests");
+        await Assert.That(restored.PublicationGeneration).IsNotNull();
         await Assert.That(restored.MachineName).IsEqualTo(original.MachineName);
         await Assert.That(restored.Timestamp).IsEqualTo(original.Timestamp);
         await Assert.That(restored.TUnitVersion).IsEqualTo(original.TUnitVersion);

@@ -159,7 +159,7 @@ internal static class Program
         {
             // This command is the designated final merge, so no publisher should still
             // be active. Skip any suite whose stable publication lock is still held.
-            if (ReportDataJson.ShouldSkipSidecar(file))
+            if (ReportDataJson.IsSidecarPublicationInProgress(file))
             {
                 continue;
             }
@@ -174,6 +174,11 @@ internal static class Program
                 // Locked, deleted mid-enumeration, or unreadable — count it with the other
                 // skipped sidecars rather than failing the whole merge over one bad file.
                 skipped++;
+                continue;
+            }
+
+            if (ReportDataJson.IsSidecarExcluded(file, bytes))
+            {
                 continue;
             }
 
