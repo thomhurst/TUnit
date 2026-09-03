@@ -134,7 +134,7 @@ public class IsAssignableToAssertion<TTarget, TValue> : Assertion<TTarget>
             return AssertionResult.Failed("value was null");
         }
 
-        var actualType = objectToCheck.GetType();
+        var actualType = objectToCheck is Type typeToCheck ? typeToCheck : objectToCheck.GetType();
 
         if (_targetType.IsAssignableFrom(actualType))
         {

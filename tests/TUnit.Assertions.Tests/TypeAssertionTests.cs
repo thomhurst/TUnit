@@ -480,12 +480,30 @@ public class TypeAssertionTests
     }
 
     [Test]
-    public async Task Test_Type_IsAssignableTo_GenericSource_RetainsRuntimeTypeSemantics()
+    public async Task Test_Type_IsAssignableTo_GenericSource_UsesRepresentedType()
     {
         IAssertionSource<Type> source = new TypeValueAssertion(typeof(Dog), null);
 
-        await Assert.That(async () => await source.IsAssignableTo<Animal>())
-            .Throws<AssertionException>();
+        await source.IsAssignableTo<Animal>();
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableTo_AfterAnd_UsesRepresentedType()
+    {
+        await Assert.That(typeof(Dog))
+            .IsClass()
+            .And.IsAssignableTo<Animal>();
+    }
+
+    [Test]
+    public async Task Test_BoxedType_GenericAssignability_IsConsistent()
+    {
+        object representedType = typeof(Dog);
+
+        await Assert.That(representedType).IsAssignableTo<Animal>();
+        await Assert.That(representedType).IsNotAssignableTo<Type>();
+        await Assert.That(representedType).IsAssignableFrom<Dog>();
+        await Assert.That(representedType).IsNotAssignableFrom<Animal>();
     }
 
     [Test]
@@ -504,6 +522,24 @@ public class TypeAssertionTests
     public async Task Test_Type_IsAssignableFrom_RuntimeTypeOverload_Passes()
     {
         await Assert.That(typeof(Animal)).IsAssignableFrom(typeof(Dog));
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableTo_NullRuntimeType_FailsAssertion()
+    {
+        var action = async () => await Assert.That(typeof(Dog)).IsAssignableTo(null!);
+
+        var exception = await Assert.That(action).Throws<AssertionException>();
+        await Assert.That(exception.Message).Contains("expected type was null");
+    }
+
+    [Test]
+    public async Task Test_Type_IsAssignableFrom_NullRuntimeType_FailsAssertion()
+    {
+        var action = async () => await Assert.That(typeof(Animal)).IsAssignableFrom(null!);
+
+        var exception = await Assert.That(action).Throws<AssertionException>();
+        await Assert.That(exception.Message).Contains("source type was null");
     }
 
 #if NET5_0_OR_GREATER

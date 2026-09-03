@@ -86,13 +86,19 @@ public static partial class TypeAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "be assignable to {expectedType}", InlineMethodBody = true)]
     public static AssertionResult IsAssignableTo(this Type value, Type expectedType)
-        => expectedType.IsAssignableFrom(value)
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"type {value.Name} is not assignable to {expectedType.Name}");
+        => expectedType switch
+        {
+            null => AssertionResult.Failed("expected type was null"),
+            _ when expectedType.IsAssignableFrom(value) => AssertionResult.Passed,
+            _ => AssertionResult.Failed($"type {value.Name} is not assignable to {expectedType.Name}"),
+        };
 
     [GenerateAssertion(ExpectationMessage = "be assignable from {sourceType}", InlineMethodBody = true)]
     public static AssertionResult IsAssignableFrom(this Type value, Type sourceType)
-        => value.IsAssignableFrom(sourceType)
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"type {value.Name} is not assignable from {sourceType.Name}");
+        => sourceType switch
+        {
+            null => AssertionResult.Failed("source type was null"),
+            _ when value.IsAssignableFrom(sourceType) => AssertionResult.Passed,
+            _ => AssertionResult.Failed($"type {value.Name} is not assignable from {sourceType.Name}"),
+        };
 }
