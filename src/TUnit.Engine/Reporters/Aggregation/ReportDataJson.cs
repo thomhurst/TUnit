@@ -26,9 +26,37 @@ internal static class ReportDataJson
     /// <summary>File extension shared by every sidecar so aggregators can discover them.</summary>
     internal const string SidecarExtension = ".tunit-report.json";
     internal const string SidecarExclusionExtension = ".excluded";
+    internal const string SidecarPublishingExtension = ".publishing";
 
     /// <summary>Merged HTML report filename, shared by the engine and the tool's default output.</summary>
     internal const string MergedReportFileName = "merged-report.html";
+
+    internal static bool ShouldSkipSidecar(string sidecarPath)
+    {
+        if (File.Exists(sidecarPath + SidecarExclusionExtension))
+        {
+            return true;
+        }
+
+        var publishingMarkerPath = sidecarPath + SidecarPublishingExtension;
+        if (!File.Exists(publishingMarkerPath))
+        {
+            return false;
+        }
+
+        try
+        {
+            using (new FileStream(publishingMarkerPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            {
+            }
+            File.Delete(publishingMarkerPath);
+            return false;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return true;
+        }
+    }
 
     /// <summary>
     /// Serializes straight to UTF-8 bytes — callers write the same payload to more than one

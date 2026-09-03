@@ -407,6 +407,104 @@ public class HtmlReporterConfigurationTests
         }
     }
 
+    [Test]
+    public async Task Empty_Session_With_Disabled_Json_Removes_Stale_Sidecars(CancellationToken cancellationToken)
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
+        var aggregationDirectory = Path.Combine(tempDirectory, "aggregate");
+        var htmlPath = Path.Combine(tempDirectory, "suite-report.html");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_REPORTS", "true");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_DIR", aggregationDirectory);
+
+        try
+        {
+            Directory.CreateDirectory(tempDirectory);
+            using var reporter = new HtmlReporter(new MockExtension());
+            reporter.SetOutputPath(htmlPath);
+            var assemblyName = reporter.BuildReportData().AssemblyName;
+
+            await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(assemblyName), htmlPath, cancellationToken);
+            TUnitSettings.Default.Reporting.JsonReportEnabled = false;
+
+            await reporter.OnTestSessionFinishingAsync(null!);
+
+            File.Exists(HtmlReporter.GetSidecarPath(htmlPath)).ShouldBeFalse();
+            Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").ShouldBeEmpty();
+        }
+        finally
+        {
+            if (Directory.Exists(tempDirectory))
+            {
+                Directory.Delete(tempDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Test]
+    public async Task Abandoned_Publication_Marker_Is_Recovered(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_REPORTS", "true");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_DIR", tempDirectory);
+
+        try
+        {
+            var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
+            var reportData = CreateReportData();
+            using var publicationMarker = aggregator.BeginSidecarPublication(reportData.AssemblyName, "suite");
+            var sidecarPath = aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(reportData), reportData.AssemblyName, "suite");
+
+            aggregator.ReadAllSidecars().ShouldBeEmpty();
+            publicationMarker.Dispose();
+            File.WriteAllBytes(sidecarPath + ReportDataJson.SidecarPublishingExtension, []);
+
+            aggregator.ReadAllSidecars().Single().AssemblyName.ShouldBe("Tests");
+            File.Exists(sidecarPath + ReportDataJson.SidecarPublishingExtension).ShouldBeFalse();
+        }
+        finally
+        {
+            if (Directory.Exists(tempDirectory))
+            {
+                Directory.Delete(tempDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Test]
+    public async Task Cancelled_Lock_Wait_Keeps_Per_Suite_Summary(CancellationToken cancellationToken)
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), $"tunit-report-test-{Guid.NewGuid():N}");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_REPORTS", "true");
+        Environment.SetEnvironmentVariable("TUNIT_AGGREGATE_DIR", tempDirectory);
+
+        try
+        {
+            using var reporter = new HtmlReporter(new MockExtension());
+            var githubReporter = new GitHubReporter(new MockExtension());
+            reporter.SetGitHubReporter(githubReporter);
+            var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
+            using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            using var cancelled = new CancellationTokenSource();
+            cancelled.Cancel();
+
+            await reporter.TryWriteSidecarAndAggregateAsync(
+                CreateReportData(),
+                Path.Combine(tempDirectory, "suite-report.html"),
+                cancelled.Token);
+
+            githubReporter.SuppressPerSuiteSummary.ShouldBeFalse();
+            aggregator.ReadAllSidecars().Single().AssemblyName.ShouldBe("Tests");
+        }
+        finally
+        {
+            if (Directory.Exists(tempDirectory))
+            {
+                Directory.Delete(tempDirectory, recursive: true);
+            }
+        }
+    }
+
     private static ReportData CreateReportData(string assemblyName = "Tests") => new()
     {
         AssemblyName = assemblyName,

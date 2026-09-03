@@ -152,6 +152,16 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 #if NET
                 TraceRegistry.Clear();
 #endif
+                if (!IsJsonReportEnabled())
+                {
+                    var emptyOutputPath = _outputPath ?? GetDefaultOutputPath();
+                    var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
+                    await DeleteSidecarsAndRefreshAggregateAsync(
+                        GetAssemblyName(),
+                        emptyOutputPath,
+                        aggregator);
+                }
+
                 return;
             }
 
@@ -237,10 +247,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            // Keep the sidecar invisible while lock ownership is unresolved. If the wait
-            // times out, the bytes still exist for a later/deferred merge without letting
-            // a concurrent merge race summary-suppression state.
-            aggregator.ExcludeSidecar(reportData.AssemblyName, htmlOutputPath);
+            // Atomic bytes stay hidden while publication ownership is active. A later
+            // process can recover the marker immediately if this publisher terminates.
+            using var publicationMarker = aggregator.BeginSidecarPublication(reportData.AssemblyName, htmlOutputPath);
             var sharedSidecarPath = aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
 
             IDisposable? aggregationLock;
@@ -250,8 +259,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             }
             catch (OperationCanceledException)
             {
-                // Publication already started. Complete the timeout-style handoff so the
-                // durable sidecar is not left permanently excluded.
                 aggregationLock = null;
             }
 
@@ -262,14 +269,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                     aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
                 }
 
-                // Suppress before making the sidecar visible: a sibling can merge it as soon
-                // as the exclusion marker disappears.
-                if (_githubReporter is not null)
-                {
-                    _githubReporter.SuppressPerSuiteSummary = true;
-                }
-
-                aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
+                publicationMarker.Dispose();
 
                 if (aggregationLock is null)
                 {
@@ -277,6 +277,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 }
 
                 RefreshAggregatedOutputs(aggregator);
+                if (_githubReporter is not null)
+                {
+                    _githubReporter.SuppressPerSuiteSummary = true;
+                }
             }
         }
         catch (Exception ex)
@@ -293,6 +297,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         TryDeleteReportFile(() => File.Delete(GetSidecarPath(htmlOutputPath)));
 
         if (aggregator is null)
+        {
+            return;
+        }
+
+        if (!aggregator.HasSidecarState(assemblyName, htmlOutputPath))
         {
             return;
         }

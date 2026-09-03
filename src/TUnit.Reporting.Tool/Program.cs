@@ -155,7 +155,9 @@ internal static class Program
         var enumeration = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true };
         foreach (var file in Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, enumeration))
         {
-            if (File.Exists(file + ReportDataJson.SidecarExclusionExtension))
+            // This command is the designated final merge, so no publisher should still
+            // be active. Recover any publication marker left by a terminated process.
+            if (ReportDataJson.ShouldSkipSidecar(file))
             {
                 continue;
             }

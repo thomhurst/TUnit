@@ -151,6 +151,27 @@ internal sealed class ReportAggregator
         File.Delete(GetExclusionMarkerPath(assemblyName, suiteSalt));
     }
 
+    internal IDisposable BeginSidecarPublication(string assemblyName, string suiteSalt)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        var markerPath = GetPublishingMarkerPath(assemblyName, suiteSalt);
+        var stream = new FileStream(markerPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+        return new PublicationMarker(stream, markerPath);
+    }
+
+    internal bool HasSidecarState(string assemblyName, string suiteSalt)
+    {
+        if (!System.IO.Directory.Exists(Directory))
+        {
+            return false;
+        }
+
+        var sidecarPath = GetSidecarPath(assemblyName, suiteSalt);
+        return File.Exists(sidecarPath)
+               || File.Exists(sidecarPath + ReportDataJson.SidecarExclusionExtension)
+               || File.Exists(sidecarPath + ReportDataJson.SidecarPublishingExtension);
+    }
+
     /// <summary>
     /// Reads every sidecar currently present in the shared directory. Unreadable or
     /// foreign files are skipped — a crashed sibling must not break the merge.
@@ -173,7 +194,7 @@ internal sealed class ReportAggregator
         {
             try
             {
-                if (File.Exists(file + ReportDataJson.SidecarExclusionExtension))
+                if (ReportDataJson.ShouldSkipSidecar(file))
                 {
                     continue;
                 }
@@ -193,6 +214,30 @@ internal sealed class ReportAggregator
         }
 
         return results;
+    }
+
+    private sealed class PublicationMarker(FileStream stream, string path) : IDisposable
+    {
+        private FileStream? _stream = stream;
+
+        public void Dispose()
+        {
+            var ownedStream = Interlocked.Exchange(ref _stream, null);
+            if (ownedStream is null)
+            {
+                return;
+            }
+
+            ownedStream.Dispose();
+            try
+            {
+                File.Delete(path);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // A reader can recover the unlocked marker after this best-effort delete.
+            }
+        }
     }
 
     /// <summary>
@@ -252,6 +297,11 @@ internal sealed class ReportAggregator
     private string GetExclusionMarkerPath(string assemblyName, string suiteSalt)
     {
         return GetSidecarPath(assemblyName, suiteSalt) + ReportDataJson.SidecarExclusionExtension;
+    }
+
+    private string GetPublishingMarkerPath(string assemblyName, string suiteSalt)
+    {
+        return GetSidecarPath(assemblyName, suiteSalt) + ReportDataJson.SidecarPublishingExtension;
     }
 
     private string GetSidecarPath(string assemblyName, string suiteSalt)
