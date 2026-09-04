@@ -15,6 +15,15 @@
       "type": "project"
     },
     "sourceName": "TestProject",
-    "preferNameDirectory": true
+    "preferNameDirectory": true,
+    "symbols": {
+      "enableDotCover": {
+        "type": "parameter",
+        "datatype": "bool",
+        "defaultValue": "false",
+        "displayName": "Enable dotCover per-test coverage",
+        "description": "Add the JetBrains.dotCover.Framework package for per-test coverage in dotCover, Rider and ReSharper."
+      }
+    }
   }
   

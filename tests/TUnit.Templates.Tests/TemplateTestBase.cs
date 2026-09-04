@@ -35,10 +35,13 @@ public abstract partial class TemplateTestBase : IDisposable
             );
 
     protected TemplateVerifierOptions OptionsWithFramework(string framework) =>
+        OptionsWithArgs("--framework", framework);
+
+    protected TemplateVerifierOptions OptionsWithArgs(params string[] args) =>
         new TemplateVerifierOptions(TemplateShortName)
         {
             TemplatePath = Path.Combine(TestContext.OutputDirectory!, "content", TemplateShortName),
-            TemplateSpecificArgs = ["--framework", framework],
+            TemplateSpecificArgs = args,
         }.WithCustomScrubbers(
             ScrubbersDefinition.Empty
                 .AddScrubber(ScrubVersions, "csproj")

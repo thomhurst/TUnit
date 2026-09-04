@@ -33,6 +33,13 @@
         "defaultValue": "net10.0",
         "replaces": "net10.0"
       },
+      "enableDotCover": {
+        "type": "parameter",
+        "datatype": "bool",
+        "defaultValue": "false",
+        "displayName": "Enable dotCover per-test coverage",
+        "description": "Add the JetBrains.dotCover.Framework package for per-test coverage in dotCover, Rider and ReSharper."
+      },
       "IsNetFramework": {
         "type": "computed",
         "value": "(framework == \"net462\" || framework == \"net472\" || framework == \"net48\" || framework == \"net481\")"
