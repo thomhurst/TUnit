@@ -7,7 +7,7 @@
     <PackageVersion Include="MassTransit" Version="9.2.1" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.11" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.1.0" />
-    <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.11" />
+    <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.12" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.5.3" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.5.3" />
     <PackageVersion Include="Azure.Data.Tables" Version="12.12.0" />
