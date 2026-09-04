@@ -114,6 +114,153 @@ public class IsNotNullAssertionSuppressorTests
     }
 
     [Test]
+    [Arguments("Assert.That(values).IsNull().Or.IsNotNull()")]
+    [Arguments("Assert.That(values).IsNotNull().Or.IsNull()")]
+    [Arguments("values.Should().BeNull().Or.NotBeNull()")]
+    [Arguments("values.Should().NotBeNull().Or.BeNull()")]
+    public async Task Does_Not_Suppress_After_Disjunctive_Null_Check(string assertion)
+    {
+        var code = $$"""
+            #nullable enable
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+            using TUnit.Assertions.Should;
+            using TUnit.Assertions.Should.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod(IList<int>? values)
+                {
+                    await {{assertion}};
+                    _ = {|#0:values|}.Count;
+                }
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(false))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    [Arguments("Assert.That(model.Or).IsNotNull().Because(nameof(MyTests.Or))")]
+    [Arguments("model.Or.Should().NotBeNull().Because(nameof(MyTests.Or))")]
+    public async Task Suppresses_When_Or_Is_Outside_The_Assertion_Chain(string assertion)
+    {
+        var code = $$"""
+            #nullable enable
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+            using TUnit.Assertions.Should;
+            using TUnit.Assertions.Should.Extensions;
+
+            public class MyTests
+            {
+                public IList<int>? Or { get; set; }
+
+                public async Task TestMethod(MyTests model)
+                {
+                    await {{assertion}};
+                    _ = {|#0:model.Or|}.Count;
+                }
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Does_Not_Suppress_After_Custom_Should_Transform()
+    {
+        const string code = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using TUnit.Assertions.Should;
+            using TUnit.Assertions.Should.Core;
+            using TUnit.Assertions.Should.Extensions;
+
+            public static class CustomAssertions
+            {
+                public static ShouldSource<string> CustomTransform(this ShouldSource<string> source) => "other".Should();
+            }
+
+            public class MyTests
+            {
+                public async Task TestMethod(string? value)
+                {
+                    await value.Should().CustomTransform().NotBeNull();
+                    _ = {|#0:value|}.Length;
+                }
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(false))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    [Arguments("CustomTransform()")]
+    [Arguments("CustomPropertyTransform().Other")]
+    public async Task Does_Not_Suppress_After_Custom_Transform_With_BuiltIn_IsNotNull(string transform)
+    {
+        var code = $$"""
+            #nullable enable
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Sources;
+
+            public static class CustomAssertions
+            {
+                public static OtherAssertion CustomTransform(this ListAssertion<int> source) => new OtherAssertion();
+                public static OtherAssertion CustomPropertyTransform(this ListAssertion<int> source) => new OtherAssertion();
+            }
+
+            public class OtherAssertion : ListAssertion<int>
+            {
+                public OtherAssertion() : base(new List<int>(), null) { }
+                public ListAssertion<int> Other => new ListAssertion<int>(new List<int>(), null);
+            }
+
+            public class MyTests
+            {
+                public async Task TestMethod(IList<int>? values)
+                {
+                    await Assert.That(values).{{transform}}.IsNotNull();
+                    _ = {|#0:values|}.Count;
+                }
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(false))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
     public async Task Does_Not_Suppress_After_Custom_IsNotNull_Instance_Method()
     {
         const string code = """
@@ -732,7 +879,7 @@ public class IsNotNullAssertionSuppressorTests
     }
 
     [Test]
-    public async Task Suppresses_After_IsNotNull_With_Or_Chain()
+    public async Task Does_Not_Suppress_After_IsNotNull_With_Or_Chain()
     {
         const string code = """
             #nullable enable
@@ -749,7 +896,7 @@ public class IsNotNullAssertionSuppressorTests
                     // IsNotNull with Or chain
                     await Assert.That(nullableString).IsNotNull().Or.IsEqualTo("fallback");
 
-                    // After the assertion, should be suppressed
+                    // IsNotNull is optional in an Or chain, so retain the warning.
                     var length = {|#0:nullableString|}.Length;
                 }
 
@@ -761,7 +908,7 @@ public class IsNotNullAssertionSuppressorTests
             .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
             .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8602)
-            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(false))
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
             .RunAsync();
     }
