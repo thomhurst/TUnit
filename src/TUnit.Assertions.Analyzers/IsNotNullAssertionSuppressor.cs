@@ -9,7 +9,8 @@ namespace TUnit.Assertions.Analyzers;
 
 /// <summary>
 /// Suppresses nullability warnings (CS8600, CS8602, CS8604, CS8618, CS8629) for variables
-/// after they have been asserted as non-null using Assert.That(x).IsNotNull().
+/// after they have been asserted as non-null using Assert.That(x).IsNotNull()
+/// or x.Should().NotBeNull().
 ///
 /// Note: This suppressor only hides the warnings; it does not change the compiler's
 /// null-state flow analysis. Variables will still appear as nullable in IntelliSense.
@@ -187,7 +188,18 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         var assertThatCall = FindAssertThatInChain(invocation);
         if (assertThatCall is null
             || assertThatCall.ArgumentList.Arguments.Count != 1
-            || !IsTUnitMethod(assertThatCall, semanticModel, cancellationToken, "global::TUnit.Assertions.Assert.That"))
+            || !IsTUnitMethod(
+                invocation,
+                semanticModel,
+                cancellationToken,
+                "global::TUnit.Assertions.Extensions.AssertionExtensions",
+                "IsNotNull")
+            || !IsTUnitMethod(
+                assertThatCall,
+                semanticModel,
+                cancellationToken,
+                "global::TUnit.Assertions.Assert",
+                "That"))
         {
             return null;
         }
@@ -200,9 +212,24 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
+        if (!IsTUnitMethod(
+                invocation,
+                semanticModel,
+                cancellationToken,
+                "global::TUnit.Assertions.Should.Extensions.ShouldAssertionExtensions",
+                "NotBeNull"))
+        {
+            return null;
+        }
+
         var shouldCall = FindShouldInChain(invocation);
         if (shouldCall is null
-            || !IsTUnitMethod(shouldCall, semanticModel, cancellationToken, "global::TUnit.Assertions.Should.ShouldExtensions.Should"))
+            || !IsTUnitMethod(
+                shouldCall,
+                semanticModel,
+                cancellationToken,
+                "global::TUnit.Assertions.Should.ShouldExtensions",
+                "Should"))
         {
             return null;
         }
@@ -217,9 +244,18 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         InvocationExpressionSyntax invocation,
         SemanticModel semanticModel,
         CancellationToken cancellationToken,
-        string fullyQualifiedNonGenericName)
-        => semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is IMethodSymbol symbol
-           && symbol.GloballyQualifiedNonGeneric() == fullyQualifiedNonGenericName;
+        string fullyQualifiedContainingTypeName,
+        string methodName)
+    {
+        if (semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is not IMethodSymbol symbol)
+        {
+            return false;
+        }
+
+        var method = symbol.ReducedFrom ?? symbol;
+        return method.Name == methodName
+               && method.ContainingType.GloballyQualifiedNonGeneric() == fullyQualifiedContainingTypeName;
+    }
 
     private bool ExpressionsMatch(
         ExpressionSyntax assertArgument,
@@ -261,8 +297,8 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         => FindInvocationInChain(invocation, identifierName: "That", parentName: "Assert");
 
     // Should() is an extension method, so its receiver is the asserted value (any expression).
-    // parentName MUST stay null — constraining it would break the suppressor for user-defined
-    // assertion entry points and for Should() reached via using-aliases / namespace imports.
+    // parentName MUST stay null because the receiver is the asserted value. Semantic validation
+    // in GetShouldReceiver still ensures that only TUnit's Should extension qualifies.
     private static InvocationExpressionSyntax? FindShouldInChain(InvocationExpressionSyntax invocation)
         => FindInvocationInChain(invocation, identifierName: "Should", parentName: null);
 
@@ -338,6 +374,6 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         => new(
             id: $"{id}Suppression",
             suppressedDiagnosticId: id,
-            justification: $"Suppress {id} for variables asserted as non-null via Assert.That(x).IsNotNull()."
+            justification: $"Suppress {id} for variables asserted as non-null via Assert.That(x).IsNotNull() or x.Should().NotBeNull()."
         );
 }
