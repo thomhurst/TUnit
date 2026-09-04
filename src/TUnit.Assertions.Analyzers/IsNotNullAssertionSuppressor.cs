@@ -206,6 +206,16 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
+        if (!IsTUnitMethod(
+                invocation,
+                semanticModel,
+                cancellationToken,
+                "global::TUnit.Assertions.Should.Extensions.ShouldAssertionExtensions",
+                "NotBeNull"))
+        {
+            return null;
+        }
+
         var shouldCall = FindShouldInChain(invocation);
         if (shouldCall is null
             || !IsTUnitMethod(

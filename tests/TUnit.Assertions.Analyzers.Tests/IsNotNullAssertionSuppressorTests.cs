@@ -165,6 +165,48 @@ public class IsNotNullAssertionSuppressorTests
     }
 
     [Test]
+    public async Task Does_Not_Suppress_CS8602_After_Custom_NotBeNull_Assertion()
+    {
+        const string code = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using CustomAssertions;
+            using TUnit.Assertions.Should;
+            using TUnit.Assertions.Should.Core;
+
+            namespace CustomAssertions
+            {
+                public static class ShouldSourceExtensions
+                {
+                    public static Task NotBeNull(this ShouldSource<string> source) => Task.CompletedTask;
+                }
+            }
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    string? nullableString = GetNullableString();
+
+                    await nullableString.Should().NotBeNull();
+
+                    var length = {|#0:nullableString|}.Length;
+                }
+
+                private string? GetNullableString() => "test";
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(false))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
     public async Task Suppresses_CS8602_After_Should_NotBeNull_In_Assertion_Chains()
     {
         const string code = """
