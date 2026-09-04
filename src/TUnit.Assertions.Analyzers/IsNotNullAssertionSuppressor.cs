@@ -215,7 +215,8 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
         var method = symbol.ReducedFrom ?? symbol;
 
-        if (method.Name != "IsNotNull")
+        if (method.Name != "IsNotNull"
+            || !IsReferencedAssertionAssembly(method.ContainingAssembly, semanticModel.Compilation))
         {
             return false;
         }
@@ -236,9 +237,16 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
             return false;
         }
 
+        var asyncEnumerableBase = semanticModel.Compilation.GetTypeByMetadataName(
+            "TUnit.Assertions.Sources.AsyncEnumerableAssertionBase`1");
+        var asyncDelegate = semanticModel.Compilation.GetTypeByMetadataName(
+            "TUnit.Assertions.Sources.AsyncDelegateAssertion");
+
         for (var type = method.ContainingType; type is not null; type = type.BaseType)
         {
-            if (SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, collectionBase))
+            if (SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, collectionBase)
+                || SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, asyncEnumerableBase)
+                || SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, asyncDelegate))
             {
                 return true;
             }
@@ -307,9 +315,6 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
             }
         }
 
-        var assertionAssembly = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Assertions.Assert")?.ContainingAssembly;
-        var entryAssembly = semanticModel.GetSymbolInfo(entryPoint, cancellationToken).Symbol?.ContainingAssembly;
-
         // An external method/property can return a TUnit assertion on another value.
         // Do not trace a null check back across such a transformation.
         for (ExpressionSyntax? current = nullCheck; current is not null; current = GetChainReceiver(current))
@@ -322,9 +327,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
             if (current is not ParenthesizedExpressionSyntax)
             {
                 var symbol = semanticModel.GetSymbolInfo(current, cancellationToken).Symbol;
-                if (symbol is null
-                    || !(SymbolEqualityComparer.Default.Equals(symbol.ContainingAssembly, assertionAssembly)
-                         || SymbolEqualityComparer.Default.Equals(symbol.ContainingAssembly, entryAssembly)))
+                if (!IsReferencedAssertionAssembly(symbol?.ContainingAssembly, semanticModel.Compilation))
                 {
                     return false;
                 }
@@ -356,7 +359,16 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
         var method = symbol.ReducedFrom ?? symbol;
         return method.Name == methodName
+               && IsReferencedAssertionAssembly(method.ContainingAssembly, semanticModel.Compilation)
                && method.ContainingType.GloballyQualifiedNonGeneric() == fullyQualifiedContainingTypeName;
+    }
+
+    private static bool IsReferencedAssertionAssembly(IAssemblySymbol? assembly, Compilation compilation)
+    {
+        // Matching namespace/type names alone also accepts source-defined lookalikes.
+        return assembly is not null
+               && (assembly.Identity.Name is "TUnit.Assertions" or "TUnit.Assertions.Should")
+               && !SymbolEqualityComparer.Default.Equals(assembly, compilation.Assembly);
     }
 
     private bool ExpressionsMatch(

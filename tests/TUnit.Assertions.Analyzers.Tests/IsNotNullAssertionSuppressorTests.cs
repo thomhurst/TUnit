@@ -20,6 +20,131 @@ public class IsNotNullAssertionSuppressorTests
     private static readonly DiagnosticResult CS8629 = new("CS8629", DiagnosticSeverity.Warning);
 
     [Test]
+    [Arguments("Assert.That(value).IsNotNull()")]
+    [Arguments("value.Should().NotBeNull()")]
+    public async Task Does_Not_Suppress_For_Source_Defined_TUnit_Lookalikes(string assertion)
+    {
+        var code = $$"""
+            #nullable enable
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+            using TUnit.Assertions.Should;
+            using TUnit.Assertions.Should.Extensions;
+
+            namespace TUnit.Assertions
+            {
+                public class FakeSource { }
+                public static class Assert
+                {
+                    public static FakeSource That<T>(T? value) => new FakeSource();
+                }
+            }
+
+            namespace TUnit.Assertions.Extensions
+            {
+                public static class AssertionExtensions
+                {
+                    public static Task IsNotNull(this FakeSource source) => Task.CompletedTask;
+                }
+            }
+
+            namespace TUnit.Assertions.Should
+            {
+                public static class ShouldExtensions
+                {
+                    public static FakeSource Should(this string? value) => new FakeSource();
+                }
+            }
+
+            namespace TUnit.Assertions.Should.Extensions
+            {
+                public static class ShouldAssertionExtensions
+                {
+                    public static Task NotBeNull(this FakeSource source) => Task.CompletedTask;
+                }
+            }
+
+            public class MyTests
+            {
+                public async Task TestMethod(string? value)
+                {
+                    await {{assertion}};
+                    _ = {|#0:value|}.Length;
+                }
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591", "CS0436")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(false))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    [Arguments("IAsyncEnumerable<int>", true)]
+    [Arguments("Task", true)]
+    [Arguments("Func<Task>", true)]
+    [Arguments("IAsyncEnumerable<int>", false)]
+    [Arguments("Task", false)]
+    [Arguments("Func<Task>", false)]
+    public async Task Recognizes_Async_IsNotNull_Instance_Methods(string valueType, bool assertNotNull)
+    {
+        var nullAssertion = assertNotNull ? "IsNotNull" : "IsNull";
+        var code = $$"""
+            #nullable enable
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod({{valueType}}? value)
+                {
+                    await Assert.That({|#0:value|}).{{nullAssertion}}();
+                    _ = value.GetHashCode();
+                }
+            }
+            """;
+
+        // The async overloads take non-nullable parameters: CS8604 occurs at That,
+        // then the compiler promotes value's null state, so there is no later CS8602.
+        // Use the runtime libraries: the netstandard2.0 Assert lacks the async-enumerable
+        // overload. Matching framework references avoid the standard helper's CS1705 issue.
+        var test = new AnalyzerTestHelpers.CSharpSuppressorTest<IsNotNullAssertionSuppressor, DefaultVerifier>
+        {
+            TestCode = code,
+#if NET10_0_OR_GREATER
+            ReferenceAssemblies = new ReferenceAssemblies("net10.0",
+                new PackageIdentity("Microsoft.NETCore.App.Ref", "10.0.0"), Path.Combine("ref", "net10.0")),
+#elif NET9_0_OR_GREATER
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net90,
+#else
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+#endif
+        };
+        test.TestState.AdditionalReferences.AddRange([
+            MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
+#if NET8_0
+            MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetSystemTextJson9DllPath()),
+#endif
+        ]);
+
+        await test
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8604)
+            .WithExpectedDiagnosticsResults(CS8604.WithLocation(0).WithIsSuppressed(assertNotNull))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
     [Arguments("int[]")]
     [Arguments("IList<int>")]
     [Arguments("IReadOnlyList<int>")]
