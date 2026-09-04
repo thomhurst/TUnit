@@ -47,7 +47,7 @@
     <Target Name="_TUnitConfigureHtmlReportCommandLineOptions"
             BeforeTargets="_GenerateSelfRegisteredExtensionsFileInputCache">
         <ItemGroup Condition="'@(TestingPlatformBuilderHook->WithMetadataValue('Identity', 'A6E2BCC3-9B4D-4B6D-8AE3-2C1E12A54F4D'))' != ''">
-            <TestingPlatformBuilderHook Update="6ADF853A-6945-4A06-9A4B-D99BC1DC1094">
+            <TestingPlatformBuilderHook Condition="'%(Identity)' == '6ADF853A-6945-4A06-9A4B-D99BC1DC1094'">
                 <TypeFullName>TUnit.Engine.Framework.NamespacedHtmlReportTestingPlatformBuilderHook</TypeFullName>
             </TestingPlatformBuilderHook>
         </ItemGroup>
