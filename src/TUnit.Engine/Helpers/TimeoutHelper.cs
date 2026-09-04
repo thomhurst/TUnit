@@ -87,32 +87,87 @@ internal static class TimeoutHelper
             }
 
             // Timeout occurred - give the execution task a brief grace period to clean up
-            try
-            {
-#if NET8_0_OR_GREATER
-                await executionTask.WaitAsync(GracePeriod, CancellationToken.None).ConfigureAwait(false);
-#else
-                // Use cancellable delay to avoid leaked tasks when executionTask completes first
-                using var graceCts = new CancellationTokenSource();
-                var delayTask = Task.Delay(GracePeriod, graceCts.Token);
-                var graceWinner = await Task.WhenAny(executionTask, delayTask).ConfigureAwait(false);
-                if (graceWinner == executionTask)
-                {
-                    graceCts.Cancel();
-                }
-#endif
-            }
-            catch
-            {
-                // Ignore all exceptions - task was cancelled, we're just giving it time to clean up
-            }
+            var executionException = await ObserveExceptionDuringGracePeriodAsync(executionTask).ConfigureAwait(false);
+
+            // Routine cancellation adds no useful context; preserve exceptions explicitly
+            // thrown while handling cancellation, such as Aspire's diagnostic exception.
+            var exceptionToPreserve = IsRoutineCancellation(executionException, timeoutCts.Token)
+                ? null
+                : executionException;
 
             // Even if task completed during grace period, timeout already elapsed so we throw
             var baseMessage = timeoutMessage ?? $"Operation timed out after {timeout}";
-            var diagnosticMessage = TimeoutDiagnostics.BuildTimeoutDiagnosticsMessage(baseMessage, executionTask);
-            throw new TimeoutException(diagnosticMessage);
+            var diagnosticMessage = TimeoutDiagnostics.BuildTimeoutDiagnosticsMessage(baseMessage, executionTask, exceptionToPreserve);
+            throw new TimeoutException(diagnosticMessage, exceptionToPreserve);
         }
 
         await executionTask.ConfigureAwait(false);
+    }
+
+    private static bool IsRoutineCancellation(Exception? exception, CancellationToken timeoutToken)
+    {
+        if (exception is not OperationCanceledException
+            {
+                InnerException: null
+            } operationCanceledException
+            || operationCanceledException.CancellationToken != timeoutToken)
+        {
+            return false;
+        }
+
+        return operationCanceledException switch
+        {
+            TaskCanceledException taskCanceledException
+                when taskCanceledException.GetType() == typeof(TaskCanceledException) =>
+                taskCanceledException.Message == new TaskCanceledException().Message,
+            { } when operationCanceledException.GetType() == typeof(OperationCanceledException) =>
+                operationCanceledException.Message == new OperationCanceledException(timeoutToken).Message,
+            _ => false
+        };
+    }
+
+    private static async Task<Exception?> ObserveExceptionDuringGracePeriodAsync(Task executionTask)
+    {
+#if NET8_0_OR_GREATER
+        try
+        {
+            await executionTask.WaitAsync(GracePeriod, CancellationToken.None).ConfigureAwait(false);
+            return null;
+        }
+        catch (TimeoutException)
+        {
+            return executionTask.IsCompleted
+                ? await ObserveCompletedTaskExceptionAsync(executionTask).ConfigureAwait(false)
+                : null;
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+#else
+        // Use cancellable delay to avoid leaked tasks when executionTask completes first
+        using var graceCts = new CancellationTokenSource();
+        var delayTask = Task.Delay(GracePeriod, graceCts.Token);
+        if (await Task.WhenAny(executionTask, delayTask).ConfigureAwait(false) != executionTask)
+        {
+            return null;
+        }
+
+        graceCts.Cancel();
+        return await ObserveCompletedTaskExceptionAsync(executionTask).ConfigureAwait(false);
+#endif
+    }
+
+    private static async Task<Exception?> ObserveCompletedTaskExceptionAsync(Task executionTask)
+    {
+        try
+        {
+            await executionTask.ConfigureAwait(false);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
     }
 }

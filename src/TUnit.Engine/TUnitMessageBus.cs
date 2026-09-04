@@ -153,7 +153,16 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
             && testContext.Metadata.TestDetails.Timeout != null
             && duration >= testContext.Metadata.TestDetails.Timeout.Value)
         {
-            return new TimeoutTestNodeStateProperty($"[{categoryLabel}] Test timed out after {testContext.Metadata.TestDetails.Timeout.Value.TotalMilliseconds}ms");
+            var explanation = $"[{categoryLabel}] Test timed out after {testContext.Metadata.TestDetails.Timeout.Value.TotalMilliseconds}ms";
+            var diagnosticException = unwrapped.InnerException
+                ?? (unwrapped is OperationCanceledException and not TaskCanceledException ? unwrapped : null);
+
+            if (diagnosticException is not null)
+            {
+                explanation = $"{explanation}{Environment.NewLine}{diagnosticException.Message}";
+            }
+
+            return new TimeoutTestNodeStateProperty(unwrapped, explanation);
         }
 
         if (category == FailureCategory.Assertion)

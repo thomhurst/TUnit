@@ -31,18 +31,22 @@ internal static class TimeoutDiagnostics
     /// </summary>
     /// <param name="baseMessage">The original timeout message.</param>
     /// <param name="executionTask">The task that was being executed when the timeout occurred.</param>
+    /// <param name="executionException">An exception observed while the task handled timeout cancellation.</param>
     /// <returns>An enhanced message with diagnostics appended.</returns>
-    public static string BuildTimeoutDiagnosticsMessage(string baseMessage, Task? executionTask)
+    public static string BuildTimeoutDiagnosticsMessage(
+        string baseMessage,
+        Task? executionTask,
+        Exception? executionException = null)
     {
         var sb = new StringBuilder(baseMessage);
 
-        AppendTaskStatus(sb, executionTask);
+        AppendTaskStatus(sb, executionTask, executionException);
         AppendStackTraceDiagnostics(sb);
 
         return sb.ToString();
     }
 
-    private static void AppendTaskStatus(StringBuilder sb, Task? executionTask)
+    private static void AppendTaskStatus(StringBuilder sb, Task? executionTask, Exception? executionException)
     {
         if (executionTask is null)
         {
@@ -55,20 +59,34 @@ internal static class TimeoutDiagnostics
         sb.Append(executionTask.Status);
         sb.Append(" ---");
 
-        if (executionTask.IsFaulted && executionTask.Exception is { } aggregateException)
+        if (executionException is not null)
         {
-            sb.AppendLine();
-            sb.Append("Task exception: ");
-
+            AppendTaskExceptionHeader(sb);
+            AppendTaskException(sb, executionException);
+        }
+        else if (executionTask.IsFaulted && executionTask.Exception is { } aggregateException)
+        {
+            AppendTaskExceptionHeader(sb);
             foreach (var innerException in aggregateException.InnerExceptions)
             {
-                sb.AppendLine();
-                sb.Append("  ");
-                sb.Append(innerException.GetType().Name);
-                sb.Append(": ");
-                sb.Append(innerException.Message);
+                AppendTaskException(sb, innerException);
             }
         }
+    }
+
+    private static void AppendTaskExceptionHeader(StringBuilder sb)
+    {
+        sb.AppendLine();
+        sb.Append("Task exception: ");
+    }
+
+    private static void AppendTaskException(StringBuilder sb, Exception exception)
+    {
+        sb.AppendLine();
+        sb.Append("  ");
+        sb.Append(exception.GetType().Name);
+        sb.Append(": ");
+        sb.Append(exception.Message);
     }
 
     private static void AppendStackTraceDiagnostics(StringBuilder sb)
