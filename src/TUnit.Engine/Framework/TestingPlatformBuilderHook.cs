@@ -10,3 +10,11 @@ public static class TestingPlatformBuilderHook
         string[] _) =>
         testApplicationBuilder.AddTUnit();
 }
+
+public static class NamespacedHtmlReportTestingPlatformBuilderHook
+{
+    public static void AddExtensions(
+        ITestApplicationBuilder testApplicationBuilder,
+        string[] _) =>
+        testApplicationBuilder.AddTUnit(HtmlCliMode.Namespaced);
+}

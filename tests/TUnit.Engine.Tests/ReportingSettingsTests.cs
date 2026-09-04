@@ -15,7 +15,7 @@ public class ReportingSettingsTests(TestMode testMode) : InvokableTestBase(testM
         try
         {
             var options = new RunOptions()
-                .WithArgument("--report-html-filename")
+                .WithArgument("--tunit-report-html-filename")
                 .WithArgument(reportPath)
                 .WithEnvironmentVariable("TUNIT_DISABLE_HTML_REPORTER", "false")
                 .WithEnvironmentVariable("TUNIT_DISABLE_JSON_REPORT", "false")

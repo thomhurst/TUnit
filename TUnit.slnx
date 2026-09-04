@@ -88,6 +88,7 @@
     <Project Path="tests/TUnit.RpcTests/TUnit.RpcTests.csproj" />
     <Project Path="tests/TUnit.SourceGenerator.IncrementalTests/TUnit.SourceGenerator.IncrementalTests.csproj" />
     <Project Path="tests/TUnit.Templates.Tests/TUnit.Templates.Tests.csproj" />
+    <Project Path="tests/TUnit.TestProject.HtmlReportDefaults/TUnit.TestProject.HtmlReportDefaults.csproj" />
     <Project Path="tests/TUnit.UnitTests/TUnit.UnitTests.csproj" />
     <Project Path="tests/TUnit.Aspire.Tests/TUnit.Aspire.Tests.csproj" />
     <Project Path="tests/TUnit.Aspire.Tests.ApiService/TUnit.Aspire.Tests.ApiService.csproj" />

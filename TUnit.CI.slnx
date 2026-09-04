@@ -112,6 +112,7 @@
     <Project Path="examples/TUnit.Example.FsCheck.TestProject/TUnit.Example.FsCheck.TestProject.csproj" />
     <Project Path="tests/TUnit.TestProject/TUnit.TestProject.csproj" />
     <Project Path="tests/TUnit.TestProject.FSharp/TUnit.TestProject.FSharp.fsproj" />
+    <Project Path="tests/TUnit.TestProject.HtmlReportDefaults/TUnit.TestProject.HtmlReportDefaults.csproj" />
     <Project Path="tests/TUnit.TestProject.Library/TUnit.TestProject.Library.csproj" />
     <Project Path="tests/TUnit.TestProject.VB.NET/TUnit.TestProject.VB.NET.vbproj" />
   </Folder>
