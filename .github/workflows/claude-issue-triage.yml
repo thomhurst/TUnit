@@ -55,4 +55,4 @@ jobs:
             not modify any other issue.
 
           claude_args: |
-            --allowedTools "Bash(.github/scripts/triage-issue.sh:*),Bash(gh issue view:*),Bash(gh issue list:*),Bash(gh search:*),Bash(gh label list:*)"
+            --allowedTools "Bash(.github/scripts/triage-issue.sh:*),Bash(gh issue view:*),Bash(gh issue list:*),Bash(gh search issues:*),Bash(gh label list:*)"
