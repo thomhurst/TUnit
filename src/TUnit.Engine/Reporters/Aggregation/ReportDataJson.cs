@@ -25,9 +25,107 @@ internal static class ReportDataJson
 
     /// <summary>File extension shared by every sidecar so aggregators can discover them.</summary>
     internal const string SidecarExtension = ".tunit-report.json";
+    internal const string SidecarPendingSegment = ".pending";
+    internal const string SidecarExclusionExtension = ".excluded";
+    internal const string SidecarPublishingExtension = ".publishing";
 
     /// <summary>Merged HTML report filename, shared by the engine and the tool's default output.</summary>
     internal const string MergedReportFileName = "merged-report.html";
+
+    internal static bool IsSidecarExcluded(string sidecarPath, ReadOnlySpan<byte> sidecarUtf8Json)
+    {
+        var canonicalPath = GetCanonicalSidecarPath(sidecarPath);
+        var exclusionPath = canonicalPath + SidecarExclusionExtension;
+        if (!File.Exists(exclusionPath))
+        {
+            return false;
+        }
+
+        var generation = GetPublicationGeneration(sidecarUtf8Json);
+        if (generation is null)
+        {
+            // Exclusions created for sidecars from before generation tracking remain valid.
+            return true;
+        }
+
+        try
+        {
+            return File.ReadAllText(exclusionPath).Equals(generation, StringComparison.Ordinal);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return true;
+        }
+    }
+
+    internal static bool IsSidecarPublicationInProgress(string sidecarPath)
+    {
+        // Pending sidecars are complete atomic files written only after a publisher's
+        // per-suite lock wait expires. The canonical publisher cannot mutate them.
+        if (IsPendingSidecar(sidecarPath))
+        {
+            return false;
+        }
+
+        var publicationLockPath = sidecarPath + SidecarPublishingExtension;
+        if (!File.Exists(publicationLockPath))
+        {
+            return false;
+        }
+
+        try
+        {
+            // Lock file is stable: deleting it after releasing the handle lets another
+            // process lock the old inode while a third process creates and locks a new one.
+            using (new FileStream(publicationLockPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            {
+            }
+            return false;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return true;
+        }
+    }
+
+    internal static string? GetPublicationGeneration(ReadOnlySpan<byte> sidecarUtf8Json)
+    {
+        try
+        {
+            var reader = new Utf8JsonReader(sidecarUtf8Json);
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.PropertyName
+                    && reader.ValueTextEquals("publicationGeneration")
+                    && reader.Read()
+                    && reader.TokenType == JsonTokenType.String)
+                {
+                    return reader.GetString();
+                }
+            }
+        }
+        catch (JsonException)
+        {
+        }
+
+        return null;
+    }
+
+    internal static bool IsPendingSidecar(string sidecarPath)
+        => sidecarPath.EndsWith(SidecarPendingSegment + SidecarExtension, StringComparison.Ordinal);
+
+    internal static string GetCanonicalSidecarPath(string sidecarPath)
+        => IsPendingSidecar(sidecarPath)
+            ? sidecarPath[..^(SidecarPendingSegment.Length + SidecarExtension.Length)] + SidecarExtension
+            : sidecarPath;
+
+    internal static string GetPendingSidecarPath(string canonicalSidecarPath)
+        => canonicalSidecarPath[..^SidecarExtension.Length] + SidecarPendingSegment + SidecarExtension;
+
+    internal static IEnumerable<string> SelectEffectiveSidecars(IEnumerable<string> sidecarPaths)
+        => sidecarPaths
+            .GroupBy(GetCanonicalSidecarPath, StringComparer.Ordinal)
+            .Select(group => group.FirstOrDefault(IsPendingSidecar) ?? group.First());
 
     /// <summary>
     /// Serializes straight to UTF-8 bytes — callers write the same payload to more than one
@@ -50,6 +148,7 @@ internal static class ReportDataJson
     {
         w.WriteStartObject();
         w.WriteNumber("schemaVersion", SchemaVersion);
+        w.WriteString("publicationGeneration", data.PublicationGeneration ?? Guid.NewGuid().ToString("N"));
         w.WriteString("assemblyName", data.AssemblyName);
         w.WriteString("machineName", data.MachineName);
         w.WriteString("timestamp", data.Timestamp);
@@ -322,6 +421,7 @@ internal static class ReportDataJson
         return new ReportData
         {
             AssemblyName = GetString(root, "assemblyName") ?? "Unknown",
+            PublicationGeneration = GetString(root, "publicationGeneration"),
             MachineName = GetString(root, "machineName") ?? "",
             Timestamp = GetString(root, "timestamp") ?? "",
             TUnitVersion = GetString(root, "tunitVersion") ?? "",

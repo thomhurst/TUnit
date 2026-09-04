@@ -39,9 +39,9 @@ internal sealed class ReportAggregator
     private const string SidecarSearchPattern = "*" + ReportDataJson.SidecarExtension;
     private const string LockFileName = ".tunit-aggregate.lock";
 
-    // Lock contention is expected (N processes finishing together, each holding the lock
-    // for a full merge), so wait far longer than the file-write retry defaults.
-    private const int LockMaxAttempts = 60;
+    // Bound lock contention to roughly ten seconds. Reporting must never hang test-suite
+    // completion; timed-out writers leave their sidecar for a later aggregate refresh.
+    private const int LockMaxAttempts = 30;
     private const int LockRetryDelayMs = 250;
 
     internal AggregationMode Mode { get; }
@@ -130,10 +130,105 @@ internal sealed class ReportAggregator
     {
         System.IO.Directory.CreateDirectory(Directory);
 
-        var fileName = $"{PathValidator.SanitizeFileName(assemblyName)}-{ShortHash(suiteSalt)}{ReportDataJson.SidecarExtension}";
-        var path = Path.Combine(Directory, fileName);
+        var path = GetSidecarPath(assemblyName, suiteSalt);
         AtomicFile.WriteAllBytes(path, sidecarUtf8Json);
         return path;
+    }
+
+    internal void WritePendingSidecar(byte[] sidecarUtf8Json, string assemblyName, string suiteSalt)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        var path = GetPendingSidecarPath(assemblyName, suiteSalt);
+        AtomicFile.WriteAllBytes(path, sidecarUtf8Json);
+    }
+
+    internal void DeletePendingSidecar(string assemblyName, string suiteSalt)
+    {
+        var path = GetPendingSidecarPath(assemblyName, suiteSalt);
+        File.Delete(path);
+    }
+
+    internal string? ReadEffectiveSidecarGeneration(string assemblyName, string suiteSalt)
+    {
+        var pendingPath = GetPendingSidecarPath(assemblyName, suiteSalt);
+        var sidecarPath = File.Exists(pendingPath)
+            ? pendingPath
+            : GetSidecarPath(assemblyName, suiteSalt);
+        return File.Exists(sidecarPath)
+            ? ReportDataJson.GetPublicationGeneration(File.ReadAllBytes(sidecarPath))
+            : null;
+    }
+
+    internal void ExcludeSidecar(string assemblyName, string suiteSalt)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        var currentGeneration = ReadEffectiveSidecarGeneration(assemblyName, suiteSalt);
+        AtomicFile.WriteAllText(GetExclusionMarkerPath(assemblyName, suiteSalt), currentGeneration ?? "");
+    }
+
+    internal void ExcludeSidecarIfGenerationMatches(string assemblyName, string suiteSalt, string? expectedGeneration)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        var currentGeneration = ReadEffectiveSidecarGeneration(assemblyName, suiteSalt);
+        if (expectedGeneration is null
+            ? currentGeneration is not null
+            : !expectedGeneration.Equals(currentGeneration, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        AtomicFile.WriteAllText(GetExclusionMarkerPath(assemblyName, suiteSalt), currentGeneration ?? "");
+    }
+
+    internal void IncludeSidecar(string assemblyName, string suiteSalt)
+    {
+        File.Delete(GetExclusionMarkerPath(assemblyName, suiteSalt));
+    }
+
+    internal IDisposable BeginSidecarPublication(string assemblyName, string suiteSalt)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        var lockPath = GetPublishingMarkerPath(assemblyName, suiteSalt);
+        return new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+    }
+
+    internal IDisposable? TryAcquireSidecarPublication(string assemblyName, string suiteSalt)
+    {
+        try
+        {
+            return BeginSidecarPublication(assemblyName, suiteSalt);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    internal async Task<IDisposable?> AcquireSidecarPublicationAsync(
+        string assemblyName,
+        string suiteSalt,
+        CancellationToken cancellationToken)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        return await AcquireFileLockAsync(
+            GetPublishingMarkerPath(assemblyName, suiteSalt),
+            cancellationToken,
+            "Warning: Report sidecar publication lock timed out; keeping the local per-suite report.");
+    }
+
+    internal bool HasSidecarState(string assemblyName, string suiteSalt)
+    {
+        if (!System.IO.Directory.Exists(Directory))
+        {
+            return false;
+        }
+
+        var sidecarPath = GetSidecarPath(assemblyName, suiteSalt);
+        var pendingPath = GetPendingSidecarPath(assemblyName, suiteSalt);
+        return File.Exists(sidecarPath)
+               || File.Exists(pendingPath)
+               || File.Exists(sidecarPath + ReportDataJson.SidecarExclusionExtension)
+               || File.Exists(sidecarPath + ReportDataJson.SidecarPublishingExtension);
     }
 
     /// <summary>
@@ -154,12 +249,20 @@ internal sealed class ReportAggregator
         // as the tunit-report tool does.
         var seenDigests = new HashSet<string>(StringComparer.Ordinal);
         using var sha = SHA256.Create();
-        foreach (var file in System.IO.Directory.GetFiles(Directory, SidecarSearchPattern))
+        var effectiveSidecars = ReportDataJson.SelectEffectiveSidecars(
+            System.IO.Directory.GetFiles(Directory, SidecarSearchPattern));
+        foreach (var file in effectiveSidecars)
         {
             try
             {
+                if (ReportDataJson.IsSidecarPublicationInProgress(file))
+                {
+                    continue;
+                }
+
                 var bytes = File.ReadAllBytes(file);
-                if (seenDigests.Add(Convert.ToBase64String(sha.ComputeHash(bytes)))
+                if (!ReportDataJson.IsSidecarExcluded(file, bytes)
+                    && seenDigests.Add(Convert.ToBase64String(sha.ComputeHash(bytes)))
                     && ReportDataJson.TryDeserialize((ReadOnlyMemory<byte>)bytes) is { } data)
                 {
                     results.Add(data);
@@ -178,14 +281,22 @@ internal sealed class ReportAggregator
     /// <summary>
     /// Acquires the cross-process aggregation lock. Every writer performs its whole
     /// read-merge-write cycle under this lock, so merges never interleave. Returns
-    /// <see langword="null"/> when the lock cannot be acquired within the timeout;
-    /// callers should then skip merging (a later sibling will produce a fresher merge).
+    /// <see langword="null"/> after a bounded wait so reporting cannot hang the run.
     /// </summary>
     internal async Task<IDisposable?> AcquireLockAsync(CancellationToken cancellationToken)
     {
         System.IO.Directory.CreateDirectory(Directory);
-        var lockPath = Path.Combine(Directory, LockFileName);
+        return await AcquireFileLockAsync(
+            Path.Combine(Directory, LockFileName),
+            cancellationToken,
+            "Warning: Report aggregation lock timed out; keeping per-suite reports and deferring aggregate refresh.");
+    }
 
+    private static async Task<IDisposable?> AcquireFileLockAsync(
+        string lockPath,
+        CancellationToken cancellationToken,
+        string timeoutWarning)
+    {
         for (var attempt = 1; attempt <= LockMaxAttempts; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -195,8 +306,6 @@ internal sealed class ReportAggregator
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                // Contention (or a permissions hiccup) on the final attempt must still fall
-                // through to the graceful "skip this merge" path, never escape as a throw.
                 if (attempt == LockMaxAttempts)
                 {
                     break;
@@ -206,7 +315,7 @@ internal sealed class ReportAggregator
             }
         }
 
-        Console.WriteLine("Warning: Could not acquire the report aggregation lock; skipping merge for this process.");
+        Console.WriteLine(timeoutWarning);
         return null;
     }
 
@@ -230,5 +339,24 @@ internal sealed class ReportAggregator
         using var sha = SHA256.Create();
         var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(value));
         return BitConverter.ToString(hash, 0, 4).Replace("-", "").ToLowerInvariant();
+    }
+
+    private string GetExclusionMarkerPath(string assemblyName, string suiteSalt)
+    {
+        return GetSidecarPath(assemblyName, suiteSalt) + ReportDataJson.SidecarExclusionExtension;
+    }
+
+    private string GetPublishingMarkerPath(string assemblyName, string suiteSalt)
+    {
+        return GetSidecarPath(assemblyName, suiteSalt) + ReportDataJson.SidecarPublishingExtension;
+    }
+
+    private string GetPendingSidecarPath(string assemblyName, string suiteSalt)
+        => ReportDataJson.GetPendingSidecarPath(GetSidecarPath(assemblyName, suiteSalt));
+
+    private string GetSidecarPath(string assemblyName, string suiteSalt)
+    {
+        var fileName = $"{PathValidator.SanitizeFileName(assemblyName)}-{ShortHash(suiteSalt)}{ReportDataJson.SidecarExtension}";
+        return Path.Combine(Directory, fileName);
     }
 }

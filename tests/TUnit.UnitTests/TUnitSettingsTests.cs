@@ -18,6 +18,9 @@ public class TUnitSettingsTests
     private int? _savedMaximumParallelTests;
     private bool _savedDetailedStackTrace;
     private bool _savedFailFast;
+    private bool _savedHtmlReportEnabled;
+    private bool _savedJsonReportEnabled;
+    private bool _savedArtifactUploadEnabled;
 
     [Before(HookType.Test)]
     public void SnapshotSettings()
@@ -29,6 +32,9 @@ public class TUnitSettingsTests
         _savedMaximumParallelTests = TUnitSettings.Default.Parallelism.MaximumParallelTests;
         _savedDetailedStackTrace = TUnitSettings.Default.Display.DetailedStackTrace;
         _savedFailFast = TUnitSettings.Default.Execution.FailFast;
+        _savedHtmlReportEnabled = TUnitSettings.Default.Reporting.HtmlReportEnabled;
+        _savedJsonReportEnabled = TUnitSettings.Default.Reporting.JsonReportEnabled;
+        _savedArtifactUploadEnabled = TUnitSettings.Default.Reporting.ArtifactUploadEnabled;
     }
 
     [After(HookType.Test)]
@@ -41,6 +47,9 @@ public class TUnitSettingsTests
         TUnitSettings.Default.Parallelism.MaximumParallelTests = _savedMaximumParallelTests;
         TUnitSettings.Default.Display.DetailedStackTrace = _savedDetailedStackTrace;
         TUnitSettings.Default.Execution.FailFast = _savedFailFast;
+        TUnitSettings.Default.Reporting.HtmlReportEnabled = _savedHtmlReportEnabled;
+        TUnitSettings.Default.Reporting.JsonReportEnabled = _savedJsonReportEnabled;
+        TUnitSettings.Default.Reporting.ArtifactUploadEnabled = _savedArtifactUploadEnabled;
     }
 
     [Test]
@@ -53,6 +62,9 @@ public class TUnitSettingsTests
         await Assert.That(TUnitSettings.Default.Parallelism.MaximumParallelTests).IsNull();
         await Assert.That(TUnitSettings.Default.Display.DetailedStackTrace).IsFalse();
         await Assert.That(TUnitSettings.Default.Execution.FailFast).IsFalse();
+        await Assert.That(TUnitSettings.Default.Reporting.HtmlReportEnabled).IsTrue();
+        await Assert.That(TUnitSettings.Default.Reporting.JsonReportEnabled).IsTrue();
+        await Assert.That(TUnitSettings.Default.Reporting.ArtifactUploadEnabled).IsTrue();
     }
 
     [Test]
@@ -60,6 +72,18 @@ public class TUnitSettingsTests
     {
         TUnitSettings.Default.Timeouts.DefaultTestTimeout = TimeSpan.FromMinutes(10);
         await Assert.That(TUnitSettings.Default.Timeouts.DefaultTestTimeout).IsEqualTo(TimeSpan.FromMinutes(10));
+    }
+
+    [Test]
+    public async Task Reporting_Settings_Can_Be_Modified()
+    {
+        TUnitSettings.Default.Reporting.HtmlReportEnabled = false;
+        TUnitSettings.Default.Reporting.JsonReportEnabled = false;
+        TUnitSettings.Default.Reporting.ArtifactUploadEnabled = false;
+
+        await Assert.That(TUnitSettings.Default.Reporting.HtmlReportEnabled).IsFalse();
+        await Assert.That(TUnitSettings.Default.Reporting.JsonReportEnabled).IsFalse();
+        await Assert.That(TUnitSettings.Default.Reporting.ArtifactUploadEnabled).IsFalse();
     }
 
     // Covers TestCoordinator's `test.Timeout ?? TUnitSettings...ExplicitDefaultTestTimeout` fallback:

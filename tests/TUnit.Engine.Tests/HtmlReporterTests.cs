@@ -31,6 +31,23 @@ public class HtmlReporterTests
     }
 
     [Test]
+    public async Task Stopping_Activity_Collection_Preserves_Spans_For_Report_Data(CancellationToken cancellationToken)
+    {
+        using var reporter = new HtmlReporter(new MockExtension());
+        cancellationToken.ThrowIfCancellationRequested();
+        await reporter.OnTestSessionStartingAsync(null!);
+
+        var activity = TUnitActivitySource.StartLifecycleActivity(TUnitActivitySource.SpanTestSession);
+        TUnitActivitySource.StopActivity(activity);
+        reporter.StopActivityCollection();
+
+        var reportData = reporter.BuildReportData();
+
+        reportData.Spans.ShouldNotBeNull();
+        reportData.Spans.ShouldContain(span => span.SpanType == TUnitActivitySource.SpanTestSession);
+    }
+
+    [Test]
     public async Task PublishArtifactAsync_Publishes_SessionFileArtifact_When_SessionContext_Set_And_File_Exists()
     {
         // Arrange

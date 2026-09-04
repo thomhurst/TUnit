@@ -12,6 +12,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Services;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Settings;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
 using TUnit.Engine.Exceptions;
@@ -27,6 +28,8 @@ namespace TUnit.Engine.Reporters.Html;
 
 internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataProducer, ITestHostApplicationLifetime, ITestSessionLifetimeHandler, IFilterReceiver, IDisposable
 {
+    private const int HtmlReportEnabledUnresolved = -1;
+
     // System.Text.Json's Utf8JsonWriter limits a single string token to int.MaxValue / 6 characters.
     // Truncate large outputs early so report generation never fails for test suites with excessive logging.
     internal const int MaxOutputLength = 1 * 1024 * 1024; // 1 MB
@@ -35,7 +38,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     private IMessageBus? _messageBus;
     private string _resultsDirectory = "TestResults";
     private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _updates = [];
+    private readonly object _htmlReportStateLock = new();
     private GitHubReporter? _githubReporter;
+    private int _htmlReportEnabledAfterDiscovery = HtmlReportEnabledUnresolved;
 
 #if NET
     private ActivityCollector? _activityCollector;
@@ -43,7 +48,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public async Task<bool> IsEnabledAsync()
     {
-        if (IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableHtmlReporter)))
+        if (!IsHtmlReportEnabled())
         {
             return false;
         }
@@ -61,6 +66,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
+        if (!IsHtmlReportEnabledForRun())
+        {
+            return Task.CompletedTask;
+        }
+
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
         // Keep only the update we'll report per test: a final-state update always wins over a
         // non-final one, otherwise the latest wins. The engine emits a single final update per
@@ -89,10 +99,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public Task BeforeRunAsync(CancellationToken cancellationToken)
     {
-#if NET
-        _activityCollector = new ActivityCollector();
-        _activityCollector.Start();
-#endif
         return Task.CompletedTask;
     }
 
@@ -100,21 +106,62 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         => Task.CompletedTask; // All work happens in OnTestSessionFinishingAsync.
 
     public Task OnTestSessionStartingAsync(ITestSessionContext testSessionContext)
-        => Task.CompletedTask;
+    {
+        lock (_htmlReportStateLock)
+        {
+            _updates.Clear();
+            _githubReporter?.ResetSessionState();
+            Volatile.Write(ref _htmlReportEnabledAfterDiscovery, HtmlReportEnabledUnresolved);
+#if NET
+            DisposeActivityCollection();
+            // Discovery hooks may re-enable reporting for this session. Start before
+            // discovery so those early spans are retained, then resolve the setting
+            // on the first post-discovery update.
+            StartActivityCollection();
+#endif
+        }
+
+        return Task.CompletedTask;
+    }
 
     public async Task OnTestSessionFinishingAsync(ITestSessionContext testSessionContext)
     {
         try
         {
 #if NET
-            _activityCollector?.Stop();
+            StopActivityCollection();
 #endif
+
+            if (!IsHtmlReportEnabledForRun())
+            {
+#if NET
+                TraceRegistry.Clear();
+#endif
+                _updates.Clear();
+                var disabledOutputPath = _outputPath ?? GetDefaultOutputPath();
+                var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
+                await DeleteSidecarsAndRefreshAggregateAsync(
+                    GetAssemblyName(),
+                    disabledOutputPath,
+                    aggregator);
+                return;
+            }
 
             if (_updates.Count == 0)
             {
 #if NET
                 TraceRegistry.Clear();
 #endif
+                if (!IsJsonReportEnabled())
+                {
+                    var emptyOutputPath = _outputPath ?? GetDefaultOutputPath();
+                    var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
+                    await DeleteSidecarsAndRefreshAggregateAsync(
+                        GetAssemblyName(),
+                        emptyOutputPath,
+                        aggregator);
+                }
+
                 return;
             }
 
@@ -163,26 +210,36 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         {
             Console.WriteLine($"Warning: HTML report generation failed: {ex.Message}");
         }
+        finally
+        {
+#if NET
+            DisposeActivityCollection();
+#endif
+        }
     }
 
-    private async Task TryWriteSidecarAndAggregateAsync(ReportData reportData, string htmlOutputPath, CancellationToken cancellationToken)
+    internal async Task TryWriteSidecarAndAggregateAsync(ReportData reportData, string htmlOutputPath, CancellationToken cancellationToken)
     {
+        var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
+
+        if (!IsJsonReportEnabled())
+        {
+            await DeleteSidecarsAndRefreshAggregateAsync(reportData.AssemblyName, htmlOutputPath, aggregator);
+            return;
+        }
+
         // Serialized once; the same bytes back both the local sidecar and the shared copy.
         var sidecarBytes = ReportDataJson.SerializeToBytes(reportData);
 
-        if (!IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableJsonReport)))
+        try
         {
-            try
-            {
-                AtomicFile.WriteAllBytes(GetSidecarPath(htmlOutputPath), sidecarBytes);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Warning: Failed to write JSON report sidecar: {ex.Message}");
-            }
+            AtomicFile.WriteAllBytes(GetSidecarPath(htmlOutputPath), sidecarBytes);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to write JSON report sidecar: {ex.Message}");
         }
 
-        var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
         if (aggregator is null)
         {
             return;
@@ -190,44 +247,152 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+            // Serialize the shared write with cleanup so cleanup cannot mistake an in-flight
+            // enabled generation for the stale generation it intended to remove.
+            using var publicationMarker = await aggregator.AcquireSidecarPublicationAsync(
+                reportData.AssemblyName,
+                htmlOutputPath,
+                CancellationToken.None);
+            if (publicationMarker is null)
+            {
+                // Publication-lock contention must not discard completed suite results.
+                // A separate pending slot cannot overwrite the active publisher's canonical
+                // generation and remains available to this or any later aggregate refresh.
+                aggregator.WritePendingSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+            }
+            else
+            {
+                // Owning the lock makes it safe for a newer normal publication to replace
+                // any pending timeout result left by an earlier publisher.
+                aggregator.DeletePendingSidecar(reportData.AssemblyName, htmlOutputPath);
+                aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+                aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
+            }
 
-            // Aggregation is committed for this suite: whatever happens below, the classic
-            // per-suite block must not be appended on top of the aggregated one. (If we
-            // fail past this point, a sibling that merges after us still renders this
-            // suite's results from the sidecar just written.)
-            if (_githubReporter is not null)
+            if (aggregator.Mode == AggregationMode.Defer && _githubReporter is not null)
             {
                 _githubReporter.SuppressPerSuiteSummary = true;
             }
 
-            // Every finishing process regenerates the merged outputs from all sidecars
-            // present so far; the last one to finish leaves the complete aggregate.
-            using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            IDisposable? aggregationLock;
+            try
+            {
+                aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                aggregationLock = null;
+            }
+
             if (aggregationLock is null)
             {
                 return;
             }
 
-            var suites = aggregator.ReadAllSidecars();
-            if (suites.Count == 0)
+            using (aggregationLock)
             {
-                return;
-            }
+                publicationMarker?.Dispose();
 
-            aggregator.WriteMergedHtml(suites);
-            Console.WriteLine($"Merged HTML test report ({suites.Count} {(suites.Count == 1 ? "suite" : "suites")} so far) written to: {aggregator.MergedReportPath}");
-
-            // The step summary is rewritten in the same lock cycle: one env parse, one
-            // lock acquisition and one sidecar scan per process for both merged outputs.
-            if (aggregator.Mode == AggregationMode.Cooperative)
-            {
-                _githubReporter?.WriteAggregatedSummary(suites, aggregator.MergedReportPath);
+                RefreshAggregatedOutputs(aggregator);
+                if (_githubReporter is not null)
+                {
+                    _githubReporter.SuppressPerSuiteSummary = true;
+                }
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Warning: Report aggregation failed: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteSidecarsAndRefreshAggregateAsync(
+        string assemblyName,
+        string htmlOutputPath,
+        ReportAggregator? aggregator)
+    {
+        TryDeleteReportFile(() => File.Delete(GetSidecarPath(htmlOutputPath)));
+
+        if (aggregator is null)
+        {
+            return;
+        }
+
+        if (!aggregator.HasSidecarState(assemblyName, htmlOutputPath))
+        {
+            return;
+        }
+
+        try
+        {
+            var expectedGeneration = aggregator.ReadEffectiveSidecarGeneration(assemblyName, htmlOutputPath);
+            using var publicationMarker = aggregator.TryAcquireSidecarPublication(assemblyName, htmlOutputPath);
+            if (publicationMarker is null)
+            {
+                // An enabled publication may already have installed its generation while
+                // holding this lock. Cleanup must not wait, acquire next, and hide it.
+                return;
+            }
+
+            // Exclude only the generation observed before the lock attempt. A publisher that
+            // won the per-suite lock in the meantime installed a newer generation and survives.
+            aggregator.ExcludeSidecarIfGenerationMatches(assemblyName, htmlOutputPath, expectedGeneration);
+
+            // The exclusion is durable and generation-scoped, so do not hold the per-suite
+            // lock during the bounded aggregate-lock wait. A staged enabled publication
+            // must be able to acquire it and clear the exclusion before either wait expires.
+            publicationMarker.Dispose();
+
+            // Cleanup must survive session cancellation or stale enabled-run sidecars can
+            // re-enter a sibling's aggregate. Lock acquisition remains time-bounded.
+            using var aggregationLock = await aggregator.AcquireLockAsync(CancellationToken.None);
+            if (aggregationLock is null)
+            {
+                return;
+            }
+
+            RefreshAggregatedOutputs(aggregator);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            Console.WriteLine($"Warning: Report aggregation cleanup failed: {ex.Message}");
+        }
+    }
+
+    private void RefreshAggregatedOutputs(ReportAggregator aggregator)
+    {
+        var suites = aggregator.ReadAllSidecars();
+        if (suites.Count == 0)
+        {
+            TryDeleteReportFile(() => File.Delete(aggregator.MergedReportPath));
+            if (aggregator.Mode == AggregationMode.Cooperative)
+            {
+                _githubReporter?.ClearAggregatedSummary();
+            }
+
+            return;
+        }
+
+        aggregator.WriteMergedHtml(suites);
+        Console.WriteLine($"Merged HTML test report ({suites.Count} {(suites.Count == 1 ? "suite" : "suites")} so far) written to: {aggregator.MergedReportPath}");
+
+        // The step summary is rewritten in the same lock cycle: one env parse, one
+        // lock acquisition and one sidecar scan per process for both merged outputs.
+        if (aggregator.Mode == AggregationMode.Cooperative)
+        {
+            _githubReporter?.WriteAggregatedSummary(suites, aggregator.MergedReportPath);
+        }
+    }
+
+    private static void TryDeleteReportFile(Action deleteFile)
+    {
+        try
+        {
+            deleteFile();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to remove disabled report file: {ex.Message}");
         }
     }
 
@@ -237,6 +402,53 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
            (value.Equals("true", StringComparison.OrdinalIgnoreCase) ||
             value.Equals("1", StringComparison.Ordinal) ||
             value.Equals("yes", StringComparison.OrdinalIgnoreCase));
+
+    internal static bool IsHtmlReportEnabled()
+        => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableHtmlReporter))
+           && TUnitSettings.Default.Reporting.HtmlReportEnabled;
+
+    internal static bool IsJsonReportEnabled()
+        => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableJsonReport))
+           && TUnitSettings.Default.Reporting.JsonReportEnabled;
+
+    internal static bool IsArtifactUploadEnabled()
+        => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableArtifactUpload))
+           && TUnitSettings.Default.Reporting.ArtifactUploadEnabled;
+
+    internal bool IsHtmlReportEnabledForRun()
+    {
+        var resolved = Volatile.Read(ref _htmlReportEnabledAfterDiscovery);
+        if (resolved != HtmlReportEnabledUnresolved)
+        {
+            return resolved == 1;
+        }
+
+        lock (_htmlReportStateLock)
+        {
+            resolved = Volatile.Read(ref _htmlReportEnabledAfterDiscovery);
+            if (resolved != HtmlReportEnabledUnresolved)
+            {
+                return resolved == 1;
+            }
+
+            var enabled = IsHtmlReportEnabled();
+
+#if NET
+            if (enabled)
+            {
+                StartActivityCollection();
+            }
+            else
+            {
+                DisposeActivityCollection();
+                TraceRegistry.Clear();
+            }
+#endif
+
+            Volatile.Write(ref _htmlReportEnabledAfterDiscovery, enabled ? 1 : 0);
+            return enabled;
+        }
+    }
 
     // Default HTML report is "{name}-{os}-{tfm}-report.html"; the sidecar drops the
     // "-report" stem so the default pair reads "{name}-{os}-{tfm}.tunit-report.json".
@@ -253,7 +465,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     internal async Task PublishArtifactAsync(string outputPath, SessionUid sessionUid, CancellationToken cancellationToken)
     {
-        if (_messageBus is null)
+        if (_messageBus is null || !IsArtifactUploadEnabled())
         {
             return;
         }
@@ -270,9 +482,33 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     public void Dispose()
     {
 #if NET
-        _activityCollector?.Dispose();
+        DisposeActivityCollection();
 #endif
     }
+
+#if NET
+    internal bool HasActivityCollector => _activityCollector is not null;
+
+    private void StartActivityCollection()
+    {
+        if (_activityCollector is not null)
+        {
+            return;
+        }
+
+        _activityCollector = new ActivityCollector();
+        _activityCollector.Start();
+    }
+
+    internal void StopActivityCollection()
+        => _activityCollector?.Stop();
+
+    private void DisposeActivityCollection()
+    {
+        _activityCollector?.Dispose();
+        _activityCollector = null;
+    }
+#endif
 
     public string? Filter { get; set; }
 
@@ -307,7 +543,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     internal ReportData BuildReportData()
     {
-        var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
+        var assemblyName = GetAssemblyName();
         var tunitVersion = typeof(HtmlReporter).Assembly.GetName().Version?.ToString() ?? "unknown";
 
         // Get the last update with a final state for each test
@@ -747,12 +983,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     private string GetDefaultOutputPath()
     {
-        var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
+        var assemblyName = GetAssemblyName();
         var sanitizedName = PathValidator.SanitizeFileName(assemblyName);
         var os = GetShortOsName();
         var tfm = GetShortFrameworkName();
         return Path.GetFullPath(Path.Combine(_resultsDirectory, $"{sanitizedName}-{os}-{tfm}-report.html"));
     }
+
+    private static string GetAssemblyName()
+        => Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
 
     private static string GetShortOsName()
     {
@@ -857,7 +1096,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             return null;
         }
 
-        if (IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableArtifactUpload)))
+        if (!IsArtifactUploadEnabled())
         {
             return null;
         }

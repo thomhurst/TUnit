@@ -12,6 +12,10 @@ internal sealed class ReportData
     [JsonPropertyName("assemblyName")]
     public required string AssemblyName { get; init; }
 
+    /// <summary>Atomic sidecar generation used only by aggregation cleanup.</summary>
+    [JsonIgnore]
+    public string? PublicationGeneration { get; init; }
+
     [JsonPropertyName("machineName")]
     public required string MachineName { get; init; }
 

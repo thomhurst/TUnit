@@ -3046,11 +3046,18 @@ namespace .Settings
     {
         public int? MaximumParallelTests { get; set; }
     }
+    public sealed class ReportingSettings
+    {
+        public bool ArtifactUploadEnabled { get; set; }
+        public bool HtmlReportEnabled { get; set; }
+        public bool JsonReportEnabled { get; set; }
+    }
     public sealed class TUnitSettings
     {
         public . Display { get; }
         public . Execution { get; }
         public . Parallelism { get; }
+        public . Reporting { get; }
         public . Timeouts { get; }
     }
     public sealed class TimeoutSettings

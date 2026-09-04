@@ -153,8 +153,17 @@ internal static class Program
         // abort the walk — SearchOption.AllDirectories would throw mid-enumeration, before
         // the per-file guard below ever ran.
         var enumeration = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true };
-        foreach (var file in Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, enumeration))
+        var effectiveSidecars = ReportDataJson.SelectEffectiveSidecars(
+            Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, enumeration));
+        foreach (var file in effectiveSidecars)
         {
+            // This command is the designated final merge, so no publisher should still
+            // be active. Skip any suite whose stable publication lock is still held.
+            if (ReportDataJson.IsSidecarPublicationInProgress(file))
+            {
+                continue;
+            }
+
             byte[] bytes;
             try
             {
@@ -165,6 +174,11 @@ internal static class Program
                 // Locked, deleted mid-enumeration, or unreadable — count it with the other
                 // skipped sidecars rather than failing the whole merge over one bad file.
                 skipped++;
+                continue;
+            }
+
+            if (ReportDataJson.IsSidecarExcluded(file, bytes))
+            {
                 continue;
             }
 
