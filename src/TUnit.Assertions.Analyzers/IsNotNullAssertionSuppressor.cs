@@ -188,12 +188,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         var assertThatCall = FindAssertThatInChain(invocation);
         if (assertThatCall is null
             || assertThatCall.ArgumentList.Arguments.Count != 1
-            || !IsTUnitMethod(
-                invocation,
-                semanticModel,
-                cancellationToken,
-                "global::TUnit.Assertions.Extensions.AssertionExtensions",
-                "IsNotNull")
+            || !IsTUnitIsNotNullMethod(invocation, semanticModel, cancellationToken)
             || !IsTUnitMethod(
                 assertThatCall,
                 semanticModel,
@@ -205,6 +200,34 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         }
 
         return assertThatCall.ArgumentList.Arguments[0].Expression;
+    }
+
+    private static bool IsTUnitIsNotNullMethod(
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        if (semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is not IMethodSymbol symbol)
+        {
+            return false;
+        }
+
+        var method = symbol.ReducedFrom ?? symbol;
+
+        // Collections and async sources provide instance methods instead of using the
+        // general extension. Validate the declaring type so custom IsNotNull methods
+        // still cannot suppress warnings, including methods that hide inherited members.
+        return method.Name == "IsNotNull"
+               && method.ContainingType.GloballyQualifiedNonGeneric() is
+                   "global::TUnit.Assertions.Extensions.AssertionExtensions"
+                   or "global::TUnit.Assertions.Sources.CollectionAssertionBase"
+                   or "global::TUnit.Assertions.Sources.ListAssertionBase"
+                   or "global::TUnit.Assertions.Sources.ReadOnlyListAssertionBase"
+                   or "global::TUnit.Assertions.Sources.DictionaryAssertionBase"
+                   or "global::TUnit.Assertions.Sources.MutableDictionaryAssertionBase"
+                   or "global::TUnit.Assertions.Sources.SetAssertionBase"
+                   or "global::TUnit.Assertions.Sources.AsyncEnumerableAssertionBase"
+                   or "global::TUnit.Assertions.Sources.AsyncDelegateAssertion";
     }
 
     private static ExpressionSyntax? GetShouldReceiver(
