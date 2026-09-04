@@ -189,6 +189,12 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         if (assertThatCall is null
             || assertThatCall.ArgumentList.Arguments.Count != 1
             || !IsTUnitMethod(
+                invocation,
+                semanticModel,
+                cancellationToken,
+                "global::TUnit.Assertions.Extensions.AssertionExtensions",
+                "IsNotNull")
+            || !IsTUnitMethod(
                 assertThatCall,
                 semanticModel,
                 cancellationToken,
