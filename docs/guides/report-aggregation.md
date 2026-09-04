@@ -8,7 +8,7 @@ Report aggregation merges all of that into **one combined HTML report and one Gi
 
 ## How It Works[​](#how-it-works "Direct link to How It Works")
 
-1. Alongside every HTML report, TUnit writes a machine-readable sidecar: `{AssemblyName}-{os}-{tfm}.tunit-report.json`. This is on by default (disable with `TUNIT_DISABLE_JSON_REPORT=true`).
+1. Alongside every HTML report, TUnit writes a machine-readable sidecar: `{AssemblyName}-{os}-{tfm}.tunit-report.json`. This is on by default (disable with `TUNIT_DISABLE_JSON_REPORT=true` or `context.Settings.Reporting.JsonReportEnabled = false`).
 2. With aggregation enabled, each test process also copies its sidecar into a directory shared by all sibling processes.
 3. As each process finishes, it takes a cross-process lock, reads *all* sidecars present so far, and regenerates the merged HTML report and the summary block. The last process to finish naturally leaves the complete aggregate — no process ever needs to know whether it is the last one.
 
@@ -233,11 +233,11 @@ tunit-report merge --directory <dir> [options]
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `TUNIT_AGGREGATE_REPORTS`   | Unset (default) — cooperative merge wherever a shared directory is resolvable (GitHub Actions, or explicit `TUNIT_AGGREGATE_DIR`); silently off otherwise. `defer` — persist sidecars + merged HTML only; no summary blocks (multi-step scenarios). `off` (also `false`/`0`/`no`/`disabled`/`none`) — no aggregation. |
 | `TUNIT_AGGREGATE_DIR`       | Shared directory for sidecars and the merged report. Required outside GitHub Actions; optional override on GitHub Actions.                                                                                                                                                                                            |
-| `TUNIT_DISABLE_JSON_REPORT` | Disables the JSON sidecar written next to the HTML report. Note: sidecars are what aggregation and `tunit-report` consume.                                                                                                                                                                                            |
+| `TUNIT_DISABLE_JSON_REPORT` | Disables the JSON sidecar written next to the HTML report. Programmatic equivalent: `context.Settings.Reporting.JsonReportEnabled = false`. Note: sidecars are what aggregation and `tunit-report` consume.                                                                                                           |
 
 ## Notes & Limitations[​](#notes--limitations "Direct link to Notes & Limitations")
 
-* Aggregation is driven by the HTML reporter's data pipeline — if you set `TUNIT_DISABLE_HTML_REPORTER`, no sidecars are produced and there is nothing to merge.
+* Aggregation is driven by the HTML reporter's data pipeline — if you set `TUNIT_DISABLE_HTML_REPORTER` or `context.Settings.Reporting.HtmlReportEnabled = false`, no sidecars are produced and there is nothing to merge.
 * With cooperative mode (the default) across *multiple steps in the same job*, each step appends its own progressively-larger block (earlier steps' blocks can't be rewritten). Use `defer` + the tool for that layout, or `off` to restore per-suite blocks.
 * Suites are identified per assembly + OS + TFM, so multi-targeted projects appear as separate rows (e.g. `MyTests (.NET 8.0.x)` / `MyTests (.NET 9.0.x)`).
 * The GitHub step summary is capped at 1 MB by GitHub; the aggregated block replaces N per-suite blocks, so it usually *reduces* summary size.

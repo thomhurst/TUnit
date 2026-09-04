@@ -16,7 +16,7 @@ The OS and runtime version are included automatically so that matrix builds (mul
 
 Open it in any modern browser. The report is fully self-contained (single HTML file) and works offline.
 
-A machine-readable JSON sidecar (`{AssemblyName}-{os}-{tfm}.tunit-report.json`) is written alongside the HTML report. It powers [report aggregation](/docs/guides/report-aggregation.md) — merging reports from multiple test projects into one — and can be disabled with `TUNIT_DISABLE_JSON_REPORT=true`.
+A machine-readable JSON sidecar (`{AssemblyName}-{os}-{tfm}.tunit-report.json`) is written alongside the HTML report. It powers [report aggregation](/docs/guides/report-aggregation.md) — merging reports from multiple test projects into one — and can be disabled with `TUNIT_DISABLE_JSON_REPORT=true` or `context.Settings.Reporting.JsonReportEnabled = false`.
 
 Running many test projects and want **one combined report instead of one per project**? See [Aggregated Reports](/docs/guides/report-aggregation.md).
 
@@ -47,6 +47,8 @@ export TUNIT_DISABLE_HTML_REPORTER=true
 ```
 
 Accepts: `true`, `1`, `yes` (case-insensitive).
+
+For version-controlled project configuration, set `context.Settings.Reporting.HtmlReportEnabled = false` in a `[Before(HookType.TestDiscovery)]` hook instead.
 
 ### Deprecated: `--report-html` Flag[​](#deprecated---report-html-flag "Direct link to deprecated---report-html-flag")
 
@@ -145,6 +147,8 @@ This is useful if you:
 * Upload the report to another endpoint anyway
 
 The report file and the `GITHUB_STEP_SUMMARY` are still generated.
+
+This can also be configured in code with `context.Settings.Reporting.ArtifactUploadEnabled = false`.
 
 ### Viewing the Report[​](#viewing-the-report "Direct link to Viewing the Report")
 
@@ -273,7 +277,7 @@ The collector uses **smart sampling**: spans from known test traces are fully re
 
 ### Report Not Generated[​](#report-not-generated "Direct link to Report Not Generated")
 
-* Check that `TUNIT_DISABLE_HTML_REPORTER` is not set in your environment
+* Check that `TUNIT_DISABLE_HTML_REPORTER` is not set and `context.Settings.Reporting.HtmlReportEnabled` is not `false`
 * Verify that the `TestResults/` directory is writable
 * Check the console output for any warning messages about report generation failures
 
