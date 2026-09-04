@@ -58,6 +58,14 @@ jobs:
           path: pr-head
           fetch-depth: 1
           persist-credentials: false
+          # actions/checkout blocks fork checkouts under pull_request_target because
+          # fetching AND EXECUTING fork code in the trusted context is a pwn request.
+          # Nothing here executes it: the head lands in pr-head/ rather than the
+          # workspace root, no build or test step runs against it, and Claude's tools
+          # are limited to Read/Glob/Grep plus read-only git and gh. Keep it that way -
+          # if a step is ever added that builds, restores or runs anything from
+          # pr-head/, this opt-in must be removed.
+          allow-unsafe-pr-checkout: true
 
       - name: Run Claude Code Review
         id: claude-review
