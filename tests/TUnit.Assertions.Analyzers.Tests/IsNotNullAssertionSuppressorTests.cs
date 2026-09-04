@@ -14,9 +14,158 @@ namespace TUnit.Assertions.Analyzers.Tests;
 /// </summary>
 public class IsNotNullAssertionSuppressorTests
 {
+    private static readonly DiagnosticResult CS8600 = new("CS8600", DiagnosticSeverity.Warning);
     private static readonly DiagnosticResult CS8602 = new("CS8602", DiagnosticSeverity.Warning);
     private static readonly DiagnosticResult CS8604 = new("CS8604", DiagnosticSeverity.Warning);
     private static readonly DiagnosticResult CS8629 = new("CS8629", DiagnosticSeverity.Warning);
+
+    [Test]
+    [Arguments("int[]")]
+    [Arguments("IList<int>")]
+    [Arguments("IReadOnlyList<int>")]
+    [Arguments("IEnumerable<int>")]
+    [Arguments("ICollection<int>")]
+    [Arguments("IReadOnlyCollection<int>")]
+    [Arguments("IDictionary<string, int>")]
+    [Arguments("IReadOnlyDictionary<string, int>")]
+    [Arguments("ISet<int>")]
+    public async Task Suppresses_After_Collection_IsNotNull_Instance_Method(string collectionType)
+    {
+        var code = $$"""
+            #nullable enable
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod({{collectionType}}? values)
+                {
+                    await Assert.That(values).IsNotNull();
+                    Consume({|#0:values|});
+                }
+
+                public async Task DereferenceTest({{collectionType}}? values)
+                {
+                    await Assert.That(values).IsNotNull();
+                    _ = {|#1:values|}.GetHashCode();
+                }
+
+                public {{collectionType}}? Values { get; set; }
+
+                public async Task PropertyTest(MyTests model)
+                {
+                    await Assert.That(model.Values).IsNotNull();
+                    Consume(model.Values!);
+                    Consume({|#2:model.Values|});
+                }
+
+                public async Task ForeachTest({{collectionType}}? values)
+                {
+                    await Assert.That(values).IsNotNull();
+                    Consume(values!);
+                    foreach (var item in {|#3:values|}) { }
+                }
+
+                public async Task ChainStartTest({{collectionType}}? values)
+                {
+                    await Assert.That(values).IsNotNull().And.IsEmpty();
+                    Consume({|#4:values|});
+                }
+
+                public async Task ChainEndTest({{collectionType}}? values)
+                {
+                    await Assert.That(values).IsEmpty().And.IsNotNull();
+                    Consume({|#5:values|});
+                }
+
+                public async Task AssignmentTest({{collectionType}}? values)
+                {
+                    await Assert.That(values).IsNotNull();
+                    {{collectionType}} nonNullable = {|#6:values|};
+                }
+
+                public async Task WithoutNullAssertionTest({{collectionType}}? values)
+                {
+                    await Assert.That(values).IsEmpty();
+                    Consume({|#7:values|});
+                }
+
+                private static void Consume({{collectionType}} values) { }
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8600, CS8602, CS8604)
+            .WithExpectedDiagnosticsResults(
+                CS8604.WithLocation(0).WithIsSuppressed(true),
+                CS8602.WithLocation(1).WithIsSuppressed(true),
+                CS8604.WithLocation(2).WithIsSuppressed(true),
+                CS8602.WithLocation(3).WithIsSuppressed(true),
+                CS8604.WithLocation(4).WithIsSuppressed(true),
+                CS8604.WithLocation(5).WithIsSuppressed(true),
+                CS8600.WithLocation(6).WithIsSuppressed(true),
+                CS8604.WithLocation(7).WithIsSuppressed(false))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Does_Not_Suppress_After_Custom_IsNotNull_Instance_Method()
+    {
+        const string code = """
+            #nullable enable
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Sources;
+
+            public static class CustomAssertions
+            {
+                public static CustomAssertion Custom(this ListAssertion<int> source) => new CustomAssertion();
+                public static CustomDerivedAssertion CustomDerived(this ListAssertion<int> source) => new CustomDerivedAssertion();
+            }
+
+            public class CustomAssertion
+            {
+                public Task IsNotNull() => Task.CompletedTask;
+            }
+
+            public class CustomDerivedAssertion : ListAssertion<int>
+            {
+                public CustomDerivedAssertion() : base(null, null) { }
+                public new Task IsNotNull() => Task.CompletedTask;
+            }
+
+            public class MyTests
+            {
+                public async Task TestMethod(IList<int>? values)
+                {
+                    await Assert.That(values).Custom().IsNotNull();
+                    _ = {|#0:values|}.Count;
+                }
+
+                public async Task HiddenMethodTest(IList<int>? values)
+                {
+                    await Assert.That(values).CustomDerived().IsNotNull();
+                    _ = {|#1:values|}.Count;
+                }
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(
+                CS8602.WithLocation(0).WithIsSuppressed(false),
+                CS8602.WithLocation(1).WithIsSuppressed(false))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
 
     [Test]
     public async Task Suppresses_CS8602_After_IsNotNull_Assertion()
