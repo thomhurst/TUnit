@@ -40,7 +40,7 @@ public class TestIsolationTests
 
         var name = isolation.GetIsolatedName("foo");
 
-        await Assert.That(name).IsEqualTo($"Test_{id}_foo");
+        await Assert.That(name).IsEqualTo($"test_{id}_foo");
     }
 
     [Test]

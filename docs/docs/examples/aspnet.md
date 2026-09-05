@@ -115,8 +115,8 @@ When tests share resources like database tables, message queues, or cache keys, 
 protected override async Task SetupAsync()
 {
     // Each test gets unique resources that no other test will touch
-    var tableName = GetIsolatedName("todos");      // "Test_42_todos"
-    var queueName = GetIsolatedName("events");     // "Test_42_events"
+    var tableName = GetIsolatedName("todos");      // "test_42_todos"
+    var queueName = GetIsolatedName("events");     // "test_42_events"
     var cachePrefix = GetIsolatedPrefix();         // "test_42_"
 
     await CreateTableAsync(tableName);
@@ -279,8 +279,8 @@ Creates a unique name for resources like database tables:
 
 ```csharp
 // In a test with UniqueId = 42:
-var tableName = GetIsolatedName("todos");  // Returns "Test_42_todos"
-var topicName = GetIsolatedName("orders"); // Returns "Test_42_orders"
+var tableName = GetIsolatedName("todos");  // Returns "test_42_todos"
+var topicName = GetIsolatedName("orders"); // Returns "test_42_orders"
 ```
 
 ### GetIsolatedPrefix
@@ -641,7 +641,7 @@ public class IsolatedTableTests : TestsBase
     // ✅ GOOD: Each test gets its own table
     protected override async Task SetupAsync()
     {
-        TableName = GetIsolatedName("todos");  // "Test_42_todos"
+        TableName = GetIsolatedName("todos");  // "test_42_todos"
         await CreateTableAsync(TableName);
     }
 
@@ -911,7 +911,7 @@ public class OverrideConfigurationTests
 var sharedTableName = "todos";
 
 // GOOD: Each test gets its own table
-var isolatedTableName = GetIsolatedName("todos");  // "Test_42_todos", "Test_43_todos", etc.
+var isolatedTableName = GetIsolatedName("todos");  // "test_42_todos", "test_43_todos", etc.
 TestContext.Current!.Output.WriteLine($"{sharedTableName} -> {isolatedTableName}");
 ```
 
@@ -1142,7 +1142,7 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
 
 | Method | Description |
 |--------|-------------|
-| `GetIsolatedName(string baseName)` | Returns `"Test_{UniqueId}_{baseName}"` |
+| `GetIsolatedName(string baseName)` | Returns `"test_{UniqueId}_{baseName}"` |
 | `GetIsolatedPrefix(string separator = "_")` | Returns `"test{separator}{UniqueId}{separator}"` |
 
 ### WebApplicationTestOptions
