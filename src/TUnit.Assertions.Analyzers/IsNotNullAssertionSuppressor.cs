@@ -188,12 +188,8 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         var assertThatCall = FindAssertThatInChain(invocation);
         if (assertThatCall is null
             || assertThatCall.ArgumentList.Arguments.Count != 1
-            || !IsTUnitMethod(
-                invocation,
-                semanticModel,
-                cancellationToken,
-                "global::TUnit.Assertions.Extensions.AssertionExtensions",
-                "IsNotNull")
+            || !IsSupportedAssertionChain(invocation, assertThatCall, semanticModel, cancellationToken)
+            || !IsTUnitIsNotNullMethod(invocation, semanticModel, cancellationToken)
             || !IsTUnitMethod(
                 assertThatCall,
                 semanticModel,
@@ -205,6 +201,58 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         }
 
         return assertThatCall.ArgumentList.Arguments[0].Expression;
+    }
+
+    private static bool IsTUnitIsNotNullMethod(
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        if (semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is not IMethodSymbol symbol)
+        {
+            return false;
+        }
+
+        var method = symbol.ReducedFrom ?? symbol;
+
+        if (method.Name != "IsNotNull"
+            || !IsReferencedAssertionAssembly(method.ContainingAssembly, semanticModel.Compilation))
+        {
+            return false;
+        }
+
+        if (method.ContainingType.GloballyQualifiedNonGeneric() == "global::TUnit.Assertions.Extensions.AssertionExtensions")
+        {
+            return true;
+        }
+
+        var collectionBase = semanticModel.Compilation.GetTypeByMetadataName(
+            "TUnit.Assertions.Sources.CollectionAssertionBase`2");
+
+        // Check the declaring assembly as well as the shared base: a custom subclass
+        // can hide IsNotNull, but that does not make its method a TUnit null check.
+        if (collectionBase is null
+            || !SymbolEqualityComparer.Default.Equals(method.ContainingAssembly, collectionBase.ContainingAssembly))
+        {
+            return false;
+        }
+
+        var asyncEnumerableBase = semanticModel.Compilation.GetTypeByMetadataName(
+            "TUnit.Assertions.Sources.AsyncEnumerableAssertionBase`1");
+        var asyncDelegate = semanticModel.Compilation.GetTypeByMetadataName(
+            "TUnit.Assertions.Sources.AsyncDelegateAssertion");
+
+        for (var type = method.ContainingType; type is not null; type = type.BaseType)
+        {
+            if (SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, collectionBase)
+                || SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, asyncEnumerableBase)
+                || SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, asyncDelegate))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static ExpressionSyntax? GetShouldReceiver(
@@ -224,6 +272,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
         var shouldCall = FindShouldInChain(invocation);
         if (shouldCall is null
+            || !IsSupportedAssertionChain(invocation, shouldCall, semanticModel, cancellationToken)
             || !IsTUnitMethod(
                 shouldCall,
                 semanticModel,
@@ -240,6 +289,62 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
             : null;
     }
 
+    private static bool IsSupportedAssertionChain(
+        InvocationExpressionSyntax nullCheck,
+        InvocationExpressionSyntax entryPoint,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        ExpressionSyntax outermost = nullCheck;
+        while ((outermost.Parent is MemberAccessExpressionSyntax member && member.Expression == outermost)
+               || (outermost.Parent is InvocationExpressionSyntax call && call.Expression == outermost)
+               || outermost.Parent is ParenthesizedExpressionSyntax)
+        {
+            outermost = (ExpressionSyntax)outermost.Parent;
+        }
+
+        // Or on either side makes the null check optional. Walk only the receiver
+        // chain, not nested arguments or lambdas belonging to another assertion.
+        for (ExpressionSyntax? current = outermost;
+             current is not null && current != entryPoint;
+             current = GetChainReceiver(current))
+        {
+            if (current is MemberAccessExpressionSyntax { Name.Identifier.Text: "Or" })
+            {
+                return false;
+            }
+        }
+
+        // An external method/property can return a TUnit assertion on another value.
+        // Do not trace a null check back across such a transformation.
+        for (ExpressionSyntax? current = nullCheck; current is not null; current = GetChainReceiver(current))
+        {
+            if (current == entryPoint)
+            {
+                return true;
+            }
+
+            if (current is not ParenthesizedExpressionSyntax)
+            {
+                var symbol = semanticModel.GetSymbolInfo(current, cancellationToken).Symbol;
+                if (!IsReferencedAssertionAssembly(symbol?.ContainingAssembly, semanticModel.Compilation))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static ExpressionSyntax? GetChainReceiver(ExpressionSyntax expression) => expression switch
+    {
+        InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax member } => member.Expression,
+        MemberAccessExpressionSyntax member => member.Expression,
+        ParenthesizedExpressionSyntax parenthesized => parenthesized.Expression,
+        _ => null,
+    };
+
     private static bool IsTUnitMethod(
         InvocationExpressionSyntax invocation,
         SemanticModel semanticModel,
@@ -254,7 +359,16 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
         var method = symbol.ReducedFrom ?? symbol;
         return method.Name == methodName
+               && IsReferencedAssertionAssembly(method.ContainingAssembly, semanticModel.Compilation)
                && method.ContainingType.GloballyQualifiedNonGeneric() == fullyQualifiedContainingTypeName;
+    }
+
+    private static bool IsReferencedAssertionAssembly(IAssemblySymbol? assembly, Compilation compilation)
+    {
+        // Matching namespace/type names alone also accepts source-defined lookalikes.
+        return assembly is not null
+               && (assembly.Identity.Name is "TUnit.Assertions" or "TUnit.Assertions.Should")
+               && !SymbolEqualityComparer.Default.Equals(assembly, compilation.Assembly);
     }
 
     private bool ExpressionsMatch(
