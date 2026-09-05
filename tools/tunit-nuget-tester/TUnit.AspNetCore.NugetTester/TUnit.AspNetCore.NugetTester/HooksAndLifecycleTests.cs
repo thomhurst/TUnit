@@ -84,7 +84,7 @@ public class HooksAndLifecycleTests : TestsBase
         // Verifies that GetIsolatedName produces a unique isolation name
         await Assert.That(_isolatedName).IsNotNull();
         await Assert.That(_isolatedName).Contains("test-resource");
-        await Assert.That(_isolatedName).Contains("Test_");
+        await Assert.That(_isolatedName).Contains("test_");
     }
 
     [Test]
