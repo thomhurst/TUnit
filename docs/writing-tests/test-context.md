@@ -91,9 +91,9 @@ var id = TestContext.Current!.Isolation.UniqueId;  // e.g. 42
 
 // Create isolated resource names
 
-var tableName = TestContext.Current!.Isolation.GetIsolatedName("todos");  // "Test_42_todos"
+var tableName = TestContext.Current!.Isolation.GetIsolatedName("todos");  // "test_42_todos"
 
-var topicName = TestContext.Current!.Isolation.GetIsolatedName("orders"); // "Test_42_orders"
+var topicName = TestContext.Current!.Isolation.GetIsolatedName("orders"); // "test_42_orders"
 
 
 
