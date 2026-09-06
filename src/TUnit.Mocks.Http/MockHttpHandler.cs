@@ -165,7 +165,8 @@ public sealed class MockHttpHandler : HttpMessageHandler
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var originalContentType = request.Content?.Headers.ContentType;
+        // ReadAsStringAsync buffers the original content, so response factories can
+        // reread it without replacing its bytes, headers, or stream ownership.
         var bodyContent = request.Content != null
             ? await request.Content.ReadAsStringAsync(
 #if NET8_0_OR_GREATER
@@ -195,12 +196,6 @@ public sealed class MockHttpHandler : HttpMessageHandler
                     captured.Matched = true;
                     if (response.Delay.HasValue)
                         await Task.Delay(response.Delay.Value, cancellationToken).ConfigureAwait(false);
-                    // Restore content so factory delegates can re-read the body
-                    if (bodyContent != null)
-                    {
-                        request.Content = new StringContent(bodyContent, System.Text.Encoding.UTF8,
-                            originalContentType?.MediaType ?? "application/octet-stream");
-                    }
                     return response.Build(request);
                 }
             }
