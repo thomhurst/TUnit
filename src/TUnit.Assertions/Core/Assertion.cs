@@ -165,13 +165,12 @@ public abstract class Assertion<TValue> : IAssertion
         }
 
         Context.PendingPreWork = null; // Clear before execution to prevent re-entry.
-        var currentScope = AssertionScope.GetCurrentAssertionScope();
-        var exceptionCountBefore = currentScope?.ExceptionCount ?? 0;
+        using var currentScope = AssertionScope.CreateIsolatedScope();
         await preWork();
 
         return !Context.SkipAssertionOnPreWorkFailure
                || currentScope is null
-               || currentScope.ExceptionCount <= exceptionCountBefore;
+               || !currentScope.HasExceptions;
     }
 
     // Create EvaluationMetadata in a separate scope to avoid creating additional

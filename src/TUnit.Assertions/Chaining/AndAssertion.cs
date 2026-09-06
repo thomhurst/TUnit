@@ -28,7 +28,7 @@ public class AndAssertion<TValue> : Assertion<TValue>
 
     public override async Task<TValue?> AssertAsync()
     {
-        var currentScope = AssertionScope.GetCurrentAssertionScope();
+        using var currentScope = AssertionScope.CreateIsolatedScope();
 
         // Try first assertion - use ExecuteCoreAsync to avoid recursion
         if (currentScope != null)
