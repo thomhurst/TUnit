@@ -12,7 +12,7 @@ public partial class TestContext
     int ITestIsolation.UniqueId => IsolationUniqueId;
 
     /// <inheritdoc/>
-    string ITestIsolation.GetIsolatedName(string baseName) => $"Test_{IsolationUniqueId}_{baseName}";
+    string ITestIsolation.GetIsolatedName(string baseName) => $"test_{IsolationUniqueId}_{baseName}";
 
     /// <inheritdoc/>
     string ITestIsolation.GetIsolatedPrefix(string separator) => $"test{separator}{IsolationUniqueId}{separator}";

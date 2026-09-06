@@ -34,12 +34,12 @@ public abstract class WebApplicationTest
     /// Use for database tables, Redis keys, Kafka topics, etc.
     /// </summary>
     /// <param name="baseName">The base name for the resource.</param>
-    /// <returns>A unique name in the format "Test_{UniqueId}_{baseName}".</returns>
+    /// <returns>A unique name in the format "test_{UniqueId}_{baseName}".</returns>
     /// <example>
     /// <code>
     /// // In a test with UniqueId = 42:
-    /// var tableName = GetIsolatedName("todos");  // Returns "Test_42_todos"
-    /// var topicName = GetIsolatedName("orders"); // Returns "Test_42_orders"
+    /// var tableName = GetIsolatedName("todos");  // Returns "test_42_todos"
+    /// var topicName = GetIsolatedName("orders"); // Returns "test_42_orders"
     /// </code>
     /// </example>
     protected string GetIsolatedName(string baseName) => TestContext.Current!.Isolation.GetIsolatedName(baseName);

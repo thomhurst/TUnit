@@ -19,12 +19,12 @@ public interface ITestIsolation
     /// Use for database tables, Redis keys, Kafka topics, etc.
     /// </summary>
     /// <param name="baseName">The base name for the resource.</param>
-    /// <returns>A unique name in the format "Test_{UniqueId}_{baseName}".</returns>
+    /// <returns>A unique name in the format "test_{UniqueId}_{baseName}".</returns>
     /// <example>
     /// <code>
     /// // In a test with UniqueId = 42:
-    /// var tableName = TestContext.Current!.Isolation.GetIsolatedName("todos");  // Returns "Test_42_todos"
-    /// var topicName = TestContext.Current!.Isolation.GetIsolatedName("orders"); // Returns "Test_42_orders"
+    /// var tableName = TestContext.Current!.Isolation.GetIsolatedName("todos");  // Returns "test_42_todos"
+    /// var topicName = TestContext.Current!.Isolation.GetIsolatedName("orders"); // Returns "test_42_orders"
     /// </code>
     /// </example>
     string GetIsolatedName(string baseName);
