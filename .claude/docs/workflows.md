@@ -1,141 +1,40 @@
-# Development Workflows
+# Development Commands
 
----
+## Build and test
 
-## Common Commands
+From the repository root:
 
-```bash
-# Build (fast inner loop — use dev solution, separate restore, graph scheduling)
+```sh
 dotnet restore TUnit.Dev.slnx
 dotnet build TUnit.Dev.slnx --no-restore -graphBuild:True
+```
 
-# Build with centralized output layout
-dotnet build TUnit.Dev.slnx --no-restore -graphBuild:True --artifacts-path artifacts
+Use `TUnit.slnx` for the full solution, including Roslyn version variants. Run `dotnet test` from the relevant test project directory. Core generator snapshots live in `tests/TUnit.Core.SourceGenerator.Tests`; public API snapshots live in `tests/TUnit.PublicAPI`.
 
-# Build full solution (CI or pre-commit)
-dotnet restore TUnit.slnx
-dotnet build TUnit.slnx --no-restore -graphBuild:True
+For the intentionally failing test application, always select the class or method under test:
 
-# Run all tests (excludes TUnit.TestProject)
-dotnet test
-
-# Snapshot tests
-dotnet test tests/TUnit.Core.SourceGenerator.Tests
-dotnet test tests/TUnit.PublicAPI
-
-# Run specific test
+```sh
+cd tests/TUnit.TestProject
 dotnet test --treenode-filter "/*/*/ClassName/*"
-
-# Build release
-dotnet build -c Release
-
-# Test AOT compatibility
-dotnet publish -c Release -p:PublishAot=true --use-current-runtime
 ```
 
----
+A single-method filter has the form `/Assembly/Namespace/ClassName/TestMethodName`. Run one filter per command; do not join paths with `|`.
 
-## Performance Testing
+For AOT validation, publish the affected test application in Release with `-p:PublishAot=true --use-current-runtime`, selecting a target framework with `-f` when it multi-targets.
 
-Run benchmarks when changing hot paths (test discovery, execution, data generation).
+## Performance
 
-```bash
-# Core performance benchmarks (BenchmarkDotNet)
-cd benchmarks/TUnit.Performance.Tests
-dotnet run -c Release
+Run `dotnet run -c Release` from the relevant benchmark project and compare before/after results:
 
-# Source generator benchmarks
-cd benchmarks/TUnit.SourceGenerator.Benchmarks
-dotnet run -c Release
+- `benchmarks/TUnit.Performance.Tests`: core performance
+- `benchmarks/TUnit.SourceGenerator.Benchmarks`: source generation
+- `benchmarks/TUnit.PerformanceBenchmarks`: large-scale workloads
 
-# Large-scale performance validation
-cd benchmarks/TUnit.PerformanceBenchmarks
-dotnet run -c Release
-```
+## Documentation snippets
 
-**When to run**:
+CI compiles C# fences in `README.md` and `docs/docs` against packages produced by the pipeline, including fences nested in lists. Warnings are errors; failure-masking directives, warning pragmas, nullable disabling, `#if false`, and suppression attributes are rejected. `NoWarn` and `WarningsNotAsErrors` must be empty.
 
-- Before/after changes to test discovery
-- Before/after changes to test execution
-- Before/after changes to argument expansion
-- Before/after caching or reflection changes
-
----
-
-## TUnit.TestProject Filters
-
-Many tests in `TUnit.TestProject` are designed to fail (testing error scenarios). Always use filters.
-
-### Filter Syntax
-
-```bash
-# Single test
---treenode-filter "/TUnit.TestProject/Namespace/ClassName/TestMethodName"
-
-# All tests in a class
---treenode-filter "/*/*/ClassName/*"
-
-# Exclude by category
---treenode-filter "/*/*/*/*[Category!=Performance]"
-```
-
-### Run Filters One at a Time
-
-OR patterns (`Pattern1|Pattern2`) can match thousands of unintended tests.
-
-```bash
-# Wrong - matches too broadly
---treenode-filter "/*/*/ClassA/*|/*/*/ClassB/*"
-
-# Correct - separate commands
-dotnet test --treenode-filter "/*/*/ClassA/*"
-dotnet test --treenode-filter "/*/*/ClassB/*"
-```
-
----
-
-## Adding a New Feature
-
-1. Write tests FIRST (TDD)
-2. Does it change core engine metadata collection?
-   - YES: Implement in BOTH source-gen AND reflection
-   - NO: Use unified code path
-3. Implement in `TUnit.Core` if new abstractions needed
-4. Add analyzer rule if misuse is possible
-5. Run all tests: `dotnet test`
-6. Accept snapshots if needed (see `CLAUDE.md`)
-7. Benchmark if touching hot paths
-8. Test AOT if using reflection
-
----
-
-## Fixing a Bug
-
-1. Write failing test that reproduces the bug
-2. Identify if it affects metadata collection (dual-mode)
-3. Fix in both source generator and reflection engine if needed
-4. Run full test suite: `dotnet test`
-5. Accept snapshots if applicable
-
----
-
-## Pre-Commit Checklist
-
-- [ ] All tests pass: `dotnet test`
-- [ ] If source generator changed: ran snapshot tests, committed `.verified.txt`
-- [ ] If public API changed: ran `TUnit.PublicAPI`, committed `.verified.txt`
-- [ ] If dual-mode feature: implemented in both modes, tested both
-- [ ] If performance-critical: profiled before/after
-- [ ] If using reflection: tested AOT, added annotations
-- [ ] No `.received.txt` files staged
-
----
-
-## Documentation Snippets
-
-CI compiles C# fences in `README.md` and `docs/docs` against packages produced by the pipeline. Fences nested in Markdown lists are supported.
-
-Use a directive immediately before a fence when its context needs to be explicit:
+Place a directive immediately before a fence to specify its context:
 
 ```markdown
 <!-- doc-test-declaration -->
@@ -143,20 +42,14 @@ Use a directive immediately before a fence when its context needs to be explicit
 <!-- doc-test-statements -->
 ```
 
-Every C# fence must compile with warnings as errors. Failure-masking ignore/contextual directives,
-warning pragmas, nullable disabling, `#if false`, and suppression attributes are rejected. The verifier
-also fails unless `NoWarn` and `WarningsNotAsErrors` are empty.
-
-Use `<!-- doc-test-shared -->` once on tutorial pages whose fences intentionally share declarations. Every fence still compiles; generated snippets use one page-scoped namespace.
-
-For a fence that mixes declarations or members with usage, split it explicitly at an exact marker:
+Use `<!-- doc-test-shared -->` once on tutorial pages whose fences share declarations; each fence still compiles in a page-scoped namespace. For fences mixing declarations or members with usage, split at an exact marker:
 
 ```markdown
 <!-- doc-test-declaration: split-before=// Usage -->
 <!-- doc-test-member: split-before=// Usage -->
 ```
 
-Run the check against local packages with:
+Verify against local packages:
 
 ```powershell
 ./scripts/Verify-DocSnippets.ps1 -PackagesPath <package-directory> -Version <semver>
