@@ -1,4 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="TUnit">
-  <rect x="2" y="2" width="60" height="60" rx="12" fill="#86f7c8"/>
-  <path fill="#07110f" d="M13 15h38v9H36.75v26h-9.5V24H13z"/>
+  <rect x="2" y="2" width="60" height="60" rx="12" fill="#d5f4e5"/>
+  <path fill="#214b3c" d="M13 15h38v9H36.75v26h-9.5V24H13z"/>
 </svg>
