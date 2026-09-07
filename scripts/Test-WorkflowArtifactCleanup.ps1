@@ -41,9 +41,10 @@ try {
 
     $settings = Join-Path $worktree '.env'
     Set-Content -LiteralPath $settings -Value 'local settings'
+    if ($IsWindows) { (Get-Item -LiteralPath $settings -Force).Attributes = [IO.FileAttributes]::Hidden }
     Remove-MergedWorktree @removeArgs
     Assert-True (Test-Path -LiteralPath $settings) 'Unknown ignored files were removed.'
-    Remove-Item -LiteralPath $settings
+    Remove-Item -LiteralPath $settings -Force
 
     $trackedLog = Join-Path $worktree 'tracked.log'
     Set-Content -LiteralPath $trackedLog -Value 'tracked fixture'
