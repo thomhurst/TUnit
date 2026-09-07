@@ -12,6 +12,7 @@ namespace ExternalLib
 
     file sealed class ServiceClientMockImpl : global::ExternalLib.ServiceClient, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
+        // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
         private readonly global::TUnit.Mocks.MockEngine<global::ExternalLib.ServiceClient> _engine = ServiceClientMockConstructionContext.Engine!;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -20,7 +21,6 @@ namespace ExternalLib
         [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         internal ServiceClientMockImpl(global::TUnit.Mocks.MockEngine<global::ExternalLib.ServiceClient> engine) : base()
         {
-            _engine = engine;
         }
 
         public override string GetValue(string key)

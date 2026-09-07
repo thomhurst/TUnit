@@ -12,6 +12,7 @@ namespace ExternalLib
 
     file sealed class GrpcClientMockImpl : global::ExternalLib.GrpcClient, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
+        // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
         private readonly global::TUnit.Mocks.MockEngine<global::ExternalLib.GrpcClient> _engine = GrpcClientMockConstructionContext.Engine!;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -20,7 +21,6 @@ namespace ExternalLib
         [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         internal GrpcClientMockImpl(global::TUnit.Mocks.MockEngine<global::ExternalLib.GrpcClient> engine) : base()
         {
-            _engine = engine;
         }
 
         protected override global::ExternalLib.GrpcClient NewInstance(global::ExternalLib.GrpcClient.ClientBaseConfiguration configuration)

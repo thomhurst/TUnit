@@ -10,6 +10,7 @@ file static class BaseDialogMockConstructionContext
 
 file sealed class BaseDialogMockImpl : global::BaseDialog, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
+    // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
     private readonly global::TUnit.Mocks.MockEngine<global::BaseDialog> _engine = BaseDialogMockConstructionContext.Engine!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -18,7 +19,6 @@ file sealed class BaseDialogMockImpl : global::BaseDialog, global::TUnit.Mocks.I
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal BaseDialogMockImpl(global::TUnit.Mocks.MockEngine<global::BaseDialog> engine) : base()
     {
-        _engine = engine;
     }
 
     [global::System.Obsolete]

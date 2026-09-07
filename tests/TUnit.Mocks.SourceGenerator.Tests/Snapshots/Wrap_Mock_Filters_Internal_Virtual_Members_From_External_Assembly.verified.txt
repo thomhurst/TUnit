@@ -14,6 +14,7 @@ namespace ExternalLib
 
     file sealed class ExternalServiceWrapMockImpl : global::ExternalLib.ExternalService, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
+        // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
         private readonly global::TUnit.Mocks.MockEngine<global::ExternalLib.ExternalService> _engine = ExternalServiceMockConstructionContext.Engine!;
         private readonly global::ExternalLib.ExternalService _wrappedInstance = ExternalServiceMockConstructionContext.WrappedInstance!;
 
@@ -23,8 +24,6 @@ namespace ExternalLib
         [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         internal ExternalServiceWrapMockImpl(global::TUnit.Mocks.MockEngine<global::ExternalLib.ExternalService> engine, global::ExternalLib.ExternalService wrappedInstance) : base()
         {
-            _engine = engine;
-            _wrappedInstance = wrappedInstance;
         }
 
         public override string PublicMethod()

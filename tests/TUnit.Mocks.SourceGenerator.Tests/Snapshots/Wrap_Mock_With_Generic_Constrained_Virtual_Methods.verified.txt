@@ -12,6 +12,7 @@ file static class RepositoryMockConstructionContext
 
 file sealed class RepositoryWrapMockImpl : global::Repository, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
+    // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
     private readonly global::TUnit.Mocks.MockEngine<global::Repository> _engine = RepositoryMockConstructionContext.Engine!;
     private readonly global::Repository _wrappedInstance = RepositoryMockConstructionContext.WrappedInstance!;
 
@@ -21,8 +22,6 @@ file sealed class RepositoryWrapMockImpl : global::Repository, global::TUnit.Moc
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal RepositoryWrapMockImpl(global::TUnit.Mocks.MockEngine<global::Repository> engine, global::Repository wrappedInstance) : base()
     {
-        _engine = engine;
-        _wrappedInstance = wrappedInstance;
     }
 
     public override T Get<T>(int id)

@@ -10,6 +10,7 @@ file static class MyServiceMockConstructionContext
 
 file sealed class MyServiceMockImpl : global::MyService, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
+    // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
     private readonly global::TUnit.Mocks.MockEngine<global::MyService> _engine = MyServiceMockConstructionContext.Engine!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -18,7 +19,6 @@ file sealed class MyServiceMockImpl : global::MyService, global::TUnit.Mocks.IRa
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal MyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::MyService> engine) : base()
     {
-        _engine = engine;
     }
 
     public override string GetValue()

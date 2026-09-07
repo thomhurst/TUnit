@@ -10,6 +10,7 @@ file static class ConfigBaseMockConstructionContext
 
 file sealed class ConfigBaseMockImpl : global::ConfigBase, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
+    // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
     private readonly global::TUnit.Mocks.MockEngine<global::ConfigBase> _engine = ConfigBaseMockConstructionContext.Engine!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -18,7 +19,6 @@ file sealed class ConfigBaseMockImpl : global::ConfigBase, global::TUnit.Mocks.I
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal ConfigBaseMockImpl(global::TUnit.Mocks.MockEngine<global::ConfigBase> engine) : base()
     {
-        _engine = engine;
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]

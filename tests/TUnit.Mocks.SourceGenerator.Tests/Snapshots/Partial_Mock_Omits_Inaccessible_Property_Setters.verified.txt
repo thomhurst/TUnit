@@ -12,6 +12,7 @@ namespace ExternalLib
 
     file sealed class ExternalResponseMockImpl : global::ExternalLib.ExternalResponse, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
+        // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
         private readonly global::TUnit.Mocks.MockEngine<global::ExternalLib.ExternalResponse> _engine = ExternalResponseMockConstructionContext.Engine!;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -20,7 +21,6 @@ namespace ExternalLib
         [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         internal ExternalResponseMockImpl(global::TUnit.Mocks.MockEngine<global::ExternalLib.ExternalResponse> engine) : base()
         {
-            _engine = engine;
         }
 
         public override int StatusCode

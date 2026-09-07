@@ -10,6 +10,7 @@ file static class ConstructorClientMockConstructionContext
 
 file sealed class ConstructorClientMockImpl : global::ConstructorClient, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
+    // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
     private readonly global::TUnit.Mocks.MockEngine<global::ConstructorClient> _engine = ConstructorClientMockConstructionContext.Engine!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -18,17 +19,14 @@ file sealed class ConstructorClientMockImpl : global::ConstructorClient, global:
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal ConstructorClientMockImpl(global::TUnit.Mocks.MockEngine<global::ConstructorClient> engine) : base()
     {
-        _engine = engine;
     }
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal ConstructorClientMockImpl(global::TUnit.Mocks.MockEngine<global::ConstructorClient> engine, string value) : base(value)
     {
-        _engine = engine;
     }
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal ConstructorClientMockImpl(global::TUnit.Mocks.MockEngine<global::ConstructorClient> engine, int value) : base(value)
     {
-        _engine = engine;
     }
 
     public override void Call()
@@ -230,6 +228,7 @@ file static class WrappedConstructorClientMockConstructionContext
 
 file sealed class WrappedConstructorClientWrapMockImpl : global::WrappedConstructorClient, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
+    // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
     private readonly global::TUnit.Mocks.MockEngine<global::WrappedConstructorClient> _engine = WrappedConstructorClientMockConstructionContext.Engine!;
     private readonly global::WrappedConstructorClient _wrappedInstance = WrappedConstructorClientMockConstructionContext.WrappedInstance!;
 
@@ -239,8 +238,6 @@ file sealed class WrappedConstructorClientWrapMockImpl : global::WrappedConstruc
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal WrappedConstructorClientWrapMockImpl(global::TUnit.Mocks.MockEngine<global::WrappedConstructorClient> engine, global::WrappedConstructorClient wrappedInstance) : base(default(int)!)
     {
-        _engine = engine;
-        _wrappedInstance = wrappedInstance;
     }
 
     public override void Call()
