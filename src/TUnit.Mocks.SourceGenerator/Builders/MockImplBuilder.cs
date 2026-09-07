@@ -127,7 +127,6 @@ internal static class MockImplBuilder
         using (writer.Block($"file sealed class {safeName}WrapMockImpl{typeParams} : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
         {
             var context = GetConstructionContextName(model, safeName);
-            writer.AppendLine("// C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.");
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine = {context}.Engine!;");
             writer.AppendLine($"private readonly {model.FullyQualifiedName} _wrappedInstance = {context}.WrappedInstance!;");
             writer.AppendLine();
@@ -480,7 +479,6 @@ internal static class MockImplBuilder
 
         using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
         {
-            writer.AppendLine("// C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.");
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine = {GetConstructionContextName(model, safeName)}.Engine!;");
             writer.AppendLine();
 

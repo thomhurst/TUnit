@@ -10,7 +10,6 @@ file static class SnapshotClientMockConstructionContext
 
 file sealed class SnapshotClientMockImpl : global::SnapshotClient, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
     private readonly global::TUnit.Mocks.MockEngine<global::SnapshotClient> _engine = SnapshotClientMockConstructionContext.Engine!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]

@@ -10,7 +10,6 @@ file static class SelfEquatableSnapshotMockConstructionContext
 
 file sealed class SelfEquatableSnapshotMockImpl : global::SelfEquatableSnapshot, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
     private readonly global::TUnit.Mocks.MockEngine<global::SelfEquatableSnapshot> _engine = SelfEquatableSnapshotMockConstructionContext.Engine!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]

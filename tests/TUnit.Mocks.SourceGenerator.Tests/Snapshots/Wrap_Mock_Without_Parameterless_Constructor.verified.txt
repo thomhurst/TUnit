@@ -12,7 +12,6 @@ file static class RealClassMockConstructionContext
 
 file sealed class RealClassWrapMockImpl : global::RealClass, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
     private readonly global::TUnit.Mocks.MockEngine<global::RealClass> _engine = RealClassMockConstructionContext.Engine!;
     private readonly global::RealClass _wrappedInstance = RealClassMockConstructionContext.WrappedInstance!;
 

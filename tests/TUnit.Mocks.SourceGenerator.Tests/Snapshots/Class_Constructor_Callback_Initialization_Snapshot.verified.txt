@@ -10,7 +10,6 @@ file static class ConstructorClientMockConstructionContext
 
 file sealed class ConstructorClientMockImpl : global::ConstructorClient, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
     private readonly global::TUnit.Mocks.MockEngine<global::ConstructorClient> _engine = ConstructorClientMockConstructionContext.Engine!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -228,7 +227,6 @@ file static class WrappedConstructorClientMockConstructionContext
 
 file sealed class WrappedConstructorClientWrapMockImpl : global::WrappedConstructorClient, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    // C# specification 15.11.3: field initializers run before base(...), making this state available to constructor callbacks.
     private readonly global::TUnit.Mocks.MockEngine<global::WrappedConstructorClient> _engine = WrappedConstructorClientMockConstructionContext.Engine!;
     private readonly global::WrappedConstructorClient _wrappedInstance = WrappedConstructorClientMockConstructionContext.WrappedInstance!;
 
