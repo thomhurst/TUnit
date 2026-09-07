@@ -14,13 +14,13 @@
   stroke-opacity: 0.5;
 }
 
-/* Dark mode adjustments */
-[data-theme='dark'] .markdown .docusaurus-mermaid-container svg[aria-roledescription='xychart'] text {
-  fill: var(--ifm-font-color-base) !important;
+/* Generated benchmarks include their own palette; keep overrides local to charts. */
+.markdown .docusaurus-mermaid-container svg[aria-roledescription='xychart'] .main > rect {
+  fill: var(--tunit-paper) !important;
 }
 
-[data-theme='dark'] .markdown .docusaurus-mermaid-container svg[aria-roledescription='xychart'] .main > rect {
-  fill: var(--ifm-background-color) !important;
+.markdown .docusaurus-mermaid-container svg[aria-roledescription='xychart'] [class^='bar-plot-'] rect {
+  fill: var(--tunit-accent) !important;
 }
 
 [data-theme='dark'] .markdown .docusaurus-mermaid-container svg[aria-roledescription='xychart'] line {

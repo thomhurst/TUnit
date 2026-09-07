@@ -42,7 +42,7 @@ const config: Config = {
       innerHTML: `window.tlumaConfig = {
   source: "thomhurst/tunit",
   theme: "auto",
-  brandColor: "blue",
+  brandColor: "green",
   button: "bottom-right",
   welcomePulse: true,
   edgePadding: "1rem",
