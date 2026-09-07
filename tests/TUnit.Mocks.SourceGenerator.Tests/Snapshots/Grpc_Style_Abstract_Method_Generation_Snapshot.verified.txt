@@ -4,9 +4,15 @@
 
 namespace ExternalLib
 {
+    file static class GrpcClientMockConstructionContext
+    {
+        [global::System.ThreadStatic]
+        internal static global::TUnit.Mocks.MockEngine<global::ExternalLib.GrpcClient>? Engine;
+    }
+
     file sealed class GrpcClientMockImpl : global::ExternalLib.GrpcClient, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
-        private readonly global::TUnit.Mocks.MockEngine<global::ExternalLib.GrpcClient> _engine;
+        private readonly global::TUnit.Mocks.MockEngine<global::ExternalLib.GrpcClient> _engine = GrpcClientMockConstructionContext.Engine!;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
@@ -14,7 +20,6 @@ namespace ExternalLib
         [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         internal GrpcClientMockImpl(global::TUnit.Mocks.MockEngine<global::ExternalLib.GrpcClient> engine) : base()
         {
-            _engine = engine;
         }
 
         protected override global::ExternalLib.GrpcClient NewInstance(global::ExternalLib.GrpcClient.ClientBaseConfiguration configuration)
@@ -45,10 +50,19 @@ namespace ExternalLib
         private static global::TUnit.Mocks.Mock<global::ExternalLib.GrpcClient> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
         {
             var engine = new global::TUnit.Mocks.MockEngine<global::ExternalLib.GrpcClient>(behavior);
-            var impl = new GrpcClientMockImpl(engine);
-            engine.Raisable = impl;
-            var mock = new global::TUnit.Mocks.Mock<global::ExternalLib.GrpcClient>(impl, engine);
-            return mock;
+            var previousEngine = GrpcClientMockConstructionContext.Engine;
+            GrpcClientMockConstructionContext.Engine = engine;
+            try
+            {
+                var impl = new GrpcClientMockImpl(engine);
+                engine.Raisable = impl;
+                var mock = new global::TUnit.Mocks.Mock<global::ExternalLib.GrpcClient>(impl, engine);
+                return mock;
+            }
+            finally
+            {
+                GrpcClientMockConstructionContext.Engine = previousEngine;
+            }
         }
     }
 }

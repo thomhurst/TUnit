@@ -2,9 +2,15 @@
 #pragma warning disable
 #nullable enable
 
+file static class ConfigBaseMockConstructionContext
+{
+    [global::System.ThreadStatic]
+    internal static global::TUnit.Mocks.MockEngine<global::ConfigBase>? Engine;
+}
+
 file sealed class ConfigBaseMockImpl : global::ConfigBase, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    private readonly global::TUnit.Mocks.MockEngine<global::ConfigBase> _engine;
+    private readonly global::TUnit.Mocks.MockEngine<global::ConfigBase> _engine = ConfigBaseMockConstructionContext.Engine!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
@@ -12,7 +18,6 @@ file sealed class ConfigBaseMockImpl : global::ConfigBase, global::TUnit.Mocks.I
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal ConfigBaseMockImpl(global::TUnit.Mocks.MockEngine<global::ConfigBase> engine) : base()
     {
-        _engine = engine;
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -33,10 +38,19 @@ file static class ConfigBasePartialMockFactory
     private static global::TUnit.Mocks.Mock<global::ConfigBase> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
     {
         var engine = new global::TUnit.Mocks.MockEngine<global::ConfigBase>(behavior);
-        var impl = new ConfigBaseMockImpl(engine);
-        engine.Raisable = impl;
-        var mock = new global::TUnit.Mocks.Mock<global::ConfigBase>(impl, engine);
-        return mock;
+        var previousEngine = ConfigBaseMockConstructionContext.Engine;
+        ConfigBaseMockConstructionContext.Engine = engine;
+        try
+        {
+            var impl = new ConfigBaseMockImpl(engine);
+            engine.Raisable = impl;
+            var mock = new global::TUnit.Mocks.Mock<global::ConfigBase>(impl, engine);
+            return mock;
+        }
+        finally
+        {
+            ConfigBaseMockConstructionContext.Engine = previousEngine;
+        }
     }
 }
 

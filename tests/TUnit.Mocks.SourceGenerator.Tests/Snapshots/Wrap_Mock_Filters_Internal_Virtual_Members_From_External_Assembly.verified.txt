@@ -4,10 +4,18 @@
 
 namespace ExternalLib
 {
+    file static class ExternalServiceMockConstructionContext
+    {
+        [global::System.ThreadStatic]
+        internal static global::TUnit.Mocks.MockEngine<global::ExternalLib.ExternalService>? Engine;
+        [global::System.ThreadStatic]
+        internal static global::ExternalLib.ExternalService? WrappedInstance;
+    }
+
     file sealed class ExternalServiceWrapMockImpl : global::ExternalLib.ExternalService, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
-        private readonly global::TUnit.Mocks.MockEngine<global::ExternalLib.ExternalService> _engine;
-        private readonly global::ExternalLib.ExternalService _wrappedInstance;
+        private readonly global::TUnit.Mocks.MockEngine<global::ExternalLib.ExternalService> _engine = ExternalServiceMockConstructionContext.Engine!;
+        private readonly global::ExternalLib.ExternalService _wrappedInstance = ExternalServiceMockConstructionContext.WrappedInstance!;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
@@ -15,8 +23,6 @@ namespace ExternalLib
         [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         internal ExternalServiceWrapMockImpl(global::TUnit.Mocks.MockEngine<global::ExternalLib.ExternalService> engine, global::ExternalLib.ExternalService wrappedInstance) : base()
         {
-            _engine = engine;
-            _wrappedInstance = wrappedInstance;
         }
 
         public override string PublicMethod()
@@ -66,10 +72,22 @@ namespace ExternalLib
         {
             var engine = new global::TUnit.Mocks.MockEngine<global::ExternalLib.ExternalService>(behavior);
             engine.IsWrapMock = true;
-            var impl = new ExternalServiceWrapMockImpl(engine, instance);
-            engine.Raisable = impl;
-            var mock = new global::TUnit.Mocks.Mock<global::ExternalLib.ExternalService>(impl, engine);
-            return mock;
+            var previousEngine = ExternalServiceMockConstructionContext.Engine;
+            ExternalServiceMockConstructionContext.Engine = engine;
+            var previousInstance = ExternalServiceMockConstructionContext.WrappedInstance;
+            ExternalServiceMockConstructionContext.WrappedInstance = instance;
+            try
+            {
+                var impl = new ExternalServiceWrapMockImpl(engine, instance);
+                engine.Raisable = impl;
+                var mock = new global::TUnit.Mocks.Mock<global::ExternalLib.ExternalService>(impl, engine);
+                return mock;
+            }
+            finally
+            {
+                ExternalServiceMockConstructionContext.Engine = previousEngine;
+                ExternalServiceMockConstructionContext.WrappedInstance = previousInstance;
+            }
         }
     }
 }

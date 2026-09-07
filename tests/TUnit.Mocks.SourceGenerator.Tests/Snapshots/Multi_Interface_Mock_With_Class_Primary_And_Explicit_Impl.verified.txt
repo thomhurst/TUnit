@@ -2,9 +2,15 @@
 #pragma warning disable
 #nullable enable
 
+file static class DataContextMockConstructionContext
+{
+    [global::System.ThreadStatic]
+    internal static global::TUnit.Mocks.MockEngine<global::DataContext>? Engine;
+}
+
 file sealed class DataContextMockImpl : global::DataContext, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    private readonly global::TUnit.Mocks.MockEngine<global::DataContext> _engine;
+    private readonly global::TUnit.Mocks.MockEngine<global::DataContext> _engine = DataContextMockConstructionContext.Engine!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
@@ -12,7 +18,6 @@ file sealed class DataContextMockImpl : global::DataContext, global::TUnit.Mocks
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal DataContextMockImpl(global::TUnit.Mocks.MockEngine<global::DataContext> engine) : base()
     {
-        _engine = engine;
     }
 
     public override string GetName()
@@ -42,10 +47,19 @@ file static class DataContextPartialMockFactory
     private static global::TUnit.Mocks.Mock<global::DataContext> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
     {
         var engine = new global::TUnit.Mocks.MockEngine<global::DataContext>(behavior);
-        var impl = new DataContextMockImpl(engine);
-        engine.Raisable = impl;
-        var mock = new global::TUnit.Mocks.Mock<global::DataContext>(impl, engine);
-        return mock;
+        var previousEngine = DataContextMockConstructionContext.Engine;
+        DataContextMockConstructionContext.Engine = engine;
+        try
+        {
+            var impl = new DataContextMockImpl(engine);
+            engine.Raisable = impl;
+            var mock = new global::TUnit.Mocks.Mock<global::DataContext>(impl, engine);
+            return mock;
+        }
+        finally
+        {
+            DataContextMockConstructionContext.Engine = previousEngine;
+        }
     }
 }
 
@@ -144,9 +158,15 @@ namespace TUnit.Mocks
 #pragma warning disable
 #nullable enable
 
+file static class DataContext_IInfraMockConstructionContext
+{
+    [global::System.ThreadStatic]
+    internal static global::TUnit.Mocks.MockEngine<global::DataContext>? Engine;
+}
+
 file sealed class DataContext_IInfraMockImpl : global::DataContext, global::IInfra, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    private readonly global::TUnit.Mocks.MockEngine<global::DataContext> _engine;
+    private readonly global::TUnit.Mocks.MockEngine<global::DataContext> _engine = DataContext_IInfraMockConstructionContext.Engine!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
@@ -154,7 +174,6 @@ file sealed class DataContext_IInfraMockImpl : global::DataContext, global::IInf
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal DataContext_IInfraMockImpl(global::TUnit.Mocks.MockEngine<global::DataContext> engine) : base()
     {
-        _engine = engine;
     }
 
     public override string GetName()
@@ -192,10 +211,19 @@ file static class DataContext_IInfraPartialMockFactory
     {
         var engine = new global::TUnit.Mocks.MockEngine<global::DataContext>(behavior);
         engine.RegisterSecondaryInterface(typeof(global::IInfra), _secondaryMap0);
-        var impl = new DataContext_IInfraMockImpl(engine);
-        engine.Raisable = impl;
-        var mock = new global::TUnit.Mocks.Mock<global::DataContext>(impl, engine);
-        return mock;
+        var previousEngine = DataContext_IInfraMockConstructionContext.Engine;
+        DataContext_IInfraMockConstructionContext.Engine = engine;
+        try
+        {
+            var impl = new DataContext_IInfraMockImpl(engine);
+            engine.Raisable = impl;
+            var mock = new global::TUnit.Mocks.Mock<global::DataContext>(impl, engine);
+            return mock;
+        }
+        finally
+        {
+            DataContext_IInfraMockConstructionContext.Engine = previousEngine;
+        }
     }
 }
 

@@ -2,9 +2,15 @@
 #pragma warning disable
 #nullable enable
 
+file static class SnapshotClientMockConstructionContext
+{
+    [global::System.ThreadStatic]
+    internal static global::TUnit.Mocks.MockEngine<global::SnapshotClient>? Engine;
+}
+
 file sealed class SnapshotClientMockImpl : global::SnapshotClient, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    private readonly global::TUnit.Mocks.MockEngine<global::SnapshotClient> _engine;
+    private readonly global::TUnit.Mocks.MockEngine<global::SnapshotClient> _engine = SnapshotClientMockConstructionContext.Engine!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
@@ -12,17 +18,14 @@ file sealed class SnapshotClientMockImpl : global::SnapshotClient, global::TUnit
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal SnapshotClientMockImpl(global::TUnit.Mocks.MockEngine<global::SnapshotClient> engine) : base()
     {
-        _engine = engine;
     }
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal SnapshotClientMockImpl(global::TUnit.Mocks.MockEngine<global::SnapshotClient> engine, global::SnapshotClient.InternalState state) : base(state)
     {
-        _engine = engine;
     }
     [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     internal SnapshotClientMockImpl(global::TUnit.Mocks.MockEngine<global::SnapshotClient> engine, global::SnapshotClient.PublicState state) : base(state)
     {
-        _engine = engine;
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -43,33 +46,42 @@ file static class SnapshotClientPartialMockFactory
     private static global::TUnit.Mocks.Mock<global::SnapshotClient> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
     {
         var engine = new global::TUnit.Mocks.MockEngine<global::SnapshotClient>(behavior);
-        SnapshotClientMockImpl impl;
-        if (constructorArgs.Length == 0)
+        var previousEngine = SnapshotClientMockConstructionContext.Engine;
+        SnapshotClientMockConstructionContext.Engine = engine;
+        try
         {
-            impl = new SnapshotClientMockImpl(engine);
-        }
-        else if (constructorArgs.Length == 1)
-        {
-            if ((constructorArgs[0] is null or global::SnapshotClient.InternalState))
+            SnapshotClientMockImpl impl;
+            if (constructorArgs.Length == 0)
             {
-                impl = new SnapshotClientMockImpl(engine, (global::SnapshotClient.InternalState)constructorArgs[0]);
+                impl = new SnapshotClientMockImpl(engine);
             }
-            else if ((constructorArgs[0] is null or global::SnapshotClient.PublicState))
+            else if (constructorArgs.Length == 1)
             {
-                impl = new SnapshotClientMockImpl(engine, (global::SnapshotClient.PublicState)constructorArgs[0]);
+                if ((constructorArgs[0] is null or global::SnapshotClient.InternalState))
+                {
+                    impl = new SnapshotClientMockImpl(engine, (global::SnapshotClient.InternalState)constructorArgs[0]);
+                }
+                else if ((constructorArgs[0] is null or global::SnapshotClient.PublicState))
+                {
+                    impl = new SnapshotClientMockImpl(engine, (global::SnapshotClient.PublicState)constructorArgs[0]);
+                }
+                else
+                {
+                    throw new global::System.ArgumentException($"No matching constructor found for type 'global::SnapshotClient' with the provided argument types.");
+                }
             }
             else
             {
-                throw new global::System.ArgumentException($"No matching constructor found for type 'global::SnapshotClient' with the provided argument types.");
+                throw new global::System.ArgumentException($"No matching constructor found for type 'global::SnapshotClient' with {constructorArgs.Length} argument(s).");
             }
+            engine.Raisable = impl;
+            var mock = new global::TUnit.Mocks.Mock<global::SnapshotClient>(impl, engine);
+            return mock;
         }
-        else
+        finally
         {
-            throw new global::System.ArgumentException($"No matching constructor found for type 'global::SnapshotClient' with {constructorArgs.Length} argument(s).");
+            SnapshotClientMockConstructionContext.Engine = previousEngine;
         }
-        engine.Raisable = impl;
-        var mock = new global::TUnit.Mocks.Mock<global::SnapshotClient>(impl, engine);
-        return mock;
     }
 }
 

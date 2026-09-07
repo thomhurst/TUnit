@@ -169,10 +169,13 @@ internal static class MockFactoryBuilder
             {
                 writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{model.FullyQualifiedName}>(behavior);");
                 writer.AppendLine("engine.IsWrapMock = true;");
-                writer.AppendLine($"var impl = new {safeName}WrapMockImpl(engine, instance);");
-                writer.AppendLine("engine.Raisable = impl;");
-                writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, engine);");
-                writer.AppendLine("return mock;");
+                EmitConstructionScope(writer, model, safeName, () =>
+                {
+                    writer.AppendLine($"var impl = new {safeName}WrapMockImpl(engine, instance);");
+                    writer.AppendLine("engine.Raisable = impl;");
+                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, engine);");
+                    writer.AppendLine("return mock;");
+                });
             }
         }
     }
@@ -208,11 +211,38 @@ internal static class MockFactoryBuilder
                 writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{model.FullyQualifiedName}>(behavior);");
                 EmitSecondaryInterfaceRegistrations(writer, model);
 
-                GenerateConstructorDispatch(writer, model, safeName);
+                EmitConstructionScope(writer, model, safeName, () =>
+                {
+                    GenerateConstructorDispatch(writer, model, safeName);
 
-                writer.AppendLine("engine.Raisable = impl;");
-                writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, engine);");
-                writer.AppendLine("return mock;");
+                    writer.AppendLine("engine.Raisable = impl;");
+                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, engine);");
+                    writer.AppendLine("return mock;");
+                });
+            }
+        }
+    }
+
+    private static void EmitConstructionScope(CodeWriter writer, MockTypeModel model, string safeName, Action construct)
+    {
+        var context = MockImplBuilder.GetConstructionContextName(model, safeName);
+        writer.AppendLine($"var previousEngine = {context}.Engine;");
+        writer.AppendLine($"{context}.Engine = engine;");
+        if (model.IsWrapMock)
+        {
+            writer.AppendLine($"var previousInstance = {context}.WrappedInstance;");
+            writer.AppendLine($"{context}.WrappedInstance = instance;");
+        }
+        using (writer.Block("try"))
+        {
+            construct();
+        }
+        using (writer.Block("finally"))
+        {
+            writer.AppendLine($"{context}.Engine = previousEngine;");
+            if (model.IsWrapMock)
+            {
+                writer.AppendLine($"{context}.WrappedInstance = previousInstance;");
             }
         }
     }
