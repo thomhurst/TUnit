@@ -2,10 +2,18 @@
 #pragma warning disable
 #nullable enable
 
+file static class RepositoryMockConstructionContext
+{
+    [global::System.ThreadStatic]
+    internal static global::TUnit.Mocks.MockEngine<global::Repository>? Engine;
+    [global::System.ThreadStatic]
+    internal static global::Repository? WrappedInstance;
+}
+
 file sealed class RepositoryWrapMockImpl : global::Repository, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    private readonly global::TUnit.Mocks.MockEngine<global::Repository> _engine;
-    private readonly global::Repository _wrappedInstance;
+    private readonly global::TUnit.Mocks.MockEngine<global::Repository> _engine = RepositoryMockConstructionContext.Engine!;
+    private readonly global::Repository _wrappedInstance = RepositoryMockConstructionContext.WrappedInstance!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
@@ -54,10 +62,22 @@ file static class RepositoryWrapMockFactory
     {
         var engine = new global::TUnit.Mocks.MockEngine<global::Repository>(behavior);
         engine.IsWrapMock = true;
-        var impl = new RepositoryWrapMockImpl(engine, instance);
-        engine.Raisable = impl;
-        var mock = new global::TUnit.Mocks.Mock<global::Repository>(impl, engine);
-        return mock;
+        var previousEngine = RepositoryMockConstructionContext.Engine;
+        RepositoryMockConstructionContext.Engine = engine;
+        var previousInstance = RepositoryMockConstructionContext.WrappedInstance;
+        RepositoryMockConstructionContext.WrappedInstance = instance;
+        try
+        {
+            var impl = new RepositoryWrapMockImpl(engine, instance);
+            engine.Raisable = impl;
+            var mock = new global::TUnit.Mocks.Mock<global::Repository>(impl, engine);
+            return mock;
+        }
+        finally
+        {
+            RepositoryMockConstructionContext.Engine = previousEngine;
+            RepositoryMockConstructionContext.WrappedInstance = previousInstance;
+        }
     }
 }
 

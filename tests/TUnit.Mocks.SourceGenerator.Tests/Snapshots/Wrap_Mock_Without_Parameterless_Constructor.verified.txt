@@ -2,10 +2,18 @@
 #pragma warning disable
 #nullable enable
 
+file static class RealClassMockConstructionContext
+{
+    [global::System.ThreadStatic]
+    internal static global::TUnit.Mocks.MockEngine<global::RealClass>? Engine;
+    [global::System.ThreadStatic]
+    internal static global::RealClass? WrappedInstance;
+}
+
 file sealed class RealClassWrapMockImpl : global::RealClass, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    private readonly global::TUnit.Mocks.MockEngine<global::RealClass> _engine;
-    private readonly global::RealClass _wrappedInstance;
+    private readonly global::TUnit.Mocks.MockEngine<global::RealClass> _engine = RealClassMockConstructionContext.Engine!;
+    private readonly global::RealClass _wrappedInstance = RealClassMockConstructionContext.WrappedInstance!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
@@ -45,10 +53,22 @@ file static class RealClassWrapMockFactory
     {
         var engine = new global::TUnit.Mocks.MockEngine<global::RealClass>(behavior);
         engine.IsWrapMock = true;
-        var impl = new RealClassWrapMockImpl(engine, instance);
-        engine.Raisable = impl;
-        var mock = new global::TUnit.Mocks.Mock<global::RealClass>(impl, engine);
-        return mock;
+        var previousEngine = RealClassMockConstructionContext.Engine;
+        RealClassMockConstructionContext.Engine = engine;
+        var previousInstance = RealClassMockConstructionContext.WrappedInstance;
+        RealClassMockConstructionContext.WrappedInstance = instance;
+        try
+        {
+            var impl = new RealClassWrapMockImpl(engine, instance);
+            engine.Raisable = impl;
+            var mock = new global::TUnit.Mocks.Mock<global::RealClass>(impl, engine);
+            return mock;
+        }
+        finally
+        {
+            RealClassMockConstructionContext.Engine = previousEngine;
+            RealClassMockConstructionContext.WrappedInstance = previousInstance;
+        }
     }
 }
 

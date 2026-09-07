@@ -2,9 +2,15 @@
 #pragma warning disable
 #nullable enable
 
+file static class SelfEquatableSnapshotMockConstructionContext
+{
+    [global::System.ThreadStatic]
+    internal static global::TUnit.Mocks.MockEngine<global::SelfEquatableSnapshot>? Engine;
+}
+
 file sealed class SelfEquatableSnapshotMockImpl : global::SelfEquatableSnapshot, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    private readonly global::TUnit.Mocks.MockEngine<global::SelfEquatableSnapshot> _engine;
+    private readonly global::TUnit.Mocks.MockEngine<global::SelfEquatableSnapshot> _engine = SelfEquatableSnapshotMockConstructionContext.Engine!;
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
@@ -69,10 +75,19 @@ file static class SelfEquatableSnapshotPartialMockFactory
     private static global::TUnit.Mocks.Mock<global::SelfEquatableSnapshot> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
     {
         var engine = new global::TUnit.Mocks.MockEngine<global::SelfEquatableSnapshot>(behavior);
-        var impl = new SelfEquatableSnapshotMockImpl(engine);
-        engine.Raisable = impl;
-        var mock = new global::TUnit.Mocks.Mock<global::SelfEquatableSnapshot>(impl, engine);
-        return mock;
+        var previousEngine = SelfEquatableSnapshotMockConstructionContext.Engine;
+        SelfEquatableSnapshotMockConstructionContext.Engine = engine;
+        try
+        {
+            var impl = new SelfEquatableSnapshotMockImpl(engine);
+            engine.Raisable = impl;
+            var mock = new global::TUnit.Mocks.Mock<global::SelfEquatableSnapshot>(impl, engine);
+            return mock;
+        }
+        finally
+        {
+            SelfEquatableSnapshotMockConstructionContext.Engine = previousEngine;
+        }
     }
 }
 
