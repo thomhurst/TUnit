@@ -30,3 +30,9 @@ Read only as needed:
 
 - [Build, test, benchmark, and documentation commands](.claude/docs/workflows.md)
 - [Architecture and source locations](.claude/docs/project-structure.md)
+
+## Local worktree lifecycle
+
+Use `scripts/AgentLocks.ps1` from the shared checkout for work-item ownership (`pr-<N>` or `issue-<N>`). Set `$agentLocks` to its absolute path, acquire before creating the checkout, and use a stable `-OwnerId` outside Codex. Git and Docker are required locally.
+
+Immediately after checkout, run `pwsh $agentLocks renew -LockName $lockName -Worktree $worktree` once to register its path. Stop owned processes, archive needed evidence outside the worktree, then release from the shared checkout in `finally`. Release removes clean checkouts even for open PRs; branches and detached commits remain available for re-checkout. See [local worktree lifecycle](scripts/WorktreeLifecycle.md) for preservation rules and crash behavior.
