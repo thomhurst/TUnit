@@ -2,7 +2,7 @@
 
 Last Updated
 
-These benchmarks were automatically generated on **2026-09-07** from the latest CI run.
+These benchmarks were automatically generated on **2026-09-08** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.400
 
@@ -71,4 +71,4 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 
-*Last generated: 2026-09-07T02:34:20.667Z*
+*Last generated: 2026-09-08T02:32:39.573Z*
