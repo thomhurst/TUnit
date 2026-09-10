@@ -92,10 +92,16 @@ public class TestRegisteredContext
 
         _executorReceivers ??= [];
 
-        if (!_executorReceivers.Contains(receiver))
+        // Identity, not equality: two distinct executors that compare equal each own their callback.
+        foreach (var queued in _executorReceivers)
         {
-            _executorReceivers.Add(receiver);
+            if (ReferenceEquals(queued, receiver))
+            {
+                return;
+            }
         }
+
+        _executorReceivers.Add(receiver);
     }
 
     /// <summary>

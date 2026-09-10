@@ -80,3 +80,66 @@ internal sealed class SerialLimit : IParallelLimit
 {
     public int Limit => 1;
 }
+
+/// <summary>
+/// Two distinct executors that compare equal each own their registration callback, so the queue
+/// behind that dispatch has to hold them apart by reference and not by equality.
+/// </summary>
+[EngineTest(ExpectedResult.Pass)]
+[TwoEqualExecutors]
+public class EqualExecutorInstanceTests
+{
+    [Test]
+    public async Task BothInstancesAreRegistered()
+    {
+        using (Assert.Multiple())
+        {
+            await Assert.That(TwoEqualExecutorsAttribute.TestExecutor!.IsRegistered).IsTrue();
+            await Assert.That(TwoEqualExecutorsAttribute.HookExecutor!.IsRegistered).IsTrue();
+        }
+    }
+}
+
+internal sealed class TwoEqualExecutorsAttribute : Attribute, ITestRegisteredEventReceiver
+{
+    public static EqualByTypeExecutor? TestExecutor { get; private set; }
+    public static EqualByTypeExecutor? HookExecutor { get; private set; }
+
+    public int Order => 0;
+
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
+    {
+        var testExecutor = new EqualByTypeExecutor();
+        var hookExecutor = new EqualByTypeExecutor();
+
+        context.SetTestExecutor(testExecutor);
+        context.SetHookExecutor(hookExecutor);
+
+        TestExecutor = testExecutor;
+        HookExecutor = hookExecutor;
+
+        return default;
+    }
+}
+
+/// <summary>
+/// Every instance compares equal to every other, so a queue keyed on equality would drop the second.
+/// </summary>
+internal sealed class EqualByTypeExecutor : GenericAbstractExecutor, ITestRegisteredEventReceiver
+{
+    public bool IsRegistered { get; private set; }
+
+    public int Order => 0;
+
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
+    {
+        IsRegistered = true;
+        return default;
+    }
+
+    public override bool Equals(object? obj) => obj is EqualByTypeExecutor;
+
+    public override int GetHashCode() => nameof(EqualByTypeExecutor).GetHashCode();
+
+    protected override ValueTask ExecuteAsync(Func<ValueTask> action) => action();
+}
