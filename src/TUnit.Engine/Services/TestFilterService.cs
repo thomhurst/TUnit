@@ -61,6 +61,19 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         return filteredTests;
     }
 
+    private async Task InvokeTestRegisteredReceiver(ITestRegisteredEventReceiver receiver, TestRegisteredContext context)
+    {
+        try
+        {
+            await receiver.OnTestRegistered(context).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}").ConfigureAwait(false);
+            throw;
+        }
+    }
+
     private async Task RegisterTest(AbstractExecutableTest test, bool isForExecution)
     {
         var registeredReceivers = test.Context.GetTestRegisteredReceivers();
@@ -86,14 +99,16 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
             foreach (var receiver in registeredReceivers)
             {
-                try
+                await InvokeTestRegisteredReceiver(receiver, registeredContext).ConfigureAwait(false);
+
+                // The receiver above may have installed an executor that is an ITestRegisteredEventReceiver
+                // in its own right, as DedicatedThreadExecutor is. GetTestRegisteredReceivers cannot have
+                // collected it, because it did not exist when that list was built. Dispatching it here
+                // rather than after the loop keeps its contribution at the position of the attribute that
+                // installed it, so a later attribute still overrides it.
+                while (registeredContext.TryDequeueExecutorEventReceiver(out var executorReceiver))
                 {
-                    await receiver.OnTestRegistered(registeredContext).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}").ConfigureAwait(false);
-                    throw;
+                    await InvokeTestRegisteredReceiver(executorReceiver, registeredContext).ConfigureAwait(false);
                 }
             }
         }
