@@ -22,14 +22,15 @@ Here are TUnit's equivalent attributes to other test frameworks.
 
 ## Test Control Attributes[​](#test-control-attributes "Direct link to Test Control Attributes")
 
-| TUnit            | xUnit                                                  | NUnit                 | MSTest    |
-| ---------------- | ------------------------------------------------------ | --------------------- | --------- |
-| \[Repeat]        | -                                                      | \[Repeat]             | -         |
-| \[Retry]         | -                                                      | \[Retry]              | -         |
-| \[Skip]          | \[Fact(Skip="")]                                       | \[Ignore]             | \[Ignore] |
-| \[Timeout]       | -                                                      | \[TimeOut]            | -         |
-| \[Explicit]      | -                                                      | \[Explicit]           | -         |
-| \[NotInParallel] | \[CollectionDefinition(DisableParallelization = true)] | \[LevelOfParallelism] | -         |
+| TUnit                     | xUnit                                                     | NUnit                 | MSTest    | Notes        |
+| ------------------------- | --------------------------------------------------------- | --------------------- | --------- | ------------ |
+| \[Repeat]                 | -                                                         | \[Repeat]             | -         |              |
+| \[Retry]                  | -                                                         | \[Retry]              | -         |              |
+| \[Skip]                   | \[Fact(Skip="")]                                          | \[Ignore]             | \[Ignore] |              |
+| - [1](#user-content-fn-1) | \[Fact(SkipWhen/SkipUnless = ...)][2](#user-content-fn-2) | -                     | -         | Dynamic Skip |
+| \[Timeout]                | \[Fact(Timeout = 1000)][2](#user-content-fn-2)            | \[TimeOut]            | -         |              |
+| \[Explicit]               | \[Fact(Explicit = true)][2](#user-content-fn-2)           | \[Explicit]           | -         |              |
+| \[NotInParallel]          | \[CollectionDefinition(DisableParallelization = true)]    | \[LevelOfParallelism] | -         |              |
 
 ## Lifecycle Hook Attributes[​](#lifecycle-hook-attributes "Direct link to Lifecycle Hook Attributes")
 
@@ -61,8 +62,18 @@ Here are TUnit's equivalent attributes to other test frameworks.
 
 ## Culture-sensitive Attributes[​](#culture-sensitive-attributes "Direct link to Culture-sensitive Attributes")
 
-| TUnit               | xUnit | NUnit                    | MSTest |
-| ------------------- | ----- | ------------------------ | ------ |
-| \[Culture("en-US")] | -     | \[SetCulture("en-US")]   | -      |
-| -                   | -     | \[Culture("en-US")]      | -      |
-| -                   | -     | \[SetUICulture("en-US")] | -      |
+| TUnit               | xUnit                                                                        | NUnit                    | MSTest | Notes                        |
+| ------------------- | ---------------------------------------------------------------------------- | ------------------------ | ------ | ---------------------------- |
+| \[Culture("en-US")] | \[CulturedFact("en-US")] / \[CulturedTheory("en-US")][3](#user-content-fn-3) | \[SetCulture("en-US")]   | -      | Sets thread culture          |
+| \[Culture("en-US")] | -                                                                            | \[SetUICulture("en-US")] | -      | Sets thread UI culture       |
+| -                   | -                                                                            | \[Culture("en-US")]      | -      | Restricts test to culture(s) |
+
+<!-- -->
+
+## Footnotes[​](#footnote-label "Direct link to Footnotes")
+
+1. Inherit from `SkipAttribute` [↩](#user-content-fnref-1)
+
+2. Introduced in **xUnit.v3** [↩](#user-content-fnref-2) [↩2](#user-content-fnref-2-2) [↩3](#user-content-fnref-2-3)
+
+3. Introduced in **xUnit.v3**. Accept one or more cultures; the test is run once per specified culture. [↩](#user-content-fnref-3)
