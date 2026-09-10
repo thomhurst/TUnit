@@ -22,15 +22,15 @@ Here are TUnit's equivalent attributes to other test frameworks.
 
 ## Test Control Attributes
 
-| TUnit           | xUnit                                                 | NUnit                | MSTest   | Notes | 
+| TUnit           | xUnit                                                 | NUnit                | MSTest   | Notes          | 
 | --------------- | ----------------------------------------------------- | -------------------- | -------- | -------------- |
-| [Repeat]        | -                                                     | [Repeat]             | -        |
-| [Retry]         | -                                                     | [Retry]              | -        |
-| [Skip]          | [Fact(Skip="")]                                       | [Ignore]             | [Ignore] |
-| - [^1]          | [Fact(SkipWhen/SkipUnless = ...)][^2]                 | -                    | -        | Dynamic Skip |
-| [Timeout]       | [Fact(Timeout = 1000)][^2]                            | [TimeOut]            | -        |
-| [Explicit]      | [Fact(Explicit = true)][^2]                           | [Explicit]           | -        |
-| [NotInParallel] | [CollectionDefinition(DisableParallelization = true)] | [LevelOfParallelism] | -        |
+| [Repeat]        | -                                                     | [Repeat]             | -        |                |
+| [Retry]         | -                                                     | [Retry]              | -        |                |
+| [Skip]          | [Fact(Skip="")]                                       | [Ignore]             | [Ignore] |                |
+| - [^1]          | [Fact(SkipWhen/SkipUnless = ...)][^2]                 | -                    | -        | Dynamic Skip   |
+| [Timeout]       | [Fact(Timeout = 1000)][^2]                            | [TimeOut]            | -        |                |
+| [Explicit]      | [Fact(Explicit = true)][^2]                           | [Explicit]           | -        |                |
+| [NotInParallel] | [CollectionDefinition(DisableParallelization = true)] | [LevelOfParallelism] | -        |                |
 
 [^1]: Inherit from `SkipAttribute`
 [^2]: Introduced in **xUnit.v3**
@@ -65,10 +65,10 @@ Here are TUnit's equivalent attributes to other test frameworks.
 
 ## Culture-sensitive Attributes
 
-| TUnit              | xUnit                                                   | NUnit                    | MSTest | Notes |
-|--------------------|---------------------------------------------------------|--------------------------|--------|--------------|
-| [Culture("en-US")] | [CulturedFact("en-US")] / [CulturedTheory("en-US")][^3] | [SetCulture("en-US")]    | -      | Sets thread culture |
-| [Culture("en-US")] | -                                                       | [SetUICulture("en-US")]  | -      | Sets thread UI culture |
+| TUnit              | xUnit                                                   | NUnit                    | MSTest | Notes                        |
+|--------------------|---------------------------------------------------------|--------------------------|--------|------------------------------|
+| [Culture("en-US")] | [CulturedFact("en-US")] / [CulturedTheory("en-US")][^3] | [SetCulture("en-US")]    | -      | Sets thread culture          |
+| [Culture("en-US")] | -                                                       | [SetUICulture("en-US")]  | -      | Sets thread UI culture       |
 | -                  | -                                                       | [Culture("en-US")]       | -      | Restricts test to culture(s) |
 
 [^3]: Introduced in **xUnit.v3**. Accept one or more cultures; the test is run once per specified culture.
