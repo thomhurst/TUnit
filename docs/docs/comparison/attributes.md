@@ -67,8 +67,8 @@ Here are TUnit's equivalent attributes to other test frameworks.
 
 | TUnit              | xUnit                                                   | NUnit                    | MSTest | Notes |
 |--------------------|---------------------------------------------------------|--------------------------|--------|--------------|
-| [Culture("en-US")] | [CulturedFact("en-US")] / [CulturedTheory("en-US")][^1] | [SetCulture("en-US")]    | -      | Sets thread culture |
+| [Culture("en-US")] | [CulturedFact("en-US")] / [CulturedTheory("en-US")][^3] | [SetCulture("en-US")]    | -      | Sets thread culture |
 | [Culture("en-US")] | -                                                       | [SetUICulture("en-US")]  | -      | Sets thread UI culture |
 | -                  | -                                                       | [Culture("en-US")]       | -      | Restricts test to culture(s) |
 
-[^1]: accept one or more cultures; the test is run once per specified culture.
+[^3]: Introduced in **xUnit.v3**. Accept one or more cultures; the test is run once per specified culture.
