@@ -1,0 +1,14 @@
+
+namespace TUnit.Core.SourceGenerator.Tests.Dynamic;
+
+internal class Basic : TestsBase
+{
+    [Test]
+    public Task Test() => RunTest(Path.Combine(Git.TestsDirectory.FullName,
+            "TUnit.TestProject",
+            "DynamicTests",
+            "Basic.cs"),
+        async generatedFiles =>
+        {
+            });
+}

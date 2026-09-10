@@ -2,6 +2,7 @@
 sidebar_position: 5
 ---
 
+
 # Type Checking
 
 TUnit assertions check types at compile time wherever possible. This gives faster feedback and catches mistakes before your build pipeline runs.

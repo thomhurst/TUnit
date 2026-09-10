@@ -2,6 +2,7 @@
 sidebar_position: 11
 ---
 
+
 # Task and Async Assertions
 
 TUnit provides specialized assertions for testing `Task` and `Task<T>` objects, including state checking, completion timeouts, and async exception handling.
@@ -181,7 +182,7 @@ public async Task API_Call_Completes_In_Time()
 {
     var apiTask = _httpClient.GetAsync("https://api.example.com/data");
 
-    await Assert.That(apiTask).CompletesWithin(TimeSpan.FromSeconds(5));
+    await Assert.That((Func<Task>)(async () => { await apiTask; })).CompletesWithin(TimeSpan.FromSeconds(5));
 
     var response = await apiTask;
     await Assert.That(response.IsSuccessStatusCode).IsTrue();
@@ -249,7 +250,7 @@ public async Task Task_Returns_Expected_Result()
     var task = GetValueAsync();
 
     // Ensure it completes in time
-    await Assert.That(task).CompletesWithin(TimeSpan.FromSeconds(1));
+    await Assert.That((Func<Task>)(async () => { await task; })).CompletesWithin(TimeSpan.FromSeconds(1));
 
     // Get the result
     var result = await task;
@@ -361,7 +362,7 @@ public async Task Any_Task_Completes()
 
     var firstCompleted = Task.WhenAny(fastTask, slowTask);
 
-    await Assert.That(firstCompleted).CompletesWithin(TimeSpan.FromMilliseconds(500));
+    await Assert.That((Func<Task>)(async () => { await firstCompleted; })).CompletesWithin(TimeSpan.FromMilliseconds(500));
 
     var completed = await firstCompleted;
     await Assert.That(completed).IsSameReferenceAs(fastTask);
@@ -397,7 +398,7 @@ public async Task Chained_Task_Assertions()
 {
     var task = GetDataAsync();
 
-    await Assert.That(task)
+    await Assert.That((Func<Task>)(async () => { await task; }))
         .CompletesWithin(TimeSpan.FromSeconds(5));
 
     await Assert.That(task)
@@ -426,7 +427,7 @@ public async Task Retry_Eventually_Succeeds()
         return "Success";
     }, maxRetries: 5);
 
-    await Assert.That(task).CompletesWithin(TimeSpan.FromSeconds(10));
+    await Assert.That((Func<Task>)(async () => { await task; })).CompletesWithin(TimeSpan.FromSeconds(10));
     var result = await task;
     await Assert.That(result).IsEqualTo("Success");
 }
@@ -446,7 +447,7 @@ public async Task Debounced_Operation()
 
     trigger.OnNext("value");
 
-    await Assert.That(debouncedTask)
+    await Assert.That((Func<Task>)(async () => { await debouncedTask; }))
         .CompletesWithin(TimeSpan.FromSeconds(1));
 }
 ```

@@ -1,0 +1,133 @@
+﻿using Microsoft.Testing.Platform.Builder;
+using Microsoft.Testing.Platform.Capabilities.TestFramework;
+using Microsoft.Testing.Platform.Helpers;
+using Microsoft.Testing.Platform.Services;
+using TUnit.Engine.Capabilities;
+using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Framework;
+using TUnit.Engine.Reporters;
+using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Configurations;
+
+#pragma warning disable TPEXP
+
+namespace TUnit.Engine.Extensions;
+
+public static class TestApplicationBuilderExtensions
+{
+    public static void AddTUnit(this ITestApplicationBuilder testApplicationBuilder) =>
+        testApplicationBuilder.AddTUnit(HtmlCliMode.Default);
+
+    public static void AddTUnit(this ITestApplicationBuilder testApplicationBuilder, HtmlCliMode htmlCliMode)
+    {
+        TUnitExtension extension = new();
+
+        var githubReporter = new GitHubReporter(extension);
+        var githubReporterCommandProvider = new GitHubReporterCommandProvider(extension);
+
+        var junitReporter = new JUnitReporter(extension);
+        var junitReporterCommandProvider = new JUnitReporterCommandProvider(extension);
+
+        var htmlReporter = new Reporters.Html.HtmlReporter(extension);
+        var htmlReporterCommandProvider = new HtmlReporterCommandProvider(extension, htmlCliMode);
+
+        htmlReporter.SetGitHubReporter(githubReporter);
+
+        testApplicationBuilder.RegisterTestFramework(
+            serviceProvider => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
+            (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
+
+        testApplicationBuilder.AddTreeNodeFilterService(extension);
+        testApplicationBuilder.AddMaximumFailedTestsService(extension);
+
+        // Core functionality command providers
+        testApplicationBuilder.CommandLine.AddProvider(() => new MaximumParallelTestsCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionModeCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new LogLevelCommandProvider(extension));
+
+        // Keep detailed stacktrace option for backward compatibility
+        testApplicationBuilder.CommandLine.AddProvider(() => new DetailedStacktraceCommandProvider(extension));
+
+        // GitHub reporter configuration
+        testApplicationBuilder.CommandLine.AddProvider(() => githubReporterCommandProvider);
+
+        // JUnit reporter configuration
+        testApplicationBuilder.CommandLine.AddProvider(() => junitReporterCommandProvider);
+
+        // HTML reporter configuration
+        testApplicationBuilder.CommandLine.AddProvider(() => htmlReporterCommandProvider);
+
+        testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
+        {
+            // Apply command-line configuration if provided
+            var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();
+            if (commandLineOptions.TryGetOptionArgumentList(GitHubReporterCommandProvider.GitHubReporterStyleOption, out var styleArgs))
+            {
+                var style = GitHubReporterCommandProvider.ParseReporterStyle(styleArgs);
+                githubReporter.SetReporterStyle(style);
+            }
+            return githubReporter;
+        });
+        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => githubReporter);
+
+        testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
+        {
+            // Apply command-line configuration if provided
+            var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();
+            if (commandLineOptions.TryGetOptionArgumentList(JUnitReporterCommandProvider.JUnitOutputPathOption, out var pathArgs))
+            {
+                junitReporter.SetOutputPath(pathArgs[0]);
+            }
+
+            // Set results directory as specified by --results-directory,
+            // so it can be used in the default output path if --junit-output-path is not provided
+            junitReporter.SetResultsDirectory(serviceProvider.GetRequiredService<IConfiguration>().GetTestResultDirectory());
+
+            return junitReporter;
+        });
+        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => junitReporter);
+
+        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => htmlReporter);
+        // MTP auto-registers IDataConsumer implementations returned from AddTestSessionLifetimeHandler,
+        // so no separate AddDataConsumer call is needed. Adding one causes a startup exception:
+        // "Consumer registered two time for data type TestNodeUpdateMessage".
+        testApplicationBuilder.TestHost.AddTestSessionLifetimeHandler(serviceProvider =>
+        {
+            var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();
+
+            // Deprecated: --report-html is now a no-op (reporter is always-on)
+            if (htmlCliMode == HtmlCliMode.Default && commandLineOptions.IsOptionSet(HtmlReporterCommandProvider.ReportHtml))
+            {
+                Console.WriteLine("Warning: --report-html is deprecated. The HTML report is now generated by default. Use TUNIT_DISABLE_HTML_REPORTER=true to disable.");
+            }
+
+            if (commandLineOptions.TryGetOptionArgumentList(htmlReporterCommandProvider.ReportHtmlFilenameOption, out var pathArgs))
+            {
+                htmlReporter.SetOutputPath(Helpers.PathValidator.ValidateAndNormalizePath(pathArgs[0], htmlReporterCommandProvider.ReportHtmlFilenameOption));
+            }
+
+            // Inject the application-level message bus so PublishArtifactAsync works in
+            // OnTestSessionFinishingAsync (called before the bus is drained/disabled).
+            htmlReporter.SetMessageBus(serviceProvider.GetMessageBus());
+
+            // Set results directory as specified by --results-directory,
+            // so it can be used in the default output path if the HTML report filename option is not provided
+            htmlReporter.SetResultsDirectory(serviceProvider.GetRequiredService<IConfiguration>().GetTestResultDirectory());
+
+            return htmlReporter;
+        });
+    }
+
+    private static IReadOnlyCollection<ITestFrameworkCapability> CreateCapabilities(IServiceProvider serviceProvider)
+    {
+        return
+        [
+            new TrxReportCapability(),
+            new BannerCapability(serviceProvider.GetRequiredService<IPlatformInformation>(), serviceProvider.GetCommandLineOptions(), serviceProvider.GetLoggerFactory()),
+            new StopExecutionCapability(),
+        ];
+    }
+}

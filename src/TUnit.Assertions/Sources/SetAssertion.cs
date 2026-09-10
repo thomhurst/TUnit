@@ -1,0 +1,149 @@
+using System.Text;
+using TUnit.Assertions.Abstractions;
+using TUnit.Assertions.Adapters;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Sources;
+
+/// <summary>
+/// Entry point for ISet&lt;T&gt; assertions.
+/// Provides set-specific assertion methods like IsSubsetOf, IsSupersetOf, Overlaps, etc.
+/// </summary>
+/// <typeparam name="TItem">The type of items in the set.</typeparam>
+public class SetAssertion<TItem> : SetAssertionBase<ISet<TItem>, TItem>, IAssertionSource<ISet<TItem>>
+#if !NETSTANDARD2_0
+    , IAssertionSourceFor<ISet<TItem>, SetAssertion<TItem>>
+#endif
+{
+    /// <summary>
+    /// Creates a new SetAssertion for the given set.
+    /// </summary>
+    public SetAssertion(ISet<TItem>? value, string expression)
+        : base(new AssertionContext<ISet<TItem>>(new EvaluationContext<ISet<TItem>>(value!), CreateExpressionBuilder(expression)))
+    {
+    }
+
+    /// <summary>
+    /// Internal constructor for continuation classes.
+    /// </summary>
+    private protected SetAssertion(AssertionContext<ISet<TItem>> context)
+        : base(context)
+    {
+    }
+
+    /// <inheritdoc />
+    protected override ISetAdapter<TItem> CreateSetAdapter(ISet<TItem> value) => new SetAdapter<TItem>(value);
+
+    /// <summary>
+    /// Seeds a set assertion over an existing context (used by the dictionary <c>.Value</c> drill-in).
+    /// </summary>
+    internal static SetAssertion<TItem> FromContext(AssertionContext<ISet<TItem>> context) => new(context);
+
+    /// <inheritdoc />
+    AssertionContext<ISet<TItem>> IAssertionSource<ISet<TItem>>.Context => Context;
+
+#if !NETSTANDARD2_0
+    public static SetAssertion<TItem> Create(ISet<TItem> item, string label) => new(item, label);
+#endif
+
+    private static StringBuilder CreateExpressionBuilder(string? expression)
+    {
+        return AssertionExpressionBuilder.Create(expression);
+    }
+}
+
+#if NET5_0_OR_GREATER
+/// <summary>
+/// Entry point for IReadOnlySet&lt;T&gt; assertions.
+/// Provides set-specific assertion methods like IsSubsetOf, IsSupersetOf, Overlaps, etc.
+/// </summary>
+/// <typeparam name="TItem">The type of items in the set.</typeparam>
+public class ReadOnlySetAssertion<TItem> : SetAssertionBase<IReadOnlySet<TItem>, TItem>, IAssertionSource<IReadOnlySet<TItem>>
+#if !NETSTANDARD2_0
+    , IAssertionSourceFor<IReadOnlySet<TItem>, ReadOnlySetAssertion<TItem>>
+#endif
+{
+    /// <summary>
+    /// Creates a new ReadOnlySetAssertion for the given read-only set.
+    /// </summary>
+    public ReadOnlySetAssertion(IReadOnlySet<TItem>? value, string expression)
+        : base(new AssertionContext<IReadOnlySet<TItem>>(new EvaluationContext<IReadOnlySet<TItem>>(value!), CreateExpressionBuilder(expression)))
+    {
+    }
+
+    /// <summary>
+    /// Internal constructor for continuation classes.
+    /// </summary>
+    private protected ReadOnlySetAssertion(AssertionContext<IReadOnlySet<TItem>> context)
+        : base(context)
+    {
+    }
+
+    /// <inheritdoc />
+    protected override ISetAdapter<TItem> CreateSetAdapter(IReadOnlySet<TItem> value) => new ReadOnlySetAdapter<TItem>(value);
+
+    /// <summary>
+    /// Seeds a read-only set assertion over an existing context (used by the dictionary <c>.Value</c> drill-in).
+    /// </summary>
+    internal static ReadOnlySetAssertion<TItem> FromContext(AssertionContext<IReadOnlySet<TItem>> context) => new(context);
+
+    /// <inheritdoc />
+    AssertionContext<IReadOnlySet<TItem>> IAssertionSource<IReadOnlySet<TItem>>.Context => Context;
+
+#if !NETSTANDARD2_0
+    public static ReadOnlySetAssertion<TItem> Create(IReadOnlySet<TItem> item, string label) => new(item, label);
+#endif
+
+    private static StringBuilder CreateExpressionBuilder(string? expression)
+    {
+        return AssertionExpressionBuilder.Create(expression);
+    }
+}
+#endif
+
+/// <summary>
+/// Entry point for HashSet&lt;T&gt; assertions.
+/// Provides set-specific assertion methods like IsSubsetOf, IsSupersetOf, Overlaps, etc.
+/// </summary>
+/// <typeparam name="TItem">The type of items in the set.</typeparam>
+public class HashSetAssertion<TItem> : SetAssertionBase<HashSet<TItem>, TItem>, IAssertionSource<HashSet<TItem>>
+#if !NETSTANDARD2_0
+    , IAssertionSourceFor<HashSet<TItem>, HashSetAssertion<TItem>>
+#endif
+{
+    /// <summary>
+    /// Creates a new HashSetAssertion for the given hash set.
+    /// </summary>
+    public HashSetAssertion(HashSet<TItem>? value, string expression)
+        : base(new AssertionContext<HashSet<TItem>>(new EvaluationContext<HashSet<TItem>>(value!), CreateExpressionBuilder(expression)))
+    {
+    }
+
+    /// <summary>
+    /// Internal constructor for continuation classes.
+    /// </summary>
+    private protected HashSetAssertion(AssertionContext<HashSet<TItem>> context)
+        : base(context)
+    {
+    }
+
+    /// <inheritdoc />
+    protected override ISetAdapter<TItem> CreateSetAdapter(HashSet<TItem> value) => new SetAdapter<TItem>(value);
+
+    /// <summary>
+    /// Seeds a hash-set assertion over an existing context (used by the dictionary <c>.Value</c> drill-in).
+    /// </summary>
+    internal static HashSetAssertion<TItem> FromContext(AssertionContext<HashSet<TItem>> context) => new(context);
+
+    /// <inheritdoc />
+    AssertionContext<HashSet<TItem>> IAssertionSource<HashSet<TItem>>.Context => Context;
+
+#if !NETSTANDARD2_0
+    public static HashSetAssertion<TItem> Create(HashSet<TItem> item, string label) => new(item, label);
+#endif
+
+    private static StringBuilder CreateExpressionBuilder(string? expression)
+    {
+        return AssertionExpressionBuilder.Create(expression);
+    }
+}

@@ -2,6 +2,7 @@
 sidebar_position: 13
 ---
 
+
 # Regex Assertions
 
 The `.Matches()` method allows you to validate strings against regular expressions and assert on capture groups, match positions, and match lengths. This is useful when you need to validate structured text like emails, phone numbers, dates, or extract specific parts of a string.
@@ -9,23 +10,26 @@ The `.Matches()` method allows you to validate strings against regular expressio
 ## Basic Usage
 
 ```csharp
-[Test]
-public async Task BasicRegexAssertions()
+public partial class RegexTests
 {
-    var email = "john.doe@example.com";
-
-    // Assert that string matches a pattern
-    await Assert.That(email).Matches(@"^[\w.]+@[\w.]+$");
-
-    // Use a compiled Regex object
-    var emailRegex = new Regex(@"^[\w.]+@[\w.]+$");
-    await Assert.That(email).Matches(emailRegex);
-
-    // Use source-generated regex (C# 11+)
     [GeneratedRegex(@"^[\w.]+@[\w.]+$")]
-    static partial Regex EmailRegex();
+    private static partial Regex EmailRegex();
 
-    await Assert.That(email).Matches(EmailRegex());
+    [Test]
+    public async Task BasicRegexAssertions()
+    {
+        var email = "john.doe@example.com";
+
+        // Assert that string matches a pattern
+        await Assert.That(email).Matches(@"^[\w.]+@[\w.]+$");
+
+        // Use a compiled Regex object
+        var emailRegex = new Regex(@"^[\w.]+@[\w.]+$");
+        await Assert.That(email).Matches(emailRegex);
+
+        // Use source-generated regex (C# 11+)
+        await Assert.That(email).Matches(EmailRegex());
+    }
 }
 ```
 
@@ -148,7 +152,7 @@ public async Task ProductCodeValidation()
         .Matches(pattern)
         .And.Group("code", code => code.StartsWith("ABC"))
         .And.Group("price", price => price.Contains(".99"))
-        .And.Group("stock", stock => stock.Length().IsEqualTo(2));
+        .And.Group("stock", stock => stock.Satisfies(value => Regex.IsMatch(value!, @"^\d{2}$")));
 }
 ```
 
@@ -256,7 +260,7 @@ public async Task CompleteEmailValidation()
         .And.Group("local", local => local.StartsWith("john"))
         .And.Group("subdomain", sub => sub.IsEqualTo("mail"))
         .And.Group("domain", domain => domain.IsEqualTo("example"))
-        .And.Group("tld", tld => tld.Length().IsEqualTo(3));
+        .And.Group("tld", tld => tld.Satisfies(value => Regex.IsMatch(value!, @"^\w{3}$")));
 
     // For position/length checks, use Regex.Match directly
     var match = System.Text.RegularExpressions.Regex.Match(email, pattern);

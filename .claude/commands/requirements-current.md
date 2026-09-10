@@ -19,6 +19,7 @@ Display detailed information about the active requirement.
    - Indicate current phase and next steps
 
 ## File Structure:
+
 - 00-initial-request.md - Original user request
 - 01-discovery-questions.md - Context discovery questions
 - 02-discovery-answers.md - User's answers
@@ -28,6 +29,7 @@ Display detailed information about the active requirement.
 - 06-requirements-spec.md - Final requirements document
 
 ## Display Format:
+
 ```
 📋 Current Requirement: [name]
 ⏱️  Duration: [time since start]
@@ -67,6 +69,7 @@ Q3: Add new API endpoint to routes/api/v1? [PENDING]
 ```
 
 ## Important:
+
 - This is view-only (doesn't continue gathering)
 - Shows complete history and context
 - Use /requirements-status to continue

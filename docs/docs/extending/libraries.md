@@ -1,3 +1,4 @@
+
 # Libraries
 
 When building a reusable library that defines shared hooks, custom attributes, base classes, or data sources for TUnit, reference **`TUnit.Core`** instead of the main `TUnit` package. The `TUnit` package configures a project as an executable test suite; `TUnit.Core` provides all the models and attributes needed for authoring test infrastructure without the test runner wiring.
@@ -83,7 +84,7 @@ public class OrderTests : DatabaseTestBase
     {
         var order = await OrderService.CreateAsync("item-1");
 
-        await Assert.That(order.Id).IsNotNull();
+        await Assert.That(order.Id).IsNotEqualTo(Guid.Empty);
     }
 }
 ```

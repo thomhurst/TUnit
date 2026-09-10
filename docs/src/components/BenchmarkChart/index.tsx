@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { type JSX, useEffect, useState } from 'react';
 import styles from './styles.module.css';
 
 interface BenchmarkData {
@@ -75,9 +75,9 @@ export default function BenchmarkChart({ category = 'AsyncTests' }: BenchmarkCha
   const unit = getUnit(sortedData[0]?.Mean || 'ms');
 
   const getBarColor = (method: string): string => {
-    if (method.includes('TUnit_AOT')) return 'var(--ifm-color-primary)';
-    if (method.includes('TUnit')) return 'var(--ifm-color-primary-light)';
-    return 'var(--ifm-color-emphasis-400)';
+    if (method.includes('TUnit_AOT')) return 'var(--tunit-chart-primary)';
+    if (method.includes('TUnit')) return 'var(--tunit-chart-secondary)';
+    return 'var(--tunit-chart-comparison)';
   };
 
   const getTextColor = (method: string): string => {

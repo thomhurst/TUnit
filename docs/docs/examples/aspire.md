@@ -1,3 +1,5 @@
+
+
 # Aspire Integration Testing
 
 TUnit provides first-class support for [Aspire](https://aspire.dev/get-started/what-is-aspire/) integration testing through the `TUnit.Aspire` package. This package eliminates the boilerplate of managing an Aspire distributed application in tests, handling the full lifecycle (build, start, wait for resources, stop, dispose) automatically.
@@ -7,6 +9,16 @@ TUnit provides first-class support for [Aspire](https://aspire.dev/get-started/w
 ```bash
 dotnet add package TUnit.Aspire
 ```
+
+:::tip Shared test-infrastructure libraries
+
+`TUnit.Aspire` references the `TUnit` metapackage, which marks the consuming project as a test project. If you are building a **shared library** of common testing infrastructure (one that is referenced by your actual test projects rather than run directly), reference `TUnit.Aspire.Core` instead — it depends only on `TUnit.Core` and won't flag the project as a test project. Your test projects then bring in `TUnit.Aspire` (or `TUnit` directly) themselves.
+
+```bash
+dotnet add package TUnit.Aspire.Core
+```
+
+:::
 
 :::info Prerequisites
 
@@ -115,10 +127,10 @@ Use `Shared = SharedType.PerTestSession` to start the Aspire app once and share 
 
 ```csharp
 [ClassDataSource<AppFixture>(Shared = SharedType.PerTestSession)]
-public class OrderTests(AppFixture fixture) { /* ... */ }
+public class OrderTests(AppFixture fixture) { private AppFixture Fixture { get; } = fixture; }
 
 [ClassDataSource<AppFixture>(Shared = SharedType.PerTestSession)]
-public class ProductTests(AppFixture fixture) { /* ... */ }
+public class ProductTests(AppFixture fixture) { private AppFixture Fixture { get; } = fixture; }
 // Both test classes share the same AppFixture instance
 ```
 
@@ -129,16 +141,19 @@ This is the recommended approach since starting an Aspire distributed applicatio
 By default, the fixture waits for **all resources to become healthy** before tests run. You can customize this:
 
 ```csharp
-public class AppFixture : AspireFixture<Projects.MyAppHost>
+public class AllRunningAppFixture : AspireFixture<Projects.MyAppHost>
 {
-    // Option 1: Change the wait behavior via property
     protected override ResourceWaitBehavior WaitBehavior => ResourceWaitBehavior.AllRunning;
+}
 
-    // Option 2: Wait for specific resources only
+public class NamedResourcesAppFixture : AspireFixture<Projects.MyAppHost>
+{
     protected override ResourceWaitBehavior WaitBehavior => ResourceWaitBehavior.Named;
     protected override IEnumerable<string> ResourcesToWaitFor() => ["apiservice", "worker"];
+}
 
-    // Option 3: Full control over the waiting logic
+public class CustomWaitAppFixture : AspireFixture<Projects.MyAppHost>
+{
     protected override async Task WaitForResourcesAsync(
         DistributedApplication app, CancellationToken cancellationToken)
     {
@@ -452,7 +467,8 @@ public class RedisFixture : IAsyncInitializer, IAsyncDisposable
 
     public async Task InitializeAsync()
     {
-        var connectionString = await App.GetConnectionStringAsync("redis");
+        var connectionString = await App.GetConnectionStringAsync("redis")
+            ?? throw new InvalidOperationException("Redis did not provide a connection string.");
         Connection = await ConnectionMultiplexer.ConnectAsync(connectionString);
     }
 
@@ -612,7 +628,7 @@ Use `App` to access the full `DistributedApplication`, then get services or conn
 var notifications = fixture.App.Services.GetRequiredService<ResourceNotificationService>();
 
 // Connection strings
-var connStr = await fixture.GetConnectionStringAsync("postgresdb");
+var connStr = await fixture.GetConnectionStringAsync("postgresdb") ?? throw new InvalidOperationException("Missing postgresdb connection string");
 ```
 
 ### Can I run different AppHosts in different test classes?
@@ -624,10 +640,10 @@ public class AppAFixture : AspireFixture<Projects.AppHostA> { }
 public class AppBFixture : AspireFixture<Projects.AppHostB> { }
 
 [ClassDataSource<AppAFixture>(Shared = SharedType.PerTestSession)]
-public class AppATests(AppAFixture fixture) { /* ... */ }
+public class AppATests(AppAFixture fixture) { private AppAFixture Fixture { get; } = fixture; }
 
 [ClassDataSource<AppBFixture>(Shared = SharedType.PerTestSession)]
-public class AppBTests(AppBFixture fixture) { /* ... */ }
+public class AppBTests(AppBFixture fixture) { private AppBFixture Fixture { get; } = fixture; }
 ```
 
 ### How do I skip waiting for tool containers?
@@ -666,7 +682,10 @@ If a resource stays in `Running` but never reaches `Healthy`, check:
 If the resource doesn't have health checks, use `AllRunning` instead of `AllHealthy`:
 
 ```csharp
-protected override ResourceWaitBehavior WaitBehavior => ResourceWaitBehavior.AllRunning;
+public class RunningResourcesAppFixture : AspireFixture<Projects.MyAppHost>
+{
+    protected override ResourceWaitBehavior WaitBehavior => ResourceWaitBehavior.AllRunning;
+}
 ```
 
 ### What's the difference between TUnit.Aspire and TUnit.AspNetCore?

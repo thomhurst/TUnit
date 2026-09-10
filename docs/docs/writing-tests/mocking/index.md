@@ -2,11 +2,12 @@
 sidebar_position: 1
 ---
 
+
 # TUnit.Mocks
 
-TUnit.Mocks is a **standalone, source-generated, AOT-compatible** mocking framework. Because mocks are generated at compile time, it works with Native AOT, trimming, and single-file publishing — unlike traditional mocking libraries that rely on runtime proxy generation.
+TUnit.Mocks is a **source-generated, AOT-compatible** mocking framework. Because mocks are generated at compile time, it works with Native AOT, trimming, and single-file publishing — unlike traditional mocking libraries that rely on runtime proxy generation.
 
-While it integrates seamlessly with TUnit's assertion engine, TUnit.Mocks has **no dependency on the TUnit test framework** and works with any test runner — xUnit, NUnit, MSTest, or no framework at all.
+While it integrates seamlessly with TUnit's assertion engine, TUnit.Mocks does **not require the TUnit test runner** and works with any test runner — xUnit, NUnit, MSTest, or no framework at all.
 
 ## Installation
 
@@ -25,6 +26,10 @@ dotnet add package TUnit.Mocks.Logging
 
 :::warning C# 14 Required
 TUnit.Mocks requires **C# 14** or later (`LangVersion` set to `14` or `preview`). If your project targets an older version, you will see error **TM004** at compile time.
+:::
+
+:::note Generated namespaces
+The setup, verification and event surface is generated into `TUnit.Mocks.Generated`, which TUnit.Mocks adds as a global using. It does not matter which namespace the mocked type itself lives in. If you set `<TUnitMockImplicitUsings>disable</TUnitMockImplicitUsings>`, add `using TUnit.Mocks.Generated;` yourself or the setup methods will not be found.
 :::
 
 ## Your First Mock
@@ -88,6 +93,31 @@ var loose = IService.Mock();                           // loose (default)
 var strict = IService.Mock(MockBehavior.Strict);       // throws on unconfigured calls
 ```
 
+### Global Default Mode
+
+In TUnit test projects, you can change the default mode for all mocks that are created without an explicit `MockBehavior`:
+
+```csharp
+using TUnit.Core;
+using TUnit.Mocks;
+
+public class GlobalSetup
+{
+    [Before(HookType.TestDiscovery)]
+    public static void Configure(BeforeTestDiscoveryContext context)
+    {
+        context.Settings.Mocks.DefaultMode = MockBehavior.Strict;
+    }
+}
+```
+
+With this setting, `IService.Mock()`, `Mock.Of<IService>()`, `Mock.Wrap(instance)`, `Mock.OfDelegate<T>()`, and `new MockRepository()` use strict mode by default. Passing a `MockBehavior` still overrides the global default:
+
+```csharp
+var strict = IService.Mock();                    // uses global strict default
+var loose = IService.Mock(MockBehavior.Loose);   // explicit override
+```
+
 ### The Mock Wrapper
 
 `T.Mock()` returns a `Mock<T>` wrapper (for interfaces, a generated subclass that also implements the interface). Extension methods are generated directly on `Mock<T>` for each member of the mocked type, and the chain methods (`.Returns()`, `.WasCalled()`, etc.) disambiguate between setup and verification:
@@ -97,8 +127,8 @@ var mock = IService.Mock();
 
 mock.GetUser(Any()).Returns(user);           // setup — .Returns() makes it a stub
 mock.GetUser(42).WasCalled(Times.Once);      // verify — .WasCalled() makes it a check
-mock.RaiseOnMessage("hi");                   // raise events — Raise{EventName}()
-mock.Object                                  // the T instance (also available via direct cast)
+mock.RaiseOnMessage(mock.Object, "hi");      // raise events — Raise{EventName}()
+_ = mock.Object;                            // the T instance (also available via direct cast)
 ```
 
 ### Typed Mock Wrapper
@@ -107,6 +137,7 @@ For interfaces, `IMyInterface.Mock()` (a C# 14 static extension member) returns 
 
 ```csharp
 var mock = IGreeter.Mock();
+static void AcceptGreeter(IGreeter greeter) { }
 
 // mock IS an IGreeter — assign directly, pass to methods, use in collections
 IGreeter greeter = mock;
@@ -160,10 +191,10 @@ mock.GetUser(42).Returns(alice);
 
 // Inline lambdas — predicate matching directly in the call
 mock.GetUser(id => id > 0).Returns(validUser);
-mock.GetByRole(role => role == "admin").Returns(admins);
+mock.GetByRole(role => role == "admin").Returns(users);
 
 // Mix lambdas with Any() or raw values
-mock.Search(name => name.StartsWith("A"), Any()).Returns(results);
+mock.Search(name => name.StartsWith("A"), Any()).Returns(users);
 
 // Is<T>() — explicit predicate matching (also works)
 mock.GetUser(Is<int>(id => id > 0)).Returns(validUser);

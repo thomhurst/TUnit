@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!-- Multi-target so public API snapshots cover every supported consumer TFM. -->
+        <TargetFrameworks>net472;net8.0;net9.0;net10.0</TargetFrameworks>
+    </PropertyGroup>
+
+  <Import Project="..\..\eng\TestProject.props" />
+
+    <PropertyGroup>
+        <Configuration>Release</Configuration>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+      <PackageReference Include="PublicApiGenerator" />
+      <PackageReference Include="Sourcy.DotNet">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Verify" />
+      <PackageReference Include="Verify.TUnit" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\TUnit.Playwright\TUnit.Playwright.csproj" />
+      <ProjectReference Include="..\..\src\TUnit.Assertions.Should\TUnit.Assertions.Should.csproj" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' != 'net472'">
+      <ProjectReference Include="..\..\src\TUnit.OpenTelemetry\TUnit.OpenTelemetry.csproj" />
+    </ItemGroup>
+
+    <!-- No transitive version pin needed: each referenced project (TUnit.Core, TUnit.Assertions,
+         ...) self-pins to the same dummy version via the root Directory.Build.props when built
+         locally, so strong-named references resolve consistently. -->
+
+    <Import Project="..\..\eng\TestProject.targets" />
+
+</Project>

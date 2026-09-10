@@ -2,6 +2,7 @@
 sidebar_position: 12
 ---
 
+
 # Specialized Type Assertions
 
 TUnit provides assertions for many specialized .NET types beyond the common primitives. This page covers GUID, HTTP, file system, networking, and other specialized assertions.
@@ -302,7 +303,7 @@ public async Task Directory_Has_Subdirectories()
 {
     var windowsDir = new DirectoryInfo(@"C:\Windows");
 
-    await Assert.That(windowsDir).HasSubdirectories();
+    await Assert.That(windowsDir.EnumerateDirectories().Any()).IsTrue();
 }
 ```
 
@@ -381,7 +382,7 @@ public async Task File_Is_System()
 
     if (systemFile.Exists)
     {
-        await Assert.That(systemFile).IsSystem();
+        await Assert.That(systemFile.Attributes.HasFlag(FileAttributes.System)).IsTrue();
     }
 }
 ```
@@ -396,7 +397,7 @@ public async Task File_Is_Executable()
 
     if (exeFile.Exists)
     {
-        await Assert.That(exeFile).IsExecutable();
+        await Assert.That(exeFile.Extension).IsEqualTo(".exe");
     }
 }
 ```
@@ -411,7 +412,7 @@ public async Task IP_Is_IPv4()
 {
     var ipv4 = IPAddress.Parse("192.168.1.1");
 
-    await Assert.That(ipv4).IsIPv4();
+    await Assert.That(ipv4.AddressFamily).IsEqualTo(AddressFamily.InterNetwork);
 }
 
 [Test]
@@ -419,7 +420,7 @@ public async Task IP_Not_IPv4()
 {
     var ipv6 = IPAddress.Parse("::1");
 
-    await Assert.That(ipv6).IsNotIPv4();
+    await Assert.That(ipv6.AddressFamily).IsNotEqualTo(AddressFamily.InterNetwork);
 }
 ```
 
@@ -431,7 +432,7 @@ public async Task IP_Is_IPv6()
 {
     var ipv6 = IPAddress.Parse("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
 
-    await Assert.That(ipv6).IsIPv6();
+    await Assert.That(ipv6.AddressFamily).IsEqualTo(AddressFamily.InterNetworkV6);
 }
 
 [Test]
@@ -439,7 +440,7 @@ public async Task IP_Not_IPv6()
 {
     var ipv4 = IPAddress.Parse("127.0.0.1");
 
-    await Assert.That(ipv4).IsNotIPv6();
+    await Assert.That(ipv4.AddressFamily).IsNotEqualTo(AddressFamily.InterNetworkV6);
 }
 ```
 
@@ -453,7 +454,7 @@ public async Task Lazy_Value_Not_Created()
 {
     var lazy = new Lazy<int>(() => 42);
 
-    await Assert.That(lazy).IsNotValueCreated();
+    await Assert.That(lazy.IsValueCreated).IsFalse();
 
     var value = lazy.Value;
 
@@ -472,7 +473,7 @@ public async Task Stream_Can_Read()
 {
     using var stream = new MemoryStream();
 
-    await Assert.That(stream).CanRead();
+    await Assert.That((Stream) stream).CanRead();
 }
 ```
 
@@ -484,7 +485,7 @@ public async Task Stream_Can_Write()
 {
     using var stream = new MemoryStream();
 
-    await Assert.That(stream).CanWrite();
+    await Assert.That((Stream) stream).CanWrite();
 }
 
 [Test]
@@ -492,7 +493,7 @@ public async Task Stream_Cannot_Write()
 {
     var readOnlyStream = new MemoryStream(new byte[10], writable: false);
 
-    await Assert.That(readOnlyStream).CannotWrite();
+    await Assert.That((Stream) readOnlyStream).CannotWrite();
 }
 ```
 
@@ -504,7 +505,7 @@ public async Task Stream_Can_Seek()
 {
     using var stream = new MemoryStream();
 
-    await Assert.That(stream).CanSeek();
+    await Assert.That((Stream) stream).CanSeek();
 }
 ```
 
@@ -547,7 +548,7 @@ public async Task Process_Is_Responding()
 {
     var process = Process.GetCurrentProcess();
 
-    await Assert.That(process).IsResponding();
+    await Assert.That(process.Responding).IsTrue();
 }
 ```
 
@@ -648,7 +649,7 @@ public async Task Encoding_Is_UTF8()
 {
     var encoding = Encoding.UTF8;
 
-    await Assert.That(encoding).IsUtf8();
+    await Assert.That(encoding.WebName).IsEqualTo(Encoding.UTF8.WebName);
 }
 
 [Test]
@@ -656,7 +657,7 @@ public async Task Encoding_Not_UTF8()
 {
     var encoding = Encoding.ASCII;
 
-    await Assert.That(encoding).IsNotUtf8();
+    await Assert.That(encoding.WebName).IsNotEqualTo(Encoding.UTF8.WebName);
 }
 ```
 
@@ -751,9 +752,9 @@ public async Task Config_Directory_Setup()
 [Test]
 public async Task Server_IP_Is_Valid()
 {
-    var serverIp = IPAddress.Parse(Configuration["ServerIP"]);
+    var serverIp = IPAddress.Parse(Configuration["ServerIP"] ?? "127.0.0.1");
 
-    await Assert.That(serverIp).IsIPv4();
+    await Assert.That(serverIp.AddressFamily).IsEqualTo(AddressFamily.InterNetwork);
 }
 ```
 

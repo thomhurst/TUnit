@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <Import Project="..\..\eng\TestProject.props" />
+
+    <PropertyGroup>
+        <RootNamespace>TUnit.TestProject.VB.NET</RootNamespace>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
+        <ProjectReference Include="..\..\src\TUnit\TUnit.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+      <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+      <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
+    </ItemGroup>
+
+    <Import Project="..\..\eng\TestProject.targets" />
+    
+</Project>

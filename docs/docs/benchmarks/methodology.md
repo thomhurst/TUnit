@@ -4,6 +4,7 @@ description: How TUnit's performance benchmarks are measured and compared
 sidebar_position: 2
 ---
 
+
 # Benchmark Methodology
 
 This page explains how TUnit's performance benchmarks are conducted to ensure fair, accurate, and reproducible results.
@@ -156,6 +157,8 @@ dotnet build -c Release -p:TestFramework=MSTEST
 
 ### 2. Execution Phase
 ```csharp
+using BenchmarkDotNet.Attributes;
+
 [Benchmark]
 public async Task TUnit()
 {

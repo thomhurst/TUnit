@@ -53,6 +53,10 @@ Both `Output.WriteLine()` and `OutputWriter.WriteLine()` are valid - the `Output
 
 Artifacts are particularly useful for debugging test failures, especially in integration tests. You can attach screenshots, logs, videos, configuration files, or any other files that help diagnose issues.
 
+Use `TestContext.ResultsDirectory` to get the absolute Microsoft.Testing.Platform results
+directory. It respects configuration such as `--results-directory` and is suitable for files
+that should live alongside test reports.
+
 For complete information about working with test artifacts, including session-level artifacts, best practices, and common use cases, see the [Test Artifacts](./artifacts.md) guide.
 
 ## Test Isolation
@@ -64,8 +68,8 @@ The `TestContext` provides built-in helpers for creating isolated resource names
 var id = TestContext.Current!.Isolation.UniqueId;  // e.g. 42
 
 // Create isolated resource names
-var tableName = TestContext.Current!.Isolation.GetIsolatedName("todos");  // "Test_42_todos"
-var topicName = TestContext.Current!.Isolation.GetIsolatedName("orders"); // "Test_42_orders"
+var tableName = TestContext.Current!.Isolation.GetIsolatedName("todos");  // "test_42_todos"
+var topicName = TestContext.Current!.Isolation.GetIsolatedName("orders"); // "test_42_orders"
 
 // Create isolated key prefixes
 var prefix = TestContext.Current!.Isolation.GetIsolatedPrefix();       // "test_42_"
@@ -77,6 +81,20 @@ These are useful for any test that needs unique resource names — database tabl
 :::tip ASP.NET Core Tests
 If you're using `TUnit.AspNetCore`, the `WebApplicationTest` base class provides the same helpers as `protected` methods (`GetIsolatedName`, `GetIsolatedPrefix`). Both share the same underlying counter, so IDs are unique across all test types.
 :::
+
+## Test Parameters
+
+`TestContext.Parameters` provides access to custom key-value parameters passed at runtime via the `--test-parameter` command-line option:
+
+```csharp
+// Run with: dotnet run --test-parameter environment=staging
+if (TestContext.Parameters.TryGetValue("environment", out var values))
+{
+    var environment = values.First(); // "staging"
+}
+```
+
+See the [Test Parameters](../execution/parameters.md) guide for full details.
 
 ## Custom Properties
 
@@ -102,6 +120,46 @@ public class MyTestClass
     }
 }
 ```
+
+## Data Source Attributes
+
+The context exposes the data source attribute instances that generated the current test's arguments:
+
+- `Metadata.ClassDataSource` — the attribute that generated the test class's constructor arguments
+- `Metadata.MethodDataSource` — the attribute that generated the test method's arguments
+
+Both are never null: for tests without a data source they return a no-op `NoDataSource` singleton, so you can pattern-match without null checks.
+
+This is useful when a fixture needs to know how it was shared. For example, a fixture can read its own `Shared` scope and `Key` during `InitializeAsync`:
+
+```csharp
+public class MyFixture : IAsyncInitializer
+{
+    public Task InitializeAsync()
+    {
+        if (TestContext.Current?.Metadata.MethodDataSource is ClassDataSourceAttribute<MyFixture> attribute)
+        {
+            var sharedType = attribute.Shared; // e.g. SharedType.Keyed
+            var key = attribute.Key;           // e.g. "MyKey"
+        }
+
+        return Task.CompletedTask;
+    }
+}
+
+public class MyTests
+{
+    [Test]
+    [ClassDataSource<MyFixture>(Shared = SharedType.Keyed, Key = "MyKey")]
+    public void MyTest(MyFixture fixture)
+    {
+    }
+}
+```
+
+Note that shared fixtures (`PerTestSession`, `PerClass`, `Keyed`, etc.) are initialized once, by the first test that uses them — inside `InitializeAsync`, `TestContext.Current` refers to that first test.
+
+If you only need the sharing key, implementing `IKeyedDataSource` on the fixture is a simpler alternative: TUnit sets its `Key` property before `InitializeAsync` is called.
 
 ## Dependency Injection
 
@@ -172,7 +230,7 @@ public static IEnumerable<object[]> TestData()
 public void MyTest(string value)
 {
     // Access the data stored during generation
-    var generatedAt = TestContext.Current.StateBag["DataGeneratedAt"];
+    var generatedAt = TestContext.Current!.StateBag["DataGeneratedAt"];
     var version = TestContext.Current.StateBag["GeneratorVersion"];
     
     Console.WriteLine($"Data was generated at: {generatedAt}");

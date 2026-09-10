@@ -1,0 +1,167 @@
+﻿using TUnit.Core;
+
+namespace TUnit.Engine.Services.TestExecution;
+
+internal static class RetryHelper
+{
+    private static readonly Task<bool> s_shouldRetryTrue = Task.FromResult(true);
+    private static readonly Task<bool> s_shouldRetryFalse = Task.FromResult(false);
+
+    public static async Task ExecuteWithRetry(TestContext testContext, Func<ValueTask> action)
+    {
+        var maxRetries = testContext.Metadata.TestDetails.RetryLimit;
+
+        for (var attempt = 0; attempt < maxRetries + 1; attempt++)
+        {
+            testContext.CurrentRetryAttempt = attempt;
+
+            try
+            {
+                await action();
+                return;
+            }
+            catch (Exception ex)
+            {
+                if (attempt >= maxRetries)
+                {
+                    throw;
+                }
+
+                testContext.OpenTestCancellationForRetry();
+
+                bool shouldRetry;
+                try
+                {
+                    shouldRetry = await ShouldRetry(testContext, ex, attempt);
+                }
+                catch
+                {
+                    if (testContext.CompleteTestCancellation())
+                    {
+                        SetCancelledResult(testContext);
+                        return;
+                    }
+
+                    throw;
+                }
+
+                if (shouldRetry)
+                {
+#if NET
+                    // Stop the failed attempt's activity before retrying
+                    var activity = testContext.Activity;
+                    if (activity is not null)
+                    {
+                        activity.SetTag(TUnitActivitySource.TagTestCaseResultStatus, "fail");
+                        activity.SetTag(TUnitActivitySource.TagTestRetryAttempt, attempt);
+                        TUnitActivitySource.RecordException(activity, ex);
+                        TUnitActivitySource.StopActivity(activity);
+                        testContext.Activity = null;
+                    }
+#endif
+
+                    // Record this failed attempt before it's cleared, so reporters (e.g. the HTML
+                    // report's retry/flaky UI) can show the full attempt history. The engine only
+                    // emits one update per test (the final result), so without this the per-attempt
+                    // data would be lost. The attempt's own TestResult IS the record we keep; we
+                    // detach the TestContext back-reference so the history doesn't retain the live
+                    // execution graph. Wrapper-exception unwrapping is deferred to the reporter
+                    // (HtmlReporter.MapException), matching how the final attempt is rendered.
+                    // Result is normally populated by the time a failing attempt reaches here, so
+                    // the first branch is the common path. The fallback covers the rare case where
+                    // the attempt threw before a TestResult was written (e.g. an exception during
+                    // setup), so the attempt is still recorded rather than dropped from the history.
+                    var failedResult = testContext.Execution.Result;
+                    var attemptResult = failedResult is not null
+                        ? failedResult with { TestContext = null }
+                        : new TestResult
+                        {
+                            State = TestState.Failed,
+                            Start = testContext.TestStart,
+                            End = testContext.Execution.TestEnd,
+                            Duration = testContext.TestStart is { } start && testContext.Execution.TestEnd is { } end
+                                ? end - start
+                                : null,
+                            Exception = ex,
+                            ComputerName = Environment.MachineName,
+                        };
+                    (testContext.RetryAttempts ??= []).Add(attemptResult);
+
+                    // Clear the previous result before retrying
+                    testContext.Execution.Result = null;
+                    testContext.TestStart = null;
+                    testContext.Execution.TestEnd = null;
+                    testContext.Timings.Clear();
+
+                    try
+                    {
+                        await ApplyBackoffDelay(testContext, attempt).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException) when (testContext.IsTestCancellationRequested)
+                    {
+                        SetCancelledResult(testContext);
+                        return;
+                    }
+
+                    if (testContext.IsTestCancellationRequested)
+                    {
+                        SetCancelledResult(testContext);
+                        return;
+                    }
+
+                    continue;
+                }
+
+                if (testContext.CompleteTestCancellation())
+                {
+                    SetCancelledResult(testContext);
+                    return;
+                }
+
+                throw;
+            }
+        }
+    }
+
+    private static Task<bool> ShouldRetry(TestContext testContext, Exception ex, int attempt)
+    {
+        if (attempt >= testContext.Metadata.TestDetails.RetryLimit)
+        {
+            return s_shouldRetryFalse;
+        }
+
+        if (testContext.RetryFunc == null)
+        {
+            // Default behavior: retry on any exception if within retry limit
+            return s_shouldRetryTrue;
+        }
+
+        return testContext.RetryFunc(testContext, ex, attempt + 1);
+    }
+
+    private static Task ApplyBackoffDelay(TestContext testContext, int attempt)
+    {
+        var backoffMs = testContext.Metadata.TestDetails.RetryBackoffMs;
+
+        if (backoffMs <= 0)
+        {
+            return Task.CompletedTask;
+        }
+
+        var multiplier = testContext.Metadata.TestDetails.RetryBackoffMultiplier;
+        var delayMs = (int)(backoffMs * Math.Pow(multiplier, attempt));
+
+        if (delayMs > 0)
+        {
+            return Task.Delay(delayMs, testContext.CancellationToken);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static void SetCancelledResult(TestContext testContext)
+    {
+        testContext.Execution.Result = null;
+        testContext.InternalExecutableTest.SetResult(TestState.Cancelled);
+    }
+}

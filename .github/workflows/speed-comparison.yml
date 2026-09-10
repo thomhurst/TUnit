@@ -11,12 +11,12 @@ jobs:
     runs-on: ubicloud-standard-4
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6.0.0
         with:
           dotnet-version: 10.0.x
 
@@ -28,9 +28,10 @@ jobs:
           dotnet build -c Release -p:TestFramework=MSTEST
         working-directory: "tools/speed-comparison/UnifiedTests"
 
-      - name: Publish TUnit AOT
+      - name: Publish AOT
         run: |
           dotnet publish -c Release -p:TestFramework=TUNIT -p:Aot=true --use-current-runtime --output bin/Release-TUNIT-AOT/net10.0
+          dotnet publish -c Release -p:TestFramework=XUNIT3 -p:Aot=true --use-current-runtime --output bin/Release-XUNIT3-AOT/net10.0
         working-directory: "tools/speed-comparison/UnifiedTests"
 
       - name: Upload Build Artifacts
@@ -53,12 +54,12 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6.0.0
         with:
           dotnet-version: 10.0.x
 
@@ -97,12 +98,12 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6.0.0
         with:
           dotnet-version: 10.0.x
 
@@ -132,7 +133,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           token: ${{ secrets.ADMIN_TOKEN }}
@@ -152,13 +153,17 @@ jobs:
           merge-multiple: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: '24'
 
       - name: Process Benchmark Results
         run: |
           node .github/scripts/process-benchmarks.js
+
+      - name: Update README Benchmark Section
+        run: |
+          node .github/scripts/update-readme-benchmarks.js
 
       - name: Upload Individual Runtime Benchmarks
         uses: actions/upload-artifact@v7
@@ -266,7 +271,7 @@ jobs:
       - name: Check for Changes
         id: check_changes
         run: |
-          git add docs/docs/benchmarks/ docs/static/benchmarks/
+          git add docs/docs/benchmarks/ docs/static/benchmarks/ README.md
           if git diff --quiet --staged; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "No benchmark changes detected"

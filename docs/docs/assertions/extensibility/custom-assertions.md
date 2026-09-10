@@ -2,6 +2,7 @@
 sidebar_position: 1
 ---
 
+
 # Custom Assertions
 
 The TUnit Assertions can be easily extended so that you can create your own assertions.
@@ -108,3 +109,4 @@ await Assert.That("Hello World")
 - **Context sharing**: Pass `source.Context` to your assertion constructor (it contains the evaluation context and expression builder)
 - **CheckAsync parameter**: Use `EvaluationMetadata<TValue> metadata` which contains both `Value` and `Exception` properties
 - **CallerArgumentExpression**: Use this attribute to capture parameter expressions for better error messages
+<!-- doc-test-shared -->

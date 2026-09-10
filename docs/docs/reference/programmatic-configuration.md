@@ -2,6 +2,7 @@
 sidebar_position: 4
 ---
 
+
 # Programmatic Configuration
 
 ## Overview
@@ -14,6 +15,8 @@ Settings are organized into logical groups:
 - `Parallelism` — concurrent test execution limits
 - `Execution` — runtime behavior such as fail-fast
 - `Display` — output and display options
+- `Reporting` — HTML report generation and publishing
+- `Mocks` — defaults for TUnit.Mocks when the package is referenced
 
 ## Usage
 
@@ -21,6 +24,7 @@ Set values inside a `[Before(HookType.TestDiscovery)]` hook so they are applied 
 
 ```csharp
 using TUnit.Core;
+using TUnit.Mocks;
 
 public class TestSetup
 {
@@ -30,6 +34,8 @@ public class TestSetup
         context.Settings.Timeouts.DefaultTestTimeout = TimeSpan.FromMinutes(5);
         context.Settings.Timeouts.DefaultHookTimeout = TimeSpan.FromMinutes(2);
         context.Settings.Execution.FailFast = true;
+        context.Settings.Reporting.HtmlReportEnabled = false;
+        context.Settings.Mocks.DefaultMode = MockBehavior.Strict;
 
         return Task.CompletedTask;
     }
@@ -69,6 +75,24 @@ Settings are accessed exclusively through `context.Settings` in the discovery ho
 |---|---|---|---|
 | `FailFast` | `bool` | `false` | Cancels the remaining test run after the first test failure. |
 
+### `context.Settings.Reporting`
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `HtmlReportEnabled` | `bool` | `true` | Generates the HTML test report. |
+| `JsonReportEnabled` | `bool` | `true` | Generates the machine-readable JSON sidecar used by report aggregation. |
+| `ArtifactUploadEnabled` | `bool` | `true` | Uploads the HTML report as an artifact when supported by the CI environment. |
+
+The corresponding `TUNIT_DISABLE_HTML_REPORTER`, `TUNIT_DISABLE_JSON_REPORT`, and `TUNIT_DISABLE_ARTIFACT_UPLOAD` environment variables take precedence over these values.
+
+### `context.Settings.Mocks`
+
+Available when `TUnit.Mocks` is referenced.
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `DefaultMode` | `MockBehavior` | `MockBehavior.Loose` | Default behavior for mocks created without an explicit mode. Set to `MockBehavior.Strict` to make unconfigured calls throw by default. |
+
 ## Precedence
 
 When the same setting is configured in multiple places, the following priority order applies (highest wins):
@@ -83,7 +107,10 @@ When the same setting is configured in multiple places, the following priority o
 Your test project sets a conservative parallelism limit in code:
 
 ```csharp
-context.Settings.Parallelism.MaximumParallelTests = 1;
+public static void Configure(BeforeTestDiscoveryContext context)
+{
+    context.Settings.Parallelism.MaximumParallelTests = 1;
+}
 ```
 
 A developer on a powerful machine can override this for a local run without changing code:

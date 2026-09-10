@@ -1,3 +1,6 @@
+
+<!-- doc-test-shared -->
+
 # Dependency Injection
 
 TUnit provides two mechanisms for controlling how test classes are constructed: the low-level `IClassConstructor` interface and the higher-level `DependencyInjectionDataSourceAttribute<TScope>` helper. Both are registered via attributes and give full control over how constructor arguments are resolved.
@@ -27,6 +30,7 @@ public class MyTestClass(SomeDependency dep)
     public async Task MyTest()
     {
         // dep was provided by CustomConstructor.Create()
+        await Assert.That(dep).IsNotNull();
     }
 }
 ```

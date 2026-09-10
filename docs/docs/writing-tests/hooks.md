@@ -1,3 +1,4 @@
+
 # Hooks
 
 Hooks let you run code at specific points in the test lifecycle using `[Before]` / `[BeforeEvery]` and `[After]` / `[AfterEvery]` attributes. Most simple setup belongs in the constructor; use hooks for async operations or shared resource management.
@@ -190,7 +191,7 @@ public class MyTestClass
     [After(Test)]
     public async Task AfterEachTest()
     {
-        await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current.Metadata.TestName}");
+        await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current!.Metadata.TestName}");
     }
 
     [Test]

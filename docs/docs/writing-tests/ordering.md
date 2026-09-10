@@ -1,3 +1,4 @@
+
 # Test Ordering & Dependencies
 
 ## Ordering with [Order]
@@ -156,7 +157,8 @@ public async Task AddItemToBag()
 public async Task DeleteItemFromBag() 
 {
     var addToBagTestContext = TestContext.Current!.Dependencies.GetTests(nameof(AddItemToBag)).First();
-    var itemId = addToBagTestContext.StateBag.Items["ItemId"];
+    var itemId = addToBagTestContext.StateBag.Items["ItemId"]
+        ?? throw new InvalidOperationException("The item ID was not recorded.");
     await DeleteFromBag(itemId);
 }
 ```

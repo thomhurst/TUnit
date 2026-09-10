@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\eng\strongname.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
+
+    <Import Project="..\..\eng\TestProject.props" />
+
+    <ItemGroup>
+        <PackageReference Include="AutoFixture" />
+        <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+        <PackageReference Include="NSubstitute" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\TUnit\TUnit.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\..\eng\strongname.snk">
+        <Link>strongname.snk</Link>
+      </None>
+    </ItemGroup>
+
+    <Import Project="..\..\eng\TestProject.targets" />
+
+</Project>

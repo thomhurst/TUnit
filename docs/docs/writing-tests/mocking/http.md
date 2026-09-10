@@ -2,6 +2,7 @@
 sidebar_position: 6
 ---
 
+
 # HTTP Mocking
 
 `TUnit.Mocks.Http` provides `MockHttpHandler` — a drop-in `HttpMessageHandler` replacement for testing code that uses `HttpClient`.
@@ -38,15 +39,17 @@ public async Task Fetches_Users_From_Api()
 
 ```csharp
 // With base address (most common)
-using var client = Mock.HttpClient("https://api.example.com");
+using var clientWithBaseAddress = Mock.HttpClient("https://api.example.com");
+_ = clientWithBaseAddress;
 
 // Without base address
-using var client = Mock.HttpClient();
-client.BaseAddress = new Uri("https://api.example.com");
+using var clientWithoutBaseAddress = Mock.HttpClient();
+clientWithoutBaseAddress.BaseAddress = new Uri("https://api.example.com");
 
 // Just the handler (when you need more control)
 var handler = Mock.HttpHandler();
-using var client = handler.CreateClient("https://api.example.com");
+using var handlerClient = handler.CreateClient("https://api.example.com");
+_ = handlerClient;
 ```
 
 `MockHttpClient` **is** an `HttpClient` — pass it anywhere `HttpClient` is expected. Use `.Handler` for all setup and verification:

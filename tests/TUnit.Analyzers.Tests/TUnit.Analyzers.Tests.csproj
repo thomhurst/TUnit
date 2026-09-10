@@ -1,0 +1,80 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\eng\TestProject.props" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.8.0" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+    <PackageReference Include="Polly" />
+    <PackageReference Include="MSTest.TestFramework" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="xunit.v3.extensibility.core" />
+    <PackageReference Include="xunit.v3.assert" />
+    <PackageReference Include="System.Text.Json" Condition="'$(TargetFramework)' == 'net8.0'" GeneratePathProperty="true" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Engine\TUnit.Engine.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Analyzers\TUnit.Analyzers.csproj" />
+    <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Core\TUnit.Core.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Assertions\TUnit.Assertions.csproj" />
+  </ItemGroup>
+
+  <!-- Copy netstandard2.0 builds into the test bin so the analyzer-test framework's
+       Net90 reference assemblies don't trigger CS1705 against the net10.0 builds otherwise
+       loaded via typeof(...).Assembly.Location. CS1705 is suppressed silently and the resulting
+       symbol-resolution failures cause analyzers to find nothing to flag. -->
+  <ItemGroup>
+    <None Include="..\..\src\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll"
+          Link="TUnit.Core.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="..\..\src\TUnit.Assertions\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.dll"
+          Link="TUnit.Assertions.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="..\TUnit.TestProject.Library\bin\$(Configuration)\netstandard2.0\TUnit.TestProject.Library.dll"
+          Link="TUnit.TestProject.Library.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="$(PkgSystem_Text_Json)\lib\net8.0\System.Text.Json.dll"
+          Condition="'$(TargetFramework)' == 'net8.0'"
+          Link="System.Text.Json.9.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"
+             Link="Shared\AnalyzerTestCompatibility.cs" />
+    <Compile Include="..\SharedTestHelpers\RulesDecouplingVerifier.cs"
+             Link="Shared\RulesDecouplingVerifier.cs" />
+  </ItemGroup>
+
+  <!-- Reference the VSTHRD analyzer assembly (Analyzer="false") so its analyzer types are
+       usable in suppressor tests via WithAnalyzer<>, without running it against this project. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="all" GeneratePathProperty="true" />
+    <Reference Include="$(PkgMicrosoft_VisualStudio_Threading_Analyzers)\analyzers\cs\Microsoft.VisualStudio.Threading.Analyzers.dll" Analyzer="false" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" VersionOverride="9.0.0" PrivateAssets="all" GeneratePathProperty="true" />
+    <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.NetAnalyzers.dll" Analyzer="false" />
+    <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" Analyzer="false" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" VersionOverride="9.0.0" PrivateAssets="all" GeneratePathProperty="true" />
+    <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.NetAnalyzers.dll" Analyzer="false" />
+    <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" Analyzer="false" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" VersionOverride="9.0.0" PrivateAssets="all" GeneratePathProperty="true" />
+    <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.NetAnalyzers.dll" Analyzer="false" />
+    <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" Analyzer="false" />
+  </ItemGroup>
+
+  <Import Project="..\..\eng\TestProject.targets" />
+</Project>

@@ -1,0 +1,701 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Mocks.SourceGenerator.Extensions;
+using TUnit.Mocks.SourceGenerator.Models;
+using System.Collections.Immutable;
+using System.Linq;
+
+namespace TUnit.Mocks.SourceGenerator.Discovery;
+
+internal static class MockTypeDiscovery
+{
+    /// <summary>
+    /// Syntax predicate: quick check if a node might be a Mock.Of&lt;T&gt;(),
+    /// MockRepository.Of&lt;T&gt;(), etc. Zero allocations - string comparison only.
+    /// </summary>
+    public static bool IsMockOfInvocation(SyntaxNode node, CancellationToken ct)
+    {
+        // Match: X.Of<T>() or X.Of<T>(behavior, args) etc.
+        // where X can be "Mock" (static) or a MockRepository variable (instance).
+        // Also match X.Wrap(instance) where T is inferred (IdentifierNameSyntax).
+        if (node is not InvocationExpressionSyntax invocation)
+            return false;
+
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
+            return false;
+
+        // Generic name syntax: Mock.Of<T>(), Mock.Wrap<T>(instance)
+        if (memberAccess.Name is GenericNameSyntax genericName)
+        {
+            var methodName = genericName.Identifier.ValueText;
+            return methodName is "Of" or "OfDelegate" or "Wrap";
+        }
+
+        // Simple name syntax: Mock.Wrap(instance) with type inference
+        if (memberAccess.Name is IdentifierNameSyntax identifierName)
+        {
+            return identifierName.Identifier.ValueText is "Wrap";
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Semantic transform: resolve the type argument(s) and build MockTypeModel(s).
+    /// For multi-interface calls (Mock.Of&lt;T1, T2&gt;()), returns both a single-type model
+    /// (for setup/verify generation) and a multi-type model (for impl/factory generation).
+    /// </summary>
+    public static ImmutableArray<MockTypeModel> TransformToModels(GeneratorSyntaxContext context, CancellationToken ct)
+    {
+        var invocation = (InvocationExpressionSyntax)context.Node;
+
+        var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation, ct);
+
+        // When the interface has static abstract members, CS8920 prevents normal symbol
+        // resolution (OverloadResolutionFailure). Fall back to CandidateSymbols.
+        IMethodSymbol? method = symbolInfo.Symbol as IMethodSymbol;
+        if (method is null && symbolInfo.CandidateReason == CandidateReason.OverloadResolutionFailure)
+        {
+            method = symbolInfo.CandidateSymbols.OfType<IMethodSymbol>().FirstOrDefault();
+        }
+
+        if (method is null)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Verify this is TUnit.Mocks.Mock.Of<T>() or TUnit.Mocks.MockRepository.Of<T>()
+        var containingTypeName = method.ContainingType?.Name;
+        if ((containingTypeName != "Mock" && containingTypeName != "MockRepository") ||
+            method.ContainingNamespace?.ToDisplayString() != "TUnit.Mocks")
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        var isDelegateMock = method.Name == "OfDelegate";
+        var isWrapMock = method.Name == "Wrap";
+
+        if (method.TypeArguments.Length == 0)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        var typeToMock = method.TypeArguments[0];
+        if (typeToMock is not INamedTypeSymbol namedType)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Skip error types (unresolvable type arguments, e.g. referencing a generated bridge type)
+        if (namedType.TypeKind == TypeKind.Error)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Get the compilation and assembly for accessibility checks and namespace conflict detection
+        var compilation = context.SemanticModel.Compilation;
+        var compilationAssembly = compilation.Assembly;
+
+        // Delegate mocking
+        if (isDelegateMock)
+        {
+            if (namedType.TypeKind != TypeKind.Delegate)
+                return ImmutableArray<MockTypeModel>.Empty;
+
+            var delegateModel = BuildDelegateTypeModel(namedType, compilation);
+            return delegateModel is not null
+                ? ImmutableArray.Create(delegateModel)
+                : ImmutableArray<MockTypeModel>.Empty;
+        }
+
+        // Wrap mock: generates a wrapper around a real instance
+        if (isWrapMock)
+        {
+            // Wrap only works with classes (not interfaces, not sealed, not structs)
+            if (namedType.TypeKind != TypeKind.Class || namedType.IsSealed || namedType.IsValueType)
+                return ImmutableArray<MockTypeModel>.Empty;
+
+            var wrapModel = BuildSingleTypeModel(
+                namedType,
+                isPartialMock: true,
+                compilationAssembly,
+                compilation,
+                isWrapMock: true,
+                cancellationToken: ct);
+            if (wrapModel is null)
+                return ImmutableArray<MockTypeModel>.Empty;
+
+            return ImmutableArray.Create(wrapModel);
+        }
+
+        // Can't mock sealed classes or structs (analyzers catch this, but skip generation)
+        if (namedType.IsSealed)
+            return ImmutableArray<MockTypeModel>.Empty;
+        if (namedType.IsValueType)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Single-type mock: build one model + transitive interface return types
+        // Partial mock behavior is determined by type kind — classes get partial mocks automatically.
+        var isPartialMock = namedType.TypeKind == TypeKind.Class;
+
+        if (method.TypeArguments.Length == 1)
+        {
+            return BuildModelWithTransitiveDependencies(
+                NormalizeSingleMockType(namedType),
+                isPartialMock,
+                compilationAssembly,
+                compilation,
+                ct);
+        }
+
+        // Multi-type mock: validate additional type args are all interfaces
+        var additionalTypes = new List<INamedTypeSymbol>();
+        for (int i = 1; i < method.TypeArguments.Length; i++)
+        {
+            if (method.TypeArguments[i] is not INamedTypeSymbol additionalType)
+                return ImmutableArray<MockTypeModel>.Empty;
+            if (additionalType.TypeKind != TypeKind.Interface)
+                return ImmutableArray<MockTypeModel>.Empty;
+            // The impl lists every additional interface in its base-type list, so one the
+            // compilation can't implement takes the whole combo down with it (CS0535) — the same
+            // reason BuildSingleTypeModel drops the primary. TM007 reports it at the call site.
+            if (!InterfaceImplementability.CanBeImplemented(additionalType, compilation))
+                return ImmutableArray<MockTypeModel>.Empty;
+            additionalTypes.Add(additionalType);
+        }
+
+        // Build single-type model for primary type (generates setup/verify/raise)
+        var singleTypeModel = BuildSingleTypeModel(
+            namedType,
+            isPartialMock,
+            compilationAssembly,
+            compilation,
+            isWrapMock: false,
+            cancellationToken: ct);
+        if (singleTypeModel is null)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Transitive auto-mock factories over the primary AND additional interfaces — without
+        // these, members returning user interfaces reference CreateAutoMock factories that are
+        // never generated when only Mock.Of<T1,T2>() appears in the assembly.
+        var visited = new HashSet<string>();
+        var transitiveModels = DiscoverTransitiveInterfaceTypes(
+            namedType, visited, compilationAssembly, compilation, ct);
+        foreach (var additionalType in additionalTypes)
+        {
+            transitiveModels.AddRange(DiscoverTransitiveInterfaceTypes(
+                additionalType, visited, compilationAssembly, compilation, ct));
+        }
+
+        // Build multi-type model (generates impl + factory)
+        var allTypes = new[] { namedType }.Concat(additionalTypes).ToArray();
+        var (methods, properties, events) = MemberDiscovery.DiscoverMembersFromMultipleTypes(allTypes, compilationAssembly, compilation);
+
+        var additionalInterfaceNames = ImmutableArray.CreateBuilder<string>(additionalTypes.Count);
+        foreach (var t in additionalTypes)
+        {
+            additionalInterfaceNames.Add(t.GetFullyQualifiedName());
+        }
+
+        var multiTypeModel = new MockTypeModel
+        {
+            FullyQualifiedName = namedType.GetFullyQualifiedName(),
+            Name = namedType.Name,
+            Namespace = namedType.ContainingNamespace?.ToDisplayString() ?? "",
+            IsInterface = namedType.TypeKind == TypeKind.Interface,
+            IsAbstract = namedType.IsAbstract,
+            IsPartialMock = isPartialMock,
+            Methods = methods,
+            Properties = properties,
+            Events = events,
+            AllInterfaces = new EquatableArray<string>(
+                namedType.AllInterfaces
+                    .Select(i => i.GetFullyQualifiedName())
+                    .ToImmutableArray()
+            ),
+            AdditionalInterfaceNames = new EquatableArray<string>(additionalInterfaceNames.MoveToImmutable()),
+            Constructors = singleTypeModel.Constructors,
+            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract),
+            // The secondary setup extensions surface additional-interface types in public
+            // signatures, so the whole multi model must drop to internal if ANY type is.
+            IsPublic = TypeAccessibility.IsEffectivelyPublic(namedType) && additionalTypes.All(TypeAccessibility.IsEffectivelyPublic),
+            UseFallbackNamespace = singleTypeModel.UseFallbackNamespace
+        };
+
+        // Per additional interface: compute the standalone→union member-ID map (registered on the
+        // engine by the factory) and build the pair model that generates the shared setup surface.
+        var surfaceContext = SecondarySurfaceFactory.CreateContext(multiTypeModel, singleTypeModel);
+        var mapsBuilder = ImmutableArray.CreateBuilder<EquatableArray<int>>(additionalTypes.Count);
+        var pairModels = new List<MockTypeModel>();
+        foreach (var additionalType in additionalTypes)
+        {
+            var standalone = BuildSingleTypeModel(
+                additionalType,
+                isPartialMock: false,
+                compilationAssembly,
+                compilation,
+                isWrapMock: false,
+                cancellationToken: ct);
+            if (standalone is null)
+            {
+                mapsBuilder.Add(EquatableArray<int>.Empty);
+                continue;
+            }
+
+            mapsBuilder.Add(SecondarySurfaceFactory.ComputeMemberIdMap(standalone, surfaceContext));
+
+            var pairModel = SecondarySurfaceFactory.BuildPairModel(
+                standalone, singleTypeModel, additionalType.GetFullyQualifiedName(), surfaceContext);
+            if (pairModel is not null)
+            {
+                pairModels.Add(pairModel);
+            }
+        }
+
+        multiTypeModel = multiTypeModel with
+        {
+            SecondaryMemberIdMaps = new EquatableArray<EquatableArray<int>>(mapsBuilder.MoveToImmutable())
+        };
+
+        var resultBuilder = ImmutableArray.CreateBuilder<MockTypeModel>(2 + pairModels.Count + transitiveModels.Count);
+        resultBuilder.Add(singleTypeModel);
+        resultBuilder.Add(multiTypeModel);
+        resultBuilder.AddRange(pairModels);
+        resultBuilder.AddRange(transitiveModels);
+        return resultBuilder.MoveToImmutable();
+    }
+
+    /// <summary>
+    /// Walks the members of a type and discovers interface return types that need mock factories
+    /// generated for auto-mocking support. Recurses over the full transitive closure; the
+    /// <paramref name="visited"/> set both prevents cycles and bounds the walk to the finite set
+    /// of distinct reachable interfaces. The closure must be complete — every auto-mockable return
+    /// type that a generated impl references must itself be generated, otherwise the boundary type
+    /// references a factory that was never emitted (CS0400). See issue #6264.
+    /// </summary>
+    internal static List<MockTypeModel> DiscoverTransitiveInterfaceTypes(
+        INamedTypeSymbol type,
+        HashSet<string> visited,
+        IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
+        CancellationToken cancellationToken)
+    {
+        var results = new List<MockTypeModel>();
+        // Mark the entry type as visited so a member returning it (a self-cycle) is skipped.
+        visited.Add(NormalizeTransitiveInterfaceReturnType(type).GetFullyQualifiedName());
+        CollectTransitiveInterfaceTypes(
+            type, visited, results, compilationAssembly, compilation, cancellationToken);
+        return results;
+    }
+
+    /// <summary>
+    /// Recursive worker for <see cref="DiscoverTransitiveInterfaceTypes"/>. Appends directly into
+    /// the shared <paramref name="results"/> accumulator (no per-frame list / merge) and records
+    /// each discovered type in <paramref name="visited"/> before recursing.
+    /// </summary>
+    private static void CollectTransitiveInterfaceTypes(
+        INamedTypeSymbol type, HashSet<string> visited, List<MockTypeModel> results,
+        IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
+        CancellationToken cancellationToken)
+    {
+        // Collect all members from the type and its interfaces
+        var members = new List<ISymbol>(type.GetMembers());
+        foreach (var iface in type.AllInterfaces)
+        {
+            members.AddRange(iface.GetMembers());
+        }
+
+        foreach (var member in members)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Skip static members — static abstract return types should not be auto-mocked
+            if (member.IsStatic) continue;
+
+            ITypeSymbol? returnType = member switch
+            {
+                IMethodSymbol m when !m.ReturnsVoid => m.ReturnType,
+                IPropertySymbol p => p.Type,
+                _ => null
+            };
+
+            if (returnType is null) continue;
+
+            // Unwrap Task<T>/ValueTask<T> to get the inner type
+            returnType = UnwrapAsyncType(returnType);
+
+            if (returnType is not INamedTypeSymbol namedReturn) continue;
+            if (namedReturn.TypeKind != TypeKind.Interface) continue;
+
+            namedReturn = NormalizeTransitiveInterfaceReturnType(namedReturn);
+            if (namedReturn.TypeKind != TypeKind.Interface)
+                continue;
+
+            // Skip BCL/system interfaces — they have members (indexers, explicit implementations)
+            // that the mock generator cannot handle, and auto-mocking them is rarely useful.
+            var ns = namedReturn.ContainingNamespace?.ToDisplayString() ?? "";
+            if (IsFrameworkNamespace(ns))
+                continue;
+
+            // Skip interfaces that have static abstract members — using them as type arguments
+            // in Mock<T>/MockEngine<T> triggers CS8920 because the static abstract members
+            // don't have a most specific implementation in the interface.
+            if (HasStaticAbstractMembers(namedReturn))
+                continue;
+
+            // Add returns false if already discovered/visited — skip without re-walking.
+            if (!visited.Add(namedReturn.GetFullyQualifiedName())) continue;
+
+            var model = BuildSingleTypeModel(
+                namedReturn,
+                isPartialMock: false,
+                compilationAssembly,
+                compilation,
+                isWrapMock: false,
+                cancellationToken: cancellationToken);
+            if (model is null) continue;
+
+            results.Add(model);
+            // Recurse into the transitive type's members, accumulating into the same list.
+            CollectTransitiveInterfaceTypes(
+                namedReturn, visited, results, compilationAssembly, compilation, cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Unwraps Task&lt;T&gt; / ValueTask&lt;T&gt; to get the inner type T.
+    /// Returns the original type if it's not an async wrapper.
+    /// </summary>
+    private static ITypeSymbol UnwrapAsyncType(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol { IsGenericType: true } named)
+        {
+            var constructedName = named.ConstructedFrom.ToDisplayString();
+            if (constructedName is "System.Threading.Tasks.Task<TResult>"
+                or "System.Threading.Tasks.ValueTask<TResult>")
+            {
+                return named.TypeArguments[0];
+            }
+        }
+        return type;
+    }
+
+    private static bool IsFrameworkNamespace(string ns) =>
+        ns == "System"    || ns.StartsWith("System.") ||
+        ns == "Microsoft" || ns.StartsWith("Microsoft.") ||
+        ns == "Windows"   || ns.StartsWith("Windows.");
+
+    /// <summary>
+    /// Returns true if the interface (or any of its base interfaces) has static abstract members
+    /// without a most specific implementation. Such interfaces cannot be used as generic type arguments
+    /// (CS8920) and should not have transitive mock factories generated.
+    /// </summary>
+    private static bool HasStaticAbstractMembers(INamedTypeSymbol interfaceType)
+    {
+        // Check the interface itself
+        foreach (var member in interfaceType.GetMembers())
+        {
+            if (member.IsStatic && member.IsAbstract)
+                return true;
+        }
+
+        // Check all inherited interfaces
+        foreach (var baseInterface in interfaceType.AllInterfaces)
+        {
+            foreach (var member in baseInterface.GetMembers())
+            {
+                if (member.IsStatic && member.IsAbstract)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static MockTypeModel? BuildDelegateTypeModel(INamedTypeSymbol delegateType, Compilation compilation)
+    {
+        var invokeMethod = delegateType.DelegateInvokeMethod;
+        if (invokeMethod is null)
+            return null;
+
+        int memberIdCounter = 0;
+        var methodModel = MemberDiscovery.CreateDelegateInvokeModel(invokeMethod, ref memberIdCounter, compilation);
+
+        return new MockTypeModel
+        {
+            FullyQualifiedName = delegateType.GetFullyQualifiedName(),
+            OpenGenericTypeOfExpression = delegateType.GetOpenGenericTypeOfExpression(),
+            Name = delegateType.Name,
+            Namespace = delegateType.ContainingNamespace?.ToDisplayString() ?? "",
+            IsInterface = false,
+            IsAbstract = false,
+            IsPartialMock = false,
+            IsDelegateType = true,
+            TypeParameters = new EquatableArray<MockTypeParameterModel>(GetTypeParameterModels(delegateType)),
+            Methods = new EquatableArray<MockMemberModel>(ImmutableArray.Create(methodModel)),
+            Properties = EquatableArray<MockMemberModel>.Empty,
+            Events = EquatableArray<MockEventModel>.Empty,
+            AllInterfaces = EquatableArray<string>.Empty,
+            IsPublic = TypeAccessibility.IsEffectivelyPublic(delegateType),
+            UseFallbackNamespace = MockNamespaceConflictDetector.HasConflict(compilation, delegateType),
+        };
+    }
+
+    private static ImmutableArray<MockTypeModel> BuildModelWithTransitiveDependencies(
+        INamedTypeSymbol namedType,
+        bool isPartialMock,
+        IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
+        CancellationToken cancellationToken)
+    {
+        var model = BuildSingleTypeModel(
+            namedType,
+            isPartialMock,
+            compilationAssembly,
+            compilation,
+            isWrapMock: false,
+            cancellationToken: cancellationToken);
+        if (model is null)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        var visited = new HashSet<string>();
+        var transitiveModels = DiscoverTransitiveInterfaceTypes(
+            namedType, visited, compilationAssembly, compilation, cancellationToken);
+
+        if (transitiveModels.Count == 0)
+            return ImmutableArray.Create(model);
+
+        var builder = ImmutableArray.CreateBuilder<MockTypeModel>(1 + transitiveModels.Count);
+        builder.Add(model);
+        builder.AddRange(transitiveModels);
+        return builder.MoveToImmutable();
+    }
+
+    private static MockTypeModel? BuildSingleTypeModel(
+        INamedTypeSymbol namedType,
+        bool isPartialMock,
+        IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
+        bool isWrapMock,
+        CancellationToken cancellationToken)
+    {
+        // An interface with abstract members this compilation can't access (e.g. `internal`
+        // members declared in another assembly) cannot be implemented by any type we could emit,
+        // so generating a mock for it is guaranteed CS0535. Drop it — for a directly requested
+        // mock the TM007 analyzer reports the reason at the call site, and members returning it
+        // fall back to a plain default (GetAutoMockFactoryMethod applies the same rule).
+        // See issue #6491.
+        if (!InterfaceImplementability.CanBeImplemented(namedType, compilation))
+            return null;
+
+        var (methods, properties, events) = MemberDiscovery.DiscoverMembers(namedType, compilationAssembly, compilation);
+
+        // Discover constructors for partial mocks of classes
+        var constructors = isPartialMock && namedType.TypeKind == TypeKind.Class
+            ? MemberDiscovery.DiscoverConstructors(
+                namedType,
+                compilation,
+                requiresFactoryAccessibleParameterTypes: !isWrapMock,
+                cancellationToken: cancellationToken)
+            : EquatableArray<MockConstructorModel>.Empty;
+
+        return new MockTypeModel
+        {
+            FullyQualifiedName = namedType.GetFullyQualifiedName(),
+            OpenGenericTypeOfExpression = namedType.GetOpenGenericTypeOfExpression(),
+            Name = namedType.Name,
+            Namespace = namedType.ContainingNamespace?.ToDisplayString() ?? "",
+            IsInterface = namedType.TypeKind == TypeKind.Interface,
+            IsAbstract = namedType.IsAbstract,
+            IsPartialMock = isPartialMock,
+            IsWrapMock = isWrapMock,
+            TypeParameters = new EquatableArray<MockTypeParameterModel>(GetTypeParameterModels(namedType)),
+            Methods = methods,
+            Properties = properties,
+            Events = events,
+            AllInterfaces = new EquatableArray<string>(
+                namedType.AllInterfaces
+                    .Select(i => i.GetFullyQualifiedName())
+                    .ToImmutableArray()
+            ),
+            Constructors = constructors,
+            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract),
+            IsPublic = TypeAccessibility.IsEffectivelyPublic(namedType),
+            UseFallbackNamespace = MockNamespaceConflictDetector.HasConflict(compilation, namedType)
+        };
+    }
+
+    private static INamedTypeSymbol NormalizeSingleMockType(INamedTypeSymbol namedType)
+    {
+        return namedType.TypeKind == TypeKind.Interface && namedType.IsGenericType
+            ? namedType.OriginalDefinition
+            : namedType;
+    }
+
+    private static INamedTypeSymbol NormalizeTransitiveInterfaceReturnType(INamedTypeSymbol namedType)
+    {
+        return namedType.TypeKind == TypeKind.Interface && namedType.IsGenericType
+            ? namedType.OriginalDefinition
+            : namedType;
+    }
+
+    private static ImmutableArray<MockTypeParameterModel> GetTypeParameterModels(INamedTypeSymbol namedType)
+    {
+        if (!ContainsTypeParameters(namedType))
+            return ImmutableArray<MockTypeParameterModel>.Empty;
+
+        return GetAllTypeParameters(namedType)
+            .Select(tp => new MockTypeParameterModel
+            {
+                Name = tp.Name,
+                Constraints = tp.GetGenericConstraints(),
+                HasReferenceTypeConstraint = tp.HasReferenceTypeConstraint,
+                HasValueTypeConstraint = tp.HasValueTypeConstraint,
+                HasAnnotatedNullableUsage = false
+            })
+            .ToImmutableArray();
+    }
+
+    private static IEnumerable<ITypeParameterSymbol> GetAllTypeParameters(INamedTypeSymbol namedType)
+    {
+        if (namedType.ContainingType is { } containingType)
+        {
+            foreach (var typeParameter in GetAllTypeParameters(containingType))
+            {
+                yield return typeParameter;
+            }
+        }
+
+        foreach (var typeParameter in namedType.TypeParameters)
+        {
+            yield return typeParameter;
+        }
+    }
+
+    private static bool ContainsTypeParameters(ITypeSymbol type)
+    {
+        return type switch
+        {
+            ITypeParameterSymbol => true,
+            IArrayTypeSymbol array => ContainsTypeParameters(array.ElementType),
+            INamedTypeSymbol named => named.TypeArguments.Any(ContainsTypeParameters),
+            IPointerTypeSymbol pointer => ContainsTypeParameters(pointer.PointedAtType),
+            _ => false
+        };
+    }
+
+    // ─── T.Mock() static extension discovery ─────────────────────────
+
+    /// <summary>
+    /// Syntax predicate: matches any <c>X.Mock()</c> invocation.
+    /// Works for both interfaces (e.g. <c>IFoo.Mock()</c>) and classes (e.g. <c>MyService.Mock()</c>).
+    /// </summary>
+    /// <remarks>
+    /// This is intentionally only a cheap name gate. Whether the left-hand side is actually a
+    /// mockable <em>type</em> (rather than a variable, field, namespace, or other expression) is
+    /// decided in <see cref="TransformMockExtensionInvocation"/> off the resolved symbol — so the
+    /// syntactic shape of the type reference doesn't matter. A simple name (<c>IFoo.Mock()</c>) and
+    /// an alias parse as <see cref="IdentifierNameSyntax"/>, but a fully-qualified reference
+    /// (<c>Namespace.IFoo.Mock()</c>) parses as a <see cref="MemberAccessExpressionSyntax"/> in
+    /// expression position — gating on syntax kind here dropped that form. See issue #6298.
+    /// </remarks>
+    public static bool IsMockExtensionInvocation(SyntaxNode node, CancellationToken ct)
+    {
+        return node is InvocationExpressionSyntax
+        {
+            Expression: MemberAccessExpressionSyntax
+            {
+                Name: IdentifierNameSyntax { Identifier.ValueText: "Mock" }
+            }
+        };
+    }
+
+    /// <summary>
+    /// Semantic transform: resolve the left-hand side of T.Mock() to a type symbol.
+    /// If it's a mockable type (interface or non-sealed class), build a MockTypeModel for it.
+    /// </summary>
+    public static ImmutableArray<MockTypeModel> TransformMockExtensionInvocation(
+        GeneratorSyntaxContext context, CancellationToken ct)
+    {
+        var invocation = (InvocationExpressionSyntax)context.Node;
+        var memberAccess = (MemberAccessExpressionSyntax)invocation.Expression;
+
+        // Resolve the LHS to a type symbol first (cheap lookup).
+        var leftSymbol = context.SemanticModel.GetSymbolInfo(memberAccess.Expression, ct);
+        if (leftSymbol.Symbol is not INamedTypeSymbol namedType)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Can't mock sealed classes, structs, or delegates via the extension
+        if (namedType.IsValueType)
+            return ImmutableArray<MockTypeModel>.Empty;
+        if (namedType.IsSealed)
+            return ImmutableArray<MockTypeModel>.Empty;
+        if (namedType.TypeKind is not (TypeKind.Interface or TypeKind.Class))
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Skip if .Mock() already resolves to a generated specialization (2nd incremental pass).
+        // The generated per-type extension lives in a class named *_MockStaticExtension.
+        // This covers both interfaces (wrapper return type in TUnit.Mocks.Generated) and
+        // classes (Mock<T> return type in TUnit.Mocks).
+        var invocationSymbol = context.SemanticModel.GetSymbolInfo(invocation, ct);
+        if (invocationSymbol.Symbol is IMethodSymbol resolved
+            && resolved.ContainingType?.Name is { } containingName
+            && containingName.EndsWith("_MockStaticExtension"))
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        var isPartialMock = namedType.TypeKind == TypeKind.Class;
+        var compilation = context.SemanticModel.Compilation;
+        var compilationAssembly = compilation.Assembly;
+        return BuildModelWithTransitiveDependencies(
+            NormalizeSingleMockType(namedType),
+            isPartialMock,
+            compilationAssembly,
+            compilation,
+            ct);
+    }
+
+    // ─── [assembly: GenerateMock(typeof(T))] discovery ────────────────────
+
+    /// <summary>
+    /// Semantic transform for <c>[assembly: GenerateMock(typeof(T))]</c>.
+    /// Extracts the type argument and pairs each model with its attribute location.
+    /// </summary>
+    public static ImmutableArray<MockGenerationRequest> TransformGenerateMockAttribute(
+        GeneratorAttributeSyntaxContext context, CancellationToken ct)
+    {
+        // The target symbol for an assembly attribute is the assembly itself
+        // The attribute constructor argument is typeof(T)
+        var compilation = context.SemanticModel.Compilation;
+        var compilationAssembly = compilation.Assembly;
+        var requests = ImmutableArray.CreateBuilder<MockGenerationRequest>();
+        foreach (var attr in context.Attributes)
+        {
+            if (attr.AttributeClass?.Name is not ("GenerateMockAttribute" or "GenerateMock"))
+                continue;
+            if (attr.AttributeClass?.ContainingNamespace?.ToDisplayString() != "TUnit.Mocks")
+                continue;
+
+            if (attr.ConstructorArguments.Length != 1)
+                continue;
+
+            var typeArg = attr.ConstructorArguments[0];
+            if (typeArg.Value is not INamedTypeSymbol namedType)
+                continue;
+
+            // Can't mock sealed classes or structs
+            if (namedType.IsSealed)
+                continue;
+            if (namedType.IsValueType)
+                continue;
+
+            var models = BuildModelWithTransitiveDependencies(
+                NormalizeSingleMockType(namedType),
+                isPartialMock: namedType.TypeKind == TypeKind.Class,
+                compilationAssembly,
+                compilation,
+                ct);
+
+            var location = attr.ApplicationSyntaxReference?.GetSyntax(ct).GetLocation()
+                           ?? context.TargetNode.GetLocation();
+            var sourceLocation = MockSourceLocation.From(location);
+            foreach (var model in models)
+            {
+                requests.Add(new MockGenerationRequest(model, sourceLocation));
+            }
+        }
+
+        return requests.ToImmutable();
+    }
+}

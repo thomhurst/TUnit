@@ -2,6 +2,7 @@
 sidebar_position: 9
 ---
 
+
 # Type Assertions
 
 TUnit provides comprehensive assertions for testing types and type properties. These assertions work with both runtime values and `Type` objects themselves.
@@ -332,12 +333,13 @@ public async Task Is_By_Ref_Like()
 [Test]
 public async Task Is_Pointer()
 {
+    Type intPtr;
     unsafe
     {
-        var intPtr = typeof(int*);
-        await Assert.That(intPtr).IsPointer();
+        intPtr = typeof(int*);
     }
 
+    await Assert.That(intPtr).IsPointer();
     await Assert.That(typeof(int)).IsNotPointer();
 }
 ```
@@ -409,7 +411,7 @@ public async Task Is_Visible()
     await Assert.That(typeof(List<int>)).IsVisible();
 
     // Internal types are not visible
-    var internalType = Assembly.GetExecutingAssembly()
+    var internalType = System.Reflection.Assembly.GetExecutingAssembly()
         .GetTypes()
         .FirstOrDefault(t => !t.IsPublic && !t.IsNested);
 
@@ -584,7 +586,7 @@ public async Task Implements_Multiple_Interfaces()
 [Test]
 public async Task Factory_Returns_Correct_Type()
 {
-    var instance = Factory.Create("user-service");
+    var instance = new ExampleFactory().Create("user-service");
 
     await Assert.That(instance).IsTypeOf<UserService>();
     await Assert.That(instance).IsAssignableTo<IService>();

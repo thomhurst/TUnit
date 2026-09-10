@@ -9,20 +9,21 @@ sidebar_position: 7
 > Large test suites (150+ tests) measuring scalability
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-05-31** from the latest CI run.
+This benchmark was automatically generated on **2026-09-06** from the latest CI run.
 
-**Environment:** Ubuntu Latest • .NET SDK 10.0.300
+**Environment:** Ubuntu Latest • .NET SDK 10.0.400
 :::
 
 ## 📊 Results
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.47.0 | 285.06 ms | 285.17 ms | 7.516 ms |
-| NUnit | 4.6.1 | 520.65 ms | 515.56 ms | 13.090 ms |
-| MSTest | 4.2.3 | 523.02 ms | 523.77 ms | 10.570 ms |
-| xUnit3 | 3.2.2 | 534.41 ms | 529.47 ms | 18.245 ms |
-| **TUnit (AOT)** | 1.47.0 | 19.80 ms | 19.08 ms | 2.016 ms |
+| **TUnit** | 1.66.10 | 299.85 ms | 299.97 ms | 2.277 ms |
+| NUnit | 4.6.1 | 577.67 ms | 577.31 ms | 12.333 ms |
+| MSTest | 4.4.0 | 538.30 ms | 538.83 ms | 6.922 ms |
+| xUnit3 | 4.0.0 | 617.79 ms | 614.70 ms | 12.319 ms |
+| **TUnit (AOT)** | 1.66.10 | 17.77 ms | 17.86 ms | 0.301 ms |
+| xUnit3_AOT | 4.0.0 | 20.37 ms | 20.41 ms | 0.601 ms |
 
 ## 📈 Visual Comparison
 
@@ -59,14 +60,14 @@ This benchmark was automatically generated on **2026-05-31** from the latest CI 
 }}%%
 xychart-beta
   title "ScaleTests Performance Comparison"
-  x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 642
-  bar [285.06, 520.65, 523.02, 534.41, 19.8]
+  x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT", "xUnit3_AOT"]
+  y-axis "Time (ms)" 0 --> 742
+  bar [299.85, 577.67, 538.3, 617.79, 17.77, 20.37]
 ```
 
 ## 🎯 Key Insights
 
-This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using identical test scenarios.
+This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3, xUnit3_AOT using identical test scenarios.
 
 ---
 
@@ -74,4 +75,4 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-05-31T00:48:53.165Z*
+*Last generated: 2026-09-06T00:37:45.929Z*

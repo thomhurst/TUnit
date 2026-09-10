@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\eng\TestProject.props" />
+
+  <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+    <IsAotCompatible>true</IsAotCompatible>
+    <PublishAot>true</PublishAot>
+    <PublishTrimmed>true</PublishTrimmed>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\eng\strongname.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The same grant third-party SDKs extend for Castle-based mocking libraries; lets the
+         runtime-stub tests (#6514) exercise stubbing an internal interface. -->
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2, PublicKey=0024000004800000940000000602000000240000525341310004000001000100c547cac37abd99c8db225ef2f6c8a3602f3b3606cc9891605d02baa56104f4cfc0734aa39b93bf7852f7d9266654753cc297e7d2edfe0bac1cdcf9f717241550e0a7b191195b7667bb4f64bcb8e2121380fd1d9d46ad2d92d2d15605093924cceaf74c4861eff62abf69b9291ed0a340e113be11e6a7d3113e92484cf7045cc7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.SQS" />
+    <PackageReference Include="Azure.Data.Tables" />
+    <PackageReference Include="Azure.Storage.Blobs" />
+    <PackageReference Include="Microsoft.Kiota.Abstractions" />
+    <ProjectReference Include="..\..\src\TUnit.Mocks\TUnit.Mocks.csproj" />
+
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.Mocks.Assertions\TUnit.Mocks.Assertions.csproj" />
+
+    <!-- Wire source generator for mock generation in test code -->
+    <ProjectReference Include="..\..\src\TUnit.Mocks.SourceGenerator\TUnit.Mocks.SourceGenerator.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+    <!-- Wire analyzer for compile-time diagnostics -->
+    <ProjectReference Include="..\..\src\TUnit.Mocks.Analyzers\TUnit.Mocks.Analyzers.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Import Project="..\..\src\TUnit.Mocks\TUnit.Mocks.props" />
+  <Import Project="..\..\src\TUnit.Mocks\TUnit.Mocks.targets" />
+  <Import Project="..\..\eng\TestProject.targets" />
+
+</Project>

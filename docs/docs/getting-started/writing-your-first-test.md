@@ -1,3 +1,4 @@
+
 # Writing your first test
 
 ## Quick Start: Complete Example
@@ -10,6 +11,11 @@ using TUnit.Assertions.Extensions;
 using TUnit.Core;
 
 namespace MyTestProject;
+
+public class Calculator
+{
+    public int Add(int left, int right) => left + right;
+}
 
 public class CalculatorTests
 {

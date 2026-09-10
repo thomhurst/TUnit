@@ -23,6 +23,7 @@ Finalize the current requirement gathering session.
 4. Based on choice:
 
 ### Option 1: Generate Spec
+
 - Create 06-requirements-spec.md
 - Include all answered questions
 - Add defaults for unanswered with "ASSUMED:" prefix
@@ -30,17 +31,20 @@ Finalize the current requirement gathering session.
 - Update metadata status to "complete"
 
 ### Option 2: Mark Incomplete
+
 - Update metadata status to "incomplete"
 - Add "lastUpdated" timestamp
 - Create summary of progress
 - Note what's still needed
 
 ### Option 3: Cancel
+
 - Confirm deletion
 - Remove requirement folder
 - Clear .current-requirement
 
 ## Final Spec Format:
+
 ```markdown
 # Requirements Specification: [Name]
 

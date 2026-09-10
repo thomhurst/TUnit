@@ -2,6 +2,7 @@
 sidebar_position: 5.5
 ---
 
+
 # String Assertions
 
 TUnit provides rich assertions for testing strings, including substring matching, pattern matching, length checks, and various string comparison options.
@@ -313,9 +314,8 @@ public async Task Length_With_Comparison()
 {
     var username = "alice";
 
-    await Assert.That(username)
-        .Length().IsGreaterThan(3)
-        .And.Length().IsLessThan(20);
+    await Assert.That(username).Length().IsGreaterThan(3);
+    await Assert.That(username).Length().IsLessThan(20);
 }
 ```
 
@@ -414,10 +414,8 @@ public async Task Validate_Email()
 {
     var email = "user@example.com";
 
-    await Assert.That(email)
-        .Contains("@")
-        .And.Matches(@"^[\w\.-]+@[\w\.-]+\.\w+$")
-        .And.DoesNotContain(" ");
+    await Assert.That(email).Contains("@").And.DoesNotContain(" ");
+    await Assert.That(email).Matches(@"^[\w\.-]+@[\w\.-]+\.\w+$");
 }
 ```
 
@@ -458,11 +456,10 @@ public async Task Validate_Username()
 {
     var username = "alice_123";
 
-    await Assert.That(username)
-        .Length().IsGreaterThanOrEqualTo(3)
-        .And.Length().IsLessThanOrEqualTo(20)
-        .And.Matches(@"^[a-zA-Z0-9_]+$")
-        .And.DoesNotContain(" ");
+    await Assert.That(username).Length().IsGreaterThanOrEqualTo(3);
+    await Assert.That(username).Length().IsLessThanOrEqualTo(20);
+    await Assert.That(username).Matches(@"^[a-zA-Z0-9_]+$");
+    await Assert.That(username).DoesNotContain(" ");
 }
 ```
 
@@ -474,12 +471,11 @@ public async Task Validate_Password()
 {
     var password = "SecureP@ss123";
 
-    await Assert.That(password)
-        .Length().IsGreaterThanOrEqualTo(8)
-        .And.Matches(@"[A-Z]")  // Has uppercase
-        .And.Matches(@"[a-z]")  // Has lowercase
-        .And.Matches(@"\d")     // Has digit
-        .And.Matches(@"[@$!%*?&]"); // Has special char
+    await Assert.That(password).Length().IsGreaterThanOrEqualTo(8);
+    await Assert.That(password).Matches(@"[A-Z]"); // Has uppercase
+    await Assert.That(password).Matches(@"[a-z]"); // Has lowercase
+    await Assert.That(password).Matches(@"\d"); // Has digit
+    await Assert.That(password).Matches(@"[@$!%*?&]"); // Has special char
 }
 ```
 

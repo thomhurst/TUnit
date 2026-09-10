@@ -2,6 +2,9 @@
 sidebar_position: 7
 ---
 
+<!-- doc-test-shared -->
+
+
 # Nested Data Sources with Initialization
 
 When writing integration tests, you often need complex test fixtures that depend on other initialized resources. TUnit's nested data source initialization feature makes this elegant and automatic.
@@ -19,6 +22,8 @@ This typically leads to complex setup code with manual initialization chains.
 ## The Solution
 
 TUnit automatically initializes nested data sources in the correct order using any data source attribute that implements `IDataSourceAttribute` (such as `[ClassDataSource<T>]`).
+
+Declare nested data sources on properties. Constructor-injected dependencies inside a data source type are not currently supported because `ClassDataSource<T>` requires that type to have a public parameterless constructor.
 
 ## Basic Example
 
@@ -39,7 +44,7 @@ public class RedisTestContainer : IAsyncInitializer, IAsyncDisposable
     
     public RedisTestContainer()
     {
-        _container = new RedisBuilder()
+        _container = new RedisBuilder("redis:8.2")
             .WithImage("redis:7-alpine")
             .Build();
     }
@@ -65,6 +70,8 @@ public class TestApplication : IAsyncInitializer, IAsyncDisposable
     public required RedisTestContainer Redis { get; init; }
     
     public HttpClient Client { get; private set; } = null!;
+    public IServiceProvider Services => _factory?.Services
+        ?? throw new InvalidOperationException("The application has not been initialized.");
     
     public async Task InitializeAsync()
     {
@@ -107,7 +114,7 @@ public class UserApiTests
         response.EnsureSuccessStatusCode();
         
         // Verify the user was cached in Redis
-        var services = app.Client.Services;
+        var services = app.Services;
         var redis = services.GetRequiredService<IConnectionMultiplexer>();
         var cached = await redis.GetDatabase().StringGetAsync("user:john@example.com");
         
@@ -159,7 +166,23 @@ public class CompleteTestEnvironment : IAsyncInitializer, IAsyncDisposable
     }
     
     // ... configuration methods
+
+    private static void ConfigureRedis(IServiceCollection services) { }
+    private static void ConfigureDatabase(IServiceCollection services) { }
+    private static void ConfigureAwsServices(IServiceCollection services) { }
+    private static Task SeedTestData() => Task.CompletedTask;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_factory is not null)
+        {
+            await _factory.DisposeAsync();
+        }
+    }
 }
+
+public sealed class PostgresTestContainer { }
+public sealed class LocalStackContainer { }
 ```
 
 ## Sharing Resources
@@ -185,7 +208,7 @@ public class OrderApiTests
 }
 
 // Or share with a specific key for fine-grained control across multiple test classes
-public class UserApiTests
+public class SharedUserApiTests
 {
     [Test]
     [ClassDataSource<TestApplication>(Shared = SharedType.Keyed, Key = "integration-tests")]
@@ -228,11 +251,12 @@ public async Task InitializeAsync()
     
     // Run migrations after container starts
     using var connection = new NpgsqlConnection(ConnectionString);
-    await connection.ExecuteAsync(@"
+    await using var command = new NpgsqlCommand(@"
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
             email VARCHAR(255) UNIQUE NOT NULL
-        )");
+        )", connection);
+    await command.ExecuteNonQueryAsync();
 }
 ```
 

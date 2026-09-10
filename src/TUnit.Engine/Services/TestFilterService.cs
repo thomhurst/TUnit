@@ -1,0 +1,344 @@
+﻿#pragma warning disable TPEXP
+
+using System.Collections.Concurrent;
+using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Requests;
+using TUnit.Core;
+using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
+using TUnit.Engine.Extensions;
+using TUnit.Engine.Logging;
+
+namespace TUnit.Engine.Services;
+
+internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegistrationService testArgumentRegistrationService)
+{
+    private static readonly ConcurrentDictionary<Type, bool> _explicitClassCache = new();
+    private HashSet<string>? _uidFilterSet;
+    public IReadOnlyCollection<AbstractExecutableTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IReadOnlyCollection<AbstractExecutableTest> testNodes)
+    {
+        if (testExecutionFilter is null or NopFilter)
+        {
+            logger.LogTrace("No test filter found.");
+
+            return FilterOutExplicitTests(testNodes);
+        }
+
+        logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
+
+        // Pre-allocate capacity to avoid resizing during filtering
+        var capacity = testNodes is ICollection<AbstractExecutableTest> col ? col.Count : 16;
+        var filteredTests = new List<AbstractExecutableTest>(capacity);
+        var filteredExplicitTests = new List<AbstractExecutableTest>(capacity / 4); // Estimate ~25% explicit tests
+
+        foreach (var test in testNodes)
+        {
+            if (MatchesTest(testExecutionFilter, test))
+            {
+                if (IsExplicitTest(test))
+                {
+                    filteredExplicitTests.Add(test);
+                }
+                else
+                {
+                    filteredTests.Add(test);
+                }
+            }
+        }
+
+        if (filteredTests.Count > 0)
+        {
+            logger.LogTrace($"Filter matched {filteredTests.Count} non-explicit tests. Excluding {filteredExplicitTests.Count} explicit tests.");
+            return filteredTests;
+        }
+
+        if (filteredExplicitTests.Count > 0)
+        {
+            logger.LogTrace($"Filter matched only explicit tests. Running {filteredExplicitTests.Count} explicit tests.");
+            return filteredExplicitTests;
+        }
+
+        return filteredTests;
+    }
+
+    private async Task RegisterTest(AbstractExecutableTest test, bool isForExecution)
+    {
+        var registeredReceivers = test.Context.GetTestRegisteredReceivers();
+
+        // Invoke event receivers BEFORE argument registration so that SkipAttribute
+        // and other ITestRegisteredEventReceiver implementations can set SkipReason
+        // before any potentially expensive data source initialization occurs.
+        // This is critical for derived SkipAttribute subclasses (e.g., skip-in-CI attributes)
+        // that need to prevent ClassDataSource initialization when the test should be skipped.
+        if (registeredReceivers.Length > 0)
+        {
+            var discoveredTest = new DiscoveredTest<object>
+            {
+                TestContext = test.Context
+            };
+
+            var registeredContext = new TestRegisteredContext(test.Context)
+            {
+                DiscoveredTest = discoveredTest
+            };
+
+            test.Context.InternalDiscoveredTest = discoveredTest;
+
+            foreach (var receiver in registeredReceivers)
+            {
+                try
+                {
+                    await receiver.OnTestRegistered(registeredContext).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}").ConfigureAwait(false);
+                    throw;
+                }
+            }
+        }
+
+        // If the test was marked as skipped by an event receiver, skip argument registration entirely.
+        // This avoids initializing expensive shared data sources (e.g., WebApplicationFactory)
+        // for tests that will never execute.
+        if (!string.IsNullOrEmpty(test.Context.SkipReason))
+        {
+            test.Context.InvalidateDisplayNameCache();
+            return;
+        }
+
+        // Argument registration creates shared data-source objects and increments their
+        // reference counts. Only do this for tests that will actually execute — those counts
+        // are only ever decremented on test completion, so registering during discovery-only
+        // requests would create fixtures as a side effect and leak them forever (#6151).
+        if (isForExecution)
+        {
+            try
+            {
+                await testArgumentRegistrationService.RegisterTestArgumentsAsync(test.Context).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Mark the test as failed - event receivers have already run above
+                test.SetResult(TestState.Failed, ex);
+            }
+        }
+
+        // Clear the cached display name after registration events
+        // This ensures that ArgumentDisplayFormatterAttribute and similar attributes
+        // have a chance to register their formatters before the display name is finalized
+        test.Context.InvalidateDisplayNameCache();
+    }
+
+    /// <summary>
+    /// Registers tests by invoking event receivers and argument registration.
+    /// Parallelized for 8+ tests. Concurrency contract: RegisterTest operates on
+    /// per-test state (TestContext), and shared services (EventReceiverRegistry,
+    /// TestArgumentRegistrationService) use ConcurrentDictionary internally.
+    /// ITestRegisteredEventReceiver implementations must be thread-safe.
+    /// </summary>
+    public async Task RegisterTestsAsync(IEnumerable<AbstractExecutableTest> tests, bool isForExecution)
+    {
+        var testList = tests as IReadOnlyList<AbstractExecutableTest> ?? tests.ToList();
+
+        if (testList.Count < 8)
+        {
+            foreach (var test in testList)
+            {
+                await RegisterTest(test, isForExecution).ConfigureAwait(false);
+            }
+            return;
+        }
+
+        await Parallel.ForEachAsync(
+            testList,
+            new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+            async (test, _) => await RegisterTest(test, isForExecution).ConfigureAwait(false)
+        ).ConfigureAwait(false);
+    }
+
+    public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, AbstractExecutableTest executableTest)
+    {
+#pragma warning disable TPEXP
+        var shouldRunTest = testExecutionFilter switch
+        {
+            null => true,
+            NopFilter => true,
+            TestNodeUidListFilter testNodeUidListFilter => GetOrCreateUidFilterSet(testNodeUidListFilter).Contains(executableTest.TestId),
+            TreeNodeFilter treeNodeFilter => CheckTreeNodeFilter(treeNodeFilter, executableTest),
+            _ => UnhandledFilter(testExecutionFilter)
+        };
+
+        return shouldRunTest;
+#pragma warning restore TPEXP
+    }
+
+    private HashSet<string> GetOrCreateUidFilterSet(
+#pragma warning disable TPEXP
+        TestNodeUidListFilter filter
+#pragma warning restore TPEXP
+    )
+    {
+        // Fast path: avoid closure allocation when already initialized
+        if (_uidFilterSet is { } cached)
+        {
+            return cached;
+        }
+
+        return LazyInitializer.EnsureInitialized(ref _uidFilterSet, () =>
+        {
+            var set = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var uid in filter.TestNodeUids)
+            {
+                set.Add(uid.Value);
+            }
+            return set;
+        })!;
+    }
+
+    private string BuildPath(AbstractExecutableTest test)
+    {
+        // Return cached path if available
+        if (test.CachedFilterPath != null)
+        {
+            return test.CachedFilterPath;
+        }
+
+        var metadata = test.Metadata;
+
+        var classMetadata = test.Context.Metadata.TestDetails.MethodMetadata.Class;
+        var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
+        var namespaceName = classMetadata.Namespace ?? "*";
+        var classTypeName = GetNestedClassName(classMetadata);
+
+        var path = $"/{assemblyName}/{namespaceName}/{classTypeName}/{metadata.TestMethodName}";
+
+        // Cache the path for future calls
+        test.CachedFilterPath = path;
+
+        return path;
+    }
+
+    private bool CheckTreeNodeFilter(
+#pragma warning disable TPEXP
+        TreeNodeFilter treeNodeFilter,
+#pragma warning restore TPEXP
+        AbstractExecutableTest executableTest)
+    {
+        var path = BuildPath(executableTest);
+
+        var propertyBag = BuildPropertyBag(executableTest);
+
+        var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
+
+        if (!matches)
+        {
+            logger.LogTrace($"Test {executableTest.TestId} with path '{path}' did not match treenode filter");
+        }
+
+        return matches;
+    }
+
+    private bool UnhandledFilter(ITestExecutionFilter testExecutionFilter)
+    {
+        logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");
+        return true;
+    }
+
+    private PropertyBag BuildPropertyBag(AbstractExecutableTest test)
+    {
+        // Return cached PropertyBag if available
+        if (test.CachedPropertyBag is PropertyBag cachedBag)
+        {
+            return cachedBag;
+        }
+
+        var propertyBag = new PropertyBag();
+
+        foreach (var category in test.Context.Metadata.TestDetails.Categories)
+        {
+            propertyBag.Add(new TestMetadataProperty(category));
+            propertyBag.Add(new TestMetadataProperty("Category", category));
+        }
+
+        // Replace LINQ with manual loop for better performance in hot path
+        foreach (var propertyEntry in test.Context.Metadata.TestDetails.CustomProperties)
+        {
+            foreach (var value in propertyEntry.Value)
+            {
+                propertyBag.Add(new TestMetadataProperty(propertyEntry.Key, value));
+            }
+        }
+
+        // Cache the PropertyBag for future calls
+        test.CachedPropertyBag = propertyBag;
+
+        return propertyBag;
+    }
+
+    private bool IsExplicitTest(AbstractExecutableTest test)
+    {
+        if (test.Context.Metadata.TestDetails.HasAttribute<ExplicitAttribute>())
+        {
+            return true;
+        }
+
+        var testClassType = test.Context.Metadata.TestDetails.ClassType;
+        return _explicitClassCache.GetOrAdd(testClassType,
+            static t => t.GetCustomAttributes(typeof(ExplicitAttribute), true).Length > 0);
+    }
+
+    private IReadOnlyCollection<AbstractExecutableTest> FilterOutExplicitTests(IReadOnlyCollection<AbstractExecutableTest> testNodes)
+    {
+        // Pre-allocate assuming most tests are not explicit
+        var capacity = testNodes is ICollection<AbstractExecutableTest> col ? col.Count : testNodes.Count;
+        var filteredTests = new List<AbstractExecutableTest>(capacity);
+
+        foreach (var test in testNodes)
+        {
+            if (!IsExplicitTest(test))
+            {
+                filteredTests.Add(test);
+            }
+            else
+            {
+                logger.LogTrace($"Test {test.TestId} is explicit and no filter was specified, skipping.");
+            }
+        }
+
+        return filteredTests;
+    }
+
+    /// <summary>
+    /// Builds the nested class name from ClassMetadata by walking the Parent chain.
+    /// Returns names joined with '+' (e.g., "OuterClass+InnerClass").
+    /// Fills array in root-to-leaf order to avoid List + Reverse allocation.
+    /// </summary>
+    internal static string GetNestedClassName(ClassMetadata classMetadata)
+    {
+        if (classMetadata.Parent == null)
+        {
+            return classMetadata.Name;
+        }
+
+        // Count depth first
+        var depth = 0;
+        var current = classMetadata;
+        while (current != null)
+        {
+            depth++;
+            current = current.Parent;
+        }
+
+        // Fill array in root-to-leaf order (avoids Reverse)
+        var hierarchy = new string[depth];
+        current = classMetadata;
+        for (var i = depth - 1; i >= 0; i--)
+        {
+            hierarchy[i] = current!.Name;
+            current = current.Parent;
+        }
+
+        return string.Join('+', hierarchy);
+    }
+}

@@ -1,0 +1,18 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.5.3">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsAspireHost>true</IsAspireHost>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Aspire.Tests.ApiService\TUnit.Aspire.Tests.ApiService.csproj" />
+  </ItemGroup>
+
+</Project>

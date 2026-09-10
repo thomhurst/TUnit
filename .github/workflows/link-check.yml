@@ -33,10 +33,10 @@ jobs:
     name: Check links in Markdown sources
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
 
       - name: Restore lychee cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: .lycheecache
           key: lychee-markdown-${{ hashFiles('docs/docs/**/*.md', 'docs/docs/**/*.mdx', 'docs/lychee.toml') }}

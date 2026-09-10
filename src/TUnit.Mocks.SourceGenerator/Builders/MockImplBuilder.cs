@@ -1,0 +1,1860 @@
+using System.Linq;
+using TUnit.Mocks.SourceGenerator.Models;
+using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
+
+namespace TUnit.Mocks.SourceGenerator.Builders;
+
+internal static class MockImplBuilder
+{
+    // Suppresses CS9035: ctor claims responsibility for required members so factory can `new XxxMockImpl(engine)` without initializers.
+    private const string SetsRequiredMembersAttribute = "[global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]";
+
+    public static void BuildInto(CodeWriter writer, MockTypeModel model)
+    {
+        var safeName = GetCompositeShortSafeName(model);
+
+        if (model.IsWrapMock)
+        {
+            BuildConstructionContext(writer, model, safeName);
+            BuildWrapMockImpl(writer, model, safeName);
+        }
+        else if (model.IsPartialMock)
+        {
+            BuildConstructionContext(writer, model, safeName);
+            BuildPartialMockImpl(writer, model, safeName);
+        }
+        else
+        {
+            BuildInterfaceMockImpl(writer, model, safeName);
+        }
+    }
+
+    internal static string GetConstructionContextName(MockTypeModel model, string safeName)
+        => GetGeneratedTypeName($"{safeName}MockConstructionContext", model);
+
+    private static void BuildConstructionContext(CodeWriter writer, MockTypeModel model, string safeName)
+    {
+        // Instance field initializers run before base constructors. Transfer the factory's state
+        // through a thread-local slot so constructor callbacks use the real engine immediately.
+        // The factory restores the slot in finally, including nested and throwing construction.
+        using (writer.Block($"file static class {GetConstructionContextName(model, safeName)}{GetConstraintClauses(model)}"))
+        {
+            writer.AppendLine("[global::System.ThreadStatic]");
+            writer.AppendLine($"internal static global::TUnit.Mocks.MockEngine<{GetMockableTypeName(model)}>? Engine;");
+            if (model.IsWrapMock)
+            {
+                writer.AppendLine("[global::System.ThreadStatic]");
+                writer.AppendLine($"internal static {model.FullyQualifiedName}? WrappedInstance;");
+            }
+        }
+        writer.AppendLine();
+    }
+
+    private static void BuildInterfaceMockImpl(CodeWriter writer, MockTypeModel model, string safeName)
+    {
+        var mockableType = GetMockableTypeName(model);
+        var typeParams = GetTypeParameterList(model);
+        var constraints = GetConstraintClauses(model);
+
+        var baseTypes = model.HasStaticAbstractMembers
+            ? mockableType  // inherit bridge interface (which : original interface)
+            : model.FullyQualifiedName;
+        if (model.AdditionalInterfaceNames.Length > 0)
+        {
+            baseTypes += ", " + string.Join(", ", model.AdditionalInterfaceNames);
+        }
+
+        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
+        {
+            writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine;");
+            writer.AppendLine();
+
+            EmitIMockObjectProperty(writer);
+
+            // Constructor
+            using (writer.Block($"internal {safeName}MockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine)"))
+            {
+                writer.AppendLine("_engine = engine;");
+                if (model.HasStaticAbstractMembers)
+                {
+                    EmitStaticEngineAssignment(writer, model, safeName);
+                }
+            }
+
+            // Methods — skip static abstract (they're in bridge DIMs)
+            foreach (var method in model.Methods)
+            {
+                if (method.IsStaticAbstract) continue;
+                writer.AppendLine();
+                GenerateInterfaceMethod(writer, method, model);
+            }
+
+            // Properties — skip static abstract (they're in bridge DIMs)
+            foreach (var prop in model.Properties)
+            {
+                if (prop.IsStaticAbstract) continue;
+                writer.AppendLine();
+                if (prop.IsIndexer)
+                {
+                    GenerateInterfaceIndexer(writer, prop);
+                }
+                else
+                {
+                    GenerateInterfaceProperty(writer, prop, model);
+                }
+            }
+
+            // Events — skip static abstract (they're in bridge DIMs)
+            foreach (var evt in model.Events)
+            {
+                if (evt.IsStaticAbstract) continue;
+                writer.AppendLine();
+                GenerateEvent(writer, evt);
+            }
+
+            // IRaisable.RaiseEvent dispatch
+            writer.AppendLine();
+            GenerateRaiseEventDispatch(writer, model);
+        }
+    }
+
+    private static void BuildWrapMockImpl(CodeWriter writer, MockTypeModel model, string safeName)
+    {
+        var mockableType = GetMockableTypeName(model);
+        var typeParams = GetTypeParameterList(model);
+        var constraints = GetConstraintClauses(model);
+
+        using (writer.Block($"file sealed class {safeName}WrapMockImpl{typeParams} : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
+        {
+            var context = GetConstructionContextName(model, safeName);
+            writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine = {context}.Engine!;");
+            writer.AppendLine($"private readonly {model.FullyQualifiedName} _wrappedInstance = {context}.WrappedInstance!;");
+            writer.AppendLine();
+
+            EmitIMockObjectProperty(writer);
+
+            // Generate constructors that pass through to base + accept wrapped instance
+            GenerateWrapConstructors(writer, model, safeName);
+
+            // Methods — skip static abstract (they're in bridge DIMs)
+            foreach (var method in model.Methods)
+            {
+                if (method.IsStaticAbstract) continue;
+                writer.AppendLine();
+                GenerateWrapMethod(writer, method, model);
+            }
+
+            // Properties — skip static abstract (they're in bridge DIMs)
+            foreach (var prop in model.Properties)
+            {
+                if (prop.IsStaticAbstract) continue;
+                writer.AppendLine();
+                if (prop.IsIndexer)
+                {
+                    GenerateWrapIndexer(writer, prop);
+                }
+                else
+                {
+                    GenerateWrapProperty(writer, prop, model);
+                }
+            }
+
+            // Events — skip static abstract (they're in bridge DIMs)
+            foreach (var evt in model.Events)
+            {
+                if (evt.IsStaticAbstract) continue;
+                writer.AppendLine();
+                GeneratePartialEvent(writer, evt);
+            }
+
+            // IRaisable.RaiseEvent dispatch
+            writer.AppendLine();
+            GenerateRaiseEventDispatch(writer, model);
+        }
+    }
+
+    private static void GenerateWrapConstructors(CodeWriter writer, MockTypeModel model, string safeName)
+    {
+        var mockableType = GetMockableTypeName(model);
+
+        // The wrap factory always constructs via `new XxxWrapMockImpl(engine, instance)` — it never
+        // forwards user-supplied constructor args (the wrapped instance is already built). Every member
+        // delegates to _wrappedInstance, so the wrapper's own base sub-object is never observed; we only
+        // need to chain to *an* accessible base constructor. Emit a single (engine, wrappedInstance) ctor.
+        writer.AppendLine(SetsRequiredMembersAttribute);
+        using (writer.Block($"internal {safeName}WrapMockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine, {model.FullyQualifiedName} wrappedInstance){GetWrapBaseInitializer(model)}"))
+        {
+            if (model.HasStaticAbstractMembers)
+            {
+                EmitStaticEngineAssignment(writer, model, safeName);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Base-constructor initializer for a wrap mock's single constructor. No explicit constructors →
+    /// implicit parameterless base(); an explicit parameterless constructor → <c>: base()</c>; otherwise
+    /// chains to the fewest-parameter accessible constructor with default arguments (the base state is
+    /// never used, so the values are irrelevant — this just satisfies C#'s base-call requirement, #6253).
+    /// </summary>
+    private static string GetWrapBaseInitializer(MockTypeModel model)
+    {
+        if (model.Constructors.Length == 0)
+        {
+            return "";
+        }
+
+        if (model.Constructors.Any(c => c.Parameters.Length == 0))
+        {
+            return " : base()";
+        }
+
+        // No accessible parameterless constructor. Prefer a constructor without `ref` parameters
+        // (those can't take an inline default expression), then the fewest parameters.
+        var ctor = model.Constructors
+            .OrderBy(c => c.Parameters.Any(p => p.Direction == ParameterDirection.Ref) ? 1 : 0)
+            .ThenBy(c => c.Parameters.Length)
+            .First();
+        var baseArgs = string.Join(", ", ctor.Parameters.Select(GetWrapBaseArgument));
+        return $" : base({baseArgs})";
+    }
+
+    private static string GetWrapBaseArgument(MockParameterModel p) => p.Direction == ParameterDirection.Out
+        ? "out _"
+        : $"default({p.FullyQualifiedType})!";
+
+    private static void GenerateWrapMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    {
+        var signatureReturnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
+        var paramList = GetParameterList(method);
+        var typeParams = GetTypeParameterList(method);
+
+        writer.AppendLineIfNotEmpty(method.ObsoleteAttribute);
+
+        // C# prohibits restating generic constraints on override methods (CS0460)
+        using (writer.Block($"{method.OverrideAccessModifier} override {signatureReturnType} {EscapeIdentifier(method.Name)}{typeParams}({paramList})"))
+        {
+            if (method.IsAbstractMember)
+            {
+                // Abstract methods: dispatch through engine (wrapped instance can't have abstract methods by definition,
+                // but we still handle it for consistency)
+                GenerateEngineDispatchBody(writer, method, model);
+            }
+            else
+            {
+                // Virtual/override methods: try engine first, fall back to wrapped instance
+                GenerateWrapMethodBody(writer, method, model);
+            }
+        }
+    }
+
+    private static void GenerateWrapMethodBody(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    {
+        // Initialize out parameters
+        foreach (var p in method.Parameters)
+        {
+            if (p.Direction == ParameterDirection.Out)
+            {
+                writer.AppendLine($"{p.Name} = default!;");
+            }
+        }
+
+        var (isTyped, typeArgs, argsList) = GetTypedDispatchInfo(method);
+        var argsArray = isTyped ? null : EmitArgsArrayVariable(writer, method);
+        var autoMockFactory = GetAutoMockFactoryLambda(method);
+
+        var argPassList = GetArgPassList(method);
+
+        if (method.IsVoid && !method.IsAsync)
+        {
+            writer.AppendLine($"if ({EmitTryHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)})");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method, model);
+            writer.AppendLine("return;");
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"_wrappedInstance.{EscapeIdentifier(method.Name)}({argPassList});");
+        }
+        else if (method.IsVoid && method.IsAsync)
+        {
+            writer.AppendLine($"if ({EmitTryHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)})");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method, model);
+            if (method.IsValueTask)
+            {
+                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+            }
+            else
+            {
+                writer.AppendLine("return global::System.Threading.Tasks.Task.CompletedTask;");
+            }
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return _wrappedInstance.{EscapeIdentifier(method.Name)}({argPassList});");
+        }
+        else if (method.IsAsync)
+        {
+            if (method.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
+            }
+            else
+            {
+                writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.UnwrappedReturnType, method.MemberId, method.Name, method.UnwrappedSmartDefault, "__result", autoMockFactory)})");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+            }
+            EmitOutRefReadback(writer, method, model);
+            if (method.IsValueTask)
+            {
+                writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
+            }
+            else
+            {
+                writer.AppendLine($"return global::System.Threading.Tasks.Task.FromResult<{method.UnwrappedReturnType}>(__result);");
+            }
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return _wrappedInstance.{EscapeIdentifier(method.Name)}({argPassList});");
+        }
+        else if (method.IsRefStructReturn)
+        {
+            writer.AppendLine($"if ({EmitTryHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)})");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            if (method.SpanReturnElementType is not null)
+            {
+                EmitSpanReturnReadback(writer, method, model);
+            }
+            else
+            {
+                EmitOutRefReadback(writer, method, model);
+                writer.AppendLine("return default;");
+            }
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return _wrappedInstance.{EscapeIdentifier(method.Name)}({argPassList});");
+        }
+        else if (method.IsReturnTypeStaticAbstractInterface)
+        {
+            writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            writer.AppendLine($"var __result = ({method.ReturnType})__rawResult!;");
+            EmitOutRefReadback(writer, method, model);
+            writer.AppendLine("return __result;");
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return _wrappedInstance.{EscapeIdentifier(method.Name)}({argPassList});");
+        }
+        else
+        {
+            writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.ReturnType, method.MemberId, method.Name, method.SmartDefault, "__result", autoMockFactory)})");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method, model);
+            writer.AppendLine("return __result;");
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return _wrappedInstance.{EscapeIdentifier(method.Name)}({argPassList});");
+        }
+    }
+
+    private static void GenerateWrapProperty(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
+    {
+        var autoMockFactory = GetAutoMockFactoryLambda(prop);
+        writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
+        writer.AppendLine($"{prop.OverrideAccessModifier} override {prop.ReturnType} {EscapeIdentifier(prop.Name)}");
+        writer.OpenBrace();
+        var getterPrefix = AccessorPrefix(prop.GetterAccessModifier);
+        var setterPrefix = AccessorPrefix(prop.SetterAccessModifier);
+
+        if (prop.HasGetter)
+        {
+            writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
+            if (prop.IsRefStructReturn)
+            {
+                if (prop.IsAbstractMember)
+                {
+                    writer.AppendLine($"{getterPrefix}get");
+                    writer.OpenBrace();
+                    writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
+                    writer.AppendLine("return default;");
+                    writer.CloseBrace();
+                }
+                else
+                {
+                    writer.AppendLine($"{getterPrefix}get");
+                    writer.OpenBrace();
+                    writer.AppendLine($"if (_engine.TryHandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>()))");
+                    writer.AppendLine("{");
+                    writer.IncreaseIndent();
+                    writer.AppendLine("return default;");
+                    writer.DecreaseIndent();
+                    writer.AppendLine("}");
+                    writer.AppendLine($"return _wrappedInstance.{EscapeIdentifier(prop.Name)};");
+                    writer.CloseBrace();
+                }
+            }
+            else if (prop.IsAbstractMember && prop.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"{getterPrefix}get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
+            }
+            else if (prop.IsAbstractMember)
+            {
+                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
+            }
+            else if (prop.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"{getterPrefix}get");
+                writer.OpenBrace();
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"return ({prop.ReturnType})__rawResult!;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.AppendLine($"return _wrappedInstance.{EscapeIdentifier(prop.Name)};");
+                writer.CloseBrace();
+            }
+            else
+            {
+                writer.AppendLine($"{getterPrefix}get");
+                writer.OpenBrace();
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}, out var __result{FormatAutoMockFactoryArgument(autoMockFactory)}))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine("return __result;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.AppendLine($"return _wrappedInstance.{EscapeIdentifier(prop.Name)};");
+                writer.CloseBrace();
+            }
+        }
+
+        if (prop.HasSetter)
+        {
+            writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
+            var setterArgs = prop.IsRefStructReturn
+                ? "global::System.Array.Empty<object?>()"
+                : "new object?[] { value }";
+
+            if (prop.IsAbstractMember)
+            {
+                writer.AppendLine($"{setterPrefix}set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
+            }
+            else
+            {
+                writer.AppendLine($"{setterPrefix}set");
+                writer.OpenBrace();
+                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs}))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"_wrappedInstance.{EscapeIdentifier(prop.Name)} = value;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.CloseBrace();
+            }
+        }
+
+        writer.CloseBrace();
+    }
+
+    private static void BuildPartialMockImpl(CodeWriter writer, MockTypeModel model, string safeName)
+    {
+        var mockableType = GetMockableTypeName(model);
+        var typeParams = GetTypeParameterList(model);
+        var constraints = GetConstraintClauses(model);
+
+        var baseTypes = model.FullyQualifiedName;
+        if (model.AdditionalInterfaceNames.Length > 0)
+        {
+            baseTypes += ", " + string.Join(", ", model.AdditionalInterfaceNames);
+        }
+
+        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
+        {
+            writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine = {GetConstructionContextName(model, safeName)}.Engine!;");
+            writer.AppendLine();
+
+            EmitIMockObjectProperty(writer);
+
+            // Generate constructors that pass through to base
+            GeneratePartialConstructors(writer, model, safeName);
+
+            // Methods — skip static abstract (they're in bridge DIMs).
+            // Members owned by an additional interface (OwnerTypeIndex >= 1) come from the
+            // interface walk, not the class walk — emit them interface-style ((re-)implementation,
+            // explicit when flagged), never as `override` of a base member that may be
+            // non-virtual or explicitly implemented.
+            foreach (var method in model.Methods)
+            {
+                if (method.IsStaticAbstract) continue;
+                writer.AppendLine();
+                if (method.OwnerTypeIndex > 0)
+                {
+                    GenerateInterfaceMethod(writer, method, model);
+                }
+                else
+                {
+                    GeneratePartialMethod(writer, method, model);
+                }
+            }
+
+            // Properties — skip static abstract (they're in bridge DIMs)
+            foreach (var prop in model.Properties)
+            {
+                if (prop.IsStaticAbstract) continue;
+                writer.AppendLine();
+                if (prop.OwnerTypeIndex > 0)
+                {
+                    if (prop.IsIndexer)
+                    {
+                        GenerateInterfaceIndexer(writer, prop);
+                    }
+                    else
+                    {
+                        GenerateInterfaceProperty(writer, prop, model);
+                    }
+                }
+                else if (prop.IsIndexer)
+                {
+                    GeneratePartialIndexer(writer, prop);
+                }
+                else
+                {
+                    GeneratePartialProperty(writer, prop, model);
+                }
+            }
+
+            // Events — skip static abstract (they're in bridge DIMs)
+            foreach (var evt in model.Events)
+            {
+                if (evt.IsStaticAbstract) continue;
+                writer.AppendLine();
+                if (evt.OwnerTypeIndex > 0)
+                {
+                    GenerateEvent(writer, evt);
+                }
+                else
+                {
+                    GeneratePartialEvent(writer, evt);
+                }
+            }
+
+            // IRaisable.RaiseEvent dispatch
+            writer.AppendLine();
+            GenerateRaiseEventDispatch(writer, model);
+        }
+    }
+
+    private static void GeneratePartialConstructors(CodeWriter writer, MockTypeModel model, string safeName)
+    {
+        var mockableType = GetMockableTypeName(model);
+
+        if (model.Constructors.Length == 0)
+        {
+            // No explicit constructors found, generate a default one
+            writer.AppendLine(SetsRequiredMembersAttribute);
+            using (writer.Block($"internal {safeName}MockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine)"))
+            {
+                if (model.HasStaticAbstractMembers)
+                {
+                    EmitStaticEngineAssignment(writer, model, safeName);
+                }
+            }
+            return;
+        }
+
+        foreach (var ctor in model.Constructors)
+        {
+            if (ctor.Parameters.Length == 0)
+            {
+                // Parameterless constructor
+                writer.AppendLine(SetsRequiredMembersAttribute);
+                using (writer.Block($"internal {safeName}MockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine) : base()"))
+                {
+                    if (model.HasStaticAbstractMembers)
+                    {
+                        EmitStaticEngineAssignment(writer, model, safeName);
+                    }
+                }
+            }
+            else
+            {
+                // Constructor with parameters - pass them through to base
+                var paramList = string.Join(", ", ctor.Parameters.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
+                var argList = string.Join(", ", ctor.Parameters.Select(p => p.Name));
+                writer.AppendLine(SetsRequiredMembersAttribute);
+                using (writer.Block($"internal {safeName}MockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine, {paramList}) : base({argList})"))
+                {
+                    if (model.HasStaticAbstractMembers)
+                    {
+                        EmitStaticEngineAssignment(writer, model, safeName);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void GenerateInterfaceMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    {
+        var signatureReturnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
+        var paramList = GetParameterList(method);
+        var typeParams = GetTypeParameterList(method);
+        var constraints = GetConstraintClauses(method, forExplicitImplementation: method.ExplicitInterfaceName is not null);
+
+        writer.AppendLineIfNotEmpty(method.ObsoleteAttribute);
+
+        if (method.ExplicitInterfaceName is not null)
+        {
+            if (method.ExplicitInterfaceCanDelegate)
+            {
+                // Return type is compatible (e.g. IEnumerable.GetEnumerator → IEnumerable<T>.GetEnumerator)
+                // — delegate to the public method.
+                var argPassList = GetArgPassList(method);
+                writer.AppendLine($"{signatureReturnType} {method.ExplicitInterfaceName}.{EscapeIdentifier(method.Name)}{typeParams}({paramList}){constraints} => {EscapeIdentifier(method.Name)}{typeParams}({argPassList});");
+            }
+            else
+            {
+                // Return types are incompatible — dispatch through the engine with a dedicated member id.
+                using (writer.Block($"{signatureReturnType} {method.ExplicitInterfaceName}.{EscapeIdentifier(method.Name)}{typeParams}({paramList}){constraints}"))
+                {
+                    GenerateEngineDispatchBody(writer, method, model);
+                }
+            }
+            return;
+        }
+
+        using (writer.Block($"public {signatureReturnType} {EscapeIdentifier(method.Name)}{typeParams}({paramList}){constraints}"))
+        {
+            GenerateEngineDispatchBody(writer, method, model);
+        }
+    }
+
+
+    private static void GeneratePartialMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    {
+        var signatureReturnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
+        var paramList = GetParameterList(method);
+        var typeParams = GetTypeParameterList(method);
+
+        writer.AppendLineIfNotEmpty(method.ObsoleteAttribute);
+
+        // C# prohibits restating generic constraints on override methods (CS0460)
+        using (writer.Block($"{method.OverrideAccessModifier} override {signatureReturnType} {EscapeIdentifier(method.Name)}{typeParams}({paramList})"))
+        {
+            if (method.IsAbstractMember)
+            {
+                // Abstract methods: same as interface methods - dispatch through engine
+                GenerateEngineDispatchBody(writer, method, model);
+            }
+            else
+            {
+                // Virtual/override methods: try engine first, fall back to base
+                GeneratePartialMethodBody(writer, method, model);
+            }
+        }
+    }
+
+    private static void GeneratePartialMethodBody(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    {
+        // Initialize out parameters
+        foreach (var p in method.Parameters)
+        {
+            if (p.Direction == ParameterDirection.Out)
+            {
+                writer.AppendLine($"{p.Name} = default!;");
+            }
+        }
+
+        var (isTyped, typeArgs, argsList) = GetTypedDispatchInfo(method);
+        var argsArray = isTyped ? null : EmitArgsArrayVariable(writer, method);
+        var autoMockFactory = GetAutoMockFactoryLambda(method);
+
+        var argPassList = GetArgPassList(method);
+
+        if (method.IsVoid && !method.IsAsync)
+        {
+            // void virtual method
+            writer.AppendLine($"if ({EmitTryHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)})");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method, model);
+            writer.AppendLine("return;");
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"base.{EscapeIdentifier(method.Name)}{GetTypeParameterList(method)}({argPassList});");
+        }
+        else if (method.IsVoid && method.IsAsync)
+        {
+            // async void virtual method (Task/ValueTask)
+            writer.AppendLine($"if ({EmitTryHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)})");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method, model);
+            EmitRawReturnCheck(writer, method);
+            if (method.IsValueTask)
+            {
+                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+            }
+            else
+            {
+                writer.AppendLine("return global::System.Threading.Tasks.Task.CompletedTask;");
+            }
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return base.{EscapeIdentifier(method.Name)}{GetTypeParameterList(method)}({argPassList});");
+        }
+        else if (method.IsAsync)
+        {
+            // async method with return (Task<T>/ValueTask<T>)
+            if (method.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
+            }
+            else
+            {
+                writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.UnwrappedReturnType, method.MemberId, method.Name, method.UnwrappedSmartDefault, "__result", autoMockFactory)})");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+            }
+            EmitOutRefReadback(writer, method, model);
+            EmitRawReturnCheck(writer, method);
+            if (method.IsValueTask)
+            {
+                writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
+            }
+            else
+            {
+                writer.AppendLine($"return global::System.Threading.Tasks.Task.FromResult<{method.UnwrappedReturnType}>(__result);");
+            }
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return base.{EscapeIdentifier(method.Name)}{GetTypeParameterList(method)}({argPassList});");
+        }
+        else if (method.IsRefStructReturn)
+        {
+            // synchronous method returning ref struct — use void dispatch, fall back to base
+            writer.AppendLine($"if ({EmitTryHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)})");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            if (method.SpanReturnElementType is not null)
+            {
+                EmitSpanReturnReadback(writer, method, model);
+            }
+            else
+            {
+                EmitOutRefReadback(writer, method, model);
+                writer.AppendLine("return default;");
+            }
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return base.{EscapeIdentifier(method.Name)}{GetTypeParameterList(method)}({argPassList});");
+        }
+        else if (method.IsReturnTypeStaticAbstractInterface)
+        {
+            writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            writer.AppendLine($"var __result = ({method.ReturnType})__rawResult!;");
+            EmitOutRefReadback(writer, method, model);
+            writer.AppendLine("return __result;");
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return base.{EscapeIdentifier(method.Name)}{GetTypeParameterList(method)}({argPassList});");
+        }
+        else
+        {
+            // synchronous method with return value
+            writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.ReturnType, method.MemberId, method.Name, method.SmartDefault, "__result", autoMockFactory)})");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method, model);
+            writer.AppendLine("return __result;");
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return base.{EscapeIdentifier(method.Name)}{GetTypeParameterList(method)}({argPassList});");
+        }
+    }
+
+    private static void GenerateEngineDispatchBody(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    {
+        // Initialize out parameters
+        foreach (var p in method.Parameters)
+        {
+            if (p.Direction == ParameterDirection.Out)
+            {
+                writer.AppendLine($"{p.Name} = default!;");
+            }
+        }
+
+        var (isTyped, typeArgs, argsList) = GetTypedDispatchInfo(method);
+        // Generic methods always dispatch through the object?[] + type-arguments fallback so their concrete
+        // type arguments reach the engine (typed dispatch can't carry them). Force the fallback path
+        // here so argsArray is materialized; the emit helpers then select the type-arg overloads.
+        if (method.IsGenericMethod)
+        {
+            isTyped = false;
+            typeArgs = null;
+            argsList = null;
+        }
+        var argsArray = isTyped ? null : EmitArgsArrayVariable(writer, method);
+        var autoMockFactory = GetAutoMockFactoryLambda(method);
+
+        var hasOutRef = HasOutRefParams(method);
+
+        if (method.IsVoid && !method.IsAsync)
+        {
+            // Pure void method
+            writer.AppendLine($"{EmitHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name, method)};");
+            EmitOutRefReadback(writer, method, model);
+        }
+        else if (method.IsVoid && method.IsAsync)
+        {
+            // Async void method (Task or ValueTask with no generic arg)
+            using (writer.Block("try"))
+            {
+                writer.AppendLine($"{EmitHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name, method)};");
+                EmitOutRefReadback(writer, method, model);
+                EmitRawReturnCheck(writer, method);
+                if (method.IsValueTask)
+                {
+                    writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+                }
+                else
+                {
+                    writer.AppendLine("return global::System.Threading.Tasks.Task.CompletedTask;");
+                }
+            }
+            using (writer.Block("catch (global::System.Exception __ex)"))
+            {
+                if (method.IsValueTask)
+                {
+                    writer.AppendLine("return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(__ex));");
+                }
+                else
+                {
+                    writer.AppendLine("return global::System.Threading.Tasks.Task.FromException(__ex);");
+                }
+            }
+        }
+        else if (method.IsAsync)
+        {
+            // Async method with return value (Task<T> or ValueTask<T>)
+            var unwrappedArg = method.IsReturnTypeStaticAbstractInterface ? "object?" : method.UnwrappedReturnType;
+            var unwrappedDefault = method.IsReturnTypeStaticAbstractInterface ? "null" : method.UnwrappedSmartDefault;
+            using (writer.Block("try"))
+            {
+                if (method.IsReturnTypeStaticAbstractInterface)
+                {
+                    writer.AppendLine($"var __result = ({method.UnwrappedReturnType}){EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, unwrappedArg, method.MemberId, method.Name, unwrappedDefault, method: method)}!;");
+                }
+                else
+                {
+                    writer.AppendLine($"var __result = {EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, unwrappedArg, method.MemberId, method.Name, unwrappedDefault, autoMockFactory, method)};");
+                }
+                EmitOutRefReadback(writer, method, model);
+                EmitRawReturnCheck(writer, method);
+                if (method.IsValueTask)
+                {
+                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
+                }
+                else
+                {
+                    writer.AppendLine($"return global::System.Threading.Tasks.Task.FromResult<{method.UnwrappedReturnType}>(__result);");
+                }
+            }
+            using (writer.Block("catch (global::System.Exception __ex)"))
+            {
+                if (method.IsValueTask)
+                {
+                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(global::System.Threading.Tasks.Task.FromException<{method.UnwrappedReturnType}>(__ex));");
+                }
+                else
+                {
+                    writer.AppendLine($"return global::System.Threading.Tasks.Task.FromException<{method.UnwrappedReturnType}>(__ex);");
+                }
+            }
+        }
+        else if (method.IsRefStructReturn)
+        {
+            // Synchronous method returning a ref struct — can't use HandleCallWithReturn<T> because
+            // ref structs can't be generic type arguments. Use void dispatch for call tracking,
+            // callbacks, and throws.
+            writer.AppendLine($"{EmitHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name, method)};");
+            if (method.SpanReturnElementType is not null)
+            {
+                // Span return: read back out/ref params AND extract return value from OutRefContext index -1
+                EmitSpanReturnReadback(writer, method, model);
+            }
+            else
+            {
+                EmitOutRefReadback(writer, method, model);
+                writer.AppendLine("return default;");
+            }
+        }
+        else if (method.IsReturnTypeStaticAbstractInterface)
+        {
+            // Return type is an interface with static abstract members — CS8920 prevents using it
+            // as a generic type argument. Use object? and cast.
+            if (hasOutRef)
+            {
+                writer.AppendLine($"var __result = ({method.ReturnType}){EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", method: method)}!;");
+                EmitOutRefReadback(writer, method, model);
+                writer.AppendLine("return __result;");
+            }
+            else
+            {
+                writer.AppendLine($"return ({method.ReturnType}){EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", method: method)}!;");
+            }
+        }
+        else
+        {
+            // Synchronous method with return value — need to read back out/ref before returning
+            if (hasOutRef)
+            {
+                writer.AppendLine($"var __result = {EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.ReturnType, method.MemberId, method.Name, method.SmartDefault, autoMockFactory, method)};");
+                EmitOutRefReadback(writer, method, model);
+                writer.AppendLine("return __result;");
+            }
+            else
+            {
+                writer.AppendLine($"return {EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.ReturnType, method.MemberId, method.Name, method.SmartDefault, autoMockFactory, method)};");
+            }
+        }
+    }
+
+    private static void GenerateInterfaceProperty(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
+    {
+        var autoMockFactory = GetAutoMockFactoryLambda(prop);
+        writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
+        if (prop.ExplicitInterfaceName is not null)
+        {
+            // Explicit interface property with incompatible return type.
+            // Dispatches independently through the engine with a dedicated MemberId.
+            writer.AppendLine($"{prop.ReturnType} {prop.ExplicitInterfaceName}.{EscapeIdentifier(prop.Name)}");
+            writer.OpenBrace();
+            if (prop.HasGetter)
+            {
+                writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
+                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
+            }
+            if (prop.HasSetter)
+            {
+                writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+            }
+            writer.CloseBrace();
+            return;
+        }
+
+        writer.AppendLine($"public {prop.ReturnType} {EscapeIdentifier(prop.Name)}");
+        writer.OpenBrace();
+
+        if (prop.HasGetter)
+        {
+            writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
+            if (prop.IsRefStructReturn)
+            {
+                // ref struct property — can't use HandleCallWithReturn<T>, use void dispatch + return default
+                writer.AppendLine("get");
+                writer.OpenBrace();
+                writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
+                writer.AppendLine("return default;");
+                writer.CloseBrace();
+            }
+            else if (prop.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
+            }
+            else
+            {
+                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
+            }
+        }
+
+        if (prop.HasSetter)
+        {
+            writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
+            if (prop.IsRefStructReturn)
+            {
+                // ref struct property — can't box value, use empty args
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", global::System.Array.Empty<object?>());");
+            }
+            else
+            {
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+            }
+        }
+
+        writer.CloseBrace();
+    }
+
+    private static void GeneratePartialProperty(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
+    {
+        var autoMockFactory = GetAutoMockFactoryLambda(prop);
+        writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
+        writer.AppendLine($"{prop.OverrideAccessModifier} override {prop.ReturnType} {EscapeIdentifier(prop.Name)}");
+        writer.OpenBrace();
+        var getterPrefix = AccessorPrefix(prop.GetterAccessModifier);
+        var setterPrefix = AccessorPrefix(prop.SetterAccessModifier);
+
+        if (prop.HasGetter)
+        {
+            writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
+            if (prop.IsRefStructReturn)
+            {
+                if (prop.IsAbstractMember)
+                {
+                    writer.AppendLine($"{getterPrefix}get");
+                    writer.OpenBrace();
+                    writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
+                    writer.AppendLine("return default;");
+                    writer.CloseBrace();
+                }
+                else
+                {
+                    writer.AppendLine($"{getterPrefix}get");
+                    writer.OpenBrace();
+                    writer.AppendLine($"if (_engine.TryHandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>()))");
+                    writer.AppendLine("{");
+                    writer.IncreaseIndent();
+                    writer.AppendLine("return default;");
+                    writer.DecreaseIndent();
+                    writer.AppendLine("}");
+                    writer.AppendLine($"return base.{EscapeIdentifier(prop.Name)};");
+                    writer.CloseBrace();
+                }
+            }
+            else if (prop.IsAbstractMember && prop.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"{getterPrefix}get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
+            }
+            else if (prop.IsAbstractMember)
+            {
+                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
+            }
+            else if (prop.IsReturnTypeStaticAbstractInterface)
+            {
+                // Virtual property getter: try engine, fall back to base (CS8920-safe)
+                writer.AppendLine($"{getterPrefix}get");
+                writer.OpenBrace();
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"return ({prop.ReturnType})__rawResult!;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.AppendLine($"return base.{EscapeIdentifier(prop.Name)};");
+                writer.CloseBrace();
+            }
+            else
+            {
+                // Virtual property getter: try engine, fall back to base
+                writer.AppendLine($"{getterPrefix}get");
+                writer.OpenBrace();
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}, out var __result{FormatAutoMockFactoryArgument(autoMockFactory)}))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine("return __result;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.AppendLine($"return base.{EscapeIdentifier(prop.Name)};");
+                writer.CloseBrace();
+            }
+        }
+
+        if (prop.HasSetter)
+        {
+            writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
+            var setterArgs = prop.IsRefStructReturn
+                ? "global::System.Array.Empty<object?>()"
+                : "new object?[] { value }";
+
+            if (prop.IsAbstractMember)
+            {
+                writer.AppendLine($"{setterPrefix}set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
+            }
+            else
+            {
+                // Virtual property setter: try engine, fall back to base
+                writer.AppendLine($"{setterPrefix}set");
+                writer.OpenBrace();
+                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs}))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"base.{EscapeIdentifier(prop.Name)} = value;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.CloseBrace();
+            }
+        }
+
+        writer.CloseBrace();
+    }
+
+    private static void GenerateInterfaceIndexer(CodeWriter writer, MockMemberModel prop)
+    {
+        var paramList = FormatIndexerParameterList(prop);
+        writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
+        writer.AppendLine($"public {prop.ReturnType} this[{paramList}]");
+        writer.OpenBrace();
+
+        if (prop.HasGetter)
+        {
+            var argsArray = GetIndexerGetterArgsArray(prop);
+            writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
+            writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
+        }
+
+        if (prop.HasSetter)
+        {
+            var setterArgs = GetIndexerSetterArgsArray(prop);
+            writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
+            writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
+        }
+
+        writer.CloseBrace();
+    }
+
+    private static void GeneratePartialIndexer(CodeWriter writer, MockMemberModel prop)
+        => GenerateOverrideIndexer(writer, prop, fallbackTarget: "base");
+
+    private static void GenerateWrapIndexer(CodeWriter writer, MockMemberModel prop)
+        => GenerateOverrideIndexer(writer, prop, fallbackTarget: "_wrappedInstance");
+
+    private static void GenerateOverrideIndexer(CodeWriter writer, MockMemberModel prop, string fallbackTarget)
+    {
+        var paramList = FormatIndexerParameterList(prop);
+        var argPassList = string.Join(", ", prop.Parameters.Select(p => p.Name));
+        writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
+        writer.AppendLine($"{prop.OverrideAccessModifier} override {prop.ReturnType} this[{paramList}]");
+        writer.OpenBrace();
+        var getterPrefix = AccessorPrefix(prop.GetterAccessModifier);
+        var setterPrefix = AccessorPrefix(prop.SetterAccessModifier);
+
+        if (prop.HasGetter)
+        {
+            var argsArray = GetIndexerGetterArgsArray(prop);
+            writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
+            if (prop.IsAbstractMember)
+            {
+                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
+            }
+            else
+            {
+                writer.AppendLine($"{getterPrefix}get");
+                writer.OpenBrace();
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault}, out var __result))");
+                writer.OpenBrace();
+                writer.AppendLine("return __result;");
+                writer.CloseBrace();
+                writer.AppendLine($"return {fallbackTarget}[{argPassList}];");
+                writer.CloseBrace();
+            }
+        }
+
+        if (prop.HasSetter)
+        {
+            var setterArgs = GetIndexerSetterArgsArray(prop);
+            writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
+            if (prop.IsAbstractMember)
+            {
+                writer.AppendLine($"{setterPrefix}set => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
+            }
+            else
+            {
+                writer.AppendLine($"{setterPrefix}set");
+                writer.OpenBrace();
+                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs}))");
+                writer.OpenBrace();
+                writer.AppendLine($"{fallbackTarget}[{argPassList}] = value;");
+                writer.CloseBrace();
+                writer.CloseBrace();
+            }
+        }
+
+        writer.CloseBrace();
+    }
+
+    private static string FormatIndexerParameterList(MockMemberModel indexer)
+        => FormatParameterList(indexer.Parameters);
+
+    private static string AccessorPrefix(string accessModifier)
+        => accessModifier.Length == 0 ? "" : accessModifier + " ";
+
+    private static string GetIndexerGetterArgsArray(MockMemberModel indexer)
+    {
+        if (indexer.Parameters.Length == 0) return "global::System.Array.Empty<object?>()";
+        var args = string.Join(", ", indexer.Parameters.Select(p => p.Name));
+        return $"new object?[] {{ {args} }}";
+    }
+
+    private static string GetIndexerSetterArgsArray(MockMemberModel indexer)
+    {
+        if (indexer.Parameters.Length == 0) return "new object?[] { value }";
+        var args = string.Join(", ", indexer.Parameters.Select(p => p.Name)) + ", value";
+        return $"new object?[] {{ {args} }}";
+    }
+
+    private static void GenerateEvent(CodeWriter writer, MockEventModel evt)
+    {
+        // Backing delegate field
+        writer.AppendLine($"private {evt.EventHandlerTypeNonNullable}? _backing_{evt.Name};");
+        writer.AppendLine();
+
+        // Event add/remove accessors
+        writer.AppendLineIfNotEmpty(evt.ObsoleteAttribute);
+        writer.AppendLine($"public event {evt.EventHandlerTypeNonNullable}? {EscapeIdentifier(evt.Name)}");
+        writer.OpenBrace();
+        writer.AppendLine($"add {{ _backing_{evt.Name} += value; _engine.RecordEventSubscription(\"{evt.Name}\", true); }}");
+        writer.AppendLine($"remove {{ _backing_{evt.Name} -= value; _engine.RecordEventSubscription(\"{evt.Name}\", false); }}");
+        writer.CloseBrace();
+        writer.AppendLine();
+
+        // Raise method for generated code to call
+        writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
+        var raiseParams = evt.RaiseParameterList.Length == 0
+            ? ""
+            : string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
+        var invokeArgs = string.IsNullOrEmpty(evt.InvokeArgs) ? "" : evt.InvokeArgs;
+        var raiseAccessModifier = evt.IsSignatureAccessibleFromAssembly ? "internal" : "private";
+        using (writer.Block($"{raiseAccessModifier} void Raise_{evt.Name}({raiseParams})"))
+        {
+            if (string.IsNullOrEmpty(invokeArgs))
+            {
+                writer.AppendLine($"_backing_{evt.Name}?.Invoke();");
+            }
+            else
+            {
+                writer.AppendLine($"_backing_{evt.Name}?.Invoke({invokeArgs});");
+            }
+        }
+    }
+
+    private static void GeneratePartialEvent(CodeWriter writer, MockEventModel evt)
+    {
+        // Backing delegate field
+        writer.AppendLine($"private {evt.EventHandlerTypeNonNullable}? _backing_{evt.Name};");
+        writer.AppendLine();
+
+        // Event add/remove accessors with override
+        writer.AppendLineIfNotEmpty(evt.ObsoleteAttribute);
+        writer.AppendLine($"{evt.OverrideAccessModifier} override event {evt.EventHandlerTypeNonNullable}? {EscapeIdentifier(evt.Name)}");
+        writer.OpenBrace();
+        writer.AppendLine($"add {{ _backing_{evt.Name} += value; _engine.RecordEventSubscription(\"{evt.Name}\", true); }}");
+        writer.AppendLine($"remove {{ _backing_{evt.Name} -= value; _engine.RecordEventSubscription(\"{evt.Name}\", false); }}");
+        writer.CloseBrace();
+        writer.AppendLine();
+
+        // Raise method for generated code to call
+        writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
+        var raiseParams = evt.RaiseParameterList.Length == 0
+            ? ""
+            : string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
+        var invokeArgs = string.IsNullOrEmpty(evt.InvokeArgs) ? "" : evt.InvokeArgs;
+        var raiseAccessModifier = evt.IsSignatureAccessibleFromAssembly ? "internal" : "private";
+        using (writer.Block($"{raiseAccessModifier} void Raise_{evt.Name}({raiseParams})"))
+        {
+            if (string.IsNullOrEmpty(invokeArgs))
+            {
+                writer.AppendLine($"_backing_{evt.Name}?.Invoke();");
+            }
+            else
+            {
+                writer.AppendLine($"_backing_{evt.Name}?.Invoke({invokeArgs});");
+            }
+        }
+    }
+
+    private static void GenerateRaiseEventDispatch(CodeWriter writer, MockTypeModel model)
+    {
+        writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
+        using (writer.Block("public void RaiseEvent(string eventName, object? args)"))
+        {
+            var instanceEvents = model.Events.Where(e => !e.IsStaticAbstract).ToArray();
+            if (instanceEvents.Length == 0)
+            {
+                writer.AppendLine("throw new global::System.InvalidOperationException($\"No event named '{eventName}' exists on this mock.\");");
+            }
+            else
+            {
+                using (writer.Block("switch (eventName)"))
+                {
+                    foreach (var evt in instanceEvents)
+                    {
+                        writer.AppendLine($"case \"{evt.Name}\":");
+                        writer.IncreaseIndent();
+                        // Brace each case so locals (e.g. the `args` pattern variable below) get
+                        // their own scope and don't collide across cases.
+                        writer.AppendLine("{");
+                        writer.IncreaseIndent();
+
+                        // Determine how to invoke: if the event handler has parameters matching EventArgs, pass args
+                        if (evt.RaiseParameterList.Length == 0)
+                        {
+                            // No-parameter event (e.g., Action)
+                            writer.AppendLine($"Raise_{evt.Name}();");
+                        }
+                        else if (evt.RaiseParameterList.Length > 1)
+                        {
+                            // Multi-parameter delegate — cast args to object[] and spread
+                            writer.AppendLine("if (args is object?[] __argArray)");
+                            writer.AppendLine("{");
+                            writer.IncreaseIndent();
+
+                            var castArgs = new List<string>();
+                            for (int i = 0; i < evt.RaiseParameterList.Length; i++)
+                            {
+                                // The `!` suppresses CS8600/CS8604 when a delegate parameter type
+                                // is non-nullable (the cast from object? would otherwise warn). The
+                                // single-parameter dispatch path uses the same `args!` pattern.
+                                castArgs.Add($"({evt.RaiseParameterList[i].FullyQualifiedType})__argArray[{i}]!");
+                            }
+                            writer.AppendLine($"Raise_{evt.Name}({string.Join(", ", castArgs)});");
+                            writer.DecreaseIndent();
+                            writer.AppendLine("}");
+                            writer.AppendLine("else");
+                            writer.AppendLine("{");
+                            writer.IncreaseIndent();
+                            writer.AppendLine($"throw new global::System.ArgumentException($\"Event '{evt.Name}' requires an object[] of arguments.\");");
+                            writer.DecreaseIndent();
+                            writer.AppendLine("}");
+                        }
+                        else
+                        {
+                            // Single-parameter event (e.g., EventHandler<TArgs>)
+                            writer.AppendLine($"Raise_{evt.Name}(({evt.RaiseParameterList[0].FullyQualifiedType})args!);");
+                        }
+
+                        writer.AppendLine("break;");
+                        writer.DecreaseIndent();
+                        writer.AppendLine("}");
+                        writer.DecreaseIndent();
+                    }
+
+                    writer.AppendLine("default:");
+                    writer.IncreaseIndent();
+                    writer.AppendLine("throw new global::System.InvalidOperationException($\"No event named '{eventName}' exists on this mock.\");");
+                    writer.DecreaseIndent();
+                }
+            }
+        }
+    }
+
+    internal static string GetParameterList(MockMemberModel method) =>
+        FormatParameterList(method.Parameters);
+
+    private static string FormatParameterList(EquatableArray<MockParameterModel> parameters)
+    {
+        return string.Join(", ", parameters.Select(p =>
+        {
+            var direction = p.Direction switch
+            {
+                ParameterDirection.Out => "out ",
+                ParameterDirection.Ref => "ref ",
+                ParameterDirection.In_Readonly => "in ",
+                _ => ""
+            };
+            return $"{direction}{p.FullyQualifiedType} {p.Name}";
+        }));
+    }
+
+    internal static string GetTypeParameterList(MockMemberModel method) =>
+        FormatTypeParameterList(method.TypeParameters);
+
+    internal static string GetTypeParameterList(MockTypeModel model) =>
+        FormatTypeParameterList(model.TypeParameters);
+
+    internal static string GetGeneratedTypeName(string baseName, MockTypeModel model) =>
+        baseName + GetTypeParameterList(model);
+
+    private static string FormatTypeParameterList(EquatableArray<MockTypeParameterModel> typeParameters)
+    {
+        if (typeParameters.Length == 0) return "";
+        return "<" + string.Join(", ", typeParameters.Select(tp => tp.Name)) + ">";
+    }
+
+    // Only for non-override declarations (interface impls, extension methods).
+    // C# prohibits restating constraints on override methods (CS0460).
+    internal static string GetConstraintClauses(MockMemberModel method, bool forExplicitImplementation = false) =>
+        FormatConstraintClauses(method.TypeParameters, forExplicitImplementation);
+
+    internal static string GetConstraintClauses(MockTypeModel model) =>
+        FormatConstraintClauses(model.TypeParameters);
+
+    private static string FormatConstraintClauses(EquatableArray<MockTypeParameterModel> typeParameters, bool forExplicitImplementation = false)
+    {
+        var clauses = new List<string>();
+        foreach (var tp in typeParameters)
+        {
+            if (forExplicitImplementation)
+            {
+                // CS0460: Only 'class' and 'struct' constraints are allowed on explicit interface implementations.
+                if (tp.HasReferenceTypeConstraint)
+                {
+                    clauses.Add($"where {tp.Name} : class");
+                }
+                else if (tp.HasValueTypeConstraint)
+                {
+                    clauses.Add($"where {tp.Name} : struct");
+                }
+                else if (tp.HasAnnotatedNullableUsage)
+                {
+                    clauses.Add($"where {tp.Name} : default");
+                }
+            }
+            else if (!string.IsNullOrEmpty(tp.Constraints))
+            {
+                clauses.Add($"where {tp.Name} : {tp.Constraints}");
+            }
+        }
+        return clauses.Count > 0 ? " " + string.Join(' ', clauses) : "";
+    }
+
+    internal static string GetOpenGenericTypeOfExpression(MockTypeModel model) =>
+        string.IsNullOrEmpty(model.OpenGenericTypeOfExpression)
+            ? model.FullyQualifiedName
+            : model.OpenGenericTypeOfExpression;
+
+    /// <summary>
+    /// Computes dispatch strategy for a method: typed (arity 1-8, no ref structs) or fallback (object?[]).
+    /// </summary>
+    private static (bool IsTyped, string? TypeArgs, string? ArgsList) GetTypedDispatchInfo(MockMemberModel method)
+    {
+        if (method.HasRefStructParams) return (false, null, null);
+        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+        if (nonOutParams.Count is < 1 or > 8) return (false, null, null);
+        var typeArgs = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
+        var argsList = string.Join(", ", nonOutParams.Select(p => p.Name));
+        return (true, typeArgs, argsList);
+    }
+
+    /// <summary>Emits a HandleCall or TryHandleCall invocation, choosing typed or fallback path.</summary>
+    /// <remarks>
+    /// A generic method always uses the object?[] fallback overload that also takes the method's
+    /// concrete type arguments, so the engine can discriminate setups/calls by type argument.
+    /// </remarks>
+    private static string EmitHandleCall(bool isTyped, string? typeArgs, string? argsList, string? argsArray, int memberId, string memberName, MockMemberModel? method = null)
+    {
+        if (method is { IsGenericMethod: true })
+        {
+            return $"_engine.HandleCall({memberId}, \"{memberName}\", {argsArray}, {TypeArgumentsArrayLiteral(method)})";
+        }
+        return isTyped
+            ? $"_engine.HandleCall<{typeArgs}>({memberId}, \"{memberName}\", {argsList})"
+            : $"_engine.HandleCall({memberId}, \"{memberName}\", {argsArray})";
+    }
+
+    /// <summary>Emits a HandleCallWithReturn invocation, choosing typed or fallback path.</summary>
+    /// <remarks>See <see cref="EmitHandleCall"/> for the generic-method type-argument path.</remarks>
+    private static string EmitHandleCallWithReturn(bool isTyped, string? typeArgs, string? argsList, string? argsArray, string returnTypeArg, int memberId, string memberName, string defaultValue, string? autoMockFactory = null, MockMemberModel? method = null)
+    {
+        if (method is { IsGenericMethod: true })
+        {
+            // Generic methods dispatch through the object?[] overload that carries the method's type
+            // arguments; an auto-mock factory (for an auto-mockable return type) is preserved before it.
+            return $"_engine.HandleCallWithReturn<{returnTypeArg}>({memberId}, \"{memberName}\", {argsArray}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)}, {TypeArgumentsArrayLiteral(method)})";
+        }
+        return isTyped
+            ? $"_engine.HandleCallWithReturn<{returnTypeArg}, {typeArgs}>({memberId}, \"{memberName}\", {argsList}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)})"
+            : $"_engine.HandleCallWithReturn<{returnTypeArg}>({memberId}, \"{memberName}\", {argsArray}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)})";
+    }
+
+    /// <summary>
+    /// Emits the type-argument array for a generic method. For the common 1–4 type-parameter cases it
+    /// references the per-closed-type cache (<c>TypeArguments.Of&lt;T&gt;.Value</c>) to avoid a per-call
+    /// allocation; higher arities fall back to a per-call <c>ImmutableArray.Create(...)</c>.
+    /// </summary>
+    internal static string TypeArgumentsArrayLiteral(MockMemberModel method)
+    {
+        var typeParams = method.TypeParameters;
+        if (typeParams.Length is >= 1 and <= 4)
+        {
+            return $"global::TUnit.Mocks.TypeArguments.Of<{string.Join(", ", typeParams.Select(tp => tp.Name))}>.Value";
+        }
+        return $"global::System.Collections.Immutable.ImmutableArray.Create<global::System.Type>({string.Join(", ", typeParams.Select(tp => $"typeof({tp.Name})"))})";
+    }
+
+    /// <summary>Emits a TryHandleCall condition, choosing typed or fallback path.</summary>
+    private static string EmitTryHandleCall(bool isTyped, string? typeArgs, string? argsList, string? argsArray, int memberId, string memberName)
+        => isTyped
+            ? $"_engine.TryHandleCall<{typeArgs}>({memberId}, \"{memberName}\", {argsList})"
+            : $"_engine.TryHandleCall({memberId}, \"{memberName}\", {argsArray})";
+
+    /// <summary>Emits a TryHandleCallWithReturn condition, choosing typed or fallback path.</summary>
+    private static string EmitTryHandleCallWithReturn(bool isTyped, string? typeArgs, string? argsList, string? argsArray, string returnTypeArg, int memberId, string memberName, string defaultValue, string outVar, string? autoMockFactory = null)
+        => isTyped
+            ? $"_engine.TryHandleCallWithReturn<{returnTypeArg}, {typeArgs}>({memberId}, \"{memberName}\", {argsList}, {defaultValue}, out var {outVar}{FormatAutoMockFactoryArgument(autoMockFactory)})"
+            : $"_engine.TryHandleCallWithReturn<{returnTypeArg}>({memberId}, \"{memberName}\", {argsArray}, {defaultValue}, out var {outVar}{FormatAutoMockFactoryArgument(autoMockFactory)})";
+
+    private static string FormatAutoMockFactoryArgument(string? autoMockFactory)
+        => autoMockFactory is null ? "" : $", {autoMockFactory}";
+
+    private static string? GetAutoMockFactoryLambda(MockMemberModel member)
+        => member.AutoMockFactoryMethod is null
+            ? null
+            : $"static __behavior => {member.AutoMockFactoryMethod}(__behavior)";
+
+    /// <summary>
+    /// Returns true if the method has any out or ref parameters that need read-back.
+    /// </summary>
+    private static bool HasOutRefParams(MockMemberModel method)
+    {
+        return method.Parameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
+    }
+
+    /// <summary>
+    /// Emits code to read back out/ref parameter values from OutRefContext after an engine call.
+    /// </summary>
+    internal static void EmitOutRefReadback(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    {
+        if (!HasOutRefParams(method)) return;
+
+        writer.AppendLine("var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();");
+        using (writer.Block("if (__outRef is not null)"))
+        {
+            EmitOutRefParamAssignments(writer, method, model);
+        }
+    }
+
+    /// <summary>
+    /// For async methods: emits code to check <see cref="TUnit.Mocks.Setup.RawReturnContext"/>
+    /// and return the raw Task/ValueTask directly if one was set by a <c>ReturnsAsync</c> setup.
+    /// </summary>
+    private static void EmitRawReturnCheck(CodeWriter writer, MockMemberModel method)
+    {
+        if (!method.IsAsync) return;
+
+        // IMPORTANT: This check must appear synchronously (no await) after the engine
+        // dispatch call. The [ThreadStatic] RawReturnContext requires same-thread consumption.
+        // The pattern type must drop an outer nullable annotation (Task<string?>? → Task<string?>):
+        // nullable types are never legal in an `is` pattern (CS8116). For an outer-nullable
+        // member, a null raw value is a legitimate contract value — ReturnsAsync accepts a null
+        // task there — so it is returned rather than falling into the mismatch throw.
+        var patternType = method.ReturnType.TrimEnd('?');
+        var isOuterNullable = patternType.Length != method.ReturnType.Length;
+        writer.AppendLine($"if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))");
+        writer.OpenBrace();
+        if (isOuterNullable)
+        {
+            writer.AppendLine("if (__rawAsync is null) return null;");
+        }
+
+        writer.AppendLine($"if (__rawAsync is {patternType} __typedAsync) return __typedAsync;");
+        writer.AppendLine($"throw new global::System.InvalidOperationException($\"ReturnsAsync: expected {method.ReturnType} but got {{__rawAsync?.GetType().Name ?? \"null\"}}\");");
+        writer.CloseBrace();
+    }
+
+    /// <summary>
+    /// For ref struct return methods with span support: emits code to consume OutRefContext,
+    /// read back out/ref params, extract span return value, and return.
+    /// Always ends with "return default;" as fallback.
+    /// </summary>
+    private static void EmitSpanReturnReadback(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    {
+        writer.AppendLine("var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();");
+        using (writer.Block("if (__outRef is not null)"))
+        {
+            EmitOutRefParamAssignments(writer, method, model);
+            writer.AppendLine($"if (__outRef.TryGetValue(global::TUnit.Mocks.Setup.OutRefContext.SpanReturnValueIndex, out var __spanRet)) return new {method.ReturnType}(({method.SpanReturnElementType}[])__spanRet!);");
+        }
+        writer.AppendLine("return default;");
+    }
+
+    /// <summary>
+    /// Emits individual out/ref parameter assignments from the __outRef dictionary.
+    /// Shared by <see cref="EmitOutRefReadback"/> and <see cref="EmitSpanReturnReadback"/>.
+    /// </summary>
+    private static void EmitOutRefParamAssignments(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    {
+        var canInvokeRefStructSetter = SupportsClosedRefStructSetter(model, method);
+        string? safeName = null;
+        string? nsPrefix = null;
+
+        for (int i = 0; i < method.Parameters.Length; i++)
+        {
+            var p = method.Parameters[i];
+            if (p.Direction != ParameterDirection.Out && p.Direction != ParameterDirection.Ref) continue;
+
+            if (p.IsNonSpanRefStruct)
+            {
+                if (!canInvokeRefStructSetter) continue;
+                safeName ??= GetCompositeShortSafeName(model);
+                nsPrefix ??= GetGlobalMockNamespacePrefix(model);
+                var delegateFqn = nsPrefix + GetOutRefSetterDelegateName(safeName, method, p);
+                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i}) && __v{i} is {delegateFqn} __d{i}) __d{i}({p.Direction.RefKeyword()} {p.Name});");
+            }
+            else if (p.SpanElementType is not null)
+            {
+                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
+            }
+            else
+            {
+                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
+            }
+        }
+    }
+
+    /// <summary>
+    /// True when the generator can emit a closed-signature delegate setter for non-span ref
+    /// struct out/ref params. Generic mock types and generic methods are excluded — their
+    /// param types may reference type parameters that aren't fully bound at delegate-decl
+    /// time and would require an <c>allows ref struct</c> constraint (C# 13, net9.0+ runtime).
+    /// Methods absent from the setup surface cannot register a setter and must not reference its
+    /// otherwise-unemitted delegate from the implementation.
+    /// </summary>
+    internal static bool SupportsClosedRefStructSetter(MockTypeModel model, MockMemberModel method)
+        => method.IsSignatureAccessibleFromAssembly
+            && !method.IsGenericMethod
+            && model.TypeParameters.Length == 0;
+
+    internal static string EmitArgsArrayVariable(CodeWriter writer, MockMemberModel method)
+    {
+        if (!method.HasRefStructParams)
+        {
+            return GetArgsArrayExpression(method, false);
+        }
+
+        writer.AppendLine("#if NET9_0_OR_GREATER");
+        writer.AppendLine($"var __args = {GetArgsArrayExpression(method, true)};");
+        writer.AppendLine("#else");
+        writer.AppendLine($"var __args = {GetArgsArrayExpression(method, false)};");
+        writer.AppendLine("#endif");
+        return "__args";
+    }
+
+    private static string GetArgsArrayExpression(MockMemberModel method, bool includeRefStructSentinels)
+    {
+        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+        if (includeRefStructSentinels)
+        {
+            if (nonOutParams.Count == 0) return "global::System.Array.Empty<object?>()";
+            var args = string.Join(", ", nonOutParams.Select(p => p.IsRefStruct ? "null" : p.Name));
+            return $"new object?[] {{ {args} }}";
+        }
+        var matchableParams = nonOutParams.Where(p => !p.IsRefStruct).ToList();
+        if (matchableParams.Count == 0) return "global::System.Array.Empty<object?>()";
+        var argsStr = string.Join(", ", matchableParams.Select(p => p.Name));
+        return $"new object?[] {{ {argsStr} }}";
+    }
+
+    /// <summary>
+    /// Gets the argument pass-through list for calling base.Method(), preserving ref/out/in directions.
+    /// </summary>
+    internal static string GetArgPassList(MockMemberModel method)
+    {
+        return string.Join(", ", method.Parameters.Select(p =>
+        {
+            var direction = p.Direction switch
+            {
+                ParameterDirection.Out => "out ",
+                ParameterDirection.Ref => "ref ",
+                ParameterDirection.In_Readonly => "in ",
+                _ => ""
+            };
+            return $"{direction}{p.Name}";
+        }));
+    }
+
+    public static string GetSafeName(string typeName)
+    {
+        return SanitizeIdentifier(typeName);
+    }
+
+    /// <summary>
+    /// Gets a safe name that includes additional interfaces for multi-interface mocks.
+    /// </summary>
+    public static string GetCompositeSafeName(MockTypeModel model)
+    {
+        var name = model.FullyQualifiedName;
+        if (model.AdditionalInterfaceNames.Length > 0)
+        {
+            name += "_" + string.Join('_', model.AdditionalInterfaceNames);
+        }
+        return GetSafeName(name);
+    }
+
+    /// <summary>
+    /// Gets a short safe name derived from just the type name (without namespace),
+    /// sanitized for generic type arguments. Produces readable names like
+    /// "IGreeter_" instead of "MyApp_IGreeter_" and "IFoo_SomeEnum_" instead of
+    /// "IFoo_Sandbox_SomeEnum_" when the type argument shares the outer namespace.
+    /// </summary>
+    public static string GetShortSafeName(MockTypeModel model)
+    {
+        var name = StripGlobalPrefix(model.FullyQualifiedName);
+        var hasNamespace = !IsGlobalNamespace(model.Namespace);
+
+        if (hasNamespace && name.StartsWith(model.Namespace + "."))
+            name = name.Substring(model.Namespace.Length + 1);
+
+        // Strip same-namespace qualifications from generic type arguments so that
+        // IFoo<global::Sandbox.SomeEnum> becomes IFoo<SomeEnum> (not IFoo<Sandbox.SomeEnum>).
+        // Cross-namespace args are kept for disambiguation.
+        if (hasNamespace)
+            name = name.Replace("global::" + model.Namespace + ".", "");
+
+        return SanitizeIdentifier(name);
+    }
+
+    /// <summary>Unqualified name of the generated delegate type used to plumb a non-span ref-struct out/ref value.</summary>
+    public static string GetOutRefSetterDelegateName(MockTypeModel model, MockMemberModel method, MockParameterModel param)
+        => GetOutRefSetterDelegateName(GetCompositeShortSafeName(model), method, param);
+
+    /// <summary>Variant that reuses a precomputed safe name to avoid recomputing it per param.</summary>
+    public static string GetOutRefSetterDelegateName(string safeName, MockMemberModel method, MockParameterModel param)
+        => $"{safeName}_{method.Name}_M{method.MemberId}_{MockMembersBuilder.ToPascalCase(param.Name)}_{param.Direction.PascalLabel()}Setter";
+
+    /// <summary>Fully qualified (<c>global::</c>-rooted) reference to the delegate.</summary>
+    public static string GetOutRefSetterDelegateFqn(MockTypeModel model, MockMemberModel method, MockParameterModel param)
+        => GetGlobalMockNamespacePrefix(model) + GetOutRefSetterDelegateName(model, method, param);
+
+    /// <summary>
+    /// Gets a composite short safe name that includes additional interfaces for multi-interface mocks.
+    /// For single-type mocks, identical to GetShortSafeName.
+    /// </summary>
+    public static string GetCompositeShortSafeName(MockTypeModel model)
+    {
+        var name = GetShortSafeName(model);
+        if (model.AdditionalInterfaceNames.Length > 0)
+        {
+            name += "_" + string.Join("_", model.AdditionalInterfaceNames.Select(StripNamespaceFromFqn));
+        }
+        return name;
+    }
+
+    /// <summary>
+    /// Strips the global:: prefix and namespace from a fully qualified name,
+    /// returning just the type name (sanitized for use in identifiers).
+    /// </summary>
+    internal static string StripNamespaceFromFqn(string fqn)
+    {
+        var name = StripGlobalPrefix(fqn);
+
+        // Find last dot not inside angle brackets to handle generic type arguments
+        var lastDotIndex = -1;
+        var depth = 0;
+        for (int i = 0; i < name.Length; i++)
+        {
+            var c = name[i];
+            if (c == '<') depth++;
+            else if (c == '>') depth--;
+            else if (c == '.' && depth == 0) lastDotIndex = i;
+        }
+        if (lastDotIndex >= 0)
+            name = name.Substring(lastDotIndex + 1);
+
+        return SanitizeIdentifier(name);
+    }
+
+    private static string StripGlobalPrefix(string name)
+        => name.StartsWith("global::") ? name.Substring("global::".Length) : name;
+
+    private static string SanitizeIdentifier(string name)
+        => IdentifierEscaping.SanitizeIdentifier(name);
+
+    /// <summary>
+    /// Root namespace for fallback-mode mock emission, used when the original namespace
+    /// already contains a colliding type. Forms either <c>TUnit.Mocks.Generated</c>
+    /// (global-namespace targets) or <c>TUnit.Mocks.Generated.{Namespace}</c>.
+    /// </summary>
+    internal const string FallbackNamespaceRoot = "TUnit.Mocks.Generated";
+
+    /// <summary>
+    /// Namespace for the user-facing setup/verify surface (the <c>_MockMemberExtensions</c> and
+    /// <c>_MockEventsExtensions</c> classes and the call wrappers they return). Extension members
+    /// are only found when their containing namespace is imported, and this one is a global using
+    /// (see TUnit.Mocks.targets) — emitting them beside the mocked type instead would silently hide
+    /// every setup unless the caller also imported that library's namespace. See issue #6494.
+    /// Generated type names here are derived from the fully qualified type name, so two mocked
+    /// types sharing a short name across namespaces stay distinct.
+    /// </summary>
+    internal const string MemberSurfaceNamespace = FallbackNamespaceRoot;
+
+    internal static bool IsGlobalNamespace(string ns)
+        => string.IsNullOrEmpty(ns) || ns == "<global namespace>";
+
+    internal static string SelectMockNamespace(string originalNamespace, bool useFallback)
+    {
+        if (useFallback)
+        {
+            return IsGlobalNamespace(originalNamespace)
+                ? FallbackNamespaceRoot
+                : $"{FallbackNamespaceRoot}.{originalNamespace}";
+        }
+
+        return IsGlobalNamespace(originalNamespace) ? "" : originalNamespace;
+    }
+
+    /// <summary>
+    /// Gets the generated namespace for mock types.
+    /// Default: emit into the same namespace as the mocked type. For global-namespace
+    /// types, returns an empty string — callers must skip the <c>namespace { }</c> block.
+    /// Fallback (when <see cref="MockTypeModel.UseFallbackNamespace"/> is true): emit
+    /// into <c>TUnit.Mocks.Generated</c> or <c>TUnit.Mocks.Generated.{Namespace}</c>.
+    /// </summary>
+    public static string GetMockNamespace(MockTypeModel model)
+        => SelectMockNamespace(model.Namespace, model.UseFallbackNamespace);
+
+    /// <summary>
+    /// Returns a <c>global::</c>-rooted namespace prefix suitable for prepending to a
+    /// type name. Yields <c>"global::"</c> when the mock namespace is empty (global
+    /// namespace) and <c>"global::{ns}."</c> otherwise. Use everywhere a builder
+    /// concatenates a namespace with a type name — concatenating directly with
+    /// <see cref="GetMockNamespace"/> produces invalid <c>global::.TypeName</c>
+    /// for globally-namespaced mock targets.
+    /// </summary>
+    public static string GetGlobalMockNamespacePrefix(MockTypeModel model)
+        => ToGlobalPrefix(GetMockNamespace(model));
+
+    internal static string ToGlobalPrefix(string mockNamespace)
+        => mockNamespace.Length == 0 ? "global::" : $"global::{mockNamespace}.";
+
+    /// <summary>
+    /// Gets the fully qualified type name to use as a generic type argument.
+    /// For types with static abstract members, returns the bridge interface FQN
+    /// (which resolves CS8920 by providing DIMs for all static abstract members).
+    /// For other types, returns the original FQN.
+    /// </summary>
+    public static string GetMockableTypeName(MockTypeModel model)
+    {
+        if (!model.HasStaticAbstractMembers) return model.FullyQualifiedName;
+        var shortName = GetCompositeShortSafeName(model);
+        var globalPrefix = GetGlobalMockNamespacePrefix(model);
+        return $"{globalPrefix}{GetGeneratedTypeName($"{shortName}Mockable", model)}";
+    }
+
+    /// <summary>
+    /// Emits the static engine assignment with a guard that detects multiple mocks of the same
+    /// static-abstract interface type within a single test context.
+    /// </summary>
+    private static void EmitIMockObjectProperty(CodeWriter writer)
+    {
+        writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
+        writer.AppendLine("global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }");
+        writer.AppendLine();
+    }
+
+    internal static void EmitStaticEngineAssignment(CodeWriter writer, MockTypeModel model, string safeName)
+    {
+        var staticEngineTypeName = GetGeneratedTypeName($"{safeName}StaticEngine", model);
+        writer.AppendLine($"if ({staticEngineTypeName}.Engine is not null)");
+        writer.OpenBrace();
+        writer.AppendLine($"throw new global::System.InvalidOperationException(");
+        writer.AppendLine($"    \"Multiple mocks of an interface with static abstract members cannot be created in the same test context. \" +");
+        writer.AppendLine($"    \"Static member calls are routed via a shared AsyncLocal engine, so only one mock instance per type is supported per test.\");");
+        writer.CloseBrace();
+        writer.AppendLine($"{staticEngineTypeName}.Engine = engine;");
+    }
+
+}

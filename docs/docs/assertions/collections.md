@@ -2,6 +2,7 @@
 sidebar_position: 6.5
 ---
 
+
 # Collection Assertions
 
 TUnit provides comprehensive assertions for testing collections, including membership, count, ordering, and equivalency checks. These assertions work with any `IEnumerable<T>`.
@@ -188,9 +189,8 @@ public async Task Count_With_Chaining()
 
     // For non-int collections, you can also use inline count assertions
     var names = new[] { "Alice", "Bob", "Charlie" };
-    await Assert.That(names)
-        .Count(c => c.IsEqualTo(3))
-        .And.Contains("Bob");
+    await Assert.That(names).Count().IsEqualTo(3);
+    await Assert.That(names).Contains("Bob");
 }
 ```
 
@@ -237,6 +237,13 @@ public async Task Collection_Has_Single_Item()
 
     await Assert.That(user.Name).IsEqualTo("Alice");
 }
+```
+
+Use `.Item` to continue assertions directly against the single item:
+
+```csharp
+var user = await Assert.That(users).HasSingleItem();
+await Assert.That(user.Name).IsEqualTo("Alice");
 ```
 
 ## Ordering Assertions
@@ -456,7 +463,7 @@ public async Task Equivalent_With_Predicate()
 
     await Assert.That(users1)
         .IsEquivalentTo(users2)
-        .Using((u1, u2) => u1.Name == u2.Name && u1.Age == u2.Age);
+        .Using((u1, u2) => u1!.Name == u2!.Name && u1.Age == u2.Age);
 }
 ```
 
@@ -733,7 +740,7 @@ public async Task API_Returns_Expected_Items()
 
     await Assert.That(response)
         .IsNotEmpty()
-        .And.All(u => u.Id > 0)
+        .And.All(u => u.Id is int id && id > 0)
         .And.All(u => !string.IsNullOrEmpty(u.Name));
 }
 ```

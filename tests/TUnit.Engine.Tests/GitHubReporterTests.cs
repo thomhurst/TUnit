@@ -1,0 +1,465 @@
+using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.TestHost;
+using Shouldly;
+using TUnit.Engine.Exceptions;
+using TUnit.Engine.Reporters;
+using TUnit.Engine.Reporters.Aggregation;
+
+namespace TUnit.Engine.Tests;
+
+[NotInParallel]
+public class GitHubReporterTests
+{
+    private readonly List<string> _tempFiles = [];
+
+    [Before(Test)]
+    public void ResetEnvironmentBeforeTest()
+    {
+        // The CI pipeline (RunEngineTestsModule) launches this process with
+        // TUNIT_DISABLE_GITHUB_REPORTER=true to prevent the test-runner's own
+        // GitHubReporter from writing to the step summary.  Clear ALL reporter-
+        // related env vars before every test so each test starts from a known
+        // clean state regardless of execution order.
+        Environment.SetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER", null);
+        Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", null);
+        Environment.SetEnvironmentVariable("TUNIT_GITHUB_REPORTER_STYLE", null);
+        Environment.SetEnvironmentVariable("GITHUB_ACTIONS", null);
+        Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", null);
+        Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", null);
+        Environment.SetEnvironmentVariable("GITHUB_SHA", null);
+    }
+
+    [After(Test)]
+    public void CleanupAfterTest()
+    {
+        ResetEnvironmentBeforeTest();
+
+        foreach (var file in _tempFiles)
+        {
+            try { File.Delete(file); } catch { /* best-effort cleanup */ }
+        }
+        _tempFiles.Clear();
+    }
+
+    [Test]
+    public async Task IsEnabledAsync_Should_Return_False_When_TUNIT_DISABLE_GITHUB_REPORTER_Is_Set()
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER", "true");
+        Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
+        Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", CreateTempFile());
+
+        var extension = new MockExtension();
+        var reporter = new GitHubReporter(extension);
+
+        // Act
+        var result = await reporter.IsEnabledAsync();
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task IsEnabledAsync_Should_Return_False_When_DISABLE_GITHUB_REPORTER_Is_Set()
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", "true");
+        Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
+        Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", CreateTempFile());
+
+        var extension = new MockExtension();
+        var reporter = new GitHubReporter(extension);
+
+        // Act
+        var result = await reporter.IsEnabledAsync();
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task IsEnabledAsync_Should_Return_False_When_Both_Environment_Variables_Are_Set()
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER", "true");
+        Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", "true");
+        Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
+        Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", CreateTempFile());
+
+        var extension = new MockExtension();
+        var reporter = new GitHubReporter(extension);
+
+        // Act
+        var result = await reporter.IsEnabledAsync();
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task IsEnabledAsync_Should_Return_False_When_GITHUB_ACTIONS_Is_Not_Set()
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER", null);
+        Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", null);
+        Environment.SetEnvironmentVariable("GITHUB_ACTIONS", null);
+        Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", CreateTempFile());
+
+        var extension = new MockExtension();
+        var reporter = new GitHubReporter(extension);
+
+        // Act
+        var result = await reporter.IsEnabledAsync();
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task ClearAggregatedSummary_Removes_Stale_Content()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+        GitHubSummaryRegion.ReplaceOrAppend(outputFile, "stale aggregate");
+
+        reporter.ClearAggregatedSummary();
+
+        File.ReadAllText(outputFile).ShouldNotContain("stale aggregate");
+    }
+
+    [Test]
+    public async Task ResetSessionState_Clears_Test_And_Presentation_State()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+        await FeedTestMessages(reporter,
+            CreatePassedTestMessage("retry", "CurrentTest", "Tests"),
+            CreatePassedTestMessage("retry", "CurrentTest", "Tests"),
+            CreatePassedTestMessage("stale", "StaleTest", "Tests"));
+        reporter.ArtifactUrl = "https://example.com/old-artifact";
+        reporter.ShowArtifactUploadTip = true;
+        reporter.SuppressPerSuiteSummary = true;
+
+        reporter.ResetSessionState();
+        await FeedTestMessages(reporter, CreatePassedTestMessage("retry", "CurrentTest", "Tests"));
+        await reporter.AfterRunAsync(0, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("**1 tests**");
+        output.ShouldNotContain("StaleTest");
+        output.ShouldNotContain("flaky");
+        reporter.ArtifactUrl.ShouldBeNull();
+        reporter.ShowArtifactUploadTip.ShouldBeFalse();
+        reporter.SuppressPerSuiteSummary.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Groups_Failures_By_Exception_Type()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+
+        await FeedTestMessages(reporter,
+            CreateFailedTestMessage("1", "TestA", "MyService", new NullReferenceException("obj was null")),
+            CreateFailedTestMessage("2", "TestB", "MyService", new NullReferenceException("another null")),
+            CreateFailedTestMessage("3", "TestC", "OtherService", new ArgumentException("bad arg"))
+        );
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("Failures by Cause");
+        output.ShouldContain("NullReferenceException (2 tests)");
+        output.ShouldContain("ArgumentException (1 test)");
+        output.ShouldContain("`MyService.TestA`");
+        output.ShouldContain("`MyService.TestB`");
+        output.ShouldContain("`OtherService.TestC`");
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Orders_Groups_By_Count_Descending()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+
+        await FeedTestMessages(reporter,
+            CreateFailedTestMessage("1", "T1", "Svc", new ArgumentException("a")),
+            CreateFailedTestMessage("2", "T2", "Svc", new NullReferenceException("n1")),
+            CreateFailedTestMessage("3", "T3", "Svc", new NullReferenceException("n2")),
+            CreateFailedTestMessage("4", "T4", "Svc", new NullReferenceException("n3"))
+        );
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        var nreIndex = output.IndexOf("NullReferenceException (3 tests)", StringComparison.Ordinal);
+        var argIndex = output.IndexOf("ArgumentException (1 test)", StringComparison.Ordinal);
+        nreIndex.ShouldBeLessThan(argIndex, "NullReferenceException group (3) should appear before ArgumentException group (1)");
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Groups_Timeouts_As_Timeout()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+
+        await FeedTestMessages(reporter,
+            CreateTimeoutTestMessage("1", "SlowTest1", "MyService"),
+            CreateTimeoutTestMessage("2", "SlowTest2", "MyService")
+        );
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("Timeout (2 tests)");
+        output.ShouldContain("`MyService.SlowTest1`");
+        output.ShouldContain("`MyService.SlowTest2`");
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Collapsible_Style_Wraps_Groups_In_Details()
+    {
+        var (reporter, outputFile) = await SetupReporter(GitHubReporterStyle.Collapsible);
+
+        await FeedTestMessages(reporter,
+            CreateFailedTestMessage("1", "T1", "Svc", new InvalidOperationException("oops"))
+        );
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("<details>");
+        output.ShouldContain("<summary>InvalidOperationException (1 test)</summary>");
+        output.ShouldContain("</details>");
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Full_Style_Renders_Groups_Expanded()
+    {
+        var (reporter, outputFile) = await SetupReporter(GitHubReporterStyle.Full);
+
+        await FeedTestMessages(reporter,
+            CreateFailedTestMessage("1", "T1", "Svc", new InvalidOperationException("oops"))
+        );
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("**InvalidOperationException (1 test)**");
+        // Full mode should not wrap failure groups in <details>
+        // The output contains <details> for other sections, but the failure group itself should use **bold**
+        output.ShouldContain("| `Svc.T1`");
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Shows_Common_Error_For_Each_Group()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+
+        await FeedTestMessages(reporter,
+            CreateFailedTestMessage("1", "T1", "Svc", new NullReferenceException("Object reference not set")),
+            CreateFailedTestMessage("2", "T2", "Svc", new NullReferenceException("Object reference not set")),
+            CreateFailedTestMessage("3", "T3", "Svc", new NullReferenceException("Different message"))
+        );
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("**Common error:**");
+        // Most frequent error message in the group wins
+        output.ShouldContain("Object reference not set");
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Caps_Group_At_50_Tests()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+
+        var messages = Enumerable.Range(1, 55)
+            .Select(i => CreateFailedTestMessage(i.ToString(), $"T{i}", "Svc", new NullReferenceException("n")))
+            .ToArray();
+        await FeedTestMessages(reporter, messages);
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("...and 5 more");
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Quick_Diagnosis_Includes_Timeouts()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+
+        await FeedTestMessages(reporter,
+            CreateFailedTestMessage("1", "T1", "Svc", new NullReferenceException("n")),
+            CreateTimeoutTestMessage("2", "SlowTest", "Svc")
+        );
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("Quick diagnosis:");
+        output.ShouldContain("Timeout");
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Unwraps_TestFailedException_For_Grouping()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+
+        var inner1 = new InvalidOperationException("Docker image not created");
+        var inner2 = new InvalidOperationException("Docker image not created");
+        await FeedTestMessages(reporter,
+            CreateFailedTestMessage("1", "T1", "Svc", new TestFailedException(inner1)),
+            CreateFailedTestMessage("2", "T2", "Svc", new TestFailedException(inner2))
+        );
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("InvalidOperationException (2 tests)");
+        output.ShouldNotContain("TestFailedException (");
+        output.ShouldContain("Docker image not created");
+        output.ShouldContain("2 × `InvalidOperationException`");
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Other_NonPassing_Tests_Remain_Separate()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+
+        await FeedTestMessages(reporter,
+            CreateFailedTestMessage("1", "FailedTest", "Svc", new Exception("err")),
+            CreatePassedTestMessage("2", "PassedTest", "Svc"),
+            CreateCancelledTestMessage("3", "CancelledTest", "Svc")
+        );
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        // Failures in grouped section
+        output.ShouldContain("Failures by Cause");
+        output.ShouldContain("`Svc.FailedTest`");
+        // Cancelled test in the other table
+        output.ShouldContain("Other non-passing tests");
+        output.ShouldContain("CancelledTest");
+    }
+
+    [Test]
+    public async Task AfterRunAsync_SourceLink_Uses_OneBased_Line_Without_Extra_Increment()
+    {
+        // Regression: source line numbers are already 1-based when they reach the reporter
+        // (via [CallerLineNumber] / Roslyn span + 1), so the GitHub blob link must NOT add
+        // another +1 — that pointed the link one line below the actual test.
+        var (reporter, outputFile) = await SetupReporter();
+        Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", "thomhurst/TUnit");
+        Environment.SetEnvironmentVariable("GITHUB_SHA", "abc123");
+        Environment.SetEnvironmentVariable("GITHUB_WORKSPACE", "/work/TUnit");
+        Environment.SetEnvironmentVariable("GITHUB_SERVER_URL", "https://github.com");
+
+        try
+        {
+            var message = new TestNodeUpdateMessage(
+                sessionUid: new SessionUid("test-session"),
+                testNode: new TestNode
+                {
+                    Uid = new TestNodeUid("loc-1"),
+                    DisplayName = "FailingTest",
+                    Properties = new PropertyBag(
+                        new FailedTestNodeStateProperty(new Exception("boom"), "boom"),
+                        new TestMethodIdentifierProperty(
+                            @namespace: "TestNamespace",
+                            assemblyFullName: "TestAssembly",
+                            typeName: "SampleTests",
+                            methodName: "FailingTest",
+                            parameterTypeFullNames: [],
+                            returnTypeFullName: "System.Void",
+                            methodArity: 0),
+                        new TestFileLocationProperty(
+                            "/work/TUnit/src/SampleTests.cs",
+                            new LinePositionSpan(new LinePosition(12, 0), new LinePosition(20, 0))))
+                });
+
+            await FeedTestMessages(reporter, message);
+            await reporter.AfterRunAsync(1, CancellationToken.None);
+
+            var output = await File.ReadAllTextAsync(outputFile);
+            output.ShouldContain("/thomhurst/TUnit/blob/abc123/src/SampleTests.cs#L12");
+            output.ShouldNotContain("#L13");
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", null);
+            Environment.SetEnvironmentVariable("GITHUB_SHA", null);
+            Environment.SetEnvironmentVariable("GITHUB_WORKSPACE", null);
+            Environment.SetEnvironmentVariable("GITHUB_SERVER_URL", null);
+        }
+    }
+
+    private string CreateTempFile()
+    {
+        var path = Path.GetTempFileName();
+        _tempFiles.Add(path);
+        return path;
+    }
+
+    private async Task<(GitHubReporter Reporter, string OutputFile)> SetupReporter(
+        GitHubReporterStyle style = GitHubReporterStyle.Collapsible)
+    {
+        var outputFile = CreateTempFile();
+        Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
+        Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", outputFile);
+
+        var reporter = new GitHubReporter(new MockExtension());
+        var enabled = await reporter.IsEnabledAsync();
+        enabled.ShouldBeTrue("Reporter should be enabled — check env var setup");
+        reporter.SetReporterStyle(style);
+        await reporter.BeforeRunAsync(CancellationToken.None);
+
+        return (reporter, outputFile);
+    }
+
+    private static async Task FeedTestMessages(GitHubReporter reporter, params TestNodeUpdateMessage[] messages)
+    {
+        foreach (var message in messages)
+        {
+            await reporter.ConsumeAsync(null!, message, CancellationToken.None);
+        }
+    }
+
+    private static TestNodeUpdateMessage CreateTestMessage(
+        string testId, string displayName, string typeName, IProperty stateProperty)
+    {
+        return new TestNodeUpdateMessage(
+            sessionUid: new SessionUid("test-session"),
+            testNode: new TestNode
+            {
+                Uid = new TestNodeUid(testId),
+                DisplayName = displayName,
+                Properties = new PropertyBag(
+                    stateProperty,
+                    new TestMethodIdentifierProperty(
+                        @namespace: "TestNamespace",
+                        assemblyFullName: "TestAssembly",
+                        typeName: typeName,
+                        methodName: displayName,
+                        parameterTypeFullNames: [],
+                        returnTypeFullName: "System.Void",
+                        methodArity: 0))
+            });
+    }
+
+    private static TestNodeUpdateMessage CreateFailedTestMessage(
+        string testId, string displayName, string typeName, Exception exception) =>
+        CreateTestMessage(testId, displayName, typeName, new FailedTestNodeStateProperty(exception, exception.Message));
+
+    private static TestNodeUpdateMessage CreateTimeoutTestMessage(
+        string testId, string displayName, string typeName) =>
+        CreateTestMessage(testId, displayName, typeName, new TimeoutTestNodeStateProperty("Test timed out after 30s"));
+
+    private static TestNodeUpdateMessage CreatePassedTestMessage(
+        string testId, string displayName, string typeName) =>
+        CreateTestMessage(testId, displayName, typeName, PassedTestNodeStateProperty.CachedInstance);
+
+#pragma warning disable CS0618, MTP0001 // Required to verify TUnit's cancelled-state reporting
+    private static TestNodeUpdateMessage CreateCancelledTestMessage(
+        string testId, string displayName, string typeName) =>
+        CreateTestMessage(testId, displayName, typeName, new CancelledTestNodeStateProperty());
+#pragma warning restore CS0618, MTP0001
+}

@@ -1,0 +1,362 @@
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using TUnit.Engine.Configuration;
+using TUnit.Engine.Helpers;
+using TUnit.Engine.Reporters.Html;
+
+namespace TUnit.Engine.Reporters.Aggregation;
+
+internal enum AggregationMode
+{
+    /// <summary>No aggregation — reporters behave per-process, as before.</summary>
+    Disabled,
+
+    /// <summary>
+    /// Sidecars are persisted to the shared directory and every finishing process
+    /// rewrites the merged HTML report and the marked GitHub step summary region.
+    /// For sibling processes within a single step (e.g. <c>dotnet test</c> on a solution).
+    /// </summary>
+    Cooperative,
+
+    /// <summary>
+    /// Sidecars and the merged HTML are persisted, but no step summary is written at all.
+    /// For pipelines that run test projects as separate steps: a final step runs
+    /// <c>tunit-report merge --github-summary</c> to emit the single block.
+    /// </summary>
+    Defer,
+}
+
+/// <summary>
+/// Cross-process report aggregation (issue #4522). Each TUnit process persists its
+/// <see cref="ReportData"/> as a JSON sidecar into a directory shared by all sibling
+/// processes of the run, then — under a cross-process file lock — re-renders the merged
+/// outputs from every sidecar present so far. The last process to finish naturally leaves
+/// the complete aggregate; no process ever needs to know whether it is the last one.
+/// </summary>
+internal sealed class ReportAggregator
+{
+    private const string SidecarSearchPattern = "*" + ReportDataJson.SidecarExtension;
+    private const string LockFileName = ".tunit-aggregate.lock";
+
+    // Bound lock contention to roughly ten seconds. Reporting must never hang test-suite
+    // completion; timed-out writers leave their sidecar for a later aggregate refresh.
+    private const int LockMaxAttempts = 30;
+    private const int LockRetryDelayMs = 250;
+
+    internal AggregationMode Mode { get; }
+    internal string Directory { get; }
+    internal string MergedReportPath => Path.Combine(Directory, ReportDataJson.MergedReportFileName);
+
+    private ReportAggregator(AggregationMode mode, string directory)
+    {
+        Mode = mode;
+        Directory = directory;
+    }
+
+    /// <summary>
+    /// Reads TUNIT_AGGREGATE_REPORTS / TUNIT_AGGREGATE_DIR and resolves the shared
+    /// directory. Aggregation is ON by default wherever a shared directory is resolvable
+    /// (GitHub Actions, or an explicit TUNIT_AGGREGATE_DIR); plain local runs silently
+    /// no-op. Returns <see langword="null"/> when aggregation is off or no shared
+    /// directory can be derived.
+    /// </summary>
+    internal static ReportAggregator? TryCreateFromEnvironment(Func<string, string?> getEnv)
+    {
+        var raw = getEnv(EnvironmentConstants.AggregateReports)?.Trim().ToLowerInvariant();
+
+        var mode = raw switch
+        {
+            "0" or "false" or "no" or "off" or "disabled" or "none" => AggregationMode.Disabled,
+            "defer" => AggregationMode.Defer,
+            // Unset, or any affirmative value (1/true/yes/cooperative): cooperative merge.
+            _ => AggregationMode.Cooperative,
+        };
+
+        if (mode == AggregationMode.Disabled)
+        {
+            return null;
+        }
+
+        var directory = ResolveDirectory(getEnv);
+        if (directory is null)
+        {
+            // Only warn when aggregation was explicitly requested — with the on-by-default
+            // behaviour, every plain local run lands here and must stay silent.
+            if (!string.IsNullOrEmpty(raw))
+            {
+                Console.WriteLine(
+                    $"Warning: {EnvironmentConstants.AggregateReports} is set but no shared directory could be resolved. " +
+                    $"Set {EnvironmentConstants.AggregateDirectory} to a directory shared by all test processes. Report aggregation is disabled for this run.");
+            }
+            return null;
+        }
+
+        return new ReportAggregator(mode, directory);
+    }
+
+    private static string? ResolveDirectory(Func<string, string?> getEnv)
+    {
+        var explicitDir = getEnv(EnvironmentConstants.AggregateDirectory);
+        if (!string.IsNullOrWhiteSpace(explicitDir))
+        {
+            return Path.GetFullPath(explicitDir!);
+        }
+
+        // On GitHub Actions a job-scoped shared directory can be derived automatically:
+        // RUNNER_TEMP is shared by every process in the job and cleaned between jobs.
+        // Run id + attempt + job keep re-runs and sibling jobs on the same runner apart.
+        if (getEnv(EnvironmentConstants.GitHubActions) is "true"
+            && getEnv(EnvironmentConstants.RunnerTemp) is { Length: > 0 } runnerTemp)
+        {
+            var runId = getEnv(EnvironmentConstants.GitHubRunId) ?? "0";
+            var attempt = getEnv(EnvironmentConstants.GitHubRunAttempt) ?? "1";
+            var job = getEnv(EnvironmentConstants.GitHubJob) ?? "job";
+            return Path.Combine(runnerTemp, "tunit-aggregate",
+                PathValidator.SanitizeFileName($"run-{runId}-{attempt}-{job}"));
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Persists this process's already-serialized report data into the shared directory.
+    /// The file name is stable per suite (assembly + report path hash), so a re-run within
+    /// the same scope overwrites rather than duplicates. Takes bytes rather than
+    /// <see cref="ReportData"/> so callers writing the sidecar to more than one location
+    /// serialize only once.
+    /// </summary>
+    internal string WriteSidecar(byte[] sidecarUtf8Json, string assemblyName, string suiteSalt)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+
+        var path = GetSidecarPath(assemblyName, suiteSalt);
+        AtomicFile.WriteAllBytes(path, sidecarUtf8Json);
+        return path;
+    }
+
+    internal void WritePendingSidecar(byte[] sidecarUtf8Json, string assemblyName, string suiteSalt)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        var path = GetPendingSidecarPath(assemblyName, suiteSalt);
+        AtomicFile.WriteAllBytes(path, sidecarUtf8Json);
+    }
+
+    internal void DeletePendingSidecar(string assemblyName, string suiteSalt)
+    {
+        var path = GetPendingSidecarPath(assemblyName, suiteSalt);
+        File.Delete(path);
+    }
+
+    internal string? ReadEffectiveSidecarGeneration(string assemblyName, string suiteSalt)
+    {
+        var pendingPath = GetPendingSidecarPath(assemblyName, suiteSalt);
+        var sidecarPath = File.Exists(pendingPath)
+            ? pendingPath
+            : GetSidecarPath(assemblyName, suiteSalt);
+        return File.Exists(sidecarPath)
+            ? ReportDataJson.GetPublicationGeneration(File.ReadAllBytes(sidecarPath))
+            : null;
+    }
+
+    internal void ExcludeSidecar(string assemblyName, string suiteSalt)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        var currentGeneration = ReadEffectiveSidecarGeneration(assemblyName, suiteSalt);
+        AtomicFile.WriteAllText(GetExclusionMarkerPath(assemblyName, suiteSalt), currentGeneration ?? "");
+    }
+
+    internal void ExcludeSidecarIfGenerationMatches(string assemblyName, string suiteSalt, string? expectedGeneration)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        var currentGeneration = ReadEffectiveSidecarGeneration(assemblyName, suiteSalt);
+        if (expectedGeneration is null
+            ? currentGeneration is not null
+            : !expectedGeneration.Equals(currentGeneration, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        AtomicFile.WriteAllText(GetExclusionMarkerPath(assemblyName, suiteSalt), currentGeneration ?? "");
+    }
+
+    internal void IncludeSidecar(string assemblyName, string suiteSalt)
+    {
+        File.Delete(GetExclusionMarkerPath(assemblyName, suiteSalt));
+    }
+
+    internal IDisposable BeginSidecarPublication(string assemblyName, string suiteSalt)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        var lockPath = GetPublishingMarkerPath(assemblyName, suiteSalt);
+        return new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+    }
+
+    internal IDisposable? TryAcquireSidecarPublication(string assemblyName, string suiteSalt)
+    {
+        try
+        {
+            return BeginSidecarPublication(assemblyName, suiteSalt);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    internal async Task<IDisposable?> AcquireSidecarPublicationAsync(
+        string assemblyName,
+        string suiteSalt,
+        CancellationToken cancellationToken)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        return await AcquireFileLockAsync(
+            GetPublishingMarkerPath(assemblyName, suiteSalt),
+            cancellationToken,
+            "Warning: Report sidecar publication lock timed out; keeping the local per-suite report.");
+    }
+
+    internal bool HasSidecarState(string assemblyName, string suiteSalt)
+    {
+        if (!System.IO.Directory.Exists(Directory))
+        {
+            return false;
+        }
+
+        var sidecarPath = GetSidecarPath(assemblyName, suiteSalt);
+        var pendingPath = GetPendingSidecarPath(assemblyName, suiteSalt);
+        return File.Exists(sidecarPath)
+               || File.Exists(pendingPath)
+               || File.Exists(sidecarPath + ReportDataJson.SidecarExclusionExtension)
+               || File.Exists(sidecarPath + ReportDataJson.SidecarPublishingExtension);
+    }
+
+    /// <summary>
+    /// Reads every sidecar currently present in the shared directory. Unreadable or
+    /// foreign files are skipped — a crashed sibling must not break the merge.
+    /// </summary>
+    internal List<ReportData> ReadAllSidecars()
+    {
+        var results = new List<ReportData>();
+        if (!System.IO.Directory.Exists(Directory))
+        {
+            return results;
+        }
+
+        // When TUNIT_AGGREGATE_DIR is pointed at a directory that also receives the local
+        // sidecar (e.g. a project's TestResults), the same suite exists twice under two
+        // names — byte-identical output of one writer, so dedupe on a content hash, same
+        // as the tunit-report tool does.
+        var seenDigests = new HashSet<string>(StringComparer.Ordinal);
+        using var sha = SHA256.Create();
+        var effectiveSidecars = ReportDataJson.SelectEffectiveSidecars(
+            System.IO.Directory.GetFiles(Directory, SidecarSearchPattern));
+        foreach (var file in effectiveSidecars)
+        {
+            try
+            {
+                if (ReportDataJson.IsSidecarPublicationInProgress(file))
+                {
+                    continue;
+                }
+
+                var bytes = File.ReadAllBytes(file);
+                if (!ReportDataJson.IsSidecarExcluded(file, bytes)
+                    && seenDigests.Add(Convert.ToBase64String(sha.ComputeHash(bytes)))
+                    && ReportDataJson.TryDeserialize((ReadOnlyMemory<byte>)bytes) is { } data)
+                {
+                    results.Add(data);
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // Locked mid-write by a sibling (it re-merges after us anyway) or not
+                // readable by this process — one bad file must not abort the whole merge.
+            }
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Acquires the cross-process aggregation lock. Every writer performs its whole
+    /// read-merge-write cycle under this lock, so merges never interleave. Returns
+    /// <see langword="null"/> after a bounded wait so reporting cannot hang the run.
+    /// </summary>
+    internal async Task<IDisposable?> AcquireLockAsync(CancellationToken cancellationToken)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        return await AcquireFileLockAsync(
+            Path.Combine(Directory, LockFileName),
+            cancellationToken,
+            "Warning: Report aggregation lock timed out; keeping per-suite reports and deferring aggregate refresh.");
+    }
+
+    private static async Task<IDisposable?> AcquireFileLockAsync(
+        string lockPath,
+        CancellationToken cancellationToken,
+        string timeoutWarning)
+    {
+        for (var attempt = 1; attempt <= LockMaxAttempts; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                return new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                if (attempt == LockMaxAttempts)
+                {
+                    break;
+                }
+
+                await Task.Delay(LockRetryDelayMs + Random.Shared.Next(0, 100), cancellationToken);
+            }
+        }
+
+        Console.WriteLine(timeoutWarning);
+        return null;
+    }
+
+    /// <summary>
+    /// Regenerates the merged HTML report from all sidecars present. Caller holds the lock.
+    /// </summary>
+    internal void WriteMergedHtml(IReadOnlyList<ReportData> suites)
+    {
+        if (suites.Count == 0)
+        {
+            return;
+        }
+
+        var merged = ReportDataMerger.Merge(suites);
+        var html = HtmlReportGenerator.GenerateHtml(merged);
+        AtomicFile.WriteAllText(MergedReportPath, html);
+    }
+
+    private static string ShortHash(string value)
+    {
+        using var sha = SHA256.Create();
+        var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(value));
+        return BitConverter.ToString(hash, 0, 4).Replace("-", "").ToLowerInvariant();
+    }
+
+    private string GetExclusionMarkerPath(string assemblyName, string suiteSalt)
+    {
+        return GetSidecarPath(assemblyName, suiteSalt) + ReportDataJson.SidecarExclusionExtension;
+    }
+
+    private string GetPublishingMarkerPath(string assemblyName, string suiteSalt)
+    {
+        return GetSidecarPath(assemblyName, suiteSalt) + ReportDataJson.SidecarPublishingExtension;
+    }
+
+    private string GetPendingSidecarPath(string assemblyName, string suiteSalt)
+        => ReportDataJson.GetPendingSidecarPath(GetSidecarPath(assemblyName, suiteSalt));
+
+    private string GetSidecarPath(string assemblyName, string suiteSalt)
+    {
+        var fileName = $"{PathValidator.SanitizeFileName(assemblyName)}-{ShortHash(suiteSalt)}{ReportDataJson.SidecarExtension}";
+        return Path.Combine(Directory, fileName);
+    }
+}

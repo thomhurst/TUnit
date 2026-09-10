@@ -2,6 +2,7 @@
 sidebar_position: 2
 ---
 
+
 # Equality and Comparison Assertions
 
 TUnit provides comprehensive assertions for testing equality and comparing values. These assertions work with any type that implements the appropriate comparison interfaces.
@@ -40,22 +41,6 @@ public async Task Not_Equal()
 
     var username = GetUsername();
     await Assert.That(username).IsNotEqualTo("admin");
-}
-```
-
-### EqualTo (Alias)
-
-`EqualTo()` is an alias for `IsEqualTo()` for more natural chaining:
-
-```csharp
-[Test]
-public async Task Using_EqualTo_Alias()
-{
-    var numbers = new[] { 1, 2, 3 };
-
-    await Assert.That(numbers)
-        .Count().IsEqualTo(3)
-        .And.Contains(2);
 }
 ```
 
@@ -361,7 +346,7 @@ public async Task Custom_Equality_Predicate()
 
     await Assert.That(people1)
         .IsEquivalentTo(people2)
-        .Using((p1, p2) => string.Equals(p1.Name, p2.Name,
+        .Using((p1, p2) => string.Equals(p1!.Name, p2!.Name,
                           StringComparison.OrdinalIgnoreCase));
 }
 ```

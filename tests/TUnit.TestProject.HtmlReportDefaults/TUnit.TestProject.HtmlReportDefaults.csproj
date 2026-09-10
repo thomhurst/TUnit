@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="..\..\eng\TestProject.props" />
+
+    <PropertyGroup>
+        <TargetFrameworks>net10.0</TargetFrameworks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\TUnit\TUnit.csproj" />
+    </ItemGroup>
+
+    <Import Project="..\..\eng\TestProject.targets" />
+
+</Project>

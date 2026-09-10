@@ -1,83 +1,38 @@
-# TUnit Development Guide
+# TUnit Agent Guide
 
-## Environment Requirements
+Use the SDK selected by `global.json`. Shared build settings live in `Directory.Build.props` (including preview C# and target frameworks).
 
-- .NET SDK 10.0+ (required by `global.json`; multi-targets `net8.0;net9.0;net10.0`)
+## Project constraints
 
-## CRITICAL RULES
+- Core engine metadata collection changes must behave identically in `src/TUnit.Core.SourceGenerator` and `src/TUnit.Engine`; test both modes. Execution after metadata collection uses a shared path, so this does not require duplicate implementations for assertions, analyzers, or shared execution code.
+- Use `Microsoft.Testing.Platform`, not VSTest APIs (`Microsoft.VisualStudio.TestPlatform`).
+- Preserve Native AOT and trimming compatibility. Annotate reflection as needed and verify AOT publishing when changing reflection paths.
+- Minimize allocations and cache reflection in discovery, execution, and data-generation hot paths. Prefer `ValueTask` for potentially synchronous operations; measure before and after performance changes.
+- Do not block on async. Prefer `[GenerateAssertion]` for new assertions; use existing implementations in `src/TUnit.Assertions` as examples.
 
-1. **Dual-Mode** - Changes to core engine metadata collection MUST work in both source-gen (`TUnit.Core.SourceGenerator`) AND reflection (`TUnit.Engine`) modes.
+## Validation
 
-2. **Snapshot Testing** - Changes to source generator output or public APIs require running snapshot tests. Commit `.verified.txt` files. NEVER commit `.received.txt`.
+- Run tests relevant to the change before pushing code.
+- Generator output changes require the affected generator's snapshot tests; public API changes require `tests/TUnit.PublicAPI`. Review snapshot differences, commit intentional updates as `.verified.txt`, and never commit `.received.txt`.
+- Never run `tests/TUnit.TestProject` without a targeted `--treenode-filter`: it contains intentional failures. Run separate filters rather than joining paths with `|`, which can match unintended tests.
+- C# documentation fences are compiled in CI with warnings as errors. See [workflows](.claude/docs/workflows.md#documentation-snippets) when editing them.
 
-3. **No VSTest** - Use `Microsoft.Testing.Platform` only. NEVER use `Microsoft.VisualStudio.TestPlatform`.
+## Git workflow
 
-4. **Performance First** - Minimize allocations in hot paths. Cache reflection. Use `ValueTask` for potentially-sync operations.
+- Use a feature branch and a ready-for-review PR by default; create drafts only when requested. Trivial documentation, agent-instruction, comment, and typo changes may go directly to `main`.
+- Use `pwsh scripts/Remove-MergedWorktrees.ps1` for squash-safe merged-worktree cleanup; `-WhatIf` reports removal candidates and preserved files.
+- When asked to clean up worktrees, remove those for merged or `[gone]` branches without per-item confirmation. Preserve branches unless deletion is requested.
+- Verify review findings against the code before fixing them. If a reviewer or user reaffirms a disputed finding after one reasoned objection, implement it.
 
-5. **AOT Compatible** - All code must work with Native AOT. Annotate reflection with `[DynamicallyAccessedMembers]`.
+## References
 
-See `.claude/docs/mandatory-rules.md` for full details.
+Read only as needed:
 
-## IMPORTANT WARNINGS
+- [Build, test, benchmark, and documentation commands](.claude/docs/workflows.md)
+- [Architecture and source locations](.claude/docs/project-structure.md)
 
-**NEVER run `TUnit.TestProject` without filters.** Many tests are designed to fail.
-```bash
-cd TUnit.TestProject
-dotnet test --treenode-filter "/*/*/SpecificClass/*"
-```
-See `.claude/docs/workflows.md` for filter syntax and details.
+## Local worktree lifecycle
 
-## Quick Fix: Snapshot Tests Failing
+Use `scripts/AgentLocks.ps1` from the shared checkout for work-item ownership (`pr-<N>` or `issue-<N>`). Set `$agentLocks` to its absolute path, acquire before creating the checkout, and use a stable `-OwnerId` outside Codex. Git and Docker are required locally.
 
-```bash
-# Review changes, then accept if intentional:
-# (Run from test project directory, e.g., TUnit.Core.SourceGenerator.Tests)
-
-# Linux/macOS:
-for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
-
-# Windows:
-for %f in (*.received.txt) do move /Y "%f" "%~nf.verified.txt"
-
-git add *.verified.txt
-```
-
-## Code Principles
-
-- **Use modern C# and .NET features.** `LangVersion` is `preview` — use latest syntax and APIs.
-- **Prefer `[GenerateAssertion]`** for new assertions. See `.claude/docs/patterns.md`.
-- **NEVER block on async** - No `.Result` or `.GetAwaiter().GetResult()`.
-
-## Decision Framework
-
-> "Does this make TUnit faster, more modern, more reliable, or more enjoyable to use?"
-
-## Branch & PR Workflow
-
-- Default: create a feature branch, open a PR, iterate via review feedback. Don't push code changes directly to `main`.
-- Exception — direct push to `main` is fine for trivial, low-risk changes that don't need review: doc tweaks (README, CLAUDE.md, `.claude/**`), agent-instruction updates, comment-only edits, typo fixes. Use judgment; if in doubt, branch + PR.
-- If the user says "push to main" while currently on `main`, confirm intent: do they mean "push my branch and merge", or "push the current branch which happens to be `main`"?
-
-## Worktree Cleanup
-
-- When asked to clean up worktrees, proceed with `git worktree remove` for `[gone]` or merged branches without asking for per-item confirmation; report what was done.
-- Preserve branches by default — only delete when explicitly asked.
-
-## PR Review Iteration
-
-- Verify each review finding against the code before applying a fix — don't blindly accept reviewer suggestions.
-- Run tests locally before pushing.
-- If you disagree with a review item, push back **once** with concrete reasoning. If the reviewer or user reaffirms, implement it instead of continuing to argue.
-- Before commit, check that related tests, snapshots, and downstream files in the same module were updated alongside the source change.
-
-## Output Limits
-
-- Keep individual responses under the 500-token output limit. For long results, split across turns or write to a file and reference it.
-
-## Further Documentation
-
-- `.claude/docs/mandatory-rules.md` - Full rule details
-- `.claude/docs/workflows.md` - Commands, checklists, filters
-- `.claude/docs/patterns.md` - Code examples
-- `.claude/docs/project-structure.md` - Project map
-- `.claude/docs/troubleshooting.md` - Common issues
+Immediately after checkout, run `pwsh $agentLocks renew -LockName $lockName -Worktree $worktree` once to register its path. Stop owned processes, archive needed evidence outside the worktree, then release from the shared checkout in `finally`. Release removes clean checkouts even for open PRs; branches and detached commits remain available for re-checkout. See [local worktree lifecycle](scripts/WorktreeLifecycle.md) for preservation rules and crash behavior.

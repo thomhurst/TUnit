@@ -1,3 +1,6 @@
+
+<!-- doc-test-shared -->
+
 # Complex Test Infrastructure Orchestration
 
 TUnit provides a property injection system that can help orchestrate complex test infrastructure setups. This page demonstrates how TUnit handles test setups that typically require manual coordination in traditional testing approaches.
@@ -35,7 +38,7 @@ public class InMemoryKafka : IAsyncInitializer, IAsyncDisposable
     [ClassDataSource<DockerNetwork>(Shared = SharedType.PerTestSession)]
     public required DockerNetwork DockerNetwork { get; init; }
 
-    public KafkaContainer Container => field ??= new KafkaBuilder()
+    public KafkaContainer Container => field ??= new KafkaBuilder("confluentinc/cp-kafka:8.2.0")
         .WithNetwork(DockerNetwork.Instance)  // Uses the injected network
         .Build();
 
@@ -57,7 +60,7 @@ public class KafkaUI : IAsyncInitializer, IAsyncDisposable
     [ClassDataSource<InMemoryKafka>(Shared = SharedType.PerTestSession)]
     public required InMemoryKafka Kafka { get; init; }
 
-    public IContainer Container => field ??= new ContainerBuilder()
+    public IContainer Container => field ??= new ContainerBuilder("confluentinc/cp-enterprise-control-center:8.2.0")
         .WithNetwork(DockerNetwork.Instance)
         .WithImage("provectuslabs/kafka-ui:latest")
         .WithPortBinding(8080, 8080)
@@ -114,6 +117,13 @@ public class WebApplicationFactory : WebApplicationFactory<Program>, IAsyncIniti
         });
     }
 }
+
+public class InMemoryRedis : IAsyncInitializer, IAsyncDisposable
+{
+    public RedisContainer Container { get; } = new RedisBuilder("redis:8.2").Build();
+    public Task InitializeAsync() => Container.StartAsync();
+    public ValueTask DisposeAsync() => Container.DisposeAsync();
+}
 ```
 
 ## Writing Clean Tests
@@ -121,7 +131,7 @@ public class WebApplicationFactory : WebApplicationFactory<Program>, IAsyncIniti
 Your actual test code remains clean and focused:
 
 ```csharp
-public class Tests : TestsBase
+public class Tests
 {
     [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
     public required WebApplicationFactory WebApplicationFactory { get; init; }
@@ -179,7 +189,7 @@ public class InMemoryPostgreSqlDatabase : IAsyncInitializer, IAsyncDisposable
     public required DockerNetwork DockerNetwork { get; init; }
 
 
-    public PostgreSqlContainer Container => field ??= new PostgreSqlBuilder()
+    public PostgreSqlContainer Container => field ??= new PostgreSqlBuilder("postgres:18")
         .WithUsername("User")
         .WithPassword("Password")
         .WithDatabase("TestDatabase")
@@ -204,30 +214,32 @@ public class InMemoryPostgreSqlDatabase : IAsyncInitializer, IAsyncDisposable
 
 For EF Core Code First applications, use per-test PostgreSQL schemas instead of per-test table names. This avoids fighting EF Core's table naming conventions and provides complete isolation using `GetIsolatedName("schema")`.
 
-See the full pattern with `IModelCacheKeyFactory`, `EnsureCreatedAsync()`, and schema cleanup in the [ASP.NET Core Integration Testing](aspnet.md#per-test-schema-isolation-with-ef-core) guide, or the working example in `TUnit.Example.Asp.Net.TestProject/EfCore/`.
+See the full pattern with `IModelCacheKeyFactory`, `EnsureCreatedAsync()`, and schema cleanup in the [ASP.NET Core Integration Testing](aspnet.md#per-test-schema-isolation-with-ef-core) guide, or the working example in `examples/TUnit.Example.Asp.Net.TestProject/EfCore/`.
 
 ## Comparison with Other Frameworks
 
 ### Without TUnit (Traditional Approach)
 ```csharp
+using Xunit;
+
 public class TestFixture : IAsyncLifetime
 {
     private INetwork? _network;
     private KafkaContainer? _kafka;
     private IContainer? _kafkaUi;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         // Manual orchestration required
         _network = new NetworkBuilder().Build();
         await _network.CreateAsync();
 
-        _kafka = new KafkaBuilder()
+        _kafka = new KafkaBuilder("confluentinc/cp-kafka:8.2.0")
             .WithNetwork(_network)
             .Build();
         await _kafka.StartAsync();
 
-        _kafkaUi = new ContainerBuilder()
+        _kafkaUi = new ContainerBuilder("provectuslabs/kafka-ui:latest")
             .WithNetwork(_network)
             .WithEnvironment("KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS",
                 $"{_kafka.Name}:9093")  // Manual wiring
@@ -235,7 +247,7 @@ public class TestFixture : IAsyncLifetime
         await _kafkaUi.StartAsync();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         // Manual cleanup in reverse order
         if (_kafkaUi != null) await _kafkaUi.DisposeAsync();

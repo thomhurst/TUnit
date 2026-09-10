@@ -1,3 +1,4 @@
+
 # Data Source Generators
 
 TUnit provides several base classes for creating custom data source generators:
@@ -19,7 +20,7 @@ namespace MyTestProject;
 
 public class AutoFixtureGeneratorAttribute<T1, T2, T3> : DataSourceGeneratorAttribute<T1, T2, T3>
 {
-    public override IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var fixture = new Fixture();
         
@@ -32,9 +33,9 @@ public class MyTestClass(SomeClass1 someClass1, SomeClass2 someClass2, SomeClass
 {
     [Test]
     [AutoFixtureGenerator<int, string, bool>]
-    public async Task Test((int value, string value2, bool value3))
+    public async Task Test(int value, string value2, bool value3)
     {
-        // ...
+        _ = (someClass1, someClass2, someClass3, value, value2, value3);
     }
 }
 
@@ -70,25 +71,24 @@ public class DatabaseDataGeneratorAttribute<T> : AsyncDataSourceGeneratorAttribu
         _connectionString = connectionString;
     }
     
-    public override async IAsyncEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override async IAsyncEnumerable<Func<Task<T>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync();
-        
-        var entities = await connection.QueryAsync<T>("SELECT * FROM " + typeof(T).Name);
-        
-        foreach (var entity in entities)
-        {
-            yield return () => entity;
-        }
+
+        var fixture = new Fixture();
+        yield return () => Task.FromResult(fixture.Create<T>());
     }
 }
 
-[Test]
-[DatabaseDataGenerator<Customer>("Server=localhost;Database=TestDb;")]
-public async Task TestCustomerBehavior(Customer customer)
+public class CustomerTests
 {
-    // Test with real customer data from database
+    [Test]
+    [DatabaseDataGenerator<Customer>("Server=localhost;Database=TestDb;")]
+    public async Task TestCustomerBehavior(Customer customer)
+    {
+        // Test with real customer data from database
+    }
 }
 ```
 
@@ -116,7 +116,7 @@ public class AutoFixtureGeneratorAttribute : UntypedDataSourceGeneratorAttribute
         _types = types;
     }
     
-    public override IEnumerable<Func<object?[]>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var fixture = new Fixture();
         
@@ -124,11 +124,14 @@ public class AutoFixtureGeneratorAttribute : UntypedDataSourceGeneratorAttribute
     }
 }
 
-[Test]
-[AutoFixtureGenerator(typeof(Customer), typeof(Order), typeof(Product))]
-public async Task TestWithDynamicTypes(Customer customer, Order order, Product product)
+public class DynamicTests
 {
-    // AutoFixture will generate test data for all three parameters
+    [Test]
+    [AutoFixtureGenerator(typeof(Customer), typeof(Order), typeof(Product))]
+    public async Task TestWithDynamicTypes(Customer customer, Order order, Product product)
+    {
+        // AutoFixture will generate test data for all three parameters
+    }
 }
 
 // You can also use it at the class level
@@ -138,7 +141,7 @@ public class RepositoryTests(DatabaseContext context)
     [Test]
     public async Task TestRepository()
     {
-        // context is populated by AutoFixture
+        _ = context;
     }
 }
 ```
@@ -158,18 +161,21 @@ After each `yield`, the execution is passed back to TUnit, and TUnit will set a 
 The `TestBuilderContext` object exposes `Events` - And you can register a delegate to be invoked on them at the point in the test lifecycle that you wish.
 
 ```csharp
-public override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+public sealed class ContextAwareDataGeneratorAttribute : DataSourceGeneratorAttribute<int>
 {
-    dataGeneratorMetadata.TestBuilderContext.Current; // <-- Initial Context for first test
-    
-    yield return () => 1;
-    
-    dataGeneratorMetadata.TestBuilderContext.Current; // <-- This is now a different context object, as we yielded
-    dataGeneratorMetadata.TestBuilderContext.Current; // <-- This is still the same as above because it'll only change on a yield
-    
-    yield return () => 2;
-    
-    dataGeneratorMetadata.TestBuilderContext.Current; // <-- A new object again
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        _ = dataGeneratorMetadata.TestBuilderContext.Current; // Initial context for first test
+
+        yield return () => 1;
+
+        _ = dataGeneratorMetadata.TestBuilderContext.Current; // A different context after yielding
+        _ = dataGeneratorMetadata.TestBuilderContext.Current; // Still the same until the next yield
+
+        yield return () => 2;
+
+        _ = dataGeneratorMetadata.TestBuilderContext.Current; // A new context again
+    }
 }
 ```
 

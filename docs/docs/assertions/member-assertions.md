@@ -2,6 +2,7 @@
 sidebar_position: 12
 ---
 
+
 # Member Assertions
 
 The `.Member()` method allows you to assert on object properties while maintaining the parent object's context for chaining. This is useful when you need to validate multiple properties of the same object.
@@ -136,9 +137,9 @@ public async Task NestedObjectAssertions()
         .IsNotNull()
         .And.Member(c => c.Name, name => name.IsEqualTo("TechCorp"))
         .And.Member(c => c.Address.City, city => city.IsEqualTo("Seattle"))
-        .And.Member(c => c.Address.ZipCode, zip => zip.Matches(@"^\d{5}$"))
-        .And.Member(c => c.Employees, employees => employees
-            .Count().IsBetween(100, 500)
-            .And.All(e => e.Email.EndsWith("@techcorp.com")));
+        .And.Member(c => c.Address.ZipCode, zip => zip.Matches(@"^\d{5}$"));
+
+    await Assert.That(company.Employees.Length).IsBetween(1, 500);
+    await Assert.That(company.Employees).All(e => e.Email.EndsWith("@example.com"));
 }
 ```

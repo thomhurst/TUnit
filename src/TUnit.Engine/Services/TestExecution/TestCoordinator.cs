@@ -1,0 +1,498 @@
+using System.Linq;
+using TUnit.Core;
+using TUnit.Core.Exceptions;
+using TUnit.Core.Logging;
+using TUnit.Core.Settings;
+using TUnit.Core.Tracking;
+using TUnit.Engine.Helpers;
+using TUnit.Engine.Interfaces;
+using TUnit.Engine.Logging;
+
+namespace TUnit.Engine.Services.TestExecution;
+
+/// <summary>
+/// Coordinates test execution by orchestrating focused services.
+/// Single Responsibility: Test execution orchestration.
+/// </summary>
+internal sealed class TestCoordinator : ITestCoordinator
+{
+    private readonly TestStateManager _stateManager;
+    private readonly ITUnitMessageBus _messageBus;
+    private readonly TestContextRestorer _contextRestorer;
+    private readonly TestExecutor _testExecutor;
+    private readonly TestInitializer _testInitializer;
+    private readonly ObjectTracker _objectTracker;
+    private readonly TUnitFrameworkLogger _logger;
+    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
+
+    public TestCoordinator(
+        TestStateManager stateManager,
+        ITUnitMessageBus messageBus,
+        TestContextRestorer contextRestorer,
+        TestExecutor testExecutor,
+        TestInitializer testInitializer,
+        ObjectTracker objectTracker,
+        TUnitFrameworkLogger logger,
+        EventReceiverOrchestrator eventReceiverOrchestrator)
+    {
+        _stateManager = stateManager;
+        _messageBus = messageBus;
+        _contextRestorer = contextRestorer;
+        _testExecutor = testExecutor;
+        _testInitializer = testInitializer;
+        _objectTracker = objectTracker;
+        _logger = logger;
+        _eventReceiverOrchestrator = eventReceiverOrchestrator;
+    }
+
+    // Dedup happens in TestRunner via its own ConcurrentDictionary<string, TCS<bool>> —
+    // it's the single entry point for both scheduler and dependency recursion, so a second
+    // guard here would just double the TCS/dict allocations per test.
+    //
+    // Note: the previous pure-forward ExecuteTestAsync → ExecuteTestInternalAsync wrapper
+    // was collapsed to eliminate one async state machine per test (#5714).
+    public async ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _stateManager.MarkRunning(test);
+            // Await InProgress so back-pressure from MTP's bounded channel spreads publishes
+            // across each test task rather than fanning 1000+ fire-and-forget writers into
+            // the channel at once.
+            await _messageBus.InProgress(test.Context).ConfigureAwait(false);
+
+            _contextRestorer.RestoreContext(test);
+
+            // Fallback registration for tests that bypass the eager PrepareForExecution pass
+            // (e.g. dynamically queued tests added mid-session). Gated so normally scheduled
+            // tests don't pay a second eligible-object scan per test.
+            if (!test.Context.EventObjectsRegistered)
+            {
+                _eventReceiverOrchestrator.RegisterReceivers(test.Context);
+            }
+
+            // Check if test was already marked as skipped during registration
+            // (e.g., by a derived SkipAttribute evaluated in OnTestRegistered).
+            // This must be checked before any instance creation or retry/timeout logic.
+            if (!string.IsNullOrEmpty(test.Context.SkipReason))
+            {
+                _stateManager.MarkSkipped(test, test.Context.SkipReason!);
+                await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            // Check if test was already marked as failed during registration (e.g., property injection failure)
+            // If so, skip execution and report the failure immediately
+            var existingResult = test.Context.Execution.Result;
+            if (existingResult?.State == TestState.Failed)
+            {
+                var exception = existingResult.Exception ?? new InvalidOperationException("Test failed during registration");
+                _stateManager.MarkFailed(test, exception);
+                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            // Clear Result and timing from any previous execution (important for repeated tests)
+            test.Context.Execution.Result = null;
+            test.Context.TestStart = null;
+            test.Context.Execution.TestEnd = null;
+            test.Context.Timings.Clear();
+
+            TestContext.Current = test.Context;
+
+            // Note: test.Context._dependencies is already populated during discovery
+            // in TestBuilder.InvokePostResolutionEventsAsync after dependencies are resolved
+
+            // Fast path: skip RetryHelper whenever there are no retries configured. Timeout is
+            // applied inside TestExecutor.ExecuteAsync regardless, so the retry wrapper is pure
+            // overhead when retryLimit == 0.
+            // Note: retryLimit == 0 means "no retries" (run once), not "unlimited retries"
+            var retryLimit = test.Context.Metadata.TestDetails.RetryLimit;
+
+            if (retryLimit == 0)
+            {
+                // No-retry fast path: the lifecycle body is inlined here to eliminate an
+                // extra async state machine on the hot path (#5714). The retry branch still
+                // dispatches through ExecuteTestLifecycleAsync because RetryHelper needs a
+                // callable delegate.
+                test.Context.CurrentRetryAttempt = 0;
+
+                // Check if this test should be skipped before creating the class instance.
+                // Derived SkipAttribute subclasses set SkipReason during OnTestRegistered (registration phase),
+                // and creating the instance can trigger expensive data source initialization (e.g., starting a
+                // WebApplicationFactory) that would fail or waste resources for tests that should be skipped.
+                if (!string.IsNullOrEmpty(test.Context.SkipReason))
+                {
+                    _stateManager.MarkSkipped(test, test.Context.SkipReason!);
+
+                    await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+                    await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    // Run Before(TestSession/Assembly/Class) hooks (incl. BeforeEvery) before constructing
+                    // the instance so the documented lifecycle contract holds — hooks precede the
+                    // constructor (#6192). Hook tasks are cached, so ExecuteAsync's later awaits are no-ops.
+                    await _testExecutor.EnsureClassAndAssemblyHooksExecutedAsync(test, cancellationToken).ConfigureAwait(false);
+
+                    // Flow AsyncLocals captured by Before(Assembly)/Before(Class) hooks into the
+                    // constructor. Must run here (not inside the gate above) so the restored ambient
+                    // ExecutionContext is still in effect when CreateInstanceAsync runs the constructor.
+                    test.Context.ClassContext.RestoreExecutionContext();
+
+                    test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
+
+                    // Drop the cached eligible-objects list so any later consumer rebuilds it with the new ClassInstance included — the initial list was built before the instance existed.
+                    test.Context.CachedEligibleEventObjects = null;
+
+                    // Check if this test should be skipped (after creating instance).
+                    // This handles basic [Skip] attributes that use SkippedTestInstance as a sentinel,
+                    // and any SkipReason set during instance creation.
+                    if (test.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
+                        !string.IsNullOrEmpty(test.Context.SkipReason))
+                    {
+                        _stateManager.MarkSkipped(test, test.Context.SkipReason ?? "Test was skipped");
+
+                        await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+                        await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            _testInitializer.PrepareTest(test);
+                            test.Context.RestoreExecutionContext();
+                            var testTimeout = ResolveAndPropagateTestTimeout(test);
+                            await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken, testTimeout).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            await DisposeTestInstanceWithSpanAsync(test).ConfigureAwait(false);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Retry wrapper path. Timeout is handled inside TestExecutor.ExecuteAsync,
+                // wrapping only the test body (not hooks or data source initialization) — fixes #4772.
+                await RetryHelper.ExecuteWithRetry(test.Context,
+                    () => ExecuteTestLifecycleAsync(test, cancellationToken)).ConfigureAwait(false);
+            }
+
+            _stateManager.MarkCompleted(test);
+
+        }
+        catch (SkipTestException ex)
+        {
+            test.Context.SkipReason = ex.Message;
+            _stateManager.MarkSkipped(test, ex.Message);
+
+            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _stateManager.MarkFailed(test, ex);
+        }
+        finally
+        {
+            // Flush console interceptors only when the test actually wrote something. The
+            // interceptor sets HasCapturedConsoleOutput on first write, so skipping when the
+            // flag is false avoids two async state machines per test in the common case of a
+            // passing test that produced no output. A test that fires-and-forgets writes via
+            // Task.Run without awaiting is already racing with termination under the old
+            // unconditional flush — the flag preserves identical semantics for that case
+            // (writes land -> flag set -> flush happens).
+            if (test.Context.HasCapturedConsoleOutput)
+            {
+                try
+                {
+                    await Console.Out.FlushAsync().ConfigureAwait(false);
+                    await Console.Error.FlushAsync().ConfigureAwait(false);
+                }
+                catch (Exception flushEx)
+                {
+                    await _logger.LogErrorAsync($"Error flushing console output for {test.TestId}: {flushEx}").ConfigureAwait(false);
+                }
+            }
+
+            // Stay null on the success path — materializing the list only when something actually fails
+            // saves ~56 bytes per passing test (and passing is the overwhelming majority).
+            var cleanupExceptions = await _objectTracker.UntrackObjects(test.Context).ConfigureAwait(false);
+
+#if NET
+            // Per-test cleanup has completed. Keep the test activity open for final status
+            // and export, but detach it from the ambient async-local context so shared
+            // class/assembly/session cleanup does not accidentally inherit the test trace.
+            TUnitActivitySource.DetachTestActivityFromAmbientContext();
+#endif
+
+            var testClass = test.Metadata.TestClassType;
+            var testAssembly = testClass.Assembly;
+            var hookExceptions = await _testExecutor.ExecuteAfterClassAssemblyHooks(test, testClass, testAssembly, CancellationToken.None).ConfigureAwait(false);
+
+            if (hookExceptions is { Count: > 0 })
+            {
+                foreach (var ex in hookExceptions)
+                {
+                    await _logger.LogErrorAsync($"Error executing After hooks for {test.TestId}: {ex}").ConfigureAwait(false);
+                }
+
+                if (cleanupExceptions is null)
+                {
+                    cleanupExceptions = hookExceptions;
+                }
+                else
+                {
+                    cleanupExceptions.AddRange(hookExceptions);
+                }
+            }
+
+            // Invoke Last event receivers for class and assembly
+            try
+            {
+                await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(
+                    test.Context,
+                    test.Context.ClassContext,
+                    CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in last test in class event receiver for {test.TestId}: {ex}").ConfigureAwait(false);
+                (cleanupExceptions ??= []).Add(ex);
+            }
+
+            try
+            {
+                await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(
+                    test.Context,
+                    test.Context.ClassContext.AssemblyContext,
+                    CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in last test in assembly event receiver for {test.TestId}: {ex}").ConfigureAwait(false);
+                (cleanupExceptions ??= []).Add(ex);
+            }
+
+            try
+            {
+                await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(
+                    test.Context,
+                    test.Context.ClassContext.AssemblyContext.TestSessionContext,
+                    CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in last test in session event receiver for {test.TestId}: {ex}").ConfigureAwait(false);
+                (cleanupExceptions ??= []).Add(ex);
+            }
+
+            // If any cleanup exceptions occurred, mark the test as failed
+            if (cleanupExceptions is { Count: > 0 })
+            {
+                var aggregatedException = cleanupExceptions.Count == 1
+                    ? cleanupExceptions[0]
+                    : new AggregateException("One or more errors occurred during test cleanup", cleanupExceptions);
+
+                _stateManager.MarkFailed(test, aggregatedException);
+            }
+
+#if NET
+            TestExecutor.FinishTestActivity(test);
+#endif
+
+            try
+            {
+                switch (test.State)
+                {
+                    case TestState.NotStarted:
+                    case TestState.WaitingForDependencies:
+                    case TestState.Queued:
+                    case TestState.Running:
+                        // This shouldn't happen
+                        await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+                        break;
+                    case TestState.Passed:
+                        await _messageBus.Passed(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+                        break;
+                    case TestState.Timeout:
+                    case TestState.Failed:
+                        TestSessionContext.Current?.MarkFailure();
+                        await _messageBus.Failed(test.Context, test.Context.Execution.Result?.Exception!, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+                        break;
+                    case TestState.Skipped:
+                        var skipReason = test.Context.SkipReason
+                                         ?? (test.Context.Execution.Result?.IsOverridden == true ? test.Context.Execution.Result.OverrideReason : null)
+                                         ?? "Skipped";
+                        await _messageBus.Skipped(test.Context, skipReason).ConfigureAwait(false);
+                        break;
+                    case TestState.Cancelled:
+                        TestSessionContext.Current?.MarkFailure();
+                        await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            finally
+            {
+                // Dispose the per-test cancellation sources now that the body and every teardown phase — After(Test)
+                // hooks, instance/OnDispose, object cleanup, After(Class)/After(Assembly) and Last receivers —
+                // have all run. Keeping them alive this long means a token copy captured mid-body stayed backed
+                // by a live source throughout teardown instead of throwing ObjectDisposedException (#6339).
+                test.Context.DisposeLinkedCancellationTokenSources();
+                test.Context.TimeoutCancellationSource?.Dispose();
+                test.Context.TimeoutCancellationSource = null;
+
+                test.Context.RemoveFromRegistry();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Core test lifecycle execution: instance creation, initialization, execution, and disposal.
+    /// Timeout is passed through to TestExecutor.ExecuteAsync, which applies it only to the test
+    /// body — hooks and data source initialization run outside the timeout scope (fixes #4772).
+    /// Used only by the retry path (RetryHelper requires a Func&lt;ValueTask&gt;); the no-retry
+    /// fast path inlines the body directly inside ExecuteTestAsync to skip one state machine.
+    /// </summary>
+    private async ValueTask ExecuteTestLifecycleAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        // Check if this test should be skipped before creating the class instance.
+        // Derived SkipAttribute subclasses set SkipReason during OnTestRegistered (registration phase),
+        // and creating the instance can trigger expensive data source initialization (e.g., starting a
+        // WebApplicationFactory) that would fail or waste resources for tests that should be skipped.
+        if (!string.IsNullOrEmpty(test.Context.SkipReason))
+        {
+            _stateManager.MarkSkipped(test, test.Context.SkipReason!);
+
+            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+            return;
+        }
+
+        // Run Before(TestSession/Assembly/Class) hooks (incl. BeforeEvery) before constructing the
+        // instance so hooks precede the constructor (#6192). Cached, so ExecuteAsync re-awaits are no-ops.
+        await _testExecutor.EnsureClassAndAssemblyHooksExecutedAsync(test, cancellationToken).ConfigureAwait(false);
+
+        // Flow AsyncLocals captured by Before(Assembly)/Before(Class) hooks into the constructor.
+        // Must run here (not inside the gate above) so the restored ambient ExecutionContext is still
+        // in effect when CreateInstanceAsync runs the constructor.
+        test.Context.ClassContext.RestoreExecutionContext();
+
+        test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
+
+        // Drop the cached eligible-objects list so any later consumer rebuilds it with the new ClassInstance included — the initial list was built before the instance existed.
+        test.Context.CachedEligibleEventObjects = null;
+
+        // Check if this test should be skipped (after creating instance).
+        // This handles basic [Skip] attributes that use SkippedTestInstance as a sentinel,
+        // and any SkipReason set during instance creation.
+        if (test.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
+            !string.IsNullOrEmpty(test.Context.SkipReason))
+        {
+            _stateManager.MarkSkipped(test, test.Context.SkipReason ?? "Test was skipped");
+
+            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+            return;
+        }
+
+        try
+        {
+            _testInitializer.PrepareTest(test);
+            test.Context.RestoreExecutionContext();
+            var testTimeout = ResolveAndPropagateTestTimeout(test);
+            await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken, testTimeout).ConfigureAwait(false);
+        }
+        finally
+        {
+            await DisposeTestInstanceWithSpanAsync(test).ConfigureAwait(false);
+        }
+    }
+
+    // Propagation is required so TUnitMessageBus.GetFailureStateProperty (which gates on
+    // TestDetails.Timeout != null) classifies a DefaultTestTimeout-triggered failure as
+    // TimeoutTestNodeStateProperty rather than a generic error.
+    private static TimeSpan? ResolveAndPropagateTestTimeout(AbstractExecutableTest test)
+    {
+        var details = test.Context.Metadata.TestDetails;
+        var testTimeout = TUnitSettings.Default.Timeouts.GetEffectiveTestTimeout(details.Timeout);
+        if (testTimeout is not null && details.Timeout is null)
+        {
+            details.Timeout = testTimeout;
+        }
+        return testTimeout;
+    }
+
+    /// <summary>
+    /// Disposes the test instance and fires OnDispose callbacks, wrapped in an OpenTelemetry
+    /// activity span for trace timeline visibility.
+    /// Parented under the test case activity when available so cleanup stays in the same
+    /// per-test trace seen by external backends and the HTML report.
+    /// </summary>
+    private Task DisposeTestInstanceWithSpanAsync(AbstractExecutableTest test)
+    {
+#if NET
+        // When no OTEL listener is attached, skip the RunWithSpanAsync wrapper — it would
+        // otherwise allocate a Func<Task> closure and a state machine per test for nothing.
+        if (TUnitActivitySource.Source.HasListeners())
+        {
+            var classType = test.Context.Metadata.TestDetails.ClassType;
+            return TUnitActivitySource.RunWithSpanAsync(
+                $"dispose {TUnitActivitySource.GetReadableTypeName(classType)}",
+                test.Context.ClassContext.Activity?.Context ?? default,
+                [
+                    new(TUnitActivitySource.TagTestId, test.Context.Id),
+                    new(TUnitActivitySource.TagTestClass, classType.FullName),
+                    new(TUnitActivitySource.TagTraceScope, TUnitActivitySource.GetScopeTag(SharedType.None))
+                ],
+                () => DisposeTestInstanceCoreAsync(test));
+        }
+#endif
+        return DisposeTestInstanceCoreAsync(test);
+    }
+
+    private async Task DisposeTestInstanceCoreAsync(AbstractExecutableTest test)
+    {
+        // Fire OnDispose callbacks — each retry gets a fresh instance
+        var onDispose = test.Context.InternalEvents.OnDispose;
+        if (onDispose?.InvocationList != null)
+        {
+            foreach (var invocation in onDispose.InvocationList)
+            {
+                try
+                {
+                    await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
+                }
+                catch (Exception disposeEx)
+                {
+#if NET
+                    TUnitActivitySource.RecordException(System.Diagnostics.Activity.Current, disposeEx);
+#endif
+                    await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}").ConfigureAwait(false);
+                }
+            }
+        }
+
+        try
+        {
+            await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
+        }
+        catch (Exception disposeEx)
+        {
+#if NET
+            TUnitActivitySource.RecordException(System.Diagnostics.Activity.Current, disposeEx);
+#endif
+            await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}").ConfigureAwait(false);
+        }
+    }
+}

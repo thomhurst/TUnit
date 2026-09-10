@@ -1,77 +1,5 @@
 [
   {
-    "date": "2026-03-06",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-07",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-08",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-09",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-10",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-11",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-12",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-13",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-14",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-15",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-16",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-18",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-19",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-20",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-21",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-22",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-23",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-03-24",
-    "environment": "Ubuntu"
-  },
-  {
     "date": "2026-03-25",
     "environment": "Ubuntu"
   },
@@ -357,6 +285,78 @@
   },
   {
     "date": "2026-05-31",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-06-07",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-06-14",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-06-21",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-06-28",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-06-29",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-07-05",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-07-12",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-07-16",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-07-19",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-07-21",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-07-26",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-08-02",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-08-09",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-08-16",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-08-17",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-08-23",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-08-30",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-09-06",
     "environment": "Ubuntu"
   }
 ]

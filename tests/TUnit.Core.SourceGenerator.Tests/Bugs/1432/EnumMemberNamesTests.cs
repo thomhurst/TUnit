@@ -1,0 +1,15 @@
+
+namespace TUnit.Core.SourceGenerator.Tests.Bugs._1432;
+
+internal class EnumMemberNamesTests : TestsBase
+{
+    [Test]
+    public Task Test() => RunTest(Path.Combine(Git.TestsDirectory.FullName,
+            "TUnit.TestProject",
+            "Bugs",
+            "1432",
+            "EnumMemberNamesTests.cs"),
+        async generatedFiles =>
+        {
+            });
+}

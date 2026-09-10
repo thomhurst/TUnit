@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\src\TUnit.Engine\TUnit.Engine.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\eng\strongname.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.Aspire\TUnit.Aspire.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Engine\TUnit.Engine.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Assertions\TUnit.Assertions.csproj" />
+    <ProjectReference Include="..\TUnit.Aspire.Tests.AppHost\TUnit.Aspire.Tests.AppHost.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\src\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Testing" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
+  </ItemGroup>
+
+</Project>

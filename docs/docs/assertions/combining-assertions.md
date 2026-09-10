@@ -2,6 +2,7 @@
 sidebar_position: 11
 ---
 
+
 # Combining Assertions
 
 TUnit provides several ways to combine multiple assertions within a single test: chaining with `.And` and `.Or`, and grouping with `Assert.Multiple()`.
@@ -17,8 +18,7 @@ public async Task MyTest()
     var result = Add(1, 2);
 
     await Assert.That(result)
-        .IsNotNull()
-        .And.IsPositive()
+        .IsPositive()
         .And.IsEqualTo(3);
 }
 ```

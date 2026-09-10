@@ -2,6 +2,7 @@
 sidebar_position: 20
 ---
 
+
 # Distributed Tracing
 
 This page is for users wiring TUnit up to a tracing backend like Seq, Jaeger, Tempo, or the Aspire dashboard. If you just want a working setup, start with [OpenTelemetry Tracing](/docs/examples/opentelemetry). If you're hitting problems, jump straight to its [Troubleshooting](/docs/examples/opentelemetry#troubleshooting) section.
@@ -54,12 +55,14 @@ Install [`TUnit.OpenTelemetry`](/docs/examples/opentelemetry#option-a-zero-confi
 Point the OTLP exporter at Seq's ingestion endpoint:
 
 ```csharp
-.AddOtlpExporter(opts =>
-{
-    opts.Endpoint = new Uri("http://localhost:5341/ingest/otlp/v1/traces");
-    opts.Protocol = OtlpExportProtocol.HttpProtobuf;
-    opts.Headers = "X-Seq-ApiKey=your-key";
-})
+using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+    .AddOtlpExporter(opts =>
+    {
+        opts.Endpoint = new Uri("http://localhost:5341/ingest/otlp/v1/traces");
+        opts.Protocol = OtlpExportProtocol.HttpProtobuf;
+        opts.Headers = "X-Seq-ApiKey=your-key";
+    })
+    .Build();
 ```
 
 Useful Seq queries:
@@ -74,7 +77,9 @@ test.case.result.status = 'fail'           -- only failures
 ### Jaeger or Tempo
 
 ```csharp
-.AddOtlpExporter(opts => opts.Endpoint = new Uri("http://localhost:4317"))
+using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+    .AddOtlpExporter(opts => opts.Endpoint = new Uri("http://localhost:4317"))
+    .Build();
 ```
 
 Jaeger groups by trace ID, so each test appears as a separate trace. Use the tag search box (`tunit.session.id="<id>"`) to find all traces from one run.
@@ -170,6 +175,7 @@ Read the endpoint from `AutoReceiver.Endpoint` and plumb it into the SUT:
 using TUnit.OpenTelemetry;
 
 var endpoint = AutoReceiver.Endpoint;    // e.g. "http://127.0.0.1:41234"
+using var process = new Process { StartInfo = new ProcessStartInfo("dotnet") };
 process.StartInfo.EnvironmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = endpoint;
 process.StartInfo.EnvironmentVariables["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/protobuf";
 ```
@@ -177,9 +183,7 @@ process.StartInfo.EnvironmentVariables["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/pr
 For the receiver to associate incoming spans with the right test, register the SUT's trace ID before it runs:
 
 ```csharp
-using TUnit.Engine.Reporters.Html;
-
-ActivityCollector.Current?.RegisterExternalTrace(Activity.Current!.TraceId.ToString());
+TestContext.Current!.RegisterTrace(Activity.Current!.TraceId);
 ```
 
 Spans arriving on a trace ID that wasn't registered are dropped (protects the report from unrelated traffic on shared runners). Each registered trace is capped at 100 external spans.

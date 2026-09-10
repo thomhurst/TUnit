@@ -43,7 +43,7 @@ public class FrameworkVersionColumn : IColumn
         {
             "TUnit" or "TUnit_AOT" or "Build_TUnit" => GetTUnitVersion(),
             "xUnit" or "Build_xUnit" => GetXUnitVersion(),
-            "xUnit3" or "Build_xUnit3" => GetXUnit3Version(),
+            "xUnit3" or "xUnit3_AOT" or "Build_xUnit3" => GetXUnit3Version(),
             "NUnit" or "Build_NUnit" => GetNUnitVersion(),
             "MSTest" or "Build_MSTest" => GetMSTestVersion(),
             _ => "Unknown"

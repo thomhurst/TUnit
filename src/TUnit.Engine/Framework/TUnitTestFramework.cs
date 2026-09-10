@@ -1,0 +1,168 @@
+using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.Testing.Platform.Capabilities.TestFramework;
+using Microsoft.Testing.Platform.Extensions;
+using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
+using Microsoft.Testing.Platform.Requests;
+using TUnit.Core;
+using TUnit.Engine.Services;
+
+namespace TUnit.Engine.Framework;
+
+/// Unified test framework with ExecutionContext handling and global exception management
+internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
+{
+    private readonly IExtension _extension;
+    private readonly IServiceProvider _frameworkServiceProvider;
+    private readonly ITestFrameworkCapabilities _capabilities;
+    private readonly ConcurrentDictionary<string, TUnitServiceProvider> _serviceProvidersPerSession = new();
+    private readonly IRequestHandler _requestHandler;
+
+    public TUnitTestFramework(
+        IExtension extension,
+        IServiceProvider frameworkServiceProvider,
+        ITestFrameworkCapabilities capabilities)
+    {
+        _extension = extension;
+        _frameworkServiceProvider = frameworkServiceProvider;
+        _capabilities = capabilities;
+        _requestHandler = new TestRequestHandler();
+    }
+
+    public string Uid => _extension.Uid;
+    public string Version => _extension.Version;
+    public string DisplayName => _extension.DisplayName;
+    public string Description => _extension.Description;
+    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
+
+    public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
+
+    public Task<CreateTestSessionResult> CreateTestSessionAsync(CreateTestSessionContext context)
+    {
+        return Task.FromResult(new CreateTestSessionResult { IsSuccess = true });
+    }
+
+    #if NET8_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "Reflection mode is not used in AOT scenarios")]
+    #endif
+    public async Task ExecuteRequestAsync(ExecuteRequestContext context)
+    {
+        try
+        {
+            var serviceProvider = GetOrCreateServiceProvider(context);
+
+            // Install contexts before init runs so anything reading GlobalContext.Current
+            // sees the populated instance instead of the lazy fallback (null TestFilter).
+            GlobalContext.Current = serviceProvider.ContextProvider.GlobalContext;
+            GlobalContext.Current.GlobalLogger = serviceProvider.Logger;
+            BeforeTestDiscoveryContext.Current = serviceProvider.ContextProvider.BeforeTestDiscoveryContext;
+            TestDiscoveryContext.Current = serviceProvider.ContextProvider.TestDiscoveryContext;
+            // Expose the engine-wide abort token on the session context so session-scoped
+            // fixtures (containers, Aspire apps, etc.) can observe run cancellation and tear
+            // themselves down.
+            serviceProvider.ContextProvider.TestSessionContext.SessionCancellationToken = serviceProvider.CancellationToken.Token;
+            TestSessionContext.Current = serviceProvider.ContextProvider.TestSessionContext;
+
+            serviceProvider.Initializer.Initialize();
+
+            await serviceProvider.HookDelegateBuilder.InitializeAsync();
+
+            // Link the platform's run-abort token (IDE stop, CI runner cancel, --abort) so it
+            // flows through the engine token to session-scoped fixtures, alongside the OS signal
+            // handlers (Ctrl+C / process exit) wired up inside Initialise.
+            serviceProvider.CancellationToken.Initialise(context.CancellationToken);
+
+            await _requestHandler.HandleRequestAsync((TestExecutionRequest) context.Request, serviceProvider, context, GetFilter(context));
+        }
+        catch (Exception e) when (IsCancellationException(e))
+        {
+            var message = context.CancellationToken.IsCancellationRequested
+                ? "The test run was cancelled."
+                : "Test execution stopped due to fail-fast.";
+            await GetOrCreateServiceProvider(context).Logger.LogErrorAsync(message);
+
+            // Re-throw is safe here — MTP handles OperationCanceledException specially.
+            throw;
+        }
+        catch (Exception e)
+        {
+            var serviceProvider = GetOrCreateServiceProvider(context);
+            await serviceProvider.Logger.LogErrorAsync(e);
+            await ReportUnhandledException(context, e);
+
+            // Do NOT re-throw — MTP hosts expect errors via CloseTestSessionResult,
+            // not propagated exceptions. Re-throwing breaks JSON-RPC transports (#5263).
+            serviceProvider.SessionFailed = true;
+        }
+        finally
+        {
+            context.Complete();
+        }
+    }
+
+    public async Task<CloseTestSessionResult> CloseTestSessionAsync(CloseTestSessionContext context)
+    {
+        bool isSuccess = true;
+
+        if (_serviceProvidersPerSession.TryRemove(context.SessionUid.Value, out var serviceProvider))
+        {
+            if (serviceProvider.SessionFailed)
+            {
+                isSuccess = false;
+            }
+
+            await serviceProvider.DisposeAsync().ConfigureAwait(false);
+        }
+
+        return new CloseTestSessionResult { IsSuccess = isSuccess };
+    }
+
+    private TUnitServiceProvider GetOrCreateServiceProvider(ExecuteRequestContext context)
+    {
+        return _serviceProvidersPerSession.GetOrAdd(
+            context.Request.Session.SessionUid.Value,
+            _ => new TUnitServiceProvider(
+                _extension,
+                context,
+                GetFilter(context),
+                context.MessageBus,
+                _frameworkServiceProvider,
+                _capabilities));
+    }
+
+    private static bool IsCancellationException(Exception e)
+    {
+        return e is TaskCanceledException or OperationCanceledException;
+    }
+
+    private async Task ReportUnhandledException(ExecuteRequestContext context, Exception exception)
+    {
+        await context.MessageBus.PublishAsync(
+            dataProducer: this,
+            data: new TestNodeUpdateMessage(
+                sessionUid: context.Request.Session.SessionUid,
+                testNode: new TestNode
+                {
+                    DisplayName = $"Unhandled exception - {exception.GetType().Name}: {exception.Message}",
+                    Uid = new TestNodeUid(Guid.NewGuid().ToString()),
+                    Properties = new PropertyBag(new ErrorTestNodeStateProperty(exception))
+                }));
+    }
+
+    private ITestExecutionFilter? GetFilter(ExecuteRequestContext context)
+    {
+        if (context.Request is RunTestExecutionRequest runRequest)
+        {
+            return runRequest.Filter;
+        }
+
+        if (context.Request is DiscoverTestExecutionRequest discoverTestExecutionRequest)
+        {
+            return discoverTestExecutionRequest.Filter;
+        }
+
+        return null;
+    }
+}

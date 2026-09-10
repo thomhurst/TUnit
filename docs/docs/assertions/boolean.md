@@ -2,6 +2,7 @@
 sidebar_position: 3.5
 ---
 
+
 # Boolean Assertions
 
 TUnit provides simple, expressive assertions for testing boolean values. These assertions work with both `bool` and `bool?` (nullable boolean) types.
@@ -35,7 +36,7 @@ public async Task Value_Is_False()
     var isExpired = CheckIfExpired(futureDate);
     await Assert.That(isExpired).IsFalse();
 
-    var isEmpty = list.Count == 0;
+    var isEmpty = list.Length == 0;
     await Assert.That(isEmpty).IsFalse();
 }
 ```
@@ -131,10 +132,10 @@ public async Task Chained_With_Other_Assertions()
 [Test]
 public async Task Email_Validation()
 {
-    var isValid = EmailValidator.Validate("test@example.com");
+    var isValid = ValidateEmail("test@example.com");
     await Assert.That(isValid).IsTrue();
 
-    var isInvalid = EmailValidator.Validate("not-an-email");
+    var isInvalid = ValidateEmail("not-an-email");
     await Assert.That(isInvalid).IsFalse();
 }
 ```
@@ -159,7 +160,7 @@ public async Task User_Permissions()
 [Test]
 public async Task Service_State()
 {
-    var service = new BackgroundService();
+    var service = new ExampleBackgroundService();
 
     await Assert.That(service.IsRunning).IsFalse();
 

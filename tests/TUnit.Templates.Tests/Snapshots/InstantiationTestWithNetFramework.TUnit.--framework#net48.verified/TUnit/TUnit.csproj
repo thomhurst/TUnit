@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TUnit" Version="0.0.0-scrubbed" />
+    <PackageReference Include="Polyfill" Version="0.0.0-scrubbed" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { type JSX, useEffect, useState } from 'react';
 import Link from '@docusaurus/Link';
 import styles from './styles.module.css';
 
-export default function BenchmarkHighlight(): JSX.Element {
+export default function BenchmarkHighlight(): JSX.Element | null {
   const [speedups, setSpeedups] = useState<any>(null);
 
   useEffect(() => {

@@ -1,0 +1,350 @@
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using Microsoft.Testing.Platform.Capabilities.TestFramework;
+using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Configurations;
+using Microsoft.Testing.Platform.Extensions;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
+using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.Messages;
+using Microsoft.Testing.Platform.Requests;
+using Microsoft.Testing.Platform.Services;
+using TUnit.Core;
+using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
+using TUnit.Core.Tracking;
+using TUnit.Engine.Building;
+using TUnit.Engine.Building.Collectors;
+using TUnit.Engine.Configuration;
+using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Discovery;
+using TUnit.Engine.Extensions;
+using TUnit.Engine.Helpers;
+using TUnit.Engine.Interfaces;
+using TUnit.Engine.Logging;
+using TUnit.Engine.Scheduling;
+using TUnit.Engine.Services;
+using TUnit.Engine.Services.TestExecution;
+
+#pragma warning disable TPEXP // Experimental API - GetClientInfo
+
+namespace TUnit.Engine.Framework;
+
+internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
+{
+    public ITestExecutionFilter? Filter
+    {
+        get;
+    }
+    private readonly Dictionary<Type, object> _services = new();
+
+    // Core services
+    public TUnitFrameworkLogger Logger { get; }
+    public ICommandLineOptions CommandLineOptions { get; }
+    public VerbosityService VerbosityService { get; }
+    public TestDiscoveryService DiscoveryService { get; }
+    public TestBuilderPipeline TestBuilderPipeline { get; }
+    public TestSessionCoordinator TestSessionCoordinator { get; }
+    public TUnitMessageBus MessageBus { get; }
+    public EngineCancellationToken CancellationToken { get; }
+    public TestFilterService TestFilterService { get; }
+    public IHookDelegateBuilder HookDelegateBuilder { get; }
+    public TestExecutor TestExecutor { get; }
+    public EventReceiverOrchestrator EventReceiverOrchestrator { get; }
+    public ITestFinder TestFinder { get; }
+    public TUnitInitializer Initializer { get; }
+    public CancellationTokenSource FailFastCancellationSource { get; }
+    public ParallelLimitLockProvider ParallelLimitLockProvider { get; }
+    public ObjectLifecycleService ObjectLifecycleService { get; }
+    public bool SessionFailed { get; set; }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
+    public TUnitServiceProvider(IExtension extension,
+        ExecuteRequestContext context,
+        ITestExecutionFilter? filter,
+        IMessageBus messageBus,
+        IServiceProvider frameworkServiceProvider,
+        ITestFrameworkCapabilities capabilities)
+    {
+        Filter = filter;
+        TestSessionId = context.Request.Session.SessionUid.Value;
+
+        var loggerFactory = frameworkServiceProvider.GetLoggerFactory();
+        var outputDevice = frameworkServiceProvider.GetOutputDevice();
+        CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
+        var configuration = frameworkServiceProvider.GetConfiguration();
+
+        TestContext.Configuration = new ConfigurationAdapter(configuration);
+        TestContext.ResultsDirectory = configuration.GetTestResultDirectory();
+
+        // Register capabilities so they're available to test contexts
+        Register<ITestFrameworkCapabilities>(capabilities);
+
+        VerbosityService = Register(new VerbosityService(CommandLineOptions, frameworkServiceProvider));
+
+        var logLevelProvider = Register(new LogLevelProvider(CommandLineOptions));
+
+        // Determine execution mode early to create appropriate services
+        var useSourceGeneration = SourceRegistrar.IsEnabled = ExecutionModeHelper.IsSourceGenerationMode(CommandLineOptions);
+
+        // Create and register mode-specific hook registrar service
+        IHookRegistrar hookDiscoveryService;
+        if (useSourceGeneration)
+        {
+            hookDiscoveryService = Register<IHookRegistrar>(new SourceGenHookRegistrar());
+        }
+        else
+        {
+            hookDiscoveryService = Register<IHookRegistrar>(new ReflectionHookRegistrar());
+        }
+
+        Initializer = new TUnitInitializer(CommandLineOptions, hookDiscoveryService);
+
+        Logger = Register(new TUnitFrameworkLogger(
+            extension,
+            outputDevice,
+            loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
+            logLevelProvider));
+
+        // Create initialization services using Lazy<T> to break circular dependencies
+        // No more two-phase initialization with Initialize() calls
+        var objectGraphDiscoveryService = Register(new ObjectGraphDiscoveryService());
+
+        // Keep TrackableObjectGraphProvider for ObjectTracker (TUnit.Core dependency)
+        var trackableObjectGraphProvider = new TrackableObjectGraphProvider();
+
+        var disposer = new Disposer(Logger);
+
+        var objectTracker = new ObjectTracker(trackableObjectGraphProvider, disposer);
+
+        // Use Lazy<T> to break circular dependency between PropertyInjector and ObjectLifecycleService
+        // PropertyInjector now depends on IInitializationCallback interface (implemented by ObjectLifecycleService)
+        // This follows Dependency Inversion Principle and improves testability
+        ObjectLifecycleService? objectLifecycleServiceInstance = null;
+        var lazyInitializationCallback = new Lazy<IInitializationCallback>(() => objectLifecycleServiceInstance!);
+        var lazyPropertyInjector = new Lazy<PropertyInjector>(() => new PropertyInjector(lazyInitializationCallback, TestSessionId));
+
+        objectLifecycleServiceInstance = new ObjectLifecycleService(lazyPropertyInjector, objectGraphDiscoveryService, objectTracker);
+        ObjectLifecycleService = Register(objectLifecycleServiceInstance);
+
+        // Register the test argument registration service to handle object registration for shared instances
+        var testArgumentRegistrationService = Register(new TestArgumentRegistrationService(ObjectLifecycleService));
+
+        TestFilterService = Register(new TestFilterService(Logger, testArgumentRegistrationService));
+
+        MessageBus = Register(new TUnitMessageBus(
+            extension,
+            CommandLineOptions,
+            VerbosityService,
+            frameworkServiceProvider,
+            context));
+
+        // Register log sinks based on output mode
+
+        // TestOutputSink: Always registered - accumulates to Context.OutputWriter/ErrorOutputWriter for test results
+        TUnitLoggerFactory.AddSink(new TestOutputSink());
+
+        // ConsoleOutputSink: For --output Detailed mode - real-time console output
+        if (VerbosityService.IsDetailedOutput)
+        {
+            TUnitLoggerFactory.AddSink(new ConsoleOutputSink(
+                StandardOutConsoleInterceptor.DefaultOut,
+                StandardErrorConsoleInterceptor.DefaultError));
+        }
+
+        // IdeStreamingSink: For IDE clients - real-time output streaming
+        // Disabled by default due to compatibility issues with Microsoft Testing Platform
+        // (duplicate TestNodeUid in TestApplicationResult.ConsumeAsync causes crashes in Rider/VS Code).
+        // Enable via TUNIT_ENABLE_IDE_STREAMING=1 environment variable.
+        if (VerbosityService.IsIdeClient &&
+            Environment.GetEnvironmentVariable(EnvironmentConstants.EnableIdeStreaming) == "1")
+        {
+            TUnitLoggerFactory.AddSink(new IdeStreamingSink(MessageBus));
+        }
+
+        CancellationToken = Register(new EngineCancellationToken());
+
+        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
+        HookDelegateBuilder = Register<IHookDelegateBuilder>(new HookDelegateBuilder(EventReceiverOrchestrator, Logger));
+
+        ParallelLimitLockProvider = Register(new ParallelLimitLockProvider());
+
+        ContextProvider = Register(new ContextProvider(this, TestSessionId, FilterParser.StringifyFilter(Filter)));
+
+        var hookExecutor = Register(new HookExecutor(HookDelegateBuilder, ContextProvider, EventReceiverOrchestrator));
+        var lifecycleCoordinator = Register(new TestLifecycleCoordinator());
+        var beforeHookTaskCache = Register(new BeforeHookTaskCache());
+        var afterHookPairTracker = Register(new AfterHookPairTracker());
+
+        TestExecutor = Register(new TestExecutor(hookExecutor, lifecycleCoordinator, beforeHookTaskCache, afterHookPairTracker, ContextProvider, EventReceiverOrchestrator));
+
+        var testStateManager = Register(new TestStateManager());
+        var testContextRestorer = Register(new TestContextRestorer());
+        var testMethodInvoker = Register(new TestMethodInvoker());
+        var hashSetPool = Register(new HashSetPool());
+
+        // Use the mode already determined earlier
+        ITestDataCollector dataCollector;
+        IStaticPropertyInitializer staticPropertyInitializer;
+
+        if (useSourceGeneration)
+        {
+            dataCollector = new AotTestDataCollector();
+            staticPropertyInitializer = new SourceGenStaticPropertyInitializer(Logger);
+        }
+        else
+        {
+            dataCollector = new ReflectionTestDataCollector();
+            staticPropertyInitializer = new ReflectionStaticPropertyInitializer(Logger);
+        }
+
+        var filterMatcher = Register<IMetadataFilterMatcher>(new MetadataFilterMatcher());
+        var dependencyExpander = Register(new MetadataDependencyExpander(filterMatcher));
+
+        var testBuilder = Register<ITestBuilder>(
+            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, ObjectLifecycleService, hookDiscoveryService, filterMatcher));
+
+        TestBuilderPipeline = Register(
+            new TestBuilderPipeline(
+                dataCollector,
+                testBuilder,
+                ContextProvider,
+                EventReceiverOrchestrator));
+
+        DiscoveryService = Register(new TestDiscoveryService(TestExecutor, TestBuilderPipeline, TestFilterService, dependencyExpander));
+
+        // Create test finder service after discovery service so it can use its cache
+        TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
+
+        var testInitializer = new TestInitializer(EventReceiverOrchestrator, ObjectLifecycleService);
+
+        // Create the new TestCoordinator that orchestrates the granular services
+        var testCoordinator = Register<ITestCoordinator>(
+            new TestCoordinator(
+                testStateManager,
+                MessageBus,
+                testContextRestorer,
+                TestExecutor,
+                testInitializer,
+                objectTracker,
+                Logger,
+                EventReceiverOrchestrator));
+
+        // Create the HookOrchestratingTestExecutorAdapter
+        // Note: We'll need to update this to handle dynamic dependencies properly
+        var sessionUid = context.Request.Session.SessionUid;
+        var isFailFastEnabled = CommandLineOptions.TryGetOptionArgumentList(FailFastCommandProvider.FailFast, out _);
+        FailFastCancellationSource = Register(new CancellationTokenSource());
+
+        var notInParallelLock = Register(new NotInParallelLock());
+
+        var testRunner = Register(
+            new TestRunner(
+                testCoordinator,
+                MessageBus,
+                isFailFastEnabled,
+                FailFastCancellationSource,
+                Logger,
+                testStateManager,
+                ParallelLimitLockProvider,
+                notInParallelLock));
+
+        // Create scheduler configuration from command line options
+        var testGroupingService = Register<ITestGroupingService>(new TestGroupingService(Logger));
+        var circularDependencyDetector = Register(new CircularDependencyDetector());
+
+        var constraintKeyScheduler = Register<IConstraintKeyScheduler>(new ConstraintKeyScheduler(
+            testRunner,
+            Logger,
+            hashSetPool));
+
+        var staticPropertyHandler = Register(new StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, lazyPropertyInjector, objectGraphDiscoveryService));
+
+        var dynamicTestQueue = Register<IDynamicTestQueue>(new DynamicTestQueue(MessageBus));
+
+        var deferredTestExpander = Register(new DeferredTestExpander(TestBuilderPipeline, TestFilterService));
+
+        var testScheduler = Register<ITestScheduler>(new TestScheduler(
+            Logger,
+            testGroupingService,
+            MessageBus,
+            CommandLineOptions,
+            testStateManager,
+            testRunner,
+            circularDependencyDetector,
+            constraintKeyScheduler,
+            hookExecutor,
+            afterHookPairTracker,
+            staticPropertyHandler,
+            dynamicTestQueue,
+            notInParallelLock));
+
+        TestSessionCoordinator = Register(new TestSessionCoordinator(EventReceiverOrchestrator,
+            Logger,
+            testScheduler,
+            serviceProvider: this,
+            ContextProvider,
+            lifecycleCoordinator,
+            MessageBus,
+            staticPropertyInitializer,
+            objectTracker,
+            deferredTestExpander));
+
+        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, dynamicTestQueue, TestFilterService, TestSessionId, CancellationToken.Token));
+
+        InitializeConsoleInterceptors();
+    }
+
+    public ContextProvider ContextProvider { get; }
+
+    public string TestSessionId { get; }
+
+    private void InitializeConsoleInterceptors()
+    {
+        var outInterceptor = new StandardOutConsoleInterceptor();
+        var errorInterceptor = new StandardErrorConsoleInterceptor();
+
+        outInterceptor.Initialize();
+        errorInterceptor.Initialize();
+
+        Register(outInterceptor);
+        Register(errorInterceptor);
+    }
+
+    public object? GetService(Type serviceType)
+    {
+        return _services.TryGetValue(serviceType, out var service) ? service : null;
+    }
+
+    private T Register<T>(T service) where T : class
+    {
+        _services[typeof(T)] = service;
+        return service;
+    }
+
+
+    public async ValueTask DisposeAsync()
+    {
+        foreach (var service in _services.Values)
+        {
+            if (service is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+            }
+            else if (service is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
+
+        _services.Clear();
+
+        // Dispose all log sinks (flushes any remaining logs)
+        await TUnitLoggerFactory.DisposeAllAsync().ConfigureAwait(false);
+
+        TestExtensions.ClearCaches();
+    }
+}

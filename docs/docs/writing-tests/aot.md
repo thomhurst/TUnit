@@ -27,8 +27,8 @@ public class GenericTests
         var value1 = default(T1);
         var value2 = default(T2);
         
-        await Assert.That(value1).IsNotNull().Or.IsEqualTo(default(T1));
-        await Assert.That(value2).IsNotNull().Or.IsEqualTo(default(T2));
+        await Assert.That(value1).IsEqualTo(default(T1));
+        await Assert.That(value2).IsEqualTo(default(T2));
     }
 }
 ```
@@ -52,16 +52,7 @@ public class GenericTestClass<T>
     {
         var defaultValue = default(T);
         
-        // For reference types, default should be null
-        // For value types, default should be the type's default value
-        if (typeof(T).IsValueType)
-        {
-            await Assert.That(defaultValue).IsNotNull();
-        }
-        else
-        {
-            await Assert.That(defaultValue).IsNull();
-        }
+        await Assert.That(defaultValue).IsEqualTo(default(T));
     }
 
     [Test]
@@ -71,6 +62,7 @@ public class GenericTestClass<T>
         var value = default(T);
         
         await Assert.That(input).IsEqualTo("test data");
+        await Assert.That(value).IsEqualTo(default(T));
         // Can use both generic type T and regular parameters
     }
 }
@@ -264,23 +256,16 @@ AOT mode provides helpful compile-time diagnostics for common issues:
 
 ### Generic Test Diagnostics
 
-```csharp
-// ❌ This will generate TUnit0058 error
-[Test]
-public async Task GenericTest<T>() // Missing [GenerateGenericTest]
-{
-    var value = default(T);
-    await Assert.That(value).IsNotNull().Or.IsNull();
-}
+Omitting `[GenerateGenericTest]` produces diagnostic `TUnit0058`. Supply each concrete type explicitly:
 
-// ✅ Correct usage
+```csharp
 [Test]
 [GenerateGenericTest(typeof(int))]
 [GenerateGenericTest(typeof(string))]
 public async Task GenericTest<T>()
 {
     var value = default(T);
-    await Assert.That(value).IsNotNull().Or.IsNull();
+    await Assert.That(value).IsEqualTo(default(T));
 }
 ```
 
@@ -301,7 +286,9 @@ public class DataSourceDiagnostics
     public IEnumerable<object[]> GetDynamicData()
     {
         // This method uses reflection internally - not AOT compatible
-        return SomeReflectionBasedDataGenerator.GetData();
+        return System.Reflection.Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Select(type => new object[] { type });
     }
 
     // ✅ Use static, compile-time known data sources

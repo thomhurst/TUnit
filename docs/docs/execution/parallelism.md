@@ -2,6 +2,7 @@
 sidebar_position: 10
 ---
 
+
 # Controlling Parallelism
 
 TUnit runs all tests in parallel by default. This page covers three attributes that give you fine-grained control when you need it.
@@ -104,7 +105,7 @@ public class OrderRepositoryTests
     public async Task Create_Order()
     {
         var order = await OrderRepository.CreateAsync("item-1");
-        await Assert.That(order.Id).IsNotNull();
+        await Assert.That(order.Id).IsNotEmptyGuid();
     }
 }
 
@@ -162,7 +163,12 @@ With a limit of `2`, at most two of these 20 test invocations execute at the sam
 ### Assembly-Level Limiter
 
 ```csharp
-[assembly: ParallelLimiter<MyParallelLimit>]
+[assembly: ParallelLimiter<MyAssemblyParallelLimit>]
+
+public record MyAssemblyParallelLimit : IParallelLimit
+{
+    public int Limit => 2;
+}
 ```
 
 More specific attributes override less specific ones. Precedence: Method > Class > Assembly.

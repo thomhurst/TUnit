@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\eng\TestProject.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.Mocks.SourceGenerator\TUnit.Mocks.SourceGenerator.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Mocks\TUnit.Mocks.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.SQS" />
+    <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
+    <PackageReference Include="Microsoft.Kiota.Abstractions" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+    <PackageReference Include="Verify" />
+    <PackageReference Include="Verify.TUnit" />
+  </ItemGroup>
+
+  <!--
+    The test compilations reference the TUnit.Mocks assembly this project already loads, so no
+    second copy is staged next to the test binary. A `ref\TUnit.Mocks.dll` copy of the
+    netstandard2.0 build used to live here: its <None Include> glob expanded at evaluation time,
+    so whether it shipped at all depended on build ordering, and when it did ship the test
+    compilations saw TUnit.Mocks twice and the generator silently emitted nothing. See
+    SnapshotTestBase.LoadReferences.
+  -->
+
+  <Import Project="..\..\eng\TestProject.targets" />
+
+</Project>

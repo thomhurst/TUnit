@@ -1,0 +1,222 @@
+using System.Text;
+
+namespace TUnit.Assertions.Core;
+
+/// <summary>
+/// Contains the shared state for an assertion chain.
+/// Combines evaluation context (value, timing, exceptions) with expression building (error messages).
+/// All assertions in a chain share the same AssertionContext instance.
+/// </summary>
+/// <typeparam name="TValue">The type of value being asserted</typeparam>
+public sealed class AssertionContext<TValue>
+{
+    /// <summary>
+    /// Handles lazy evaluation, caching, and exception capture for the source value.
+    /// </summary>
+    public EvaluationContext<TValue> Evaluation { get; }
+
+    /// <summary>
+    /// Builds the assertion chain expression for error messages.
+    /// Mutated as assertions are chained together.
+    /// </summary>
+    public StringBuilder ExpressionBuilder { get; }
+
+    /// <summary>
+    /// Creates a new assertion context with the given evaluation context and expression builder.
+    /// </summary>
+    public AssertionContext(EvaluationContext<TValue> evaluation, StringBuilder expressionBuilder)
+    {
+        Evaluation = evaluation ?? throw new ArgumentNullException(nameof(evaluation));
+        ExpressionBuilder = expressionBuilder ?? throw new ArgumentNullException(nameof(expressionBuilder));
+    }
+
+    /// <summary>
+    /// Creates a new assertion context for immediate values (no evaluation needed).
+    /// </summary>
+    public AssertionContext(TValue? value, StringBuilder expressionBuilder)
+    {
+        Evaluation = new EvaluationContext<TValue>(value);
+        ExpressionBuilder = expressionBuilder ?? throw new ArgumentNullException(nameof(expressionBuilder));
+    }
+
+    /// <summary>
+    /// Creates a derived context by transforming to a different type with automatic pending link transfer.
+    /// This is the standard way to create type-transforming assertions (like WhenParsedInto, Match, IsTypeOf, etc).
+    /// Automatically handles:
+    /// - Transferring the expression builder
+    /// - Consuming pending links from the source context
+    /// - Setting up pre-work to execute previous assertions before the transformation
+    ///
+    /// Uses lazy evaluation to prevent stack overflow in circular reference scenarios.
+    /// </summary>
+    /// <typeparam name="TNew">The target type after transformation</typeparam>
+    /// <param name="evaluationFactory">Factory to create the new evaluation context from the current one</param>
+    /// <returns>A new assertion context with pending links properly transferred</returns>
+    public AssertionContext<TNew> Map<TNew>(Func<EvaluationContext<TValue>, EvaluationContext<TNew>> evaluationFactory)
+    {
+        var newEvaluation = evaluationFactory(Evaluation);
+        var newContext = new AssertionContext<TNew>(newEvaluation, ExpressionBuilder);
+
+        // Transfer pending links from source context to handle cross-type chaining
+        // e.g., Assert.That(str).Length().IsEqualTo(3).And.Match(@"\d+").And.Captured<int>(1)
+        var (pendingAssertion, combinerType) = ConsumePendingLink();
+        if (pendingAssertion != null)
+        {
+            // Store the pending assertion execution as pre-work
+            // It will be executed before any assertions on the transformed value
+            newContext.PendingPreWork = async () => await pendingAssertion.ExecuteCoreAsync();
+        }
+
+        if (PreservePendingPreWorkOnMap && PendingPreWork is { } preWork)
+        {
+            PendingPreWork = null;
+            var existing = newContext.PendingPreWork;
+            newContext.PendingPreWork = existing is null
+                ? preWork
+                : async () => { await preWork(); await existing(); };
+            newContext.PreservePendingPreWorkOnMap = true;
+            newContext.SkipAssertionOnPreWorkFailure = SkipAssertionOnPreWorkFailure;
+        }
+
+        return newContext;
+    }
+
+    /// <summary>
+    /// Convenience overload for simple value-to-value transformations.
+    /// Wraps a simple mapper function in an evaluation context transformation.
+    /// </summary>
+    public AssertionContext<TNew> Map<TNew>(Func<TValue?, TNew?> mapper)
+    {
+        return Map(evalContext => evalContext.Map(mapper));
+    }
+
+    /// <summary>
+    /// Convenience overload for async value-to-value transformations.
+    /// Wraps an async mapper function in an evaluation context transformation.
+    /// The Task is unwrapped, allowing assertions to chain on the result type directly.
+    /// </summary>
+    public AssertionContext<TNew> Map<TNew>(Func<TValue?, Task<TNew?>> asyncMapper)
+    {
+        return Map(evalContext => evalContext.Map(asyncMapper));
+    }
+
+    /// <summary>
+    /// Maps to <typeparamref name="TNew"/> while preserving an already-captured <see cref="PendingPreWork"/>.
+    /// Plain <see cref="Map{TNew}(Func{TValue, TNew})"/> transfers a pending And/Or link as pre-work but does
+    /// not carry pre-work that was already captured (e.g. the <c>ContainsKey</c> check a dictionary
+    /// <c>.Value</c> drill-in holds). Used by generated collection-shape wrappers to identity-upcast a concrete
+    /// value shape (<c>List&lt;T&gt;</c> → <c>IList&lt;T&gt;</c>) without dropping that pre-work.
+    /// </summary>
+    internal AssertionContext<TNew> MapPreservingPreWork<TNew>(Func<TValue?, TNew?> mapper)
+    {
+        var mapped = Map(mapper);
+        if (PendingPreWork is { } preWork)
+        {
+            var existing = mapped.PendingPreWork;
+            mapped.PendingPreWork = existing is null
+                ? preWork
+                : async () => { await existing(); await preWork(); };
+        }
+
+        return mapped;
+    }
+
+    /// <summary>
+    /// Creates a detached context that shares this context's evaluation (so it sees the same value)
+    /// but has its own expression builder and no pending link. Used to construct an inner assertion
+    /// whose construction must NOT consume this context's And/Or pending link.
+    /// </summary>
+    internal AssertionContext<TValue> CreateDetached() => new(Evaluation, new StringBuilder());
+
+    public AssertionContext<TException> MapException<TException>() where TException : Exception
+    {
+        return new AssertionContext<TException>(
+            Evaluation.MapException<TException>(),
+            ExpressionBuilder
+        );
+    }
+
+    /// <summary>
+    /// Gets the evaluated value and any exception that occurred.
+    /// Evaluates once and caches the result for subsequent calls.
+    /// </summary>
+    public Task<(TValue? Value, Exception? Exception)> GetAsync()
+    {
+        return Evaluation.GetAsync();
+    }
+
+    /// <summary>
+    /// Gets the timing information for this evaluation.
+    /// Only meaningful after evaluation has occurred.
+    /// </summary>
+    public (DateTimeOffset Start, DateTimeOffset End) GetTiming()
+    {
+        return Evaluation.GetTiming();
+    }
+
+    /// <summary>
+    /// Pending assertion to link with when the next assertion is constructed.
+    /// Set by AndContinuation/OrContinuation, consumed by Assertion constructor.
+    /// </summary>
+    internal Assertion<TValue>? PendingLinkPrevious { get; private set; }
+
+    /// <summary>
+    /// The type of combiner (And/Or) for the pending link.
+    /// </summary>
+    internal CombinerType? PendingLinkType { get; private set; }
+
+    /// <summary>
+    /// Pre-work to execute before evaluating assertions in this context.
+    /// Used for cross-type assertion chaining (e.g., string assertions before WhenParsedInto&lt;int&gt;).
+    /// </summary>
+    internal Func<Task>? PendingPreWork { get; set; }
+
+    /// <summary>
+    /// Keeps pending pre-work attached while drill-in operations map through intermediate types.
+    /// </summary>
+    internal bool PreservePendingPreWorkOnMap { get; set; }
+
+    /// <summary>
+    /// Skips the mapped assertion when pending pre-work fails inside <see cref="Assert.Multiple"/>.
+    /// Used when the mapped value is only valid after the pre-work succeeds.
+    /// </summary>
+    internal bool SkipAssertionOnPreWorkFailure { get; set; }
+
+    /// <summary>
+    /// Sets the pending link state for the next assertion to consume.
+    /// Called by AndContinuation/OrContinuation constructors.
+    /// </summary>
+    internal void SetPendingLink(Assertion<TValue> previous, CombinerType type)
+    {
+        PendingLinkPrevious = previous;
+        PendingLinkType = type;
+    }
+
+    /// <summary>
+    /// Consumes and clears the pending link state.
+    /// Called by Assertion constructor to auto-detect chaining.
+    /// </summary>
+    internal (Assertion<TValue>? previous, CombinerType? type) ConsumePendingLink()
+    {
+        var result = (PendingLinkPrevious, PendingLinkType);
+        PendingLinkPrevious = null;
+        PendingLinkType = null;
+        return result;
+    }
+
+    /// <summary>
+    /// Converts a non-nullable reference type context to its nullable equivalent.
+    /// This is safe because reference types and their nullable counterparts have identical runtime representations.
+    /// Used primarily by the assertion source generator to handle non-nullable to nullable conversions.
+    /// IMPORTANT: This should only be called when TValue is a reference type (class).
+    /// </summary>
+    /// <returns>The same context instance viewed as nullable</returns>
+    internal AssertionContext<TValue?> AsNullable()
+    {
+        // This cast is safe because for reference types, TValue and TValue?
+        // have the same runtime representation. We are only changing the
+        // compiler's static analysis view of the type.
+        // The generator ensures this is only called for reference types.
+        return (AssertionContext<TValue?>)(object)this;
+    }
+}

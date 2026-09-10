@@ -1,0 +1,74 @@
+<Project>
+  <!-- Experimental (#6514 Tier 2): compile-time internals access for TUnit.Mocks.
+       Opt in per project with:
+         <TUnitMocksExperimentalInternalsAccess>true</TUnitMocksExperimentalInternalsAccess>
+         <ItemGroup><TUnitMocksInternalsAccess Include="Some.Sdk.Assembly" /></ItemGroup>
+       Selected references are swapped (for the compiler only) with copies whose internals are
+       public, and IgnoresAccessChecksTo is applied so CoreCLR skips accessibility checks at
+       runtime. The original assemblies still ship and load; the rewritten copies never leave
+       the intermediate directory. Fully inert unless the property is set. -->
+
+  <PropertyGroup Condition="'$(TUnitMocksExperimentalInternalsAccess)' == 'true'">
+    <_TUnitMocksInternalsAccessTasksTfm Condition="'$(MSBuildRuntimeType)' == 'Core'">net8.0</_TUnitMocksInternalsAccessTasksTfm>
+    <_TUnitMocksInternalsAccessTasksTfm Condition="'$(_TUnitMocksInternalsAccessTasksTfm)' == ''">net472</_TUnitMocksInternalsAccessTasksTfm>
+
+    <!-- Packaged layout: this file sits in buildTransitive/<tfm>/ (or build/netstandard2.0/),
+         with the task under tasks/<tfm>/ at the package root. -->
+    <TUnitMocksInternalsAccessTasksAssembly Condition="'$(TUnitMocksInternalsAccessTasksAssembly)' == '' and Exists('$(MSBuildThisFileDirectory)..\..\tasks\$(_TUnitMocksInternalsAccessTasksTfm)\TUnit.Mocks.InternalsAccess.Tasks.dll')">$(MSBuildThisFileDirectory)..\..\tasks\$(_TUnitMocksInternalsAccessTasksTfm)\TUnit.Mocks.InternalsAccess.Tasks.dll</TUnitMocksInternalsAccessTasksAssembly>
+
+    <!-- Repo-local layout: this file sits in src/TUnit.Mocks/, the task project beside it.
+         Dev loop note: MSBuild nodes load the task assembly in-proc and hold the file lock
+         across builds — run `dotnet build-server shutdown` after changing the task project. -->
+    <TUnitMocksInternalsAccessTasksAssembly Condition="'$(TUnitMocksInternalsAccessTasksAssembly)' == ''">$(MSBuildThisFileDirectory)..\TUnit.Mocks.InternalsAccess.Tasks\bin\$(Configuration)\$(_TUnitMocksInternalsAccessTasksTfm)\TUnit.Mocks.InternalsAccess.Tasks.dll</TUnitMocksInternalsAccessTasksAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="TUnit.Mocks.InternalsAccess.Tasks.PublicizeAssemblyReferences"
+             AssemblyFile="$(TUnitMocksInternalsAccessTasksAssembly)"
+             Condition="'$(TUnitMocksExperimentalInternalsAccess)' == 'true'" />
+
+  <Target Name="_TUnitMocksInternalsAccessNetFxGuard"
+          BeforeTargets="CoreCompile"
+          Condition="'$(TUnitMocksExperimentalInternalsAccess)' == 'true' and '@(TUnitMocksInternalsAccess)' != '' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Warning Code="TUMIA002"
+             Text="TUnit.Mocks internals access is inert on .NET Framework: the runtime does not honor IgnoresAccessChecksToAttribute. References were not publicized for this target." />
+  </Target>
+
+  <Target Name="TUnitMocksPublicizeReferences"
+          DependsOnTargets="FindReferenceAssembliesForReferences"
+          AfterTargets="FindReferenceAssembliesForReferences"
+          BeforeTargets="CoreCompile"
+          Condition="'$(TUnitMocksExperimentalInternalsAccess)' == 'true' and '@(TUnitMocksInternalsAccess)' != '' and '$(TargetFrameworkIdentifier)' != '.NETFramework'">
+
+    <PropertyGroup>
+      <_TUnitMocksIactSourceFile>$(IntermediateOutputPath)TUnitMocksIgnoresAccessChecksTo.g.cs</_TUnitMocksIactSourceFile>
+      <!-- Set false when another package already injects IgnoresAccessChecksToAttribute into
+           the compilation (would otherwise be a duplicate-type error). -->
+      <TUnitMocksInternalsAccessEmitAttributeDefinition Condition="'$(TUnitMocksInternalsAccessEmitAttributeDefinition)' == ''">true</TUnitMocksInternalsAccessEmitAttributeDefinition>
+    </PropertyGroup>
+
+    <PublicizeAssemblyReferences
+        ReferencePaths="@(ReferencePathWithRefAssemblies)"
+        AssembliesToPublicize="@(TUnitMocksInternalsAccess)"
+        RuntimeAssemblies="@(RuntimeCopyLocalItems);@(ReferenceCopyLocalPaths)"
+        OutputDirectory="$(IntermediateOutputPath)tunit-mocks-internals\"
+        GeneratedSourceFile="$(_TUnitMocksIactSourceFile)"
+        EmitAttributeDefinition="$(TUnitMocksInternalsAccessEmitAttributeDefinition)">
+      <Output TaskParameter="PublicizedReferences" ItemName="_TUnitMocksPublicizedReference" />
+      <Output TaskParameter="SupersededReferences" ItemName="_TUnitMocksSupersededReference" />
+    </PublicizeAssemblyReferences>
+
+    <ItemGroup>
+      <!-- Swap ONLY the compiler's view (ReferencePathWithRefAssemblies feeds Csc and nothing
+           else). ReferencePath stays untouched, so copy-local outputs and deps.json keep the
+           original assembly and the runtime binds to it — where IgnoresAccessChecksTo takes
+           over. Superseded = the selected reference plus any same-simple-name duplicates; a
+           leftover duplicate would carry the publicized copy's assembly identity (CS1703). -->
+      <ReferencePathWithRefAssemblies Remove="@(_TUnitMocksSupersededReference)" />
+      <ReferencePathWithRefAssemblies Include="@(_TUnitMocksPublicizedReference)" />
+      <Compile Include="$(_TUnitMocksIactSourceFile)" />
+      <FileWrites Include="$(_TUnitMocksIactSourceFile)" />
+      <FileWrites Include="@(_TUnitMocksPublicizedReference)" />
+      <FileWrites Include="@(_TUnitMocksPublicizedReference->'%(Identity).sig')" />
+    </ItemGroup>
+  </Target>
+</Project>

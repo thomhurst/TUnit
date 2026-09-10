@@ -1,0 +1,15 @@
+
+namespace TUnit.Core.SourceGenerator.Tests.Bugs._1589;
+
+internal class Hooks1589 : TestsBase
+{
+    [Test]
+    public Task Test() => RunTest(Path.Combine(Git.TestsDirectory.FullName,
+            "TUnit.TestProject",
+            "Bugs",
+            "1589",
+            "MyTests.cs"),
+        async generatedFiles =>
+        {
+            });
+}

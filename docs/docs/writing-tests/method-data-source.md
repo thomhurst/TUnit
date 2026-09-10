@@ -26,6 +26,8 @@ If you return a reference to the same object, tests may interfere with each othe
 Here's the simplest example — a method that returns a single `Func<T>`, creating one test case:
 
 ```csharp
+public record AdditionTestData(int Value1, int Value2, int ExpectedResult);
+
 public static class MyTestDataSources
 {
     public static Func<AdditionTestData> SingleTestCase()

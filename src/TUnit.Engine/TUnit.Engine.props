@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+    <PropertyGroup>
+        <IsTestProject>true</IsTestProject>
+        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+        <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+        <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+        <OutputType>Exe</OutputType>
+        <GenerateProgramFile>false</GenerateProgramFile>
+        <UseTestingPlatformProtocol>true</UseTestingPlatformProtocol>
+        <IsTestingPlatformEnabled>true</IsTestingPlatformEnabled>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <IsVBProject Condition="'$(MSBuildProjectFile)' != '' and '$(MSBuildProjectFile.EndsWith(.vbproj))'">true</IsVBProject>
+        <IsFSharpProject Condition="'$(MSBuildProjectFile)' != '' and '$(MSBuildProjectFile.EndsWith(.fsproj))'">true</IsFSharpProject>
+        <TUnitReflectionScanner Condition="'$(IsVBProject)' == 'true' or '$(IsFSharpProject)' == 'true'">true</TUnitReflectionScanner>
+    </PropertyGroup>
+
+    <!--
+      TUnit's Assert.That(...) overloads are disambiguated with [OverloadResolutionPriority],
+      which only C# 13+ honors. net8.0-and-earlier projects default to C# 12 and silently ignore
+      it, breaking overload resolution (CS0411/CS0121; issues #6276, #6280). This default MUST
+      live in .props, not .targets: the SDK sets the target-framework default LangVersion during
+      the .targets phase, so a .targets default (Condition="'$(LangVersion)' == ''") never wins.
+      Consumers can still override LangVersion explicitly.
+    -->
+    <PropertyGroup>
+        <LangVersion Condition="'$(LangVersion)' == ''">latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!--
+          !!! IMPORTANT !!!
+          DO NOT CHANGE THE GUID, IT'S A WELL KNOWN EXTENSION POINT AND THIS EXTENSION NEEDS TO BE REGISTERED AT THE END
+          WE HAVE CODE INSIDE THE TASK 'TestingPlatformEntryPoint' TO ENSURE THE ORDER OF THE REGISTRATION BASED ON THIS GUID
+        -->
+        <TestingPlatformBuilderHook Include="6ADF853A-6945-4A06-9A4B-D99BC1DC1094" >
+            <DisplayName>TUnit</DisplayName>
+            <TypeFullName>TUnit.Engine.Framework.TestingPlatformBuilderHook</TypeFullName>
+        </TestingPlatformBuilderHook>
+    </ItemGroup>
+
+    <Target Name="_TUnitConfigureHtmlReportCommandLineOptions"
+            BeforeTargets="_GenerateSelfRegisteredExtensionsFileInputCache">
+        <!-- Microsoft.Testing.Extensions.HtmlReport declares this builder-hook identity in its
+             build props. If upstream changes it, update this condition and integration tests. -->
+        <ItemGroup Condition="'@(TestingPlatformBuilderHook->WithMetadataValue('Identity', 'A6E2BCC3-9B4D-4B6D-8AE3-2C1E12A54F4D'))' != ''">
+            <TestingPlatformBuilderHook Condition="'%(Identity)' == '6ADF853A-6945-4A06-9A4B-D99BC1DC1094'">
+                <TypeFullName>TUnit.Engine.Framework.NamespacedHtmlReportTestingPlatformBuilderHook</TypeFullName>
+            </TestingPlatformBuilderHook>
+        </ItemGroup>
+    </Target>
+
+</Project>

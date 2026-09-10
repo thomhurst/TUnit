@@ -1,3 +1,4 @@
+
 # Instrumenting: Global Test IDs
 
 There are plenty use cases for having a unique identifier for each test in your test suite. If you're engineering tests that connect to a data source, you might want to ensure data isolation between the tests. One way to do that is cleaning up the data source after each test, but that prevents you from running tests cleanly in parallel, and it requires you to write either very intelligent or a lot of cleanup code. Additionally, bugs can cause data to leak between tests and make your tests flaky.
@@ -87,3 +88,4 @@ class MyTestClassThatNeedsUniqueTestIds
 
 The test identifier for each test is assigned in the order that TUnit discovers the tests. The test identifier is unique for each test and is guaranteed to be assigned before the test starts. For other uses cases, you would need to adjust the implementation of `AssignTestIdentifiersAttribute` to suit your needs. For example, you could choose to use GUIDs instead of integers. We've only used integers to match the Redis database number example.
 
+<!-- doc-test-shared -->

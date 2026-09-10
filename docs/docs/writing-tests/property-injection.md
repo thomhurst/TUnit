@@ -1,3 +1,6 @@
+
+<!-- doc-test-shared -->
+
 # Property Injection
 
 TUnit's AOT-compatible property injection system makes it easy to initialize properties on your test class with compile-time safety and excellent performance.
@@ -93,7 +96,7 @@ public class TestDataFixture : IAsyncDiscoveryInitializer, IAsyncDisposable
     public async Task InitializeAsync()
     {
         // Runs during DISCOVERY, before test enumeration
-        _testCases = await LoadTestCasesFromDatabaseAsync();
+        _testCases = [.. await LoadTestCasesFromDatabaseAsync()];
     }
 
     public IEnumerable<string> GetTestCases() => _testCases;
@@ -156,7 +159,7 @@ public class PropertySetterTests
     public required InnerModel Property6 { get; init; }
 
     // Source-generated data injection
-    [DataSourceGeneratorTests.AutoFixtureGenerator<string>]
+    [Arguments("generated_value")]
     public required string Property7 { get; init; }
 
     // Async initialization example (IAsyncInitializer)
@@ -207,15 +210,14 @@ Here's a comprehensive example showing how to orchestrate multiple test containe
 // In-memory SQL container that auto-starts and stops
 public class InMemorySql : IAsyncInitializer, IAsyncDisposable
 {
-    private TestcontainersContainer? _container;
+    private IContainer? _container;
 
-    public TestcontainersContainer Container => _container
+    public IContainer Container => _container
         ?? throw new InvalidOperationException("Container not initialized");
 
     public async Task InitializeAsync()
     {
-        _container = new TestcontainersBuilder<TestcontainersContainer>()
-            .WithImage("postgres:latest")
+        _container = new ContainerBuilder("postgres:18")
             .WithEnvironment("POSTGRES_PASSWORD", "password")
             .Build();
 
@@ -317,6 +319,12 @@ public class ConditionalService : IAsyncInitializer
         }
     }
 }
+
+public class DatabaseService
+{
+    public Task<bool> RequiresMigration() => Task.FromResult(false);
+    public Task MigrateAsync() => Task.CompletedTask;
+}
 ```
 
 #### Circular Dependencies
@@ -328,12 +336,16 @@ public class ServiceA : IAsyncInitializer
 {
     [ClassDataSource<ServiceB>]
     public required ServiceB B { get; init; } // This will fail!
+
+    public Task InitializeAsync() => Task.CompletedTask;
 }
 
 public class ServiceB : IAsyncInitializer
 {
     [ClassDataSource<ServiceA>]
     public required ServiceA A { get; init; } // Circular dependency!
+
+    public Task InitializeAsync() => Task.CompletedTask;
 }
 ```
 

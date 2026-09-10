@@ -4,6 +4,50 @@ The `ClassDataSource` attribute is used to instantiate and inject in new classes
 
 The attribute takes a generic type argument, which is the type of data you want to inject into your test.
 
+The type created by `ClassDataSource<T>` must have a public parameterless constructor. Constructor injection is supported on the test class receiving the data source, but not on the data source type itself.
+
+For nested dependencies, use property injection on the data source type:
+
+```csharp
+[ClassDataSource<ApplicationFixture>(Shared = SharedType.PerTestSession)]
+public class ApplicationTests(ApplicationFixture fixture)
+{
+    [Test]
+    public async Task Application_Is_Available()
+    {
+        await Assert.That(fixture.IsAvailable).IsTrue();
+    }
+}
+
+public class ApplicationFixture : IAsyncInitializer
+{
+    [ClassDataSource<DatabaseFixture>(Shared = SharedType.PerTestSession)]
+    public required DatabaseFixture Database { get; init; }
+
+    public bool IsAvailable { get; private set; }
+
+    public Task InitializeAsync()
+    {
+        // Database has already been initialized.
+        IsAvailable = Database.IsAvailable;
+        return Task.CompletedTask;
+    }
+}
+
+public class DatabaseFixture : IAsyncInitializer
+{
+    public bool IsAvailable { get; private set; }
+
+    public Task InitializeAsync()
+    {
+        IsAvailable = true;
+        return Task.CompletedTask;
+    }
+}
+```
+
+See [Nested Property Injection](property-injection.md#nested-property-injection) for dependency chains and lifecycle details.
+
 It also takes an optional `Shared` argument, controlling whether you want to share the instance among other tests. This is useful when it is expensive to create an object and you want to reuse the same instance across many tests.
 
 Avoid mutating the state of shared objects within tests. Because tests run concurrently, the execution order is unpredictable, and shared mutable state leads to flaky tests.
@@ -34,15 +78,9 @@ public class MyTestClass
     {
         // Some properties/methods/whatever!
 
-        public async Task InitializeAsync()
-        {
-            await StartServer();
-        }
+        public Task InitializeAsync() => Task.CompletedTask; // start server
 
-        public async ValueTask DisposeAsync()
-        {
-            await StopServer();
-        }
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask; // stop server
     }
 }
 ```
@@ -56,7 +94,15 @@ If you are using an overload that supports injecting multiple classes at once (e
 E.g.
 
 ```csharp
-[Test]
+public sealed record Value1;
+public sealed record Value2;
+public sealed record Value3;
+public sealed record Value4;
+public sealed record Value5;
+
+public class MyType
+{
+    [Test]
     [ClassDataSource<Value1, Value2, Value3, Value4, Value5>
         (
         Shared = [SharedType.PerTestSession, SharedType.Keyed, SharedType.PerClass, SharedType.Keyed, SharedType.None],
@@ -67,8 +113,9 @@ E.g.
         // Index 3: Value4 (Keyed) - "Value4Key"
         // Index 4: Value5 (None) - empty string (no key needed)
         )]
-    public class MyType(Value1 value1, Value2 value2, Value3 value3, Value4 value4, Value5 value5)
+    public void Test(Value1 value1, Value2 value2, Value3 value3, Value4 value4, Value5 value5)
     {
-
+        Console.WriteLine($"{value1}, {value2}, {value3}, {value4}, {value5}");
     }
+}
 ```

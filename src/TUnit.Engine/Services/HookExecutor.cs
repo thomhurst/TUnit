@@ -1,0 +1,783 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.ExceptionServices;
+using TUnit.Core;
+using TUnit.Core.Exceptions;
+using TUnit.Core.Services;
+using TUnit.Engine.Interfaces;
+
+namespace TUnit.Engine.Services;
+
+/// <summary>
+/// Responsible for executing hooks and event receivers with proper context hierarchy.
+/// Merges the functionality of hooks and first/last event receivers for unified lifecycle management.
+/// Follows Single Responsibility Principle - only handles hook and event receiver execution.
+/// </summary>
+internal sealed class HookExecutor
+{
+    private readonly IHookDelegateBuilder _hookCollectionService;
+    private readonly IContextProvider _contextProvider;
+    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
+
+    public HookExecutor(
+        IHookDelegateBuilder hookCollectionService,
+        IContextProvider contextProvider,
+        EventReceiverOrchestrator eventReceiverOrchestrator)
+    {
+        _hookCollectionService = hookCollectionService;
+        _contextProvider = contextProvider;
+        _eventReceiverOrchestrator = eventReceiverOrchestrator;
+    }
+
+    public async ValueTask ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
+    {
+        var hooks = await _hookCollectionService.CollectBeforeTestSessionHooksAsync().ConfigureAwait(false);
+
+        if (hooks.Count > 0)
+        {
+            foreach (var hook in hooks)
+            {
+                try
+                {
+                    _contextProvider.TestSessionContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, _contextProvider.TestSessionContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
+
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
+                    throw new BeforeTestSessionException($"BeforeTestSession hook failed: {ex.Message}", ex);
+                }
+            }
+        }
+
+        // Try to start the session activity now.  When the user sets up their
+        // TracerProvider in Before(TestSession), this is the first opportunity
+        // where HasListeners() returns true.  When they set it up earlier (e.g.
+        // in Before(TestDiscovery)), the activity was already started by
+        // TryStartSessionActivity() before discovery — this call is a no-op.
+#if NET
+        TryStartSessionActivity();
+#endif
+    }
+
+    public async ValueTask<List<Exception>> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
+    {
+        // Stop the session activity BEFORE hooks run, because user hooks
+        // typically dispose the TracerProvider / ActivityListener. If we
+        // stopped the activity after hooks, the exporter would already be
+        // gone and the root span would never be exported.
+#if NET
+        FinishSessionActivity(hasErrors: _contextProvider.TestSessionContext.HasFailures);
+#endif
+
+        var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync().ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return [];
+        }
+
+        // Defer exception list allocation until actually needed
+        List<Exception>? exceptions = null;
+
+        foreach (var hook in hooks)
+        {
+            try
+            {
+                _contextProvider.TestSessionContext.RestoreExecutionContext();
+                await ExecuteHookWithActivityAsync(hook, _contextProvider.TestSessionContext, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Collect hook exceptions instead of throwing immediately
+                // This allows all hooks to run even if some fail
+                exceptions ??= [];
+                exceptions.Add(new AfterTestSessionException($"AfterTestSession hook failed: {ex.Message}", ex));
+            }
+        }
+
+        return exceptions ?? [];
+    }
+
+#if NET
+    /// <summary>
+    /// Lazily starts the session activity once an ActivityListener is registered,
+    /// so discovery and execution spans can parent under it.
+    /// </summary>
+    internal void TryStartSessionActivity()
+    {
+        var sessionContext = _contextProvider.TestSessionContext;
+
+        if (sessionContext.Activity is not null)
+        {
+            return;
+        }
+
+        if (TUnitActivitySource.LifecycleSource.HasListeners())
+        {
+            sessionContext.Activity = TUnitActivitySource.StartLifecycleActivity(
+                TUnitActivitySource.SpanTestSession,
+                System.Diagnostics.ActivityKind.Internal,
+                default,
+                [
+                    new(TUnitActivitySource.TagSessionId, sessionContext.Id),
+                    new(TUnitActivitySource.TagTestFilter, sessionContext.TestFilter)
+                ]);
+        }
+    }
+
+    private void FinishSessionActivity(bool hasErrors)
+    {
+        var sessionContext = _contextProvider.TestSessionContext;
+        var activity = sessionContext.Activity;
+
+        if (activity is null)
+        {
+            return;
+        }
+
+        activity.SetTag(TUnitActivitySource.TagTestCount, sessionContext.AllTests.Count);
+
+        if (hasErrors)
+        {
+            activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+        }
+
+        TUnitActivitySource.StopActivity(activity);
+        sessionContext.Activity = null;
+    }
+#endif
+
+    public async ValueTask ExecuteBeforeAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
+    {
+        var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
+
+#if NET
+        TryStartAssemblyActivity(assembly);
+#endif
+
+        // Execute BeforeEvery(Assembly) hooks first (global hooks run before specific hooks)
+        var beforeEveryAssemblyHooks = await _hookCollectionService.CollectBeforeEveryAssemblyHooksAsync().ConfigureAwait(false);
+
+        if (beforeEveryAssemblyHooks.Count > 0)
+        {
+            foreach (var hook in beforeEveryAssemblyHooks)
+            {
+                try
+                {
+                    assemblyContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, assemblyContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
+
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
+                    throw new BeforeAssemblyException($"BeforeEveryAssembly hook failed: {ex.Message}", ex);
+                }
+            }
+        }
+
+        // Execute Before(Assembly) hooks after BeforeEvery hooks
+        var hooks = await _hookCollectionService.CollectBeforeAssemblyHooksAsync(assembly).ConfigureAwait(false);
+
+        if (hooks.Count > 0)
+        {
+            foreach (var hook in hooks)
+            {
+                try
+                {
+                    assemblyContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, assemblyContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
+
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
+                    throw new BeforeAssemblyException($"BeforeAssembly hook failed: {ex.Message}", ex);
+                }
+            }
+        }
+    }
+
+    public async ValueTask<List<Exception>> ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
+    {
+        var afterAssemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
+
+        // Defer exception list allocation until actually needed
+        List<Exception>? exceptions = null;
+
+        // Execute After(Assembly) hooks first (specific hooks run before global hooks for cleanup)
+        var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assembly).ConfigureAwait(false);
+
+        if (hooks.Count > 0)
+        {
+            foreach (var hook in hooks)
+            {
+                try
+                {
+                    afterAssemblyContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, afterAssemblyContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    // Collect hook exceptions instead of throwing immediately
+                    // This allows all hooks to run even if some fail
+                    exceptions ??= [];
+                    exceptions.Add(new AfterAssemblyException($"AfterAssembly hook failed: {ex.Message}", ex));
+                }
+            }
+        }
+
+        // Execute AfterEvery(Assembly) hooks after After hooks (global hooks run last for cleanup)
+        var afterEveryAssemblyHooks = await _hookCollectionService.CollectAfterEveryAssemblyHooksAsync().ConfigureAwait(false);
+
+        if (afterEveryAssemblyHooks.Count > 0)
+        {
+            foreach (var hook in afterEveryAssemblyHooks)
+            {
+                try
+                {
+                    afterAssemblyContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, afterAssemblyContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    exceptions ??= [];
+                    exceptions.Add(new AfterAssemblyException($"AfterEveryAssembly hook failed: {ex.Message}", ex));
+                }
+            }
+        }
+
+#if NET
+        FinishAssemblyActivity(assembly, hasErrors: exceptions is { Count: > 0 });
+#endif
+
+        return exceptions ?? [];
+    }
+
+#if NET
+    internal void TryStartAssemblyActivity(Assembly assembly)
+    {
+        if (!TUnitActivitySource.LifecycleSource.HasListeners())
+        {
+            return;
+        }
+
+        var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
+        if (assemblyContext.Activity is not null)
+        {
+            return;
+        }
+
+        lock (assemblyContext.SynchronizationLock)
+        {
+            if (assemblyContext.Activity is not null)
+            {
+                return;
+            }
+
+            var sessionActivity = _contextProvider.TestSessionContext.Activity;
+            assemblyContext.Activity = TUnitActivitySource.StartLifecycleActivity(
+                TUnitActivitySource.SpanTestAssembly,
+                System.Diagnostics.ActivityKind.Internal,
+                sessionActivity?.Context ?? default,
+                [
+                    new(TUnitActivitySource.TagAssemblyName, assembly.GetName().Name)
+                ]);
+        }
+    }
+
+    internal bool HasAssemblyActivity(Assembly assembly)
+        => _contextProvider.GetOrCreateAssemblyContext(assembly).Activity is not null;
+
+    internal ValueTask<List<Exception>> FinishAssemblyActivityAsync(Assembly assembly)
+    {
+        FinishAssemblyActivity(assembly, hasErrors: false);
+        return new ValueTask<List<Exception>>([]);
+    }
+
+    private void FinishAssemblyActivity(Assembly assembly, bool hasErrors)
+    {
+        var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
+        lock (assemblyContext.SynchronizationLock)
+        {
+            var activity = assemblyContext.Activity;
+            if (activity is null)
+            {
+                return;
+            }
+
+            activity.SetTag(TUnitActivitySource.TagTestCount, assemblyContext.TestCount);
+
+            if (hasErrors)
+            {
+                activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+            }
+
+            TUnitActivitySource.StopActivity(activity);
+            assemblyContext.Activity = null;
+        }
+    }
+#endif
+
+    public async ValueTask ExecuteBeforeClassHooksAsync(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass, CancellationToken cancellationToken)
+    {
+        var classContext = _contextProvider.GetOrCreateClassContext(testClass);
+
+#if NET
+        TryStartClassActivity(testClass);
+#endif
+
+        // Execute BeforeEvery(Class) hooks first (global hooks run before specific hooks)
+        var beforeEveryClassHooks = await _hookCollectionService.CollectBeforeEveryClassHooksAsync().ConfigureAwait(false);
+
+        if (beforeEveryClassHooks.Count > 0)
+        {
+            foreach (var hook in beforeEveryClassHooks)
+            {
+                try
+                {
+                    classContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, classContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
+
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
+                    throw new BeforeClassException($"BeforeEveryClass hook failed: {ex.Message}", ex);
+                }
+            }
+        }
+
+        // Execute Before(Class) hooks after BeforeEvery hooks
+        var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClass).ConfigureAwait(false);
+
+        if (hooks.Count > 0)
+        {
+            foreach (var hook in hooks)
+            {
+                try
+                {
+                    classContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, classContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
+
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
+                    throw new BeforeClassException($"BeforeClass hook failed: {ex.Message}", ex);
+                }
+            }
+        }
+    }
+
+    public async ValueTask<List<Exception>> ExecuteAfterClassHooksAsync(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass, CancellationToken cancellationToken)
+    {
+        var afterClassContext = _contextProvider.GetOrCreateClassContext(testClass);
+
+        // Defer exception list allocation until actually needed
+        List<Exception>? exceptions = null;
+
+        // Execute After(Class) hooks first (specific hooks run before global hooks for cleanup)
+        var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClass).ConfigureAwait(false);
+
+        if (hooks.Count > 0)
+        {
+            foreach (var hook in hooks)
+            {
+                try
+                {
+                    afterClassContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, afterClassContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    // Collect hook exceptions instead of throwing immediately
+                    // This allows all hooks to run even if some fail
+                    exceptions ??= [];
+                    exceptions.Add(new AfterClassException($"AfterClass hook failed: {ex.Message}", ex));
+                }
+            }
+        }
+
+        // Execute AfterEvery(Class) hooks after After hooks (global hooks run last for cleanup)
+        var afterEveryClassHooks = await _hookCollectionService.CollectAfterEveryClassHooksAsync().ConfigureAwait(false);
+
+        if (afterEveryClassHooks.Count > 0)
+        {
+            foreach (var hook in afterEveryClassHooks)
+            {
+                try
+                {
+                    afterClassContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, afterClassContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    exceptions ??= [];
+                    exceptions.Add(new AfterClassException($"AfterEveryClass hook failed: {ex.Message}", ex));
+                }
+            }
+        }
+
+#if NET
+        FinishClassActivity(testClass, hasErrors: exceptions is { Count: > 0 });
+#endif
+
+        return exceptions ?? [];
+    }
+
+#if NET
+    internal void TryStartClassActivity(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass)
+    {
+        if (!TUnitActivitySource.LifecycleSource.HasListeners())
+        {
+            return;
+        }
+
+        var classContext = _contextProvider.GetOrCreateClassContext(testClass);
+        if (classContext.Activity is not null)
+        {
+            return;
+        }
+
+        lock (classContext.SynchronizationLock)
+        {
+            if (classContext.Activity is not null)
+            {
+                return;
+            }
+
+            var assemblyActivity = classContext.AssemblyContext.Activity;
+            classContext.Activity = TUnitActivitySource.StartLifecycleActivity(
+                TUnitActivitySource.SpanTestSuite,
+                System.Diagnostics.ActivityKind.Internal,
+                assemblyActivity?.Context ?? default,
+                [
+                    new(TUnitActivitySource.TagTestSuiteName, testClass.Name),
+                    new(TUnitActivitySource.TagClassNamespace, testClass.Namespace)
+                ]);
+        }
+    }
+
+    internal bool HasClassActivity(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass)
+        => _contextProvider.GetOrCreateClassContext(testClass).Activity is not null;
+
+    internal ValueTask<List<Exception>> FinishClassActivityAsync(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass)
+    {
+        FinishClassActivity(testClass, hasErrors: false);
+        return new ValueTask<List<Exception>>([]);
+    }
+
+    private void FinishClassActivity(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass, bool hasErrors)
+    {
+        var classContext = _contextProvider.GetOrCreateClassContext(testClass);
+        lock (classContext.SynchronizationLock)
+        {
+            var activity = classContext.Activity;
+            if (activity is null)
+            {
+                return;
+            }
+
+            activity.SetTag(TUnitActivitySource.TagTestCount, classContext.TestCount);
+
+            if (hasErrors)
+            {
+                activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+            }
+
+            TUnitActivitySource.StopActivity(activity);
+            classContext.Activity = null;
+        }
+    }
+#endif
+
+    public ValueTask ExecuteBeforeTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        var testClassType = test.Metadata.TestClassType;
+
+        var beforeEveryTestHooks = _hookCollectionService.GetCachedBeforeEveryTestHooks();
+        var hasCachedBeforeTestHooks = _hookCollectionService.TryGetCachedBeforeTestHooks(testClassType, out var beforeTestHooks);
+
+        if (beforeEveryTestHooks.Count == 0 && hasCachedBeforeTestHooks && beforeTestHooks.Count == 0)
+        {
+            return default;
+        }
+
+        return ExecuteBeforeTestHooksCoreAsync(test, testClassType, beforeEveryTestHooks, hasCachedBeforeTestHooks ? beforeTestHooks : null, cancellationToken);
+    }
+
+    private async ValueTask ExecuteBeforeTestHooksCoreAsync(
+        AbstractExecutableTest test,
+        Type testClassType,
+        IReadOnlyList<NamedHookDelegate<TestContext>> beforeEveryTestHooks,
+        IReadOnlyList<NamedHookDelegate<TestContext>>? cachedBeforeTestHooks,
+        CancellationToken cancellationToken)
+    {
+        if (beforeEveryTestHooks.Count > 0)
+        {
+            foreach (var hook in beforeEveryTestHooks)
+            {
+                try
+                {
+                    test.Context.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, test.Context, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
+
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
+                    throw new BeforeTestException($"BeforeEveryTest hook failed: {ex.Message}", ex);
+                }
+            }
+        }
+
+        var beforeTestHooks = cachedBeforeTestHooks
+            ?? await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType).ConfigureAwait(false);
+
+        if (beforeTestHooks.Count > 0)
+        {
+            foreach (var hook in beforeTestHooks)
+            {
+                try
+                {
+                    test.Context.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, test.Context, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
+
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
+                    throw new BeforeTestException($"BeforeTest hook failed: {ex.Message}", ex);
+                }
+            }
+        }
+    }
+
+    public ValueTask<IReadOnlyList<Exception>> ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        var testClassType = test.Metadata.TestClassType;
+
+        var afterEveryTestHooks = _hookCollectionService.GetCachedAfterEveryTestHooks();
+        var hasCachedAfterTestHooks = _hookCollectionService.TryGetCachedAfterTestHooks(testClassType, out var afterTestHooks);
+
+        if (afterEveryTestHooks.Count == 0 && hasCachedAfterTestHooks && afterTestHooks.Count == 0)
+        {
+            return new ValueTask<IReadOnlyList<Exception>>([]);
+        }
+
+        return ExecuteAfterTestHooksCoreAsync(test, testClassType, afterEveryTestHooks, hasCachedAfterTestHooks ? afterTestHooks : null, cancellationToken);
+    }
+
+    private async ValueTask<IReadOnlyList<Exception>> ExecuteAfterTestHooksCoreAsync(
+        AbstractExecutableTest test,
+        Type testClassType,
+        IReadOnlyList<NamedHookDelegate<TestContext>> afterEveryTestHooks,
+        IReadOnlyList<NamedHookDelegate<TestContext>>? cachedAfterTestHooks,
+        CancellationToken cancellationToken)
+    {
+        List<Exception>? exceptions = null;
+
+        var afterTestHooks = cachedAfterTestHooks
+            ?? await _hookCollectionService.CollectAfterTestHooksAsync(testClassType).ConfigureAwait(false);
+
+        if (afterTestHooks.Count > 0)
+        {
+            foreach (var hook in afterTestHooks)
+            {
+                try
+                {
+                    test.Context.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, test.Context, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    exceptions ??= [];
+                    exceptions.Add(new AfterTestException($"After(Test) hook failed: {ex.Message}", ex));
+                }
+            }
+        }
+
+        if (afterEveryTestHooks.Count > 0)
+        {
+            foreach (var hook in afterEveryTestHooks)
+            {
+                try
+                {
+                    test.Context.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, test.Context, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    exceptions ??= [];
+                    exceptions.Add(new AfterTestException($"AfterEvery(Test) hook failed: {ex.Message}", ex));
+                }
+            }
+        }
+
+        return exceptions ?? [];
+    }
+
+    public async ValueTask ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    {
+        var hooks = await _hookCollectionService.CollectBeforeTestDiscoveryHooksAsync().ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var hook in hooks)
+        {
+            try
+            {
+                _contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
+                await ExecuteHookWithActivityAsync(hook, _contextProvider.BeforeTestDiscoveryContext, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new BeforeTestDiscoveryException($"BeforeTestDiscovery hook failed: {ex.Message}", ex);
+            }
+        }
+    }
+
+    public async ValueTask ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    {
+        var hooks = await _hookCollectionService.CollectAfterTestDiscoveryHooksAsync().ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var hook in hooks)
+        {
+            try
+            {
+                _contextProvider.TestDiscoveryContext.RestoreExecutionContext();
+                await ExecuteHookWithActivityAsync(hook, _contextProvider.TestDiscoveryContext, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new AfterTestDiscoveryException($"AfterTestDiscovery hook failed: {ex.Message}", ex);
+            }
+        }
+    }
+
+#if NET
+    private static async ValueTask ExecuteHookWithActivityAsync<TContext>(NamedHookDelegate<TContext> hook, TContext context, CancellationToken cancellationToken)
+        where TContext : Context
+    {
+        System.Diagnostics.Activity? hookActivity = null;
+        var activitySource = context is TestContext
+            ? TUnitActivitySource.Source
+            : TUnitActivitySource.LifecycleSource;
+
+        // Capture the pre-hook Activity.Current as the known-good restore target.
+        // StopActivity internally restores to hookActivity._previousActiveActivity,
+        // but that chain can be corrupted when RestoreExecutionContext() overwrites
+        // Activity.Current during the hook. We overwrite StopActivity's restore
+        // with this known-good value to guarantee a correct Activity.Current after.
+        var previousActivity = System.Diagnostics.Activity.Current;
+
+        if (activitySource.HasListeners())
+        {
+            hookActivity = activitySource.StartActivity(
+                hook.ActivityName,
+                System.Diagnostics.ActivityKind.Internal,
+                context.Activity?.Context ?? default);
+        }
+
+        try
+        {
+            await hook.Invoke(context, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            TUnitActivitySource.RecordException(hookActivity, ex);
+            throw;
+        }
+        finally
+        {
+            TUnitActivitySource.StopActivity(hookActivity);
+            System.Diagnostics.Activity.Current = previousActivity;
+        }
+    }
+#else
+    private static async ValueTask ExecuteHookWithActivityAsync<TContext>(NamedHookDelegate<TContext> hook, TContext context, CancellationToken cancellationToken)
+        where TContext : Context
+    {
+        await hook.Invoke(context, cancellationToken).ConfigureAwait(false);
+    }
+#endif
+}

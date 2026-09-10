@@ -2,6 +2,7 @@
 sidebar_position: 2
 ---
 
+
 # Setup & Stubbing
 
 Methods are called directly on `Mock<T>` — the chain method (`.Returns()`, `.Throws()`, etc.) makes it a setup.
@@ -37,12 +38,12 @@ mock.Delete(Any()).Throws(new ArgumentException("bad id"));
 ```csharp
 // Simple callback
 var callCount = 0;
-mock.Process(Any())
+mock.Process(Any<string>())
     .Callback(() => callCount++);
 
 // Callback with access to arguments
-mock.Process(Any())
-    .Callback((object?[] args) => Console.WriteLine($"Called with: {args[0]}"));
+mock.Process(Any<string>())
+    .Callback(() => Console.WriteLine("Called with an argument"));
 ```
 
 ### Sequential Behaviors
@@ -145,6 +146,8 @@ Explicit setups take precedence over auto-tracked values.
 **Out parameters** are excluded from setup signatures. Use the generated strongly-typed `.SetsOut{Name}()` methods to assign their values:
 
 ```csharp
+IEntity svc = mock.Object;
+
 // Strongly-typed — named after the parameter, compile-time safe
 mock.TryGet("key")
     .Returns(true)
@@ -157,6 +160,8 @@ bool found = svc.TryGet("key", out var value);
 **Ref parameters** are included in setup signatures and participate in argument matching. Use `.SetsRef{Name}()` to assign output values:
 
 ```csharp
+IEntity svc = mock.Object;
+
 mock.Swap(Any())
     .SetsRefValue(99);
 
@@ -202,15 +207,16 @@ Use `[assembly: GenerateMock(typeof(T))]` to work around this. The source genera
 ```csharp
 using TUnit.Mocks;
 
-[assembly: GenerateMock(typeof(IMyParseable))]
+[assembly: GenerateMock(typeof(IMyService))]
 
-public interface IMyParseable : IParsable<IMyParseable>
+public interface IMyService
 {
+    static abstract string CreateDefaultName();
     string Format();
 }
 
 // In your test — use the generated bridge type:
-var mock = Mock.Of<TUnit_Mocks_Tests_IMyParseable_Mockable>();
+var mock = IMyServiceMockable.Mock();
 mock.Format().Returns("formatted");
 ```
 
@@ -250,21 +256,60 @@ mock.Object.DoWork(); // calls realService.DoWork()
 Create a single mock that implements multiple interfaces:
 
 ```csharp
-var mock = Mock.Of<ILogger, IDisposable>();
+var mock = Mock.Of<IGreeter, IDisposable>();
 
-mock.Log(Any()); // ILogger method
-mock.Object.Log("test");
+mock.Greet(Any()).Returns("Hello!"); // IGreeter method
+_ = mock.Object.Greet("Alice");
 
 ((IDisposable)mock.Object).Dispose(); // IDisposable method
 ```
 
 Supports up to 4 interfaces: `Mock.Of<T1, T2, T3, T4>()`.
 
+Members of the secondary interfaces appear directly on the mock, just like the primary's — setup, verify, and event raising all work the same way:
+
+```csharp
+var mock = Mock.Of<IGreeter, IEntity>();
+
+mock.Name.Returns("Alice");         // IEntity property setup
+mock.Name.WasCalled();              // IEntity property verification
+```
+
+When a secondary member's name collides with a member of another interface on the mock, it is exposed with a short interface prefix instead (e.g. `mock.IDisposable_Tag`).
+
+The primary type can also be a concrete class:
+
+```csharp
+public class ConcreteService
+{
+    public virtual string GetName() => "real";
+}
+
+public interface IExtra
+{
+    string Tag { get; }
+}
+
+var mock = Mock.Of<ConcreteService, IExtra>();
+mock.Tag.Returns("test");
+
+_ = ((IExtra)mock.Object).Tag; // "test"
+```
+
+Constructor arguments for class primaries are supported: `Mock.Of<MyService, IExtra>(arg1, arg2)`.
+
 ## Setup Chaining
 
 Setup methods return chain objects that support additional behaviors:
 
 ```csharp
+public interface IProcessor
+{
+    event EventHandler? ProcessCompleted;
+    bool Process(string input);
+}
+
+var mock = Mock.Of<IProcessor>();
 mock.Process(Any())
     .Returns(true)
     .RaisesProcessCompleted(EventArgs.Empty)   // strongly-typed auto-raise event

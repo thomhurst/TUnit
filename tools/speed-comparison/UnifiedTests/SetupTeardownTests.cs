@@ -5,22 +5,22 @@ namespace UnifiedTests;
 
 [TestClass]
 #if XUNIT3
-public class SetupTeardownTests : IDisposable
+public class SetupTeardownTests : IAsyncLifetime
 #else
 public class SetupTeardownTests
 #endif
 {
     // Simulated expensive state
-    private byte[] _databaseConnection;
-    private List<string> _tempFiles;
-    private HttpClient _httpClient;
-    private StringBuilder _logBuilder;
+    private byte[] _databaseConnection = null!;
+    private List<string> _tempFiles = null!;
+    private HttpClient _httpClient = null!;
+    private StringBuilder _logBuilder = null!;
 
 #if TUNIT
     [Before(Test)]
     public async Task Setup()
 #elif XUNIT3
-    public SetupTeardownTests()
+    public async ValueTask InitializeAsync()
 #elif NUNIT
     [SetUp]
     public async Task Setup()
@@ -31,13 +31,6 @@ public class SetupTeardownTests
     public async Task Setup()
 #endif
     {
-#if XUNIT3
-        SetupCore().GetAwaiter().GetResult();
-    }
-
-    private async Task SetupCore()
-    {
-#endif
         // Simulate expensive database connection initialization
         _databaseConnection = new byte[1024 * 100]; // 100KB allocation
         for (int i = 0; i < _databaseConnection.Length; i++)
@@ -67,7 +60,7 @@ public class SetupTeardownTests
     [After(Test)]
     public async Task Cleanup()
 #elif XUNIT3
-    public void Dispose()
+    public async ValueTask DisposeAsync()
 #elif NUNIT
     [TearDown]
     public async Task Cleanup()
@@ -78,13 +71,6 @@ public class SetupTeardownTests
     public async Task Cleanup()
 #endif
     {
-#if XUNIT3
-        CleanupCore().GetAwaiter().GetResult();
-    }
-
-    private async Task CleanupCore()
-    {
-#endif
         // Simulate database connection cleanup
         if (_databaseConnection != null)
         {
@@ -353,13 +339,8 @@ public class SetupTeardownTests
     public void JsonOperationTest()
     {
         // Simulate JSON serialization
-        var data = new
-        {
-            Id = 123,
-            Name = "Test Data",
-            Values = Enumerable.Range(0, 50).ToArray()
-        };
-        var json = System.Text.Json.JsonSerializer.Serialize(data);
+        var data = new JsonPayload(123, "Test Data", Enumerable.Range(0, 50).ToArray());
+        var json = System.Text.Json.JsonSerializer.Serialize(data, BenchmarkJsonContext.Default.JsonPayload);
         _logBuilder.AppendLine($"JSON length: {json.Length}");
     }
 
@@ -368,13 +349,15 @@ public class SetupTeardownTests
     {
         // Simulate async JSON operations
         await Task.Delay(10);
-        var data = new
-        {
-            Id = 123,
-            Name = "Test Data",
-            Values = Enumerable.Range(0, 50).ToArray()
-        };
-        var json = System.Text.Json.JsonSerializer.Serialize(data);
+        var data = new JsonPayload(123, "Test Data", Enumerable.Range(0, 50).ToArray());
+        var json = System.Text.Json.JsonSerializer.Serialize(data, BenchmarkJsonContext.Default.JsonPayload);
         _logBuilder.AppendLine($"Async JSON length: {json.Length}");
     }
 }
+
+// Concrete DTO + source-generated serializer context so JSON tests work under Native AOT,
+// where reflection-based System.Text.Json serialization is disabled.
+public sealed record JsonPayload(int Id, string Name, int[] Values);
+
+[System.Text.Json.Serialization.JsonSerializable(typeof(JsonPayload))]
+internal partial class BenchmarkJsonContext : System.Text.Json.Serialization.JsonSerializerContext;

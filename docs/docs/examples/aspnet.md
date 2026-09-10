@@ -1,3 +1,4 @@
+
 # ASP.NET Core Integration Testing
 
 TUnit provides first-class support for ASP.NET Core integration testing through the `TUnit.AspNetCore` package. This package enables per-test isolation with shared infrastructure, making it easy to write fast, parallel integration tests.
@@ -114,8 +115,8 @@ When tests share resources like database tables, message queues, or cache keys, 
 protected override async Task SetupAsync()
 {
     // Each test gets unique resources that no other test will touch
-    var tableName = GetIsolatedName("todos");      // "Test_42_todos"
-    var queueName = GetIsolatedName("events");     // "Test_42_events"
+    var tableName = GetIsolatedName("todos");      // "test_42_todos"
+    var queueName = GetIsolatedName("events");     // "test_42_events"
     var cachePrefix = GetIsolatedPrefix();         // "test_42_"
 
     await CreateTableAsync(tableName);
@@ -278,8 +279,8 @@ Creates a unique name for resources like database tables:
 
 ```csharp
 // In a test with UniqueId = 42:
-var tableName = GetIsolatedName("todos");  // Returns "Test_42_todos"
-var topicName = GetIsolatedName("orders"); // Returns "Test_42_orders"
+var tableName = GetIsolatedName("todos");  // Returns "test_42_todos"
+var topicName = GetIsolatedName("orders"); // Returns "test_42_orders"
 ```
 
 ### GetIsolatedPrefix
@@ -299,7 +300,7 @@ var dotPrefix = GetIsolatedPrefix("."); // Returns "test.42."
 ```csharp
 public class InMemoryDatabase : IAsyncInitializer, IAsyncDisposable
 {
-    public PostgreSqlContainer Container { get; } = new PostgreSqlBuilder()
+    public PostgreSqlContainer Container { get; } = new PostgreSqlBuilder("postgres:18")
         .WithImage("postgres:16-alpine")
         .Build();
 
@@ -373,7 +374,9 @@ public class TodoDbContext : DbContext
 
     // IConfiguration is optional: resolved via DI in the app, absent when
     // constructing standalone (e.g. in SetupAsync for EnsureCreatedAsync).
-    public TodoDbContext(DbContextOptions<TodoDbContext> options, IConfiguration? config = null)
+    public TodoDbContext(
+        DbContextOptions<TodoDbContext> options,
+        Microsoft.Extensions.Configuration.IConfiguration? config = null)
         : base(options)
     {
         SchemaName = config?["Database:Schema"] ?? "public";
@@ -458,7 +461,7 @@ public abstract class EfCoreTodoTestBase : WebApplicationTest<EfCoreWebApplicati
 - `IModelCacheKeyFactory` ensures EF Core caches a separate model per schema
 - Cleanup uses `DROP SCHEMA ... CASCADE` to remove all tables at once
 
-See the full working example in `TUnit.Example.Asp.Net.TestProject/EfCore/`.
+See the full working example in `examples/TUnit.Example.Asp.Net.TestProject/EfCore/`.
 
 ## HTTP Exchange Capture
 
@@ -467,10 +470,10 @@ Capture and inspect HTTP requests/responses for assertions:
 ```csharp
 public class CaptureTests : TestsBase
 {
-    protected override WebApplicationTestOptions Options => new()
+    protected override void ConfigureTestOptions(WebApplicationTestOptions options)
     {
-        EnableHttpExchangeCapture = true
-    };
+        options.EnableHttpExchangeCapture = true;
+    }
 
     [Test]
     public async Task RequestIsCaptured()
@@ -498,10 +501,10 @@ using TUnit.AspNetCore.Interception;
 
 public class CaptureTests : TestsBase
 {
-    protected override WebApplicationTestOptions Options => new()
+    protected override void ConfigureTestOptions(WebApplicationTestOptions options)
     {
-        EnableHttpExchangeCapture = true
-    };
+        options.EnableHttpExchangeCapture = true;
+    }
 
     protected override void ConfigureTestServices(IServiceCollection services)
     {
@@ -602,10 +605,10 @@ dotnet add package TUnit.Logging.Microsoft
 using TUnit.Logging.Microsoft;
 
 // Via ILoggingBuilder
-builder.Logging.AddTUnit(TestContext.Current!);
+TUnit.Logging.Microsoft.LoggingBuilderExtensions.AddTUnit(builder.Logging, TestContext.Current!);
 
 // Or via IServiceCollection
-services.AddTUnitLogging(TestContext.Current!);
+TUnit.Logging.Microsoft.ServiceCollectionExtensions.AddTUnitLogging(services, TestContext.Current!);
 ```
 
 All log output is routed through TUnit's console interceptor and sink pipeline, so logs appear in test output, IDE test explorers, and the console (when using `--output Detailed`).
@@ -619,28 +622,38 @@ If a resource is shared (database, queue, cache), each test must use its own iso
 :::
 
 ```csharp
-// ❌ BAD: All tests share the same table - will cause flaky failures
-protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+public class SharedTableTests : TestsBase
 {
-    config.AddInMemoryCollection(new Dictionary<string, string?>
+    // ❌ BAD: All tests share the same table - will cause flaky failures
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
     {
-        { "Database:TableName", "todos" }  // Shared = flaky!
-    });
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "Database:TableName", "todos" }  // Shared = flaky!
+        });
+    }
 }
 
-// ✅ GOOD: Each test gets its own table
-protected override async Task SetupAsync()
+public class IsolatedTableTests : TestsBase
 {
-    TableName = GetIsolatedName("todos");  // "Test_42_todos"
-    await CreateTableAsync(TableName);
-}
+    private string TableName { get; set; } = null!;
 
-protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
-{
-    config.AddInMemoryCollection(new Dictionary<string, string?>
+    // ✅ GOOD: Each test gets its own table
+    protected override async Task SetupAsync()
     {
-        { "Database:TableName", TableName }  // Isolated = reliable!
-    });
+        TableName = GetIsolatedName("todos");  // "test_42_todos"
+        await CreateTableAsync(TableName);
+    }
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+    {
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "Database:TableName", TableName }  // Isolated = reliable!
+        });
+    }
+
+    private static Task CreateTableAsync(string tableName) => Task.CompletedTask;
 }
 ```
 
@@ -689,11 +702,19 @@ public async Task Cleanup()
 ### 4. Inject Containers at Factory Level
 
 ```csharp
+public sealed class PostgresContainerFixture : IAsyncInitializer, IAsyncDisposable
+{
+    public PostgreSqlContainer Container { get; } = new PostgreSqlBuilder("postgres:18").Build();
+
+    public Task InitializeAsync() => Container.StartAsync();
+    public ValueTask DisposeAsync() => Container.DisposeAsync();
+}
+
 public class WebApplicationFactory : TestWebApplicationFactory<Program>
 {
     // Shared across all tests
-    [ClassDataSource<PostgresContainer>(Shared = SharedType.PerTestSession)]
-    public PostgresContainer Postgres { get; init; } = null!;
+    [ClassDataSource<PostgresContainerFixture>(Shared = SharedType.PerTestSession)]
+    public PostgresContainerFixture Postgres { get; init; } = null!;
 
     [ClassDataSource<RedisContainer>(Shared = SharedType.PerTestSession)]
     public RedisContainer Redis { get; init; } = null!;
@@ -706,7 +727,7 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
 // Container wrapper
 public class InMemoryPostgres : IAsyncInitializer, IAsyncDisposable
 {
-    public PostgreSqlContainer Container { get; } = new PostgreSqlBuilder().Build();
+    public PostgreSqlContainer Container { get; } = new PostgreSqlBuilder("postgres:18").Build();
     public async Task InitializeAsync() => await Container.StartAsync();
     public async ValueTask DisposeAsync() => await Container.DisposeAsync();
 }
@@ -841,25 +862,32 @@ The key benefits:
 3. You're not accidentally reading from a different source (e.g., `appsettings.json`)
 
 ```csharp
-// Factory sets default
-protected override void ConfigureWebHost(IWebHostBuilder builder)
+public class DefaultConfigurationFactory : TestWebApplicationFactory<Program>
 {
-    builder.ConfigureAppConfiguration((_, config) =>
+    // Factory sets default
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.ConfigureAppConfiguration((_, config) =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "Database:ConnectionString", "factory-default" }
+            });
+        });
+    }
+}
+
+public class OverrideConfigurationTests
+    : WebApplicationTest<DefaultConfigurationFactory, Program>
+{
+    // Test overrides - this WILL work because it runs after
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
     {
         config.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            { "Database:ConnectionString", "factory-default" }
+            { "Database:ConnectionString", "test-specific-value" }  // This wins!
         });
-    });
-}
-
-// Test overrides - this WILL work because it runs after
-protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
-{
-    config.AddInMemoryCollection(new Dictionary<string, string?>
-    {
-        { "Database:ConnectionString", "test-specific-value" }  // This wins!
-    });
+    }
 }
 ```
 
@@ -880,10 +908,11 @@ protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
 
 ```csharp
 // BAD: All parallel tests share the same table
-var tableName = "todos";
+var sharedTableName = "todos";
 
 // GOOD: Each test gets its own table
-var tableName = GetIsolatedName("todos");  // "Test_42_todos", "Test_43_todos", etc.
+var isolatedTableName = GetIsolatedName("todos");  // "test_42_todos", "test_43_todos", etc.
+TestContext.Current!.Output.WriteLine($"{sharedTableName} -> {isolatedTableName}");
 ```
 
 ### Can I have different factory configurations for different test classes?
@@ -1026,26 +1055,35 @@ public class MyTest : TestsBase
 **Problem:** You set configuration values in `ConfigureWebHost` using `ConfigureAppConfiguration`, but your app's `Program.cs` doesn't see them during startup. Your breakpoint in Program.cs hits **before** the `ConfigureAppConfiguration` callback.
 
 ```csharp
-// Factory - this approach has a timing issue!
-protected override void ConfigureWebHost(IWebHostBuilder builder)
+public class DeferredConfigurationFactory : TestWebApplicationFactory<Program>
 {
-    Console.WriteLine("ConfigureWebHost called");  // This runs first...
-
-    builder.ConfigureAppConfiguration((_, config) =>
+    // Factory - this approach has a timing issue!
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        Console.WriteLine("ConfigureAppConfiguration callback");  // ...but THIS runs AFTER Program.cs!
-        config.AddInMemoryCollection(new Dictionary<string, string?>
+        Console.WriteLine("ConfigureWebHost called");  // This runs first...
+
+        builder.ConfigureAppConfiguration((_, config) =>
         {
-            { "SomeKey", "SomeValue" }
+            Console.WriteLine("ConfigureAppConfiguration callback");  // ...but THIS runs AFTER Program.cs!
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "SomeKey", "SomeValue" }
+            });
         });
-    });
+    }
 }
 
-// Program.cs - this runs BEFORE ConfigureAppConfiguration callback!
-var builder = WebApplication.CreateBuilder(args);
-if (builder.Configuration["SomeKey"] != "SomeValue")
+public static class ApplicationStartup
 {
-    throw new InvalidOperationException("SomeKey not found!");  // This throws!
+    public static void Configure(string[] args)
+    {
+        // Program.cs - this runs BEFORE ConfigureAppConfiguration callback!
+        var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
+        if (builder.Configuration["SomeKey"] != "SomeValue")
+        {
+            throw new InvalidOperationException("SomeKey not found!");  // This throws!
+        }
+    }
 }
 ```
 
@@ -1104,7 +1142,7 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
 
 | Method | Description |
 |--------|-------------|
-| `GetIsolatedName(string baseName)` | Returns `"Test_{UniqueId}_{baseName}"` |
+| `GetIsolatedName(string baseName)` | Returns `"test_{UniqueId}_{baseName}"` |
 | `GetIsolatedPrefix(string separator = "_")` | Returns `"test{separator}{UniqueId}{separator}"` |
 
 ### WebApplicationTestOptions

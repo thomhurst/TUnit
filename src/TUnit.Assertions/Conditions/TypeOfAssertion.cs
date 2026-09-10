@@ -1,0 +1,405 @@
+using System.Text;
+using TUnit.Assertions.Attributes;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+/// <summary>
+/// Asserts that a value is of a specific type and transforms the assertion chain to that type.
+/// This demonstrates type transformation using EvaluationContext.Map().
+/// </summary>
+public class TypeOfAssertion<TFrom, TTo> : Assertion<TTo>
+{
+    private readonly Type _expectedType;
+
+    public TypeOfAssertion(
+        AssertionContext<TFrom> parentContext)
+        : base(parentContext.Map<TTo>(value =>
+            {
+                if (value is TTo casted)
+                {
+                    return casted;
+                }
+
+                throw new InvalidCastException(
+                    $"Value is of type {value?.GetType().Name ?? "null"}, not {typeof(TTo).Name}");
+            }))
+    {
+        // Note: Pending link transfer is handled by AssertionContext<T>.Map()
+        // No need to duplicate that logic here
+        _expectedType = typeof(TTo);
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TTo> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        // The type check already happened in the Map function
+        // If we got here without exception, the type is correct
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed(exception.Message));
+        }
+
+        return AssertionResult._passedTask;
+    }
+
+    protected override string GetExpectation() => $"to be of type {_expectedType.Name}";
+}
+
+/// <summary>
+/// Asserts that a value is NOT exactly of the specified type.
+/// </summary>
+public class IsNotTypeOfAssertion<TValue, TExpected> : Assertion<TValue>
+{
+    private readonly Type _expectedType;
+
+    public IsNotTypeOfAssertion(
+        AssertionContext<TValue> context)
+        : base(context)
+    {
+        _expectedType = typeof(TExpected);
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
+        }
+
+        if (value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        var actualType = value.GetType();
+
+        if (actualType != _expectedType)
+        {
+            return AssertionResult._passedTask;
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"received type {actualType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to not be of type {_expectedType.Name}";
+}
+
+/// <summary>
+/// Asserts that a value's type is assignable to a specific type (is the type or a subtype),
+/// and transforms the assertion chain to that type so the awaited result is the typed value.
+/// Works with both direct value assertions and exception assertions (via .And after Throws).
+/// </summary>
+public class IsAssignableToAssertion<TTarget, TValue> : Assertion<TTarget>
+{
+    // The original (pre-map) context. Both this and the mapped base context share the same
+    // cached underlying evaluation, so the source is still evaluated only once. We read from
+    // it during the check to preserve the original value/exception type for validation and
+    // error messages (the mapped value is null when the cast doesn't apply).
+    private readonly AssertionContext<TValue> _sourceContext;
+    private readonly Type _targetType = typeof(TTarget);
+
+    public IsAssignableToAssertion(
+        AssertionContext<TValue> context)
+        : base(context.Map<TTarget>(value => value is TTarget casted ? casted : default))
+    {
+        _sourceContext = context;
+    }
+
+    // The mapped metadata is intentionally unused: validation runs against the original
+    // (pre-map) context so the original value/exception type is available for the message.
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TTarget> _)
+    {
+        var (value, exception) = await _sourceContext.GetAsync();
+
+        object? objectToCheck;
+
+        // If we have an exception (from Throws/ThrowsExactly), check that
+        if (exception != null)
+        {
+            objectToCheck = exception;
+        }
+        // Otherwise check the value
+        else if (value != null)
+        {
+            objectToCheck = value;
+        }
+        else
+        {
+            return AssertionResult.Failed("value was null");
+        }
+
+        var actualType = objectToCheck.GetType();
+
+        if (_targetType.IsAssignableFrom(actualType))
+        {
+            return AssertionResult.Passed;
+        }
+
+        return AssertionResult.Failed($"type {actualType.Name} is not assignable to {_targetType.Name}");
+    }
+
+    protected override string GetExpectation() => $"to be assignable to {_targetType.Name}";
+}
+
+/// <summary>
+/// Asserts that a represented <see cref="Type"/> is assignable to a target type while
+/// retaining the represented type as the assertion value.
+/// </summary>
+public sealed class TypeIsAssignableToAssertion<TTarget> : Assertion<Type>
+{
+    private readonly Type _targetType = typeof(TTarget);
+
+    public TypeIsAssignableToAssertion(AssertionContext<Type> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Type> metadata)
+    {
+        if (metadata.Exception is { } exception)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
+        }
+
+        if (metadata.Value is not { } representedType)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        return _targetType.IsAssignableFrom(representedType)
+            ? AssertionResult._passedTask
+            : Task.FromResult(AssertionResult.Failed(
+                $"type {representedType.Name} is not assignable to {_targetType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to be assignable to {_targetType.Name}";
+}
+
+/// <summary>
+/// Asserts that a value's type is NOT assignable to a specific type.
+/// Works with both direct value assertions and exception assertions (via .And after Throws).
+/// </summary>
+public class IsNotAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
+{
+    private readonly bool _useRepresentedType;
+    private readonly Type _targetType;
+
+    public IsNotAssignableToAssertion(
+        AssertionContext<TValue> context)
+        : this(context, useRepresentedType: false)
+    {
+    }
+
+    internal IsNotAssignableToAssertion(
+        AssertionContext<TValue> context,
+        bool useRepresentedType)
+        : base(context)
+    {
+        _useRepresentedType = useRepresentedType;
+        _targetType = typeof(TTarget);
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        object? objectToCheck = null;
+
+        // If we have an exception (from Throws/ThrowsExactly), check that
+        if (exception != null)
+        {
+            objectToCheck = exception;
+        }
+        // Otherwise check the value
+        else if (value != null)
+        {
+            objectToCheck = value;
+        }
+        else
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        var actualType = _useRepresentedType && objectToCheck is Type representedType
+            ? representedType
+            : objectToCheck.GetType();
+
+        if (!_targetType.IsAssignableFrom(actualType))
+        {
+            return AssertionResult._passedTask;
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"type {actualType.Name} is assignable to {_targetType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to not be assignable to {_targetType.Name}";
+}
+
+/// <summary>
+/// Asserts that a value's type is assignable from a specific type.
+/// Checks: actualType.IsAssignableFrom(typeof(TSource))
+/// This means "can a value of type TSource be assigned to a variable of this value's type?"
+/// </summary>
+public class IsAssignableFromAssertion<TSource, TValue> : Assertion<TValue>
+{
+    private readonly bool _useRepresentedType;
+    private readonly Type _sourceType;
+
+    public IsAssignableFromAssertion(
+        AssertionContext<TValue> context)
+        : this(context, useRepresentedType: false)
+    {
+    }
+
+    internal IsAssignableFromAssertion(
+        AssertionContext<TValue> context,
+        bool useRepresentedType)
+        : base(context)
+    {
+        _useRepresentedType = useRepresentedType;
+        _sourceType = typeof(TSource);
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        object? objectToCheck = null;
+
+        if (exception != null)
+        {
+            objectToCheck = exception;
+        }
+        else if (value != null)
+        {
+            objectToCheck = value;
+        }
+        else
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        var actualType = _useRepresentedType && objectToCheck is Type representedType
+            ? representedType
+            : objectToCheck.GetType();
+
+        if (actualType.IsAssignableFrom(_sourceType))
+        {
+            return AssertionResult._passedTask;
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"type {actualType.Name} is not assignable from {_sourceType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to be assignable from {_sourceType.Name}";
+}
+
+/// <summary>
+/// Asserts that a value's type is NOT assignable from a specific type.
+/// Checks: !actualType.IsAssignableFrom(typeof(TSource))
+/// </summary>
+public class IsNotAssignableFromAssertion<TSource, TValue> : Assertion<TValue>
+{
+    private readonly bool _useRepresentedType;
+    private readonly Type _sourceType;
+
+    public IsNotAssignableFromAssertion(
+        AssertionContext<TValue> context)
+        : this(context, useRepresentedType: false)
+    {
+    }
+
+    internal IsNotAssignableFromAssertion(
+        AssertionContext<TValue> context,
+        bool useRepresentedType)
+        : base(context)
+    {
+        _useRepresentedType = useRepresentedType;
+        _sourceType = typeof(TSource);
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        object? objectToCheck = null;
+
+        if (exception != null)
+        {
+            objectToCheck = exception;
+        }
+        else if (value != null)
+        {
+            objectToCheck = value;
+        }
+        else
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        var actualType = _useRepresentedType && objectToCheck is Type representedType
+            ? representedType
+            : objectToCheck.GetType();
+
+        if (!actualType.IsAssignableFrom(_sourceType))
+        {
+            return AssertionResult._passedTask;
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"type {actualType.Name} is assignable from {_sourceType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to not be assignable from {_sourceType.Name}";
+}
+
+/// <summary>
+/// Asserts that a value is exactly of the specified type (using runtime Type parameter).
+/// </summary>
+public class IsTypeOfRuntimeAssertion<TValue> : Assertion<TValue>
+{
+    private readonly Type _expectedType;
+
+    public IsTypeOfRuntimeAssertion(
+        AssertionContext<TValue> context,
+        Type expectedType)
+        : base(context)
+    {
+        _expectedType = expectedType ?? throw new ArgumentNullException(nameof(expectedType));
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
+        }
+
+        if (value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        var actualType = value.GetType();
+
+        if (actualType == _expectedType)
+        {
+            return AssertionResult._passedTask;
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"received type {actualType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to be of type {_expectedType.Name}";
+}

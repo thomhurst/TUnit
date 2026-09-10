@@ -2,6 +2,7 @@
 sidebar_position: 3
 ---
 
+
 # Verification
 
 Verification uses the same methods as setup — the chain method (`.WasCalled()`, `.WasNeverCalled()`) makes it a verification instead of a setup.
@@ -45,7 +46,6 @@ Property verification mirrors the setup API — defaults to the **getter**:
 ```csharp
 // Getter verification
 mock.Name.WasCalled(Times.Once);           // getter called once
-mock.Name.Getter.WasCalled(Times.Once);    // explicit — same as above
 mock.Name.WasNeverCalled();                 // getter never accessed
 
 // Setter verification — any value
@@ -54,7 +54,7 @@ mock.Count.Setter.WasNeverCalled();
 
 // Setter verification — specific value
 mock.Count.Set(42).WasCalled(Times.Once);
-mock.Count.Set(v => v > 0).WasCalled(Times.AtLeast(1));
+mock.Count.Set(Is<int>(v => v > 0)).WasCalled(Times.AtLeast(1));
 ```
 
 ## Argument Matching in Verification

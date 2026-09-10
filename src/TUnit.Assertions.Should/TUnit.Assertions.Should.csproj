@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="PackageVersion">
+
+    <Import Project="..\..\eng\Library.props" />
+    <Import Project="..\..\eng\SourceGenerationDebug.props" />
+
+    <PropertyGroup>
+        <!-- Package is still in beta, so its version carries a "-beta" suffix. Stamp it here
+             rather than passing PackageVersion=x-beta to the pack command: that global property
+             flows into the referenced TUnit.Assertions project too, so the emitted dependency
+             would read "TUnit.Assertions >= x-beta" - a version that is never published, and one
+             that outranks plain "x" whenever the build version is itself a prerelease (PR builds),
+             which fails consumer restores with NU1605. -->
+        <PackageVersion Condition="'$(PackageVersion)' != ''">$(PackageVersion)-beta</PackageVersion>
+        <PackageVersion Condition="'$(PackageVersion)' == ''">$(Version)-beta</PackageVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+
+        <!-- Generator runs at Should.dll build time (baking built-in extensions) AND in
+             consumer compilations (so users' own [AssertionExtension] classes get Should
+             counterparts). The generator skips assertion classes whose Should{Name}Extensions
+             already exists in a referenced assembly, preventing the CS0121 duplicate-definition
+             ambiguity that would otherwise arise from re-emitting the baked extensions. -->
+        <ProjectReference Include="..\TUnit.Assertions.Should.SourceGenerator\TUnit.Assertions.Should.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Assertions.Should.SourceGenerator\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.Should.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+
+    <Import Project="..\..\eng\Library.targets" />
+
+</Project>

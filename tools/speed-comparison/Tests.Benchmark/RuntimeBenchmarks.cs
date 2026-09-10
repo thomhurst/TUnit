@@ -70,6 +70,19 @@ public class RuntimeBenchmarks : BenchmarkBase
     }
 
     [Benchmark]
+    [BenchmarkCategory("Runtime", "AOT")]
+    public async Task xUnit3_AOT()
+    {
+        var aotPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT3-AOT", Framework);
+        var exeName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "UnifiedTests.exe" : "UnifiedTests";
+
+        await Cli.Wrap(Path.Combine(aotPath, exeName))
+            .WithArguments(["--filter-query", $"/*/*/{ClassName}/*"])
+            .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
+            .ExecuteBufferedAsync();
+    }
+
+    [Benchmark]
     public async Task xUnit3()
     {
         var binPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT3", Framework);

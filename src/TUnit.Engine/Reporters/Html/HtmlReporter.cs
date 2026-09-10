@@ -1,0 +1,1173 @@
+using System.Collections.Concurrent;
+using System.Globalization;
+using System.Net;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.Json;
+using Microsoft.Testing.Platform.Extensions;
+using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Extensions.TestHost;
+using Microsoft.Testing.Platform.Messages;
+using Microsoft.Testing.Platform.Services;
+using Microsoft.Testing.Platform.TestHost;
+using TUnit.Core;
+using TUnit.Core.Settings;
+using TUnit.Engine.Configuration;
+using TUnit.Engine.Constants;
+using TUnit.Engine.Exceptions;
+using TUnit.Engine.Extensions;
+using TUnit.Engine.Framework;
+using TUnit.Engine.Helpers;
+using TUnit.Engine.Reporters;
+using TUnit.Engine.Reporters.Aggregation;
+
+#pragma warning disable TPEXP
+
+namespace TUnit.Engine.Reporters.Html;
+
+internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataProducer, ITestHostApplicationLifetime, ITestSessionLifetimeHandler, IFilterReceiver, IDisposable
+{
+    private const int HtmlReportEnabledUnresolved = -1;
+
+    // System.Text.Json's Utf8JsonWriter limits a single string token to int.MaxValue / 6 characters.
+    // Truncate large outputs early so report generation never fails for test suites with excessive logging.
+    internal const int MaxOutputLength = 1 * 1024 * 1024; // 1 MB
+
+    private string? _outputPath;
+    private IMessageBus? _messageBus;
+    private string _resultsDirectory = "TestResults";
+    private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _updates = [];
+    private readonly object _htmlReportStateLock = new();
+    private GitHubReporter? _githubReporter;
+    private int _htmlReportEnabledAfterDiscovery = HtmlReportEnabledUnresolved;
+
+#if NET
+    private ActivityCollector? _activityCollector;
+#endif
+
+    public async Task<bool> IsEnabledAsync()
+    {
+        if (!IsHtmlReportEnabled())
+        {
+            return false;
+        }
+
+        return await extension.IsEnabledAsync();
+    }
+
+    public string Uid { get; } = $"{extension.Uid}HtmlReporter";
+
+    public string Version => extension.Version;
+
+    public string DisplayName => extension.DisplayName;
+
+    public string Description => extension.Description;
+
+    public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
+    {
+        if (!IsHtmlReportEnabledForRun())
+        {
+            return Task.CompletedTask;
+        }
+
+        var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
+        // Keep only the update we'll report per test: a final-state update always wins over a
+        // non-final one, otherwise the latest wins. The engine emits a single final update per
+        // test, so storing the whole stream (the old ConcurrentQueue) just wasted memory.
+        _updates.AddOrUpdate(
+            testNodeUpdateMessage.TestNode.Uid.Value,
+            testNodeUpdateMessage,
+            (_, existing) => PreferForReport(existing, testNodeUpdateMessage));
+        return Task.CompletedTask;
+    }
+
+    // Selects which update to keep for the report when more than one arrives for a test: a
+    // final-state update always wins over a non-final one; otherwise the later (incoming) one
+    // wins. Mirrors the previous "last final, else last overall" walk over the per-test queue.
+    private static TestNodeUpdateMessage PreferForReport(TestNodeUpdateMessage existing, TestNodeUpdateMessage incoming)
+        => HasFinalState(incoming) || !HasFinalState(existing) ? incoming : existing;
+
+    // Named distinctly from the TestNodeStateProperty.IsFinalState() extension to avoid two
+    // same-named symbols in scope; this overload reaches into the update's node state for callers.
+    private static bool HasFinalState(TestNodeUpdateMessage update)
+        => update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>().IsFinalState();
+
+    public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage)];
+
+    public Type[] DataTypesProduced { get; } = [typeof(SessionFileArtifact)];
+
+    public Task BeforeRunAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task AfterRunAsync(int exitCode, CancellationToken cancellation)
+        => Task.CompletedTask; // All work happens in OnTestSessionFinishingAsync.
+
+    public Task OnTestSessionStartingAsync(ITestSessionContext testSessionContext)
+    {
+        lock (_htmlReportStateLock)
+        {
+            _updates.Clear();
+            _githubReporter?.ResetSessionState();
+            Volatile.Write(ref _htmlReportEnabledAfterDiscovery, HtmlReportEnabledUnresolved);
+#if NET
+            DisposeActivityCollection();
+            // Discovery hooks may re-enable reporting for this session. Start before
+            // discovery so those early spans are retained, then resolve the setting
+            // on the first post-discovery update.
+            StartActivityCollection();
+#endif
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public async Task OnTestSessionFinishingAsync(ITestSessionContext testSessionContext)
+    {
+        try
+        {
+#if NET
+            StopActivityCollection();
+#endif
+
+            if (!IsHtmlReportEnabledForRun())
+            {
+#if NET
+                TraceRegistry.Clear();
+#endif
+                _updates.Clear();
+                var disabledOutputPath = _outputPath ?? GetDefaultOutputPath();
+                var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
+                await DeleteSidecarsAndRefreshAggregateAsync(
+                    GetAssemblyName(),
+                    disabledOutputPath,
+                    aggregator);
+                return;
+            }
+
+            if (_updates.Count == 0)
+            {
+#if NET
+                TraceRegistry.Clear();
+#endif
+                if (!IsJsonReportEnabled())
+                {
+                    var emptyOutputPath = _outputPath ?? GetDefaultOutputPath();
+                    var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
+                    await DeleteSidecarsAndRefreshAggregateAsync(
+                        GetAssemblyName(),
+                        emptyOutputPath,
+                        aggregator);
+                }
+
+                return;
+            }
+
+            ReportData reportData;
+            try
+            {
+                reportData = BuildReportData();
+            }
+            finally
+            {
+#if NET
+                TraceRegistry.Clear();
+#endif
+            }
+
+            var html = HtmlReportGenerator.GenerateHtml(reportData);
+
+            if (string.IsNullOrEmpty(html))
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(_outputPath))
+            {
+                _outputPath = GetDefaultOutputPath();
+            }
+
+            var outputPath = _outputPath!;
+            // WriteFileAsync returns false if all retry attempts are exhausted (locked file, bad path, etc.).
+            // Artifact publishing is gated on a successful write — no file means no artifact.
+            var written = await WriteFileAsync(outputPath, html, testSessionContext.CancellationToken);
+
+            if (written)
+            {
+                await PublishArtifactAsync(outputPath, testSessionContext.SessionUid, testSessionContext.CancellationToken);
+            }
+
+            // GitHub Actions integration (artifact upload + step summary)
+            reportData.ArtifactUrl = await TryGitHubIntegrationAsync(outputPath, testSessionContext.CancellationToken);
+
+            // Machine-readable sidecar + cross-process aggregation. Written after the
+            // GitHub integration so the sidecar carries this suite's artifact URL.
+            await TryWriteSidecarAndAggregateAsync(reportData, outputPath, testSessionContext.CancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: HTML report generation failed: {ex.Message}");
+        }
+        finally
+        {
+#if NET
+            DisposeActivityCollection();
+#endif
+        }
+    }
+
+    internal async Task TryWriteSidecarAndAggregateAsync(ReportData reportData, string htmlOutputPath, CancellationToken cancellationToken)
+    {
+        var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
+
+        if (!IsJsonReportEnabled())
+        {
+            await DeleteSidecarsAndRefreshAggregateAsync(reportData.AssemblyName, htmlOutputPath, aggregator);
+            return;
+        }
+
+        // Serialized once; the same bytes back both the local sidecar and the shared copy.
+        var sidecarBytes = ReportDataJson.SerializeToBytes(reportData);
+
+        try
+        {
+            AtomicFile.WriteAllBytes(GetSidecarPath(htmlOutputPath), sidecarBytes);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to write JSON report sidecar: {ex.Message}");
+        }
+
+        if (aggregator is null)
+        {
+            return;
+        }
+
+        try
+        {
+            // Serialize the shared write with cleanup so cleanup cannot mistake an in-flight
+            // enabled generation for the stale generation it intended to remove.
+            using var publicationMarker = await aggregator.AcquireSidecarPublicationAsync(
+                reportData.AssemblyName,
+                htmlOutputPath,
+                CancellationToken.None);
+            if (publicationMarker is null)
+            {
+                // Publication-lock contention must not discard completed suite results.
+                // A separate pending slot cannot overwrite the active publisher's canonical
+                // generation and remains available to this or any later aggregate refresh.
+                aggregator.WritePendingSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+            }
+            else
+            {
+                // Owning the lock makes it safe for a newer normal publication to replace
+                // any pending timeout result left by an earlier publisher.
+                aggregator.DeletePendingSidecar(reportData.AssemblyName, htmlOutputPath);
+                aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
+                aggregator.IncludeSidecar(reportData.AssemblyName, htmlOutputPath);
+            }
+
+            if (aggregator.Mode == AggregationMode.Defer && _githubReporter is not null)
+            {
+                _githubReporter.SuppressPerSuiteSummary = true;
+            }
+
+            IDisposable? aggregationLock;
+            try
+            {
+                aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                aggregationLock = null;
+            }
+
+            if (aggregationLock is null)
+            {
+                return;
+            }
+
+            using (aggregationLock)
+            {
+                publicationMarker?.Dispose();
+
+                RefreshAggregatedOutputs(aggregator);
+                if (_githubReporter is not null)
+                {
+                    _githubReporter.SuppressPerSuiteSummary = true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Report aggregation failed: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteSidecarsAndRefreshAggregateAsync(
+        string assemblyName,
+        string htmlOutputPath,
+        ReportAggregator? aggregator)
+    {
+        TryDeleteReportFile(() => File.Delete(GetSidecarPath(htmlOutputPath)));
+
+        if (aggregator is null)
+        {
+            return;
+        }
+
+        if (!aggregator.HasSidecarState(assemblyName, htmlOutputPath))
+        {
+            return;
+        }
+
+        try
+        {
+            var expectedGeneration = aggregator.ReadEffectiveSidecarGeneration(assemblyName, htmlOutputPath);
+            using var publicationMarker = aggregator.TryAcquireSidecarPublication(assemblyName, htmlOutputPath);
+            if (publicationMarker is null)
+            {
+                // An enabled publication may already have installed its generation while
+                // holding this lock. Cleanup must not wait, acquire next, and hide it.
+                return;
+            }
+
+            // Exclude only the generation observed before the lock attempt. A publisher that
+            // won the per-suite lock in the meantime installed a newer generation and survives.
+            aggregator.ExcludeSidecarIfGenerationMatches(assemblyName, htmlOutputPath, expectedGeneration);
+
+            // The exclusion is durable and generation-scoped, so do not hold the per-suite
+            // lock during the bounded aggregate-lock wait. A staged enabled publication
+            // must be able to acquire it and clear the exclusion before either wait expires.
+            publicationMarker.Dispose();
+
+            // Cleanup must survive session cancellation or stale enabled-run sidecars can
+            // re-enter a sibling's aggregate. Lock acquisition remains time-bounded.
+            using var aggregationLock = await aggregator.AcquireLockAsync(CancellationToken.None);
+            if (aggregationLock is null)
+            {
+                return;
+            }
+
+            RefreshAggregatedOutputs(aggregator);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            Console.WriteLine($"Warning: Report aggregation cleanup failed: {ex.Message}");
+        }
+    }
+
+    private void RefreshAggregatedOutputs(ReportAggregator aggregator)
+    {
+        var suites = aggregator.ReadAllSidecars();
+        if (suites.Count == 0)
+        {
+            TryDeleteReportFile(() => File.Delete(aggregator.MergedReportPath));
+            if (aggregator.Mode == AggregationMode.Cooperative)
+            {
+                _githubReporter?.ClearAggregatedSummary();
+            }
+
+            return;
+        }
+
+        aggregator.WriteMergedHtml(suites);
+        Console.WriteLine($"Merged HTML test report ({suites.Count} {(suites.Count == 1 ? "suite" : "suites")} so far) written to: {aggregator.MergedReportPath}");
+
+        // The step summary is rewritten in the same lock cycle: one env parse, one
+        // lock acquisition and one sidecar scan per process for both merged outputs.
+        if (aggregator.Mode == AggregationMode.Cooperative)
+        {
+            _githubReporter?.WriteAggregatedSummary(suites, aggregator.MergedReportPath);
+        }
+    }
+
+    private static void TryDeleteReportFile(Action deleteFile)
+    {
+        try
+        {
+            deleteFile();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to remove disabled report file: {ex.Message}");
+        }
+    }
+
+    // The truthy vocabulary shared by the TUNIT_DISABLE_* switches.
+    private static bool IsTruthyEnv(string? value)
+        => value is not null &&
+           (value.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+            value.Equals("1", StringComparison.Ordinal) ||
+            value.Equals("yes", StringComparison.OrdinalIgnoreCase));
+
+    internal static bool IsHtmlReportEnabled()
+        => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableHtmlReporter))
+           && TUnitSettings.Default.Reporting.HtmlReportEnabled;
+
+    internal static bool IsJsonReportEnabled()
+        => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableJsonReport))
+           && TUnitSettings.Default.Reporting.JsonReportEnabled;
+
+    internal static bool IsArtifactUploadEnabled()
+        => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableArtifactUpload))
+           && TUnitSettings.Default.Reporting.ArtifactUploadEnabled;
+
+    internal bool IsHtmlReportEnabledForRun()
+    {
+        var resolved = Volatile.Read(ref _htmlReportEnabledAfterDiscovery);
+        if (resolved != HtmlReportEnabledUnresolved)
+        {
+            return resolved == 1;
+        }
+
+        lock (_htmlReportStateLock)
+        {
+            resolved = Volatile.Read(ref _htmlReportEnabledAfterDiscovery);
+            if (resolved != HtmlReportEnabledUnresolved)
+            {
+                return resolved == 1;
+            }
+
+            var enabled = IsHtmlReportEnabled();
+
+#if NET
+            if (enabled)
+            {
+                StartActivityCollection();
+            }
+            else
+            {
+                DisposeActivityCollection();
+                TraceRegistry.Clear();
+            }
+#endif
+
+            Volatile.Write(ref _htmlReportEnabledAfterDiscovery, enabled ? 1 : 0);
+            return enabled;
+        }
+    }
+
+    // Default HTML report is "{name}-{os}-{tfm}-report.html"; the sidecar drops the
+    // "-report" stem so the default pair reads "{name}-{os}-{tfm}.tunit-report.json".
+    internal static string GetSidecarPath(string htmlOutputPath)
+    {
+        const string reportSuffix = "-report.html";
+        if (htmlOutputPath.EndsWith(reportSuffix, StringComparison.OrdinalIgnoreCase))
+        {
+            return htmlOutputPath.Substring(0, htmlOutputPath.Length - reportSuffix.Length) + ReportDataJson.SidecarExtension;
+        }
+
+        return Path.ChangeExtension(htmlOutputPath, null) + ReportDataJson.SidecarExtension;
+    }
+
+    internal async Task PublishArtifactAsync(string outputPath, SessionUid sessionUid, CancellationToken cancellationToken)
+    {
+        if (_messageBus is null || !IsArtifactUploadEnabled())
+        {
+            return;
+        }
+
+        // SessionFileArtifact is consumed by MTP itself (not user-defined consumers),
+        // so no AddDataProducer registration is required — same pattern as TUnitMessageBus.
+        await _messageBus.PublishAsync(this, new SessionFileArtifact(
+            sessionUid,
+            new FileInfo(outputPath),
+            "HTML Test Report",
+            "TUnit HTML test results report"));
+    }
+
+    public void Dispose()
+    {
+#if NET
+        DisposeActivityCollection();
+#endif
+    }
+
+#if NET
+    internal bool HasActivityCollector => _activityCollector is not null;
+
+    private void StartActivityCollection()
+    {
+        if (_activityCollector is not null)
+        {
+            return;
+        }
+
+        _activityCollector = new ActivityCollector();
+        _activityCollector.Start();
+    }
+
+    internal void StopActivityCollection()
+        => _activityCollector?.Stop();
+
+    private void DisposeActivityCollection()
+    {
+        _activityCollector?.Dispose();
+        _activityCollector = null;
+    }
+#endif
+
+    public string? Filter { get; set; }
+
+    internal void SetOutputPath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            throw new ArgumentException("Output path cannot be null or empty", nameof(path));
+        }
+
+        _outputPath = path;
+    }
+
+    // Called by the AddTestSessionLifetimeHandler factory at startup, before any session events fire,
+    // so _messageBus is guaranteed to be set before OnTestSessionFinishingAsync is invoked.
+    internal void SetMessageBus(IMessageBus? messageBus)
+    {
+        _messageBus = messageBus;
+    }
+
+    internal void SetGitHubReporter(GitHubReporter githubReporter)
+    {
+        _githubReporter = githubReporter;
+    }
+
+    // Called by the AddTestSessionLifetimeHandler factory at startup, before any session events fire,
+    // so _resultsDirectory is guaranteed to be set before OnTestSessionFinishingAsync is invoked.
+    internal void SetResultsDirectory(string path)
+    {
+        _resultsDirectory = path;
+    }
+
+    internal ReportData BuildReportData()
+    {
+        var assemblyName = GetAssemblyName();
+        var tunitVersion = typeof(HtmlReporter).Assembly.GetName().Version?.ToString() ?? "unknown";
+
+        // Get the last update with a final state for each test
+        // Each test's update was already reduced to the one we report (final-state preferred) in
+        // ConsumeAsync, so _updates maps directly to the nodes to render.
+        var lastUpdates = _updates;
+
+        var summary = new ReportSummary();
+        var groupsByClass = new Dictionary<string, List<ReportTestResult>>();
+        var groupNamespaces = new Dictionary<string, string>();
+        double overallStartMs = double.MaxValue;
+        double overallEndMs = double.MinValue;
+
+        // Build span lookup to correlate traces with test results
+#if NET
+        var spanLookup = _activityCollector?.GetTestSpanLookup();
+#else
+        var spanLookup = (Dictionary<string, (string TraceId, string SpanId)>?)null;
+#endif
+
+        // Resolve source-control context once; reused for per-test source links and report metadata below.
+        var ci = SourceControlContext.Detect(Environment.GetEnvironmentVariable);
+
+        foreach (var kvp in lastUpdates)
+        {
+            // ConsumeAsync prefers a final-state update per test, but a test abandoned mid-flight
+            // (e.g. process-crash recovery) may only ever have a non-final update stored. Skip those
+            // so the report never renders a discovered/in-progress node as if it were a result.
+            if (!HasFinalState(kvp.Value))
+            {
+                continue;
+            }
+
+            var testNode = kvp.Value.TestNode;
+
+            // Correlate trace/span IDs from collected activities
+            string? traceId = null, spanId = null;
+            if (spanLookup?.TryGetValue(kvp.Key, out var spanInfo) == true)
+            {
+                traceId = spanInfo.TraceId;
+                spanId = spanInfo.SpanId;
+            }
+
+            // Build the per-attempt history for the flaky/retry UI. The engine emits only one
+            // update per test (the final result), so we cannot reconstruct attempts from the
+            // update stream. Instead, failed attempts that triggered a retry are captured during
+            // execution and carried here on the final node via TUnitRetryAttemptsProperty; the
+            // final attempt is the node's own state. We stitch the two together in order.
+            ReportAttempt[]? attempts = null;
+            var retryAttempt = 0;
+            var priorAttempts = testNode.Properties.AsEnumerable()
+                .OfType<TUnitRetryAttemptsProperty>()
+                .FirstOrDefault();
+            if (priorAttempts is { Attempts.Count: > 0 })
+            {
+                var finalState = testNode.Properties.SingleOrDefault<TestNodeStateProperty>();
+                var (finalStatus, finalException, _) = ExtractStatus(finalState);
+                var finalDuration = testNode.Properties.AsEnumerable()
+                    .OfType<TimingProperty>()
+                    .FirstOrDefault()?.GlobalTiming.Duration.TotalMilliseconds ?? 0;
+
+                var attemptList = new List<ReportAttempt>(priorAttempts.Attempts.Count + 1);
+                foreach (var prior in priorAttempts.Attempts)
+                {
+                    // We keep only the top-level type/message/stack here; MapException's recursive
+                    // InnerException chain is intentionally discarded, matching how the final
+                    // attempt is rendered (ReportAttempt has no inner-exception field).
+                    var priorException = MapException(prior.Exception);
+                    attemptList.Add(new ReportAttempt
+                    {
+                        Status = StatusFromState(prior.State),
+                        DurationMs = prior.Duration?.TotalMilliseconds ?? 0,
+                        ExceptionType = priorException?.Type,
+                        ExceptionMessage = priorException?.Message,
+                        StackTrace = priorException?.StackTrace,
+                    });
+                }
+
+                attemptList.Add(new ReportAttempt
+                {
+                    Status = finalStatus,
+                    DurationMs = finalDuration,
+                    ExceptionType = finalException?.Type,
+                    ExceptionMessage = finalException?.Message,
+                    StackTrace = finalException?.StackTrace,
+                });
+
+                // Index of the surviving (final) attempt; equals testContext.CurrentRetryAttempt.
+                // Derived from the attempt list rather than read back from the node because
+                // CurrentRetryAttempt is not serialised onto the TestNode. A non-zero value here is
+                // what flags the test as flaky in AccumulateStatus.
+                retryAttempt = attemptList.Count - 1;
+                attempts = attemptList.ToArray();
+            }
+
+#if NET
+            var additionalTraceIds = FilterAdditionalTraceIds(TraceRegistry.GetTraceIds(kvp.Key), traceId);
+            string[]? additionalTraceIdsForResult = additionalTraceIds.Length > 0 ? additionalTraceIds : null;
+#else
+            string[]? additionalTraceIdsForResult = null;
+#endif
+
+            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult, attempts, ci.RepositorySlug, ci.Workspace);
+
+            AccumulateStatus(summary, testResult);
+
+            // Group by class name
+            var className = testResult.ClassName;
+            if (!groupsByClass.TryGetValue(className, out var list))
+            {
+                list = [];
+                groupsByClass[className] = list;
+            }
+
+            list.Add(testResult);
+
+            // Track namespace
+            var testMethodIdentifier = testNode.Properties.AsEnumerable()
+                .OfType<TestMethodIdentifierProperty>()
+                .FirstOrDefault();
+            if (testMethodIdentifier != null && !groupNamespaces.ContainsKey(className))
+            {
+                groupNamespaces[className] = testMethodIdentifier.Namespace;
+            }
+
+            // Track overall timing
+            var timingProperty = testNode.Properties.AsEnumerable()
+                .OfType<TimingProperty>()
+                .FirstOrDefault();
+            if (timingProperty?.GlobalTiming is { } globalTiming)
+            {
+                var startMs = globalTiming.StartTime.ToUnixTimeMilliseconds();
+                var endMs = (globalTiming.StartTime + globalTiming.Duration).ToUnixTimeMilliseconds();
+                if (startMs < overallStartMs)
+                {
+                    overallStartMs = startMs;
+                }
+
+                if (endMs > overallEndMs)
+                {
+                    overallEndMs = endMs;
+                }
+            }
+        }
+
+        var totalDurationMs = overallStartMs < double.MaxValue ? overallEndMs - overallStartMs : 0;
+
+        // Build groups
+        var groups = new ReportTestGroup[groupsByClass.Count];
+        var i = 0;
+        foreach (var kvp in groupsByClass)
+        {
+            var groupSummary = new ReportSummary();
+            foreach (var test in kvp.Value)
+            {
+                AccumulateStatus(groupSummary, test);
+            }
+
+            groups[i++] = new ReportTestGroup
+            {
+                ClassName = kvp.Key,
+                Namespace = groupNamespaces.GetValueOrDefault(kvp.Key, ""),
+                Summary = groupSummary,
+                Tests = OrderTestsForDisplay(kvp.Value)
+            };
+        }
+
+        // Collect spans
+        SpanData[]? spans = null;
+#if NET
+        if (_activityCollector != null)
+        {
+            spans = _activityCollector.GetAllSpans();
+
+            // Use the session span duration as the header duration when available,
+            // since it captures the full wall-clock time including initialization.
+            // The test-timing-based duration only covers test execution.
+            var sessionSpan = spans?.FirstOrDefault(s => s.SpanType == TUnitActivitySource.SpanTestSession);
+            if (sessionSpan != null)
+            {
+                totalDurationMs = sessionSpan.DurationMs;
+            }
+        }
+#endif
+
+        return new ReportData
+        {
+            AssemblyName = assemblyName,
+            MachineName = Environment.MachineName,
+            Timestamp = DateTimeOffset.UtcNow.ToString("dd MMM yyyy, HH:mm:ss 'UTC'", CultureInfo.InvariantCulture),
+            TUnitVersion = tunitVersion,
+            OperatingSystem = RuntimeInformation.OSDescription,
+            RuntimeVersion = RuntimeInformation.FrameworkDescription,
+            Filter = Filter,
+            TotalDurationMs = totalDurationMs,
+            Summary = summary,
+            Groups = groups,
+            Spans = spans,
+            CommitSha = ci.CommitSha,
+            Branch = ci.Branch,
+            PullRequestNumber = ci.PullRequestNumber,
+            RepositorySlug = ci.RepositorySlug,
+            SourceLinks = ci.Links,
+        };
+    }
+
+    private static void AccumulateStatus(ReportSummary summary, ReportTestResult testResult)
+    {
+        summary.Total++;
+        switch (testResult.Status)
+        {
+            case "passed" when testResult.RetryAttempt > 0:
+                summary.Passed++;
+                summary.Flaky++;
+                break;
+            case "passed":
+                summary.Passed++;
+                break;
+            case "failed" or "error":
+                summary.Failed++;
+                break;
+            case "skipped":
+                summary.Skipped++;
+                break;
+            case "timedOut":
+                summary.TimedOut++;
+                break;
+            case "cancelled":
+                summary.Cancelled++;
+                break;
+        }
+    }
+
+#if NET
+    // The engine auto-registers the test's own traceId in TraceRegistry for OTLP correlation,
+    // so it shows up in GetTraceIds alongside any user-added traces. Strip it here so the
+    // primary trace (rendered as "Trace Timeline") isn't also rendered as a "Linked Trace".
+    internal static string[] FilterAdditionalTraceIds(string[] allTraceIds, string? primaryTraceId)
+    {
+        if (allTraceIds.Length == 0 || primaryTraceId is null)
+        {
+            return allTraceIds;
+        }
+
+        var filtered = new List<string>(allTraceIds.Length);
+        foreach (var tid in allTraceIds)
+        {
+            if (!string.Equals(tid, primaryTraceId, StringComparison.OrdinalIgnoreCase))
+            {
+                filtered.Add(tid);
+            }
+        }
+
+        return filtered.Count == allTraceIds.Length ? allTraceIds : filtered.ToArray();
+    }
+#endif
+
+    internal static ReportTestResult[] OrderTestsForDisplay(IEnumerable<ReportTestResult> tests)
+    {
+        // Parse to DateTimeOffset so the sort works regardless of how the caller formatted
+        // StartTime — production writes UTC ISO-8601, but tests construct ReportTestResult
+        // directly via InternalsVisibleTo and could pass non-UTC offsets.
+        return tests
+            .OrderBy(static test => ParseStartTimeForSort(test.StartTime))
+            .ThenBy(static test => test.DisplayName, StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static DateTimeOffset ParseStartTimeForSort(string? raw)
+    {
+        return DateTimeOffset.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var parsed)
+            ? parsed
+            : DateTimeOffset.MaxValue;
+    }
+
+    internal static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds, ReportAttempt[]? attempts = null, string? ciRepo = null, string? ciWorkspace = null)
+    {
+        IProperty? stateProperty = null;
+        TestMethodIdentifierProperty? testMethodIdentifier = null;
+        TimingProperty? timingProperty = null;
+        TestFileLocationProperty? fileLocation = null;
+        string? stdOut = null;
+        string? stdErr = null;
+        List<string>? categories = null;
+        List<ReportKeyValue>? customProperties = null;
+
+        foreach (var prop in testNode.Properties.AsEnumerable())
+        {
+            switch (prop)
+            {
+                case TestNodeStateProperty when stateProperty is null:
+                    stateProperty = prop;
+                    break;
+                case TestMethodIdentifierProperty m:
+                    testMethodIdentifier = m;
+                    break;
+                case TimingProperty t:
+                    timingProperty = t;
+                    break;
+                case TestFileLocationProperty f:
+                    fileLocation = f;
+                    break;
+                case StandardOutputProperty o:
+                    stdOut = TruncateOutput(o.StandardOutput);
+                    break;
+                case StandardErrorProperty e:
+                    stdErr = TruncateOutput(e.StandardError);
+                    break;
+                case TestMetadataProperty meta:
+                    // MTP convention (matches Microsoft.Testing.Extensions.VSTestBridge): categories are
+                    // emitted as TestMetadataProperty(category, "") — name in Key, empty Value. Traits/
+                    // custom properties use (key, value) with a non-empty Value.
+                    if (string.IsNullOrEmpty(meta.Value))
+                    {
+                        categories ??= [];
+                        categories.Add(meta.Key);
+                    }
+                    else
+                    {
+                        customProperties ??= [];
+                        customProperties.Add(new ReportKeyValue { Key = meta.Key, Value = meta.Value });
+                    }
+                    break;
+            }
+        }
+
+        var categoriesArray = categories?.ToArray();
+        var customPropertiesArray = customProperties?.ToArray();
+
+        var className = testMethodIdentifier?.TypeName ?? "UnknownClass";
+        var methodName = testMethodIdentifier?.MethodName ?? testNode.DisplayName;
+
+        var (status, exception, skipReason) = ExtractStatus(stateProperty);
+
+        var durationMs = timingProperty?.GlobalTiming.Duration.TotalMilliseconds ?? 0;
+        var startTime = timingProperty?.GlobalTiming.StartTime;
+        var endTime = startTime.HasValue ? startTime.Value + timingProperty!.GlobalTiming.Duration : (DateTimeOffset?)null;
+
+        return new ReportTestResult
+        {
+            Id = testId,
+            DisplayName = testNode.DisplayName,
+            MethodName = methodName,
+            ClassName = className,
+            Status = status,
+            DurationMs = durationMs,
+            StartTime = startTime?.ToUniversalTime().ToString("o"),
+            EndTime = endTime?.ToUniversalTime().ToString("o"),
+            Exception = exception,
+            Output = stdOut,
+            ErrorOutput = stdErr,
+            Categories = categoriesArray is { Length: > 0 } ? categoriesArray : null,
+            CustomProperties = customPropertiesArray is { Length: > 0 } ? customPropertiesArray : null,
+            FilePath = fileLocation?.FilePath,
+            LineNumber = fileLocation?.LineSpan.Start.Line,
+            // Line numbers are already 1-based here. Emit an end line only when the span covers
+            // more than the declaration line (source-gen) — reflection has none, so leave it null.
+            EndLineNumber = fileLocation?.LineSpan.End.Line is { } endLine && endLine > fileLocation.LineSpan.Start.Line ? endLine : null,
+            SourceRelativePath = SourcePathResolver.ToRepoRelativePath(fileLocation?.FilePath, ciWorkspace, ciRepo),
+            SkipReason = skipReason,
+            RetryAttempt = retryAttempt,
+            Attempts = attempts,
+            TraceId = traceId,
+            SpanId = spanId,
+            AdditionalTraceIds = additionalTraceIds
+        };
+    }
+
+    internal static string? TruncateOutput(string? value)
+    {
+        if (value is null || value.Length <= MaxOutputLength)
+        {
+            return value;
+        }
+
+        // Back off one char if we would split a surrogate pair, which would produce invalid UTF-16.
+        var cutAt = MaxOutputLength;
+        if (char.IsHighSurrogate(value[cutAt - 1]))
+        {
+            cutAt--;
+        }
+
+        return new System.Text.StringBuilder(cutAt + 64)
+            .Append(value, 0, cutAt)
+            .Append($"\n[... output truncated \u2014 {value.Length:N0} total characters]")
+            .ToString();
+    }
+
+    private static (string Status, ReportExceptionData? Exception, string? SkipReason) ExtractStatus(IProperty? stateProperty)
+    {
+        return stateProperty switch
+        {
+            PassedTestNodeStateProperty => ("passed", null, null),
+            FailedTestNodeStateProperty failed => ("failed", MapException(failed.Exception), null),
+            ErrorTestNodeStateProperty error => ("error", MapException(error.Exception), null),
+            TimeoutTestNodeStateProperty timeout => ("timedOut", MapException(timeout.Exception), null),
+            SkippedTestNodeStateProperty skipped => ("skipped", null, skipped.Explanation),
+#pragma warning disable CS0618, MTP0001 // Retained for TUnit's HTML cancellation reporting
+            CancelledTestNodeStateProperty => ("cancelled", null, null),
+#pragma warning restore CS0618, MTP0001
+            InProgressTestNodeStateProperty => ("inProgress", null, null),
+            _ => ("unknown", null, null)
+        };
+    }
+
+    // Maps a captured retry attempt's TestState to the same status vocabulary ExtractStatus
+    // produces for the final node, so prior and final attempts render consistently. A retried
+    // attempt is always a failure of some kind; Failed maps to "failed" (HtmlReportGenerator's
+    // MapStatus collapses "failed"/"error"/"timedOut" to "fail" for the UI).
+    private static string StatusFromState(TestState state) => state switch
+    {
+        TestState.Passed => "passed",
+        TestState.Failed => "failed",
+        TestState.Timeout => "timedOut",
+        TestState.Skipped => "skipped",
+        TestState.Cancelled => "cancelled",
+        _ => "error",
+    };
+
+    private static ReportExceptionData? MapException(Exception? ex)
+    {
+        if (ex is null)
+        {
+            return null;
+        }
+
+        ex = TUnitFailedException.Unwrap(ex);
+
+        return new ReportExceptionData
+        {
+            Type = ex.GetType().FullName ?? ex.GetType().Name,
+            Message = ex.Message,
+            StackTrace = ex.StackTrace,
+            InnerException = MapException(ex.InnerException)
+        };
+    }
+
+    private string GetDefaultOutputPath()
+    {
+        var assemblyName = GetAssemblyName();
+        var sanitizedName = PathValidator.SanitizeFileName(assemblyName);
+        var os = GetShortOsName();
+        var tfm = GetShortFrameworkName();
+        return Path.GetFullPath(Path.Combine(_resultsDirectory, $"{sanitizedName}-{os}-{tfm}-report.html"));
+    }
+
+    private static string GetAssemblyName()
+        => Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
+
+    private static string GetShortOsName()
+    {
+#if NET
+        if (OperatingSystem.IsWindows()) return "windows";
+        if (OperatingSystem.IsLinux()) return "linux";
+        if (OperatingSystem.IsMacOS()) return "macos";
+#else
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return "windows";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "linux";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "macos";
+#endif
+        return "unknown";
+    }
+
+    private static string GetShortFrameworkName()
+    {
+        // RuntimeInformation.FrameworkDescription returns e.g. ".NET 10.0.0" or ".NET Framework 4.8.0"
+        var desc = RuntimeInformation.FrameworkDescription;
+        if (desc.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase))
+        {
+            var version = desc.Substring(".NET Framework ".Length).Trim();
+            var dotIndex = version.IndexOf('.');
+            if (dotIndex > 0)
+            {
+                var secondDot = version.IndexOf('.', dotIndex + 1);
+                if (secondDot > 0) version = version.Substring(0, secondDot);
+            }
+            return $"net{version.Replace(".", "")}";
+        }
+
+        if (desc.StartsWith(".NET ", StringComparison.OrdinalIgnoreCase))
+        {
+            var version = desc.Substring(".NET ".Length).Trim();
+            var dotIndex = version.IndexOf('.');
+            if (dotIndex > 0)
+            {
+                var secondDot = version.IndexOf('.', dotIndex + 1);
+                if (secondDot > 0) version = version.Substring(0, secondDot);
+            }
+            return $"net{version}";
+        }
+
+        return "unknown";
+    }
+
+    private static async Task<bool> WriteFileAsync(string path, string content, CancellationToken cancellationToken)
+    {
+        var directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        const int maxAttempts = EngineDefaults.FileWriteMaxAttempts;
+
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+#if NET
+                await File.WriteAllTextAsync(path, content, Encoding.UTF8, cancellationToken);
+#else
+                File.WriteAllText(path, content, Encoding.UTF8);
+#endif
+                Console.WriteLine($"HTML test report written to: {path}");
+                return true;
+            }
+            catch (IOException ex) when (attempt < maxAttempts && IsFileLocked(ex))
+            {
+                var baseDelay = EngineDefaults.BaseRetryDelayMs * Math.Pow(2, attempt - 1);
+                var jitter = Random.Shared.Next(0, EngineDefaults.MaxRetryJitterMs);
+                var delay = (int)(baseDelay + jitter);
+
+                Console.WriteLine($"HTML report file is locked, retrying in {delay}ms (attempt {attempt}/{maxAttempts})");
+                await Task.Delay(delay, cancellationToken);
+            }
+        }
+
+        Console.WriteLine($"Failed to write HTML test report to: {path} after {maxAttempts} attempts");
+        return false;
+    }
+
+    private static bool IsFileLocked(IOException exception)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var errorCode = exception.HResult & 0xFFFF;
+            return errorCode is 0x20 or 0x21; // ERROR_SHARING_VIOLATION / ERROR_LOCK_VIOLATION
+        }
+
+        // On POSIX, concurrent writers are less common; fallback to message heuristic
+        return exception.Message.Contains("being used by another process") ||
+               exception.Message.Contains("access denied", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <returns>The uploaded artifact's URL, when the in-process upload succeeded.</returns>
+    private async Task<string?> TryGitHubIntegrationAsync(string filePath, CancellationToken cancellationToken)
+    {
+        if (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubActions) is not "true")
+        {
+            return null;
+        }
+
+        if (!IsArtifactUploadEnabled())
+        {
+            return null;
+        }
+
+        var repo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
+        var runId = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRunId);
+
+        // Try in-process artifact upload if the runtime token is available
+        string? artifactId = null;
+        var runtimeToken = Environment.GetEnvironmentVariable(EnvironmentConstants.ActionsRuntimeToken);
+        var resultsUrl = Environment.GetEnvironmentVariable(EnvironmentConstants.ActionsResultsUrl);
+        var hasRuntimeToken = !string.IsNullOrEmpty(runtimeToken) && !string.IsNullOrEmpty(resultsUrl);
+
+        if (!hasRuntimeToken)
+        {
+            Console.WriteLine("Tip: To enable automatic HTML report artifact upload, see https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload");
+        }
+        else
+        {
+            try
+            {
+                var retentionDays = ParseRetentionDays();
+                artifactId = await GitHubArtifactUploader.UploadAsync(filePath, runtimeToken!, resultsUrl!, retentionDays, cancellationToken);
+
+                if (artifactId is not null)
+                {
+                    Console.WriteLine($"HTML report uploaded as GitHub artifact (ID: {artifactId})");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to upload HTML report artifact: {ex.Message}");
+            }
+        }
+
+        string? artifactUrl = null;
+        if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
+        {
+            var serverUrl = (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl) ?? EnvironmentConstants.GitHubDefaultServerUrl).TrimEnd('/');
+            artifactUrl = $"{serverUrl}/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
+        }
+
+        if (_githubReporter is not null)
+        {
+            if (!hasRuntimeToken)
+            {
+                _githubReporter.ShowArtifactUploadTip = true;
+            }
+            else if (artifactUrl is not null)
+            {
+                _githubReporter.ArtifactUrl = artifactUrl;
+            }
+        }
+
+        return artifactUrl;
+    }
+
+    private static int? ParseRetentionDays()
+    {
+        var raw = Environment.GetEnvironmentVariable(EnvironmentConstants.ArtifactRetentionDays);
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return null;
+        }
+
+        if (int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var days) && days > 0)
+        {
+            return days;
+        }
+
+        Console.WriteLine($"Warning: Ignoring invalid {EnvironmentConstants.ArtifactRetentionDays} value '{raw}' (expected a positive integer number of days).");
+        return null;
+    }
+}

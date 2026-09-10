@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\eng\Library.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+    <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+    <PackageReference Include="Microsoft.Testing.Extensions.Telemetry" />
+  </ItemGroup>
+
+  <Import Project="..\..\eng\Library.targets" />
+
+</Project>

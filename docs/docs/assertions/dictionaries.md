@@ -2,6 +2,7 @@
 sidebar_position: 6.8
 ---
 
+
 # Dictionary Assertions
 
 TUnit provides specialized assertions for testing dictionaries (`IReadOnlyDictionary<TKey, TValue>`), including key and value membership checks. Dictionaries also inherit all collection assertions.
@@ -180,7 +181,7 @@ public async Task Any_Key_Starts_With()
 [Test]
 public async Task Configuration_Has_Required_Keys()
 {
-    var config = LoadConfiguration();
+    var config = GetConfigurationValues();
 
     using (Assert.Multiple())
     {
@@ -473,7 +474,7 @@ public async Task Empty_vs_Null_Dictionary()
 [Test]
 public async Task All_Required_Keys_Present()
 {
-    var config = LoadConfiguration();
+    var config = GetConfigurationValues();
     var requiredKeys = new[] { "ApiKey", "Database", "Environment" };
 
     foreach (var key in requiredKeys)
@@ -489,7 +490,7 @@ Or with `Assert.Multiple`:
 [Test]
 public async Task All_Required_Keys_Present_Multiple()
 {
-    var config = LoadConfiguration();
+    var config = GetConfigurationValues();
     var requiredKeys = new[] { "ApiKey", "Database", "Environment" };
 
     using (Assert.Multiple())

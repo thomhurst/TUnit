@@ -1,0 +1,242 @@
+using System.Text.Json.Serialization;
+using TUnit.Core;
+
+namespace TUnit.Engine.Reporters.Html;
+
+// NOTE: the [JsonPropertyName] attributes below are documentation-only. JSON output
+// is hand-written via Utf8JsonWriter in HtmlReportGenerator.SerializeReport; renaming
+// an attribute here will not change the emitted property name. Update the writer.
+
+internal sealed class ReportData
+{
+    [JsonPropertyName("assemblyName")]
+    public required string AssemblyName { get; init; }
+
+    /// <summary>Atomic sidecar generation used only by aggregation cleanup.</summary>
+    [JsonIgnore]
+    public string? PublicationGeneration { get; init; }
+
+    [JsonPropertyName("machineName")]
+    public required string MachineName { get; init; }
+
+    [JsonPropertyName("timestamp")]
+    public required string Timestamp { get; init; }
+
+    [JsonPropertyName("tunitVersion")]
+    public required string TUnitVersion { get; init; }
+
+    [JsonPropertyName("operatingSystem")]
+    public required string OperatingSystem { get; init; }
+
+    [JsonPropertyName("runtimeVersion")]
+    public required string RuntimeVersion { get; init; }
+
+    [JsonPropertyName("filter")]
+    public string? Filter { get; init; }
+
+    [JsonPropertyName("totalDurationMs")]
+    public double TotalDurationMs { get; init; }
+
+    [JsonPropertyName("summary")]
+    public required ReportSummary Summary { get; init; }
+
+    [JsonPropertyName("groups")]
+    public required ReportTestGroup[] Groups { get; init; }
+
+    [JsonPropertyName("spans")]
+    public SpanData[]? Spans { get; init; }
+
+    [JsonPropertyName("commitSha")]
+    public string? CommitSha { get; init; }
+
+    [JsonPropertyName("branch")]
+    public string? Branch { get; init; }
+
+    [JsonPropertyName("pullRequestNumber")]
+    public string? PullRequestNumber { get; init; }
+
+    [JsonPropertyName("repositorySlug")]
+    public string? RepositorySlug { get; init; }
+
+    [JsonIgnore]
+    public SourceLinkTemplates? SourceLinks { get; init; }
+
+    /// <summary>
+    /// Link to this suite's uploaded HTML report artifact, when the in-process GitHub
+    /// upload succeeded. Not part of the HTML renderer JSON — persisted only in the
+    /// aggregation sidecar (see <c>ReportDataJson</c>) so the merged step summary can
+    /// link each suite's individual report. Mutable because the upload happens after
+    /// the report data is built.
+    /// </summary>
+    [JsonIgnore]
+    public string? ArtifactUrl { get; set; }
+}
+
+internal sealed class ReportSummary
+{
+    [JsonPropertyName("total")]
+    public int Total { get; set; }
+
+    [JsonPropertyName("passed")]
+    public int Passed { get; set; }
+
+    [JsonPropertyName("failed")]
+    public int Failed { get; set; }
+
+    [JsonPropertyName("skipped")]
+    public int Skipped { get; set; }
+
+    [JsonPropertyName("cancelled")]
+    public int Cancelled { get; set; }
+
+    [JsonPropertyName("timedOut")]
+    public int TimedOut { get; set; }
+
+    [JsonPropertyName("flaky")]
+    public int Flaky { get; set; }
+
+    [JsonIgnore]
+    public int CleanPassed => Passed - Flaky;
+
+    [JsonIgnore]
+    public int TotalFailed => Failed + TimedOut;
+
+    /// <summary>Everything that should mark a suite/run as not-green, cancellations included.</summary>
+    [JsonIgnore]
+    public int TotalUnsuccessful => Failed + TimedOut + Cancelled;
+
+    /// <summary>Accumulates another summary into this one (used when merging suites).</summary>
+    public void Add(ReportSummary other)
+    {
+        Total += other.Total;
+        Passed += other.Passed;
+        Failed += other.Failed;
+        Skipped += other.Skipped;
+        Cancelled += other.Cancelled;
+        TimedOut += other.TimedOut;
+        Flaky += other.Flaky;
+    }
+}
+
+internal sealed class ReportTestGroup
+{
+    [JsonPropertyName("className")]
+    public required string ClassName { get; init; }
+
+    [JsonPropertyName("namespace")]
+    public required string Namespace { get; init; }
+
+    [JsonPropertyName("summary")]
+    public required ReportSummary Summary { get; init; }
+
+    [JsonPropertyName("tests")]
+    public required ReportTestResult[] Tests { get; init; }
+}
+
+// A record so consumers (e.g. ReportDataMerger) can rewrite single properties via `with`
+// without a hand-maintained copy that silently drops newly added members.
+internal sealed record ReportTestResult
+{
+    [JsonPropertyName("id")]
+    public required string Id { get; init; }
+
+    [JsonPropertyName("displayName")]
+    public required string DisplayName { get; init; }
+
+    [JsonPropertyName("methodName")]
+    public required string MethodName { get; init; }
+
+    [JsonPropertyName("className")]
+    public required string ClassName { get; init; }
+
+    [JsonPropertyName("status")]
+    public required string Status { get; init; }
+
+    [JsonPropertyName("durationMs")]
+    public double DurationMs { get; init; }
+
+    [JsonPropertyName("startTime")]
+    public string? StartTime { get; init; }
+
+    [JsonPropertyName("endTime")]
+    public string? EndTime { get; init; }
+
+    [JsonPropertyName("exception")]
+    public ReportExceptionData? Exception { get; init; }
+
+    [JsonPropertyName("output")]
+    public string? Output { get; init; }
+
+    [JsonPropertyName("errorOutput")]
+    public string? ErrorOutput { get; init; }
+
+    [JsonPropertyName("categories")]
+    public string[]? Categories { get; init; }
+
+    [JsonPropertyName("customProperties")]
+    public ReportKeyValue[]? CustomProperties { get; init; }
+
+    [JsonPropertyName("filePath")]
+    public string? FilePath { get; init; }
+
+    [JsonPropertyName("lineNumber")]
+    public int? LineNumber { get; init; }
+
+    [JsonPropertyName("endLineNumber")]
+    public int? EndLineNumber { get; init; }
+
+    [JsonPropertyName("sourceRelativePath")]
+    public string? SourceRelativePath { get; init; }
+
+    [JsonPropertyName("skipReason")]
+    public string? SkipReason { get; init; }
+
+    [JsonPropertyName("retryAttempt")]
+    public int RetryAttempt { get; init; }
+
+    [JsonPropertyName("attempts")]
+    public ReportAttempt[]? Attempts { get; init; }
+
+    [JsonPropertyName("traceId")]
+    public string? TraceId { get; init; }
+
+    [JsonPropertyName("spanId")]
+    public string? SpanId { get; init; }
+
+    [JsonPropertyName("additionalTraceIds")]
+    public string[]? AdditionalTraceIds { get; init; }
+}
+
+internal sealed class ReportAttempt
+{
+    [JsonPropertyName("status")]
+    public required string Status { get; init; }
+
+    [JsonPropertyName("durationMs")]
+    public double DurationMs { get; init; }
+
+    [JsonPropertyName("exceptionType")]
+    public string? ExceptionType { get; init; }
+
+    [JsonPropertyName("exceptionMessage")]
+    public string? ExceptionMessage { get; init; }
+
+    [JsonPropertyName("stackTrace")]
+    public string? StackTrace { get; init; }
+}
+
+internal sealed class ReportExceptionData
+{
+    [JsonPropertyName("type")]
+    public required string Type { get; init; }
+
+    [JsonPropertyName("message")]
+    public required string Message { get; init; }
+
+    [JsonPropertyName("stackTrace")]
+    public string? StackTrace { get; init; }
+
+    [JsonPropertyName("innerException")]
+    public ReportExceptionData? InnerException { get; init; }
+}
+

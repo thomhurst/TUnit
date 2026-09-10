@@ -1,3 +1,4 @@
+
 # Test Artifacts
 
 Test artifacts are files (screenshots, logs, videos, JSON dumps, etc.) that you can attach to your tests. They are invaluable for debugging test failures, especially in integration tests and end-to-end tests.
@@ -9,6 +10,23 @@ TUnit supports attaching artifacts at two levels:
 ## Test-Level Artifacts
 
 Attach files to individual tests using `TestContext.Current.Output.AttachArtifact()`.
+
+### Writing Artifacts to the Results Directory
+
+Use `TestContext.ResultsDirectory` to place generated files alongside reports and other
+artifacts. The property returns the absolute directory selected by Microsoft.Testing.Platform,
+including any `--results-directory` override.
+
+```csharp
+[Test]
+public async Task CaptureLog()
+{
+    var artifactPath = Path.Combine(TestContext.ResultsDirectory, "application.log");
+
+    await File.WriteAllTextAsync(artifactPath, "Diagnostic information");
+    TestContext.Current!.Output.AttachArtifact(artifactPath);
+}
+```
 
 ### Basic Usage
 
@@ -252,7 +270,8 @@ public void SetupTestArtifactDirectory()
 [Test]
 public void MyTest()
 {
-    var artifactDir = (string)TestContext.Current!.StateBag["ArtifactDir"];
+    var artifactDir = TestContext.Current!.StateBag["ArtifactDir"] as string
+        ?? throw new InvalidOperationException("ArtifactDir was not initialized");
     var logPath = Path.Combine(artifactDir, "test.log");
     
     // ... test logic ...
@@ -273,7 +292,8 @@ For large artifacts (videos, extensive logs), consider only attaching them when 
 [After(Test)]
 public async Task ConditionalArtifactAttachment()
 {
-    var testContext = TestContext.Current;
+    var testContext = TestContext.Current
+        ?? throw new InvalidOperationException("No active test context.");
     
     if (testContext?.Execution.Result?.State is TestState.Failed or TestState.Timeout)
     {
@@ -340,9 +360,10 @@ else
 [After(Test)]
 public async Task CapturePlaywrightArtifacts()
 {
-    var testContext = TestContext.Current;
+    var testContext = TestContext.Current
+        ?? throw new InvalidOperationException("No active test context.");
     
-    if (testContext?.Execution.Result?.State != TestState.Passed)
+    if (testContext.Execution.Result?.State != TestState.Passed)
     {
         // Capture screenshot
         var screenshotPath = $"artifacts/screenshot-{testContext.Id}.png";
@@ -355,7 +376,7 @@ public async Task CapturePlaywrightArtifacts()
         });
         
         // Capture video if enabled
-        if (_browserContext.Options?.RecordVideo != null)
+        if (_page.Video is not null)
         {
             await _page.CloseAsync();
             var videoPath = await _page.Video!.PathAsync();

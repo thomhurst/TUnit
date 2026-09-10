@@ -2,6 +2,7 @@
 sidebar_position: 7.5
 ---
 
+
 # DateTime and Time Assertions
 
 TUnit provides comprehensive assertions for date and time types, including `DateTime`, `DateTimeOffset`, `DateOnly`, `TimeOnly`, and `TimeSpan`, with support for tolerance-based comparisons and specialized checks.
@@ -158,7 +159,7 @@ public async Task Weekend_Check()
 
     var monday = new DateTime(2024, 1, 8); // Monday
     await Assert.That(monday).IsOnWeekday();
-    await Assert.That(monday).IsNotOnWeekend();
+    await Assert.That(monday.DayOfWeek is not DayOfWeek.Saturday and not DayOfWeek.Sunday).IsTrue();
 }
 ```
 

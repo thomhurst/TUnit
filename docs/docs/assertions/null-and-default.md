@@ -2,6 +2,7 @@
 sidebar_position: 2.5
 ---
 
+
 # Null and Default Value Assertions
 
 TUnit provides assertions for testing null values and default values. These assertions integrate with C#'s nullability annotations to provide better compile-time safety.
@@ -16,7 +17,7 @@ Tests that a value is `null`:
 [Test]
 public async Task Null_Value()
 {
-    string? result = GetOptionalValue();
+    string? result = GetOptionalString();
     await Assert.That(result).IsNull();
 
     Person? person = FindPerson("unknown-id");
@@ -290,8 +291,8 @@ public async Task Required_Fields_With_Chaining()
 
     await Assert.That(config.DatabaseConnection)
         .IsNotNull()
-        .And.Member(c => c.Server).IsNotNull()
-        .And.Member(c => c.Database).IsNotNull();
+        .And.Member(c => c.Server, server => server.IsNotNull())
+        .And.Member(c => c.Database, database => database.IsNotNull());
 }
 ```
 

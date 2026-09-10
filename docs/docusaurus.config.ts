@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'TUnit',
-  tagline: 'Welcome to TUnit Testing',
+  tagline: 'Fast, modern .NET testing',
   favicon: 'img/tunit-favicon.svg',
 
   // Set the production url of your site here
@@ -32,7 +32,7 @@ const config: Config = {
   },
 
   plugins: [
-    'docusaurus-plugin-llms',
+    '@signalwire/docusaurus-plugin-llms-txt',
   ],
 
   headTags: [
@@ -42,7 +42,7 @@ const config: Config = {
       innerHTML: `window.tlumaConfig = {
   source: "thomhurst/tunit",
   theme: "auto",
-  brandColor: "blue",
+  brandColor: "green",
   button: "bottom-right",
   welcomePulse: true,
   edgePadding: "1rem",
@@ -92,7 +92,15 @@ const config: Config = {
   themes: ['@docusaurus/theme-mermaid'],
 
   themeConfig: {
-    // Replace with your project's social card
+    mermaid: {
+      options: {
+        // Default is 200px, which wraps most labels onto 4-5 lines and turns
+        // flowcharts into unreadably narrow, very tall diagrams.
+        flowchart: {
+          wrappingWidth: 400,
+        },
+      },
+    },
     algolia: {
       // The application ID provided by Algolia
       appId: 'RLNKZO4OTO',
@@ -101,7 +109,7 @@ const config: Config = {
 
       indexName: 'tunit',
     },
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/tunit-social-card.png',
     navbar: {
       title: 'TUnit',
       logo: {
