@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Engine.Capabilities;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Reporters;
 #pragma warning disable TPEXP
@@ -196,7 +197,14 @@ internal static class TestExtensions
 
                 if (exception is not null)
                 {
-                    propertyBag.Add(new TrxExceptionProperty(exception.Message, exception.StackTrace));
+                    // A TRX ErrorInfo only carries a message and a stack trace, so fold the inner-exception
+                    // chain into both (#1327). IDE clients already receive a FlattenedException (no inner
+                    // chain, so this is a no-op); console clients still hand over the full chain here.
+                    var stackTrace = FlattenedException.CombineStackTraces(exception);
+
+                    propertyBag.Add(new TrxExceptionProperty(
+                        FlattenedException.CombineMessages(exception),
+                        stackTrace.Length == 0 ? null : stackTrace));
                 }
                 else if (!string.IsNullOrEmpty(explanation))
                 {
