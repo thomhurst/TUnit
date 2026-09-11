@@ -1,4 +1,6 @@
 using Shouldly;
+using TUnit.Assertions.Exceptions;
+using TUnit.Core.Exceptions;
 using TUnit.Engine.Exceptions;
 
 namespace TUnit.Engine.Tests;
@@ -142,7 +144,7 @@ public class FlattenedExceptionTests
         // every member message is already in the outer message and no member was ever thrown.
         var first = new InvalidOperationException("Expected 1 but was 2");
         var second = new InvalidOperationException("Expected true but was false");
-        var exception = Throw(() => new Exception(
+        var exception = Throw(() => new AssertionException(
             $"Expected 1 but was 2{Environment.NewLine}{Environment.NewLine}Expected true but was false",
             new AggregateException(first, second)));
 
@@ -176,7 +178,7 @@ public class FlattenedExceptionTests
     {
         // Hook wrappers splice the cause into their own message: "BeforeTest hook failed: boom".
         var cause = Throw(() => new InvalidOperationException("boom", Throw(() => new FormatException("root cause"))));
-        var exception = Throw(() => new Exception("BeforeTest hook failed: boom", cause));
+        var exception = Throw(() => new BeforeTestException("BeforeTest hook failed: boom", cause));
 
         var wrapped = FlattenedException.Wrap(exception);
 
@@ -199,6 +201,38 @@ public class FlattenedExceptionTests
         wrapped.Message.ShouldStartWith(aggregate.Message);
         wrapped.Message.ShouldContain(" ---> System.InvalidOperationException: first");
         wrapped.Message.ShouldContain(" ---> System.ArgumentException: second");
+    }
+
+    [Test]
+    public void UnrelatedParentContainingInnerMessage_PreservesInnerException()
+    {
+        var exception = new Exception("operation boom failed", new InvalidOperationException("boom"));
+
+        var wrapped = FlattenedException.Wrap(exception);
+
+        wrapped.Message.ShouldBe(string.Join(Environment.NewLine,
+            "operation boom failed",
+            " ---> System.InvalidOperationException: boom"));
+    }
+
+    [Test]
+    public void UnrelatedParentContainingAggregateMemberMessages_PreservesEveryMember()
+    {
+        var exception = new Exception("Invalid id format: 1", new AggregateException(
+            new ArgumentException("id"), new FormatException("1")));
+
+        var wrapped = FlattenedException.Wrap(exception);
+
+        wrapped.Message.ShouldContain(" ---> System.ArgumentException: id");
+        wrapped.Message.ShouldContain(" ---> System.FormatException: 1");
+    }
+
+    [Test]
+    public void InnerExceptionWithEmptyMessage_PreservesType()
+    {
+        var wrapped = FlattenedException.Wrap(new Exception("outer", new InvalidOperationException("")));
+
+        wrapped.Message.ShouldContain(" ---> System.InvalidOperationException: ");
     }
 
     [Test]
@@ -229,6 +263,39 @@ public class FlattenedExceptionTests
 
         wrapped.Data["assert.expected"].ShouldBe("1");
         wrapped.Data["assert.actual"].ShouldBe("2");
+    }
+
+    [Test]
+    public void AggregateException_CopiesAssertionDataFromFirstMemberOnly()
+    {
+        var first = new AssertionException("first");
+        first.Data["assert.expected"] = "1";
+        first.Data["assert.actual"] = "2";
+        first.Data["unrelated"] = "private member data";
+        var second = new AssertionException("second");
+        second.Data["assert.expected"] = "3";
+        second.Data["assert.actual"] = "4";
+
+        var wrapped = FlattenedException.Wrap(new AggregateException(first, second));
+
+        wrapped.Data["assert.expected"].ShouldBe("1");
+        wrapped.Data["assert.actual"].ShouldBe("2");
+        wrapped.Data.Contains("unrelated").ShouldBeFalse();
+    }
+
+    [Test]
+    public void AggregateException_PreservesRootAssertionData()
+    {
+        var first = new AssertionException("first");
+        first.Data["assert.expected"] = "member expected";
+        first.Data["assert.actual"] = "member actual";
+        var aggregate = new AggregateException(first, new Exception("second"));
+        aggregate.Data["assert.expected"] = "root expected";
+
+        var wrapped = FlattenedException.Wrap(aggregate);
+
+        wrapped.Data["assert.expected"].ShouldBe("root expected");
+        wrapped.Data["assert.actual"].ShouldBe("member actual");
     }
 
     [Test]

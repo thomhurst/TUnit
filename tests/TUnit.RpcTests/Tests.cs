@@ -289,6 +289,7 @@ public class Tests
         using (Assert.Multiple())
         {
             await Assert.That(errorMessage).Contains("timed out");
+            await Assert.That(errorMessage).Contains("Custom task cancellation diagnostic");
             await Assert.That(errorMessage).Contains("Inner diagnostic");
             await Assert.That(errorMessage).Contains("System.FormatException: Root cause");
         }

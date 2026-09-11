@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Text;
+using TUnit.Core.Exceptions;
 
 namespace TUnit.Engine.Exceptions;
 
@@ -39,6 +40,22 @@ internal sealed class FlattenedException : TUnitFailedException
         {
             Data[entry.Key] = entry.Value;
         }
+
+        // Classification uses the first aggregate member. Preserve its assertion diff when the
+        // aggregate itself has no expected/actual values, without copying unrelated sibling data.
+        if (ChainSource(exception) is AggregateException { InnerExceptions.Count: > 0 } aggregate)
+        {
+            CopyAssertionData(aggregate.InnerExceptions[0], "assert.expected");
+            CopyAssertionData(aggregate.InnerExceptions[0], "assert.actual");
+        }
+    }
+
+    private void CopyAssertionData(Exception source, string key)
+    {
+        if (!Data.Contains(key) && source.Data.Contains(key))
+        {
+            Data[key] = source.Data[key];
+        }
     }
 
     /// <summary>
@@ -64,8 +81,7 @@ internal sealed class FlattenedException : TUnitFailedException
     /// <summary>
     /// The outer message followed by one <c> ---> Type: Message</c> line per inner exception,
     /// outermost first. Every member of an <see cref="AggregateException"/> is included; an inner
-    /// aggregate itself gets no line, and an inner message the enclosing exception already embeds
-    /// is not repeated.
+    /// aggregate itself gets no line, and messages embedded by known TUnit wrappers are not repeated.
     /// </summary>
     internal static string CombineMessages(Exception exception)
     {
@@ -77,7 +93,7 @@ internal sealed class FlattenedException : TUnitFailedException
         }
 
         var builder = new StringBuilder(exception.Message);
-        AppendInnerMessages(builder, chainSource, chainSource is AggregateException ? null : chainSource.Message);
+        AppendInnerMessages(builder, chainSource, EmbeddedMessage(chainSource));
 
         return builder.ToString();
     }
@@ -116,12 +132,25 @@ internal sealed class FlattenedException : TUnitFailedException
             : exception;
     }
 
-    // ancestorMessage is the message of the nearest enclosing non-aggregate exception, or null when
-    // the chain starts at an AggregateException reported whole. An inner exception whose message
-    // that ancestor already embeds is not repeated: hook wrappers splice the cause into their own
-    // message, and Assert.Multiple lists every failure in the outer message before attaching them
-    // as an AggregateException. Its own inner exceptions are still visited. An inner aggregate gets
-    // no line of its own; its Message is boilerplate plus the member messages listed individually.
+    // Only known TUnit wrappers embed their causes. Arbitrary user exceptions may contain the
+    // same text by coincidence, so substring matches must never suppress their inner exceptions.
+    private static string? EmbeddedMessage(Exception exception)
+    {
+        if (exception is BeforeTestException or BeforeClassException or BeforeAssemblyException
+            or BeforeTestSessionException or BeforeTestDiscoveryException
+            or AfterTestException or AfterClassException or AfterAssemblyException
+            or AfterTestSessionException or AfterTestDiscoveryException
+            || (exception.GetType().FullName == "TUnit.Assertions.Exceptions.AssertionException"
+                && exception.InnerException is AggregateException))
+        {
+            return exception.Message;
+        }
+
+        return null;
+    }
+
+    // Keep the embedding wrapper's message across an inner aggregate, which only groups members.
+    // Descendants are still visited even when a known wrapper already includes a member's message.
     private static void AppendInnerMessages(StringBuilder builder, Exception exception, string? ancestorMessage)
     {
         foreach (var inner in GetInnerExceptions(exception))
@@ -134,8 +163,8 @@ internal sealed class FlattenedException : TUnitFailedException
 
             var message = inner.Message;
 
-            if (message.Length > 0
-                && (ancestorMessage is null || ancestorMessage.IndexOf(message, StringComparison.Ordinal) < 0))
+            if (message.Length == 0
+                || ancestorMessage is null || ancestorMessage.IndexOf(message, StringComparison.Ordinal) < 0)
             {
                 builder.Append(Environment.NewLine)
                     .Append(InnerMessagePrefix)
@@ -144,7 +173,7 @@ internal sealed class FlattenedException : TUnitFailedException
                     .Append(message);
             }
 
-            AppendInnerMessages(builder, inner, message);
+            AppendInnerMessages(builder, inner, EmbeddedMessage(inner));
         }
     }
 

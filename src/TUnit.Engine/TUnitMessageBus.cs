@@ -76,7 +76,8 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
         var duration = testContext.Execution.TestEnd - testContext.Execution.TestStart;
 
-        var updateType = GetFailureStateProperty(testContext, exception, duration ?? TimeSpan.Zero);
+        var updateType = GetFailureStateProperty(exception, testContext.Metadata.TestDetails.Timeout,
+            duration ?? TimeSpan.Zero, IsConsole);
 
         var testNode = testContext.ToTestNode(updateType);
 
@@ -139,7 +140,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         )));
     }
 
-    private TestNodeStateProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
+    internal static TestNodeStateProperty GetFailureStateProperty(Exception e, TimeSpan? timeout, TimeSpan duration, bool isConsole)
     {
         // Unwrap AggregateException once so all downstream logic sees the real cause
         var unwrapped = e is AggregateException { InnerExceptions.Count: > 0 } agg
@@ -161,25 +162,29 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         // exception because MTP's terminal reporter already renders the chain from InnerException,
         // labels error/timeout outcomes with the exception's runtime type (which would otherwise
         // read FlattenedException), and gives each inner exception its own highlighted block.
-        var reported = IsConsole ? reportedRoot : FlattenedException.Wrap(reportedRoot);
+        var reported = isConsole ? reportedRoot : FlattenedException.Wrap(reportedRoot);
 
         if (category == FailureCategory.Timeout
-            && testContext.Metadata.TestDetails.Timeout != null
-            && duration >= testContext.Metadata.TestDetails.Timeout.Value)
+            && timeout != null
+            && duration >= timeout.Value)
         {
-            var explanation = $"[{categoryLabel}] Test timed out after {testContext.Metadata.TestDetails.Timeout.Value.TotalMilliseconds}ms";
-            var diagnosticException = unwrapped.InnerException
-                ?? (unwrapped is OperationCanceledException and not TaskCanceledException ? unwrapped : null);
+            var explanation = $"[{categoryLabel}] Test timed out after {timeout.Value.TotalMilliseconds}ms";
 
-            if (diagnosticException is not null)
+            if (!isConsole)
             {
-                // The explanation becomes error.message for IDE clients, so fold the diagnostic
-                // exception's own inner messages in for them; console output walks the chain itself.
-                var diagnosticMessage = IsConsole
-                    ? diagnosticException.Message
-                    : FlattenedException.CombineMessages(diagnosticException);
+                // IDE clients receive the explanation instead of Exception.Message. Include the
+                // complete reported root so both cancellation diagnostics and aggregate siblings survive.
+                explanation = $"{explanation}{Environment.NewLine}{reported.Message}";
+            }
+            else
+            {
+                var diagnosticException = unwrapped.InnerException
+                    ?? (unwrapped is OperationCanceledException and not TaskCanceledException ? unwrapped : null);
 
-                explanation = $"{explanation}{Environment.NewLine}{diagnosticMessage}";
+                if (diagnosticException is not null)
+                {
+                    explanation = $"{explanation}{Environment.NewLine}{diagnosticException.Message}";
+                }
             }
 
             return new TimeoutTestNodeStateProperty(reported, explanation);
