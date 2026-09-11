@@ -135,6 +135,40 @@ public class FlattenedExceptionTests
         wrapped.StackTrace!.ShouldContain(nameof(Throw));
     }
 
+    [Test]
+    public void ConsoleWrapperAroundAggregate_FoldsEverySiblingFromWrappedOriginal()
+    {
+        // TestFailedException (the console-mode wrapper) exposes only the first aggregate member as
+        // InnerException; folding must read the chain from WrappedException instead.
+        var first = Throw(() => new InvalidOperationException("first"));
+        var second = Throw(() => new ArgumentException("second", Throw(() => new FormatException("second-inner"))));
+        var aggregate = Throw(() => new AggregateException("aggregate", first, second));
+        var wrapper = new TestFailedException(aggregate);
+
+        var message = FlattenedException.CombineMessages(wrapper);
+        var stackTrace = FlattenedException.CombineStackTraces(wrapper);
+
+        message.ShouldStartWith(wrapper.Message);
+        message.ShouldContain(" ---> System.InvalidOperationException: first");
+        message.ShouldContain(" ---> System.ArgumentException: second");
+        message.ShouldContain(" ---> System.FormatException: second-inner");
+
+        stackTrace.ShouldStartWith(wrapper.StackTrace);
+        stackTrace.ShouldContain("--- Inner exception stack trace (System.InvalidOperationException) ---");
+        stackTrace.ShouldContain("--- Inner exception stack trace (System.ArgumentException) ---");
+        stackTrace.ShouldContain("--- Inner exception stack trace (System.FormatException) ---");
+    }
+
+    [Test]
+    public void AlreadyFlattened_CombineIsNoOp()
+    {
+        var wrapped = FlattenedException.Wrap(CreateNestedException());
+
+        FlattenedException.CombineMessages(wrapped).ShouldBe(wrapped.Message);
+        FlattenedException.CombineStackTraces(wrapped).ShouldBe(wrapped.StackTrace);
+        FlattenedException.Wrap(wrapped).ShouldBeSameAs(wrapped);
+    }
+
     private static Exception CreateNestedException()
     {
         try

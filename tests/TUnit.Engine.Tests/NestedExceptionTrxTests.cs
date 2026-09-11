@@ -31,4 +31,29 @@ public class NestedExceptionTrxTests(TestMode testMode) : InvokableTestBase(test
                 },
             ]);
     }
+
+    [Test]
+    public async Task Trx_ErrorInfo_Includes_Every_Aggregate_Member()
+    {
+        // The console host wraps the AggregateException in TestFailedException before the TRX
+        // property is built; the fold must still list every member, not just the first.
+        await RunTestsWithFilter(
+            "/*/*/IdeExceptionReportingTests/AggregateFailures",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result =>
+                {
+                    var errorInfo = result.Results.Single().Output?.ErrorInfo;
+                    errorInfo.ShouldNotBeNull();
+
+                    errorInfo.Message.ShouldContain("System.InvalidOperationException: First failure");
+                    errorInfo.Message.ShouldContain("System.ArgumentException: Second failure");
+                    errorInfo.Message.ShouldContain("System.FormatException: Second failure cause");
+
+                    errorInfo.StackTrace.ShouldContain("IdeExceptionReportingTests.First()");
+                    errorInfo.StackTrace.ShouldContain("IdeExceptionReportingTests.Second()");
+                },
+            ]);
+    }
 }

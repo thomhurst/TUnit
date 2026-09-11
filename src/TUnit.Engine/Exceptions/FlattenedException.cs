@@ -40,7 +40,7 @@ internal sealed class FlattenedException : TUnitFailedException
     /// </summary>
     public static Exception Wrap(Exception exception)
     {
-        return exception.InnerException is null
+        return ChainSource(exception).InnerException is null
             ? exception
             : new FlattenedException(exception);
     }
@@ -60,13 +60,15 @@ internal sealed class FlattenedException : TUnitFailedException
     /// </summary>
     internal static string CombineMessages(Exception exception)
     {
-        if (exception.InnerException is null)
+        var chainSource = ChainSource(exception);
+
+        if (chainSource.InnerException is null)
         {
             return exception.Message;
         }
 
         var builder = new StringBuilder(exception.Message);
-        AppendInnerMessages(builder, exception);
+        AppendInnerMessages(builder, chainSource);
 
         return builder.ToString();
     }
@@ -77,15 +79,28 @@ internal sealed class FlattenedException : TUnitFailedException
     /// </summary>
     internal static string CombineStackTraces(Exception exception)
     {
-        if (exception.InnerException is null)
+        var chainSource = ChainSource(exception);
+
+        if (chainSource.InnerException is null)
         {
             return exception.StackTrace ?? string.Empty;
         }
 
         var builder = new StringBuilder(exception.StackTrace);
-        AppendInnerStackTraces(builder, exception);
+        AppendInnerStackTraces(builder, chainSource);
 
         return builder.ToString();
+    }
+
+    // The console wrapper (TestFailedException) keeps only the first member of a wrapped
+    // AggregateException as its InnerException, so the chain is folded from the wrapped original to
+    // keep every sibling; the wrapper's own (filtered) Message and StackTrace still lead the output.
+    // A FlattenedException is already folded: its InnerException is null, so nothing is appended.
+    private static Exception ChainSource(Exception exception)
+    {
+        return exception is TUnitFailedException { WrappedException: { } wrapped } and not FlattenedException
+            ? wrapped
+            : exception;
     }
 
     private static void AppendInnerMessages(StringBuilder builder, Exception exception)
