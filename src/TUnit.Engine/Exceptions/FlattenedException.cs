@@ -47,7 +47,7 @@ internal sealed class FlattenedException : TUnitFailedException
 
     public override string ToString()
     {
-        var type = WrappedException?.GetType().FullName ?? GetType().FullName;
+        var type = WrappedException!.GetType().FullName;
 
         return StackTrace.Length == 0
             ? $"{type}: {Message}"

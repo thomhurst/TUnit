@@ -1,4 +1,4 @@
-﻿using TUnit.RpcTests.Models;
+using TUnit.RpcTests.Models;
 
 namespace TUnit.RpcTests;
 
@@ -211,6 +211,85 @@ public class Tests
             await Assert.That(errorStackTrace).Contains("NestedExceptionTests.Method1()");
             await Assert.That(errorStackTrace).Contains("NestedExceptionTests.Method2()");
             await Assert.That(errorStackTrace).Contains("NestedExceptionTests.Method3()");
+        }
+    }
+
+    // Regression for https://github.com/thomhurst/TUnit/issues/1327 - a multi-member AggregateException
+    // used to be reduced to its first member before reporting, so IDE clients never saw the siblings.
+    [Test]
+    [Timeout(300_000)]
+    [Retry(3)]
+    [MethodDataSource(nameof(Frameworks))]
+    public async Task RunTests_WithAggregateException_ReportsEverySiblingToIdeClients(string framework, CancellationToken cancellationToken)
+    {
+        await using var session = await TestHostSession.StartAsync(framework, cancellationToken);
+
+        var discovered = await session.DiscoverAsync(cancellationToken);
+
+        var aggregateTests = discovered
+            .Select(x => x.Node)
+            .Where(node => node.Uid.Contains(".IdeExceptionReportingTests.") && node.Uid.Contains(".AggregateFailures."))
+            .ToArray();
+
+        await Assert.That(aggregateTests).Count().IsEqualTo(1);
+
+        var runUpdates = await session.RunAsync(aggregateTests, cancellationToken);
+
+        var failed = runUpdates
+            .Select(x => x.Node)
+            .Where(node => node.ExecutionState is "error" or "failed")
+            .ToArray();
+
+        await Assert.That(failed).Count().IsEqualTo(1);
+
+        var errorMessage = failed[0].ExtensionData?["error.message"].GetString();
+        var errorStackTrace = failed[0].ExtensionData?["error.stacktrace"].GetString();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(errorMessage).Contains("System.InvalidOperationException: First failure");
+            await Assert.That(errorMessage).Contains("System.ArgumentException: Second failure");
+            await Assert.That(errorMessage).Contains("System.FormatException: Second failure cause");
+            await Assert.That(errorStackTrace).Contains("IdeExceptionReportingTests.First()");
+            await Assert.That(errorStackTrace).Contains("IdeExceptionReportingTests.Second()");
+        }
+    }
+
+    // Regression for https://github.com/thomhurst/TUnit/issues/1327 - the timeout explanation is what IDE
+    // clients receive as error.message, and it used to carry only the immediate diagnostic message.
+    [Test]
+    [Timeout(300_000)]
+    [Retry(3)]
+    [MethodDataSource(nameof(Frameworks))]
+    public async Task RunTests_WithTimeoutDiagnosticChain_ReportsEveryDiagnosticMessageToIdeClients(string framework, CancellationToken cancellationToken)
+    {
+        await using var session = await TestHostSession.StartAsync(framework, cancellationToken);
+
+        var discovered = await session.DiscoverAsync(cancellationToken);
+
+        var timeoutTests = discovered
+            .Select(x => x.Node)
+            .Where(node => node.Uid.Contains(".IdeExceptionReportingTests.") && node.Uid.Contains("Timeout_With_Nested_Diagnostic"))
+            .ToArray();
+
+        await Assert.That(timeoutTests).Count().IsEqualTo(1);
+
+        var runUpdates = await session.RunAsync(timeoutTests, cancellationToken);
+
+        var timedOut = runUpdates
+            .Select(x => x.Node)
+            .Where(node => node.ExecutionState is "timed-out")
+            .ToArray();
+
+        await Assert.That(timedOut).Count().IsEqualTo(1);
+
+        var errorMessage = timedOut[0].ExtensionData?["error.message"].GetString();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(errorMessage).Contains("timed out");
+            await Assert.That(errorMessage).Contains("Inner diagnostic");
+            await Assert.That(errorMessage).Contains("System.FormatException: Root cause");
         }
     }
 }

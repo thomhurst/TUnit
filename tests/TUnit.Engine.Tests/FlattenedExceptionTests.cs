@@ -47,7 +47,7 @@ public class FlattenedExceptionTests
 
         var wrapped = FlattenedException.Wrap(exception);
 
-        var stackTrace = wrapped.StackTrace;
+        var stackTrace = wrapped.StackTrace!;
         stackTrace.ShouldContain($"{nameof(FlattenedExceptionTests)}.{nameof(Method1)}()");
         stackTrace.ShouldContain($"{nameof(FlattenedExceptionTests)}.{nameof(Method2)}()");
         stackTrace.ShouldContain($"{nameof(FlattenedExceptionTests)}.{nameof(Method3)}()");
@@ -117,9 +117,9 @@ public class FlattenedExceptionTests
         wrapped.Message.ShouldContain(" ---> System.InvalidOperationException: first");
         wrapped.Message.ShouldContain(" ---> System.ArgumentException: second");
         wrapped.Message.ShouldContain(" ---> System.FormatException: second-inner");
-        wrapped.StackTrace.ShouldContain("--- Inner exception stack trace (System.InvalidOperationException) ---");
-        wrapped.StackTrace.ShouldContain("--- Inner exception stack trace (System.ArgumentException) ---");
-        wrapped.StackTrace.ShouldContain("--- Inner exception stack trace (System.FormatException) ---");
+        wrapped.StackTrace!.ShouldContain("--- Inner exception stack trace (System.InvalidOperationException) ---");
+        wrapped.StackTrace!.ShouldContain("--- Inner exception stack trace (System.ArgumentException) ---");
+        wrapped.StackTrace!.ShouldContain("--- Inner exception stack trace (System.FormatException) ---");
     }
 
     [Test]
@@ -131,8 +131,8 @@ public class FlattenedExceptionTests
         var wrapped = FlattenedException.Wrap(exception);
 
         wrapped.Message.ShouldContain(" ---> System.InvalidOperationException: never thrown");
-        wrapped.StackTrace.ShouldContain("--- Inner exception stack trace (System.InvalidOperationException) ---");
-        wrapped.StackTrace.ShouldContain(nameof(Throw));
+        wrapped.StackTrace!.ShouldContain("--- Inner exception stack trace (System.InvalidOperationException) ---");
+        wrapped.StackTrace!.ShouldContain(nameof(Throw));
     }
 
     private static Exception CreateNestedException()

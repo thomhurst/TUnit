@@ -153,7 +153,11 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         // never the InnerException chain, so Rider/VS showed just the outermost exception (#1327).
         // Fold the chain into those two members for IDE clients. Console output is left untouched:
         // MTP's terminal reporter walks InnerException itself and would otherwise print the chain twice.
-        var reported = IsConsole ? unwrapped : FlattenedException.Wrap(unwrapped);
+        // A multi-member AggregateException (e.g. several failing [After] hooks) is folded whole so
+        // every sibling is listed; a single-member one stays reduced to its real cause.
+        var reported = IsConsole
+            ? unwrapped
+            : FlattenedException.Wrap(e is AggregateException { InnerExceptions.Count: > 1 } ? e : unwrapped);
 
         if (category == FailureCategory.Timeout
             && testContext.Metadata.TestDetails.Timeout != null
@@ -165,7 +169,13 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
             if (diagnosticException is not null)
             {
-                explanation = $"{explanation}{Environment.NewLine}{diagnosticException.Message}";
+                // The explanation becomes error.message for IDE clients, so fold the diagnostic
+                // exception's own inner messages in for them; console output walks the chain itself.
+                var diagnosticMessage = IsConsole
+                    ? diagnosticException.Message
+                    : FlattenedException.CombineMessages(diagnosticException);
+
+                explanation = $"{explanation}{Environment.NewLine}{diagnosticMessage}";
             }
 
             return new TimeoutTestNodeStateProperty(reported, explanation);
