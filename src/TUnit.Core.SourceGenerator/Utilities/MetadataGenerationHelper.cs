@@ -121,7 +121,7 @@ internal static class MetadataGenerationHelper
 
     /// <summary>
     /// Generates ClassMetadata with recursive parent as a string expression.
-    /// Used by the per-class path to pre-generate shared locals.
+    /// Used by test-source generation to pre-generate shared fields.
     /// </summary>
     public static string GenerateClassMetadataGetOrAddWithParentExpression(INamedTypeSymbol typeSymbol, int indentLevel = 0)
     {

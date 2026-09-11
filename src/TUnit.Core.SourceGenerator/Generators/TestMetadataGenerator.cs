@@ -2965,19 +2965,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Pre-generates shared local variable declarations for the top of GetTests() and Materialize().
-    /// Generates __classMetadata and __classType locals that are referenced by factory calls.
-    /// </summary>
-    private static string PreGenerateSharedLocals(INamedTypeSymbol typeSymbol, string className)
-    {
-        var writer = new CodeWriter(includeHeader: false);
-        var classMetadataExpr = MetadataGenerationHelper.GenerateClassMetadataGetOrAddWithParentExpression(typeSymbol, writer.IndentLevel);
-        writer.AppendLine($"var __classMetadata = {classMetadataExpr};");
-        writer.AppendLine($"var __classType = typeof({className});");
-        return writer.ToString();
-    }
-
-    /// <summary>
     /// Generates __classMetadata and __classType as static readonly fields instead of local variables.
     /// Used by the per-class path to inline MethodMetadata construction into field initializers,
     /// eliminating the separate __InitMethodMetadatas method and saving one JIT per class.
@@ -3307,7 +3294,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     AttributeGroups = distinctBodies.ToEquatableArray(),
                     InstanceFactoryBodyCode = InstanceFactoryGenerator.GenerateInstanceFactoryBody(typeSymbol),
                     ReflectionFieldAccessorsCode = PreGenerateReflectionFieldAccessors(typeSymbol),
-                    SharedLocalsCode = PreGenerateSharedLocals(typeSymbol, className),
                     SharedFieldsCode = PreGenerateSharedFields(typeSymbol, className),
                 };
             });
