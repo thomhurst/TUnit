@@ -1,4 +1,4 @@
-using TUnit.RpcTests.Models;
+﻿using TUnit.RpcTests.Models;
 
 namespace TUnit.RpcTests;
 
@@ -168,5 +168,49 @@ public class Tests
             .ToArray();
 
         await Assert.That(skipped).Count().IsGreaterThan(0);
+    }
+
+    // Regression for https://github.com/thomhurst/TUnit/issues/1327 - MTP's server-mode serializer only
+    // sends Exception.Message and Exception.StackTrace to IDE clients, never the InnerException chain,
+    // so Rider and Visual Studio showed just the outermost exception. The engine must fold the chain
+    // into both fields for non-console clients.
+    [Test]
+    [Timeout(300_000)]
+    [Retry(3)]
+    [MethodDataSource(nameof(Frameworks))]
+    public async Task RunTests_WithNestedException_ReportsInnerExceptionsToIdeClients(string framework, CancellationToken cancellationToken)
+    {
+        await using var session = await TestHostSession.StartAsync(framework, cancellationToken);
+
+        var discovered = await session.DiscoverAsync(cancellationToken);
+
+        var nestedExceptionTests = discovered
+            .Select(x => x.Node)
+            .Where(node => node.Uid.Contains(".NestedExceptionTests."))
+            .ToArray();
+
+        await Assert.That(nestedExceptionTests).Count().IsEqualTo(1);
+
+        var runUpdates = await session.RunAsync(nestedExceptionTests, cancellationToken);
+
+        var failed = runUpdates
+            .Select(x => x.Node)
+            .Where(node => node.ExecutionState is "error" or "failed")
+            .ToArray();
+
+        await Assert.That(failed).Count().IsEqualTo(1);
+
+        var errorMessage = failed[0].ExtensionData?["error.message"].GetString();
+        var errorStackTrace = failed[0].ExtensionData?["error.stacktrace"].GetString();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(errorMessage).Contains("Thrown from Method1");
+            await Assert.That(errorMessage).Contains("System.ArgumentException: Thrown from Method2");
+            await Assert.That(errorMessage).Contains("System.InvalidOperationException: Thrown from Method3");
+            await Assert.That(errorStackTrace).Contains("NestedExceptionTests.Method1()");
+            await Assert.That(errorStackTrace).Contains("NestedExceptionTests.Method2()");
+            await Assert.That(errorStackTrace).Contains("NestedExceptionTests.Method3()");
+        }
     }
 }

@@ -139,7 +139,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         )));
     }
 
-    private static TestNodeStateProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
+    private TestNodeStateProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
     {
         // Unwrap AggregateException once so all downstream logic sees the real cause
         var unwrapped = e is AggregateException { InnerExceptions.Count: > 0 } agg
@@ -148,6 +148,12 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
         var category = FailureCategorizer.Categorize(unwrapped);
         var categoryLabel = FailureCategorizer.GetLabel(category);
+
+        // MTP's server-mode (IDE) serializer only transmits Exception.Message and Exception.StackTrace,
+        // never the InnerException chain, so Rider/VS showed just the outermost exception (#1327).
+        // Fold the chain into those two members for IDE clients. Console output is left untouched:
+        // MTP's terminal reporter walks InnerException itself and would otherwise print the chain twice.
+        var reported = IsConsole ? unwrapped : FlattenedException.Wrap(unwrapped);
 
         if (category == FailureCategory.Timeout
             && testContext.Metadata.TestDetails.Timeout != null
@@ -162,15 +168,15 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
                 explanation = $"{explanation}{Environment.NewLine}{diagnosticException.Message}";
             }
 
-            return new TimeoutTestNodeStateProperty(unwrapped, explanation);
+            return new TimeoutTestNodeStateProperty(reported, explanation);
         }
 
         if (category == FailureCategory.Assertion)
         {
-            return new FailedTestNodeStateProperty(unwrapped, $"[{categoryLabel}] {unwrapped.Message}");
+            return new FailedTestNodeStateProperty(reported, $"[{categoryLabel}] {reported.Message}");
         }
 
-        return new ErrorTestNodeStateProperty(unwrapped, $"[{categoryLabel}] {unwrapped.Message}");
+        return new ErrorTestNodeStateProperty(reported, $"[{categoryLabel}] {reported.Message}");
     }
 
     public Task<bool> IsEnabledAsync()
