@@ -149,15 +149,17 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         var category = FailureCategorizer.Categorize(unwrapped);
         var categoryLabel = FailureCategorizer.GetLabel(category);
 
+        // A multi-member AggregateException (e.g. several failing [After] hooks) is reported whole so
+        // every sibling is listed; a single-member one stays reduced to its real cause. This applies
+        // to console runs too: with --detailed-stacktrace the aggregate arrives unwrapped, and MTP's
+        // terminal reporter flattens a top-level aggregate itself.
+        var reportedRoot = e is AggregateException { InnerExceptions.Count: > 1 } ? e : unwrapped;
+
         // MTP's server-mode (IDE) serializer only transmits Exception.Message and Exception.StackTrace,
         // never the InnerException chain, so Rider/VS showed just the outermost exception (#1327).
         // Fold the chain into those two members for IDE clients. Console output is left untouched:
         // MTP's terminal reporter walks InnerException itself and would otherwise print the chain twice.
-        // A multi-member AggregateException (e.g. several failing [After] hooks) is folded whole so
-        // every sibling is listed; a single-member one stays reduced to its real cause.
-        var reported = IsConsole
-            ? unwrapped
-            : FlattenedException.Wrap(e is AggregateException { InnerExceptions.Count: > 1 } ? e : unwrapped);
+        var reported = IsConsole ? reportedRoot : FlattenedException.Wrap(reportedRoot);
 
         if (category == FailureCategory.Timeout
             && testContext.Metadata.TestDetails.Timeout != null

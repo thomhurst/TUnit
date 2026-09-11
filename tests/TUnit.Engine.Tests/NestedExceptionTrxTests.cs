@@ -56,4 +56,31 @@ public class NestedExceptionTrxTests(TestMode testMode) : InvokableTestBase(test
                 },
             ]);
     }
+
+    [Test]
+    public async Task Trx_ErrorInfo_Includes_Every_Aggregate_Member_With_Detailed_StackTrace()
+    {
+        // With --detailed-stacktrace the console host reports the raw AggregateException instead of
+        // the TestFailedException wrapper; it must still be reported whole rather than reduced to
+        // its first member.
+        await RunTestsWithFilter(
+            "/*/*/IdeExceptionReportingTests/AggregateFailures",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result =>
+                {
+                    var errorInfo = result.Results.Single().Output?.ErrorInfo;
+                    errorInfo.ShouldNotBeNull();
+
+                    errorInfo.Message.ShouldContain("System.InvalidOperationException: First failure");
+                    errorInfo.Message.ShouldContain("System.ArgumentException: Second failure");
+                    errorInfo.Message.ShouldContain("System.FormatException: Second failure cause");
+
+                    errorInfo.StackTrace.ShouldContain("IdeExceptionReportingTests.First()");
+                    errorInfo.StackTrace.ShouldContain("IdeExceptionReportingTests.Second()");
+                },
+            ],
+            new RunOptions().WithArgument("--detailed-stacktrace"));
+    }
 }
