@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Helpers;
@@ -26,9 +27,11 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             });
 
         // Pipeline 1: Find properties with IDataSourceAttribute and group by containing class
+        // Partial properties can receive attributes from their other declaration.
         var propertyDataSources = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (node, _) => node is PropertyDeclarationSyntax,
+                predicate: static (node, _) => node is PropertyDeclarationSyntax property
+                    && (property.AttributeLists.Count > 0 || property.Modifiers.Any(SyntaxKind.PartialKeyword)),
                 transform: static (ctx, _) => ExtractPropertyDataSource(ctx))
             .Where(static x => x is not null)
             .Select(static (x, _) => x!);
