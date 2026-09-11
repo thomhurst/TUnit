@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Helpers;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Extensions;
 
@@ -17,13 +18,7 @@ public static class AttributeDataExtensions
 
     public static bool IsDataSourceAttribute(this AttributeData? attributeData)
     {
-        if (attributeData?.AttributeClass == null)
-        {
-            return false;
-        }
-
-        return InterfaceHelper.ImplementsInterface(attributeData.AttributeClass,
-            WellKnownFullyQualifiedClassNames.IDataSourceAttribute.WithGlobalPrefix);
+        return DataSourceAttributeHelper.IsDataSourceAttribute(attributeData?.AttributeClass);
     }
 
     public static bool IsTypedDataSourceAttribute(this AttributeData? attributeData)
