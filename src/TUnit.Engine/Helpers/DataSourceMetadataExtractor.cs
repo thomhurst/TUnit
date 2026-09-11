@@ -30,6 +30,14 @@ internal static class DataSourceMetadataExtractor
             return null;
         }
 
+        // ArgumentsAttribute is sealed, so these reads have the same semantics as reflection.
+        if (dataSource is ArgumentsAttribute arguments)
+        {
+            return arguments.DisplayName is null && arguments.Skip is null && arguments.Categories is null
+                ? null
+                : new TestDataRowMetadata(arguments.DisplayName, null, arguments.Skip, arguments.Categories);
+        }
+
         var type = dataSource.GetType();
 
         // Try to get DisplayName property
