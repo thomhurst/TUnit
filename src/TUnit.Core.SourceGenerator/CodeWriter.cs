@@ -215,35 +215,56 @@ public class CodeWriter : ICodeWriter
             return this;
         }
 
-        var lines = multilineText.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
-
-        // Skip leading empty lines
-        var startIndex = 0;
-        while (startIndex < lines.Length && string.IsNullOrWhiteSpace(lines[startIndex]))
+        var position = 0;
+        var hasContent = false;
+        var pendingBlankLines = 0;
+        while (position < multilineText.Length)
         {
-            startIndex++;
-        }
-
-        // Skip trailing empty lines
-        var endIndex = lines.Length - 1;
-        while (endIndex >= startIndex && string.IsNullOrWhiteSpace(lines[endIndex]))
-        {
-            endIndex--;
-        }
-
-        // Process remaining lines, preserving blank lines within the content
-        for (var i = startIndex; i <= endIndex; i++)
-        {
-            var line = lines[i].TrimEnd();
-            if (line.Length == 0)
+            var lineStart = position;
+            while (position < multilineText.Length && multilineText[position] is not '\r' and not '\n')
             {
-                // Preserve blank lines by forcing a newline even when already at line start
+                position++;
+            }
+
+            var lineEnd = position;
+            if (position < multilineText.Length)
+            {
+                var newline = multilineText[position++];
+                if (newline == '\r' && position < multilineText.Length && multilineText[position] == '\n')
+                {
+                    position++;
+                }
+            }
+
+            while (lineEnd > lineStart && char.IsWhiteSpace(multilineText[lineEnd - 1]))
+            {
+                lineEnd--;
+            }
+
+            if (lineEnd == lineStart)
+            {
+                if (hasContent)
+                {
+                    pendingBlankLines++;
+                }
+                continue;
+            }
+
+            // Delay blank lines so leading/trailing ones are omitted, while interior ones survive.
+            while (pendingBlankLines > 0)
+            {
                 _builder.AppendLine();
+                pendingBlankLines--;
             }
-            else
+
+            if (_isNewLine)
             {
-                AppendLine(line);
+                _builder.Append(GetIndentation(_indentLevel));
             }
+            _builder.Append(multilineText, lineStart, lineEnd - lineStart);
+            _builder.AppendLine();
+            _isNewLine = true;
+            hasContent = true;
         }
 
         return this;
