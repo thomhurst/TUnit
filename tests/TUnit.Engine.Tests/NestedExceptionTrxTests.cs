@@ -25,9 +25,16 @@ public class NestedExceptionTrxTests(TestMode testMode) : InvokableTestBase(test
                     errorInfo.Message.ShouldContain("System.ArgumentException: Thrown from Method2");
                     errorInfo.Message.ShouldContain("System.InvalidOperationException: Thrown from Method3");
 
-                    errorInfo.StackTrace.ShouldContain("NestedExceptionTests.Method1()");
+                    // The outer trace is filtered in a default console run (the TestProject namespace
+                    // starts with "TUnit." and is stripped as internal), so only the inner traces and
+                    // their order are load-bearing here.
                     errorInfo.StackTrace.ShouldContain("NestedExceptionTests.Method2()");
                     errorInfo.StackTrace.ShouldContain("NestedExceptionTests.Method3()");
+
+                    var argumentSeparator = errorInfo.StackTrace.IndexOf("--- Inner exception stack trace (System.ArgumentException) ---", StringComparison.Ordinal);
+                    var invalidOperationSeparator = errorInfo.StackTrace.IndexOf("--- Inner exception stack trace (System.InvalidOperationException) ---", StringComparison.Ordinal);
+                    argumentSeparator.ShouldBeGreaterThan(-1);
+                    invalidOperationSeparator.ShouldBeGreaterThan(argumentSeparator);
                 },
             ]);
     }

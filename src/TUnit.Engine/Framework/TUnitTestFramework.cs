@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
@@ -139,6 +140,13 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     private async Task ReportUnhandledException(ExecuteRequestContext context, Exception exception)
     {
+        // Same IDE fold as TUnitMessageBus.GetFailureStateProperty: server-mode clients only see
+        // Exception.Message and Exception.StackTrace, so a discovery hook failure would otherwise
+        // lose its cause (#1327).
+        var reported = _frameworkServiceProvider.IsConsoleClient()
+            ? exception
+            : FlattenedException.Wrap(exception);
+
         await context.MessageBus.PublishAsync(
             dataProducer: this,
             data: new TestNodeUpdateMessage(
@@ -147,7 +155,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 {
                     DisplayName = $"Unhandled exception - {exception.GetType().Name}: {exception.Message}",
                     Uid = new TestNodeUid(Guid.NewGuid().ToString()),
-                    Properties = new PropertyBag(new ErrorTestNodeStateProperty(exception))
+                    Properties = new PropertyBag(new ErrorTestNodeStateProperty(reported))
                 }));
     }
 

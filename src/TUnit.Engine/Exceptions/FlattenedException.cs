@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Text;
 
 namespace TUnit.Engine.Exceptions;
@@ -32,6 +33,12 @@ internal sealed class FlattenedException : TUnitFailedException
     private FlattenedException(Exception exception)
         : base(CombineMessages(exception), CombineStackTraces(exception), exception)
     {
+        // MTP's server-mode serializer reads Data["assert.expected"] / Data["assert.actual"] from the
+        // reported exception as its expected/actual fallback, so keep the original entries reachable.
+        foreach (DictionaryEntry entry in exception.Data)
+        {
+            Data[entry.Key] = entry.Value;
+        }
     }
 
     /// <summary>
@@ -56,7 +63,9 @@ internal sealed class FlattenedException : TUnitFailedException
 
     /// <summary>
     /// The outer message followed by one <c> ---> Type: Message</c> line per inner exception,
-    /// outermost first. Every inner exception of an <see cref="AggregateException"/> is included.
+    /// outermost first. Every member of an <see cref="AggregateException"/> is included; an inner
+    /// aggregate itself gets no line, and an inner message the enclosing exception already embeds
+    /// is not repeated.
     /// </summary>
     internal static string CombineMessages(Exception exception)
     {
@@ -68,14 +77,14 @@ internal sealed class FlattenedException : TUnitFailedException
         }
 
         var builder = new StringBuilder(exception.Message);
-        AppendInnerMessages(builder, chainSource);
+        AppendInnerMessages(builder, chainSource, chainSource is AggregateException ? null : chainSource.Message);
 
         return builder.ToString();
     }
 
     /// <summary>
-    /// The outer stack trace followed by each inner exception's stack trace, each introduced by a
-    /// separator line naming the inner exception type, outermost first.
+    /// The outer stack trace followed by each thrown inner exception's stack trace, each introduced
+    /// by a separator line naming the inner exception type, outermost first.
     /// </summary>
     internal static string CombineStackTraces(Exception exception)
     {
@@ -86,8 +95,12 @@ internal sealed class FlattenedException : TUnitFailedException
             return exception.StackTrace ?? string.Empty;
         }
 
+        // A TUnit wrapper presents a filtered outer trace (TUnit internals omitted); keep the inner
+        // traces consistent with it instead of reintroducing engine frames below the hint.
+        var filter = exception is TUnitFailedException;
+
         var builder = new StringBuilder(exception.StackTrace);
-        AppendInnerStackTraces(builder, chainSource);
+        AppendInnerStackTraces(builder, chainSource, filter);
 
         return builder.ToString();
     }
@@ -103,39 +116,61 @@ internal sealed class FlattenedException : TUnitFailedException
             : exception;
     }
 
-    private static void AppendInnerMessages(StringBuilder builder, Exception exception)
+    // ancestorMessage is the message of the nearest enclosing non-aggregate exception, or null when
+    // the chain starts at an AggregateException reported whole. An inner exception whose message
+    // that ancestor already embeds is not repeated: hook wrappers splice the cause into their own
+    // message, and Assert.Multiple lists every failure in the outer message before attaching them
+    // as an AggregateException. Its own inner exceptions are still visited. An inner aggregate gets
+    // no line of its own; its Message is boilerplate plus the member messages listed individually.
+    private static void AppendInnerMessages(StringBuilder builder, Exception exception, string? ancestorMessage)
     {
         foreach (var inner in GetInnerExceptions(exception))
         {
-            builder.Append(Environment.NewLine)
-                .Append(InnerMessagePrefix)
-                .Append(inner.GetType().FullName)
-                .Append(": ")
-                .Append(inner.Message);
+            if (inner is AggregateException)
+            {
+                AppendInnerMessages(builder, inner, ancestorMessage);
+                continue;
+            }
 
-            AppendInnerMessages(builder, inner);
+            var message = inner.Message;
+
+            if (message.Length > 0
+                && (ancestorMessage is null || ancestorMessage.IndexOf(message, StringComparison.Ordinal) < 0))
+            {
+                builder.Append(Environment.NewLine)
+                    .Append(InnerMessagePrefix)
+                    .Append(inner.GetType().FullName)
+                    .Append(": ")
+                    .Append(message);
+            }
+
+            AppendInnerMessages(builder, inner, message);
         }
     }
 
-    private static void AppendInnerStackTraces(StringBuilder builder, Exception exception)
+    // An inner exception that was never thrown (an Assert.Multiple member, a hand-built cause) has
+    // no frames; its type is already on the message line, so no separator is emitted for it.
+    private static void AppendInnerStackTraces(StringBuilder builder, Exception exception, bool filter)
     {
         foreach (var inner in GetInnerExceptions(exception))
         {
-            if (builder.Length > 0)
+            var stackTrace = inner.StackTrace;
+
+            if (!string.IsNullOrEmpty(stackTrace))
             {
-                builder.Append(Environment.NewLine);
+                if (builder.Length > 0)
+                {
+                    builder.Append(Environment.NewLine);
+                }
+
+                builder.Append(InnerStackTracePrefix)
+                    .Append(inner.GetType().FullName)
+                    .Append(InnerStackTraceSuffix)
+                    .Append(Environment.NewLine)
+                    .Append(filter ? FilterStackTrace(stackTrace) : stackTrace);
             }
 
-            builder.Append(InnerStackTracePrefix)
-                .Append(inner.GetType().FullName)
-                .Append(InnerStackTraceSuffix);
-
-            if (!string.IsNullOrEmpty(inner.StackTrace))
-            {
-                builder.Append(Environment.NewLine).Append(inner.StackTrace);
-            }
-
-            AppendInnerStackTraces(builder, inner);
+            AppendInnerStackTraces(builder, inner, filter);
         }
     }
 

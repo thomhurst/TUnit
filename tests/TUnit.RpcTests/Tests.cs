@@ -208,6 +208,7 @@ public class Tests
             await Assert.That(errorMessage).Contains("Thrown from Method1");
             await Assert.That(errorMessage).Contains("System.ArgumentException: Thrown from Method2");
             await Assert.That(errorMessage).Contains("System.InvalidOperationException: Thrown from Method3");
+            await Assert.That(errorStackTrace).Contains("NestedExceptionTests.Test()");
             await Assert.That(errorStackTrace).Contains("NestedExceptionTests.Method1()");
             await Assert.That(errorStackTrace).Contains("NestedExceptionTests.Method2()");
             await Assert.That(errorStackTrace).Contains("NestedExceptionTests.Method3()");

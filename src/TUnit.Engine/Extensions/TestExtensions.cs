@@ -200,11 +200,11 @@ internal static class TestExtensions
                     // A TRX ErrorInfo only carries a message and a stack trace, so fold the inner-exception
                     // chain into both (#1327). IDE clients already receive a FlattenedException (no inner
                     // chain, so this is a no-op); console clients still hand over the full chain here.
-                    var stackTrace = FlattenedException.CombineStackTraces(exception);
+                    var folded = FlattenedException.Wrap(exception);
 
                     propertyBag.Add(new TrxExceptionProperty(
-                        FlattenedException.CombineMessages(exception),
-                        stackTrace.Length == 0 ? null : stackTrace));
+                        folded.Message,
+                        string.IsNullOrEmpty(folded.StackTrace) ? null : folded.StackTrace));
                 }
                 else if (!string.IsNullOrEmpty(explanation))
                 {

@@ -23,7 +23,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
     private readonly SessionUid _sessionSessionUid = context.Request.Session.SessionUid;
 
     private bool? _isConsole;
-    private bool IsConsole => _isConsole ??= serviceProvider.GetClientInfo().Id.Contains("console", StringComparison.InvariantCultureIgnoreCase);
+    private bool IsConsole => _isConsole ??= serviceProvider.IsConsoleClient();
 
     // Tests created by expanding a deferred-enumeration placeholder (or runtime variants) carry a
     // ParentTestId; surfacing it as the MTP parentTestNodeUid makes IDEs nest them under that node.
@@ -157,8 +157,10 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
         // MTP's server-mode (IDE) serializer only transmits Exception.Message and Exception.StackTrace,
         // never the InnerException chain, so Rider/VS showed just the outermost exception (#1327).
-        // Fold the chain into those two members for IDE clients. Console output is left untouched:
-        // MTP's terminal reporter walks InnerException itself and would otherwise print the chain twice.
+        // Fold the chain into those two members for IDE clients only. The console keeps the raw
+        // exception because MTP's terminal reporter already renders the chain from InnerException,
+        // labels error/timeout outcomes with the exception's runtime type (which would otherwise
+        // read FlattenedException), and gives each inner exception its own highlighted block.
         var reported = IsConsole ? reportedRoot : FlattenedException.Wrap(reportedRoot);
 
         if (category == FailureCategory.Timeout

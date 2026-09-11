@@ -22,7 +22,7 @@ public sealed class VerbosityService
     {
         _isDetailedOutput = GetOutputLevel(commandLineOptions, serviceProvider);
         _logLevel = GetLogLevel(commandLineOptions);
-        IsIdeClient = !IsConsoleEnvironment(serviceProvider);
+        IsIdeClient = !serviceProvider.IsConsoleClient();
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public sealed class VerbosityService
         }
 
         // Smart defaults: Normal for console (buffered output), Detailed for IDE (real-time output)
-        return !IsConsoleEnvironment(serviceProvider);
+        return !serviceProvider.IsConsoleClient();
     }
 
     private static LogLevel GetLogLevel(ICommandLineOptions commandLineOptions)
@@ -85,20 +85,5 @@ public sealed class VerbosityService
         }
 
         return LogLevel.Information;
-    }
-
-    private static bool IsConsoleEnvironment(IServiceProvider serviceProvider)
-    {
-        try
-        {
-            var clientInfo = serviceProvider.GetClientInfo();
-            return clientInfo.Id.Contains("console", StringComparison.InvariantCultureIgnoreCase);
-        }
-        catch (Exception ex)
-        {
-            // If we can't determine, default to console behavior
-            System.Diagnostics.Debug.WriteLine($"Failed to determine console environment: {ex}");
-            return true;
-        }
     }
 }
