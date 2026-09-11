@@ -61,6 +61,12 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             CheckSetUps(context, methodSymbol, createdObjects);
         }
 
+        // Teardown analysis can only remove members discovered during setup.
+        if (createdObjects.IsEmpty)
+        {
+            return;
+        }
+
         foreach (var methodSymbol in methodSymbols)
         {
             CheckTeardowns(context, methodSymbol, createdObjects);
