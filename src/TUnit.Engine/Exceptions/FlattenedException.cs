@@ -41,12 +41,14 @@ internal sealed class FlattenedException : TUnitFailedException
             Data[entry.Key] = entry.Value;
         }
 
-        // Classification uses the first aggregate member. Preserve its assertion diff when the
-        // aggregate itself has no expected/actual values, without copying unrelated sibling data.
-        if (ChainSource(exception) is AggregateException { InnerExceptions.Count: > 0 } aggregate)
+        // Follow the first member through nested aggregates to preserve its assertion diff.
+        // Outer values take precedence; unrelated data and sibling data are not copied.
+        var source = ChainSource(exception);
+        while (source is AggregateException { InnerExceptions.Count: > 0 } aggregate)
         {
-            CopyAssertionData(aggregate.InnerExceptions[0], "assert.expected");
-            CopyAssertionData(aggregate.InnerExceptions[0], "assert.actual");
+            source = aggregate.InnerExceptions[0];
+            CopyAssertionData(source, "assert.expected");
+            CopyAssertionData(source, "assert.actual");
         }
     }
 

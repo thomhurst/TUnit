@@ -51,11 +51,18 @@ public class ExceptionReportingTests
     }
 
     [Test]
-    public void IdeAggregateAssertion_PreservesFirstMembersDiffAndAllSiblingMessages()
+    [Arguments(false)]
+    [Arguments(true)]
+    public void IdeAggregateAssertion_PreservesFirstMembersDiffAndAllSiblingMessages(bool nested)
     {
-        var first = new AssertionException("First assertion failure");
+        Exception first = new AssertionException("First assertion failure");
         first.Data["assert.expected"] = "1";
         first.Data["assert.actual"] = "2";
+        if (nested)
+        {
+            first = new AggregateException(first, new Exception("Nested sibling diagnostic"));
+        }
+
         var exception = new AggregateException(first, new Exception("Cleanup sibling diagnostic"));
 
         var state = TUnitMessageBus.GetFailureStateProperty(exception, null, TimeSpan.Zero, isConsole: false);
@@ -67,5 +74,9 @@ public class ExceptionReportingTests
         failed.Explanation.ShouldContain("[Assertion Failure]");
         failed.Explanation.ShouldContain("First assertion failure");
         failed.Explanation.ShouldContain("System.Exception: Cleanup sibling diagnostic");
+        if (nested)
+        {
+            failed.Explanation.ShouldContain("System.Exception: Nested sibling diagnostic");
+        }
     }
 }

@@ -306,9 +306,12 @@ public class FlattenedExceptionTests
     }
 
     [Test]
-    public void AggregateException_CopiesAssertionDataFromFirstMemberOnly()
+    [Arguments(1)]
+    [Arguments(2)]
+    [Arguments(3)]
+    public void AggregateException_CopiesAssertionDataFromFirstMemberOnly(int depth)
     {
-        var first = new AssertionException("first");
+        Exception first = new AssertionException("first");
         first.Data["assert.expected"] = "1";
         first.Data["assert.actual"] = "2";
         first.Data["unrelated"] = "private member data";
@@ -316,7 +319,12 @@ public class FlattenedExceptionTests
         second.Data["assert.expected"] = "3";
         second.Data["assert.actual"] = "4";
 
-        var wrapped = FlattenedException.Wrap(new AggregateException(first, second));
+        for (var i = 0; i < depth; i++)
+        {
+            first = new AggregateException(first, second);
+        }
+
+        var wrapped = FlattenedException.Wrap(first);
 
         wrapped.Data["assert.expected"].ShouldBe("1");
         wrapped.Data["assert.actual"].ShouldBe("2");
@@ -324,11 +332,19 @@ public class FlattenedExceptionTests
     }
 
     [Test]
-    public void AggregateException_PreservesRootAssertionData()
+    [Arguments(1)]
+    [Arguments(2)]
+    [Arguments(3)]
+    public void AggregateException_PreservesRootAssertionData(int depth)
     {
-        var first = new AssertionException("first");
+        Exception first = new AssertionException("first");
         first.Data["assert.expected"] = "member expected";
         first.Data["assert.actual"] = "member actual";
+        for (var i = 1; i < depth; i++)
+        {
+            first = new AggregateException(first, new Exception("nested sibling"));
+        }
+
         var aggregate = new AggregateException(first, new Exception("second"));
         aggregate.Data["assert.expected"] = "root expected";
 
