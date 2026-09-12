@@ -7,12 +7,18 @@ body:
     attributes:
       value: |
         Thanks for taking the time to report a bug! Please fill out the information below to help us investigate.
-
-        **Before submitting**, please check:
-        - [ ] I've searched [existing issues](https://github.com/thomhurst/TUnit/issues) to ensure this isn't a duplicate
-        - [ ] I've read the [documentation](https://tunit.dev/) and this isn't expected behavior
-        - [ ] I'm using the latest version of TUnit
-
+  - type: checkboxes
+    id: bug-checklist
+    attributes:
+      label: Bug report checklist
+      description: Before submitting, please check
+      options:
+        - label: I've searched [existing issues](https://github.com/thomhurst/TUnit/issues) to ensure this isn't a duplicate
+          required: true
+        - label: I've read the [documentation](https://tunit.dev/) and this isn't expected behavior
+          required: true
+        - label: I'm using the latest version of TUnit
+          required: true
   - type: textarea
     id: description
     attributes:
