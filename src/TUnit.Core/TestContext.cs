@@ -223,7 +223,23 @@ public partial class TestContext : Context,
     public static TestContext? GetById(string id) =>
         Guid.TryParse(id, out var guid) ? _testContextsByGuid.GetValueOrDefault(guid) : null;
 
-    internal void RemoveFromRegistry() => _testContextsByGuid.TryRemove(_idGuid, out _);
+    internal void RemoveFromRegistry()
+    {
+        _testContextsByGuid.TryRemove(_idGuid, out _);
+        // Reporting has completed. Do not retain its cached properties with a
+        // context that user code or session summaries keep alive after execution.
+        Volatile.Write(ref CachedReportingProperties, null);
+    }
+
+    internal static void ClearReportingCaches()
+    {
+        // Discovery-only sessions and failures before execution can leave contexts
+        // registered. Release their reporting metadata when the engine resets.
+        foreach (var entry in _testContextsByGuid)
+        {
+            Volatile.Write(ref entry.Value.CachedReportingProperties, null);
+        }
+    }
 
     /// <summary>
     /// Gets the dictionary of test parameters indexed by parameter name.
@@ -398,6 +414,9 @@ public partial class TestContext : Context,
     internal IClassConstructor? ClassConstructor => _testBuilderContext.ClassConstructor;
 
     internal object[]? CachedEligibleEventObjects { get; set; }
+
+    // Owned by the engine; object keeps Core independent of MTP reporting types.
+    internal object? CachedReportingProperties;
 
     // Pre-computed typed event receivers (filtered, sorted, scoped-attribute filtered)
     // These are computed lazily on first access and cached

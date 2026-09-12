@@ -8,8 +8,104 @@ using TUnit.Engine.Reporters;
 
 namespace TUnit.Engine.Tests;
 
+[NotInParallel]
 public class TestNodeLocationTests
 {
+    [Test]
+    public void ClearCaches_Refreshes_Metadata_For_Existing_Contexts()
+    {
+        var context = CreateTestContext(Guid.NewGuid().ToString("N"), "Before.cs", 1, 0, 1, 0);
+        try
+        {
+            var before = context.ToTestNode(DiscoveredTestNodeStateProperty.CachedInstance);
+            context.CachedReportingProperties.ShouldNotBeNull();
+            context.Metadata.TestDetails.TestFilePath = "After.cs";
+            TestExtensions.ClearCaches();
+            context.CachedReportingProperties.ShouldBeNull();
+            var after = context.ToTestNode(InProgressTestNodeStateProperty.CachedInstance);
+
+            before.Properties.AsEnumerable().OfType<TestFileLocationProperty>().Single().FilePath.ShouldBe("Before.cs");
+            after.Properties.AsEnumerable().OfType<TestFileLocationProperty>().Single().FilePath.ShouldBe("After.cs");
+            before.Properties.AsEnumerable().OfType<DiscoveredTestNodeStateProperty>().Count().ShouldBe(1);
+            after.Properties.AsEnumerable().OfType<InProgressTestNodeStateProperty>().Count().ShouldBe(1);
+            context.RemoveFromRegistry();
+            context.CachedReportingProperties.ShouldBeNull();
+        }
+        finally
+        {
+            context.RemoveFromRegistry();
+            context.Dispose();
+        }
+    }
+
+    [Test]
+    [Arguments("Passed")]
+    [Arguments("Failed")]
+    [Arguments("Error")]
+    [Arguments("Timeout")]
+    [Arguments("Skipped")]
+    [Arguments("Cancelled")]
+    public void Final_Updates_Release_Cache_Without_Coordinator_Cleanup(string state)
+    {
+        var context = CreateTestContext(Guid.NewGuid().ToString("N"), "Tests.cs", 1, 0, 1, 0);
+        try
+        {
+            context.Metadata.TestDetails.Categories.Add("Category");
+            var discovered = context.ToTestNode(DiscoveredTestNodeStateProperty.CachedInstance);
+            context.CachedReportingProperties.ShouldNotBeNull();
+
+#pragma warning disable CS0618, MTP0001 // Exercise the engine's cancellation reporting path.
+            TestNodeStateProperty finalState = state switch
+            {
+                "Passed" => PassedTestNodeStateProperty.CachedInstance,
+                "Failed" => new FailedTestNodeStateProperty(new Exception("failure")),
+                "Error" => new ErrorTestNodeStateProperty(new Exception("error")),
+                "Timeout" => new TimeoutTestNodeStateProperty(),
+                "Skipped" => new SkippedTestNodeStateProperty("skipped"),
+                "Cancelled" => new CancelledTestNodeStateProperty(),
+                _ => throw new ArgumentOutOfRangeException(nameof(state))
+            };
+#pragma warning restore CS0618, MTP0001
+            var final = context.ToTestNode(finalState);
+
+            context.CachedReportingProperties.ShouldBeNull();
+            final.Properties.AsEnumerable().OfType<TestNodeStateProperty>().Single().ShouldBeSameAs(finalState);
+            final.Properties.AsEnumerable().OfType<TestFileLocationProperty>().Single().FilePath.ShouldBe("Tests.cs");
+            final.Properties.AsEnumerable().OfType<TestMetadataProperty>().Single()
+                .ShouldBeSameAs(discovered.Properties.AsEnumerable().OfType<TestMetadataProperty>().Single());
+        }
+        finally
+        {
+            context.RemoveFromRegistry();
+            context.Dispose();
+        }
+    }
+
+    [Test]
+    public void Concurrent_Updates_Keep_Separate_Message_State()
+    {
+        var context = CreateTestContext(Guid.NewGuid().ToString("N"), "Tests.cs", 1, 0, 1, 0);
+        try
+        {
+            var nodes = new TestNode[64];
+            Parallel.For(0, nodes.Length, i => nodes[i] = context.ToTestNode(i % 2 == 0
+                ? DiscoveredTestNodeStateProperty.CachedInstance
+                : InProgressTestNodeStateProperty.CachedInstance));
+
+            for (var i = 0; i < nodes.Length; i++)
+            {
+                var state = nodes[i].Properties.AsEnumerable().OfType<TestNodeStateProperty>().Single();
+                (state is DiscoveredTestNodeStateProperty).ShouldBe(i % 2 == 0);
+                nodes[i].Properties.AsEnumerable().OfType<TestFileLocationProperty>().Single().FilePath.ShouldBe("Tests.cs");
+            }
+        }
+        finally
+        {
+            context.RemoveFromRegistry();
+            context.Dispose();
+        }
+    }
+
     [Test]
     public void ToTestNode_Uses_Source_Span_For_Mtp_File_Location()
     {
