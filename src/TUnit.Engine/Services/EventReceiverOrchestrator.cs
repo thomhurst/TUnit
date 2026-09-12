@@ -49,6 +49,13 @@ internal sealed class EventReceiverOrchestrator
 
         foreach (var obj in context.GetEligibleEventObjects())
         {
+            // Ordinary attributes, arguments and test instances cannot receive events.
+            // Avoid retaining them in the deduplication set or scanning every receiver interface.
+            if (obj is not IEventReceiver)
+            {
+                continue;
+            }
+
             // Use single TryAdd operation instead of Contains + Add
             if (!_initializedObjects.Add(obj))
             {
@@ -88,7 +95,7 @@ internal sealed class EventReceiverOrchestrator
     {
         var classInstance = context.Metadata.TestDetails.ClassInstance;
         Debug.Assert(classInstance is not null, "RegisterClassInstanceReceiver should only be called after ClassInstance is assigned.");
-        if (classInstance is null)
+        if (classInstance is not IEventReceiver)
         {
             return;
         }
