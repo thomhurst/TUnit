@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -29,25 +30,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
             });
 
-        var compilationContext = context
-            .CompilationProvider
-            .Select(static (c, _) =>
-            {
-                var wellKnownTypes = new WellKnownTypes(c);
-                return new CompilationContext(
-                    (CSharpCompilation)c,
-                    new AttributeWriter(c),
-                    wellKnownTypes
-                );
-            });
+        var compilationContexts = new ConditionalWeakTable<Compilation, CompilationContext>();
+
+        CompilationContext GetCompilationContext(Compilation compilation) =>
+            compilationContexts.GetValue(compilation, static c =>
+                new CompilationContext((CSharpCompilation)c, new AttributeWriter(c), new WellKnownTypes(c)));
 
         var testMethodsProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.TestAttribute",
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
-                transform: static (ctx, _) => ctx)
-            .Combine(compilationContext)
-            .Select(static (ctx, _) => GetTestMethodMetadata(ctx.Left, ctx.Right))
+                transform: (ctx, _) => GetTestMethodMetadata(ctx, GetCompilationContext(ctx.SemanticModel.Compilation)))
             .Where(static m => m is not null)
             .Combine(enabledProvider);
 
@@ -55,9 +48,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .ForAttributeWithMetadataName(
                 "TUnit.Core.InheritsTestsAttribute",
                 predicate: static (node, _) => node is ClassDeclarationSyntax,
-                transform: static (ctx, _) => ctx)
-            .Combine(compilationContext)
-            .Select(static (ctx, _) => GetInheritsTestsClassMetadata(ctx.Left, ctx.Right))
+                transform: (ctx, _) => GetInheritsTestsClassMetadata(ctx, GetCompilationContext(ctx.SemanticModel.Compilation)))
             .Where(static m => m is not null)
             .Combine(enabledProvider);
 
