@@ -23,7 +23,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
     private readonly SessionUid _sessionSessionUid = context.Request.Session.SessionUid;
 
     private bool? _isConsole;
-    private bool IsConsole => _isConsole ??= serviceProvider.GetClientInfo().Id.Contains("console", StringComparison.InvariantCultureIgnoreCase);
+    private bool IsConsole => _isConsole ??= serviceProvider.IsConsoleClient();
 
     // Tests created by expanding a deferred-enumeration placeholder (or runtime variants) carry a
     // ParentTestId; surfacing it as the MTP parentTestNodeUid makes IDEs nest them under that node.
@@ -76,7 +76,8 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
         var duration = testContext.Execution.TestEnd - testContext.Execution.TestStart;
 
-        var updateType = GetFailureStateProperty(testContext, exception, duration ?? TimeSpan.Zero);
+        var updateType = GetFailureStateProperty(exception, testContext.Metadata.TestDetails.Timeout,
+            duration ?? TimeSpan.Zero, IsConsole);
 
         var testNode = testContext.ToTestNode(updateType);
 
@@ -139,7 +140,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         )));
     }
 
-    private static TestNodeStateProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
+    internal static TestNodeStateProperty GetFailureStateProperty(Exception e, TimeSpan? timeout, TimeSpan duration, bool isConsole)
     {
         // Unwrap AggregateException once so all downstream logic sees the real cause
         var unwrapped = e is AggregateException { InnerExceptions.Count: > 0 } agg
@@ -149,28 +150,52 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         var category = FailureCategorizer.Categorize(unwrapped);
         var categoryLabel = FailureCategorizer.GetLabel(category);
 
-        if (category == FailureCategory.Timeout
-            && testContext.Metadata.TestDetails.Timeout != null
-            && duration >= testContext.Metadata.TestDetails.Timeout.Value)
-        {
-            var explanation = $"[{categoryLabel}] Test timed out after {testContext.Metadata.TestDetails.Timeout.Value.TotalMilliseconds}ms";
-            var diagnosticException = unwrapped.InnerException
-                ?? (unwrapped is OperationCanceledException and not TaskCanceledException ? unwrapped : null);
+        // A multi-member AggregateException (e.g. several failing [After] hooks) is reported whole so
+        // every sibling is listed; a single-member one stays reduced to its real cause. This applies
+        // to console runs too: with --detailed-stacktrace the aggregate arrives unwrapped, and MTP's
+        // terminal reporter flattens a top-level aggregate itself.
+        var reportedRoot = e is AggregateException { InnerExceptions.Count: > 1 } ? e : unwrapped;
 
-            if (diagnosticException is not null)
+        // MTP's server-mode (IDE) serializer only transmits Exception.Message and Exception.StackTrace,
+        // never the InnerException chain, so Rider/VS showed just the outermost exception (#1327).
+        // Fold the chain into those two members for IDE clients only. The console keeps the raw
+        // exception because MTP's terminal reporter already renders the chain from InnerException,
+        // labels error/timeout outcomes with the exception's runtime type (which would otherwise
+        // read FlattenedException), and gives each inner exception its own highlighted block.
+        var reported = isConsole ? reportedRoot : FlattenedException.Wrap(reportedRoot);
+
+        if (category == FailureCategory.Timeout
+            && timeout != null
+            && duration >= timeout.Value)
+        {
+            var explanation = $"[{categoryLabel}] Test timed out after {timeout.Value.TotalMilliseconds}ms";
+
+            if (!isConsole)
             {
-                explanation = $"{explanation}{Environment.NewLine}{diagnosticException.Message}";
+                // IDE clients receive the explanation instead of Exception.Message. Include the
+                // complete reported root so both cancellation diagnostics and aggregate siblings survive.
+                explanation = $"{explanation}{Environment.NewLine}{reported.Message}";
+            }
+            else
+            {
+                var diagnosticException = unwrapped.InnerException
+                    ?? (unwrapped is OperationCanceledException and not TaskCanceledException ? unwrapped : null);
+
+                if (diagnosticException is not null)
+                {
+                    explanation = $"{explanation}{Environment.NewLine}{diagnosticException.Message}";
+                }
             }
 
-            return new TimeoutTestNodeStateProperty(unwrapped, explanation);
+            return new TimeoutTestNodeStateProperty(reported, explanation);
         }
 
         if (category == FailureCategory.Assertion)
         {
-            return new FailedTestNodeStateProperty(unwrapped, $"[{categoryLabel}] {unwrapped.Message}");
+            return new FailedTestNodeStateProperty(reported, $"[{categoryLabel}] {reported.Message}");
         }
 
-        return new ErrorTestNodeStateProperty(unwrapped, $"[{categoryLabel}] {unwrapped.Message}");
+        return new ErrorTestNodeStateProperty(reported, $"[{categoryLabel}] {reported.Message}");
     }
 
     public Task<bool> IsEnabledAsync()

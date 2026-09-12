@@ -20,6 +20,16 @@ public abstract class TUnitFailedException : TUnitException
         StackTrace = FilterStackTrace(innerException?.StackTrace);
     }
 
+    /// <summary>
+    /// Presents a pre-computed <paramref name="message"/> and <paramref name="stackTrace"/> for
+    /// <paramref name="wrappedException"/> without carrying its inner-exception chain.
+    /// </summary>
+    internal TUnitFailedException(string message, string stackTrace, Exception wrappedException) : base(message)
+    {
+        WrappedException = wrappedException;
+        StackTrace = stackTrace;
+    }
+
     public override string StackTrace { get; }
 
     [return: NotNullIfNotNull(nameof(exception))]
