@@ -6,6 +6,27 @@ namespace TUnit.Engine.Tests;
 public class TimeoutTests1(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
+    public async Task LinkedTokensAreReportedAsTimeouts()
+    {
+        await RunTestsWithFilter(
+            "/*/*/LinkedTokenTimeoutTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(3),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(3),
+                result =>
+                {
+                    foreach (var test in result.Results)
+                    {
+                        test.Output!.ErrorInfo!.Message.ToLowerInvariant().ShouldContain("timed out");
+                    }
+
+                    result.Results.Single(test => test.TestName.Contains("CustomLinkedCancellationDiagnostic"))
+                        .Output!.ErrorInfo!.Message.ShouldContain("Linked timeout diagnostic");
+                }
+            ]);
+    }
+
+    [Test]
     public async Task Test()
     {
         await RunTestsWithFilter(

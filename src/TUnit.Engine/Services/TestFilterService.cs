@@ -61,6 +61,26 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         return filteredTests;
     }
 
+    private async Task InvokeTestRegisteredReceiver(ITestRegisteredEventReceiver receiver, TestRegisteredContext context,
+        HashSet<ITestRegisteredEventReceiver> invokedReceivers)
+    {
+        // Record identity before invoking: a receiver can install itself as an executor.
+        if (!invokedReceivers.Add(receiver))
+        {
+            return;
+        }
+
+        try
+        {
+            await receiver.OnTestRegistered(context).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}").ConfigureAwait(false);
+            throw;
+        }
+    }
+
     private async Task RegisterTest(AbstractExecutableTest test, bool isForExecution)
     {
         var registeredReceivers = test.Context.GetTestRegisteredReceivers();
@@ -83,17 +103,17 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             };
 
             test.Context.InternalDiscoveredTest = discoveredTest;
+            var invokedReceivers = new HashSet<ITestRegisteredEventReceiver>(Core.Helpers.ReferenceEqualityComparer.Instance);
 
             foreach (var receiver in registeredReceivers)
             {
-                try
+                await InvokeTestRegisteredReceiver(receiver, registeredContext, invokedReceivers).ConfigureAwait(false);
+
+                // Dynamically installed executor callbacks run after their installer, regardless of their
+                // own Order. The shared identity set also covers executors in the original receiver list.
+                while (registeredContext.TryDequeueExecutorEventReceiver(out var executorReceiver))
                 {
-                    await receiver.OnTestRegistered(registeredContext).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}").ConfigureAwait(false);
-                    throw;
+                    await InvokeTestRegisteredReceiver(executorReceiver, registeredContext, invokedReceivers).ConfigureAwait(false);
                 }
             }
         }

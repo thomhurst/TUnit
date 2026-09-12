@@ -20,9 +20,10 @@ public partial class TestContext
     private volatile bool _testCancellationRequested;
     private List<CancellationToken>? _externalCancellationTokens;
     private CancellationTokenSource? _linkedCancellationTokenSource;
+    private CancellationToken _linkedCancellationBaseToken;
     // Token copies can escape into user code and remain in use through teardown (#6339).
     // Keep replaced sources alive until the complete test lifecycle has finished.
-    private List<CancellationTokenSource>? _retiredLinkedCancellationTokenSources;
+    private List<(CancellationTokenSource Source, CancellationToken BaseToken)>? _retiredLinkedCancellationTokenSources;
     internal CancellationToken CancellationToken { get; private set; }
 
     // Linked source backing the per-test timeout token. Owned for the whole test lifecycle — the body
@@ -297,11 +298,40 @@ public partial class TestContext
 
         if (_linkedCancellationTokenSource is { } previousLinkedCancellationTokenSource)
         {
-            (_retiredLinkedCancellationTokenSources ??= []).Add(previousLinkedCancellationTokenSource);
+            (_retiredLinkedCancellationTokenSources ??= []).Add((previousLinkedCancellationTokenSource, _linkedCancellationBaseToken));
         }
 
         _linkedCancellationTokenSource = linkedCancellationTokenSource;
+        _linkedCancellationBaseToken = _baseCancellationToken;
         CancellationToken = linkedCancellationTokenSource.Token;
+    }
+
+    internal bool IsLinkedCancellationToken(CancellationToken token, CancellationToken baseToken)
+    {
+        lock (Lock)
+        {
+            if (_linkedCancellationTokenSource is { } currentSource
+                && _linkedCancellationBaseToken == baseToken
+                && currentSource.Token == token)
+            {
+                return true;
+            }
+
+            // A test can still use a captured token after another linked token or retry replaces it.
+            // Match its original base as well, so earlier attempts cannot become the current timeout.
+            if (_retiredLinkedCancellationTokenSources is { } retiredSources)
+            {
+                foreach (var retired in retiredSources)
+                {
+                    if (retired.BaseToken == baseToken && retired.Source.Token == token)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 
     internal void DisposeLinkedCancellationTokenSources()
@@ -329,7 +359,7 @@ public partial class TestContext
         {
             for (var i = retiredLinkedCancellationTokenSources.Count - 1; i >= 0; i--)
             {
-                retiredLinkedCancellationTokenSources[i].Dispose();
+                retiredLinkedCancellationTokenSources[i].Source.Dispose();
             }
 
             _retiredLinkedCancellationTokenSources = null;

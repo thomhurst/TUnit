@@ -21,6 +21,13 @@ namespace TUnit.Core.Interfaces;
 /// The <see cref="IEventReceiver.Order"/> property can be used to control the execution order
 /// when multiple implementations of this interface exist.
 /// </para>
+/// <para>
+/// Executors installed through <see cref="TestRegisteredContext.SetTestExecutor"/> or
+/// <see cref="TestRegisteredContext.SetHookExecutor"/> during registration are invoked after
+/// their installing receiver returns, rather than being globally sorted by their own Order.
+/// Each receiver instance is invoked at most once per test, even when it is both an eligible
+/// event object and an installed executor. Distinct instances are compared by reference identity.
+/// </para>
 /// </remarks>
 public interface ITestRegisteredEventReceiver : IEventReceiver
 {
