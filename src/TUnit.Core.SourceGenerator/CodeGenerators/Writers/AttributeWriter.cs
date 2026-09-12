@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -10,6 +10,7 @@ public class AttributeWriter(Compilation compilation)
     private const string TUnitRootNamespace = "TUnit";
 
     private readonly Dictionary<AttributeData, string> _attributeObjectInitializerCache = new();
+    private readonly Dictionary<INamedTypeSymbol, string> _argumentFreeAttributeInitializerCache = new(SymbolEqualityComparer.Default);
     private readonly Dictionary<INamedTypeSymbol, bool> _tunitRelatedCache = new(SymbolEqualityComparer.Default);
 
     public void WriteAttributes(ICodeWriter sourceCodeWriter,
@@ -66,6 +67,23 @@ public class AttributeWriter(Compilation compilation)
 
     public string GetAttributeObjectInitializer(AttributeData attributeData)
     {
+        // Argument-free attributes such as [Test] have the same initializer at every
+        // application site. Cache by type so large suites only format it once.
+        if (attributeData.AttributeClass is { } attributeClass &&
+            attributeData.ApplicationSyntaxReference?.GetSyntax() is AttributeSyntax
+            {
+                ArgumentList: null or { Arguments.Count: 0 }
+            })
+        {
+            if (!_argumentFreeAttributeInitializerCache.TryGetValue(attributeClass, out var argumentFreeInitializer))
+            {
+                argumentFreeInitializer = GetAttributeObjectInitializerInner(compilation, attributeData);
+                _argumentFreeAttributeInitializerCache.Add(attributeClass, argumentFreeInitializer);
+            }
+
+            return argumentFreeInitializer;
+        }
+
         if (_attributeObjectInitializerCache.TryGetValue(attributeData, out var initializer))
         {
             return initializer;
