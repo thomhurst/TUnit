@@ -231,6 +231,16 @@ public partial class TestContext : Context,
         Volatile.Write(ref CachedReportingProperties, null);
     }
 
+    internal static void ClearReportingCaches()
+    {
+        // Discovery-only sessions and failures before execution can leave contexts
+        // registered. Release their reporting metadata when the engine resets.
+        foreach (var entry in _testContextsByGuid)
+        {
+            Volatile.Write(ref entry.Value.CachedReportingProperties, null);
+        }
+    }
+
     /// <summary>
     /// Gets the dictionary of test parameters indexed by parameter name.
     /// </summary>

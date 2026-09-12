@@ -36,6 +36,7 @@ internal static class TestExtensions
     {
         AssemblyFullNameCache.Clear();
         Volatile.Write(ref _reportingCacheScope, new object());
+        TestContext.ClearReportingCaches();
         _cachedIsTrxEnabled = null;
     }
 
@@ -55,6 +56,12 @@ internal static class TestExtensions
 
         var properties = CreateCachedProperties(testContext, scope);
         Volatile.Write(ref testContext.CachedReportingProperties, properties);
+        // A reset may have swept this context while its properties were being
+        // created. Do not retain an entry published after that sweep.
+        if (!ReferenceEquals(scope, Volatile.Read(ref _reportingCacheScope)))
+        {
+            Interlocked.CompareExchange(ref testContext.CachedReportingProperties, null, properties);
+        }
         return properties;
 
         static CachedTestNodeProperties CreateCachedProperties(TestContext testContext, object scope)
@@ -238,6 +245,13 @@ internal static class TestExtensions
             DisplayName = testContext.GetDisplayName(),
             Properties = propertyBag
         };
+
+        if (isFinalState)
+        {
+            // Placeholders and failures before execution do not reach the
+            // coordinator's registry cleanup. The node owns its property snapshot.
+            Volatile.Write(ref testContext.CachedReportingProperties, null);
+        }
 
         return testNode;
     }
