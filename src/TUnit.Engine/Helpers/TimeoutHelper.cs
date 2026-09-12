@@ -78,30 +78,39 @@ internal static class TimeoutHelper
 
         var winner = await Task.WhenAny(executionTask, cancelledTcs.Task).ConfigureAwait(false);
 
-        if (winner == cancelledTcs.Task)
+        if (winner == executionTask)
         {
-            // Determine if it was external cancellation or timeout
-            if (externalToken.IsCancellationRequested)
+            try
             {
-                throw new OperationCanceledException(externalToken);
+                await executionTask.ConfigureAwait(false);
+                return;
             }
-
-            // Timeout occurred - give the execution task a brief grace period to clean up
-            var executionException = await ObserveExceptionDuringGracePeriodAsync(executionTask).ConfigureAwait(false);
-
-            // Routine cancellation adds no useful context; preserve exceptions explicitly
-            // thrown while handling cancellation, such as Aspire's diagnostic exception.
-            var exceptionToPreserve = IsRoutineCancellation(executionException, timeoutCts.Token)
-                ? null
-                : executionException;
-
-            // Even if task completed during grace period, timeout already elapsed so we throw
-            var baseMessage = timeoutMessage ?? $"Operation timed out after {timeout}";
-            var diagnosticMessage = TimeoutDiagnostics.BuildTimeoutDiagnosticsMessage(baseMessage, executionTask, exceptionToPreserve);
-            throw new TimeoutException(diagnosticMessage, exceptionToPreserve);
+            catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested)
+            {
+                // The operation can observe cancellation before the detection task wins WhenAny.
+                // Classify that cancellation through the same timeout/external-cancellation path.
+            }
         }
 
-        await executionTask.ConfigureAwait(false);
+        // Determine if it was external cancellation or timeout
+        if (externalToken.IsCancellationRequested)
+        {
+            throw new OperationCanceledException(externalToken);
+        }
+
+        // Timeout occurred - give the execution task a brief grace period to clean up
+        var executionException = await ObserveExceptionDuringGracePeriodAsync(executionTask).ConfigureAwait(false);
+
+        // Routine cancellation adds no useful context; preserve exceptions explicitly
+        // thrown while handling cancellation, such as Aspire's diagnostic exception.
+        var exceptionToPreserve = IsRoutineCancellation(executionException, timeoutCts.Token)
+            ? null
+            : executionException;
+
+        // Even if task completed during grace period, timeout already elapsed so we throw
+        var baseMessage = timeoutMessage ?? $"Operation timed out after {timeout}";
+        var diagnosticMessage = TimeoutDiagnostics.BuildTimeoutDiagnosticsMessage(baseMessage, executionTask, exceptionToPreserve);
+        throw new TimeoutException(diagnosticMessage, exceptionToPreserve);
     }
 
     private static bool IsRoutineCancellation(Exception? exception, CancellationToken timeoutToken)
