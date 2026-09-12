@@ -367,7 +367,8 @@ internal class TestExecutor
                         testTimeout.Value,
                         testBodyTimeoutCts,
                         testCancellationToken,
-                        timeoutMessage).ConfigureAwait(false);
+                        timeoutMessage,
+                        context).ConfigureAwait(false);
                 }
                 else
                 {

@@ -1,3 +1,4 @@
+using TUnit.Core;
 using TUnit.Engine.Helpers;
 
 namespace TUnit.UnitTests;
@@ -151,8 +152,105 @@ public class TimeoutHelperTests
             _ => Task.CompletedTask, Timeout.InfiniteTimeSpan, CancellationToken.None);
     }
 
+    [Test]
+    [Arguments(true, false)]
+    [Arguments(true, true)]
+    [Arguments(false, false)]
+    [Arguments(false, true)]
+    public async Task Linked_Timeout_Cancellation_Is_Classified_Without_Routine_Diagnostics(
+        bool executionCompletesFirst, bool rebuildAfterCapture)
+    {
+        var context = CreateContext();
+        context.Execution.AddLinkedCancellationToken(CancellationToken.None);
+
+        try
+        {
+            var exception = await Assert.That(() => ExecuteWithControlledTimeoutAsync(
+                    _ =>
+                    {
+                        var capturedToken = context.Execution.CancellationToken;
+                        if (rebuildAfterCapture)
+                        {
+                            context.Execution.AddLinkedCancellationToken(CancellationToken.None);
+                        }
+
+                        return Task.FromCanceled(capturedToken);
+                    }, executionCompletesFirst, context))
+                .ThrowsExactly<TimeoutException>();
+
+            await Assert.That(exception!.InnerException).IsNull();
+            await Assert.That(exception.Message).DoesNotContain(nameof(TaskCanceledException));
+        }
+        finally
+        {
+            context.DisposeLinkedCancellationTokenSources();
+            context.RemoveFromRegistry();
+        }
+    }
+
+    [Test]
+    [Arguments(true)]
+    [Arguments(false)]
+    public async Task Linked_Timeout_Preserves_Custom_Diagnostics(bool executionCompletesFirst)
+    {
+        var context = CreateContext();
+        context.Execution.AddLinkedCancellationToken(CancellationToken.None);
+        OperationCanceledException? expected = null;
+
+        try
+        {
+            var exception = await Assert.That(() => ExecuteWithControlledTimeoutAsync(
+                    _ =>
+                    {
+                        expected = new OperationCanceledException("Linked timeout diagnostic", context.Execution.CancellationToken);
+                        return Task.FromException(expected);
+                    }, executionCompletesFirst, context))
+                .ThrowsExactly<TimeoutException>();
+
+            await Assert.That(exception!.InnerException).IsSameReferenceAs(expected);
+            await Assert.That(exception.Message).Contains("Linked timeout diagnostic");
+        }
+        finally
+        {
+            context.DisposeLinkedCancellationTokenSources();
+            context.RemoveFromRegistry();
+        }
+    }
+
+    [Test]
+    public async Task Linked_Cancellation_From_An_Earlier_Base_Is_Not_The_Current_Timeout()
+    {
+        var context = CreateContext();
+        using var earlierSource = new CancellationTokenSource();
+        context.SetCancellationToken(earlierSource.Token);
+        context.Execution.AddLinkedCancellationToken(CancellationToken.None);
+        var earlierToken = context.Execution.CancellationToken;
+        earlierSource.Cancel();
+
+        try
+        {
+            var exception = await Assert.That(() => ExecuteWithControlledTimeoutAsync(
+                    _ => Task.FromCanceled(earlierToken), executionCompletesFirst: true, context))
+                .ThrowsExactly<TaskCanceledException>();
+
+            await Assert.That(exception!.CancellationToken).IsEqualTo(earlierToken);
+        }
+        finally
+        {
+            context.DisposeLinkedCancellationTokenSources();
+            context.RemoveFromRegistry();
+        }
+    }
+
+    private static TestContext CreateContext()
+    {
+        var currentContext = TestContext.Current!;
+        return new TestContext(nameof(TimeoutHelperTests), currentContext.ServiceProvider, currentContext.ClassContext,
+            new TestBuilderContext { TestMetadata = currentContext.TestDetails.MethodMetadata }, CancellationToken.None);
+    }
+
     private static async Task ExecuteWithControlledTimeoutAsync(
-        Func<CancellationToken, Task> operation, bool executionCompletesFirst)
+        Func<CancellationToken, Task> operation, bool executionCompletesFirst, TestContext? testContext = null)
     {
         using var timeoutCts = new CancellationTokenSource();
         var releaseOperation = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -160,10 +258,11 @@ public class TimeoutHelperTests
         var timeoutTask = TimeoutHelper.ExecuteWithTimeoutAsync(
             cancellationToken =>
             {
+                testContext?.SetCancellationToken(cancellationToken);
                 // Cancel the caller-owned timeout source without depending on a timer or scheduler delay.
                 timeoutCts.Cancel();
                 return executionCompletesFirst ? operation(cancellationToken) : CompleteAfterReleaseAsync(cancellationToken);
-            }, Timeout.InfiniteTimeSpan, timeoutCts, CancellationToken.None);
+            }, Timeout.InfiniteTimeSpan, timeoutCts, CancellationToken.None, testContext: testContext);
 
         // When both tasks are already complete, WhenAny selects execution (the first argument).
         // Otherwise timeout detection wins before the operation is released into the grace period.

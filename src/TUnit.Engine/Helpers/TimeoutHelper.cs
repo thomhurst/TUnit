@@ -1,3 +1,4 @@
+using TUnit.Core;
 using TUnit.Engine.Constants;
 
 namespace TUnit.Engine.Helpers;
@@ -55,6 +56,7 @@ internal static class TimeoutHelper
     /// <param name="timeoutCts">Caller-owned CTS, already linked to <paramref name="externalToken"/>. Not disposed here.</param>
     /// <param name="externalToken">The external token the CTS is linked to; used to distinguish timeout from external cancellation.</param>
     /// <param name="timeoutMessage">Optional custom timeout message. If null, uses default message.</param>
+    /// <param name="testContext">Tracks execution tokens linked to the timeout token, including captured tokens replaced during execution.</param>
     /// <exception cref="TimeoutException">Thrown when the timeout elapses before task completion.</exception>
     /// <exception cref="OperationCanceledException">Thrown when cancellation is requested.</exception>
     public static async Task ExecuteWithTimeoutAsync(
@@ -62,7 +64,8 @@ internal static class TimeoutHelper
         TimeSpan timeout,
         CancellationTokenSource timeoutCts,
         CancellationToken externalToken,
-        string? timeoutMessage = null)
+        string? timeoutMessage = null,
+        TestContext? testContext = null)
     {
         // Set up cancellation detection BEFORE scheduling timeout to avoid race condition
         // where timeout fires before registration completes (with very small timeouts)
@@ -87,7 +90,7 @@ internal static class TimeoutHelper
             }
             catch (OperationCanceledException exception)
                 when (timeoutCts.IsCancellationRequested
-                    && exception.CancellationToken == timeoutCts.Token)
+                    && IsTimeoutCancellationToken(exception.CancellationToken, timeoutCts.Token, testContext))
             {
                 // The operation can observe cancellation before the detection task wins WhenAny.
                 // Classify that cancellation through the same timeout/external-cancellation path.
@@ -105,7 +108,7 @@ internal static class TimeoutHelper
 
         // Routine cancellation adds no useful context; preserve exceptions explicitly
         // thrown while handling cancellation, such as Aspire's diagnostic exception.
-        var exceptionToPreserve = IsRoutineCancellation(executionException, timeoutCts.Token)
+        var exceptionToPreserve = IsRoutineCancellation(executionException, timeoutCts.Token, testContext)
             ? null
             : executionException;
 
@@ -115,13 +118,16 @@ internal static class TimeoutHelper
         throw new TimeoutException(diagnosticMessage, exceptionToPreserve);
     }
 
-    private static bool IsRoutineCancellation(Exception? exception, CancellationToken timeoutToken)
+    private static bool IsTimeoutCancellationToken(CancellationToken token, CancellationToken timeoutToken, TestContext? testContext)
+        => token == timeoutToken || testContext?.IsLinkedCancellationToken(token, timeoutToken) == true;
+
+    private static bool IsRoutineCancellation(Exception? exception, CancellationToken timeoutToken, TestContext? testContext)
     {
         if (exception is not OperationCanceledException
             {
                 InnerException: null
             } operationCanceledException
-            || operationCanceledException.CancellationToken != timeoutToken)
+            || !IsTimeoutCancellationToken(operationCanceledException.CancellationToken, timeoutToken, testContext))
         {
             return false;
         }
