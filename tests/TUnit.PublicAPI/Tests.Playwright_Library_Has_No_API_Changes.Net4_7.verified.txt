@@ -120,6 +120,15 @@ namespace
         public static . PlaywrightSetup() { }
         public static void SetDefaultExpectTimeout(float timeout) { }
     }
+    public class RecordVideoAttribute : .TUnitAttribute, ., .
+    {
+        public RecordVideoAttribute(string path = "playwright-artifacts/", int width = 1280, int height = 1400) { }
+        public int Height { get; }
+        public int Order { get; }
+        public string Path { get; }
+        public int Width { get; }
+        public . OnTestDiscovered(.DiscoveredTestContext discoveredTestContext) { }
+    }
     public class TUnitPlaywrightSettings
     {
         public .BrowserNewContextOptions? DefaultBrowserNewContextOptions { get; set; }
