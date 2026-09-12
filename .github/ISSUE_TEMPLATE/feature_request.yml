@@ -7,12 +7,18 @@ body:
     attributes:
       value: |
         Thanks for suggesting a feature! We appreciate your input in making TUnit better.
-
-        **Before submitting**, please:
-        - [ ] Search [existing issues](https://github.com/thomhurst/TUnit/issues) and [discussions](https://github.com/thomhurst/TUnit/discussions) to ensure this hasn't been suggested before
-        - [ ] Check the [documentation](https://tunit.dev/) to confirm this feature doesn't already exist
-        - [ ] Consider starting a [discussion](https://github.com/thomhurst/TUnit/discussions/new?category=ideas) first for larger features to get community feedback
-
+  - type: checkboxes
+    id: feature-checklist
+    attributes:
+      label: Feature request checklist
+      description: Before submitting, please check
+      options:
+        - label: Search [existing issues](https://github.com/thomhurst/TUnit/issues) and [discussions](https://github.com/thomhurst/TUnit/discussions) to ensure this hasn't been suggested before
+          required: true
+        - label: Check the [documentation](https://tunit.dev/) to confirm this feature doesn't already exist
+          required: true
+        - label: Consider starting a [discussion](https://github.com/thomhurst/TUnit/discussions/new?category=ideas) first for larger features to get community feedback
+          required: true
   - type: textarea
     id: problem
     attributes:
