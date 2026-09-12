@@ -8,8 +8,59 @@ using TUnit.Engine.Reporters;
 
 namespace TUnit.Engine.Tests;
 
+[NotInParallel]
 public class TestNodeLocationTests
 {
+    [Test]
+    public void ClearCaches_Refreshes_Metadata_For_Existing_Contexts()
+    {
+        var context = CreateTestContext(Guid.NewGuid().ToString("N"), "Before.cs", 1, 0, 1, 0);
+        try
+        {
+            var before = context.ToTestNode(DiscoveredTestNodeStateProperty.CachedInstance);
+            context.Metadata.TestDetails.TestFilePath = "After.cs";
+            TestExtensions.ClearCaches();
+            var after = context.ToTestNode(InProgressTestNodeStateProperty.CachedInstance);
+
+            before.Properties.AsEnumerable().OfType<TestFileLocationProperty>().Single().FilePath.ShouldBe("Before.cs");
+            after.Properties.AsEnumerable().OfType<TestFileLocationProperty>().Single().FilePath.ShouldBe("After.cs");
+            before.Properties.AsEnumerable().OfType<DiscoveredTestNodeStateProperty>().Count().ShouldBe(1);
+            after.Properties.AsEnumerable().OfType<InProgressTestNodeStateProperty>().Count().ShouldBe(1);
+            context.RemoveFromRegistry();
+            context.CachedReportingProperties.ShouldBeNull();
+        }
+        finally
+        {
+            context.RemoveFromRegistry();
+            context.Dispose();
+        }
+    }
+
+    [Test]
+    public void Concurrent_Updates_Keep_Separate_Message_State()
+    {
+        var context = CreateTestContext(Guid.NewGuid().ToString("N"), "Tests.cs", 1, 0, 1, 0);
+        try
+        {
+            var nodes = new TestNode[64];
+            Parallel.For(0, nodes.Length, i => nodes[i] = context.ToTestNode(i % 2 == 0
+                ? DiscoveredTestNodeStateProperty.CachedInstance
+                : InProgressTestNodeStateProperty.CachedInstance));
+
+            for (var i = 0; i < nodes.Length; i++)
+            {
+                var state = nodes[i].Properties.AsEnumerable().OfType<TestNodeStateProperty>().Single();
+                (state is DiscoveredTestNodeStateProperty).ShouldBe(i % 2 == 0);
+                nodes[i].Properties.AsEnumerable().OfType<TestFileLocationProperty>().Single().FilePath.ShouldBe("Tests.cs");
+            }
+        }
+        finally
+        {
+            context.RemoveFromRegistry();
+            context.Dispose();
+        }
+    }
+
     [Test]
     public void ToTestNode_Uses_Source_Span_For_Mtp_File_Location()
     {

@@ -17,10 +17,13 @@ internal static class TestExtensions
     private static bool? _cachedIsTrxEnabled;
 
     private static readonly ConcurrentDictionary<Assembly, string> AssemblyFullNameCache = new();
-    private static readonly ConcurrentDictionary<string, CachedTestNodeProperties> TestNodePropertiesCache = new();
+    // Changing the scope invalidates entries even when callers retain a context
+    // across service-provider resets, without a global per-test dictionary.
+    private static object _reportingCacheScope = new();
 
     private sealed class CachedTestNodeProperties
     {
+        public required object Scope { get; init; }
         public required TestFileLocationProperty FileLocation { get; init; }
         public required TestMethodIdentifierProperty MethodIdentifier { get; init; }
         public TestMetadataProperty[]? CategoryProperties { get; init; }
@@ -32,7 +35,7 @@ internal static class TestExtensions
     internal static void ClearCaches()
     {
         AssemblyFullNameCache.Clear();
-        TestNodePropertiesCache.Clear();
+        Volatile.Write(ref _reportingCacheScope, new object());
         _cachedIsTrxEnabled = null;
     }
 
@@ -43,9 +46,18 @@ internal static class TestExtensions
 
     private static CachedTestNodeProperties GetOrCreateCachedProperties(TestContext testContext)
     {
-        var testId = testContext.Metadata.TestDetails.TestId;
+        var scope = Volatile.Read(ref _reportingCacheScope);
+        if (Volatile.Read(ref testContext.CachedReportingProperties) is CachedTestNodeProperties cached &&
+            ReferenceEquals(cached.Scope, scope))
+        {
+            return cached;
+        }
 
-        return TestNodePropertiesCache.GetOrAdd(testId, static (_, testContext) =>
+        var properties = CreateCachedProperties(testContext, scope);
+        Volatile.Write(ref testContext.CachedReportingProperties, properties);
+        return properties;
+
+        static CachedTestNodeProperties CreateCachedProperties(TestContext testContext, object scope)
         {
             var testDetails = testContext.Metadata.TestDetails;
 
@@ -106,6 +118,7 @@ internal static class TestExtensions
 
             return new CachedTestNodeProperties
             {
+                Scope = scope,
                 FileLocation = fileLocation,
                 MethodIdentifier = methodIdentifier,
                 CategoryProperties = categoryProps,
@@ -113,7 +126,7 @@ internal static class TestExtensions
                 TrxFullyQualifiedTypeName = trxTypeName,
                 TrxCategories = trxCategories
             };
-        }, testContext);
+        }
     }
 
     internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty)
