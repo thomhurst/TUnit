@@ -21,6 +21,14 @@ The interfaces they can implement are:
 
 This can be useful especially when generating data that you need to track and maybe dispose later. By hooking into these events, we can do things like track and dispose our objects when we need.
 
+## Registration callbacks for executors
+
+An executor that implements `ITestRegisteredEventReceiver` receives `OnTestRegistered` when a registration receiver installs it through `SetTestExecutor` or `SetHookExecutor`, unless it has already received the callback for that test. Its callback runs after the installing receiver returns. Dynamically installed executors are not globally sorted by their own `Order`.
+
+Each receiver instance receives this callback at most once per test, using reference identity. This also applies when the same instance is already an eligible event object, installs itself, or is installed as both the test and hook executor. Distinct instances that compare equal still receive separate callbacks.
+
+An explicit `[ParallelLimiter<T>]` takes precedence over a limiter set through `TestRegisteredContext.SetParallelLimiter`, including one set by an executor, regardless of callback order.
+
 ## Execution Stage Control
 
 > **Note**: This feature is available on .NET 8.0+ only due to default interface member requirements.

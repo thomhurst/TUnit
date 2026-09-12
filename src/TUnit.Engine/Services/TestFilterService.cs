@@ -61,8 +61,15 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         return filteredTests;
     }
 
-    private async Task InvokeTestRegisteredReceiver(ITestRegisteredEventReceiver receiver, TestRegisteredContext context)
+    private async Task InvokeTestRegisteredReceiver(ITestRegisteredEventReceiver receiver, TestRegisteredContext context,
+        HashSet<ITestRegisteredEventReceiver> invokedReceivers)
     {
+        // Record identity before invoking: a receiver can install itself as an executor.
+        if (!invokedReceivers.Add(receiver))
+        {
+            return;
+        }
+
         try
         {
             await receiver.OnTestRegistered(context).ConfigureAwait(false);
@@ -96,19 +103,17 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             };
 
             test.Context.InternalDiscoveredTest = discoveredTest;
+            var invokedReceivers = new HashSet<ITestRegisteredEventReceiver>(Core.Helpers.ReferenceEqualityComparer.Instance);
 
             foreach (var receiver in registeredReceivers)
             {
-                await InvokeTestRegisteredReceiver(receiver, registeredContext).ConfigureAwait(false);
+                await InvokeTestRegisteredReceiver(receiver, registeredContext, invokedReceivers).ConfigureAwait(false);
 
-                // The receiver above may have installed an executor that is an ITestRegisteredEventReceiver
-                // in its own right, as DedicatedThreadExecutor is. GetTestRegisteredReceivers cannot have
-                // collected it, because it did not exist when that list was built. Dispatching it here
-                // rather than after the loop keeps its contribution at the position of the attribute that
-                // installed it, so a later attribute still overrides it.
+                // Dynamically installed executor callbacks run after their installer, regardless of their
+                // own Order. The shared identity set also covers executors in the original receiver list.
                 while (registeredContext.TryDequeueExecutorEventReceiver(out var executorReceiver))
                 {
-                    await InvokeTestRegisteredReceiver(executorReceiver, registeredContext).ConfigureAwait(false);
+                    await InvokeTestRegisteredReceiver(executorReceiver, registeredContext, invokedReceivers).ConfigureAwait(false);
                 }
             }
         }

@@ -131,6 +131,8 @@ Tests not assigned to any group run separately under normal parallel execution r
 
 The limit is shared across **all** tests referencing the same `IParallelLimit` type. Tests with a different limiter type or no limiter are unaffected.
 
+An explicit `[ParallelLimiter<T>]` always takes precedence over a limiter set programmatically through `TestRegisteredContext.SetParallelLimiter`, including one supplied by an executor. This precedence does not depend on registration callback order. Without an explicit attribute, the last programmatic limiter applies.
+
 ```csharp
 using TUnit.Core;
 

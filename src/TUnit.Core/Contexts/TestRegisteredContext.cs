@@ -11,6 +11,7 @@ public class TestRegisteredContext
 {
     private List<ITestRegisteredEventReceiver>? _executorReceivers;
     private int _dispatchedExecutorReceiverCount;
+    private IParallelLimit? _explicitParallelLimiter;
 
     public string TestName { get; }
     public string? CustomDisplayName { get; }
@@ -55,10 +56,17 @@ public class TestRegisteredContext
     }
 
     /// <summary>
-    /// Sets the parallel limiter for the test
+    /// Sets the programmatic parallel limiter for the test. An explicit
+    /// <see cref="ParallelLimiterAttribute{TParallelLimit}"/> takes precedence regardless of callback order.
     /// </summary>
     public void SetParallelLimiter(IParallelLimit parallelLimit)
     {
+        TestContext.ParallelLimiter = _explicitParallelLimiter ?? parallelLimit;
+    }
+
+    internal void SetExplicitParallelLimiter(IParallelLimit parallelLimit)
+    {
+        _explicitParallelLimiter = parallelLimit;
         TestContext.ParallelLimiter = parallelLimit;
     }
 
@@ -78,9 +86,8 @@ public class TestRegisteredContext
     /// </summary>
     /// <param name="executor">The executor a registration receiver has just installed.</param>
     /// <remarks>
-    /// An executor is neither an attribute, an argument nor the class instance, so the engine's
-    /// eligible-object pass cannot collect it: it comes into existence part-way through the dispatch of the
-    /// receivers that pass produced. An executor that is both an <see cref="ITestExecutor"/> and an
+    /// An executor installed during registration may not have been collected by the engine's
+    /// eligible-object pass. An executor that is both an <see cref="ITestExecutor"/> and an
     /// <see cref="IHookExecutor"/> arrives through two calls and is queued once.
     /// </remarks>
     private void QueueExecutorEventReceiver(object executor)
