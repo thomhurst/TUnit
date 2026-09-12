@@ -109,6 +109,30 @@ public class TimeoutHelperTests
     }
 
     [Test]
+    public async Task Independent_Operation_Cancellation_Is_Preserved_When_Timeout_Is_Also_Cancelled()
+    {
+        var operationToken = new CancellationToken(true);
+
+        var exception = await Assert.That(() => ExecuteWithControlledTimeoutAsync(
+                _ => Task.FromCanceled(operationToken), executionCompletesFirst: true))
+            .ThrowsExactly<TaskCanceledException>();
+
+        await Assert.That(exception!.CancellationToken).IsEqualTo(operationToken);
+    }
+
+    [Test]
+    public async Task Tokenless_Operation_Cancellation_Is_Preserved_When_Timeout_Is_Also_Cancelled()
+    {
+        var expected = new OperationCanceledException("Independent cancellation");
+
+        var exception = await Assert.That(() => ExecuteWithControlledTimeoutAsync(
+                _ => Task.FromException(expected), executionCompletesFirst: true))
+            .ThrowsExactly<OperationCanceledException>();
+
+        await Assert.That(exception).IsSameReferenceAs(expected);
+    }
+
+    [Test]
     public async Task Operation_Failure_Is_Preserved_Before_Timeout()
     {
         var expected = new InvalidOperationException("Operation failed");

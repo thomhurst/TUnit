@@ -85,7 +85,9 @@ internal static class TimeoutHelper
                 await executionTask.ConfigureAwait(false);
                 return;
             }
-            catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested)
+            catch (OperationCanceledException exception)
+                when (timeoutCts.IsCancellationRequested
+                    && exception.CancellationToken == timeoutCts.Token)
             {
                 // The operation can observe cancellation before the detection task wins WhenAny.
                 // Classify that cancellation through the same timeout/external-cancellation path.
