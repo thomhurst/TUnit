@@ -190,6 +190,46 @@ public class FlattenedExceptionTests
     }
 
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public void TestExecutionException_SingleFailure_DoesNotRepeatMessage(bool consoleWrapper)
+    {
+        var cause = Throw(() => new InvalidOperationException("test failure"));
+        var exception = Throw(() => new TestExecutionException(cause, [], []));
+        var reported = consoleWrapper ? new TestFailedException(exception) : exception;
+
+        var wrapped = FlattenedException.Wrap(reported);
+
+        wrapped.Message.ShouldBe(reported.Message);
+        wrapped.StackTrace!.ShouldContain("--- Inner exception stack trace (System.InvalidOperationException) ---");
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public void TestExecutionException_CombinedFailures_DoesNotRepeatMessages_PreservesDeeperCauses(bool consoleWrapper)
+    {
+        var cause = Throw(() => new InvalidOperationException("test failure",
+            Throw(() => new FormatException("root cause"))));
+        var hook = Throw(() => new AfterTestException("AfterTest hook failed: cleanup failure",
+            Throw(() => new ArgumentException("cleanup failure"))));
+        var receiver = Throw(() => new ApplicationException("receiver failure"));
+        var exception = Throw(() => new TestExecutionException(cause, [hook], [receiver]));
+        var reported = consoleWrapper ? new TestFailedException(exception) : exception;
+
+        var wrapped = FlattenedException.Wrap(reported);
+
+        wrapped.Message.ShouldBe(string.Join(Environment.NewLine,
+            reported.Message,
+            " ---> System.FormatException: root cause"));
+        wrapped.StackTrace!.ShouldContain("--- Inner exception stack trace (System.InvalidOperationException) ---");
+        wrapped.StackTrace!.ShouldContain("--- Inner exception stack trace (System.FormatException) ---");
+        wrapped.StackTrace!.ShouldContain("--- Inner exception stack trace (TUnit.Core.Exceptions.AfterTestException) ---");
+        wrapped.StackTrace!.ShouldContain("--- Inner exception stack trace (System.ArgumentException) ---");
+        wrapped.StackTrace!.ShouldContain("--- Inner exception stack trace (System.ApplicationException) ---");
+    }
+
+    [Test]
     public void RootAggregate_MembersListedEvenThoughAggregateMessageEmbedsThem()
     {
         var first = Throw(() => new InvalidOperationException("first"));

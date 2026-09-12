@@ -140,6 +140,7 @@ internal sealed class FlattenedException : TUnitFailedException
             or BeforeTestSessionException or BeforeTestDiscoveryException
             or AfterTestException or AfterClassException or AfterAssemblyException
             or AfterTestSessionException or AfterTestDiscoveryException
+            or TestExecutionException
             || (exception.GetType().FullName == "TUnit.Assertions.Exceptions.AssertionException"
                 && exception.InnerException is AggregateException))
         {
