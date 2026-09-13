@@ -122,7 +122,7 @@ namespace
     }
     public class RecordVideoAttribute : .TUnitAttribute, ., .
     {
-        public RecordVideoAttribute(string path = "playwright-artifacts/", int width = 1280, int height = 1400) { }
+        public RecordVideoAttribute(string path = "playwright-artifacts", int width = 1280, int height = 1400) { }
         public int Height { get; }
         public int Order { get; }
         public string Path { get; }

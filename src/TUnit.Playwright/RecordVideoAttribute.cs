@@ -7,6 +7,13 @@ namespace TUnit.Playwright;
 /// Enables Playwright video recording for the browser context created by <see cref="ContextTest"/>
 /// (and any test class that derives from it, such as <see cref="PageTest"/>).
 /// </summary>
+/// <param name="path">
+/// The directory that recorded videos are written to, resolved relative to the test
+/// application's working directory unless given as an absolute path. Defaults to
+/// <c>"playwright-artifacts"</c>.
+/// </param>
+/// <param name="width">The viewport width used for the recording, in pixels. Defaults to <c>1280</c>.</param>
+/// <param name="height">The viewport height used for the recording, in pixels. Defaults to <c>1400</c>.</param>
 /// <remarks>
 /// The recorded video is saved under <see cref="Path"/> once the browser context is closed.
 /// </remarks>
@@ -16,17 +23,17 @@ public class RecordVideoAttribute(string path = "playwright-artifacts", int widt
     internal const string StateBagKey = "TUnit.Playwright.RecordVideoAttribute";
 
     /// <summary>
-    /// The directory that recorded videos are written to. Defaults to <c>"playwright-artifacts/"</c>.
+    /// The directory that recorded videos are written to. Defaults to <c>"playwright-artifacts"</c>.
     /// </summary>
     public string Path { get; } = path;
 
     /// <summary>
-    /// The viewport width used for the recording. Defaults to <c>1280</c>.
+    /// The viewport width used for the recording, in pixels. Defaults to <c>1280</c>.
     /// </summary>
     public int Width { get; } = width;
 
     /// <summary>
-    /// The viewport height used for the recording. Defaults to <c>1400</c>.
+    /// The viewport height used for the recording, in pixels. Defaults to <c>1400</c>.
     /// </summary>
     public int Height { get; } = height;
 
