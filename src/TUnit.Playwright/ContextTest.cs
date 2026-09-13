@@ -27,10 +27,10 @@ public class ContextTest : BrowserTest
             recordVideo is not null)
         {
             // Never mutate TUnitPlaywrightSettings.Default.DefaultBrowserNewContextOptions in place:
-            // it is a shared singleton reused across every test, and BrowserNewContextOptions has no Clone().
+            // it is a shared singleton reused across every test.
             if (configuredDefault is not null)
             {
-                options = CloneOptions(configuredDefault);
+                options = new BrowserNewContextOptions(configuredDefault);
             }
 
             options.RecordVideoDir = string.IsNullOrEmpty(recordVideo.Path)
@@ -44,50 +44,6 @@ public class ContextTest : BrowserTest
         }
 
         return options;
-    }
-
-    private static BrowserNewContextOptions CloneOptions(BrowserNewContextOptions source)
-    {
-        return new BrowserNewContextOptions
-        {
-            AcceptDownloads = source.AcceptDownloads,
-            BaseURL = source.BaseURL,
-            BypassCSP = source.BypassCSP,
-            ClientCertificates = source.ClientCertificates,
-            ColorScheme = source.ColorScheme,
-            Contrast = source.Contrast,
-            DeviceScaleFactor = source.DeviceScaleFactor,
-            ExtraHTTPHeaders = source.ExtraHTTPHeaders,
-            ForcedColors = source.ForcedColors,
-            Geolocation = source.Geolocation,
-            HasTouch = source.HasTouch,
-            HttpCredentials = source.HttpCredentials,
-            IgnoreHTTPSErrors = source.IgnoreHTTPSErrors,
-            IsMobile = source.IsMobile,
-            JavaScriptEnabled = source.JavaScriptEnabled,
-            Locale = source.Locale,
-            Offline = source.Offline,
-            Permissions = source.Permissions,
-            Proxy = source.Proxy,
-            RecordHarContent = source.RecordHarContent,
-            RecordHarMode = source.RecordHarMode,
-            RecordHarOmitContent = source.RecordHarOmitContent,
-            RecordHarPath = source.RecordHarPath,
-            RecordHarUrlFilter = source.RecordHarUrlFilter,
-            RecordHarUrlFilterRegex = source.RecordHarUrlFilterRegex,
-            RecordHarUrlFilterString = source.RecordHarUrlFilterString,
-            RecordVideoDir = source.RecordVideoDir,
-            RecordVideoSize = source.RecordVideoSize,
-            ReducedMotion = source.ReducedMotion,
-            ScreenSize = source.ScreenSize,
-            ServiceWorkers = source.ServiceWorkers,
-            StorageState = source.StorageState,
-            StorageStatePath = source.StorageStatePath,
-            StrictSelectors = source.StrictSelectors,
-            TimezoneId = source.TimezoneId,
-            UserAgent = source.UserAgent,
-            ViewportSize = source.ViewportSize,
-        };
     }
 
     [Before(HookType.Test, "", 0)]
