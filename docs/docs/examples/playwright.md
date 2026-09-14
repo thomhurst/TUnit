@@ -125,13 +125,13 @@ This ensures at most 2 tests from this class run at the same time, preventing br
 
 ## Recording Videos
 
-Add `[RecordVideo]` to a test class (or an individual test) that inherits from `ContextTest` or `PageTest` to record a video of every browser context it creates:
+Add `[RecordVideo]` to an individual test in a class that inherits from `ContextTest` or `PageTest` to record a video of every browser context it creates. Applying it per-test, rather than to the whole class, keeps recording (and the disk space and overhead it costs) limited to the tests that actually need it - such as ones you're debugging or that are flaky:
 
 ```csharp
-[RecordVideo]
 public class LoginPageTests : PageTest
 {
     [Test]
+    [RecordVideo]
     public async Task Login_Button_Is_Visible()
     {
         await Page.GotoAsync("https://example.com/login");
@@ -148,10 +148,18 @@ Once the test finishes, its recording is renamed to match the test (and attempt,
 Pass constructor arguments to control where recordings are written and the viewport size used while recording:
 
 ```csharp
-[RecordVideo(path: "videos", width: 1920, height: 1080)]
 public class LoginPageTests : PageTest
 {
-    // ...
+    [Test]
+    [RecordVideo(path: "videos", width: 1920, height: 1080)]
+    public async Task Login_Button_Is_Visible()
+    {
+        await Page.GotoAsync("https://example.com/login");
+
+        var loginButton = Page.Locator("button#login");
+
+        await Assert.That(await loginButton.IsVisibleAsync()).IsTrue();
+    }
 }
 ```
 
