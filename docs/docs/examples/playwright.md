@@ -123,4 +123,40 @@ public class HeavyBrowserTests : PageTest
 
 This ensures at most 2 tests from this class run at the same time, preventing browser resource exhaustion.
 
+## Recording Videos
+
+Add `[RecordVideo]` to a test class (or an individual test) that inherits from `ContextTest` or `PageTest` to record a video of every browser context it creates:
+
+```csharp
+[RecordVideo]
+public class LoginPageTests : PageTest
+{
+    [Test]
+    public async Task Login_Button_Is_Visible()
+    {
+        await Page.GotoAsync("https://example.com/login");
+
+        var loginButton = Page.Locator("button#login");
+
+        await Assert.That(await loginButton.IsVisibleAsync()).IsTrue();
+    }
+}
+```
+
+Once the test finishes, its recording is renamed to match the test (and attempt, if the test was retried) and attached to the test result, so it's easy to find in CI output alongside a dozen other recordings.
+
+Pass constructor arguments to control where recordings are written and the viewport size used while recording:
+
+```csharp
+[RecordVideo(path: "videos", width: 1920, height: 1080)]
+public class LoginPageTests : PageTest
+{
+    // ...
+}
+```
+
+- `path` - directory recordings are written to, resolved relative to the test application's working directory unless given as an absolute path. Defaults to `"playwright-artifacts"`.
+- `width` - viewport width used for the recording, in pixels. Defaults to `1280`.
+- `height` - viewport height used for the recording, in pixels. Defaults to `1400`.
+
 For full Playwright API details, see the [Playwright for .NET documentation](https://playwright.dev/dotnet/).
