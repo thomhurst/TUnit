@@ -29,6 +29,10 @@ public class BrowserTest : PlaywrightTest
     public virtual bool PropagateTraceContext => true;
 
     private readonly List<IBrowserContext> _contexts = [];
+    // Tracks every page ever opened in a context this test created, including ones closed
+    // before teardown - IBrowserContext.Pages drops a page as soon as it closes, which would
+    // otherwise lose the video of a page closed early to flush its recording.
+    private readonly List<IPage> _pages = [];
     private readonly Lock _contextsLock = new();
     private readonly BrowserTypeLaunchOptions _options;
 
@@ -37,12 +41,22 @@ public class BrowserTest : PlaywrightTest
         options = PlaywrightTelemetryHeaders.Merge(options, PropagateTraceContext);
         var context = await Browser.NewContextAsync(options).ConfigureAwait(false);
 
+        context.Page += OnContextPage;
+
         lock (_contextsLock)
         {
             _contexts.Add(context);
         }
 
         return context;
+    }
+
+    private void OnContextPage(object? sender, IPage page)
+    {
+        lock (_contextsLock)
+        {
+            _pages.Add(page);
+        }
     }
 
     [Before(HookType.Test, "", 0)]
@@ -61,11 +75,19 @@ public class BrowserTest : PlaywrightTest
     public async Task BrowserTearDown(TestContext testContext)
     {
         List<IBrowserContext> contextsSnapshot;
+        List<IPage> pagesSnapshot;
 
         lock (_contextsLock)
         {
             contextsSnapshot = [.. _contexts];
             _contexts.Clear();
+            pagesSnapshot = [.. _pages];
+            _pages.Clear();
+        }
+
+        foreach (var context in contextsSnapshot)
+        {
+            context.Page -= OnContextPage;
         }
 
         // IVideo.PathAsync() only resolves its final path once the recording is flushed to
@@ -76,16 +98,17 @@ public class BrowserTest : PlaywrightTest
         // TestContext is still the one executing - late enough that the file is finished,
         // but before this test reports its result, so the renamed file attaches to this
         // test's own result rather than becoming a run-wide artifact.
+        //
+        // Pages are read from the tracked list rather than IBrowserContext.Pages, which
+        // drops a page - and its video - the moment the page closes; closing a page before
+        // teardown is an established way to flush its recording early.
         var videos = new List<IVideo>();
 
-        foreach (var context in contextsSnapshot)
+        foreach (var page in pagesSnapshot)
         {
-            foreach (var page in context.Pages)
+            if (page.Video is { } video)
             {
-                if (page.Video is { } video)
-                {
-                    videos.Add(video);
-                }
+                videos.Add(video);
             }
         }
 
