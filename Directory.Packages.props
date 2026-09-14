@@ -4,7 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Grpc.Core.Api" Version="2.83.0" />
-    <PackageVersion Include="MassTransit" Version="9.2.1" />
+    <PackageVersion Include="MassTransit" Version="9.2.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.1.0" />
     <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.13" />
