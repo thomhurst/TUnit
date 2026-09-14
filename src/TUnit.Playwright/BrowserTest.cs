@@ -167,13 +167,23 @@ public class BrowserTest : PlaywrightTest
                 var suffix = videos.Count > 1 ? $"-{i + 1}" : string.Empty;
                 var target = Path.Combine(directory, $"{baseName}{suffix}.webm");
 
-                // Last-resort de-duplication in case a target name is somehow already taken.
-                for (var n = 2; File.Exists(target); n++)
+                // File.Move throws if the target already exists, so retry with an
+                // incremented counter on that specific failure instead of checking
+                // existence beforehand - a concurrently running test could create the
+                // target between such a check and the move, and a pre-check alone
+                // wouldn't catch that race.
+                for (var n = 2; ; n++)
                 {
-                    target = Path.Combine(directory, $"{baseName}{suffix}-{n}.webm");
+                    try
+                    {
+                        File.Move(sourcePath, target);
+                        break;
+                    }
+                    catch (IOException) when (File.Exists(target) && n < 1000)
+                    {
+                        target = Path.Combine(directory, $"{baseName}{suffix}-{n}.webm");
+                    }
                 }
-
-                File.Move(sourcePath, target);
 
                 testContext.Output.AttachArtifact(target, Path.GetFileName(target), "Playwright video recording");
             }
