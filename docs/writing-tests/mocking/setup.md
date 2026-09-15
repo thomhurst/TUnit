@@ -444,4 +444,6 @@ mock.Process(Any())
 
 The typed `.Raises{EventName}()` methods provide IntelliSense and compile-time safety for event parameters. The string-based `.Raises(eventName, args)` overload is also available.
 
+Events with stack-only (`ref struct`) or by-reference (`ref`, `in`, or `out`) arguments use immediate `Raise{EventName}()` calls. Deferred `.Raises{EventName}()` helpers are not generated for these events. Use a `.Callback(...)` that creates fresh arguments instead; see [events with stack-only or by-reference arguments](/docs/writing-tests/mocking/advanced.md#events-with-stack-only-or-by-reference-arguments).
+
 See [Advanced Features](/docs/writing-tests/mocking/advanced.md) for details on events and state machines.

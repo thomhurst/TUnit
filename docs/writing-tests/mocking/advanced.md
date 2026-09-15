@@ -43,9 +43,25 @@ mock.RaiseOnMessage("Hello!");
 Trigger an event automatically when a method is called using the typed `.Raises{EventName}()` method on a setup chain:
 
 ```
+public interface IMessageConnection
+
+{
+
+    event EventHandler<string>? OnMessage;
+
+    void SendMessage(string message);
+
+}
+
+
+
+// Usage
+
+var mock = Mock.Of<IMessageConnection>();
+
 mock.SendMessage(Any())
 
-    .RaisesOnMessage(mock.Object, "echo");
+    .RaisesOnMessage("echo");
 
 
 
@@ -55,6 +71,62 @@ mock.Object.SendMessage("test");
 ```
 
 The typed raise methods are generated per-event with correct parameter types, giving you IntelliSense and compile-time safety. The string-based `.Raises(eventName, args)` overload is still available for dynamic scenarios.
+
+### Events with Stack-Only or By-Reference Arguments[​](#events-with-stack-only-or-by-reference-arguments "Direct link to Events with Stack-Only or By-Reference Arguments")
+
+Immediate `Raise{EventName}()` calls support `ref struct` arguments, including `Span<T>` and `ReadOnlySpan<T>`, without boxing. On .NET 10 and later, this also works with `EventHandler<TEventArgs>` when `TEventArgs` is a ref struct:
+
+```
+public readonly ref struct Payload(int value)
+
+{
+
+    public int Value { get; } = value;
+
+}
+
+
+
+public interface IPayloadSource
+
+{
+
+    event EventHandler<Payload>? Changed;
+
+    void Poll();
+
+}
+
+
+
+// Usage
+
+var mock = Mock.Of<IPayloadSource>();
+
+var received = 0;
+
+mock.Object.Changed += (_, payload) => received = payload.Value;
+
+
+
+mock.RaiseChanged(new Payload(42));
+
+Console.WriteLine(received); // 42
+
+
+
+// Create fresh arguments when the configured method runs.
+
+mock.Poll().Callback(() => mock.RaiseChanged(new Payload(99)));
+
+mock.Object.Poll();
+
+Console.WriteLine(received); // 99
+```
+
+Custom delegates retain their `ref`, `in`, and `out` modifiers in generated raise methods. Pass the same modifier when raising the event, such as `mock.RaiseChanged(ref payload)`. Changes to `ref` arguments reach the caller and later subscribers. An `out` argument receives the last subscriber's value, or `default` when no subscribers exist. Generic event parameters with `where T : allows ref struct` also use typed dispatch.
+
+Deferred `.Raises{EventName}(args)` helpers are not generated for stack-only or by-reference arguments: a setup cannot retain a stack-only value or a reference to the caller's variable. Use `.Callback(...)` as above, creating arguments inside the callback. Do not capture a ref struct local from outside the callback. The string-based boxed dispatch cannot raise these events and throws `NotSupportedException`.
 
 ### Event Subscription Tracking[​](#event-subscription-tracking "Direct link to Event Subscription Tracking")
 
