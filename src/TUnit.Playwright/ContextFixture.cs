@@ -9,12 +9,16 @@ namespace TUnit.Playwright;
 /// Authoring a new fixture class is the way to change that scope — attribute arguments on
 /// inherited <c>init</c> properties cannot be overridden.
 /// </summary>
-public class ContextFixture : IAsyncInitializer, IAsyncDisposable
+public class ContextFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptInitializer
 {
+    private readonly PlaywrightFixtureLifecycle _lifecycle = new();
+    private IBrowserContext? _context;
+    private PlaywrightVideoRecorder? _recording;
+
     [ClassDataSource<BrowserFixture>(Shared = SharedType.PerTestSession)]
     public required BrowserFixture BrowserFixture { get; init; }
 
-    public IBrowserContext Context { get; private set; } = null!;
+    public IBrowserContext Context => _context!;
 
     /// <summary>
     /// Returns the options used when creating each <see cref="IBrowserContext"/>. Defaults
@@ -24,10 +28,7 @@ public class ContextFixture : IAsyncInitializer, IAsyncDisposable
     /// (<c>new BrowserNewContextOptions()</c>).
     /// </summary>
     protected virtual BrowserNewContextOptions GetContextOptions() =>
-        TUnitPlaywrightSettings.Default.DefaultBrowserNewContextOptions ?? new BrowserNewContextOptions
-        {
-            Locale = "en-US", ColorScheme = ColorScheme.Light,
-        };
+        PlaywrightContextOptions.Defaults();
 
     /// <summary>
     /// When <c>true</c>, seeds the context with W3C trace propagation headers from
@@ -37,15 +38,31 @@ public class ContextFixture : IAsyncInitializer, IAsyncDisposable
 
     public virtual async Task InitializeAsync()
     {
-        var options = PlaywrightTelemetryHeaders.Merge(GetContextOptions(), PropagateTraceContext);
-        Context = await BrowserFixture.Browser.NewContextAsync(options).ConfigureAwait(false);
+        var owner = TestContext.Current;
+        _recording = null;
+        var options = PlaywrightContextOptions.ApplyRecording(GetContextOptions(), owner);
+        options = PlaywrightTelemetryHeaders.Merge(options, PropagateTraceContext);
+        _context = await BrowserFixture.Browser.NewContextAsync(options).ConfigureAwait(false);
+        _recording = !string.IsNullOrEmpty(options.RecordVideoDir) && owner is not null
+            ? new PlaywrightVideoRecorder(_context, owner)
+            : null;
     }
+
+    bool ITestAttemptInitializer.IsInitialized => _lifecycle.IsInitialized;
+
+    async ValueTask ITestAttemptInitializer.InitializeForTestAttemptAsync(TestContext context, CancellationToken cancellationToken) =>
+        await _lifecycle.InitializeAsync(this, context).WaitAsync(cancellationToken).ConfigureAwait(false);
 
     public virtual async ValueTask DisposeAsync()
     {
-        if (Context is not null)
+        if (_recording is { } recording)
         {
-            await Context.CloseAsync().ConfigureAwait(false);
+            await recording.CloseAsync().ConfigureAwait(false);
+            _context = null;
+        }
+        else if (Interlocked.Exchange(ref _context, null) is { } context)
+        {
+            await context.CloseAsync().ConfigureAwait(false);
         }
     }
 }

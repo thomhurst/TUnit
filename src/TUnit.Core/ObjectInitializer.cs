@@ -54,6 +54,11 @@ internal static class ObjectInitializer
     /// <param name="cancellationToken">Cancellation token.</param>
     internal static ValueTask InitializeAsync(object? obj, CancellationToken cancellationToken = default)
     {
+        if (obj is ITestAttemptInitializer attemptInitializer && TestContext.Current is { } context)
+        {
+            return attemptInitializer.InitializeForTestAttemptAsync(context, cancellationToken);
+        }
+
         if (obj is not IAsyncInitializer asyncInitializer)
         {
             return default;
@@ -73,6 +78,11 @@ internal static class ObjectInitializer
     /// </remarks>
     internal static bool IsInitialized(object? obj)
     {
+        if (obj is ITestAttemptInitializer attemptInitializer)
+        {
+            return attemptInitializer.IsInitialized;
+        }
+
         if (obj is not IAsyncInitializer)
         {
             return false;

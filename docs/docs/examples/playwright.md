@@ -125,7 +125,7 @@ This ensures at most 2 tests from this class run at the same time, preventing br
 
 ## Recording Videos
 
-Add `[RecordVideo]` to an individual test in a class that inherits from `ContextTest` or `PageTest` to record a video of every browser context it creates. Applying it per-test, rather than to the whole class, keeps recording (and the disk space and overhead it costs) limited to the tests that actually need it - such as ones you're debugging or that are flaky:
+Add `[RecordVideo]` to an individual test that inherits from `ContextTest` or `PageTest`, or uses per-test `ContextFixture` or `PageFixture` instances. Recording is enabled only for the selected test methods:
 
 ```csharp
 public class LoginPageTests : PageTest
@@ -145,7 +145,29 @@ public class LoginPageTests : PageTest
 
 Once the test finishes, its recording is renamed to match the test (and attempt, if the test was retried) and attached to the test result, so it's easy to find in CI output alongside a dozen other recordings.
 
-`[RecordVideo]` supports test methods in classes derived from `ContextTest` or `PageTest` only. It does not support the composition API (`ContextFixture` or `PageFixture`); using it without a supported base class produces a discovery error. For fixture-based tests, override `ContextFixture.GetContextOptions()` to configure Playwright's `RecordVideoDir` and manage video artifacts explicitly.
+The same attribute works with composition:
+
+```csharp
+public class CheckoutTests
+{
+    [ClassDataSource<PageFixture>]
+    public required PageFixture BrowserPage { get; init; }
+
+    [Test]
+    [RecordVideo]
+    public async Task Checkout_Page_Is_Visible()
+    {
+        await BrowserPage.Page.GotoAsync("https://example.com");
+        await Assert.That(await BrowserPage.Page.Locator("body").IsVisibleAsync()).IsTrue();
+    }
+}
+```
+
+Keep `ContextFixture` and `PageFixture` private to each test with their default `SharedType.None`. The underlying `BrowserFixture` can still be shared. Recording fixtures shared between tests are rejected because their videos cannot be attributed reliably to one test.
+
+With `[RecordVideo]`, each retry gets fresh contexts and pages before setup hooks run. Recordings are finalized after teardown hooks and attached with the attempt number. Multiple page fixtures and pages closed early are supported. Without the attribute, fixtures retain their normal lifetime across retries.
+
+Overrides of `ContextFixture.GetContextOptions()` retain their custom options; recording settings are applied to a copy. If overriding fixture initialization or disposal, call the base implementation to preserve recording and cleanup.
 
 Pass constructor arguments to control where recordings are written and the viewport size used while recording:
 

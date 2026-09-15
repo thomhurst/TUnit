@@ -72,6 +72,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     private static Counter GetOrCreateCounter(object obj) =>
         s_trackedObjects.GetOrAdd(obj, static _ => new Counter());
 
+    internal static bool IsShared(object obj) =>
+        s_trackedObjects.TryGetValue(obj, out var counter) && counter.CurrentCount > 1;
+
     /// <summary>
     /// Counts total tracked objects across all depth levels without allocating a new collection.
     /// </summary>
