@@ -1,9 +1,15 @@
 using System;
+using System.Linq;
 
 namespace TUnit.Mocks.SourceGenerator.Models;
 
 internal sealed record MockEventModel : IEquatable<MockEventModel>
 {
+    public bool HasRefStructParams => RaiseParameterList.Any(p => p.IsRefStruct);
+
+    public bool RequiresTypedRaise => HasRefStructParams
+        || RaiseParameterList.Any(p => p.Direction != ParameterDirection.In);
+
     public string Name { get; init; } = "";
     /// <summary>
     /// The fully qualified event handler type, with nullable annotations

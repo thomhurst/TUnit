@@ -8,6 +8,23 @@ namespace TUnit.Mocks.SourceGenerator.Extensions;
 
 internal static class MethodSymbolExtensions
 {
+    // Light up the Roslyn 4.12+ API while retaining compatibility with older compiler hosts.
+    // Cache an open delegate so symbol discovery does not perform reflection per parameter.
+    private static readonly System.Func<ITypeParameterSymbol, bool>? AllowsRefLikeTypeGetter =
+        CreateAllowsRefLikeTypeGetter();
+
+    private static System.Func<ITypeParameterSymbol, bool>? CreateAllowsRefLikeTypeGetter()
+    {
+        var getter = typeof(ITypeParameterSymbol).GetProperty("AllowsRefLikeType")?.GetMethod;
+        return getter is null
+            ? null
+            : System.Delegate.CreateDelegate(typeof(System.Func<ITypeParameterSymbol, bool>), getter,
+                throwOnBindFailure: false) as System.Func<ITypeParameterSymbol, bool>;
+    }
+
+    public static bool AllowsRefStruct(this ITypeParameterSymbol typeParam)
+        => AllowsRefLikeTypeGetter?.Invoke(typeParam) == true;
+
     public static ParameterDirection GetParameterDirection(this IParameterSymbol param)
     {
         return param.RefKind switch
@@ -25,7 +42,8 @@ internal static class MethodSymbolExtensions
         !typeParam.HasUnmanagedTypeConstraint &&
         !typeParam.HasNotNullConstraint &&
         typeParam.ConstraintTypes.Length == 0 &&
-        !typeParam.HasConstructorConstraint;
+        !typeParam.HasConstructorConstraint &&
+        !typeParam.AllowsRefStruct();
 
     public static string GetGenericConstraints(this ITypeParameterSymbol typeParam)
     {
@@ -52,6 +70,9 @@ internal static class MethodSymbolExtensions
 
         if (typeParam.HasConstructorConstraint)
             constraints.Add("new()");
+
+        if (typeParam.AllowsRefStruct())
+            constraints.Add("allows ref struct");
 
         return string.Join(", ", constraints);
     }
