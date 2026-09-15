@@ -130,6 +130,13 @@ internal sealed class EventReceiverOrchestrator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ValueTask InvokeTestStartEventReceiversAsync(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage = null)
     {
+#if !NET
+        // Older targets have no Stage property: every receiver belongs to the late stage.
+        if (stage == EventReceiverStage.Early)
+        {
+            return default;
+        }
+#endif
         // Fast path - no allocation if no receivers
         if (!_registry.HasTestStartReceivers())
         {
@@ -178,6 +185,12 @@ internal sealed class EventReceiverOrchestrator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ValueTask<IReadOnlyList<Exception>> InvokeTestEndEventReceiversAsync(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage = null)
     {
+#if !NET
+        if (stage == EventReceiverStage.Early)
+        {
+            return new ValueTask<IReadOnlyList<Exception>>([]);
+        }
+#endif
         if (!_registry.HasTestEndReceivers())
         {
             return new ValueTask<IReadOnlyList<Exception>>([]);

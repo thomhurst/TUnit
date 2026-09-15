@@ -14,7 +14,7 @@ public class BrowserFixture : IAsyncInitializer, IAsyncDisposable
     [ClassDataSource<PlaywrightFixture>(Shared = SharedType.PerTestSession)]
     public required PlaywrightFixture PlaywrightFixture { get; init; }
 
-    public IBrowser Browser { get; private set; } = null!;
+    public IBrowser Browser { get; internal set; } = null!;
 
     public virtual string BrowserName => Microsoft.Playwright.BrowserType.Chromium;
 

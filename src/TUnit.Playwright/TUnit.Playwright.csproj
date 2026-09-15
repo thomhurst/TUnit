@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Playwright" />
+    <InternalsVisibleTo Include="TUnit.UnitTests" Key="$(PublicKey)" />
   </ItemGroup>
 
   <ItemGroup>

@@ -10,23 +10,38 @@ namespace TUnit.Playwright;
 /// properties on the same test class therefore yield two isolated browser contexts while
 /// sharing the underlying <see cref="BrowserFixture"/> at <see cref="SharedType.PerTestSession"/>.
 /// </summary>
-public class PageFixture : IAsyncInitializer, IAsyncDisposable
+public class PageFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptInitializer
 {
+    private readonly PlaywrightFixtureLifecycle _lifecycle = new();
+    private IPage? _page;
+
     [ClassDataSource<ContextFixture>]
     public required ContextFixture ContextFixture { get; init; }
 
-    public IPage Page { get; private set; } = null!;
+    public IPage Page => _page!;
 
     public virtual async Task InitializeAsync()
     {
-        Page = await ContextFixture.Context.NewPageAsync().ConfigureAwait(false);
+        // Preserve explicitly initialized contexts while allowing retries to recreate one.
+        if (ContextFixture.Context is null)
+        {
+            await ObjectInitializer.InitializeAsync(ContextFixture).ConfigureAwait(false);
+        }
+        var context = ContextFixture.Context
+            ?? throw new InvalidOperationException("ContextFixture did not create a browser context during initialization.");
+        _page = await context.NewPageAsync().ConfigureAwait(false);
     }
+
+    bool ITestAttemptInitializer.IsInitialized => _lifecycle.IsInitialized;
+
+    async ValueTask ITestAttemptInitializer.InitializeForTestAttemptAsync(TestContext context, CancellationToken cancellationToken) =>
+        await _lifecycle.InitializeAsync(this, context).WaitAsync(cancellationToken).ConfigureAwait(false);
 
     public virtual async ValueTask DisposeAsync()
     {
-        if (Page is not null)
+        if (Interlocked.Exchange(ref _page, null) is { } page)
         {
-            await Page.CloseAsync().ConfigureAwait(false);
+            await page.CloseAsync().ConfigureAwait(false);
         }
     }
 }
