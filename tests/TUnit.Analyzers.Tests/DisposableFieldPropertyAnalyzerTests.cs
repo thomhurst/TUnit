@@ -5,6 +5,83 @@ namespace TUnit.Analyzers.Tests;
 public class DisposableFieldPropertyAnalyzerTests
 {
     [Test]
+    [MatrixDataSource]
+    public async Task Boxing_Dispose_Flags_Issue(
+        [Matrix("((IDisposable)obj).Dispose(); return default;",
+            "((IDisposable)obj)?.Dispose(); return default;",
+            "(obj as IDisposable)?.Dispose(); return default;",
+            "((IDisposable)(object)obj).Dispose(); return default;",
+            "return ((IAsyncDisposable)obj).DisposeAsync();",
+            "return ((IAsyncDisposable)obj)?.DisposeAsync() ?? default;",
+            "return (obj as IAsyncDisposable)?.DisposeAsync() ?? default;",
+            "return ((IAsyncDisposable)(object)obj).DisposeAsync();")]
+        string cleanup,
+        [Matrix(false, true)] bool useProperty)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            struct Resource : IDisposable, IAsyncDisposable
+            {
+                public bool IsDisposed { get; private set; }
+                public void Dispose() => IsDisposed = true;
+                public ValueTask DisposeAsync() { Dispose(); return default; }
+            }
+
+            public sealed class MyTest : IAsyncDisposable
+            {
+                {{(useProperty ? "Resource {|#0:obj|} { get; }" : "Resource {|#0:obj|};")}}
+
+                public MyTest() => obj = new Resource();
+                public ValueTask DisposeAsync() { {{cleanup}} }
+
+                [Test]
+                public void Test() { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.Dispose_Member_In_Cleanup).WithLocation(0).WithArguments("obj"));
+    }
+
+    [Test]
+    [MatrixDataSource]
+    public async Task Unboxing_Dispose_Flags_Issue(
+        [Matrix("((Resource)obj).Dispose(); return default;", "return ((Resource)obj).DisposeAsync();")]
+        string cleanup,
+        [Matrix(false, true)] bool useProperty)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            interface IResource : IDisposable, IAsyncDisposable { }
+
+            struct Resource : IResource
+            {
+                public bool IsDisposed { get; private set; }
+                public void Dispose() => IsDisposed = true;
+                public ValueTask DisposeAsync() { Dispose(); return default; }
+            }
+
+            public sealed class MyTest : IAsyncDisposable
+            {
+                {{(useProperty ? "IResource {|#0:obj|} { get; }" : "IResource {|#0:obj|};")}}
+
+                public MyTest() => obj = new Resource();
+                public ValueTask DisposeAsync() { {{cleanup}} }
+
+                [Test]
+                public void Test() { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.Dispose_Member_In_Cleanup).WithLocation(0).WithArguments("obj"));
+    }
+
+    [Test]
     public async Task Explicit_IDisposable_Implementation_No_Issue_When_Disposed_Through_Cast()
     {
         await Verifier.VerifyAnalyzerAsync(

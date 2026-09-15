@@ -319,8 +319,10 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             operation = (parent as IConditionalAccessOperation)?.Operation;
         }
 
-        // User-defined conversions can return a different object, so only unwrap built-in conversions.
-        while (operation is IConversionOperation { OperatorMethod: null } conversion)
+        // Boxing and unboxing dispose a copy; user-defined conversions can return another object.
+        // Only unwrap identity and reference conversions.
+        while (operation is IConversionOperation { OperatorMethod: null } conversion
+               && (conversion.Conversion.IsIdentity || conversion.Conversion.IsReference))
         {
             operation = conversion.Operand;
         }
