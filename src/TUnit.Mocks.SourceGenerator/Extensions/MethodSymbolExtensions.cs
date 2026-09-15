@@ -11,9 +11,16 @@ internal static class MethodSymbolExtensions
     // Light up the Roslyn 4.12+ API while retaining compatibility with older compiler hosts.
     // Cache an open delegate so symbol discovery does not perform reflection per parameter.
     private static readonly System.Func<ITypeParameterSymbol, bool>? AllowsRefLikeTypeGetter =
-        (System.Func<ITypeParameterSymbol, bool>?)typeof(ITypeParameterSymbol)
-            .GetProperty("AllowsRefLikeType")?.GetMethod?
-            .CreateDelegate(typeof(System.Func<ITypeParameterSymbol, bool>));
+        CreateAllowsRefLikeTypeGetter();
+
+    private static System.Func<ITypeParameterSymbol, bool>? CreateAllowsRefLikeTypeGetter()
+    {
+        var getter = typeof(ITypeParameterSymbol).GetProperty("AllowsRefLikeType")?.GetMethod;
+        return getter is null
+            ? null
+            : System.Delegate.CreateDelegate(typeof(System.Func<ITypeParameterSymbol, bool>), getter,
+                throwOnBindFailure: false) as System.Func<ITypeParameterSymbol, bool>;
+    }
 
     public static bool AllowsRefStruct(this ITypeParameterSymbol typeParam)
         => AllowsRefLikeTypeGetter?.Invoke(typeParam) == true;

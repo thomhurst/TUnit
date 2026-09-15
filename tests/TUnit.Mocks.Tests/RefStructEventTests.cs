@@ -43,8 +43,8 @@ public class RefStructEventTests
     [Test]
     public async Task AntiConstrained_Generic_Event_Accepts_RefStruct_And_Boxable_Arguments()
     {
-        var stackOnly = Mock.Of<IAntiConstrained<Payload>>();
-        var boxable = Mock.Of<IAntiConstrained<int>>();
+        var stackOnly = IAntiConstrained<Payload>.Mock();
+        var boxable = IAntiConstrained<int>.Mock();
         var received = 0;
         stackOnly.Object.AntiConstrainedChanged += value => received += value.Value;
         boxable.Object.AntiConstrainedChanged += value => received += value;
@@ -248,7 +248,7 @@ public class RefStructEventTests
     public async Task Inherited_And_Generic_Events_Can_Be_Raised()
     {
         var inherited = Mock.Of<IInherited>();
-        var generic = Mock.Of<IGeneric<int>>();
+        var generic = IGeneric<int>.Mock();
         var received = 0;
         inherited.Object.Changed += e => received += e.Value;
         generic.Object.Generic += values => received += values[0];
