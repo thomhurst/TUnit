@@ -77,6 +77,14 @@ internal enum ParameterDirection
 
 internal static class ParameterDirectionExtensions
 {
+    public static string KeywordPrefix(this ParameterDirection direction) => direction switch
+    {
+        ParameterDirection.Out => "out ",
+        ParameterDirection.Ref => "ref ",
+        ParameterDirection.In_Readonly => "in ",
+        _ => ""
+    };
+
     /// <summary>Lower-case C# keyword for an out/ref direction. Only valid when <paramref name="d"/> is Out or Ref.</summary>
     public static string RefKeyword(this ParameterDirection d) => d == ParameterDirection.Out ? "out" : "ref";
 

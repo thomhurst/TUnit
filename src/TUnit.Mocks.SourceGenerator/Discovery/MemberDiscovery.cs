@@ -1035,7 +1035,7 @@ internal static class MemberDiscovery
             // EventHandler pattern: skip sender (first param), expose remaining as raise params
             var argsParams = invokeMethod.Parameters.Skip(1).ToArray();
             raiseParameters = string.Join(", ", argsParams.Select(p => $"{p.Type.GetFullyQualifiedName()} {EscapeIdentifier(p.Name)}"));
-            invokeArgs = "this, " + string.Join(", ", argsParams.Select(p => EscapeIdentifier(p.Name)));
+            invokeArgs = "this, " + string.Join(", ", argsParams.Select(p => p.GetParameterDirection().KeywordPrefix() + EscapeIdentifier(p.Name)));
             eventArgsType = argsParams.Length == 1
                 ? argsParams[0].Type.GetFullyQualifiedName()
                 : raiseParameters; // fallback for multi-arg EventHandler subtypes
@@ -1045,7 +1045,7 @@ internal static class MemberDiscovery
         {
             // Custom delegate (Action<T>, Func<T>, user-defined): expose all params
             raiseParameters = string.Join(", ", invokeMethod.Parameters.Select(p => $"{p.Type.GetFullyQualifiedName()} {EscapeIdentifier(p.Name)}"));
-            invokeArgs = string.Join(", ", invokeMethod.Parameters.Select(p => EscapeIdentifier(p.Name)));
+            invokeArgs = string.Join(", ", invokeMethod.Parameters.Select(p => p.GetParameterDirection().KeywordPrefix() + EscapeIdentifier(p.Name)));
             eventArgsType = raiseParameters;
             raiseParams = invokeMethod.Parameters.ToArray();
         }
@@ -1056,8 +1056,8 @@ internal static class MemberDiscovery
                 Name = EscapeIdentifier(p.Name),
                 FullyQualifiedType = p.Type.GetFullyQualifiedNameWithNullability(),
                 Type = p.Type.GetMinimallyQualifiedNameWithNullability(),
-                Direction = ParameterDirection.In,
-                IsRefStruct = p.Type.IsRefLikeType
+                Direction = p.GetParameterDirection(),
+                IsRefStruct = p.Type.IsRefLikeType || p.Type is ITypeParameterSymbol typeParam && typeParam.AllowsRefStruct()
             }).ToImmutableArray());
 
         return new MockEventModel

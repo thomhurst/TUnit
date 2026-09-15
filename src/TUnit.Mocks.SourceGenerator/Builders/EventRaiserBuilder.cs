@@ -8,10 +8,10 @@ namespace TUnit.Mocks.SourceGenerator.Builders;
 /// Each event uses its primary or secondary surface's identity so the same raise extension
 /// works with single-type, multi-type, partial, and wrap mocks.
 /// </summary>
-internal static class RefStructEventBuilder
+internal static class EventRaiserBuilder
 {
     private static bool NeedsInterface(MockEventModel evt)
-        => evt.HasRefStructParams && evt.IsSignatureAccessibleFromAssembly && !evt.IsStaticAbstract;
+        => evt.RequiresTypedRaise && evt.IsSignatureAccessibleFromAssembly && !evt.IsStaticAbstract;
 
     public static string GetInterfaceName(MockTypeModel model, MockEventModel evt)
     {
@@ -35,10 +35,10 @@ internal static class RefStructEventBuilder
         => string.Concat(model.Events.Where(NeedsInterface).Select(evt => ", " + GetInterfaceType(model, evt)));
 
     public static string GetParameters(MockEventModel evt)
-        => string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
+        => string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.Direction.KeywordPrefix()}{p.FullyQualifiedType} {p.Name}"));
 
     public static string GetArguments(MockEventModel evt)
-        => string.Join(", ", evt.RaiseParameterList.Select(p => p.Name));
+        => string.Join(", ", evt.RaiseParameterList.Select(p => p.Direction.KeywordPrefix() + p.Name));
 
     public static void EmitInterfaces(CodeWriter writer, MockTypeModel model)
     {

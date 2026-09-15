@@ -19,6 +19,8 @@ public sealed class IEventsMock : global::TUnit.Mocks.Mock<global::IEvents>, glo
 
     event global::BufferHandler? global::IEvents.Buffered { add => Object.Buffered += value; remove => Object.Buffered -= value; }
 
+    event global::UpdateHandler? global::IEvents.Updated { add => Object.Updated += value; remove => Object.Updated -= value; }
+
     event global::System.EventHandler<string>? global::IEvents.Ordinary { add => Object.Ordinary += value; remove => Object.Ordinary -= value; }
 }
 
@@ -54,6 +56,9 @@ namespace TUnit.Mocks.Generated
             public global::TUnit.Mocks.EventSubscriptionAccessor Buffered
                 => new(events.Engine, "Buffered");
 
+            public global::TUnit.Mocks.EventSubscriptionAccessor Updated
+                => new(events.Engine, "Updated");
+
             public global::TUnit.Mocks.EventSubscriptionAccessor Ordinary
                 => new(events.Engine, "Ordinary");
         }
@@ -67,7 +72,7 @@ namespace TUnit.Mocks.Generated
 #pragma warning disable
 #nullable enable
 
-file sealed class IEventsMockImpl : global::IEvents, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject, global::TUnit.Mocks.Generated.IEvents_Changed_Raiser, global::TUnit.Mocks.Generated.IEvents_Buffered_Raiser
+file sealed class IEventsMockImpl : global::IEvents, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject, global::TUnit.Mocks.Generated.IEvents_Changed_Raiser, global::TUnit.Mocks.Generated.IEvents_Buffered_Raiser, global::TUnit.Mocks.Generated.IEvents_Updated_Raiser
 {
     private readonly global::TUnit.Mocks.MockEngine<global::IEvents> _engine;
 
@@ -117,6 +122,21 @@ file sealed class IEventsMockImpl : global::IEvents, global::TUnit.Mocks.IRaisab
         _backing_Buffered?.Invoke(name, bytes, payload);
     }
 
+    private global::UpdateHandler? _backing_Updated;
+
+    public event global::UpdateHandler? Updated
+    {
+        add { _backing_Updated += value; _engine.RecordEventSubscription("Updated", true); }
+        remove { _backing_Updated -= value; _engine.RecordEventSubscription("Updated", false); }
+    }
+
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    internal void Raise_Updated(ref global::Payload payload, in global::System.ReadOnlySpan<byte> bytes, out global::Payload result)
+    {
+        result = default!;
+        _backing_Updated?.Invoke(ref payload, in bytes, out result);
+    }
+
     private global::System.EventHandler<string>? _backing_Ordinary;
 
     public event global::System.EventHandler<string>? Ordinary
@@ -135,6 +155,8 @@ file sealed class IEventsMockImpl : global::IEvents, global::TUnit.Mocks.IRaisab
 
     void global::TUnit.Mocks.Generated.IEvents_Buffered_Raiser.Raise(string name, global::System.ReadOnlySpan<byte> bytes, global::Payload payload) => Raise_Buffered(name, bytes, payload);
 
+    void global::TUnit.Mocks.Generated.IEvents_Updated_Raiser.Raise(ref global::Payload payload, in global::System.ReadOnlySpan<byte> bytes, out global::Payload result) => Raise_Updated(ref payload, in bytes, out result);
+
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     public void RaiseEvent(string eventName, object? args)
     {
@@ -147,6 +169,10 @@ file sealed class IEventsMockImpl : global::IEvents, global::TUnit.Mocks.IRaisab
             case "Buffered":
                 {
                     throw new global::System.NotSupportedException("Event 'Buffered' has ref struct parameters and cannot be raised with boxed arguments.");
+                }
+            case "Updated":
+                {
+                    throw new global::System.NotSupportedException("Event 'Updated' has ref struct parameters and cannot be raised with boxed arguments.");
                 }
             case "Ordinary":
                 {
@@ -206,6 +232,11 @@ namespace TUnit.Mocks.Generated
         void Raise(string name, global::System.ReadOnlySpan<byte> bytes, global::Payload payload);
     }
 
+    internal interface IEvents_Updated_Raiser
+    {
+        void Raise(ref global::Payload payload, in global::System.ReadOnlySpan<byte> bytes, out global::Payload result);
+    }
+
     public static class IEvents_MockMemberExtensions
     {
         public static IEvents_Execute_M0_MockCall Execute(this global::TUnit.Mocks.Mock<global::IEvents> mock)
@@ -228,6 +259,11 @@ namespace TUnit.Mocks.Generated
         public static void RaiseBuffered(this global::TUnit.Mocks.Mock<global::IEvents> mock, string name, global::System.ReadOnlySpan<byte> bytes, global::Payload payload)
         {
             ((global::TUnit.Mocks.Generated.IEvents_Buffered_Raiser)global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).Raise(name, bytes, payload);
+        }
+
+        public static void RaiseUpdated(this global::TUnit.Mocks.Mock<global::IEvents> mock, ref global::Payload payload, in global::System.ReadOnlySpan<byte> bytes, out global::Payload result)
+        {
+            ((global::TUnit.Mocks.Generated.IEvents_Updated_Raiser)global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).Raise(ref payload, in bytes, out result);
         }
 
         public static void RaiseOrdinary(this global::TUnit.Mocks.Mock<global::IEvents> mock, string e)

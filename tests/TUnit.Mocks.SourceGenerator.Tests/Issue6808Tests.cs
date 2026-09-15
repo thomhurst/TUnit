@@ -42,11 +42,13 @@ public class Issue6808Tests : SnapshotTestBase
         public ref struct Payload { public int Value; }
         public delegate void PayloadHandler(Payload payload);
         public delegate void BufferHandler(string name, ReadOnlySpan<byte> bytes, Payload payload);
+        public delegate void UpdateHandler(ref Payload payload, in ReadOnlySpan<byte> bytes, out Payload result);
 
         public interface IEvents
         {
             event PayloadHandler? Changed;
             event BufferHandler? Buffered;
+            event UpdateHandler? Updated;
             event EventHandler<string>? Ordinary;
             void Execute();
             int Query();
@@ -59,6 +61,9 @@ public class Issue6808Tests : SnapshotTestBase
                 var mock = Mock.Of<IEvents>(MockBehavior.Strict);
                 mock.RaiseChanged(new Payload { Value = 42 });
                 mock.RaiseBuffered("data", new byte[] { 1, 2 }, new Payload());
+                var payload = new Payload();
+                ReadOnlySpan<byte> bytes = new byte[] { 1, 2 };
+                mock.RaiseUpdated(ref payload, in bytes, out var result);
                 mock.Execute().Callback(() => mock.RaiseChanged(new Payload()));
                 mock.Query().Returns(1).RaisesOrdinary("done");
             }
@@ -72,12 +77,85 @@ public class Issue6808Tests : SnapshotTestBase
         var generated = string.Join("\n", RunGenerator(CustomDelegateSource));
         await Assert.That(generated).DoesNotContain("RaisesChanged(");
         await Assert.That(generated).DoesNotContain("RaisesBuffered(");
+        await Assert.That(generated).DoesNotContain("RaisesUpdated(");
         await Assert.That(generated).Contains("RaisesOrdinary(");
     }
 
     [Test]
     public Task RefStruct_Events_Generation_Snapshot()
         => VerifyGeneratorOutput(CustomDelegateSource);
+
+    [Test]
+    [Arguments("ref", "Payload")]
+    [Arguments("in", "Payload")]
+    [Arguments("out", "Payload")]
+    [Arguments("ref", "int")]
+    [Arguments("in", "int")]
+    [Arguments("out", "int")]
+    public void ByReference_Event_Compiles(string modifier, string type)
+    {
+        AssertEventCodeCompiles($$"""
+            using TUnit.Mocks;
+            using TUnit.Mocks.Generated;
+            public ref struct Payload { }
+            public delegate void Handler({{modifier}} {{type}} payload);
+            public interface IEvents { event Handler? Changed; }
+            public class Usage
+            {
+                public void Test()
+                {
+                    var mock = Mock.Of<IEvents>();
+                    var payload = new {{type}}();
+                    mock.RaiseChanged({{modifier}} payload);
+                }
+            }
+            """);
+    }
+
+#if NET9_0_OR_GREATER
+    [Test]
+    public void AntiConstrained_Event_From_Metadata_Compiles()
+    {
+        var reference = CreateExternalAssemblyReference("""
+            namespace External;
+            public delegate void Handler<T>(T value) where T : allows ref struct;
+            public interface IEvents<T> where T : allows ref struct
+            {
+                event Handler<T>? Changed;
+            }
+            """);
+        AssertEventCodeCompiles("""
+            using TUnit.Mocks;
+            using TUnit.Mocks.Generated;
+            [assembly: GenerateMock(typeof(External.IEvents<>))]
+            public class Usage
+            {
+                public void Raise<T>(Mock<External.IEvents<T>> mock, T value) where T : allows ref struct
+                    => mock.RaiseChanged(value);
+            }
+            """, [reference]);
+    }
+
+    [Test]
+    public void AntiConstrained_Event_Uses_Typed_Dispatch_And_Preserves_Constraints()
+    {
+        AssertEventCodeCompiles("""
+            using TUnit.Mocks;
+            using TUnit.Mocks.Generated;
+            [assembly: GenerateMock(typeof(IEvents<>))]
+            public delegate void Handler<T>(T value) where T : allows ref struct;
+            public interface IEvents<T> where T : allows ref struct
+            {
+                event Handler<T>? Changed;
+            }
+            public class Usage
+            {
+                public void Raise<T>(Mock<IEvents<T>> mock, T value) where T : allows ref struct
+                    => mock.RaiseChanged(value);
+            }
+            """);
+    }
+#endif
 
 #if NET10_0_OR_GREATER
     [Test]

@@ -85,7 +85,7 @@ internal static class MockMembersBuilder
         // silently hid every setup for types from a namespace the test hadn't `using`'d (#6494).
         using (writer.OptionalNamespaceBlock(MockImplBuilder.MemberSurfaceNamespace))
         {
-            RefStructEventBuilder.EmitInterfaces(writer, model);
+            EventRaiserBuilder.EmitInterfaces(writer, model);
 
             // Extension methods class
             using (writer.Block($"{model.Visibility} static class {safeName}_MockMemberExtensions"))
@@ -850,9 +850,9 @@ internal static class MockMembersBuilder
         string wrapperName)
     {
         bool first = true;
-        // Deferred setups retain their arguments. Stack-only values must instead be created
-        // when the call runs, for example in Callback(() => mock.RaiseEvent(new Args())).
-        foreach (var evt in events.Where(e => !e.HasRefStructParams))
+        // Deferred setups cannot retain stack-only values or caller references. Create
+        // arguments when the call runs, for example in Callback(() => mock.RaiseEvent(new Args())).
+        foreach (var evt in events.Where(e => !e.RequiresTypedRaise))
         {
             if (!first) writer.AppendLine();
             first = false;
@@ -1628,18 +1628,16 @@ internal static class MockMembersBuilder
 
             var extensionParam = $"this global::TUnit.Mocks.Mock<{mockableType}> mock";
 
-            var raiseParamStr = evt.RaiseParameterList.Length == 0
-                ? ""
-                : string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
+            var raiseParamStr = EventRaiserBuilder.GetParameters(evt);
             var raiseParams = string.IsNullOrEmpty(raiseParamStr)
                 ? extensionParam
                 : $"{extensionParam}, {raiseParamStr}";
 
-            if (evt.HasRefStructParams)
+            if (evt.RequiresTypedRaise)
             {
                 using (writer.Block($"public static void Raise{evt.Name}{typeParams}({raiseParams}){constraints}"))
                 {
-                    writer.AppendLine($"(({RefStructEventBuilder.GetInterfaceType(model, evt)})global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).Raise({RefStructEventBuilder.GetArguments(evt)});");
+                    writer.AppendLine($"(({EventRaiserBuilder.GetInterfaceType(model, evt)})global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).Raise({EventRaiserBuilder.GetArguments(evt)});");
                 }
                 continue;
             }

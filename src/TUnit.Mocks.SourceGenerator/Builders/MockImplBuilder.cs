@@ -64,7 +64,7 @@ internal static class MockImplBuilder
             baseTypes += ", " + string.Join(", ", model.AdditionalInterfaceNames);
         }
 
-        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{RefStructEventBuilder.GetBaseInterfaces(model)}{constraints}"))
+        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{EventRaiserBuilder.GetBaseInterfaces(model)}{constraints}"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine;");
             writer.AppendLine();
@@ -124,7 +124,7 @@ internal static class MockImplBuilder
         var typeParams = GetTypeParameterList(model);
         var constraints = GetConstraintClauses(model);
 
-        using (writer.Block($"file sealed class {safeName}WrapMockImpl{typeParams} : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{RefStructEventBuilder.GetBaseInterfaces(model)}{constraints}"))
+        using (writer.Block($"file sealed class {safeName}WrapMockImpl{typeParams} : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{EventRaiserBuilder.GetBaseInterfaces(model)}{constraints}"))
         {
             var context = GetConstructionContextName(model, safeName);
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine = {context}.Engine!;");
@@ -477,7 +477,7 @@ internal static class MockImplBuilder
             baseTypes += ", " + string.Join(", ", model.AdditionalInterfaceNames);
         }
 
-        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{RefStructEventBuilder.GetBaseInterfaces(model)}{constraints}"))
+        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{EventRaiserBuilder.GetBaseInterfaces(model)}{constraints}"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine = {GetConstructionContextName(model, safeName)}.Engine!;");
             writer.AppendLine();
@@ -1221,24 +1221,7 @@ internal static class MockImplBuilder
         writer.CloseBrace();
         writer.AppendLine();
 
-        // Raise method for generated code to call
-        writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-        var raiseParams = evt.RaiseParameterList.Length == 0
-            ? ""
-            : string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
-        var invokeArgs = string.IsNullOrEmpty(evt.InvokeArgs) ? "" : evt.InvokeArgs;
-        var raiseAccessModifier = evt.IsSignatureAccessibleFromAssembly ? "internal" : "private";
-        using (writer.Block($"{raiseAccessModifier} void Raise_{evt.Name}({raiseParams})"))
-        {
-            if (string.IsNullOrEmpty(invokeArgs))
-            {
-                writer.AppendLine($"_backing_{evt.Name}?.Invoke();");
-            }
-            else
-            {
-                writer.AppendLine($"_backing_{evt.Name}?.Invoke({invokeArgs});");
-            }
-        }
+        GenerateEventRaiseMethod(writer, evt);
     }
 
     private static void GeneratePartialEvent(CodeWriter writer, MockEventModel evt)
@@ -1256,29 +1239,29 @@ internal static class MockImplBuilder
         writer.CloseBrace();
         writer.AppendLine();
 
-        // Raise method for generated code to call
+        GenerateEventRaiseMethod(writer, evt);
+    }
+
+    private static void GenerateEventRaiseMethod(CodeWriter writer, MockEventModel evt)
+    {
         writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-        var raiseParams = evt.RaiseParameterList.Length == 0
-            ? ""
-            : string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
-        var invokeArgs = string.IsNullOrEmpty(evt.InvokeArgs) ? "" : evt.InvokeArgs;
+        var raiseParams = EventRaiserBuilder.GetParameters(evt);
         var raiseAccessModifier = evt.IsSignatureAccessibleFromAssembly ? "internal" : "private";
         using (writer.Block($"{raiseAccessModifier} void Raise_{evt.Name}({raiseParams})"))
         {
-            if (string.IsNullOrEmpty(invokeArgs))
+            // Conditional invocation must still assign out parameters when there are no handlers.
+            foreach (var parameter in evt.RaiseParameterList.Where(p => p.Direction == ParameterDirection.Out))
             {
-                writer.AppendLine($"_backing_{evt.Name}?.Invoke();");
+                writer.AppendLine($"{parameter.Name} = default!;");
             }
-            else
-            {
-                writer.AppendLine($"_backing_{evt.Name}?.Invoke({invokeArgs});");
-            }
+
+            writer.AppendLine($"_backing_{evt.Name}?.Invoke({evt.InvokeArgs});");
         }
     }
 
     private static void GenerateRaiseEventDispatch(CodeWriter writer, MockTypeModel model)
     {
-        RefStructEventBuilder.EmitImplementations(writer, model);
+        EventRaiserBuilder.EmitImplementations(writer, model);
 
         writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
         using (writer.Block("public void RaiseEvent(string eventName, object? args)"))
@@ -1302,9 +1285,10 @@ internal static class MockImplBuilder
                         writer.IncreaseIndent();
 
                         // Determine how to invoke: if the event handler has parameters matching EventArgs, pass args
-                        if (evt.HasRefStructParams)
+                        if (evt.RequiresTypedRaise)
                         {
-                            writer.AppendLine($"throw new global::System.NotSupportedException(\"Event '{evt.Name}' has ref struct parameters and cannot be raised with boxed arguments.\");");
+                            var parameterKind = evt.HasRefStructParams ? "ref struct" : "by-reference";
+                            writer.AppendLine($"throw new global::System.NotSupportedException(\"Event '{evt.Name}' has {parameterKind} parameters and cannot be raised with boxed arguments.\");");
                         }
                         else if (evt.RaiseParameterList.Length == 0)
                         {
@@ -1342,7 +1326,7 @@ internal static class MockImplBuilder
                             writer.AppendLine($"Raise_{evt.Name}(({evt.RaiseParameterList[0].FullyQualifiedType})args!);");
                         }
 
-                        if (!evt.HasRefStructParams)
+                        if (!evt.RequiresTypedRaise)
                         {
                             writer.AppendLine("break;");
                         }

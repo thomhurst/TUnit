@@ -1,3 +1,7 @@
+#if NET9_0_OR_GREATER
+[assembly: TUnit.Mocks.GenerateMock(typeof(TUnit.Mocks.Tests.RefStructEventTests.IAntiConstrained<>))]
+#endif
+
 namespace TUnit.Mocks.Tests;
 
 public class RefStructEventTests
@@ -11,6 +15,46 @@ public class RefStructEventTests
     public delegate void BufferHandler(string name, ReadOnlySpan<int> values, Payload payload);
     public delegate void MutableBufferHandler(Span<int> values);
     public delegate void GenericBufferHandler<T>(ReadOnlySpan<T> values) where T : unmanaged;
+    public delegate void RefPayloadHandler(ref Payload payload);
+    public delegate void InPayloadHandler(in Payload payload);
+    public delegate void OutPayloadHandler(out Payload payload);
+    public delegate void MixedHandler(ref Payload payload, in ReadOnlySpan<int> values, out Payload result);
+    public delegate void RefIntHandler(ref int value);
+
+    public interface IByReferenceEvents
+    {
+        event RefPayloadHandler? RefChanged;
+        event InPayloadHandler? InChanged;
+        event OutPayloadHandler? OutChanged;
+        event MixedHandler? MixedChanged;
+        event RefIntHandler? IntChanged;
+    }
+
+#if NET9_0_OR_GREATER
+    public delegate void AntiConstrainedHandler<T>(T value) where T : allows ref struct;
+    public interface IAntiConstrained<T> where T : allows ref struct
+    {
+        event AntiConstrainedHandler<T>? AntiConstrainedChanged;
+    }
+
+    private static void RaiseAntiConstrained<T>(Mock<IAntiConstrained<T>> mock, T value) where T : allows ref struct
+        => mock.RaiseAntiConstrainedChanged(value);
+
+    [Test]
+    public async Task AntiConstrained_Generic_Event_Accepts_RefStruct_And_Boxable_Arguments()
+    {
+        var stackOnly = Mock.Of<IAntiConstrained<Payload>>();
+        var boxable = Mock.Of<IAntiConstrained<int>>();
+        var received = 0;
+        stackOnly.Object.AntiConstrainedChanged += value => received += value.Value;
+        boxable.Object.AntiConstrainedChanged += value => received += value;
+
+        RaiseAntiConstrained(stackOnly, new Payload(2));
+        RaiseAntiConstrained(boxable, 3);
+
+        await Assert.That(received).IsEqualTo(5);
+    }
+#endif
 
     public interface IEvents
     {
@@ -37,12 +81,19 @@ public class RefStructEventTests
     public abstract class Service
     {
         public abstract event PayloadHandler? ServiceChanged;
+        public abstract event OutPayloadHandler? ServiceProduced;
     }
 
     public class WrappedService
     {
         public virtual event PayloadHandler? WrappedChanged;
+        public virtual event OutPayloadHandler? WrappedProduced;
         public virtual void Execute() => WrappedChanged?.Invoke(new Payload(99));
+        public virtual void Produce(out Payload payload)
+        {
+            payload = default;
+            WrappedProduced?.Invoke(out payload);
+        }
     }
 
 #if NET10_0_OR_GREATER
@@ -238,6 +289,106 @@ public class RefStructEventTests
         mock.RaiseServiceChanged(new Payload(2));
         mock.RaiseSecondary(new Payload(3));
 
+        await Assert.That(received).IsEqualTo(5);
+    }
+
+    [Test]
+    public async Task Ref_Changes_Reach_Later_Subscribers_And_Caller()
+    {
+        var mock = Mock.Of<IByReferenceEvents>();
+        mock.Object.RefChanged += (ref Payload value) => value = new Payload(value.Value + 1);
+        mock.Object.RefChanged += (ref Payload value) => value = new Payload(value.Value * 10);
+        var payload = new Payload(1);
+
+        mock.RaiseRefChanged(ref payload);
+        var received = payload.Value;
+
+        await Assert.That(received).IsEqualTo(20);
+    }
+
+    [Test]
+    public async Task In_Parameter_Reaches_Subscriber()
+    {
+        var mock = Mock.Of<IByReferenceEvents>();
+        var received = 0;
+        mock.Object.InChanged += (in Payload value) => received = value.Value;
+        var payload = new Payload(42);
+
+        mock.RaiseInChanged(in payload);
+
+        await Assert.That(received).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Out_Parameter_Uses_Last_Subscriber_And_Default_When_Unsubscribed()
+    {
+        var mock = Mock.Of<IByReferenceEvents>();
+        OutPayloadHandler first = (out Payload value) => value = new Payload(1);
+        OutPayloadHandler last = (out Payload value) => value = new Payload(42);
+        mock.Object.OutChanged += first;
+        mock.Object.OutChanged += last;
+
+        mock.RaiseOutChanged(out var payload);
+        var received = payload.Value;
+        mock.Object.OutChanged -= first;
+        mock.Object.OutChanged -= last;
+        mock.RaiseOutChanged(out payload);
+        var empty = payload.Value;
+
+        await Assert.That(received).IsEqualTo(42);
+        await Assert.That(empty).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task Mixed_Reference_Directions_Preserve_Arguments()
+    {
+        var mock = Mock.Of<IByReferenceEvents>();
+        mock.Object.MixedChanged += (ref Payload value, in ReadOnlySpan<int> values, out Payload result) =>
+        {
+            value = new Payload(value.Value + values[0]);
+            result = new Payload(value.Value * 2);
+        };
+        var payload = new Payload(2);
+        ReadOnlySpan<int> values = new int[] { 3 };
+
+        mock.RaiseMixedChanged(ref payload, in values, out var result);
+        var updated = payload.Value;
+        var produced = result.Value;
+
+        await Assert.That(updated).IsEqualTo(5);
+        await Assert.That(produced).IsEqualTo(10);
+    }
+
+    [Test]
+    public async Task Boxable_ByReference_Event_Also_Preserves_Caller_Reference()
+    {
+        var mock = Mock.Of<IByReferenceEvents>();
+        mock.Object.IntChanged += (ref int value) => value++;
+        var received = 41;
+
+        mock.RaiseIntChanged(ref received);
+
+        await Assert.That(received).IsEqualTo(42);
+        await Assert.That(() => MockRegistry.GetEngine(mock).Raisable!.RaiseEvent("IntChanged", 41))
+            .Throws<NotSupportedException>();
+    }
+
+    [Test]
+    public async Task Partial_And_Wrap_Out_Events_Assign_Results()
+    {
+        var partial = Mock.Of<Service>();
+        var wrapped = Mock.Wrap(new WrappedService());
+        partial.RaiseServiceProduced(out var beforePartial);
+        wrapped.RaiseWrappedProduced(out var beforeWrapped);
+        var empty = beforePartial.Value + beforeWrapped.Value;
+        partial.Object.ServiceProduced += (out Payload value) => value = new Payload(2);
+        wrapped.Object.WrappedProduced += (out Payload value) => value = new Payload(3);
+
+        partial.RaiseServiceProduced(out var partialResult);
+        wrapped.RaiseWrappedProduced(out var wrappedResult);
+        var received = partialResult.Value + wrappedResult.Value;
+
+        await Assert.That(empty).IsEqualTo(0);
         await Assert.That(received).IsEqualTo(5);
     }
 
