@@ -308,37 +308,43 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         var operation = invocationOperation.Instance;
 
-        while (operation is not null)
+        if (operation is IConditionalAccessInstanceOperation)
         {
-            if (operation is IConditionalAccessOperation conditionalAccessOperation)
+            var parent = operation.Parent;
+            while (parent is not null and not IConditionalAccessOperation)
             {
-                return conditionalAccessOperation.Operation;
+                parent = parent.Parent;
             }
 
-            if (operation is IFieldReferenceOperation or IPropertyReferenceOperation)
-            {
-                return operation;
-            }
-
-            operation = operation.Parent;
+            operation = (parent as IConditionalAccessOperation)?.Operation;
         }
 
-        return null;
+        // User-defined conversions can return a different object, so only unwrap built-in conversions.
+        while (operation is IConversionOperation { OperatorMethod: null } conversion)
+        {
+            operation = conversion.Operand;
+        }
+
+        return operation is IFieldReferenceOperation or IPropertyReferenceOperation ? operation : null;
     }
 
     private static bool IsDisposeInvocation(SyntaxNodeAnalysisContext context, IInvocationOperation invocationOperation)
     {
         if (invocationOperation.TargetMethod is { Name: "Dispose", Parameters.IsDefaultOrEmpty: true })
         {
-            return invocationOperation.Instance?.Type?.AllInterfaces.Any(x => x.SpecialType == SpecialType.System_IDisposable) ==
-                   true;
+            var instanceType = invocationOperation.Instance?.Type;
+            return instanceType?.SpecialType == SpecialType.System_IDisposable
+                   || instanceType?.AllInterfaces.Any(x => x.SpecialType == SpecialType.System_IDisposable) == true;
         }
 
         if (invocationOperation.TargetMethod is { Name: "DisposeAsync", Parameters.IsDefaultOrEmpty: true })
         {
             var asyncDisposable = context.Compilation.GetTypeByMetadataName("System.IAsyncDisposable");
-            return invocationOperation.Instance?.Type?.AllInterfaces.Any(x =>
-                SymbolEqualityComparer.Default.Equals(x, asyncDisposable)) == true;
+            var instanceType = invocationOperation.Instance?.Type;
+            return asyncDisposable != null
+                   && (SymbolEqualityComparer.Default.Equals(instanceType, asyncDisposable)
+                       || instanceType?.AllInterfaces.Any(x =>
+                           SymbolEqualityComparer.Default.Equals(x, asyncDisposable)) == true);
         }
 
         return false;
