@@ -145,6 +145,8 @@ public class LoginPageTests : PageTest
 
 Once the test finishes, its recording is renamed to match the test (and attempt, if the test was retried) and attached to the test result, so it's easy to find in CI output alongside a dozen other recordings.
 
+`[RecordVideo]` supports test methods in classes derived from `ContextTest` or `PageTest` only. It does not support the composition API (`ContextFixture` or `PageFixture`); using it without a supported base class produces a discovery error. For fixture-based tests, override `ContextFixture.GetContextOptions()` to configure Playwright's `RecordVideoDir` and manage video artifacts explicitly.
+
 Pass constructor arguments to control where recordings are written and the viewport size used while recording:
 
 ```csharp

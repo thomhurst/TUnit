@@ -16,7 +16,13 @@ namespace TUnit.Playwright;
 /// <param name="height">The viewport height used for the recording, in pixels. Defaults to <c>1400</c>.</param>
 /// <remarks>
 /// The recorded video is saved under <see cref="Path"/> once the browser context is closed.
+/// This attribute is not supported by the composition API (<see cref="ContextFixture"/>
+/// or <see cref="PageFixture"/>). Tests must derive from <see cref="ContextTest"/>;
+/// unsupported use produces a discovery error.
 /// </remarks>
+#pragma warning disable TUnit0028 // This framework attribute defines its own targets; it does not override a user-facing attribute.
+[AttributeUsage(AttributeTargets.Method)]
+#pragma warning restore TUnit0028
 public class RecordVideoAttribute(string path = "playwright-artifacts", int width = 1280, int height = 1400)
     : TUnitAttribute, ITestDiscoveryEventReceiver
 {
@@ -43,6 +49,14 @@ public class RecordVideoAttribute(string path = "playwright-artifacts", int widt
     /// <inheritdoc />
     public ValueTask OnTestDiscovered(DiscoveredTestContext discoveredTestContext)
     {
+        if (!typeof(ContextTest).IsAssignableFrom(discoveredTestContext.TestDetails.ClassType))
+        {
+            throw new InvalidOperationException(
+                "[RecordVideo] requires a test class derived from ContextTest or PageTest. " +
+                "It is not supported with ContextFixture or PageFixture. " +
+                "For fixture-based tests, configure RecordVideoDir in GetContextOptions() and manage video artifacts explicitly.");
+        }
+
         discoveredTestContext.TestContext.StateBag[StateBagKey] = this;
         return default;
     }

@@ -29,10 +29,9 @@ public class BrowserTest : PlaywrightTest
     public virtual bool PropagateTraceContext => true;
 
     private readonly List<IBrowserContext> _contexts = [];
-    // Tracks every page ever opened in a context this test created, including ones closed
-    // before teardown - IBrowserContext.Pages drops a page as soon as it closes, which would
-    // otherwise lose the video of a page closed early to flush its recording.
-    private readonly List<IPage> _pages = [];
+    // Retain videos from pages closed before teardown: IBrowserContext.Pages drops
+    // each page as soon as it closes. Allocate only for contexts with recording enabled.
+    private List<IVideo>? _videos;
     private readonly Lock _contextsLock = new();
     private readonly BrowserTypeLaunchOptions _options;
 
@@ -41,11 +40,14 @@ public class BrowserTest : PlaywrightTest
         options = PlaywrightTelemetryHeaders.Merge(options, PropagateTraceContext);
         var context = await Browser.NewContextAsync(options).ConfigureAwait(false);
 
-        context.Page += OnContextPage;
-
         lock (_contextsLock)
         {
             _contexts.Add(context);
+            if (!string.IsNullOrEmpty(options.RecordVideoDir))
+            {
+                _videos ??= [];
+                context.Page += OnContextPage;
+            }
         }
 
         return context;
@@ -55,7 +57,11 @@ public class BrowserTest : PlaywrightTest
     {
         lock (_contextsLock)
         {
-            _pages.Add(page);
+            // An event already in flight can arrive after teardown unsubscribes.
+            if (sender is IBrowserContext context && _contexts.Contains(context) && page.Video is { } video)
+            {
+                _videos?.Add(video);
+            }
         }
     }
 
@@ -75,41 +81,9 @@ public class BrowserTest : PlaywrightTest
     public async Task BrowserTearDown(TestContext testContext)
     {
         List<IBrowserContext> contextsSnapshot;
-        List<IPage> pagesSnapshot;
-
         lock (_contextsLock)
         {
             contextsSnapshot = [.. _contexts];
-            _contexts.Clear();
-            pagesSnapshot = [.. _pages];
-            _pages.Clear();
-        }
-
-        foreach (var context in contextsSnapshot)
-        {
-            context.Page -= OnContextPage;
-        }
-
-        // IVideo.PathAsync() only resolves its final path once the recording is flushed to
-        // disk, which Playwright guarantees once the owning page (and so its context) has
-        // closed - so every video reference has to be grabbed before closing, then read
-        // back afterwards. Capturing them here, in the hook that actually closes every
-        // context this test opened, means the rename can happen while this test's own
-        // TestContext is still the one executing - late enough that the file is finished,
-        // but before this test reports its result, so the renamed file attaches to this
-        // test's own result rather than becoming a run-wide artifact.
-        //
-        // Pages are read from the tracked list rather than IBrowserContext.Pages, which
-        // drops a page - and its video - the moment the page closes; closing a page before
-        // teardown is an established way to flush its recording early.
-        var videos = new List<IVideo>();
-
-        foreach (var page in pagesSnapshot)
-        {
-            if (page.Video is { } video)
-            {
-                videos.Add(video);
-            }
         }
 
         List<Exception>? exceptions = null;
@@ -127,9 +101,24 @@ public class BrowserTest : PlaywrightTest
             }
         }
 
+        // Keep tracking until all contexts have closed so popups opened during teardown
+        // are included. Video paths are read only after context closure flushes recordings.
+        List<IVideo>? videos;
+        lock (_contextsLock)
+        {
+            foreach (var context in contextsSnapshot)
+            {
+                context.Page -= OnContextPage;
+            }
+
+            _contexts.Clear();
+            videos = _videos;
+            _videos = null;
+        }
+
         Browser = null!;
 
-        if (videos.Count > 0)
+        if (videos is { Count: > 0 })
         {
             await RenameAndAttachVideosAsync(testContext, videos).ConfigureAwait(false);
         }
@@ -196,6 +185,22 @@ public class BrowserTest : PlaywrightTest
         }
     }
 
-    private static string SanitizeForFileName(string value) =>
-        string.Concat(value.Split(Path.GetInvalidFileNameChars())).Replace(' ', '-');
+    private static string SanitizeForFileName(string value)
+    {
+        var characters = value.ToCharArray();
+        var invalidCharacters = Path.GetInvalidFileNameChars();
+        for (var i = 0; i < characters.Length; i++)
+        {
+            if (Array.IndexOf(invalidCharacters, characters[i]) >= 0)
+            {
+                characters[i] = '_';
+            }
+            else if (characters[i] == ' ')
+            {
+                characters[i] = '-';
+            }
+        }
+
+        return characters.Length == 0 ? "test" : new string(characters);
+    }
 }
