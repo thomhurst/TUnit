@@ -10,6 +10,14 @@ Parallel execution is a major contributor to TUnit's speed advantage. See the [p
 
 With no attributes, every test is eligible to run concurrently. The .NET thread pool determines how many execute at once. For most test suites this is the fastest option and requires no configuration.
 
+Async tests and the thread pool
+
+TUnit uses the standard .NET thread pool and, like most .NET applications, is susceptible to thread pool starvation. Blocking calls or heavy CPU-bound `Task.Run` work can delay async continuations in other tests and cause timed waits to expire.
+
+Use proper async throughout your tests: `await` asynchronous APIs instead of blocking with `.Wait()`, `.Result`, or `.GetAwaiter().GetResult()`. Await asynchronous I/O directly rather than wrapping it in `Task.Run`; `Task.Run` still uses the same thread pool.
+
+For heavy CPU-bound tests, use a shared [`ParallelLimiter<T>`](#parallellimitert--limiting-concurrent-test-count) to reduce concurrency for those tests. The limiter caps concurrent tests that share it, not the number of tasks each test creates.
+
 ## `[NotInParallel]` — Disabling Parallelism[​](#notinparallel--disabling-parallelism "Direct link to notinparallel--disabling-parallelism")
 
 Add `[NotInParallel]` to prevent a test from running at the same time as other constrained tests.
