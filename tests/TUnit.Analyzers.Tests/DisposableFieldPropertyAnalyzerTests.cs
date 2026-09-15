@@ -5,6 +5,264 @@ namespace TUnit.Analyzers.Tests;
 public class DisposableFieldPropertyAnalyzerTests
 {
     [Test]
+    [MatrixDataSource]
+    public async Task Boxing_Dispose_Flags_Issue(
+        [Matrix("((IDisposable)obj).Dispose(); return default;",
+            "((IDisposable)obj)?.Dispose(); return default;",
+            "(obj as IDisposable)?.Dispose(); return default;",
+            "((IDisposable)(object)obj).Dispose(); return default;",
+            "return ((IAsyncDisposable)obj).DisposeAsync();",
+            "return ((IAsyncDisposable)obj)?.DisposeAsync() ?? default;",
+            "return (obj as IAsyncDisposable)?.DisposeAsync() ?? default;",
+            "return ((IAsyncDisposable)(object)obj).DisposeAsync();")]
+        string cleanup,
+        [Matrix(false, true)] bool useProperty)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            struct Resource : IDisposable, IAsyncDisposable
+            {
+                public bool IsDisposed { get; private set; }
+                public void Dispose() => IsDisposed = true;
+                public ValueTask DisposeAsync() { Dispose(); return default; }
+            }
+
+            public sealed class MyTest : IAsyncDisposable
+            {
+                {{(useProperty ? "Resource {|#0:obj|} { get; }" : "Resource {|#0:obj|};")}}
+
+                public MyTest() => obj = new Resource();
+                public ValueTask DisposeAsync() { {{cleanup}} }
+
+                [Test]
+                public void Test() { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.Dispose_Member_In_Cleanup).WithLocation(0).WithArguments("obj"));
+    }
+
+    [Test]
+    [MatrixDataSource]
+    public async Task Unboxing_Dispose_Flags_Issue(
+        [Matrix("((Resource)obj).Dispose(); return default;", "return ((Resource)obj).DisposeAsync();")]
+        string cleanup,
+        [Matrix(false, true)] bool useProperty)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            interface IResource : IDisposable, IAsyncDisposable { }
+
+            struct Resource : IResource
+            {
+                public bool IsDisposed { get; private set; }
+                public void Dispose() => IsDisposed = true;
+                public ValueTask DisposeAsync() { Dispose(); return default; }
+            }
+
+            public sealed class MyTest : IAsyncDisposable
+            {
+                {{(useProperty ? "IResource {|#0:obj|} { get; }" : "IResource {|#0:obj|};")}}
+
+                public MyTest() => obj = new Resource();
+                public ValueTask DisposeAsync() { {{cleanup}} }
+
+                [Test]
+                public void Test() { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.Dispose_Member_In_Cleanup).WithLocation(0).WithArguments("obj"));
+    }
+
+    [Test]
+    public async Task Explicit_IDisposable_Implementation_No_Issue_When_Disposed_Through_Cast()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using TUnit.Core;
+
+            class MyObject : IDisposable
+            {
+                void IDisposable.Dispose() => throw new NotImplementedException();
+            }
+
+            public sealed class MyTest : IDisposable
+            {
+                public MyTest() => obj = new();
+                readonly MyObject obj;
+                public void Dispose() => ((IDisposable)obj).Dispose();
+
+                [Test]
+                public void Test() { }
+            }
+            """);
+    }
+
+    [Test]
+    [MatrixDataSource]
+    public async Task Cast_Dispose_No_Issue(
+        [Matrix("((IDisposable)obj).Dispose()", "((IDisposable)this.obj).Dispose()",
+            "((IDisposable)obj)?.Dispose()", "(obj as IDisposable)?.Dispose()",
+            "((MyObject)obj).Dispose()", "((MyObject)obj)?.Dispose()",
+            "((IDisposable)(object)obj).Dispose()", "((IDisposable)(object)obj)?.Dispose()")]
+        string disposeExpression,
+        [Matrix(false, true)] bool useProperty)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using TUnit.Core;
+
+            class MyObject : IDisposable
+            {
+                void IDisposable.Dispose() { }
+                public void Dispose() { }
+            }
+
+            public sealed class MyTest : IDisposable
+            {
+                {{(useProperty ? "MyObject obj { get; }" : "readonly MyObject obj;")}}
+
+                public MyTest() => obj = new();
+                public void Dispose() => {{disposeExpression}};
+
+                [Test]
+                public void Test() { }
+            }
+            """);
+    }
+
+    [Test]
+    [MatrixDataSource]
+    public async Task Cast_DisposeAsync_No_Issue(
+        [Matrix("((IAsyncDisposable)obj).DisposeAsync()", "((IAsyncDisposable)this.obj).DisposeAsync()",
+            "((IAsyncDisposable)obj)?.DisposeAsync() ?? default", "(obj as IAsyncDisposable)?.DisposeAsync() ?? default",
+            "((MyObject)obj).DisposeAsync()", "((MyObject)obj)?.DisposeAsync() ?? default",
+            "((IAsyncDisposable)(object)obj).DisposeAsync()", "((IAsyncDisposable)(object)obj)?.DisposeAsync() ?? default")]
+        string disposeExpression,
+        [Matrix(false, true)] bool useProperty)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            class MyObject : IAsyncDisposable
+            {
+                ValueTask IAsyncDisposable.DisposeAsync() => default;
+                public ValueTask DisposeAsync() => default;
+            }
+
+            public sealed class MyTest : IAsyncDisposable
+            {
+                {{(useProperty ? "MyObject obj { get; }" : "readonly MyObject obj;")}}
+
+                public MyTest() => obj = new();
+                public ValueTask DisposeAsync() => {{disposeExpression}};
+
+                [Test]
+                public void Test() { }
+            }
+            """);
+    }
+
+    [Test]
+    [MatrixDataSource]
+    public async Task Cast_Dispose_In_Hook_Respects_Hook_Level(
+        [Matrix("Class", "Assembly", "TestSession")] string setupHook,
+        [Matrix(false, true)] bool useAsync,
+        [Matrix(false, true)] bool wrongHook)
+    {
+        var cleanupHook = wrongHook ? (setupHook == "Class" ? "Assembly" : "Class") : setupHook;
+        var memberName = wrongHook ? "{|#0:obj|}" : "obj";
+        var disposeStatement = useAsync
+            ? "return ((IAsyncDisposable)obj).DisposeAsync();"
+            : "((IDisposable)obj).Dispose(); return default;";
+
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            class MyObject : IDisposable, IAsyncDisposable
+            {
+                void IDisposable.Dispose() { }
+                ValueTask IAsyncDisposable.DisposeAsync() => default;
+            }
+
+            public class MyTest
+            {
+                static MyObject {{memberName}} = null!;
+
+                [Before(HookType.{{setupHook}})]
+                public static void Setup() => obj = new MyObject();
+
+                [After(HookType.{{cleanupHook}})]
+                public static ValueTask Cleanup()
+                {
+                    {{disposeStatement}}
+                }
+
+                [Test]
+                public void Test() { }
+            }
+            """,
+            wrongHook
+                ? [Verifier.Diagnostic(Rules.Dispose_Member_In_Cleanup).WithLocation(0).WithArguments("obj")]
+                : []);
+    }
+
+    [Test]
+    [Arguments("public void Dispose() => ((IDisposable)new MyObject()).Dispose();")]
+    [Arguments("public void Dispose() => ((IDisposable)new MyObject())?.Dispose();")]
+    [Arguments("public void Cleanup() => ((IDisposable)obj).Dispose(); public void Dispose() { }")]
+    [Arguments("public void Dispose() => ((OtherObject)obj).Dispose();")]
+    [Arguments("public void Dispose() => ((OtherObject)obj)?.Dispose();")]
+    public async Task Cast_Dispose_Without_Member_Cleanup_Flags_Issue(string cleanup)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using TUnit.Core;
+
+            class MyObject : IDisposable
+            {
+                void IDisposable.Dispose() { }
+                public static explicit operator OtherObject(MyObject value) => new OtherObject();
+            }
+
+            class OtherObject : IDisposable
+            {
+                public void Dispose() { }
+            }
+
+            public sealed class MyTest : IDisposable
+            {
+                readonly MyObject {|#0:obj|};
+
+                public MyTest() => obj = new();
+                {{cleanup}}
+
+                [Test]
+                public void Test() { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.Dispose_Member_In_Cleanup)
+                .WithLocation(0)
+                .WithArguments("obj"));
+    }
+
+    [Test]
     public async Task New_Disposable_Flags_Issue()
     {
         await Verifier
