@@ -29,6 +29,10 @@ public class BrowserTest : PlaywrightTest
     public virtual bool PropagateTraceContext => true;
 
     private readonly List<IBrowserContext> _contexts = [];
+    // Tracks every page ever opened in a context this test created, including ones closed
+    // before teardown - IBrowserContext.Pages drops a page as soon as it closes, which would
+    // otherwise lose the video of a page closed early to flush its recording.
+    private readonly List<IPage> _pages = [];
     private readonly Lock _contextsLock = new();
     private readonly BrowserTypeLaunchOptions _options;
 
@@ -37,12 +41,22 @@ public class BrowserTest : PlaywrightTest
         options = PlaywrightTelemetryHeaders.Merge(options, PropagateTraceContext);
         var context = await Browser.NewContextAsync(options).ConfigureAwait(false);
 
+        context.Page += OnContextPage;
+
         lock (_contextsLock)
         {
             _contexts.Add(context);
         }
 
         return context;
+    }
+
+    private void OnContextPage(object? sender, IPage page)
+    {
+        lock (_contextsLock)
+        {
+            _pages.Add(page);
+        }
     }
 
     [Before(HookType.Test, "", 0)]
@@ -61,11 +75,41 @@ public class BrowserTest : PlaywrightTest
     public async Task BrowserTearDown(TestContext testContext)
     {
         List<IBrowserContext> contextsSnapshot;
+        List<IPage> pagesSnapshot;
 
         lock (_contextsLock)
         {
             contextsSnapshot = [.. _contexts];
             _contexts.Clear();
+            pagesSnapshot = [.. _pages];
+            _pages.Clear();
+        }
+
+        foreach (var context in contextsSnapshot)
+        {
+            context.Page -= OnContextPage;
+        }
+
+        // IVideo.PathAsync() only resolves its final path once the recording is flushed to
+        // disk, which Playwright guarantees once the owning page (and so its context) has
+        // closed - so every video reference has to be grabbed before closing, then read
+        // back afterwards. Capturing them here, in the hook that actually closes every
+        // context this test opened, means the rename can happen while this test's own
+        // TestContext is still the one executing - late enough that the file is finished,
+        // but before this test reports its result, so the renamed file attaches to this
+        // test's own result rather than becoming a run-wide artifact.
+        //
+        // Pages are read from the tracked list rather than IBrowserContext.Pages, which
+        // drops a page - and its video - the moment the page closes; closing a page before
+        // teardown is an established way to flush its recording early.
+        var videos = new List<IVideo>();
+
+        foreach (var page in pagesSnapshot)
+        {
+            if (page.Video is { } video)
+            {
+                videos.Add(video);
+            }
         }
 
         List<Exception>? exceptions = null;
@@ -85,10 +129,73 @@ public class BrowserTest : PlaywrightTest
 
         Browser = null!;
 
+        if (videos.Count > 0)
+        {
+            await RenameAndAttachVideosAsync(testContext, videos).ConfigureAwait(false);
+        }
+
         if (exceptions is { Count: > 0 })
         {
             throw new AggregateException("One or more browser contexts failed to close.", exceptions);
         }
     }
 
+    // Playwright names its recordings page@<hash>.webm, which tells you nothing about which
+    // test produced which video once CI has uploaded a dozen of them, and the name can't be
+    // set through RecordVideoDir - so rename each one to reflect the test that recorded it.
+    private static async Task RenameAndAttachVideosAsync(TestContext testContext, List<IVideo> videos)
+    {
+        // A retried test records once per attempt; number them so the flaky-test videos
+        // line up with the attempts shown in the run report instead of overwriting.
+        var attempt = testContext.Execution.CurrentRetryAttempt;
+        var baseName = SanitizeForFileName(testContext.Metadata.TestName) +
+                       (attempt > 0 ? $"-attempt{attempt + 1}" : string.Empty);
+
+        for (var i = 0; i < videos.Count; i++)
+        {
+            try
+            {
+                var sourcePath = await videos[i].PathAsync().ConfigureAwait(false);
+
+                if (!File.Exists(sourcePath))
+                {
+                    continue;
+                }
+
+                var directory = Path.GetDirectoryName(sourcePath)!;
+                // A test that opens more than one page records more than one video.
+                var suffix = videos.Count > 1 ? $"-{i + 1}" : string.Empty;
+                var target = Path.Combine(directory, $"{baseName}{suffix}.webm");
+
+                // File.Move throws if the target already exists, so retry with an
+                // incremented counter on that specific failure instead of checking
+                // existence beforehand - a concurrently running test could create the
+                // target between such a check and the move, and a pre-check alone
+                // wouldn't catch that race.
+                for (var n = 2; ; n++)
+                {
+                    try
+                    {
+                        File.Move(sourcePath, target);
+                        break;
+                    }
+                    catch (IOException) when (File.Exists(target) && n < 1000)
+                    {
+                        target = Path.Combine(directory, $"{baseName}{suffix}-{n}.webm");
+                    }
+                }
+
+                testContext.Output.AttachArtifact(target, Path.GetFileName(target), "Playwright video recording");
+            }
+            catch (Exception renameFailure)
+            {
+                // A recording we couldn't rename is still a usable recording - never fail
+                // a run (or hide the real result) over cosmetic artifact naming.
+                Console.WriteLine($"Could not rename video for {testContext.Metadata.TestName}: {renameFailure.Message}");
+            }
+        }
+    }
+
+    private static string SanitizeForFileName(string value) =>
+        string.Concat(value.Split(Path.GetInvalidFileNameChars())).Replace(' ', '-');
 }

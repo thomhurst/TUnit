@@ -123,4 +123,48 @@ public class HeavyBrowserTests : PageTest
 
 This ensures at most 2 tests from this class run at the same time, preventing browser resource exhaustion.
 
+## Recording Videos
+
+Add `[RecordVideo]` to an individual test in a class that inherits from `ContextTest` or `PageTest` to record a video of every browser context it creates. Applying it per-test, rather than to the whole class, keeps recording (and the disk space and overhead it costs) limited to the tests that actually need it - such as ones you're debugging or that are flaky:
+
+```csharp
+public class LoginPageTests : PageTest
+{
+    [Test]
+    [RecordVideo]
+    public async Task Login_Button_Is_Visible()
+    {
+        await Page.GotoAsync("https://example.com/login");
+
+        var loginButton = Page.Locator("button#login");
+
+        await Assert.That(await loginButton.IsVisibleAsync()).IsTrue();
+    }
+}
+```
+
+Once the test finishes, its recording is renamed to match the test (and attempt, if the test was retried) and attached to the test result, so it's easy to find in CI output alongside a dozen other recordings.
+
+Pass constructor arguments to control where recordings are written and the viewport size used while recording:
+
+```csharp
+public class LoginPageTests : PageTest
+{
+    [Test]
+    [RecordVideo(path: "videos", width: 1920, height: 1080)]
+    public async Task Login_Button_Is_Visible()
+    {
+        await Page.GotoAsync("https://example.com/login");
+
+        var loginButton = Page.Locator("button#login");
+
+        await Assert.That(await loginButton.IsVisibleAsync()).IsTrue();
+    }
+}
+```
+
+- `path` - directory recordings are written to, resolved relative to the test application's working directory unless given as an absolute path. Defaults to `"playwright-artifacts"`.
+- `width` - viewport width used for the recording, in pixels. Defaults to `1280`.
+- `height` - viewport height used for the recording, in pixels. Defaults to `1400`.
+
 For full Playwright API details, see the [Playwright for .NET documentation](https://playwright.dev/dotnet/).
