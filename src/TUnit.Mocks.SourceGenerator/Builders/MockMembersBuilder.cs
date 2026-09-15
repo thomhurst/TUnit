@@ -85,6 +85,8 @@ internal static class MockMembersBuilder
         // silently hid every setup for types from a namespace the test hadn't `using`'d (#6494).
         using (writer.OptionalNamespaceBlock(MockImplBuilder.MemberSurfaceNamespace))
         {
+            RefStructEventBuilder.EmitInterfaces(writer, model);
+
             // Extension methods class
             using (writer.Block($"{model.Visibility} static class {safeName}_MockMemberExtensions"))
             {
@@ -848,7 +850,9 @@ internal static class MockMembersBuilder
         string wrapperName)
     {
         bool first = true;
-        foreach (var evt in events)
+        // Deferred setups retain their arguments. Stack-only values must instead be created
+        // when the call runs, for example in Callback(() => mock.RaiseEvent(new Args())).
+        foreach (var evt in events.Where(e => !e.HasRefStructParams))
         {
             if (!first) writer.AppendLine();
             first = false;
@@ -1630,6 +1634,15 @@ internal static class MockMembersBuilder
             var raiseParams = string.IsNullOrEmpty(raiseParamStr)
                 ? extensionParam
                 : $"{extensionParam}, {raiseParamStr}";
+
+            if (evt.HasRefStructParams)
+            {
+                using (writer.Block($"public static void Raise{evt.Name}{typeParams}({raiseParams}){constraints}"))
+                {
+                    writer.AppendLine($"(({RefStructEventBuilder.GetInterfaceType(model, evt)})global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).Raise({RefStructEventBuilder.GetArguments(evt)});");
+                }
+                continue;
+            }
 
             string argsExpr;
             if (evt.RaiseParameterList.Length == 0)

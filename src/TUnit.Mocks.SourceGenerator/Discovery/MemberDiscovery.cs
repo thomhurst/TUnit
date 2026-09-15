@@ -1056,7 +1056,8 @@ internal static class MemberDiscovery
                 Name = EscapeIdentifier(p.Name),
                 FullyQualifiedType = p.Type.GetFullyQualifiedNameWithNullability(),
                 Type = p.Type.GetMinimallyQualifiedNameWithNullability(),
-                Direction = ParameterDirection.In
+                Direction = ParameterDirection.In,
+                IsRefStruct = p.Type.IsRefLikeType
             }).ToImmutableArray());
 
         return new MockEventModel

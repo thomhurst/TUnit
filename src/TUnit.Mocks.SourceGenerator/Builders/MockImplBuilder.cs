@@ -64,7 +64,7 @@ internal static class MockImplBuilder
             baseTypes += ", " + string.Join(", ", model.AdditionalInterfaceNames);
         }
 
-        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
+        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{RefStructEventBuilder.GetBaseInterfaces(model)}{constraints}"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine;");
             writer.AppendLine();
@@ -124,7 +124,7 @@ internal static class MockImplBuilder
         var typeParams = GetTypeParameterList(model);
         var constraints = GetConstraintClauses(model);
 
-        using (writer.Block($"file sealed class {safeName}WrapMockImpl{typeParams} : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
+        using (writer.Block($"file sealed class {safeName}WrapMockImpl{typeParams} : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{RefStructEventBuilder.GetBaseInterfaces(model)}{constraints}"))
         {
             var context = GetConstructionContextName(model, safeName);
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine = {context}.Engine!;");
@@ -477,7 +477,7 @@ internal static class MockImplBuilder
             baseTypes += ", " + string.Join(", ", model.AdditionalInterfaceNames);
         }
 
-        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
+        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{RefStructEventBuilder.GetBaseInterfaces(model)}{constraints}"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine = {GetConstructionContextName(model, safeName)}.Engine!;");
             writer.AppendLine();
@@ -1278,6 +1278,8 @@ internal static class MockImplBuilder
 
     private static void GenerateRaiseEventDispatch(CodeWriter writer, MockTypeModel model)
     {
+        RefStructEventBuilder.EmitImplementations(writer, model);
+
         writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
         using (writer.Block("public void RaiseEvent(string eventName, object? args)"))
         {
@@ -1300,7 +1302,11 @@ internal static class MockImplBuilder
                         writer.IncreaseIndent();
 
                         // Determine how to invoke: if the event handler has parameters matching EventArgs, pass args
-                        if (evt.RaiseParameterList.Length == 0)
+                        if (evt.HasRefStructParams)
+                        {
+                            writer.AppendLine($"throw new global::System.NotSupportedException(\"Event '{evt.Name}' has ref struct parameters and cannot be raised with boxed arguments.\");");
+                        }
+                        else if (evt.RaiseParameterList.Length == 0)
                         {
                             // No-parameter event (e.g., Action)
                             writer.AppendLine($"Raise_{evt.Name}();");
@@ -1336,7 +1342,10 @@ internal static class MockImplBuilder
                             writer.AppendLine($"Raise_{evt.Name}(({evt.RaiseParameterList[0].FullyQualifiedType})args!);");
                         }
 
-                        writer.AppendLine("break;");
+                        if (!evt.HasRefStructParams)
+                        {
+                            writer.AppendLine("break;");
+                        }
                         writer.DecreaseIndent();
                         writer.AppendLine("}");
                         writer.DecreaseIndent();
