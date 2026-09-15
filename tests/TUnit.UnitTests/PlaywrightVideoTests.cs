@@ -67,6 +67,76 @@ public class PlaywrightVideoTests
     }
 
     [Test]
+    public async Task TeardownRejectsNewContextsWhileClosing()
+    {
+        using var scope = new VideoTestScope();
+        await scope.Test.NewContext(new BrowserNewContextOptions());
+        var closure = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        scope.BrowserContext.CloseAsync().Returns(closure.Task);
+        var teardown = scope.Test.BrowserTearDown(scope.Context);
+
+        try
+        {
+            await Assert.That(teardown.IsCompleted).IsFalse();
+            await Assert.That(() => scope.Test.NewContext(new BrowserNewContextOptions()))
+                .Throws<InvalidOperationException>().WithMessageContaining("after teardown has started");
+            await scope.Browser.Received(1).NewContextAsync(Arg.Any<BrowserNewContextOptions>());
+        }
+        finally
+        {
+            closure.TrySetResult();
+            await teardown;
+        }
+
+        await Assert.That(() => scope.Test.NewContext(new BrowserNewContextOptions())).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task TeardownWaitsForPendingContextCreation(bool creationFails)
+    {
+        using var scope = new VideoTestScope();
+        var creation = new TaskCompletionSource<IBrowserContext>(TaskCreationOptions.RunContinuationsAsynchronously);
+        scope.Browser.NewContextAsync(Arg.Any<BrowserNewContextOptions>()).Returns(creation.Task);
+        var pendingContext = scope.Test.NewContext(new BrowserNewContextOptions { RecordVideoDir = scope.Directory });
+        var page = scope.CreatePage();
+        scope.BrowserContext.CloseAsync().Returns(_ =>
+        {
+            scope.OpenPage(page);
+            return Task.CompletedTask;
+        });
+        var teardown = scope.Test.BrowserTearDown(scope.Context);
+
+        try
+        {
+            await Assert.That(teardown.IsCompleted).IsFalse();
+        }
+        finally
+        {
+            if (creationFails)
+            {
+                creation.TrySetException(new InvalidOperationException("creation failed"));
+                await Assert.That(async () => await pendingContext).Throws<InvalidOperationException>();
+            }
+            else
+            {
+                creation.TrySetResult(scope.BrowserContext);
+                await pendingContext;
+            }
+
+            await teardown;
+        }
+
+        await scope.BrowserContext.Received(creationFails ? 0 : 1).CloseAsync();
+        await Assert.That(scope.Context.Output.Artifacts.Count).IsEqualTo(creationFails ? 0 : 1);
+        if (!creationFails)
+        {
+            scope.BrowserContext.Received(1).Page -= Arg.Any<EventHandler<IPage>>();
+        }
+    }
+
+    [Test]
     public async Task TeardownStillAttachesVideosAndClosesOtherContextsAfterCloseFailure()
     {
         using var scope = new VideoTestScope();
@@ -123,6 +193,19 @@ public class PlaywrightVideoTests
     [Arguments("\0\0", "__.webm")]
     [Arguments("", "test.webm")]
     [Arguments("Video Name", "Video-Name.webm")]
+    [Arguments("CON", "_CON.webm")]
+    [Arguments("prn", "_prn.webm")]
+    [Arguments("Aux", "_Aux.webm")]
+    [Arguments("NUL.tar.gz", "_NUL.tar.gz.webm")]
+    [Arguments("COM1", "_COM1.webm")]
+    [Arguments("LPT9.test", "_LPT9.test.webm")]
+    [Arguments("COM¹", "_COM¹.webm")]
+    [Arguments("LPT²", "_LPT².webm")]
+    [Arguments("COM³", "_COM³.webm")]
+    [Arguments("CONIN$", "_CONIN$.webm")]
+    [Arguments("CONOUT$", "_CONOUT$.webm")]
+    [Arguments("COM10", "COM10.webm")]
+    [Arguments("Console", "Console.webm")]
     public async Task VideoNamesReplaceInvalidCharacters(string testName, string expected)
     {
         using var scope = new VideoTestScope(testName);
@@ -132,6 +215,7 @@ public class PlaywrightVideoTests
         await scope.Test.BrowserTearDown(scope.Context);
 
         await Assert.That(scope.Context.Output.Artifacts.Single().File.Name).IsEqualTo(expected);
+        await Assert.That(File.ReadAllText(scope.Context.Output.Artifacts.Single().File.FullName)).IsEqualTo("recording");
     }
 
     [Test]
@@ -317,6 +401,34 @@ public class PlaywrightVideoTests
     private sealed class CustomContextFixture(BrowserNewContextOptions options) : ContextFixture
     {
         protected override BrowserNewContextOptions GetContextOptions() => options;
+    }
+
+    [Test]
+    public async Task OptionOnlyRecordingKeepsSharedFixtureLifetimeWithoutAttributingVideos()
+    {
+        using var first = new VideoTestScope("First");
+        var options = new BrowserNewContextOptions { RecordVideoDir = first.Directory };
+        var fixture = new CustomContextFixture(options) { BrowserFixture = first.CreateFixture().ContextFixture.BrowserFixture };
+        TraceScopeRegistry.RegisterFromDataSource(new ClassDataSourceAttribute<ContextFixture> { Shared = SharedType.PerTestSession }, [fixture]);
+        await ObjectInitializer.InitializeAsync(fixture);
+        var firstPage = await fixture.Context.NewPageAsync();
+        var firstPath = await firstPage.Video!.PathAsync();
+        first.Context.CurrentRetryAttempt = 1;
+        await ObjectInitializer.InitializeAsync(fixture);
+
+        using var second = new VideoTestScope("Second");
+        await ObjectInitializer.InitializeAsync(fixture);
+        var secondPage = await fixture.Context.NewPageAsync();
+        var secondPath = await secondPage.Video!.PathAsync();
+        await fixture.DisposeAsync();
+
+        await first.Browser.Received(1).NewContextAsync(Arg.Is<BrowserNewContextOptions>(value => value.RecordVideoDir == first.Directory));
+        await first.BrowserContext.Received(1).CloseAsync();
+        first.BrowserContext.DidNotReceive().Page += Arg.Any<EventHandler<IPage>>();
+        await Assert.That(first.Context.Output.Artifacts.Count).IsEqualTo(0);
+        await Assert.That(second.Context.Output.Artifacts.Count).IsEqualTo(0);
+        await Assert.That(File.ReadAllText(firstPath)).IsEqualTo("recording");
+        await Assert.That(File.ReadAllText(secondPath)).IsEqualTo("recording");
     }
 
     [Test]

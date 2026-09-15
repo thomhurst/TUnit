@@ -169,6 +169,8 @@ With `[RecordVideo]`, each retry gets fresh contexts and pages before setup hook
 
 Overrides of `ContextFixture.GetContextOptions()` retain their custom options; recording settings are applied to a copy. If overriding fixture initialization or disposal, call the base implementation to preserve recording and cleanup.
 
+Setting `RecordVideoDir` through `DefaultBrowserNewContextOptions` or `GetContextOptions()` without `[RecordVideo]` enables Playwright recording with the fixture's normal lifetime. These videos keep Playwright's filenames and are not automatically attached to a test result, because shared fixtures can record more than one test. Manage those artifacts yourself, or use `[RecordVideo]` with per-test fixtures for automatic naming and attachment.
+
 Pass constructor arguments to control where recordings are written and the viewport size used while recording:
 
 ```csharp

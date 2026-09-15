@@ -136,6 +136,13 @@ internal sealed class PlaywrightVideoRecorder
             }
         }
 
-        return characters.Length == 0 ? "test" : new string(characters);
+        var name = characters.Length == 0 ? "test" : new string(characters);
+        // Windows device names remain reserved even when followed by an extension.
+        var dot = name.IndexOf('.');
+        var stem = (dot < 0 ? name : name.Substring(0, dot)).ToUpperInvariant();
+        var reserved = stem is "CON" or "PRN" or "AUX" or "NUL" or "CONIN$" or "CONOUT$" ||
+                       (stem.Length == 4 && (stem.StartsWith("COM", StringComparison.Ordinal) || stem.StartsWith("LPT", StringComparison.Ordinal)) &&
+                        stem[3] is >= '1' and <= '9' or '¹' or '²' or '³');
+        return reserved ? "_" + name : name;
     }
 }

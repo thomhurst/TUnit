@@ -28,7 +28,7 @@ public class BrowserTest : PlaywrightTest
     /// </remarks>
     public virtual bool PropagateTraceContext => true;
 
-    private readonly List<(IBrowserContext Context, PlaywrightVideoRecorder? Recording)> _contexts = [];
+    private readonly List<Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording)>> _contexts = [];
     private readonly Lock _contextsLock = new();
     private readonly BrowserTypeLaunchOptions _options;
 
@@ -36,17 +36,27 @@ public class BrowserTest : PlaywrightTest
     {
         var owner = TestContext.Current;
         options = PlaywrightTelemetryHeaders.Merge(options, PropagateTraceContext);
-        var context = await Browser.NewContextAsync(options).ConfigureAwait(false);
+        Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording)> creation;
+        lock (_contextsLock)
+        {
+            var browser = Browser ?? throw new InvalidOperationException("Cannot create a browser context before setup or after teardown has started.");
+            creation = CreateContextAsync(browser, options, owner);
+            // Track pending creation too, so teardown waits for every context it owns.
+            _contexts.Add(creation);
+        }
+
+        return (await creation.ConfigureAwait(false)).Context;
+    }
+
+    private static async Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording)> CreateContextAsync(
+        IBrowser browser, BrowserNewContextOptions options, TestContext? owner)
+    {
+        var context = await browser.NewContextAsync(options).ConfigureAwait(false);
         var recording = !string.IsNullOrEmpty(options.RecordVideoDir) && owner is not null
             ? new PlaywrightVideoRecorder(context, owner)
             : null;
 
-        lock (_contextsLock)
-        {
-            _contexts.Add((context, recording));
-        }
-
-        return context;
+        return (context, recording);
     }
 
     [Before(HookType.Test, "", 0)]
@@ -58,24 +68,40 @@ public class BrowserTest : PlaywrightTest
         }
 
         var service = await BrowserService.Register(this, BrowserType, _options).ConfigureAwait(false);
-        Browser = service.Browser;
+        lock (_contextsLock)
+        {
+            Browser = service.Browser;
+        }
     }
 
     [After(HookType.Test, "", 0)]
     public async Task BrowserTearDown(TestContext testContext)
     {
-        (IBrowserContext Context, PlaywrightVideoRecorder? Recording)[] contexts;
+        Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording)>[] contexts;
         lock (_contextsLock)
         {
+            Browser = null!;
             contexts = _contexts.ToArray();
             _contexts.Clear();
         }
 
         List<Exception>? exceptions = null;
-        foreach (var (context, recording) in contexts)
+        foreach (var creation in contexts)
         {
+            (IBrowserContext Context, PlaywrightVideoRecorder? Recording) created;
             try
             {
+                created = await creation.ConfigureAwait(false);
+            }
+            catch
+            {
+                // NewContext reports creation failures; there is no context to close.
+                continue;
+            }
+
+            try
+            {
+                var (context, recording) = created;
                 await (recording?.CloseAsync() ?? context.CloseAsync()).ConfigureAwait(false);
             }
             catch (Exception exception)
@@ -84,7 +110,6 @@ public class BrowserTest : PlaywrightTest
             }
         }
 
-        Browser = null!;
         if (exceptions is not null)
         {
             throw new AggregateException("One or more browser contexts failed to close.", exceptions);

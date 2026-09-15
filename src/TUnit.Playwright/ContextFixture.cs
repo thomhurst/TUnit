@@ -43,7 +43,8 @@ public class ContextFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptI
         var options = PlaywrightContextOptions.ApplyRecording(GetContextOptions(), owner);
         options = PlaywrightTelemetryHeaders.Merge(options, PropagateTraceContext);
         _context = await BrowserFixture.Browser.NewContextAsync(options).ConfigureAwait(false);
-        _recording = !string.IsNullOrEmpty(options.RecordVideoDir) && owner is not null
+        // Option-only recording can span shared fixture lifetimes and has no single test owner.
+        _recording = PlaywrightContextOptions.Recording(owner) is not null && owner is not null
             ? new PlaywrightVideoRecorder(_context, owner)
             : null;
     }
