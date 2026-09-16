@@ -75,6 +75,18 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
+  <!-- Verify 33+ enforces the Open Source Maintenance Fee at build time (SponsorCheck SC021).
+       TUnit is a non-revenue open source project, so it claims the OpenSource exemption.
+       The exemption end month must be no earlier than the build month and at most 12 months
+       after it, so it is computed from the build clock. Six months sits clear of both bounds,
+       which absorbs any UTC/local-time difference at a month boundary. The "s" format is
+       culture-invariant (a "yyyy-MM" custom format would follow the machine's calendar).
+       See https://github.com/VerifyTests/Verify/blob/main/docs/maintenance-fee.md -->
+  <PropertyGroup>
+    <Verify_SponsorshipExemption>OpenSource</Verify_SponsorshipExemption>
+    <Verify_SponsorshipExemptionUntil>$([System.DateTime]::UtcNow.AddMonths(6).ToString("s").Substring(0, 7))</Verify_SponsorshipExemptionUntil>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
     <None Include="$(MSBuildThisFileDirectory)assets/logo.jpg" Pack="true" PackagePath="\" />
