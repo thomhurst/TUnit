@@ -32,10 +32,20 @@ Choose the link that matches the task; these are alternatives, not a reading che
 | Run tests or select tests | [Running tests](https://tunit.dev/docs/getting-started/running-your-tests.md) or [filters](https://tunit.dev/docs/execution/test-filters.md) |
 | Migrate an existing suite | [xUnit](https://tunit.dev/docs/migration/xunit.md), [NUnit](https://tunit.dev/docs/migration/nunit.md), or [MSTest](https://tunit.dev/docs/migration/mstest.md), matching the source framework |
 | Mocking | [TUnit.Mocks](https://tunit.dev/docs/writing-tests/mocking.md) |
-| Integration tests | [ASP.NET Core](https://tunit.dev/docs/examples/aspnet.md) or [Aspire](https://tunit.dev/docs/examples/aspire.md) |
+| Aspire integration testing | [Aspire](https://tunit.dev/docs/examples/aspire.md) |
+| ASP.NET Core integration testing | [ASP.NET Core](https://tunit.dev/docs/examples/aspnet.md) |
+| Playwright browser testing | [Playwright](https://tunit.dev/docs/examples/playwright.md) |
+| Testcontainers and container fixtures | [ASP.NET Core integration examples](https://tunit.dev/docs/examples/aspnet.md) (see "With Testcontainers") |
+| Native AOT, trimming, or reflection mode | [AOT compatibility](https://tunit.dev/docs/writing-tests/aot.md) or [engine modes](https://tunit.dev/docs/execution/engine-modes.md) |
+| Custom assertions | [Assertion source generators](https://tunit.dev/docs/assertions/extensibility/source-generator-assertions.md) or [custom assertion implementations](https://tunit.dev/docs/assertions/extensibility/custom-assertions.md) |
+| Custom data sources | [Data source generators](https://tunit.dev/docs/extending/data-source-generators.md) |
+| Event receivers | [Event subscribing](https://tunit.dev/docs/writing-tests/event-subscribing.md) |
+| TestContext and test metadata | [Test context](https://tunit.dev/docs/writing-tests/test-context.md) |
+| Diagnostics, output, or tracing | [Logging](https://tunit.dev/docs/extending/logging.md), [test artifacts](https://tunit.dev/docs/writing-tests/artifacts.md), or [OpenTelemetry](https://tunit.dev/docs/examples/opentelemetry.md) |
+| Cancellation | [Cancelling a test](https://tunit.dev/docs/execution/cancellation.md) |
 | Discovery, build, or execution failures | [Troubleshooting](https://tunit.dev/docs/troubleshooting.md) |
 
-For other topics, use the index selectively: for example, `TestContext`, cancellation, Native AOT, trimming, analyzers, custom assertions, Playwright, or Testcontainers.
+For other topics, such as analyzers or framework-specific integrations, use the index selectively.
 
 ## Essential distinctions
 
