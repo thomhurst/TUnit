@@ -1,0 +1,97 @@
+name: Agent Skill
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - 'docs/**'
+      - '.github/workflows/agent-skill.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - 'docs/**'
+      - '.github/workflows/agent-skill.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # Pin a CLI with skill support instead of depending on the runner image version.
+      - name: Download GitHub CLI
+        shell: bash
+        run: |
+          cli_dir="$RUNNER_TEMP/gh-skill-cli"
+          mkdir -p "$cli_dir"
+          gh release download v2.98.0 --repo cli/cli --dir "$cli_dir" \
+            --pattern 'gh_2.98.0_linux_amd64.tar.gz' --pattern 'gh_2.98.0_checksums.txt'
+          cd "$cli_dir"
+          sha256sum --check --ignore-missing gh_2.98.0_checksums.txt
+          tar -xzf gh_2.98.0_linux_amd64.tar.gz
+          echo "$cli_dir/gh_2.98.0_linux_amd64/bin" >> "$GITHUB_PATH"
+
+      - name: Validate skill metadata
+        run: gh skill publish --dry-run ./skills
+
+      - name: Verify local installation
+        run: |
+          gh skill install ./skills tunit --from-local --dir "$RUNNER_TEMP/tunit-skills"
+          test -s "$RUNNER_TEMP/tunit-skills/tunit/SKILL.md"
+
+  documentation-routes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          cache: yarn
+          cache-dependency-path: docs/yarn.lock
+
+      - name: Install documentation dependencies
+        working-directory: docs
+        run: yarn install --frozen-lockfile
+
+      - name: Build documentation
+        working-directory: docs
+        run: yarn build
+
+      # Check the PR's generated routes, including slugs and index pages, before deployment.
+      # Do not use docs/lychee.toml: it excludes tunit.dev URLs.
+      - name: Check routes against built documentation
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --remap '^https://tunit\.dev/ file://${{ github.workspace }}/docs/build/'
+            --no-progress
+            'skills/**/*.md'
+          fail: true
+
+      # Production checks run separately from PR/push checks so new pages need not be deployed first.
+      - name: Check deployed documentation routes
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --scheme https
+            --max-retries 3
+            --timeout 20
+            --no-progress
+            'skills/**/*.md'
+          fail: true
