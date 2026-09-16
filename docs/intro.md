@@ -10,6 +10,20 @@ Performance
 
 TUnit is designed for speed. Through source generation and compile-time optimizations, TUnit significantly outperforms traditional testing frameworks. See the [performance benchmarks](/docs/benchmarks/.md) for real-world speed comparisons.
 
+## Install the agent skill[​](#install-the-agent-skill "Direct link to Install the agent skill")
+
+Install the **TUnit agent skill** to help your coding agent write, migrate, and troubleshoot TUnit tests. It fetches only the relevant Markdown pages from this documentation site, so detailed API guidance and examples stay up to date without loading the entire documentation into your agent's context. Network access is required to fetch those pages.
+
+With a GitHub CLI version that supports [`gh skill`](https://cli.github.com/manual/gh_skill), preview the skill and install it:
+
+```
+gh skill preview thomhurst/TUnit tunit
+
+gh skill install thomhurst/TUnit tunit
+```
+
+Use `--agent` and `--scope` to choose the installation target. Installation defaults to the latest release; until a release includes the skill, append `@main` to `tunit` in both commands to use the default branch. See the [installation options](https://cli.github.com/manual/gh_skill_install).
+
 ## What's in These Docs[​](#whats-in-these-docs "Direct link to What's in These Docs")
 
 * **[Getting Started](/docs/getting-started/installation.md)** — Install TUnit, write your first test, and run it
