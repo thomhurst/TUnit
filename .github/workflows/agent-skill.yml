@@ -5,13 +5,17 @@ on:
     branches: [main]
     paths:
       - 'skills/**'
+      - 'docs/**'
       - '.github/workflows/agent-skill.yml'
   push:
     branches: [main]
     paths:
       - 'skills/**'
+      - 'docs/**'
       - '.github/workflows/agent-skill.yml'
   workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * 1'
 
 permissions:
   contents: read
@@ -49,8 +53,39 @@ jobs:
           gh skill install ./skills tunit --from-local --dir "$RUNNER_TEMP/tunit-skills"
           test -s "$RUNNER_TEMP/tunit-skills/tunit/SKILL.md"
 
-      # The documentation site's lychee config excludes tunit.dev; skill routes must reach the live Markdown pages.
-      - name: Check documentation routes
+  documentation-routes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          cache: yarn
+          cache-dependency-path: docs/yarn.lock
+
+      - name: Install documentation dependencies
+        working-directory: docs
+        run: yarn install --frozen-lockfile
+
+      - name: Build documentation
+        working-directory: docs
+        run: yarn build
+
+      # Check the PR's generated routes, including slugs and index pages, before deployment.
+      # Do not use docs/lychee.toml: it excludes tunit.dev URLs.
+      - name: Check routes against built documentation
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --remap '^https://tunit\.dev/ file://${{ github.workspace }}/docs/build/'
+            --no-progress
+            'skills/**/*.md'
+          fail: true
+
+      # Production checks run separately from PR/push checks so new pages need not be deployed first.
+      - name: Check deployed documentation routes
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         uses: lycheeverse/lychee-action@v2
         with:
           args: >-
