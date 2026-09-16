@@ -335,6 +335,19 @@ TUnit runs F# and VB.NET test projects too, and `TUnit.Assertions.FSharp` provid
 
 The syntax will feel familiar. For example, xUnit's `[Fact]` becomes `[Test]`, and `[Theory]` + `[InlineData]` becomes `[Test]` + `[Arguments]`. See the migration guides for full details: [xUnit](https://tunit.dev/docs/migration/xunit) · [NUnit](https://tunit.dev/docs/migration/nunit) · [MSTest](https://tunit.dev/docs/migration/mstest).
 
+## Agent skill
+
+The [TUnit skill](skills/tunit/SKILL.md) helps coding agents write, migrate, and troubleshoot TUnit tests. It loads only the relevant Markdown pages from [tunit.dev](https://tunit.dev), keeping detailed examples and API guidance in the documentation rather than duplicating them in the skill. Network access is required to fetch those pages.
+
+With a GitHub CLI version that supports [`gh skill`](https://cli.github.com/manual/gh_skill):
+
+```sh
+gh skill preview thomhurst/TUnit tunit
+gh skill install thomhurst/TUnit tunit
+```
+
+Use `--agent` and `--scope` to choose the installation target. Installation defaults to the latest release; until a release includes the skill, append `@main` to `tunit` in both commands to use the default branch. See the [installation options](https://cli.github.com/manual/gh_skill_install).
+
 ## Repository layout
 
 - `src/` — product libraries, analyzers, source generators, integrations, templates, and tools shipped as packages
