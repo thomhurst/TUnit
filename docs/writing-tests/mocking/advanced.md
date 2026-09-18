@@ -530,6 +530,24 @@ features.Get<IFunctionBindingsFeature>().WasCalled(Times.Once);
 
 At build time, each listed reference is swapped — for the compiler only — with a copy whose internals are rewritten to public, preserving the assembly identity. The original assembly still ships and loads; an `IgnoresAccessChecksTo` attribute (honored by the .NET runtime) makes the compiled IL valid against it at execution time. This is the established "publicizer" pattern used by several long-lived OSS tools, wired into the TUnit.Mocks package.
 
+### Editors and design-time builds[​](#editors-and-design-time-builds "Direct link to Editors and design-time builds")
+
+The publicized copy reaches the compiler through the reference list, so editors and IDE tooling see the same internals the build does.
+
+One case needs a nudge: when a listed assembly comes from a `ProjectReference`, tooling that loads projects through Roslyn's MSBuild workspace (the C# language server, OmniSharp, anything on `MSBuildWorkspace`) binds to the referenced *project's* compilation, which has no publicized internals — the build succeeds while the editor underlines every internal type with `CS0122` ([#6836](https://github.com/thomhurst/TUnit/issues/6836)). TUnit therefore detaches that project reference in **design-time builds only**, leaving the publicized copy as the reference for that assembly. Real builds are untouched: the project still builds, copies local, and lands in `deps.json`.
+
+The trade-off is that the referenced project shows up in the editor as a compiled assembly: "go to definition" lands on metadata rather than its source, and edits to it reach the test project after a rebuild. To keep the live project reference instead — and the false `CS0122` reports that come with it — set:
+
+```
+<PropertyGroup>
+
+  <TUnitMocksInternalsAccessDetachDesignTimeProjectReferences>false</TUnitMocksInternalsAccessDetachDesignTimeProjectReferences>
+
+</PropertyGroup>
+```
+
+For a project you own, `[assembly: InternalsVisibleTo]` remains the simpler answer; internals access exists for assemblies you cannot change.
+
 ### Caveats[​](#caveats "Direct link to Caveats")
 
 * **Experimental.** `IgnoresAccessChecksToAttribute` is honored by the runtime but is not a documented public contract.
