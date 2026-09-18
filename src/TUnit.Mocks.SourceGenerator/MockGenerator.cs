@@ -92,8 +92,10 @@ public class MockGenerator : IIncrementalGenerator
 
                 // Flag types that would emit the same generated names before anything is written:
                 // duplicate hint names abort the generator and take every mock in the compilation
-                // with them. See issue #6505.
-                return GeneratedNameCollisionDetector.Annotate(requests);
+                // with them. See issue #6505. One target mocked in several modes is not such a
+                // collision — it just has to agree on who emits the shared member surface (#6834).
+                return SharedMemberSurfaceResolver.Resolve(
+                    GeneratedNameCollisionDetector.Annotate(requests));
             });
 
         // Step 3: Generate source for each unique type
@@ -265,7 +267,18 @@ public class MockGenerator : IIncrementalGenerator
     private static void GenerateWrapMock(SourceProductionContext spc, MockTypeModel model)
     {
         var fileName = GetSafeFileName(model);
-        GenerateImplFactoryMembersAndEvents(spc, model, fileName);
+
+        // The wrap impl and factory are already types of their own (file-scoped `{name}WrapMockImpl`
+        // and `{name}WrapMockFactory`), so a hint name of their own is all they need to coexist with
+        // the regular mock of the same type (#6834).
+        spc.AddSource($"{fileName}_WrapMockImplFactory.g.cs", BuildCombinedImplAndFactory(model));
+
+        // The member surface belongs to the type rather than to the mode, so the regular model
+        // emits it whenever the type is also mocked that way.
+        if (model.EmitsSharedMemberSurface)
+        {
+            GenerateMembersAndEvents(spc, model, fileName);
+        }
     }
 
     private static void GenerateMultiInterfaceMock(SourceProductionContext spc, MockTypeModel model)
@@ -280,6 +293,11 @@ public class MockGenerator : IIncrementalGenerator
         var implFactorySource = BuildCombinedImplAndFactory(model);
         spc.AddSource($"{fileName}_MockImplFactory.g.cs", implFactorySource);
 
+        GenerateMembersAndEvents(spc, model, fileName);
+    }
+
+    private static void GenerateMembersAndEvents(SourceProductionContext spc, MockTypeModel model, string fileName)
+    {
         var membersSource = MockMembersBuilder.Build(model);
         spc.AddSource($"{fileName}_MockMembers.g.cs", membersSource);
 
