@@ -44,6 +44,11 @@
       <!-- Set false when another package already injects IgnoresAccessChecksToAttribute into
            the compilation (would otherwise be a duplicate-type error). -->
       <TUnitMocksInternalsAccessEmitAttributeDefinition Condition="'$(TUnitMocksInternalsAccessEmitAttributeDefinition)' == ''">true</TUnitMocksInternalsAccessEmitAttributeDefinition>
+      <!-- Design-time builds only: detach the project references that were publicized, so
+           Roslyn-workspace tooling reads the publicized copy instead of the referenced
+           project's own (un-publicized) compilation. Set false to keep the live project
+           reference in the editor and accept the false CS0122 reports it produces. -->
+      <TUnitMocksInternalsAccessDetachDesignTimeProjectReferences Condition="'$(TUnitMocksInternalsAccessDetachDesignTimeProjectReferences)' == ''">true</TUnitMocksInternalsAccessDetachDesignTimeProjectReferences>
     </PropertyGroup>
 
     <PublicizeAssemblyReferences
@@ -70,5 +75,25 @@
       <FileWrites Include="@(_TUnitMocksPublicizedReference)" />
       <FileWrites Include="@(_TUnitMocksPublicizedReference->'%(Identity).sig')" />
     </ItemGroup>
+
+    <!-- A publicized reference that came from a ProjectReference is still a live project
+         reference to Roslyn-workspace tooling (MSBuildWorkspace, the C# language server,
+         OmniSharp): those hosts reference the *source compilation* of the referenced project,
+         which has no publicized internals, and report a false CS0122 on every internal type
+         the build accepts. Dropping the reference's compile output at design time — nothing is
+         compiled or copied in a design-time build — leaves the publicized copy as the only
+         reference for that assembly, so the editor sees what Csc sees. Real builds are
+         untouched: the project reference still builds, copies local and lands in deps.json.
+         Only applied to references this run actually publicized, so a failed publicize keeps
+         the project reference intact. -->
+    <ItemGroup Condition="'$(DesignTimeBuild)' == 'true' and '$(TUnitMocksInternalsAccessDetachDesignTimeProjectReferences)' == 'true'">
+      <_TUnitMocksPublicizedProjectFile Include="@(_TUnitMocksPublicizedReference->'%(MSBuildSourceProjectFile)')"
+                                        Condition="'%(_TUnitMocksPublicizedReference.MSBuildSourceProjectFile)' != ''" />
+      <ProjectReference Update="@(_TUnitMocksPublicizedProjectFile)" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <Message Importance="Low"
+             Condition="'@(_TUnitMocksPublicizedProjectFile)' != ''"
+             Text="TUnitMocksInternalsAccess: design-time build, detached publicized project reference(s): @(_TUnitMocksPublicizedProjectFile)" />
   </Target>
 </Project>
