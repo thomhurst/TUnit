@@ -101,8 +101,10 @@ internal static class MemberDiscovery
     /// <param name="slotHasGetter">/<param name="slotHasSetter">: the accessors declared by the
     /// shadowed slot itself, so the wrapper forward for it emits only those (asymmetric <c>new</c>
     /// hiding — CS0550, #6263). Both true for methods, where accessor presence is irrelevant.</param>
+    /// <param name="slotIsInitOnly">Whether the slot's setter is an <c>init</c> accessor, which the
+    /// forward has to match exactly (CS8855, #6829). Irrelevant for methods, hence the default.</param>
     private static void RecordAdditionalWrapperInterface(List<MockMemberModel> members, int index, string interfaceFqn,
-        bool slotHasGetter, bool slotHasSetter)
+        bool slotHasGetter, bool slotHasSetter, bool slotIsInitOnly = false)
     {
         var existing = members[index];
         var ownSlot = existing.ExplicitInterfaceName ?? existing.DeclaringInterfaceName;
@@ -113,7 +115,8 @@ internal static class MemberDiscovery
         {
             InterfaceName = interfaceFqn,
             HasGetter = slotHasGetter,
-            HasSetter = slotHasSetter
+            HasSetter = slotHasSetter,
+            IsInitOnly = slotIsInitOnly
         };
         members[index] = existing with
         {
@@ -296,7 +299,8 @@ internal static class MemberDiscovery
                                     // the accessors this slot declares (#6263).
                                     RecordAdditionalWrapperInterface(state.Properties, existingIndex.Value, interfaceFqn,
                                         IsAccessorAccessible(property.GetMethod, compilationAssembly),
-                                        IsAccessorAccessible(property.SetMethod, compilationAssembly));
+                                        IsAccessorAccessible(property.SetMethod, compilationAssembly),
+                                        property.SetMethod?.IsInitOnly == true);
                                 }
                                 // else: class-primary walk and the existing member already covers
                                 // every accessor the interface needs — plain dedup.
@@ -332,7 +336,8 @@ internal static class MemberDiscovery
                                 {
                                     RecordAdditionalWrapperInterface(state.Properties, existingIndex.Value, interfaceFqn,
                                         IsAccessorAccessible(indexer.GetMethod, compilationAssembly),
-                                        IsAccessorAccessible(indexer.SetMethod, compilationAssembly));
+                                        IsAccessorAccessible(indexer.SetMethod, compilationAssembly),
+                                        indexer.SetMethod?.IsInitOnly == true);
                                 }
                             }
                             else if (primaryClassSymbol is not null && state.SeenExplicitImpls.Add($"{interfaceFqn}|{key}"))
@@ -782,6 +787,10 @@ internal static class MemberDiscovery
         {
             HasGetter = existing.HasGetter || newGetterAccessible,
             HasSetter = existing.HasSetter || newSetterAccessible,
+            // The merged member's accessor kind follows whichever slot contributed the setter; a
+            // slot that only widens an already-present setter cannot change it (#6829).
+            IsInitOnly = existing.HasSetter ? existing.IsInitOnly
+                : newSetterAccessible ? newProperty.SetMethod?.IsInitOnly == true : existing.IsInitOnly,
             SetterMemberId = existing.HasSetter ? existing.SetterMemberId
                 : newSetterAccessible ? memberIdCounter++ : existing.SetterMemberId
         };
@@ -814,6 +823,7 @@ internal static class MemberDiscovery
             IsProperty = true,
             HasGetter = hasGetter,
             HasSetter = hasSetter,
+            IsInitOnly = hasSetter && property.SetMethod?.IsInitOnly == true,
             OwnHasGetter = hasGetter,
             OwnHasSetter = hasSetter,
             SetterMemberId = setterId,
@@ -937,6 +947,7 @@ internal static class MemberDiscovery
             IsIndexer = true,
             HasGetter = hasGetter,
             HasSetter = hasSetter,
+            IsInitOnly = hasSetter && indexer.SetMethod?.IsInitOnly == true,
             OwnHasGetter = hasGetter,
             OwnHasSetter = hasSetter,
             Parameters = new EquatableArray<MockParameterModel>(

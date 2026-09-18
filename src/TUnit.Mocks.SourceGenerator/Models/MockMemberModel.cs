@@ -18,6 +18,14 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public bool IsProperty { get; init; }
     public bool HasGetter { get; init; }
     public bool HasSetter { get; init; }
+    /// <summary>
+    /// Whether the setter is an <c>init</c> accessor rather than a <c>set</c> accessor. The
+    /// implementation must match the interface/base slot exactly or the build fails with
+    /// CS8854/CS8855 (#6829), so every emitted accessor keys off this flag. An init-only property
+    /// can only be assigned on <c>this</c>/<c>base</c>, which also rules out the wrapped-instance
+    /// and wrapper-forward assignments the <c>set</c> paths emit (CS8852).
+    /// </summary>
+    public bool IsInitOnly { get; init; }
     public int SetterMemberId { get; init; }
     public bool IsIndexer { get; init; }
     public bool IsGenericMethod { get; init; }
@@ -158,6 +166,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && IsProperty == other.IsProperty
             && HasGetter == other.HasGetter
             && HasSetter == other.HasSetter
+            && IsInitOnly == other.IsInitOnly
             && SetterMemberId == other.SetterMemberId
             && IsIndexer == other.IsIndexer
             && IsGenericMethod == other.IsGenericMethod
