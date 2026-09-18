@@ -39,6 +39,17 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     public bool IsSecondaryMemberSurface { get; init; }
 
     /// <summary>
+    /// Whether this model emits the type's setup/verification surface (<c>_MockMembers.g.cs</c> and
+    /// <c>_MockEvents.g.cs</c>). That surface describes the mocked type, not the way it is
+    /// constructed, and its extension class is not <c>file</c>-scoped — so when one type is mocked
+    /// in more than one mode (<c>Mock.Of&lt;T&gt;</c> and <c>Mock.Wrap</c> of the same T), exactly
+    /// one of the models owns it and the others emit only their own impl and factory (#6834).
+    /// Assigned by <see cref="Discovery.SharedMemberSurfaceResolver"/>; true for every model that
+    /// has no competing sibling.
+    /// </summary>
+    public bool EmitsSharedMemberSurface { get; init; } = true;
+
+    /// <summary>
     /// On multi-type models only: one entry per <see cref="AdditionalInterfaceNames"/> element,
     /// mapping that interface's standalone member IDs (the pair surface's local ordinals,
     /// indexed positionally) to this combo's union member IDs (-1 = unmapped). Emitted into the
@@ -107,6 +118,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && Constructors.Equals(other.Constructors)
             && HasStaticAbstractMembers == other.HasStaticAbstractMembers
             && IsSecondaryMemberSurface == other.IsSecondaryMemberSurface
+            && EmitsSharedMemberSurface == other.EmitsSharedMemberSurface
             && CollidesWith == other.CollidesWith
             && SecondaryMemberIdMaps.Equals(other.SecondaryMemberIdMaps);
     }

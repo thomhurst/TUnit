@@ -65,7 +65,7 @@ internal static class GeneratedNameCollisionDetector
             // reaches this point as separate models sharing an identity. Only distinct targets
             // meeting at one name are a #6505 collision.
             var others = group
-                .Where(other => Identity(other.Model) != Identity(model))
+                .Where(other => MockTypeIdentity.Of(other.Model) != MockTypeIdentity.Of(model))
                 .Select(other => other.Model.FullyQualifiedName)
                 .Distinct()
                 .ToList();
@@ -77,9 +77,4 @@ internal static class GeneratedNameCollisionDetector
 
         return annotated;
     }
-
-    private static string Identity(MockTypeModel model)
-        => model.AdditionalInterfaceNames.Length == 0
-            ? model.FullyQualifiedName
-            : model.FullyQualifiedName + "|" + string.Join("|", model.AdditionalInterfaceNames);
 }
