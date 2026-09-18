@@ -65,9 +65,48 @@ public class Issue6829Tests : SnapshotTestBase
         }
         """;
 
+    // Same signature, different setter kinds: neither slot can be dropped and one member cannot
+    // implement both, so the `set` slot is split off into an explicit interface implementation that
+    // dispatches on the shared member ids.
+    private const string MixedSetterKindsSource = """
+        using TUnit.Mocks;
+
+        namespace TestNamespace;
+
+        public interface IInitSlot
+        {
+            int V { get; init; }
+            string this[int i] { get; init; }
+        }
+
+        public interface ISetSlot
+        {
+            int V { get; set; }
+            string this[int i] { get; set; }
+        }
+
+        public interface IBothSlots : IInitSlot, ISetSlot;
+
+        public class Usage
+        {
+            void M()
+            {
+                _ = Mock.Of<IBothSlots>();
+            }
+        }
+        """;
+
     [Test]
     public Task Interface_With_Init_Only_Members_Emits_Init_Accessors()
         => VerifyGeneratorOutput(InitOnlyInterfaceSource);
+
+    [Test]
+    public Task Clashing_Setter_Kinds_Split_Into_Explicit_Slots()
+        => VerifyGeneratorOutput(MixedSetterKindsSource);
+
+    [Test]
+    public void Clashing_Setter_Kinds_Compile()
+        => AssertMockImplementationsCompile(MixedSetterKindsSource);
 
     [Test]
     public void Init_Only_Members_Compile_For_Every_Mock_Shape()

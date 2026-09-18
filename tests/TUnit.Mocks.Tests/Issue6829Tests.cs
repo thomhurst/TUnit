@@ -49,6 +49,23 @@ public class WrappableInitOnlyProperty
     public virtual int Value { get; init; } = 7;
 }
 
+// Same signature, different setter kinds. Neither slot can be dropped and one member cannot
+// implement both, so the `set` slot becomes an explicit interface implementation that dispatches
+// on the same member ids as the implicit `init` one.
+public interface IInitSlot
+{
+    int V { get; init; }
+    string this[int i] { get; init; }
+}
+
+public interface ISetSlot
+{
+    int V { get; set; }
+    string this[int i] { get; set; }
+}
+
+public interface IBothSetterKinds : IInitSlot, ISetSlot;
+
 #endregion
 
 public class Issue6829Tests
@@ -139,6 +156,47 @@ public class Issue6829Tests
         mock.Value.Returns(21);
 
         await Assert.That(mock.Object.Value).IsEqualTo(21);
+    }
+
+    [Test]
+    public async Task Clashing_Setter_Kinds_Serve_Both_Slots_From_One_Setup()
+    {
+        var mock = IBothSetterKinds.Mock();
+        mock.V.Returns(5);
+        mock.Item(2).Returns("two");
+
+        // One setup covers both slots — the explicit `set` slot shares the implicit slot's ids.
+        await Assert.That(((IInitSlot)mock.Object).V).IsEqualTo(5);
+        await Assert.That(((ISetSlot)mock.Object).V).IsEqualTo(5);
+        await Assert.That(((IInitSlot)mock.Object)[2]).IsEqualTo("two");
+        await Assert.That(((ISetSlot)mock.Object)[2]).IsEqualTo("two");
+    }
+
+    [Test]
+    public async Task Clashing_Setter_Kinds_Verify_Through_The_Shared_Member()
+    {
+        var mock = IBothSetterKinds.Mock();
+
+        ((ISetSlot)mock.Object).V = 9;
+        ((ISetSlot)mock.Object)[1] = "one";
+
+        mock.V.Set(9).WasCalled();
+        mock.SetItem(1, "one").WasCalled();
+
+        await Assert.That(mock.Invocations).HasCount(2);
+    }
+
+    [Test]
+    public async Task Clashing_Setter_Kinds_Are_Reachable_Through_The_Typed_Wrapper()
+    {
+        var mock = IBothSetterKinds.Mock();
+        mock.V.Returns(4);
+
+        IBothSetterKinds asInterface = mock;
+        ((ISetSlot)asInterface).V = 7;
+
+        await Assert.That(((IInitSlot)asInterface).V).IsEqualTo(4);
+        mock.V.Set(7).WasCalled();
     }
 
     [Test]

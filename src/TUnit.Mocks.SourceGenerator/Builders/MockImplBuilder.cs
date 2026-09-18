@@ -1110,7 +1110,12 @@ internal static class MockImplBuilder
     {
         var paramList = FormatIndexerParameterList(prop);
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
-        writer.AppendLine($"public {prop.ReturnType} this[{paramList}]");
+        // An explicit slot dispatches on the same member ids as the implicit indexer, but it has to
+        // be declared explicitly: the two differ only in accessor kind, so declaring both publicly
+        // would be a duplicate member (CS0111, #6829).
+        writer.AppendLine(prop.ExplicitInterfaceName is not null
+            ? $"{prop.ReturnType} {prop.ExplicitInterfaceName}.this[{paramList}]"
+            : $"public {prop.ReturnType} this[{paramList}]");
         writer.OpenBrace();
 
         if (prop.HasGetter)

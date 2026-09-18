@@ -134,7 +134,7 @@ internal static class MockWrapperTypeBuilder
         var interfaceName = GetForwardingInterfaceName(prop, model);
         // The primary forward emits the declaring slot's OWN accessors, not the merged set, so an
         // asymmetric `new`-hidden slot doesn't gain an accessor it never declared (CS0550, #6263).
-        EmitPropertyForward(writer, prop, interfaceName, GetPrimaryTarget(prop, interfaceName), prop.OwnHasGetter, prop.OwnHasSetter, prop.IsInitOnly);
+        EmitPropertyForward(writer, prop, interfaceName, GetPrimaryTarget(prop, interfaceName, model), prop.OwnHasGetter, prop.OwnHasSetter, prop.IsInitOnly);
 
         foreach (var extra in prop.AdditionalExplicitSlots)
         {
@@ -168,7 +168,7 @@ internal static class MockWrapperTypeBuilder
     private static void GenerateIndexerForwarding(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
         var interfaceName = GetForwardingInterfaceName(prop, model);
-        EmitIndexerForward(writer, prop, interfaceName, GetPrimaryTarget(prop, interfaceName), prop.OwnHasGetter, prop.OwnHasSetter, prop.IsInitOnly);
+        EmitIndexerForward(writer, prop, interfaceName, GetPrimaryTarget(prop, interfaceName, model), prop.OwnHasGetter, prop.OwnHasSetter, prop.IsInitOnly);
 
         foreach (var extra in prop.AdditionalExplicitSlots)
         {
@@ -219,10 +219,25 @@ internal static class MockWrapperTypeBuilder
     // to the slot's interface when the member is an explicit interface impl on the underlying object,
     // or when it also satisfies other slots — otherwise `Object.X` may be ambiguous (CS0121) or bind
     // to the wrong slot (#6252).
-    private static string GetPrimaryTarget(MockMemberModel member, string interfaceName)
-        => member.ExplicitInterfaceName is not null || member.AdditionalExplicitSlots.Length > 0
+    private static string GetPrimaryTarget(MockMemberModel member, string interfaceName, MockTypeModel? model = null)
+        => member.ExplicitInterfaceName is not null
+            || member.AdditionalExplicitSlots.Length > 0
+            || (model is not null && HasExplicitSiblingSlot(member, model))
             ? CastTarget(interfaceName)
             : "Object";
+
+    /// <summary>
+    /// Whether another property or indexer of the same shape is implemented explicitly for a
+    /// different interface — the case where two slots share a signature but cannot share one member
+    /// (clashing <c>set</c>/<c>init</c> accessor kinds, #6829). <c>Object.X</c> is ambiguous across
+    /// those two slots, so the implicit member's forward has to name the slot it targets.
+    /// </summary>
+    private static bool HasExplicitSiblingSlot(MockMemberModel member, MockTypeModel model)
+        => member.ExplicitInterfaceName is null
+            && model.Properties.Any(other => other.ExplicitInterfaceName is not null
+                && other.IsIndexer == member.IsIndexer
+                && other.Name == member.Name
+                && other.ReturnType == member.ReturnType);
 
     private static string GetAccessorObsoletePrefix(string obsoleteAttribute)
         => obsoleteAttribute.Length > 0 ? obsoleteAttribute + " " : "";

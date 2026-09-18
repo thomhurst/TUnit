@@ -279,6 +279,17 @@ internal static class MemberDiscovery
                                     // Signature collision with different return type → explicit interface impl
                                     state.Properties.Add(Tag(CreatePropertyModel(property, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, compilationAssembly, compilation), ownerTypeIndex));
                                 }
+                                else if (HasSetterKindCollision(existingProp, property, compilationAssembly))
+                                {
+                                    // Same signature, different setter kinds (`set` vs `init`) — one
+                                    // member cannot implement both slots, because each implementation
+                                    // has to match its slot's accessor kind (CS8854/CS8855, #6829).
+                                    // This slot gets its own explicit impl instead of being merged.
+                                    if (state.SeenExplicitImpls.Add($"{interfaceFqn}|{key}"))
+                                    {
+                                        state.Properties.Add(Tag(CreateExplicitSlotAlias(property, existingProp, interfaceFqn, compilationAssembly, compilation), ownerTypeIndex));
+                                    }
+                                }
                                 else if (primaryClassSymbol is not null
                                     && ((!existingProp.HasGetter && property.GetMethod is not null)
                                         || (!existingProp.HasSetter && property.SetMethod is not null)))
@@ -326,7 +337,16 @@ internal static class MemberDiscovery
                         var key = $"I:[{paramTypes}]";
                         if (state.SeenProperties.TryGetValue(key, out var existingIndex))
                         {
-                            if (existingIndex.HasValue)
+                            if (existingIndex.HasValue
+                                && HasSetterKindCollision(state.Properties[existingIndex.Value], indexer, compilationAssembly))
+                            {
+                                // See the property case: clashing setter kinds can't share a member.
+                                if (state.SeenExplicitImpls.Add($"{interfaceFqn}|{key}"))
+                                {
+                                    state.Properties.Add(Tag(CreateExplicitSlotAlias(indexer, state.Properties[existingIndex.Value], interfaceFqn, compilationAssembly, compilation), ownerTypeIndex));
+                                }
+                            }
+                            else if (existingIndex.HasValue)
                             {
                                 MergePropertyAccessors(state.Properties, existingIndex.Value, indexer, ref state.MemberIdCounter, compilationAssembly);
                                 // Distinct indexer slot hidden by `new` (or inherited twice) — the
@@ -794,6 +814,34 @@ internal static class MemberDiscovery
             SetterMemberId = existing.HasSetter ? existing.SetterMemberId
                 : newSetterAccessible ? memberIdCounter++ : existing.SetterMemberId
         };
+    }
+
+    /// <summary>
+    /// Whether <paramref name="property"/> declares a setter of a different kind (<c>set</c> vs
+    /// <c>init</c>) than the member already collected for the same signature. Such slots cannot
+    /// share one implicit implementation — an implementation has to match its slot's accessor kind
+    /// exactly — so the caller gives this slot its own explicit interface implementation (#6829).
+    /// </summary>
+    private static bool HasSetterKindCollision(MockMemberModel existing, IPropertySymbol property,
+        IAssemblySymbol? compilationAssembly)
+        => existing.HasSetter
+            && IsAccessorAccessible(property.SetMethod, compilationAssembly)
+            && existing.IsInitOnly != property.SetMethod!.IsInitOnly;
+
+    /// <summary>
+    /// Builds an explicit-interface model for a slot that cannot share the implicit member's
+    /// accessors. It keeps the shared member's ids, so both slots dispatch on one logical member
+    /// and a single setup or verification still covers whichever slot the caller goes through.
+    /// </summary>
+    private static MockMemberModel CreateExplicitSlotAlias(IPropertySymbol property, MockMemberModel shared,
+        string interfaceFqn, IAssemblySymbol? compilationAssembly, Compilation compilation)
+    {
+        var unusedIds = 0;
+        var model = property.IsIndexer
+            ? CreateIndexerModel(property, ref unusedIds, interfaceFqn, interfaceFqn, compilationAssembly, compilation)
+            : CreatePropertyModel(property, ref unusedIds, interfaceFqn, interfaceFqn, compilationAssembly, compilation);
+
+        return model with { MemberId = shared.MemberId, SetterMemberId = shared.SetterMemberId };
     }
 
     /// <summary>
