@@ -26,6 +26,14 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     /// and wrapper-forward assignments the <c>set</c> paths emit (CS8852).
     /// </summary>
     public bool IsInitOnly { get; init; }
+    /// <summary>
+    /// Whether this member is an explicit interface implementation that reuses another member's
+    /// ids rather than owning its own. Emitted when two slots share a signature but cannot share
+    /// one implementation (clashing <c>set</c>/<c>init</c> accessor kinds, #6829): both dispatch on
+    /// one logical member, so the alias must not also claim the setup and verification surface —
+    /// that member already generates it, and a second copy would be a duplicate overload (CS0111).
+    /// </summary>
+    public bool IsSharedSlotAlias { get; init; }
     public int SetterMemberId { get; init; }
     public bool IsIndexer { get; init; }
     public bool IsGenericMethod { get; init; }
@@ -167,6 +175,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && HasGetter == other.HasGetter
             && HasSetter == other.HasSetter
             && IsInitOnly == other.IsInitOnly
+            && IsSharedSlotAlias == other.IsSharedSlotAlias
             && SetterMemberId == other.SetterMemberId
             && IsIndexer == other.IsIndexer
             && IsGenericMethod == other.IsGenericMethod

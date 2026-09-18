@@ -841,7 +841,12 @@ internal static class MemberDiscovery
             ? CreateIndexerModel(property, ref unusedIds, interfaceFqn, interfaceFqn, compilationAssembly, compilation)
             : CreatePropertyModel(property, ref unusedIds, interfaceFqn, interfaceFqn, compilationAssembly, compilation);
 
-        return model with { MemberId = shared.MemberId, SetterMemberId = shared.SetterMemberId };
+        return model with
+        {
+            MemberId = shared.MemberId,
+            SetterMemberId = shared.SetterMemberId,
+            IsSharedSlotAlias = true
+        };
     }
 
     /// <summary>

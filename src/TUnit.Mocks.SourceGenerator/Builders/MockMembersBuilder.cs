@@ -133,14 +133,14 @@ internal static class MockMembersBuilder
 
                 // Indexers -- expose as Item(...)/SetItem(..., value) extension methods so
                 // setups and verifications can target distinct index values independently.
-                // Each indexer overload (different parameter signature) gets its own pair.
-                // Explicit implementations are skipped for the same reason as explicit properties:
-                // they are forwarding shims sharing the implicit member's ids, so generating their
-                // own Item/SetItem would duplicate an existing overload (CS0111, #6829).
+                // Each indexer overload (different parameter signature) gets its own pair, except
+                // an alias sharing another indexer's ids — that indexer already generates the pair,
+                // and a second copy would be a duplicate overload (CS0111, #6829). An explicit
+                // indexer that owns its ids keeps its own surface.
                 var indexers = model.Properties
                     .Where(p => p.IsIndexer
                         && p.IsSignatureAccessibleFromAssembly
-                        && p.ExplicitInterfaceName is null
+                        && !p.IsSharedSlotAlias
                         && !p.IsStaticAbstract
                         && !p.IsRefStructReturn
                         && !p.IsReturnTypeStaticAbstractInterface)

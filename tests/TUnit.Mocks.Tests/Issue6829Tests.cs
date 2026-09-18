@@ -66,6 +66,23 @@ public interface ISetSlot
 
 public interface IBothSetterKinds : IInitSlot, ISetSlot;
 
+// An explicit indexer that owns its member ids, rather than aliasing another one: the class
+// implements the interface indexer non-virtually, so the mock can only intercept it by
+// re-implementing the interface explicitly. Its setup surface must survive.
+public interface IIndexedService
+{
+    string this[int index] { get; set; }
+}
+
+public class BlockingIndexerService : IIndexedService
+{
+    public string this[int index]
+    {
+        get => $"real-{index}";
+        set { }
+    }
+}
+
 #endregion
 
 public class Issue6829Tests
@@ -197,6 +214,18 @@ public class Issue6829Tests
 
         await Assert.That(((IInitSlot)asInterface).V).IsEqualTo(4);
         mock.V.Set(7).WasCalled();
+    }
+
+    [Test]
+    public async Task Explicit_Indexer_Owning_Its_Ids_Keeps_Its_Setup_Surface()
+    {
+        var mock = Mock.Of<BlockingIndexerService, IIndexedService>();
+        mock.Item(1).Returns("mocked");
+
+        await Assert.That(((IIndexedService)mock.Object)[1]).IsEqualTo("mocked");
+
+        ((IIndexedService)mock.Object)[2] = "written";
+        mock.SetItem(2, "written").WasCalled();
     }
 
     [Test]
