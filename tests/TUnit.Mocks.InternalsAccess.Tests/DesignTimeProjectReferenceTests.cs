@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security;
 using System.Text;
 using System.Text.Json;
 using Task = System.Threading.Tasks.Task;
@@ -115,13 +116,13 @@ public class DesignTimeProjectReferenceTests
                    <PropertyGroup>
                      <TargetFramework>{TargetFramework}</TargetFramework>
                      <TUnitMocksExperimentalInternalsAccess>true</TUnitMocksExperimentalInternalsAccess>
-                     <TUnitMocksInternalsAccessTasksAssembly>{TasksAssembly}</TUnitMocksInternalsAccessTasksAssembly>
+                     <TUnitMocksInternalsAccessTasksAssembly>{Xml(TasksAssembly)}</TUnitMocksInternalsAccessTasksAssembly>
                    </PropertyGroup>
                    <ItemGroup>
                      <TUnitMocksInternalsAccess Include="{LibraryAssemblyName}" />
                      <ProjectReference Include="..\lib\lib.csproj" />
                    </ItemGroup>
-                   <Import Project="{TargetsFile}" />
+                   <Import Project="{Xml(TargetsFile)}" />
                  </Project>
                  """);
 
@@ -138,9 +139,24 @@ public class DesignTimeProjectReferenceTests
                   """);
 
             var probeProject = Path.Combine(probe, "probe.csproj");
-            await RunAsync("build", probeProject);
+
+            try
+            {
+                await RunAsync("build", probeProject);
+            }
+            catch
+            {
+                Directory.Delete(root, recursive: true);
+                throw;
+            }
+
             return new Scenario(root, probeProject);
         }
+
+        /// <summary>
+        /// A checkout path may legally contain characters that are markup in a project file.
+        /// </summary>
+        private static string Xml(string path) => SecurityElement.Escape(path);
 
         public ValueTask DisposeAsync()
         {
@@ -219,7 +235,13 @@ public class DesignTimeProjectReferenceTests
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 // A reused MSBuild node keeps the task assembly — this test project's own build
-                // output — loaded and locked for the next build in this repository.
+                // output — loaded and locked for the next build in this repository. The MSBuild
+                // server outlives the process entirely and holds the same lock, so both are off.
+                Environment =
+                {
+                    ["MSBUILDUSESERVER"] = "0",
+                    ["MSBUILDDISABLENODEREUSE"] = "1",
+                },
                 ArgumentList = { verb, project, "-nologo", "-nr:false" },
             };
 
