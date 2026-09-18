@@ -200,7 +200,7 @@ public class Issue6829Tests
         mock.V.Set(9).WasCalled();
         mock.SetItem(1, "one").WasCalled();
 
-        await Assert.That(mock.Invocations).HasCount(2);
+        await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(2);
     }
 
     [Test]
