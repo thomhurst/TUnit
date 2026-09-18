@@ -101,8 +101,10 @@ internal static class MemberDiscovery
     /// <param name="slotHasGetter">/<param name="slotHasSetter">: the accessors declared by the
     /// shadowed slot itself, so the wrapper forward for it emits only those (asymmetric <c>new</c>
     /// hiding — CS0550, #6263). Both true for methods, where accessor presence is irrelevant.</param>
+    /// <param name="slotIsInitOnly">Whether the slot's setter is an <c>init</c> accessor, which the
+    /// forward has to match exactly (CS8855, #6829). Irrelevant for methods, hence the default.</param>
     private static void RecordAdditionalWrapperInterface(List<MockMemberModel> members, int index, string interfaceFqn,
-        bool slotHasGetter, bool slotHasSetter)
+        bool slotHasGetter, bool slotHasSetter, bool slotIsInitOnly = false)
     {
         var existing = members[index];
         var ownSlot = existing.ExplicitInterfaceName ?? existing.DeclaringInterfaceName;
@@ -113,7 +115,8 @@ internal static class MemberDiscovery
         {
             InterfaceName = interfaceFqn,
             HasGetter = slotHasGetter,
-            HasSetter = slotHasSetter
+            HasSetter = slotHasSetter,
+            IsInitOnly = slotIsInitOnly
         };
         members[index] = existing with
         {
@@ -276,6 +279,17 @@ internal static class MemberDiscovery
                                     // Signature collision with different return type → explicit interface impl
                                     state.Properties.Add(Tag(CreatePropertyModel(property, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, compilationAssembly, compilation), ownerTypeIndex));
                                 }
+                                else if (HasSetterKindCollision(existingProp, property, compilationAssembly))
+                                {
+                                    // Same signature, different setter kinds (`set` vs `init`) — one
+                                    // member cannot implement both slots, because each implementation
+                                    // has to match its slot's accessor kind (CS8854/CS8855, #6829).
+                                    // This slot gets its own explicit impl instead of being merged.
+                                    if (state.SeenExplicitImpls.Add($"{interfaceFqn}|{key}"))
+                                    {
+                                        state.Properties.Add(Tag(CreateExplicitSlotAlias(property, existingProp, interfaceFqn, compilationAssembly, compilation), ownerTypeIndex));
+                                    }
+                                }
                                 else if (primaryClassSymbol is not null
                                     && ((!existingProp.HasGetter && property.GetMethod is not null)
                                         || (!existingProp.HasSetter && property.SetMethod is not null)))
@@ -296,7 +310,8 @@ internal static class MemberDiscovery
                                     // the accessors this slot declares (#6263).
                                     RecordAdditionalWrapperInterface(state.Properties, existingIndex.Value, interfaceFqn,
                                         IsAccessorAccessible(property.GetMethod, compilationAssembly),
-                                        IsAccessorAccessible(property.SetMethod, compilationAssembly));
+                                        IsAccessorAccessible(property.SetMethod, compilationAssembly),
+                                        property.SetMethod?.IsInitOnly == true);
                                 }
                                 // else: class-primary walk and the existing member already covers
                                 // every accessor the interface needs — plain dedup.
@@ -322,7 +337,16 @@ internal static class MemberDiscovery
                         var key = $"I:[{paramTypes}]";
                         if (state.SeenProperties.TryGetValue(key, out var existingIndex))
                         {
-                            if (existingIndex.HasValue)
+                            if (existingIndex.HasValue
+                                && HasSetterKindCollision(state.Properties[existingIndex.Value], indexer, compilationAssembly))
+                            {
+                                // See the property case: clashing setter kinds can't share a member.
+                                if (state.SeenExplicitImpls.Add($"{interfaceFqn}|{key}"))
+                                {
+                                    state.Properties.Add(Tag(CreateExplicitSlotAlias(indexer, state.Properties[existingIndex.Value], interfaceFqn, compilationAssembly, compilation), ownerTypeIndex));
+                                }
+                            }
+                            else if (existingIndex.HasValue)
                             {
                                 MergePropertyAccessors(state.Properties, existingIndex.Value, indexer, ref state.MemberIdCounter, compilationAssembly);
                                 // Distinct indexer slot hidden by `new` (or inherited twice) — the
@@ -332,7 +356,8 @@ internal static class MemberDiscovery
                                 {
                                     RecordAdditionalWrapperInterface(state.Properties, existingIndex.Value, interfaceFqn,
                                         IsAccessorAccessible(indexer.GetMethod, compilationAssembly),
-                                        IsAccessorAccessible(indexer.SetMethod, compilationAssembly));
+                                        IsAccessorAccessible(indexer.SetMethod, compilationAssembly),
+                                        indexer.SetMethod?.IsInitOnly == true);
                                 }
                             }
                             else if (primaryClassSymbol is not null && state.SeenExplicitImpls.Add($"{interfaceFqn}|{key}"))
@@ -782,8 +807,45 @@ internal static class MemberDiscovery
         {
             HasGetter = existing.HasGetter || newGetterAccessible,
             HasSetter = existing.HasSetter || newSetterAccessible,
+            // The merged member's accessor kind follows whichever slot contributed the setter; a
+            // slot that only widens an already-present setter cannot change it (#6829).
+            IsInitOnly = existing.HasSetter ? existing.IsInitOnly
+                : newSetterAccessible ? newProperty.SetMethod?.IsInitOnly == true : existing.IsInitOnly,
             SetterMemberId = existing.HasSetter ? existing.SetterMemberId
                 : newSetterAccessible ? memberIdCounter++ : existing.SetterMemberId
+        };
+    }
+
+    /// <summary>
+    /// Whether <paramref name="property"/> declares a setter of a different kind (<c>set</c> vs
+    /// <c>init</c>) than the member already collected for the same signature. Such slots cannot
+    /// share one implicit implementation — an implementation has to match its slot's accessor kind
+    /// exactly — so the caller gives this slot its own explicit interface implementation (#6829).
+    /// </summary>
+    private static bool HasSetterKindCollision(MockMemberModel existing, IPropertySymbol property,
+        IAssemblySymbol? compilationAssembly)
+        => existing.HasSetter
+            && IsAccessorAccessible(property.SetMethod, compilationAssembly)
+            && existing.IsInitOnly != property.SetMethod!.IsInitOnly;
+
+    /// <summary>
+    /// Builds an explicit-interface model for a slot that cannot share the implicit member's
+    /// accessors. It keeps the shared member's ids, so both slots dispatch on one logical member
+    /// and a single setup or verification still covers whichever slot the caller goes through.
+    /// </summary>
+    private static MockMemberModel CreateExplicitSlotAlias(IPropertySymbol property, MockMemberModel shared,
+        string interfaceFqn, IAssemblySymbol? compilationAssembly, Compilation compilation)
+    {
+        var unusedIds = 0;
+        var model = property.IsIndexer
+            ? CreateIndexerModel(property, ref unusedIds, interfaceFqn, interfaceFqn, compilationAssembly, compilation)
+            : CreatePropertyModel(property, ref unusedIds, interfaceFqn, interfaceFqn, compilationAssembly, compilation);
+
+        return model with
+        {
+            MemberId = shared.MemberId,
+            SetterMemberId = shared.SetterMemberId,
+            IsSharedSlotAlias = true
         };
     }
 
@@ -814,6 +876,7 @@ internal static class MemberDiscovery
             IsProperty = true,
             HasGetter = hasGetter,
             HasSetter = hasSetter,
+            IsInitOnly = hasSetter && property.SetMethod?.IsInitOnly == true,
             OwnHasGetter = hasGetter,
             OwnHasSetter = hasSetter,
             SetterMemberId = setterId,
@@ -937,6 +1000,7 @@ internal static class MemberDiscovery
             IsIndexer = true,
             HasGetter = hasGetter,
             HasSetter = hasSetter,
+            IsInitOnly = hasSetter && indexer.SetMethod?.IsInitOnly == true,
             OwnHasGetter = hasGetter,
             OwnHasSetter = hasSetter,
             Parameters = new EquatableArray<MockParameterModel>(

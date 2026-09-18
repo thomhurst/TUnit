@@ -16,13 +16,16 @@ internal sealed record MockExplicitInterfaceSlot : IEquatable<MockExplicitInterf
     public string InterfaceName { get; init; } = "";
     public bool HasGetter { get; init; }
     public bool HasSetter { get; init; }
+    /// <summary>Whether this slot's setter is an <c>init</c> accessor (#6829).</summary>
+    public bool IsInitOnly { get; init; }
 
     public bool Equals(MockExplicitInterfaceSlot? other)
     {
         if (other is null) return false;
         return InterfaceName == other.InterfaceName
             && HasGetter == other.HasGetter
-            && HasSetter == other.HasSetter;
+            && HasSetter == other.HasSetter
+            && IsInitOnly == other.IsInitOnly;
     }
 
     public override int GetHashCode()
@@ -33,6 +36,7 @@ internal sealed record MockExplicitInterfaceSlot : IEquatable<MockExplicitInterf
             hash = hash * 31 + InterfaceName.GetHashCode();
             hash = hash * 31 + HasGetter.GetHashCode();
             hash = hash * 31 + HasSetter.GetHashCode();
+            hash = hash * 31 + IsInitOnly.GetHashCode();
             return hash;
         }
     }

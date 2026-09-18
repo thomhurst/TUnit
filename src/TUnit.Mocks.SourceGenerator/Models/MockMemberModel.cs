@@ -18,6 +18,22 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public bool IsProperty { get; init; }
     public bool HasGetter { get; init; }
     public bool HasSetter { get; init; }
+    /// <summary>
+    /// Whether the setter is an <c>init</c> accessor rather than a <c>set</c> accessor. The
+    /// implementation must match the interface/base slot exactly or the build fails with
+    /// CS8854/CS8855 (#6829), so every emitted accessor keys off this flag. An init-only property
+    /// can only be assigned on <c>this</c>/<c>base</c>, which also rules out the wrapped-instance
+    /// and wrapper-forward assignments the <c>set</c> paths emit (CS8852).
+    /// </summary>
+    public bool IsInitOnly { get; init; }
+    /// <summary>
+    /// Whether this member is an explicit interface implementation that reuses another member's
+    /// ids rather than owning its own. Emitted when two slots share a signature but cannot share
+    /// one implementation (clashing <c>set</c>/<c>init</c> accessor kinds, #6829): both dispatch on
+    /// one logical member, so the alias must not also claim the setup and verification surface —
+    /// that member already generates it, and a second copy would be a duplicate overload (CS0111).
+    /// </summary>
+    public bool IsSharedSlotAlias { get; init; }
     public int SetterMemberId { get; init; }
     public bool IsIndexer { get; init; }
     public bool IsGenericMethod { get; init; }
@@ -158,6 +174,8 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && IsProperty == other.IsProperty
             && HasGetter == other.HasGetter
             && HasSetter == other.HasSetter
+            && IsInitOnly == other.IsInitOnly
+            && IsSharedSlotAlias == other.IsSharedSlotAlias
             && SetterMemberId == other.SetterMemberId
             && IsIndexer == other.IsIndexer
             && IsGenericMethod == other.IsGenericMethod

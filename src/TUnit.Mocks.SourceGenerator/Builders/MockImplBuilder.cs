@@ -444,9 +444,12 @@ internal static class MockImplBuilder
                 ? "global::System.Array.Empty<object?>()"
                 : "new object?[] { value }";
 
-            if (prop.IsAbstractMember)
+            // An init-only property cannot be assigned on the wrapped instance (CS8852 — only
+            // `this`/`base` are assignable from an init accessor), so it dispatches without the
+            // pass-through fallback the `set` path has (#6829).
+            if (prop.IsAbstractMember || prop.IsInitOnly)
             {
-                writer.AppendLine($"{setterPrefix}set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
+                writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
             }
             else
             {
@@ -951,7 +954,7 @@ internal static class MockImplBuilder
             if (prop.HasSetter)
             {
                 writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
-                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+                writer.AppendLine($"{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
             }
             writer.CloseBrace();
             return;
@@ -988,11 +991,11 @@ internal static class MockImplBuilder
             if (prop.IsRefStructReturn)
             {
                 // ref struct property — can't box value, use empty args
-                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", global::System.Array.Empty<object?>());");
+                writer.AppendLine($"{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", global::System.Array.Empty<object?>());");
             }
             else
             {
-                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+                writer.AppendLine($"{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
             }
         }
 
@@ -1082,12 +1085,13 @@ internal static class MockImplBuilder
 
             if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"{setterPrefix}set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
+                writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
             }
             else
             {
-                // Virtual property setter: try engine, fall back to base
-                writer.AppendLine($"{setterPrefix}set");
+                // Virtual property setter: try engine, fall back to base (assigning `base` is
+                // allowed from an init accessor, so init-only needs no special case here)
+                writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)}");
                 writer.OpenBrace();
                 writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs}))");
                 writer.AppendLine("{");
@@ -1106,7 +1110,12 @@ internal static class MockImplBuilder
     {
         var paramList = FormatIndexerParameterList(prop);
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
-        writer.AppendLine($"public {prop.ReturnType} this[{paramList}]");
+        // An explicit slot dispatches on the same member ids as the implicit indexer, but it has to
+        // be declared explicitly: the two differ only in accessor kind, so declaring both publicly
+        // would be a duplicate member (CS0111, #6829).
+        writer.AppendLine(prop.ExplicitInterfaceName is not null
+            ? $"{prop.ReturnType} {prop.ExplicitInterfaceName}.this[{paramList}]"
+            : $"public {prop.ReturnType} this[{paramList}]");
         writer.OpenBrace();
 
         if (prop.HasGetter)
@@ -1120,7 +1129,7 @@ internal static class MockImplBuilder
         {
             var setterArgs = GetIndexerSetterArgsArray(prop);
             writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
-            writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
+            writer.AppendLine($"{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
         }
 
         writer.CloseBrace();
@@ -1167,13 +1176,15 @@ internal static class MockImplBuilder
         {
             var setterArgs = GetIndexerSetterArgsArray(prop);
             writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
-            if (prop.IsAbstractMember)
+            // `base[...]` stays assignable from an init accessor, but the wrapped instance does not
+            // (CS8852), so an init-only wrap indexer dispatches without the fallback (#6829).
+            if (prop.IsAbstractMember || (prop.IsInitOnly && fallbackTarget != "base"))
             {
-                writer.AppendLine($"{setterPrefix}set => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
+                writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
             }
             else
             {
-                writer.AppendLine($"{setterPrefix}set");
+                writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)}");
                 writer.OpenBrace();
                 writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs}))");
                 writer.OpenBrace();
@@ -1192,6 +1203,12 @@ internal static class MockImplBuilder
     private static string AccessorPrefix(string accessModifier)
         => accessModifier.Length == 0 ? "" : accessModifier + " ";
 
+    /// <summary>
+    /// The keyword the setter must be emitted with. An <c>init</c> slot has to be implemented by an
+    /// <c>init</c> accessor — a <c>set</c> accessor fails with CS8854/CS8855 (#6829).
+    /// </summary>
+    private static string SetterKeyword(MockMemberModel prop) => prop.IsInitOnly ? "init" : "set";
+
     private static string GetIndexerGetterArgsArray(MockMemberModel indexer)
     {
         if (indexer.Parameters.Length == 0) return "global::System.Array.Empty<object?>()";
@@ -1199,7 +1216,7 @@ internal static class MockImplBuilder
         return $"new object?[] {{ {args} }}";
     }
 
-    private static string GetIndexerSetterArgsArray(MockMemberModel indexer)
+    internal static string GetIndexerSetterArgsArray(MockMemberModel indexer)
     {
         if (indexer.Parameters.Length == 0) return "new object?[] { value }";
         var args = string.Join(", ", indexer.Parameters.Select(p => p.Name)) + ", value";
