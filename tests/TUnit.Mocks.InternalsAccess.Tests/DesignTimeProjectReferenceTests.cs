@@ -20,7 +20,7 @@ public class DesignTimeProjectReferenceTests
     [Test]
     public async Task Design_Time_Build_Detaches_The_Publicized_Project_Reference()
     {
-        var scenario = await Scenario.CreateAsync();
+        await using var scenario = await Scenario.CreateAsync();
 
         var reference = await scenario.QueryProjectReferenceAsync(designTimeBuild: true);
 
@@ -28,9 +28,22 @@ public class DesignTimeProjectReferenceTests
     }
 
     [Test]
+    public async Task Detached_Project_Reference_Still_Compiles_Against_The_Publicized_Copy()
+    {
+        await using var scenario = await Scenario.CreateAsync();
+
+        // The detach must not cost the reference: what the editor reads back is the compiler
+        // command line, and the publicized copy has to be the assembly on it.
+        var references = await scenario.QueryCompilerReferencesAsync(designTimeBuild: true);
+
+        await Assert.That(references).HasSingleItem();
+        await Assert.That(references[0]).Contains(Path.Combine("tunit-mocks-internals"));
+    }
+
+    [Test]
     public async Task Real_Build_Keeps_The_Publicized_Project_Reference()
     {
-        var scenario = await Scenario.CreateAsync();
+        await using var scenario = await Scenario.CreateAsync();
 
         var reference = await scenario.QueryProjectReferenceAsync(designTimeBuild: false);
 
@@ -41,7 +54,7 @@ public class DesignTimeProjectReferenceTests
     [Test]
     public async Task Detaching_Can_Be_Opted_Out_Of()
     {
-        var scenario = await Scenario.CreateAsync();
+        await using var scenario = await Scenario.CreateAsync();
 
         var reference = await scenario.QueryProjectReferenceAsync(
             designTimeBuild: true,
@@ -50,11 +63,17 @@ public class DesignTimeProjectReferenceTests
         await Assert.That(reference).IsEqualTo("");
     }
 
-    private sealed class Scenario
+    private sealed class Scenario : IAsyncDisposable
     {
         private const string LibraryAssemblyName = "DesignTimeSdkLib";
 
-        private Scenario(string probeProject) => ProbeProject = probeProject;
+        private Scenario(string root, string probeProject)
+        {
+            Root = root;
+            ProbeProject = probeProject;
+        }
+
+        private string Root { get; }
 
         private string ProbeProject { get; }
 
@@ -120,7 +139,14 @@ public class DesignTimeProjectReferenceTests
 
             var probeProject = Path.Combine(probe, "probe.csproj");
             await RunAsync("build", probeProject);
-            return new Scenario(probeProject);
+            return new Scenario(root, probeProject);
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            // -nr:false leaves no MSBuild node behind, so nothing still holds the outputs.
+            Directory.Delete(Root, recursive: true);
+            return ValueTask.CompletedTask;
         }
 
         /// <summary>
@@ -128,6 +154,41 @@ public class DesignTimeProjectReferenceTests
         /// ReferenceOutputAssembly metadata the project reference carries afterwards.
         /// </summary>
         public async Task<string> QueryProjectReferenceAsync(bool designTimeBuild, params string[] extraArguments)
+        {
+            var arguments = ArgumentsFor(designTimeBuild);
+
+            arguments.AddRange(extraArguments);
+
+            var items = await QueryItemsAsync("ProjectReference", [.. arguments]);
+            var item = items.EnumerateArray().Single();
+            return item.TryGetProperty("ReferenceOutputAssembly", out var metadata) ? metadata.GetString() ?? "" : "";
+        }
+
+        /// <summary>
+        /// The /reference: arguments the compiler would be invoked with for the publicized
+        /// assembly — what a workspace host reads back as the project's metadata references.
+        /// </summary>
+        public async Task<string[]> QueryCompilerReferencesAsync(bool designTimeBuild)
+        {
+            var items = await QueryItemsAsync("CscCommandLineArgs", [.. ArgumentsFor(designTimeBuild)]);
+
+            return items.EnumerateArray()
+                .Select(item => item.GetProperty("Identity").GetString() ?? "")
+                .Where(argument => argument.StartsWith("/reference:", StringComparison.Ordinal)
+                                   && argument.Contains(LibraryAssemblyName, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+        }
+
+        private async Task<JsonElement> QueryItemsAsync(string itemName, string[] arguments)
+        {
+            var output = await RunAsync("msbuild", ProbeProject, [.. arguments, "-getItem:" + itemName]);
+
+            // -getItem prints JSON, but a warning can still precede it.
+            var document = JsonDocument.Parse(output[output.IndexOf('{')..]);
+            return document.RootElement.GetProperty("Items").GetProperty(itemName);
+        }
+
+        private static List<string> ArgumentsFor(bool designTimeBuild)
         {
             List<string> arguments =
             [
@@ -139,20 +200,16 @@ public class DesignTimeProjectReferenceTests
             if (designTimeBuild)
             {
                 // What an IDE passes: nothing is compiled or copied, so the reference swap is
-                // free to reshape the reference set the workspace reads back.
+                // free to reshape the reference set the workspace reads back. The last two also
+                // drive _ComputeNonExistentFileProperty, which is what makes CoreCompile run
+                // (and so report its command line) even when the outputs are up to date.
                 arguments.Add("-p:DesignTimeBuild=true");
                 arguments.Add("-p:BuildProjectReferences=false");
+                arguments.Add("-p:BuildingInsideVisualStudio=true");
+                arguments.Add("-p:BuildingProject=false");
             }
 
-            arguments.AddRange(extraArguments);
-            arguments.Add("-getItem:ProjectReference");
-
-            var output = await RunAsync("msbuild", ProbeProject, [.. arguments]);
-
-            using var document = JsonDocument.Parse(output[output.IndexOf('{')..]);
-            var items = document.RootElement.GetProperty("Items").GetProperty("ProjectReference");
-            var item = items.EnumerateArray().Single();
-            return item.TryGetProperty("ReferenceOutputAssembly", out var metadata) ? metadata.GetString() ?? "" : "";
+            return arguments;
         }
 
         private static async Task<string> RunAsync(string verb, string project, params string[] arguments)
