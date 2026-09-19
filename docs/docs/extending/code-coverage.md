@@ -110,7 +110,7 @@ dotnet new TUnit -n MyTests --language VB --enable-dotcover
 Or add the package to an existing project:
 
 ```bash
-dotnet package add JetBrains.dotCover.Framework
+dotnet add package JetBrains.dotCover.Framework
 ```
 
 ## Troubleshooting
