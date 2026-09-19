@@ -17,6 +17,12 @@ public class BasicTemplateTests : TemplateTestBase
     }
 
     [Test]
+    public async Task InstantiationTestWithDotCover()
+    {
+        await Engine.Execute(OptionsWithArgs("--enable-dotcover")).ConfigureAwait(false);
+    }
+
+    [Test]
     public async Task InstantiationTestWithFSharp()
     {
         TemplateShortName = "TUnit.FSharp";
@@ -28,5 +34,19 @@ public class BasicTemplateTests : TemplateTestBase
     {
         TemplateShortName = "TUnit.VB";
         await Engine.Execute(Options).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task InstantiationTestWithFSharpDotCover()
+    {
+        TemplateShortName = "TUnit.FSharp";
+        await Engine.Execute(OptionsWithArgs("--enable-dotcover")).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task InstantiationTestWithVBDotCover()
+    {
+        TemplateShortName = "TUnit.VB";
+        await Engine.Execute(OptionsWithArgs("--enable-dotcover")).ConfigureAwait(false);
     }
 }

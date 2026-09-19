@@ -16,6 +16,9 @@
 <!--#if (IsNetFramework) -->
     <PackageReference Include="Polyfill" Version="11.3.0" PrivateAssets="all" />
 <!--#endif -->
+<!--#if (enableDotCover) -->
+    <PackageReference Include="JetBrains.dotCover.Framework" Version="1.0.2" />
+<!--#endif -->
   </ItemGroup>
 
 </Project>

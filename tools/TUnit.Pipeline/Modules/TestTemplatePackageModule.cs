@@ -56,6 +56,39 @@ public class TestTemplatePackageModule : Module<CommandResult>
             LogSettings = logSettings
         }, cancellationToken);
 
+        // Create TUnit project with the opt-in dotCover parameter
+        await context.DotNet().New.Execute(new DotNetNewOptions
+        {
+            TemplateShortName = "TUnit",
+            Name = "MyTestProjectDotCover",
+            TemplateArgs = "--enable-dotcover",
+        }, new CommandExecutionOptions
+        {
+            LogSettings = logSettings
+        }, cancellationToken);
+
+        // Create TUnit.FSharp project with the opt-in dotCover parameter
+        await context.DotNet().New.Execute(new DotNetNewOptions
+        {
+            TemplateShortName = "TUnit.FSharp",
+            Name = "MyTestProjectFSharpDotCover",
+            TemplateArgs = "--enable-dotcover",
+        }, new CommandExecutionOptions
+        {
+            LogSettings = logSettings
+        }, cancellationToken);
+
+        // Create TUnit.VB project with the opt-in dotCover parameter
+        await context.DotNet().New.Execute(new DotNetNewOptions
+        {
+            TemplateShortName = "TUnit.VB",
+            Name = "MyTestProjectVBDotCover",
+            TemplateArgs = "--enable-dotcover",
+        }, new CommandExecutionOptions
+        {
+            LogSettings = logSettings
+        }, cancellationToken);
+
         // Create TUnit.AspNet project
         await context.DotNet().New.Execute(new DotNetNewOptions
         {
