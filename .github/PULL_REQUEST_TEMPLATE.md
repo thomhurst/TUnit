@@ -30,7 +30,7 @@ Fixes #
 
 ### TUnit-Specific Requirements
 
-<!-- These are critical for TUnit contributions - see CLAUDE.md for details -->
+<!-- These are critical for TUnit contributions - see AGENTS.md for details -->
 
 - [ ] **Dual-Mode Implementation**: If this change affects test discovery/execution, I have implemented it in BOTH:
   - [ ] Source Generator path (`TUnit.Core.SourceGenerator`)

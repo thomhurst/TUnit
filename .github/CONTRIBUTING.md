@@ -171,4 +171,4 @@ TUnit is designed to handle millions of tests. When contributing:
 
 All code must work with Native AOT and IL trimming. Add appropriate `[DynamicallyAccessedMembers]` annotations when using reflection.
 
-For detailed development guidelines, see the [CLAUDE.md](https://github.com/thomhurst/TUnit/blob/main/CLAUDE.md) file in the repository root.
+For detailed development guidelines, see the [AGENTS.md](https://github.com/thomhurst/TUnit/blob/main/AGENTS.md) file in the repository root.
