@@ -3,7 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Grpc.Core.Api" Version="2.83.0" />
+    <PackageVersion Include="Grpc.Core.Api" Version="2.84.0" />
     <PackageVersion Include="MassTransit" Version="9.2.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.1.0" />
