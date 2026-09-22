@@ -1434,51 +1434,28 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var attrTypeName = attr.AttributeClass.GloballyQualified();
         var testMethodParameters = methodSymbol.Parameters;
 
-        // Get the attribute syntax to access source text (preserves precision for decimals)
-        var attributeSyntax = attr.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
-        if (attributeSyntax == null)
+        // The application syntax is null for metadata references. For CompilationReferences to other
+        // projects (IDE workspaces) it exists but lives in a tree this compilation does not own: its source
+        // text is still usable for literal extraction, but only a tree in this compilation can provide the
+        // semantic model needed to fully qualify identifiers.
+        var attributeSyntax = attr.GetApplicationSyntax(compilation, out var syntaxIsInCompilation);
+        var semanticModel = attributeSyntax is not null && syntaxIsInCompilation
+            ? compilation.GetSemanticModel(attributeSyntax.SyntaxTree)
+            : null;
+
+        if (semanticModel is null)
         {
-            // No syntax available - fall back to TypedConstant-based formatting
-            var formatter = new TypedConstantFormatter();
-            writer.Append($"new {attrTypeName}(");
-
-            if (attr.ConstructorArguments is
-                [
-                    { Kind: TypedConstantKind.Array } _
-                ])
-            {
-                var arrayValues = attr.ConstructorArguments[0].Values;
-                for (var i = 0; i < arrayValues.Length; i++)
-                {
-                    var targetType = i < testMethodParameters.Length ? testMethodParameters[i].Type : null;
-                    writer.Append(formatter.FormatForCode(arrayValues[i], targetType));
-                    if (i < arrayValues.Length - 1) writer.Append(", ");
-                }
-            }
-            else
-            {
-                for (var i = 0; i < attr.ConstructorArguments.Length; i++)
-                {
-                    var targetType = i < testMethodParameters.Length ? testMethodParameters[i].Type : null;
-                    writer.Append(formatter.FormatForCode(attr.ConstructorArguments[i], targetType));
-                    if (i < attr.ConstructorArguments.Length - 1) writer.Append(", ");
-                }
-            }
-
-            writer.AppendLine("),");
+            GenerateArgumentsAttributeFromTypedConstants(writer, attrTypeName, attr, testMethodParameters, attributeSyntax);
             return;
         }
 
         // Get the argument expressions from syntax
-        var argumentList = attributeSyntax.ArgumentList;
+        var argumentList = attributeSyntax!.ArgumentList;
         if (argumentList == null || argumentList.Arguments.Count == 0)
         {
             writer.AppendLine($"new {attrTypeName}(),");
             return;
         }
-
-        // Get semantic model for rewriting expressions with fully qualified names
-        var semanticModel = compilation.GetSemanticModel(attributeSyntax.SyntaxTree);
 
         writer.Append($"new {attrTypeName}(");
 
@@ -1548,6 +1525,168 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             writer.AppendLine(",");
         }
+    }
+
+    /// <summary>
+    /// Emits an <c>[Arguments]</c> attribute from its <see cref="TypedConstant"/>s, mirroring the object
+    /// initializer shape of the syntax-based path. Used when the attribute has no syntax (metadata
+    /// reference) or when its syntax belongs to another compilation (IDE project reference).
+    /// </summary>
+    /// <param name="foreignSyntax">
+    /// The application syntax when it exists in another compilation. Numeric literals passed to
+    /// <see cref="decimal"/> parameters keep their source text so precision matches same-project
+    /// generation; everything else is formatted from the typed constants.
+    /// </param>
+    private static void GenerateArgumentsAttributeFromTypedConstants(
+        CodeWriter writer,
+        string attrTypeName,
+        AttributeData attr,
+        ImmutableArray<IParameterSymbol> testMethodParameters,
+        AttributeSyntax? foreignSyntax)
+    {
+        // Build into a local buffer so a formatting failure part-way through leaves the shared writer
+        // untouched; the caller's catch block then appends its own fallback to a clean line.
+        var buffer = new CodeWriter(includeHeader: false);
+
+        WriteArgumentsAttributeFromTypedConstants(buffer, attrTypeName, attr, testMethodParameters, foreignSyntax);
+
+        writer.AppendRaw(buffer.ToString());
+    }
+
+    private static void WriteArgumentsAttributeFromTypedConstants(
+        CodeWriter writer,
+        string attrTypeName,
+        AttributeData attr,
+        ImmutableArray<IParameterSymbol> testMethodParameters,
+        AttributeSyntax? foreignSyntax)
+    {
+        var formatter = new TypedConstantFormatter();
+
+        writer.Append($"new {attrTypeName}(");
+
+        if (attr.ConstructorArguments is [{ Kind: TypedConstantKind.Array, IsNull: true }])
+        {
+            // [Arguments(null)] binds null to the params array itself; the constructor turns it into [null].
+            writer.Append("null");
+        }
+        else
+        {
+            var values = attr.ConstructorArguments is [{ Kind: TypedConstantKind.Array } array]
+                ? array.Values
+                : attr.ConstructorArguments;
+
+            // Source text can only be trusted when the syntax arguments line up 1:1 with the values,
+            // i.e. the params-expanded form. [Arguments(new object[] { ... })] has one syntax argument
+            // for many values and must use the typed constants.
+            var positionalSyntax = foreignSyntax?.ArgumentList?.Arguments
+                .Where(a => a.NameEquals is null)
+                .ToArray();
+            var syntaxAligned = positionalSyntax is not null && positionalSyntax.Length == values.Length;
+
+            for (var i = 0; i < values.Length; i++)
+            {
+                var targetType = i < testMethodParameters.Length ? testMethodParameters[i].Type : null;
+
+                if (syntaxAligned
+                    && targetType?.SpecialType == SpecialType.System_Decimal
+                    && TryGetDecimalLiteralText(positionalSyntax![i].Expression, out var decimalLiteral))
+                {
+                    writer.Append(decimalLiteral);
+                }
+                else
+                {
+                    writer.Append(formatter.FormatForCode(values[i], targetType));
+                }
+
+                if (i < values.Length - 1)
+                {
+                    writer.Append(", ");
+                }
+            }
+        }
+
+        writer.Append(")");
+
+        // Named arguments (Skip, DisplayName, Categories, SkipIfEmpty, ...)
+        var namedArguments = attr.NamedArguments;
+        if (namedArguments.Length > 0)
+        {
+            writer.AppendLine();
+            writer.AppendLine("{");
+            writer.Indent();
+
+            for (var i = 0; i < namedArguments.Length; i++)
+            {
+                var namedArgument = namedArguments[i];
+                writer.Append($"{namedArgument.Key} = {TypedConstantParser.GetRawTypedConstantValue(namedArgument.Value)}");
+
+                if (i < namedArguments.Length - 1)
+                {
+                    writer.AppendLine(",");
+                }
+            }
+
+            writer.AppendLine();
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
+        else
+        {
+            writer.AppendLine(",");
+        }
+    }
+
+    /// <summary>
+    /// Extracts a numeric literal (optionally signed) as a <see cref="decimal"/> literal with the
+    /// <c>m</c> suffix, keeping the exact digits from source. Only forms that C# allows for decimal
+    /// literals qualify: plain digits with optional separators, fraction, exponent and a real suffix
+    /// (<c>d</c>/<c>f</c>/<c>m</c>). Hex and binary prefixes and integral suffixes (<c>L</c>, <c>U</c>,
+    /// <c>UL</c>) have no decimal form and must be formatted from their typed constant instead.
+    /// </summary>
+    private static bool TryGetDecimalLiteralText(ExpressionSyntax expression, out string decimalLiteral)
+    {
+        decimalLiteral = string.Empty;
+        var sign = string.Empty;
+
+        if (expression is PrefixUnaryExpressionSyntax unary)
+        {
+            if (unary.IsKind(SyntaxKind.UnaryMinusExpression))
+            {
+                sign = "-";
+            }
+            else if (!unary.IsKind(SyntaxKind.UnaryPlusExpression))
+            {
+                return false;
+            }
+
+            expression = unary.Operand;
+        }
+
+        if (expression is not LiteralExpressionSyntax literal || !literal.IsKind(SyntaxKind.NumericLiteralExpression))
+        {
+            return false;
+        }
+
+        var token = literal.Token.Text;
+
+        if (token.Length > 1 && token[0] == '0' && (token[1] is 'x' or 'X' or 'b' or 'B'))
+        {
+            return false;
+        }
+
+        if (token.Length > 0 && (token[token.Length - 1] is 'd' or 'D' or 'f' or 'F' or 'm' or 'M'))
+        {
+            token = token.Substring(0, token.Length - 1);
+        }
+
+        // Anything other than a digit left at the end is an integral suffix (L, U, UL, ...).
+        if (token.Length == 0 || !char.IsDigit(token[token.Length - 1]))
+        {
+            return false;
+        }
+
+        decimalLiteral = $"{sign}{token}m";
+        return true;
     }
 
     private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol)
