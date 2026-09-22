@@ -20,6 +20,11 @@
       </PackageReference>
       <PackageReference Include="Verify" />
       <PackageReference Include="Verify.TUnit" />
+      <!-- CodeCoverage (transitive via TUnit) 18.11+ bundles a netstandard2.0 Mono.Cecil.dll that
+           overwrites the net40 build PublicApiGenerator needs. The netstandard2.0 build cannot
+           resolve .NET Framework facades, so net472 fails with "Failed to resolve assembly:
+           'netstandard'". Coverage is never collected for these tests, so drop the package. -->
+      <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" ExcludeAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
