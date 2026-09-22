@@ -177,34 +177,81 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 #endif
             }
 
-            var html = HtmlReportGenerator.GenerateHtml(reportData);
-
-            if (string.IsNullOrEmpty(html))
+            // The sidecar JSON doesn't depend on the HTML, and on large suites each takes a
+            // noticeable slice of session teardown — so serialize the sidecar on another core
+            // while the HTML is generated, compressed and written. Nothing mutates reportData
+            // until this task has been awaited below.
+            var sidecarTask = IsJsonReportEnabled()
+                ? Task.Run(() => ReportDataJson.SerializeToBuffer(reportData))
+                : null;
+            SegmentedBufferWriter? preSerializedSidecar = null;
+            try
             {
-                return;
-            }
+                var html = HtmlReportGenerator.GenerateHtml(reportData);
 
-            if (string.IsNullOrEmpty(_outputPath))
+                if (string.IsNullOrEmpty(html))
+                {
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(_outputPath))
+                {
+                    _outputPath = GetDefaultOutputPath();
+                }
+
+                var outputPath = _outputPath!;
+                // WriteFileAsync returns false if all retry attempts are exhausted (locked file, bad path, etc.).
+                // Artifact publishing is gated on a successful write — no file means no artifact.
+                var written = await WriteFileAsync(outputPath, html, testSessionContext.CancellationToken);
+
+                if (written)
+                {
+                    await PublishArtifactAsync(outputPath, testSessionContext.SessionUid, testSessionContext.CancellationToken);
+                }
+
+                // GitHub Actions integration (artifact upload + step summary)
+                var artifactUrl = await TryGitHubIntegrationAsync(outputPath, testSessionContext.CancellationToken);
+
+                if (sidecarTask is not null)
+                {
+                    var serialized = await sidecarTask;
+                    sidecarTask = null;
+
+                    // The early serialization ran before the artifact URL was known; it's only
+                    // reusable when there is none (the common, non-GitHub-upload case).
+                    if (artifactUrl is null)
+                    {
+                        preSerializedSidecar = serialized;
+                    }
+                    else
+                    {
+                        serialized.Dispose();
+                    }
+                }
+
+                reportData.ArtifactUrl = artifactUrl;
+
+                // Machine-readable sidecar + cross-process aggregation. Written after the
+                // GitHub integration so the sidecar carries this suite's artifact URL.
+                await TryWriteSidecarAndAggregateAsync(reportData, outputPath, testSessionContext.CancellationToken, preSerializedSidecar);
+            }
+            finally
             {
-                _outputPath = GetDefaultOutputPath();
+                preSerializedSidecar?.Dispose();
+
+                if (sidecarTask is not null)
+                {
+                    // Abandoned (HTML generation failed or produced nothing): release its buffers.
+                    try
+                    {
+                        (await sidecarTask).Dispose();
+                    }
+                    catch
+                    {
+                        // The sidecar was never going to be written; its failure is moot.
+                    }
+                }
             }
-
-            var outputPath = _outputPath!;
-            // WriteFileAsync returns false if all retry attempts are exhausted (locked file, bad path, etc.).
-            // Artifact publishing is gated on a successful write — no file means no artifact.
-            var written = await WriteFileAsync(outputPath, html, testSessionContext.CancellationToken);
-
-            if (written)
-            {
-                await PublishArtifactAsync(outputPath, testSessionContext.SessionUid, testSessionContext.CancellationToken);
-            }
-
-            // GitHub Actions integration (artifact upload + step summary)
-            reportData.ArtifactUrl = await TryGitHubIntegrationAsync(outputPath, testSessionContext.CancellationToken);
-
-            // Machine-readable sidecar + cross-process aggregation. Written after the
-            // GitHub integration so the sidecar carries this suite's artifact URL.
-            await TryWriteSidecarAndAggregateAsync(reportData, outputPath, testSessionContext.CancellationToken);
         }
         catch (Exception ex)
         {
@@ -218,7 +265,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
     }
 
-    internal async Task TryWriteSidecarAndAggregateAsync(ReportData reportData, string htmlOutputPath, CancellationToken cancellationToken)
+    /// <param name="preSerialized">
+    /// <paramref name="reportData"/> already serialized by <see cref="ReportDataJson.SerializeToBuffer"/>,
+    /// or <see langword="null"/> to serialize here. Owned (and disposed) by the caller.
+    /// </param>
+    internal async Task TryWriteSidecarAndAggregateAsync(ReportData reportData, string htmlOutputPath, CancellationToken cancellationToken, SegmentedBufferWriter? preSerialized = null)
     {
         var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
 
@@ -229,7 +280,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
 
         // Serialized once; the same bytes back both the local sidecar and the shared copy.
-        var sidecarBytes = ReportDataJson.SerializeToBytes(reportData);
+        using var ownedSidecarBytes = preSerialized is null ? ReportDataJson.SerializeToBuffer(reportData) : null;
+        var sidecarBytes = preSerialized ?? ownedSidecarBytes!;
 
         try
         {

@@ -31,6 +31,7 @@
     <Compile Include="..\TUnit.Engine\Reporters\Html\HtmlReportDataModel.cs" Link="Linked\HtmlReportDataModel.cs" />
     <Compile Include="..\TUnit.Engine\Reporters\Html\HtmlReportGenerator.cs" Link="Linked\HtmlReportGenerator.cs" />
     <Compile Include="..\TUnit.Engine\Reporters\Aggregation\AtomicFile.cs" Link="Linked\AtomicFile.cs" />
+    <Compile Include="..\TUnit.Engine\Reporters\Aggregation\SegmentedBufferWriter.cs" Link="Linked\SegmentedBufferWriter.cs" />
     <Compile Include="..\TUnit.Engine\Reporters\Aggregation\ReportDataJson.cs" Link="Linked\ReportDataJson.cs" />
     <Compile Include="..\TUnit.Engine\Reporters\Aggregation\ReportDataMerger.cs" Link="Linked\ReportDataMerger.cs" />
     <Compile Include="..\TUnit.Engine\Reporters\Aggregation\AggregatedSummaryWriter.cs" Link="Linked\AggregatedSummaryWriter.cs" />

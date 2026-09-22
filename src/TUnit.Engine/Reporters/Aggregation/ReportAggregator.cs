@@ -135,7 +135,24 @@ internal sealed class ReportAggregator
         return path;
     }
 
+    /// <inheritdoc cref="WriteSidecar(byte[], string, string)"/>
+    internal string WriteSidecar(SegmentedBufferWriter sidecarUtf8Json, string assemblyName, string suiteSalt)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+
+        var path = GetSidecarPath(assemblyName, suiteSalt);
+        AtomicFile.WriteAllBytes(path, sidecarUtf8Json);
+        return path;
+    }
+
     internal void WritePendingSidecar(byte[] sidecarUtf8Json, string assemblyName, string suiteSalt)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        var path = GetPendingSidecarPath(assemblyName, suiteSalt);
+        AtomicFile.WriteAllBytes(path, sidecarUtf8Json);
+    }
+
+    internal void WritePendingSidecar(SegmentedBufferWriter sidecarUtf8Json, string assemblyName, string suiteSalt)
     {
         System.IO.Directory.CreateDirectory(Directory);
         var path = GetPendingSidecarPath(assemblyName, suiteSalt);
