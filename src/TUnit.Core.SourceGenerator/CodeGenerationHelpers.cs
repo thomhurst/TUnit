@@ -27,15 +27,14 @@ internal static class CodeGenerationHelpers
             {
                 var arg = attr.ConstructorArguments[i];
 
-                // Expand a params array into individual arguments
+                // Expand a params array into individual arguments. A null array (e.g. [Arguments(null)])
+                // falls through and is emitted as a single null, which binds to the params array itself.
                 if (i == attr.ConstructorArguments.Length - 1
                     && arg.Kind == TypedConstantKind.Array
+                    && !arg.IsNull
                     && IsParamsArrayArgument(attr))
                 {
-                    if (!arg.Values.IsDefault)
-                    {
-                        argStrings.AddRange(arg.Values.Select(v => TypedConstantParser.GetRawTypedConstantValue(v)));
-                    }
+                    argStrings.AddRange(arg.Values.Select(v => TypedConstantParser.GetRawTypedConstantValue(v)));
                 }
                 else
                 {
