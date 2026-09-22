@@ -128,17 +128,32 @@ internal static class ReportDataJson
             .Select(group => group.FirstOrDefault(IsPendingSidecar) ?? group.First());
 
     /// <summary>
-    /// Serializes straight to UTF-8 bytes — callers write the same payload to more than one
-    /// file, so producing bytes once avoids a UTF-8 → string → UTF-8 round trip per copy.
+    /// Serializes straight to UTF-8 in pooled chunks — callers write the same payload to more
+    /// than one file, so producing it once avoids re-serializing (which would also mint a new
+    /// publication generation) per copy, and chunking avoids the grow-and-copy churn of a
+    /// contiguous buffer for multi-megabyte reports. The caller owns (and must dispose) the result.
     /// </summary>
-    internal static byte[] SerializeToBytes(ReportData data)
+    internal static SegmentedBufferWriter SerializeToBuffer(ReportData data)
     {
-        using var ms = new MemoryStream();
-        using (var w = new Utf8JsonWriter(ms, new JsonWriterOptions { Indented = false }))
+        var buffer = new SegmentedBufferWriter();
+        try
         {
+            using var w = new Utf8JsonWriter(buffer, new JsonWriterOptions { Indented = false });
             Write(w, data);
         }
-        return ms.ToArray();
+        catch
+        {
+            buffer.Dispose();
+            throw;
+        }
+
+        return buffer;
+    }
+
+    internal static byte[] SerializeToBytes(ReportData data)
+    {
+        using var buffer = SerializeToBuffer(data);
+        return buffer.ToArray();
     }
 
     internal static string Serialize(ReportData data)

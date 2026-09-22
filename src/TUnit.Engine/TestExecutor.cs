@@ -24,6 +24,11 @@ internal class TestExecutor
 {
     private static readonly ConcurrentDictionary<Type, bool> ClassHookPresenceCache = new();
     private static readonly ConcurrentDictionary<Type, bool> TestHookPresenceCache = new();
+#if NET
+    // Assembly.GetName() builds a fresh AssemblyName (plus version/culture/key parsing) on
+    // every call; the test-case span tags it once per test while tracing is enabled.
+    private static readonly ConcurrentDictionary<Assembly, string?> AssemblyNameCache = new();
+#endif
 
     private readonly HookExecutor _hookExecutor;
     private readonly TestLifecycleCoordinator _lifecycleCoordinator;
@@ -275,7 +280,7 @@ internal class TestExecutor
                         new(TUnitActivitySource.TagTestClass, testDetails.ClassType.FullName),
                         new(TUnitActivitySource.TagClassNamespace, testDetails.ClassType.Namespace),
                         new(TUnitActivitySource.TagTestMethod, testDetails.MethodName),
-                        new(TUnitActivitySource.TagAssemblyName, testAssembly.GetName().Name),
+                        new(TUnitActivitySource.TagAssemblyName, AssemblyNameCache.GetOrAdd(testAssembly, static a => a.GetName().Name)),
                         new(TUnitActivitySource.TagSessionId, executableTest.Context.ClassContext.AssemblyContext.TestSessionContext.Id),
                         new(TUnitActivitySource.TagTestId, executableTest.Context.Id),
                         new(TUnitActivitySource.TagTestNodeUid, testDetails.TestId),

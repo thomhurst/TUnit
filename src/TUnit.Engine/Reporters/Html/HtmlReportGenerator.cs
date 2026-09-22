@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using TUnit.Core;
 using TUnit.Core.Enums;
+using TUnit.Engine.Reporters.Aggregation;
 
 namespace TUnit.Engine.Reporters.Html;
 
@@ -23,8 +24,11 @@ internal static class HtmlReportGenerator
     internal static string GenerateHtml(ReportData data)
     {
         var template = Template.Value;
-        var json = SerializeReport(data);
-        var compressed = GzipBase64(json);
+        string compressed;
+        using (var json = SerializeReport(data))
+        {
+            compressed = GzipBase64(json);
+        }
         var encodedName = WebUtility.HtmlEncode(data.AssemblyName);
 
         return template
@@ -56,17 +60,26 @@ internal static class HtmlReportGenerator
         return raw.Remove(begin, end + SampleDataEndMarker.Length - begin);
     }
 
-    private static string GzipBase64(string json)
-    {
-        var bytes = Encoding.UTF8.GetBytes(json);
-        using var output = new MemoryStream();
+    // The level that matters is the RUNTIME's zlib, not the compile-time TFM (a net8.0 build of
+    // this code routinely runs on newer runtimes). .NET 9+ ships zlib-ng, where Optimal is both
+    // ~2x faster and slightly smaller than SmallestSize on report JSON; classic zlib (.NET 8)
+    // still gets a few percent tighter output from SmallestSize, at ~3.5x the CPU cost.
 #if NET
-        using (var gz = new GZipStream(output, CompressionLevel.SmallestSize, leaveOpen: true))
+    private static readonly CompressionLevel GzipLevel = Environment.Version.Major >= 9
+        ? CompressionLevel.Optimal
+        : CompressionLevel.SmallestSize;
 #else
-        using (var gz = new GZipStream(output, CompressionLevel.Optimal, leaveOpen: true))
+    private static readonly CompressionLevel GzipLevel = CompressionLevel.Optimal;
 #endif
+
+    private static string GzipBase64(SegmentedBufferWriter utf8Json)
+    {
+        // JSON compresses roughly 10:1; pre-sizing avoids most of the MemoryStream's
+        // grow-and-copy steps without over-reserving for small reports.
+        using var output = new MemoryStream(checked((int)Math.Min(int.MaxValue, Math.Max(256, utf8Json.Length / 8))));
+        using (var gz = new GZipStream(output, GzipLevel, leaveOpen: true))
         {
-            gz.Write(bytes, 0, bytes.Length);
+            utf8Json.WriteTo(gz);
         }
         return Convert.ToBase64String(output.GetBuffer(), 0, checked((int)output.Length));
     }
@@ -80,7 +93,10 @@ internal static class HtmlReportGenerator
         return reader.ReadToEnd();
     }
 
-    private static string SerializeReport(ReportData data)
+    // Returns the renderer JSON as UTF-8 in pooled chunks: it is only ever compressed, so it
+    // never needs to exist as one contiguous array or as a (twice as large) UTF-16 string.
+    // The caller owns (and must dispose) the result.
+    private static SegmentedBufferWriter SerializeReport(ReportData data)
     {
         var totalTests = 0;
         foreach (var g in data.Groups)
@@ -170,9 +186,10 @@ internal static class HtmlReportGenerator
             }
         }
 
-        using var ms = new MemoryStream();
-        using (var w = new Utf8JsonWriter(ms, new JsonWriterOptions { Indented = false }))
+        var buffer = new SegmentedBufferWriter();
+        try
         {
+            using var w = new Utf8JsonWriter(buffer, new JsonWriterOptions { Indented = false });
             w.WriteStartObject();
             w.WriteString("project", data.AssemblyName);
             w.WriteString("when", data.Timestamp);
@@ -223,7 +240,13 @@ internal static class HtmlReportGenerator
 
             w.WriteEndObject();
         }
-        return Encoding.UTF8.GetString(ms.GetBuffer(), 0, checked((int)ms.Length));
+        catch
+        {
+            buffer.Dispose();
+            throw;
+        }
+
+        return buffer;
     }
 
 #if NET

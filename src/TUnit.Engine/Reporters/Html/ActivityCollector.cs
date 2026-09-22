@@ -60,7 +60,10 @@ internal sealed class ActivityCollector : IDisposable
     // arrive hex-encoded as uppercase (Convert.ToHexString) while in-process Activity
     // IDs serialize lowercase. Without case-insensitive keys the two would split into
     // separate buckets for the same logical trace.
-    private readonly ConcurrentDictionary<string, ConcurrentQueue<SpanData>> _spansByTrace = new(StringComparer.OrdinalIgnoreCase);
+    // One bucket per trace — and every test case starts its own trace, so this holds one
+    // bucket per test. A ConcurrentQueue's first segment alone is several hundred bytes;
+    // SpanBucket is a small locked list since a trace's spans rarely contend.
+    private readonly ConcurrentDictionary<string, SpanBucket> _spansByTrace = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, int> _externalSpanCountsByTest = new(StringComparer.OrdinalIgnoreCase);
     // Fallback per-trace cap for external spans whose parent chain is broken
     // (e.g. Npgsql async pooling where Activity.Parent is null but traceId is correct).
@@ -232,13 +235,19 @@ internal sealed class ActivityCollector : IDisposable
             }
         }
 
-        var queue = _spansByTrace.GetOrAdd(span.TraceId, static _ => new ConcurrentQueue<SpanData>());
-        queue.Enqueue(span);
+        var bucket = _spansByTrace.GetOrAdd(span.TraceId, static _ => new SpanBucket());
+        bucket.Add(span);
     }
 
     public SpanData[] GetAllSpans()
     {
-        return _spansByTrace.Values.SelectMany(q => q).ToArray();
+        var all = new List<SpanData>();
+        foreach (var kvp in _spansByTrace)
+        {
+            kvp.Value.CopyTo(all);
+        }
+
+        return all.ToArray();
     }
 
     /// <summary>
@@ -251,7 +260,7 @@ internal sealed class ActivityCollector : IDisposable
 
         foreach (var kvp in _spansByTrace)
         {
-            foreach (var span in kvp.Value)
+            foreach (var span in kvp.Value.Snapshot())
             {
                 if (span.Tags is null)
                 {
@@ -395,51 +404,31 @@ internal sealed class ActivityCollector : IDisposable
             }
         }
 
-        var queue = _spansByTrace.GetOrAdd(traceId, _ => new ConcurrentQueue<SpanData>());
+        var bucket = _spansByTrace.GetOrAdd(traceId, static _ => new SpanBucket());
 
-        ReportKeyValue[]? tags = null;
-        var tagCollection = activity.TagObjects.ToArray();
-        if (tagCollection.Length > 0)
-        {
-            tags = new ReportKeyValue[tagCollection.Length];
-            for (var i = 0; i < tagCollection.Length; i++)
-            {
-                tags[i] = new ReportKeyValue
-                {
-                    Key = tagCollection[i].Key,
-                    Value = tagCollection[i].Value?.ToString() ?? ""
-                };
-            }
-        }
+        // Enumerate* struct enumerators instead of LINQ ToArray over the IEnumerable
+        // properties: no boxed enumerator or intermediate array per span. Two passes over
+        // the (short) linked lists — count, then fill — keep the arrays exactly sized.
+        var tags = ToReportKeyValues(activity.EnumerateTagObjects());
 
         SpanEvent[]? events = null;
-        var eventCollection = activity.Events.ToArray();
-        if (eventCollection.Length > 0)
+        var eventCount = 0;
+        foreach (ref readonly var _ in activity.EnumerateEvents())
         {
-            events = new SpanEvent[eventCollection.Length];
-            for (var i = 0; i < eventCollection.Length; i++)
-            {
-                var evt = eventCollection[i];
-                ReportKeyValue[]? evtTags = null;
-                var evtTagCollection = evt.Tags.ToArray();
-                if (evtTagCollection.Length > 0)
-                {
-                    evtTags = new ReportKeyValue[evtTagCollection.Length];
-                    for (var j = 0; j < evtTagCollection.Length; j++)
-                    {
-                        evtTags[j] = new ReportKeyValue
-                        {
-                            Key = evtTagCollection[j].Key,
-                            Value = evtTagCollection[j].Value?.ToString() ?? ""
-                        };
-                    }
-                }
+            eventCount++;
+        }
 
-                events[i] = new SpanEvent
+        if (eventCount > 0)
+        {
+            events = new SpanEvent[eventCount];
+            var i = 0;
+            foreach (ref readonly var evt in activity.EnumerateEvents())
+            {
+                events[i++] = new SpanEvent
                 {
                     Name = evt.Name,
                     TimestampMs = evt.Timestamp.ToUnixTimeMilliseconds(),
-                    Tags = evtTags
+                    Tags = ToReportKeyValues(evt.EnumerateTagObjects())
                 };
             }
         }
@@ -447,16 +436,22 @@ internal sealed class ActivityCollector : IDisposable
         var parentSpanId = activity.ParentSpanId != default ? activity.ParentSpanId.ToString() : null;
 
         SpanLink[]? links = null;
-        var activityLinks = activity.Links.ToArray();
-        if (activityLinks.Length > 0)
+        var linkCount = 0;
+        foreach (ref readonly var _ in activity.EnumerateLinks())
         {
-            links = new SpanLink[activityLinks.Length];
-            for (var i = 0; i < activityLinks.Length; i++)
+            linkCount++;
+        }
+
+        if (linkCount > 0)
+        {
+            links = new SpanLink[linkCount];
+            var i = 0;
+            foreach (ref readonly var link in activity.EnumerateLinks())
             {
-                links[i] = new SpanLink
+                links[i++] = new SpanLink
                 {
-                    TraceId = activityLinks[i].Context.TraceId.ToString(),
-                    SpanId = activityLinks[i].Context.SpanId.ToString()
+                    TraceId = link.Context.TraceId.ToString(),
+                    SpanId = link.Context.SpanId.ToString()
                 };
             }
         }
@@ -486,7 +481,7 @@ internal sealed class ActivityCollector : IDisposable
             Links = links
         };
 
-        queue.Enqueue(spanData);
+        bucket.Add(spanData);
 
         // Cleanup: remove test case span from tracking sets once it stops.
         // All child spans will have already stopped by this point (children stop before parents).
@@ -499,9 +494,69 @@ internal sealed class ActivityCollector : IDisposable
         }
     }
 
+    private static ReportKeyValue[]? ToReportKeyValues(Activity.Enumerator<KeyValuePair<string, object?>> tagObjects)
+    {
+        var count = 0;
+        foreach (ref readonly var _ in tagObjects)
+        {
+            count++;
+        }
+
+        if (count == 0)
+        {
+            return null;
+        }
+
+        var result = new ReportKeyValue[count];
+        var i = 0;
+        foreach (ref readonly var tag in tagObjects)
+        {
+            result[i++] = new ReportKeyValue
+            {
+                Key = tag.Key,
+                Value = tag.Value?.ToString() ?? ""
+            };
+        }
+
+        return result;
+    }
+
     public void Dispose()
     {
         Stop();
+    }
+
+    /// <summary>
+    /// Spans recorded for one trace, in arrival order. Writers are the activity listener and
+    /// the OTLP receiver; reads happen at report time, so contention is negligible.
+    /// </summary>
+    private sealed class SpanBucket
+    {
+        private readonly List<SpanData> _spans = new(4);
+
+        public void Add(SpanData span)
+        {
+            lock (_spans)
+            {
+                _spans.Add(span);
+            }
+        }
+
+        public void CopyTo(List<SpanData> destination)
+        {
+            lock (_spans)
+            {
+                destination.AddRange(_spans);
+            }
+        }
+
+        public SpanData[] Snapshot()
+        {
+            lock (_spans)
+            {
+                return _spans.ToArray();
+            }
+        }
     }
 }
 #endif

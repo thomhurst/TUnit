@@ -22,6 +22,24 @@ internal static class AtomicFile
         }
     }
 
+    internal static void WriteAllBytes(string path, SegmentedBufferWriter bytes)
+    {
+        var tempPath = TempPathFor(path);
+        WriteBuffer(tempPath, bytes);
+        if (!TrySwap(tempPath, path))
+        {
+            WriteBuffer(path, bytes);
+        }
+    }
+
+    private static void WriteBuffer(string path, SegmentedBufferWriter bytes)
+    {
+        // Same create/truncate semantics as File.WriteAllBytes; streamed chunk by chunk so a
+        // multi-megabyte payload is never materialized as one contiguous array.
+        using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, bufferSize: 1);
+        bytes.WriteTo(stream);
+    }
+
     internal static void WriteAllText(string path, string content)
     {
         var tempPath = TempPathFor(path);
