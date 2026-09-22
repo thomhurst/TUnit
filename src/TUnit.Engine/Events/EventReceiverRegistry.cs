@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces;
 
@@ -34,6 +35,12 @@ internal sealed class EventReceiverRegistry
         All = ~0
     }
 
+    // Events whose receivers are enumerated from the registry rather than per test.
+    private const EventTypes ScopeEvents =
+        EventTypes.FirstTestInSession | EventTypes.LastTestInSession
+        | EventTypes.FirstTestInAssembly | EventTypes.LastTestInAssembly
+        | EventTypes.FirstTestInClass | EventTypes.LastTestInClass;
+
     // Accessed via Volatile.Read + Interlocked.CompareExchange to provide acquire/release
     // semantics without the cost of a volatile field on every write path.
     private int _registeredEvents;
@@ -47,7 +54,9 @@ internal sealed class EventReceiverRegistry
     private readonly ConcurrentDictionary<Type, Array> _cachedTypedReceivers = new();
 
     /// <summary>
-    /// Register event receivers from a collection of objects.
+    /// Stores scope event receivers so they can be enumerated via <see cref="GetReceiversOfType{T}"/>.
+    /// Callers must have called <see cref="RegisterPresence"/> for each receiver first; its
+    /// presence flags are not recomputed here.
     /// </summary>
     public void RegisterReceivers(ReadOnlySpan<object> objects)
     {
@@ -58,7 +67,24 @@ internal sealed class EventReceiverRegistry
     }
 
     /// <summary>
-    /// Register a single event receiver.
+    /// Records the event types <paramref name="receiver"/> handles without storing it.
+    /// Idempotent and allocation-free, so callers need no deduplication.
+    /// </summary>
+    /// <returns>
+    /// Whether <paramref name="receiver"/> implements a first/last-in-scope receiver interface.
+    /// Only those receivers are enumerated from the registry, so only they need to be stored via
+    /// <see cref="RegisterReceiver"/>; per-test receivers (start/end/skipped/registered) are
+    /// dispatched from each test's own eligible objects.
+    /// </returns>
+    public bool RegisterPresence(object receiver)
+    {
+        var flags = Classify(receiver);
+        SetFlags(flags);
+        return (flags & ScopeEvents) != 0;
+    }
+
+    /// <summary>
+    /// Stores a single scope event receiver. Callers must have called <see cref="RegisterPresence"/> first.
     /// </summary>
     public void RegisterReceiver(object receiver)
     {
@@ -67,13 +93,12 @@ internal sealed class EventReceiverRegistry
 
     private void RegisterReceiverInternal(object receiver)
     {
-        UpdateEventFlags(receiver);
+        // Presence flags were already set by RegisterPresence; classifying again would be redundant.
+        Debug.Assert(((EventTypes)Volatile.Read(ref _registeredEvents)).HasFlag(Classify(receiver)),
+            "RegisterPresence must be called before storing a receiver.");
 
-        // Register for each interface type the object implements.
-        RegisterIfImplements<ITestStartEventReceiver>(receiver);
-        RegisterIfImplements<ITestEndEventReceiver>(receiver);
-        RegisterIfImplements<ITestSkippedEventReceiver>(receiver);
-        RegisterIfImplements<ITestRegisteredEventReceiver>(receiver);
+        // Only scope receivers are ever enumerated (see RegisterPresence); per-test receiver
+        // types need nothing beyond the presence flags.
         RegisterIfImplements<IFirstTestInTestSessionEventReceiver>(receiver);
         RegisterIfImplements<ILastTestInTestSessionEventReceiver>(receiver);
         RegisterIfImplements<IFirstTestInAssemblyEventReceiver>(receiver);
@@ -204,7 +229,7 @@ internal sealed class EventReceiverRegistry
         return typedArray;
     }
 
-    private void UpdateEventFlags(object receiver)
+    private static EventTypes Classify(object receiver)
     {
         var flags = EventTypes.None;
         if (receiver is ITestStartEventReceiver)
@@ -248,6 +273,11 @@ internal sealed class EventReceiverRegistry
             flags |= EventTypes.LastTestInClass;
         }
 
+        return flags;
+    }
+
+    private void SetFlags(EventTypes flags)
+    {
         if (flags == EventTypes.None)
         {
             return;

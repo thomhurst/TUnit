@@ -56,6 +56,16 @@ internal sealed class EventReceiverOrchestrator
                 continue;
             }
 
+            // Per-test receivers are dispatched from each test's own eligible objects, so the
+            // registry only needs to know they exist. Keeping them out of the dedup set matters:
+            // attributes such as [Arguments] implement ITestRegisteredEventReceiver, and
+            // System.Attribute's reflection-based Equals/GetHashCode (with colliding hashes)
+            // made registering one per test quadratic.
+            if (!_registry.RegisterPresence(obj))
+            {
+                continue;
+            }
+
             // Use single TryAdd operation instead of Contains + Add
             if (!_initializedObjects.Add(obj))
             {
@@ -104,6 +114,12 @@ internal sealed class EventReceiverOrchestrator
         // at registration time and should never be treated as an event receiver. Callers
         // already short-circuit on this sentinel, but guard here too.
         if (classInstance is SkippedTestInstance)
+        {
+            return;
+        }
+
+        // A fresh instance per test: tracking it in the dedup set would only retain it.
+        if (!_registry.RegisterPresence(classInstance))
         {
             return;
         }
