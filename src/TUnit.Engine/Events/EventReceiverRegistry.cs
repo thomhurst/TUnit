@@ -58,6 +58,25 @@ internal sealed class EventReceiverRegistry
     }
 
     /// <summary>
+    /// Whether <paramref name="receiver"/> implements a first/last-in-scope receiver interface.
+    /// These are the only receivers enumerated from the registry; per-test receivers
+    /// (start/end/skipped/registered) are dispatched from each test's own eligible objects.
+    /// </summary>
+    public static bool IsScopeReceiver(object receiver) =>
+        receiver is IFirstTestInTestSessionEventReceiver
+            or ILastTestInTestSessionEventReceiver
+            or IFirstTestInAssemblyEventReceiver
+            or ILastTestInAssemblyEventReceiver
+            or IFirstTestInClassEventReceiver
+            or ILastTestInClassEventReceiver;
+
+    /// <summary>
+    /// Records the event types a per-test receiver handles without storing the receiver.
+    /// Idempotent and allocation-free, so callers need no deduplication.
+    /// </summary>
+    public void RegisterPresence(object receiver) => UpdateEventFlags(receiver);
+
+    /// <summary>
     /// Register a single event receiver.
     /// </summary>
     public void RegisterReceiver(object receiver)
@@ -69,11 +88,8 @@ internal sealed class EventReceiverRegistry
     {
         UpdateEventFlags(receiver);
 
-        // Register for each interface type the object implements.
-        RegisterIfImplements<ITestStartEventReceiver>(receiver);
-        RegisterIfImplements<ITestEndEventReceiver>(receiver);
-        RegisterIfImplements<ITestSkippedEventReceiver>(receiver);
-        RegisterIfImplements<ITestRegisteredEventReceiver>(receiver);
+        // Only scope receivers are ever enumerated (see IsScopeReceiver); per-test receiver
+        // types need nothing beyond the presence flags set above.
         RegisterIfImplements<IFirstTestInTestSessionEventReceiver>(receiver);
         RegisterIfImplements<ILastTestInTestSessionEventReceiver>(receiver);
         RegisterIfImplements<IFirstTestInAssemblyEventReceiver>(receiver);
