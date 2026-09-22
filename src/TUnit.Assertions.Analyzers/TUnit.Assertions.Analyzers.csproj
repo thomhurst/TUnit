@@ -12,7 +12,11 @@
     <NoWarn>RS2003</NoWarn>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <IsPackable>false</IsPackable>
+    <DefineConstants>$(DefineConstants);TUNIT_ASSERTIONS_ANALYZERS</DefineConstants>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\TUnit.Analyzers\Extensions\TypeExtensions.GloballyQualified.cs" Link="Extensions\TypeExtensions.GloballyQualified.cs" />
+  </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>TUnit.Assertions.Analyzers.Tests</_Parameter1>
