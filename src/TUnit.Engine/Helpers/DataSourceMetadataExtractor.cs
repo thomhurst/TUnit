@@ -1,4 +1,6 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using TUnit.Core;
 
 namespace TUnit.Engine.Helpers;
@@ -8,6 +10,8 @@ namespace TUnit.Engine.Helpers;
 /// </summary>
 internal static class DataSourceMetadataExtractor
 {
+    private static readonly ConcurrentDictionary<Type, (PropertyInfo? DisplayName, PropertyInfo? Skip, PropertyInfo? Categories)> MetadataProperties = new();
+
     /// <summary>
     /// Extracts metadata from a data source attribute if it has the relevant properties.
     /// </summary>
@@ -25,7 +29,7 @@ internal static class DataSourceMetadataExtractor
         Justification = "Known TUnit data source types are preserved via DynamicDependency. Custom data sources must preserve their own properties.")]
     public static TestDataRowMetadata? ExtractFromAttribute(IDataSourceAttribute? dataSource)
     {
-        if (dataSource is null)
+        if (dataSource is null or NoDataSource)
         {
             return null;
         }
@@ -38,18 +42,16 @@ internal static class DataSourceMetadataExtractor
                 : new TestDataRowMetadata(arguments.DisplayName, null, arguments.Skip, arguments.Categories);
         }
 
-        var type = dataSource.GetType();
+        // Property lookups are cached per type: this runs for every generated test row.
+        var (displayNameProp, skipProp, categoriesProp) = MetadataProperties.GetOrAdd(dataSource.GetType(), LookupMetadataProperties);
 
         // Try to get DisplayName property
-        var displayNameProp = type.GetProperty("DisplayName");
         var displayName = displayNameProp?.GetValue(dataSource) as string;
 
         // Try to get Skip property
-        var skipProp = type.GetProperty("Skip");
         var skip = skipProp?.GetValue(dataSource) as string;
 
         // Try to get Categories property
-        var categoriesProp = type.GetProperty("Categories");
         var categories = categoriesProp?.GetValue(dataSource) as string[];
 
         if (displayName is null && skip is null && categories is null)
@@ -64,6 +66,11 @@ internal static class DataSourceMetadataExtractor
     /// Merges metadata from TestDataRow wrapper with metadata from the data source attribute.
     /// TestDataRow metadata takes precedence over attribute metadata.
     /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Reflection on unknown types",
+        Justification = "Known TUnit data source types are preserved via DynamicDependency on ExtractFromAttribute. Custom data sources must preserve their own properties.")]
+    private static (PropertyInfo? DisplayName, PropertyInfo? Skip, PropertyInfo? Categories) LookupMetadataProperties(Type type)
+        => (type.GetProperty("DisplayName"), type.GetProperty("Skip"), type.GetProperty("Categories"));
+
     public static TestDataRowMetadata? Merge(TestDataRowMetadata? rowMetadata, TestDataRowMetadata? attributeMetadata)
     {
         if (rowMetadata is null && attributeMetadata is null)

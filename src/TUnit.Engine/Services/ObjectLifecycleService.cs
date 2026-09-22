@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
+using TUnit.Core.Discovery;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
@@ -67,16 +68,18 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// </summary>
     public async Task RegisterTestAsync(TestContext testContext, CancellationToken cancellationToken = default)
     {
-        var objectBag = testContext.StateBag.Items;
         var methodMetadata = testContext.Metadata.TestDetails.MethodMetadata;
-        var events = testContext.InternalEvents;
         var testClassType = testContext.Metadata.TestDetails.ClassType;
 
         try
         {
             // Resolve property values (creating shared objects) and cache them WITHOUT setting on placeholder instance
-            // This ensures shared objects are created once and tracked with the correct reference count
-            await PropertyInjector.ResolveAndCachePropertiesAsync(testClassType, objectBag, methodMetadata, events, testContext, cancellationToken);
+            // This ensures shared objects are created once and tracked with the correct reference count.
+            // The state bag/events are only materialized when there are properties to resolve.
+            if (PropertyInjectionCache.GetOrCreatePlan(testClassType).HasProperties)
+            {
+                await PropertyInjector.ResolveAndCachePropertiesAsync(testClassType, testContext.StateBag.Items, methodMetadata, testContext.InternalEvents, testContext, cancellationToken);
+            }
 
             // Track the cached objects so they get the correct reference count
             _objectTracker.TrackObjects(testContext);
@@ -256,8 +259,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     private async Task InitializeTrackedObjectsAsync(TestContext testContext, CancellationToken cancellationToken)
     {
         // SortedList keeps keys in ascending order; iterate by index in reverse for descending depth.
-        var trackedObjects = testContext.TrackedObjects;
-        var values = trackedObjects.Values;
+        var trackedObjects = testContext.TrackedObjectsIfCreated;
+        var values = trackedObjects is not { Count: > 0 } ? (IList<HashSet<object>>)Array.Empty<HashSet<object>>() : trackedObjects.Values;
 
         for (var i = values.Count - 1; i >= 0; i--)
         {
@@ -417,6 +420,12 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             throw new ArgumentNullException(nameof(obj));
         }
 
+        // Nothing to inject: skip the placeholder bag/events allocations and the injector walk.
+        if (!PropertyInjectionCache.HasInjectableProperties(obj.GetType()))
+        {
+            return obj;
+        }
+
         objectBag ??= new ConcurrentDictionary<string, object?>();
         events ??= new TestContextEvents();
 
@@ -540,7 +549,22 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// <param name="rootObject">The root object to discover nested objects from.</param>
     /// <param name="initializer">The initializer function to call for each object.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    private async Task InitializeNestedObjectsAsync(
+    private Task InitializeNestedObjectsAsync(
+        object rootObject,
+        Func<object?, CancellationToken, ValueTask> initializer,
+        CancellationToken cancellationToken)
+    {
+        // Plain objects (e.g. a test class with no injected/initializer properties) have no nested
+        // graph — skip building one and the async state machine that walks it.
+        if (!ObjectGraphDiscoverer.MayHaveNestedObjects(rootObject.GetType()))
+        {
+            return Task.CompletedTask;
+        }
+
+        return InitializeNestedObjectsCoreAsync(rootObject, initializer, cancellationToken);
+    }
+
+    private async Task InitializeNestedObjectsCoreAsync(
         object rootObject,
         Func<object?, CancellationToken, ValueTask> initializer,
         CancellationToken cancellationToken)

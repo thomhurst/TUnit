@@ -26,6 +26,7 @@ public record TestBuilderContext
     public string DefinitionId => _definitionId ??= Guid.NewGuid().ToString();
 
     private ConcurrentDictionary<string, object?>? _stateBag;
+    private TestBuilderContext? _stateBagSource;
     private TestContextEvents? _events;
 
     /// <summary>
@@ -33,9 +34,45 @@ public record TestBuilderContext
     /// </summary>
     public ConcurrentDictionary<string, object?> StateBag
     {
-        get => _stateBag ??= new ConcurrentDictionary<string, object?>();
-        set => _stateBag = value;
+        get => Volatile.Read(ref _stateBag) ?? GetOrCreateStateBag();
+        set
+        {
+            _stateBagSource = null;
+            Volatile.Write(ref _stateBag, value);
+        }
     }
+
+    // Slow path kept out of the getter so the common "already created" read stays inlineable.
+    // A context sharing another context's bag (see ShareStateBagWith) resolves it from that
+    // source on first access instead of forcing the source to allocate one up front — most
+    // tests never touch the bag, and a ConcurrentDictionary costs ~1KB (per-core lock array).
+    private ConcurrentDictionary<string, object?> GetOrCreateStateBag()
+    {
+        var created = _stateBagSource?.StateBag ?? new ConcurrentDictionary<string, object?>();
+        return Interlocked.CompareExchange(ref _stateBag, created, null) ?? created;
+    }
+
+    /// <summary>
+    /// Makes this context use <paramref name="source"/>'s state bag without materializing it.
+    /// Equivalent to <c>StateBag = source.StateBag</c>, except the bag is only created
+    /// (on the source) when either context first reads it.
+    /// </summary>
+    internal void ShareStateBagWith(TestBuilderContext source)
+    {
+        if (Volatile.Read(ref source._stateBag) is { } existing)
+        {
+            StateBag = existing;
+            return;
+        }
+
+        Volatile.Write(ref _stateBag, null);
+        _stateBagSource = source;
+    }
+
+    /// <summary>
+    /// True when a state bag has been materialized for this context (directly or via the context it shares with).
+    /// </summary>
+    internal bool HasStateBag => Volatile.Read(ref _stateBag) is not null || _stateBagSource is { HasStateBag: true };
 
     /// <inheritdoc cref="StateBag"/>
     [Obsolete("Use StateBag property instead.")]
@@ -43,7 +80,7 @@ public record TestBuilderContext
 
     internal void CopyStateBagTo(TestBuilderContext target)
     {
-        if (_stateBag is { IsEmpty: false } bag)
+        if (HasStateBag && StateBag is { IsEmpty: false } bag)
         {
             target.StateBag = new ConcurrentDictionary<string, object?>(bag);
         }
@@ -54,6 +91,12 @@ public record TestBuilderContext
         get => _events ??= new TestContextEvents();
         set => _events = value;
     }
+
+    /// <summary>
+    /// The events container if something has created it, otherwise <c>null</c>. For read-only
+    /// consumers that would otherwise allocate an empty container just to find no subscribers.
+    /// </summary>
+    internal TestContextEvents? EventsIfCreated => _events;
 
     /// <summary>
     /// Gets or sets the data source attribute that generated the test's method arguments, if any.
@@ -106,11 +149,29 @@ public record TestBuilderContext
 public class TestBuilderContextAccessor
 {
     private TestBuilderContext _current;
+    private readonly bool _publishToAsyncLocal = true;
 
     public TestBuilderContextAccessor(TestBuilderContext context)
     {
         _current = context;
         TestBuilderContext.Current = context;
+    }
+
+    /// <summary>
+    /// Creates an accessor that only tracks the current context without publishing it to
+    /// <see cref="TestBuilderContext.Current"/>. Used by the engine when no user code can run while
+    /// the accessor is live (no data sources / class constructor), saving an ExecutionContext
+    /// allocation per AsyncLocal write.
+    /// </summary>
+    internal TestBuilderContextAccessor(TestBuilderContext context, bool publishToAsyncLocal)
+    {
+        _current = context;
+        _publishToAsyncLocal = publishToAsyncLocal;
+
+        if (publishToAsyncLocal)
+        {
+            TestBuilderContext.Current = context;
+        }
     }
 
     public TestBuilderContext Current
@@ -119,7 +180,11 @@ public class TestBuilderContextAccessor
         set
         {
             _current = value;
-            TestBuilderContext.Current = value;
+
+            if (_publishToAsyncLocal)
+            {
+                TestBuilderContext.Current = value;
+            }
         }
     }
 }

@@ -99,6 +99,10 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     private Dictionary<string, List<string>>? _customProperties;
     public Dictionary<string, List<string>> CustomProperties =>
         _customProperties ?? Interlocked.CompareExchange(ref _customProperties, [], null) ?? _customProperties;
+
+    // Read-only views for engine code: null means "none", without materializing an empty collection.
+    internal List<string>? CategoriesIfCreated => Volatile.Read(ref _categories);
+    internal Dictionary<string, List<string>>? CustomPropertiesIfCreated => Volatile.Read(ref _customProperties);
     public Type[]? TestClassParameterTypes { get; set; }
 
     public required IReadOnlyDictionary<Type, IReadOnlyList<Attribute>> AttributesByType { get; init; }

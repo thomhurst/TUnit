@@ -42,4 +42,12 @@ public sealed class TestBuildContext : Context, IDisposable
         Current = null;
         base.Dispose();
     }
+
+    /// <summary>
+    /// Releases the context's resources without writing <see cref="Current"/>. For callers that
+    /// own the async flow the context was published in and are about to leave it (the flow's
+    /// AsyncLocal changes are discarded on return anyway), so clearing it would only cost an
+    /// extra ExecutionContext allocation.
+    /// </summary>
+    internal void DisposeWithoutClearingCurrent() => base.Dispose();
 }

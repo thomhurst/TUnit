@@ -104,16 +104,15 @@ public static class ClassConstructorHelper
 
     private static ClassConstructorAttribute? GetClassConstructorAttribute(IReadOnlyList<Attribute> attributes)
     {
-        ClassConstructorAttribute? classConstructorAttribute = null;
-        foreach (Attribute attribute in attributes)
+        // Indexed loop: foreach over the interface would box an enumerator on every instance creation.
+        for (var i = 0; i < attributes.Count; i++)
         {
-            if (attribute is ClassConstructorAttribute classAttribute)
+            if (attributes[i] is ClassConstructorAttribute classAttribute)
             {
-                classConstructorAttribute = classAttribute;
-                break;
+                return classAttribute;
             }
         }
 
-        return classConstructorAttribute;
+        return null;
     }
 }

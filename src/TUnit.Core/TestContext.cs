@@ -113,8 +113,6 @@ public partial class TestContext : Context,
 
     internal IServiceProvider Services => ServiceProvider;
 
-    private static readonly AsyncLocal<TestContext?> TestContexts = new();
-
     // Use ConcurrentDictionary for thread-safe access during parallel test discovery
     internal static readonly ConcurrentDictionary<string, List<string>> InternalParametersDictionary = new();
 
@@ -137,16 +135,13 @@ public partial class TestContext : Context,
     /// </example>
     public static new TestContext? Current
     {
-        get => TestContexts.Value
+        get => AmbientContexts.Current?.Test
 #if NET
             ?? ResolveFromActivityBaggage()
 #endif
             ;
-        internal set
-        {
-            TestContexts.Value = value;
-            ClassHookContext.Current = value?.ClassContext;
-        }
+        // Cascades to the class/assembly/session/discovery contexts in a single AsyncLocal write.
+        internal set => AmbientContexts.SetTest(value);
     }
 
 #if NET
@@ -375,7 +370,7 @@ public partial class TestContext : Context,
 
     internal override void SetAsyncLocalContext()
     {
-        TestContexts.Value = this;
+        AmbientContexts.SetTestOnly(this);
     }
 
     internal bool RunOnTestDiscovery { get; set; }
@@ -481,7 +476,24 @@ public partial class TestContext : Context,
 
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
 
-    internal SortedList<int, HashSet<object>> TrackedObjects { get; } = new();
+    private SortedList<int, HashSet<object>>? _trackedObjects;
+
+    // Created on first write: only tests with arguments or injected properties track objects.
+    internal SortedList<int, HashSet<object>> TrackedObjects
+    {
+        get
+        {
+            if (Volatile.Read(ref _trackedObjects) is { } existing)
+            {
+                return existing;
+            }
+
+            var created = new SortedList<int, HashSet<object>>();
+            return Interlocked.CompareExchange(ref _trackedObjects, created, null) ?? created;
+        }
+    }
+
+    internal SortedList<int, HashSet<object>>? TrackedObjectsIfCreated => Volatile.Read(ref _trackedObjects);
 
     /// <summary>
     /// Sets the output captured during test building phase.

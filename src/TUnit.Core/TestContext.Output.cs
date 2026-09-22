@@ -18,14 +18,41 @@ public partial class TestContext
     // Engine writes are sequential per-test (lifecycle-ordered).
     // User-facing writes via the obsolete ITestOutput.RecordTiming API may be concurrent,
     // so all access through the obsolete bridge takes _timingsLock.
-    internal List<TimingEntry> Timings { get; } = [];
-    private readonly Lock _timingsLock = new();
+    // Both lists are created on first write (most tests record neither) and double as their own
+    // lock objects, so a passing test pays for no list or lock allocations here.
+    private List<TimingEntry>? _timings;
     // Artifacts use a lock because AttachArtifact is user-facing and can be called
     // from parallel Task.WhenAll branches within a single test.
-    private readonly Lock _artifactsLock = new();
-    private readonly List<Artifact> _artifacts = [];
+    private List<Artifact>? _artifacts;
 
-    internal IReadOnlyList<Artifact> Artifacts { get { lock (_artifactsLock) return [.. _artifacts]; } }
+    internal IReadOnlyList<TimingEntry> Timings =>
+        (IReadOnlyList<TimingEntry>?)Volatile.Read(ref _timings) ?? Array.Empty<TimingEntry>();
+
+    internal void ClearTimings()
+    {
+        if (Volatile.Read(ref _timings) is { } timings)
+        {
+            lock (timings) timings.Clear();
+        }
+    }
+
+    internal IReadOnlyList<Artifact> Artifacts
+    {
+        get
+        {
+            if (Volatile.Read(ref _artifacts) is not { } artifacts)
+            {
+                return Array.Empty<Artifact>();
+            }
+
+            lock (artifacts)
+            {
+                return artifacts.Count == 0 ? Array.Empty<Artifact>() : [.. artifacts];
+            }
+        }
+    }
+
+    private List<Artifact> GetOrCreateArtifacts() => LazyInitializer.EnsureInitialized(ref _artifacts)!;
 
     // Explicit interface implementations for ITestOutput
     TextWriter ITestOutput.StandardOutput => OutputWriter;
@@ -37,22 +64,29 @@ public partial class TestContext
     {
         get
         {
-            lock (_timingsLock)
+            if (Volatile.Read(ref _timings) is not { } timings)
             {
-                return Timings.ConvertAll(t => new Timing(t.StepName, t.Start, t.End));
+                return Array.Empty<Timing>();
+            }
+
+            lock (timings)
+            {
+                return timings.ConvertAll(t => new Timing(t.StepName, t.Start, t.End));
             }
         }
     }
 
     void ITestOutput.RecordTiming(Timing timing)
     {
-        lock (_timingsLock) Timings.Add(new TimingEntry(timing.StepName, timing.Start, timing.End));
+        var timings = LazyInitializer.EnsureInitialized(ref _timings)!;
+        lock (timings) timings.Add(new TimingEntry(timing.StepName, timing.Start, timing.End));
     }
 #pragma warning restore CS0618
 
     void ITestOutput.AttachArtifact(Artifact artifact)
     {
-        lock (_artifactsLock) _artifacts.Add(artifact);
+        var artifacts = GetOrCreateArtifacts();
+        lock (artifacts) artifacts.Add(artifact);
     }
 
     void ITestOutput.AttachArtifact(string filePath, string? displayName, string? description)
@@ -64,7 +98,8 @@ public partial class TestContext
             DisplayName = displayName ?? fileInfo.Name,
             Description = description
         };
-        lock (_artifactsLock) _artifacts.Add(artifact);
+        var artifacts = GetOrCreateArtifacts();
+        lock (artifacts) artifacts.Add(artifact);
     }
 
     string ITestOutput.GetStandardOutput() => GetOutput();

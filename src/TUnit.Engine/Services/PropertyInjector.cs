@@ -85,7 +85,7 @@ internal sealed class PropertyInjector
     /// <summary>
     /// Injects properties into an object and recursively into nested objects.
     /// </summary>
-    public async Task InjectPropertiesAsync(
+    public Task InjectPropertiesAsync(
         object instance,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
@@ -107,6 +107,23 @@ internal sealed class PropertyInjector
             throw new ArgumentNullException(nameof(events));
         }
 
+        // A root without injectable properties is a no-op (nested recursion is also plan-driven),
+        // so skip renting/clearing a visited ConcurrentDictionary — Clear() reallocates its tables.
+        if (!PropertyInjectionCache.HasInjectableProperties(instance.GetType()))
+        {
+            return Task.CompletedTask;
+        }
+
+        return InjectPropertiesCoreAsync(instance, objectBag, methodMetadata, events, cancellationToken);
+    }
+
+    private async Task InjectPropertiesCoreAsync(
+        object instance,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        CancellationToken cancellationToken)
+    {
         var visitedObjects = RentVisitedDictionary();
 
         try

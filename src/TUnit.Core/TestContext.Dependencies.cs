@@ -6,12 +6,13 @@ namespace TUnit.Core;
 
 public partial class TestContext
 {
-    internal readonly List<TestDetails> _dependencies = [];
+    // Populated (and only allocated) when the test actually has dependencies.
+    internal List<TestDetails>? _dependencies;
     internal bool _dependenciesPopulated;
     internal string? ParentTestId { get; set; }
     internal TestRelationship Relationship { get; set; } = TestRelationship.None;
 
-    IReadOnlyList<TestDetails> ITestDependencies.DependsOn => _dependencies;
+    IReadOnlyList<TestDetails> ITestDependencies.DependsOn => (IReadOnlyList<TestDetails>?)_dependencies ?? Array.Empty<TestDetails>();
     string? ITestDependencies.ParentTestId => ParentTestId;
     TestRelationship ITestDependencies.Relationship => Relationship;
 

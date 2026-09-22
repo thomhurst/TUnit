@@ -20,11 +20,30 @@ internal sealed class TestDependencyResolver
     ];
     private readonly Lock _resolutionLock = new();
 
+    // Number of _allTests entries already added to the lookup indices. The indices are only needed
+    // when some test declares dependencies, so they are built on first use instead of on every
+    // registration (three dictionary inserts and a list per method name, per test).
+    private int _indexedCount;
+
     public void RegisterTest(AbstractExecutableTest test)
     {
         lock (_resolutionLock)
         {
             _allTests.Add(test);
+
+            if (_testsWithPendingDependencies.Count > 0)
+            {
+                ResolvePendingDependencies();
+            }
+        }
+    }
+
+    // Must be called under _resolutionLock (or before a lock-free batch starts).
+    private void EnsureIndexed()
+    {
+        for (; _indexedCount < _allTests.Count; _indexedCount++)
+        {
+            var test = _allTests[_indexedCount];
 
             var testType = test.Metadata.TestClassType;
             _testsByType.AddToList(testType, test);
@@ -34,8 +53,6 @@ internal sealed class TestDependencyResolver
 
             // Cache test by composite key for fast lookups in GetTransitiveDependencies
             _testLookupCache[(testType, methodName)] = test;
-
-            ResolvePendingDependencies();
         }
     }
 
@@ -58,6 +75,8 @@ internal sealed class TestDependencyResolver
         {
             return false;
         }
+
+        EnsureIndexed();
 
         try
         {
@@ -116,6 +135,7 @@ internal sealed class TestDependencyResolver
 
     private List<AbstractExecutableTest> FindMatchingTests(TestDependency dependency, AbstractExecutableTest dependentTest)
     {
+        // Callers either hold _resolutionLock or run after BatchResolveDependencies indexed everything.
         var matches = new List<AbstractExecutableTest>();
 
         IEnumerable<AbstractExecutableTest> searchScope;
@@ -187,6 +207,11 @@ internal sealed class TestDependencyResolver
         if (testsWithDependencies.Count == 0)
         {
             return;
+        }
+
+        lock (_resolutionLock)
+        {
+            EnsureIndexed();
         }
 
         Parallel.ForEach(testsWithDependencies, test =>
@@ -279,6 +304,11 @@ internal sealed class TestDependencyResolver
 
     public IReadOnlyList<TestDetails> GetTransitiveDependencies(TestDetails testDetails)
     {
+        lock (_resolutionLock)
+        {
+            EnsureIndexed();
+        }
+
         var visited = new HashSet<TestDetails>();
         var result = new List<TestDetails>();
 

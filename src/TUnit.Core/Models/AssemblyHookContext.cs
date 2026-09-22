@@ -6,15 +6,11 @@ namespace TUnit.Core;
 [DebuggerDisplay("{Assembly.GetName().Name}")]
 public class AssemblyHookContext : Context
 {
-    private static readonly AsyncLocal<AssemblyHookContext?> Contexts = new();
     public static new AssemblyHookContext? Current
     {
-        get => Contexts.Value;
-        internal set
-        {
-            Contexts.Value = value;
-            TestSessionContext.Current = value?.TestSessionContext;
-        }
+        get => AmbientContexts.Current?.Assembly;
+        // Cascades to the session/discovery contexts in a single AsyncLocal write.
+        internal set => AmbientContexts.SetAssembly(value);
     }
 
     internal AssemblyHookContext(TestSessionContext testSessionContext) : base(testSessionContext)

@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
@@ -7,6 +7,7 @@ using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.PropertyInjection;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Extensions;
@@ -114,7 +115,7 @@ internal sealed class TestBuilder : ITestBuilder
 #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
 #endif
-    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext, CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext, CancellationToken cancellationToken = default)
     {
         // OPTIMIZATION: Pre-filter in execution mode to skip building tests that cannot match the filter
         if (buildingContext.IsForExecution && buildingContext.Filter != null)
@@ -130,8 +131,11 @@ internal sealed class TestBuilder : ITestBuilder
 
         try
         {
-            // Create a context for capturing output during test building
-            using var buildContext = new TestBuildContext();
+            // Create a context for capturing output during test building.
+            // Leaving this async method discards the AsyncLocal write, so disposal does not need to
+            // reset Current (the catch block below clears it explicitly for the failure path).
+            var buildContext = new TestBuildContext();
+            using var buildContextLease = new BuildContextLease(buildContext);
             TestBuildContext.Current = buildContext;
 
             // Handle GenericTestMetadata with ConcreteInstantiations
@@ -168,18 +172,29 @@ internal sealed class TestBuilder : ITestBuilder
                 InitializedAttributes = attributes  // Store the initialized attributes
             };
 
+            var classConstructorAttribute = attributes.FirstOfType<ClassConstructorAttribute>();
+
+            // Without data sources or a class constructor no user code runs while building, so nothing
+            // can observe TestBuilderContext.Current — skip publishing it (each AsyncLocal write
+            // allocates a new ExecutionContext and value map, twice per test here).
+            var publishBuilderContext = metadata.ClassDataSources.Length > 0
+                || metadata.DataSources.Length > 0
+                || classConstructorAttribute != null;
+
             // Set the static AsyncLocal immediately so it's available for property data sources
             // This must be set BEFORE any operations that might invoke data source methods
-            TestBuilderContext.Current = testBuilderContext;
+            if (publishBuilderContext)
+            {
+                TestBuilderContext.Current = testBuilderContext;
+            }
 
             // Check for ClassConstructor attribute and set it early if present (reuse already created attributes)
-            var classConstructorAttribute = attributes.FirstOfType<ClassConstructorAttribute>();
             if (classConstructorAttribute != null)
             {
                 testBuilderContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
             }
 
-            var contextAccessor = new TestBuilderContextAccessor(testBuilderContext);
+            var contextAccessor = new TestBuilderContextAccessor(testBuilderContext, publishBuilderContext);
 
             // DeferEnumeration: emit a single placeholder node instead of enumerating the data source(s).
             // The placeholder is built during both discovery and the execution build (so it matches the
@@ -199,17 +214,13 @@ internal sealed class TestBuilder : ITestBuilder
                 var classDataLoopIndex = 0;
                 var hasAnyClassData = false;
                 await foreach (var classDataFactory in GetInitializedDataRowsAsync(
-                                   classDataSource,
-                                   DataGeneratorMetadataCreator.CreateDataGeneratorMetadata
-                                   (
-                                       testMetadata: metadata,
-                                       testSessionId: _sessionId,
-                                       generatorType: DataGeneratorType.ClassParameters,
-                                       testClassInstance: null, // Never pass instance for class data sources (circular dependency)
-                                       classInstanceArguments: null,
-                                       contextAccessor
-                                   ),
-                                   cancellationToken))
+                    classDataSource,
+                    metadata,
+                    generatorType: DataGeneratorType.ClassParameters,
+                    testClassInstance: null,
+                    classInstanceArguments: null,
+                    contextAccessor,
+                    cancellationToken))
                 {
                     hasAnyClassData = true;
                     classDataLoopIndex++;
@@ -260,17 +271,13 @@ internal sealed class TestBuilder : ITestBuilder
                             var methodDataLoopIndex = 0;
                             var hasAnyMethodData = false;
                             await foreach (var methodDataFactory in GetInitializedDataRowsAsync(
-                                               methodDataSource,
-                                               DataGeneratorMetadataCreator.CreateDataGeneratorMetadata
-                                               (
-                                                   testMetadata: metadata,
-                                                   testSessionId: _sessionId,
-                                                   generatorType: DataGeneratorType.TestParameters,
-                                                   testClassInstance: methodDataSource is IAccessesInstanceData ? instanceForMethodDataSources : null,
-                                                   classInstanceArguments: classData,
-                                                   contextAccessor
-                                               ),
-                                               cancellationToken))
+                                methodDataSource,
+                                metadata,
+                                generatorType: DataGeneratorType.TestParameters,
+                                testClassInstance: methodDataSource is IAccessesInstanceData ? instanceForMethodDataSources : null,
+                                classInstanceArguments: classData,
+                                contextAccessor,
+                                cancellationToken))
                             {
                                 hasAnyMethodData = true;
                                 methodDataLoopIndex++;
@@ -323,55 +330,67 @@ internal sealed class TestBuilder : ITestBuilder
                                         }
                                     }
 
-                                    var tempTestData = new TestData
-                                    {
-                                        TestClassInstanceFactory = () => Task.FromResult<object>(null!), // Temporary placeholder
-                                        ClassDataSourceAttributeIndex = classDataAttributeIndex,
-                                        ClassDataLoopIndex = classDataLoopIndex,
-                                        ClassData = classData,
-                                        MethodDataSourceAttributeIndex = methodDataAttributeIndex,
-                                        MethodDataLoopIndex = methodDataLoopIndex,
-                                        MethodData = methodData,
-                                        RepeatIndex = i,
-                                        InheritanceDepth = metadata.InheritanceDepth
-                                    };
-
                                     Type[] resolvedClassGenericArgs;
                                     Type[] resolvedMethodGenericArgs;
 
-                                    try
+                                    if (metadata.GenericTypeInfo == null
+                                        && metadata.GenericMethodTypeArguments is not { Length: > 0 }
+                                        && metadata.GenericMethodInfo == null)
                                     {
-                                        var resolution = TestGenericTypeResolver.Resolve(metadata, tempTestData);
-                                        resolvedClassGenericArgs = resolution.ResolvedClassGenericArguments;
-                                        resolvedMethodGenericArgs = resolution.ResolvedMethodGenericArguments;
+                                        // Nothing generic to resolve (TestGenericTypeResolver.Resolve would return empty
+                                        // arrays) — skip the placeholder TestData and resolution result per test.
+                                        resolvedClassGenericArgs = Type.EmptyTypes;
+                                        resolvedMethodGenericArgs = Type.EmptyTypes;
                                     }
-                                    catch (GenericTypeResolutionException) when (
-                                        metadata.TestClassType.IsGenericTypeDefinition &&
-                                        classData.Length == 0 &&
-                                        methodData.Length > 0)
+                                    else
                                     {
-                                        // Special handling for generic classes with no constructor arguments
-                                        // but with method parameters that can help infer the generic types
+                                        var tempTestData = new TestData
+                                        {
+                                            TestClassInstanceFactory = () => Task.FromResult<object>(null!), // Temporary placeholder
+                                            ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                                            ClassDataLoopIndex = classDataLoopIndex,
+                                            ClassData = classData,
+                                            MethodDataSourceAttributeIndex = methodDataAttributeIndex,
+                                            MethodDataLoopIndex = methodDataLoopIndex,
+                                            MethodData = methodData,
+                                            RepeatIndex = i,
+                                            InheritanceDepth = metadata.InheritanceDepth
+                                        };
+
                                         try
                                         {
-                                            resolvedClassGenericArgs = TryInferClassGenericsFromMethodData(
-                                                metadata, methodData);
-                                            resolvedMethodGenericArgs = Type.EmptyTypes; // No method generics in this case
+                                            var resolution = TestGenericTypeResolver.Resolve(metadata, tempTestData);
+                                            resolvedClassGenericArgs = resolution.ResolvedClassGenericArguments;
+                                            resolvedMethodGenericArgs = resolution.ResolvedMethodGenericArguments;
                                         }
-                                        catch (Exception innerEx)
+                                        catch (GenericTypeResolutionException) when (
+                                            metadata.TestClassType.IsGenericTypeDefinition &&
+                                            classData.Length == 0 &&
+                                            methodData.Length > 0)
                                         {
-                                            // If we still can't resolve, create a failed test
-                                            var failedTest = CreateFailedTestForDataGenerationError(metadata, innerEx);
+                                            // Special handling for generic classes with no constructor arguments
+                                            // but with method parameters that can help infer the generic types
+                                            try
+                                            {
+                                                resolvedClassGenericArgs = TryInferClassGenericsFromMethodData(
+                                                    metadata, methodData);
+                                                resolvedMethodGenericArgs = Type.EmptyTypes; // No method generics in this case
+                                            }
+                                            catch (Exception innerEx)
+                                            {
+                                                // If we still can't resolve, create a failed test
+                                                var failedTest = CreateFailedTestForDataGenerationError(metadata, innerEx);
+                                                tests.Add(failedTest);
+                                                continue;
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            // If generic resolution fails, create a failed test
+                                            var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
                                             tests.Add(failedTest);
                                             continue;
                                         }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        // If generic resolution fails, create a failed test
-                                        var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
-                                        tests.Add(failedTest);
-                                        continue;
                                     }
 
                                     if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
@@ -412,16 +431,29 @@ internal sealed class TestBuilder : ITestBuilder
                                         Metadata = finalMetadata
                                     };
 
-                                    // Events is lazy-initialized; explicitly share StateBag from per-iteration context
-                                    var testSpecificContext = new TestBuilderContext
+                                    TestBuilderContext testSpecificContext;
+                                    if (classDataSource is NoDataSource && methodDataSource is NoDataSource)
                                     {
-                                        TestMetadata = metadata.MethodMetadata,
-                                        StateBag = contextAccessor.Current.StateBag,
-                                        ClassConstructor = testBuilderContext.ClassConstructor,
-                                        DataSourceAttribute = contextAccessor.Current.DataSourceAttribute,
-                                        ClassDataSourceAttribute = classDataSource,
-                                        InitializedAttributes = attributes
-                                    };
+                                        // No data source ran against the per-iteration context (NoDataSource has no
+                                        // factories that could register events or state), and it already holds
+                                        // exactly the values below — use it directly rather than cloning it.
+                                        testSpecificContext = contextAccessor.Current;
+                                    }
+                                    else
+                                    {
+                                        // Events is lazy-initialized; explicitly share StateBag from per-iteration context
+                                        testSpecificContext = new TestBuilderContext
+                                        {
+                                            TestMetadata = metadata.MethodMetadata,
+                                            ClassConstructor = testBuilderContext.ClassConstructor,
+                                            DataSourceAttribute = contextAccessor.Current.DataSourceAttribute,
+                                            ClassDataSourceAttribute = classDataSource,
+                                            InitializedAttributes = attributes
+                                        };
+
+                                        // Shares the per-iteration bag lazily; it is only allocated if something reads it.
+                                        testSpecificContext.ShareStateBagWith(contextAccessor.Current);
+                                    }
 
                                     var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken);
 
@@ -593,12 +625,20 @@ internal sealed class TestBuilder : ITestBuilder
         }
         catch (Exception ex)
         {
+            // The build context was disposed on leaving the try block; stop routing output to it.
+            TestBuildContext.Current = null;
+
             var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
             tests.Add(failedTest);
             return tests;
         }
 
         return tests;
+    }
+
+    private readonly struct BuildContextLease(TestBuildContext buildContext) : IDisposable
+    {
+        public void Dispose() => buildContext.DisposeWithoutClearingCurrent();
     }
 
     private static Type[] TryInferClassGenericsFromMethodData(TestMetadata metadata, object?[] methodData)
@@ -810,13 +850,27 @@ internal sealed class TestBuilder : ITestBuilder
 
     private static readonly IDataSourceAttribute[] _dataSourceArray = [NoDataSource.Instance];
 
-    private async Task<IDataSourceAttribute[]> GetDataSourcesAsync(IDataSourceAttribute[] dataSources, CancellationToken cancellationToken = default)
+    private ValueTask<IDataSourceAttribute[]> GetDataSourcesAsync(IDataSourceAttribute[] dataSources, CancellationToken cancellationToken = default)
     {
         if (dataSources.Length == 0)
         {
-            return _dataSourceArray;
+            return new ValueTask<IDataSourceAttribute[]>(_dataSourceArray);
         }
 
+        foreach (var dataSource in dataSources)
+        {
+            if (PropertyInjectionCache.HasInjectableProperties(dataSource.GetType()))
+            {
+                return InjectDataSourcePropertiesAsync(dataSources, cancellationToken);
+            }
+        }
+
+        // Nothing to inject — complete synchronously without an async state machine/Task.
+        return new ValueTask<IDataSourceAttribute[]>(dataSources);
+    }
+
+    private async ValueTask<IDataSourceAttribute[]> InjectDataSourcePropertiesAsync(IDataSourceAttribute[] dataSources, CancellationToken cancellationToken)
+    {
         // Inject properties into data sources during discovery (IAsyncInitializer deferred to execution)
         foreach (var dataSource in dataSources)
         {
@@ -830,7 +884,42 @@ internal sealed class TestBuilder : ITestBuilder
     /// Ensures a data source is initialized before use and returns data rows.
     /// This centralizes the initialization logic for all data source usage.
     /// </summary>
-    private async IAsyncEnumerable<Func<Task<object?[]?>>> GetInitializedDataRowsAsync(
+    private IAsyncEnumerable<Func<Task<object?[]?>>> GetInitializedDataRowsAsync(
+        IDataSourceAttribute dataSource,
+        TestMetadata metadata,
+        DataGeneratorType generatorType,
+        object? testClassInstance,
+        object?[]? classInstanceArguments,
+        TestBuilderContextAccessor contextAccessor,
+        CancellationToken cancellationToken = default)
+    {
+        // NoDataSource always yields exactly one empty row and ignores its metadata — skip building
+        // a DataGeneratorMetadata and an async-iterator state machine for every plain test.
+        if (dataSource is NoDataSource)
+        {
+            return SingleEmptyRow.Instance;
+        }
+
+        var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateDataGeneratorMetadata(
+            testMetadata: metadata,
+            testSessionId: _sessionId,
+            generatorType: generatorType,
+            testClassInstance: testClassInstance,
+            classInstanceArguments: classInstanceArguments,
+            contextAccessor);
+
+        // Fast path: nothing to inject (e.g. NoDataSource, [Arguments]) — enumerate the source directly.
+        // Skips a wrapping async-iterator state machine and, more importantly, avoids materializing the
+        // builder context's StateBag/Events (a ConcurrentDictionary per test) just to pass them along.
+        if (!PropertyInjectionCache.HasInjectableProperties(dataSource.GetType()))
+        {
+            return dataSource.GetDataRowsAsync(dataGeneratorMetadata);
+        }
+
+        return GetInitializedDataRowsWithInjectionAsync(dataSource, dataGeneratorMetadata, cancellationToken);
+    }
+
+    private async IAsyncEnumerable<Func<Task<object?[]?>>> GetInitializedDataRowsWithInjectionAsync(
         IDataSourceAttribute dataSource,
         DataGeneratorMetadata dataGeneratorMetadata,
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -847,6 +936,41 @@ internal sealed class TestBuilder : ITestBuilder
         await foreach (var dataRow in propertyInjectedDataSource.GetDataRowsAsync(dataGeneratorMetadata))
         {
             yield return dataRow;
+        }
+    }
+
+    /// <summary>
+    /// The rows of <see cref="NoDataSource"/>: a single row with no arguments. Stateless, so one
+    /// instance is shared; each enumeration only allocates a tiny enumerator.
+    /// </summary>
+    private sealed class SingleEmptyRow : IAsyncEnumerable<Func<Task<object?[]?>>>
+    {
+        public static readonly SingleEmptyRow Instance = new();
+
+        private static readonly Task<object?[]?> EmptyRowTask = Task.FromResult<object?[]?>([]);
+        private static readonly Func<Task<object?[]?>> EmptyRowFactory = static () => EmptyRowTask;
+
+        public IAsyncEnumerator<Func<Task<object?[]?>>> GetAsyncEnumerator(CancellationToken cancellationToken = default)
+            => new Enumerator();
+
+        private sealed class Enumerator : IAsyncEnumerator<Func<Task<object?[]?>>>
+        {
+            private bool _moved;
+
+            public Func<Task<object?[]?>> Current => EmptyRowFactory;
+
+            public ValueTask<bool> MoveNextAsync()
+            {
+                if (_moved)
+                {
+                    return new ValueTask<bool>(false);
+                }
+
+                _moved = true;
+                return new ValueTask<bool>(true);
+            }
+
+            public ValueTask DisposeAsync() => default;
         }
     }
 
@@ -877,7 +1001,7 @@ internal sealed class TestBuilder : ITestBuilder
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Hook discovery service handles mode-specific logic; reflection calls suppressed in AOT mode")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Hook discovery service handles mode-specific logic; dynamic code suppressed in AOT mode")]
-    public async Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext, CancellationToken cancellationToken = default)
+    public async ValueTask<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext, CancellationToken cancellationToken = default)
     {
         // Discover instance hooks for closed generic types (no-op in source gen mode)
         if (metadata.TestClassType is { IsGenericType: true, IsGenericTypeDefinition: false })
@@ -963,13 +1087,9 @@ internal sealed class TestBuilder : ITestBuilder
 #if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
 #endif
-    public async ValueTask InvokePostResolutionEventsAsync(AbstractExecutableTest test)
+    public ValueTask InvokePostResolutionEventsAsync(AbstractExecutableTest test)
     {
         var context = test.Context;
-
-        // Set TestContext.Current so output capture works via AsyncLocal
-        // This ensures any console output during event receiver invocation is captured
-        TestContext.Current = context;
 
         // Populate TestContext._dependencies from resolved test.Dependencies
         // This makes dependencies available to event receivers and hooks
@@ -979,7 +1099,31 @@ internal sealed class TestBuilder : ITestBuilder
         // Note: ITestRegisteredEventReceiver.OnTestRegistered is NOT called here.
         // Registration events fire later in TestFilterService.RegisterTest for filtered tests only.
         // This ensures OnTestRegistered is called exactly once per test that will actually run.
-        await InvokeDiscoveryEventReceiversAsync(context);
+        var receivers = context.GetTestDiscoveryReceivers();
+        if (receivers.Length == 0)
+        {
+            // Nothing observes the context — skip the AsyncLocal write (a new ExecutionContext and
+            // value map per test), the DiscoveredTestContext and the async state machine.
+            return default;
+        }
+
+        return InvokeDiscoveryEventReceiversAsync(context, receivers);
+    }
+
+    private static async ValueTask InvokeDiscoveryEventReceiversAsync(TestContext context, ITestDiscoveryEventReceiver[] receivers)
+    {
+        // Set TestContext.Current so output capture works via AsyncLocal
+        // This ensures any console output during event receiver invocation is captured
+        TestContext.Current = context;
+
+        var discoveredContext = new DiscoveredTestContext(
+            context.Metadata.TestDetails.TestName,
+            context);
+
+        foreach (var receiver in receivers)
+        {
+            await receiver.OnTestDiscovered(discoveredContext);
+        }
     }
 
     /// <inheritdoc />
@@ -993,16 +1137,18 @@ internal sealed class TestBuilder : ITestBuilder
             return;
         }
 
-        PopulateDependencies(test, context._dependencies);
+        PopulateDependencies(test, context);
         context._dependenciesPopulated = true;
     }
 
-    private static void PopulateDependencies(AbstractExecutableTest test, List<TestDetails> dependencies)
+    private static void PopulateDependencies(AbstractExecutableTest test, TestContext context)
     {
         if (test.Dependencies.Length == 0)
         {
             return;
         }
+
+        var dependencies = context._dependencies ??= [];
 
         var collected = new HashSet<TestDetails>();
         var visited = new HashSet<AbstractExecutableTest>();
@@ -1090,7 +1236,8 @@ internal sealed class TestBuilder : ITestBuilder
             TestEndColumnNumber = metadata.EndColumnNumber,
             ReturnType = metadata.MethodMetadata.ReturnType ?? typeof(void),
             MethodMetadata = metadata.MethodMetadata,
-            AttributesByType = attributes.ToAttributeDictionary(),
+            // Built on first lookup; most tests only ever ask ContainsKey (e.g. [Explicit]).
+            AttributesByType = attributes.Length == 0 ? AttributeDictionaryHelper.Empty : new LazyAttributeDictionary(attributes),
             MethodGenericArguments = testData.ResolvedMethodGenericArguments,
             ClassGenericArguments = testData.ResolvedClassGenericArguments
         };
@@ -1102,18 +1249,6 @@ internal sealed class TestBuilder : ITestBuilder
             CancellationToken.None);
 
         return context;
-    }
-
-#if NET8_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-#endif
-    private Task InvokeDiscoveryEventReceiversAsync(TestContext context)
-    {
-        var discoveredContext = new DiscoveredTestContext(
-            context.Metadata.TestDetails.TestName,
-            context);
-
-        return _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
     }
 
     private static bool HasDeferredDataSource(TestMetadata metadata)
@@ -1233,7 +1368,21 @@ internal sealed class TestBuilder : ITestBuilder
         };
     }
 
-    private async Task<Attribute[]> InitializeAttributesAsync(Attribute[] attributes, CancellationToken cancellationToken = default)
+    private ValueTask<Attribute[]> InitializeAttributesAsync(Attribute[] attributes, CancellationToken cancellationToken = default)
+    {
+        foreach (var attribute in attributes)
+        {
+            if (attribute is IDataSourceAttribute && PropertyInjectionCache.HasInjectableProperties(attribute.GetType()))
+            {
+                return InitializeAttributesCoreAsync(attributes, cancellationToken);
+            }
+        }
+
+        // No data source attribute needs property injection — complete synchronously.
+        return new ValueTask<Attribute[]>(attributes);
+    }
+
+    private async ValueTask<Attribute[]> InitializeAttributesCoreAsync(Attribute[] attributes, CancellationToken cancellationToken)
     {
         // Inject properties into data source attributes during discovery
         // IAsyncInitializer.InitializeAsync is deferred to execution time
@@ -1637,15 +1786,13 @@ internal sealed class TestBuilder : ITestBuilder
             var classDataLoopIndex = 0;
 
             await foreach (var classDataFactory in GetInitializedDataRowsAsync(
-                               classDataSource,
-                               DataGeneratorMetadataCreator.CreateDataGeneratorMetadata(
-                                   testMetadata: metadata,
-                                   testSessionId: _sessionId,
-                                   generatorType: DataGeneratorType.ClassParameters,
-                                   testClassInstance: null,
-                                   classInstanceArguments: null,
-                                   contextAccessor),
-                               cancellationToken).WithCancellation(cancellationToken))
+                classDataSource,
+                metadata,
+                generatorType: DataGeneratorType.ClassParameters,
+                testClassInstance: null,
+                classInstanceArguments: null,
+                contextAccessor,
+                cancellationToken).WithCancellation(cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 classDataLoopIndex++;
@@ -1690,13 +1837,11 @@ internal sealed class TestBuilder : ITestBuilder
 
                         await foreach (var methodDataFactory in GetInitializedDataRowsAsync(
                             methodDataSource,
-                            DataGeneratorMetadataCreator.CreateDataGeneratorMetadata(
-                                testMetadata: metadata,
-                                testSessionId: _sessionId,
-                                generatorType: DataGeneratorType.TestParameters,
-                                testClassInstance: methodDataSource is IAccessesInstanceData ? instanceForMethodDataSources : null,
-                                classInstanceArguments: classData,
-                                contextAccessor),
+                            metadata,
+                            generatorType: DataGeneratorType.TestParameters,
+                            testClassInstance: methodDataSource is IAccessesInstanceData ? instanceForMethodDataSources : null,
+                            classInstanceArguments: classData,
+                            contextAccessor,
                             cancellationToken))
                         {
                             cancellationToken.ThrowIfCancellationRequested();
@@ -1966,12 +2111,14 @@ internal sealed class TestBuilder : ITestBuilder
             var testSpecificContext = new TestBuilderContext
             {
                 TestMetadata = metadata.MethodMetadata,
-                StateBag = contextAccessor.Current.StateBag,
                 ClassConstructor = contextAccessor.Current.ClassConstructor,
                 DataSourceAttribute = methodDataSource ?? contextAccessor.Current.DataSourceAttribute,
                 ClassDataSourceAttribute = classDataSource ?? contextAccessor.Current.ClassDataSourceAttribute,
                 InitializedAttributes = attributes
             };
+
+            // Shares the per-iteration bag lazily; it is only allocated if something reads it.
+            testSpecificContext.ShareStateBagWith(contextAccessor.Current);
 
             var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken: cancellationToken);
 
