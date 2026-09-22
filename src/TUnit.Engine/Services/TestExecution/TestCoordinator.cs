@@ -97,7 +97,7 @@ internal sealed class TestCoordinator : ITestCoordinator
             test.Context.Execution.Result = null;
             test.Context.TestStart = null;
             test.Context.Execution.TestEnd = null;
-            test.Context.Timings.Clear();
+            test.Context.ClearTimings();
 
             TestContext.Current = test.Context;
 
@@ -180,7 +180,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                 // Retry wrapper path. Timeout is handled inside TestExecutor.ExecuteAsync,
                 // wrapping only the test body (not hooks or data source initialization) — fixes #4772.
                 await RetryHelper.ExecuteWithRetry(test.Context,
-                    () => ExecuteTestLifecycleAsync(test, cancellationToken)).ConfigureAwait(false);
+                    CreateLifecycleInvoker(test, cancellationToken)).ConfigureAwait(false);
             }
 
             _stateManager.MarkCompleted(test);
@@ -353,6 +353,11 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
     }
 
+    // Built in a helper so ExecuteTestAsync doesn't allocate the lambda's closure on entry for every
+    // test — only tests that actually take the retry path pay for it.
+    private Func<ValueTask> CreateLifecycleInvoker(AbstractExecutableTest test, CancellationToken cancellationToken)
+        => () => ExecuteTestLifecycleAsync(test, cancellationToken);
+
     /// <summary>
     /// Core test lifecycle execution: instance creation, initialization, execution, and disposal.
     /// Timeout is passed through to TestExecutor.ExecuteAsync, which applies it only to the test
@@ -446,25 +451,34 @@ internal sealed class TestCoordinator : ITestCoordinator
         // otherwise allocate a Func<Task> closure and a state machine per test for nothing.
         if (TUnitActivitySource.Source.HasListeners())
         {
-            var classType = test.Context.Metadata.TestDetails.ClassType;
-            return TUnitActivitySource.RunWithSpanAsync(
-                $"dispose {TUnitActivitySource.GetReadableTypeName(classType)}",
-                test.Context.ClassContext.Activity?.Context ?? default,
-                [
-                    new(TUnitActivitySource.TagTestId, test.Context.Id),
-                    new(TUnitActivitySource.TagTestClass, classType.FullName),
-                    new(TUnitActivitySource.TagTraceScope, TUnitActivitySource.GetScopeTag(SharedType.None))
-                ],
-                () => DisposeTestInstanceCoreAsync(test));
+            return DisposeTestInstanceInSpanAsync(test);
         }
 #endif
         return DisposeTestInstanceCoreAsync(test);
     }
 
+#if NET
+    // Separate method so the closure capturing `test` is only allocated when a listener is attached
+    // (a lambda capturing a parameter is otherwise allocated on entry to the enclosing method).
+    private Task DisposeTestInstanceInSpanAsync(AbstractExecutableTest test)
+    {
+        var classType = test.Context.Metadata.TestDetails.ClassType;
+        return TUnitActivitySource.RunWithSpanAsync(
+            $"dispose {TUnitActivitySource.GetReadableTypeName(classType)}",
+            test.Context.ClassContext.Activity?.Context ?? default,
+            [
+                new(TUnitActivitySource.TagTestId, test.Context.Id),
+                new(TUnitActivitySource.TagTestClass, classType.FullName),
+                new(TUnitActivitySource.TagTraceScope, TUnitActivitySource.GetScopeTag(SharedType.None))
+            ],
+            () => DisposeTestInstanceCoreAsync(test));
+    }
+#endif
+
     private async Task DisposeTestInstanceCoreAsync(AbstractExecutableTest test)
     {
         // Fire OnDispose callbacks — each retry gets a fresh instance
-        var onDispose = test.Context.InternalEvents.OnDispose;
+        var onDispose = test.Context.InternalEventsIfCreated?.OnDispose;
         if (onDispose?.InvocationList != null)
         {
             foreach (var invocation in onDispose.InvocationList)

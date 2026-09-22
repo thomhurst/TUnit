@@ -7,15 +7,11 @@ namespace TUnit.Core;
 [DebuggerDisplay("{ClassType.Name}")]
 public class ClassHookContext : Context
 {
-    private static readonly AsyncLocal<ClassHookContext?> Contexts = new();
     public static new ClassHookContext? Current
     {
-        get => Contexts.Value;
-        internal set
-        {
-            Contexts.Value = value;
-            AssemblyHookContext.Current = value?.AssemblyContext;
-        }
+        get => AmbientContexts.Current?.Class;
+        // Cascades to the assembly/session/discovery contexts in a single AsyncLocal write.
+        internal set => AmbientContexts.SetClass(value);
     }
 
     internal ClassHookContext(AssemblyHookContext assemblyHookContext) : base(assemblyHookContext)

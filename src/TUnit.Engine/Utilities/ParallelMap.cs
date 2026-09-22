@@ -93,9 +93,27 @@ internal static class ParallelMap
         CancellationToken cancellationToken = default)
         => ForParallelAsync(source.Count, index => selector(source[index]), maxDegreeOfParallelism, cancellationToken);
 
-    public static async Task<TResult[]> ForParallelAsync<TResult>(
+    /// <summary>
+    /// <see cref="SelectParallelAsync{TSource,TResult}"/> for selectors that usually complete
+    /// synchronously: a <see cref="ValueTask{TResult}"/> result avoids a Task allocation per item.
+    /// </summary>
+    public static Task<TResult[]> SelectParallelValueAsync<TSource, TResult>(
+        IReadOnlyList<TSource> source,
+        Func<TSource, ValueTask<TResult>> selector,
+        int maxDegreeOfParallelism,
+        CancellationToken cancellationToken = default)
+        => ForParallelValueAsync(source.Count, index => selector(source[index]), maxDegreeOfParallelism, cancellationToken);
+
+    public static Task<TResult[]> ForParallelAsync<TResult>(
         int count,
         Func<int, Task<TResult>> selector,
+        int maxDegreeOfParallelism,
+        CancellationToken cancellationToken = default)
+        => ForParallelValueAsync(count, index => new ValueTask<TResult>(selector(index)), maxDegreeOfParallelism, cancellationToken);
+
+    public static async Task<TResult[]> ForParallelValueAsync<TResult>(
+        int count,
+        Func<int, ValueTask<TResult>> selector,
         int maxDegreeOfParallelism,
         CancellationToken cancellationToken = default)
     {

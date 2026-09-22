@@ -91,7 +91,7 @@ internal static class RetryHelper
                     testContext.Execution.Result = null;
                     testContext.TestStart = null;
                     testContext.Execution.TestEnd = null;
-                    testContext.Timings.Clear();
+                    testContext.ClearTimings();
 
                     try
                     {

@@ -9,24 +9,29 @@ public partial class TestContext
     /// </summary>
     internal TestContextEvents InternalEvents => _testBuilderContext.Events;
 
-    /// <inheritdoc/>
-    AsyncEvent<TestContext>? ITestEvents.OnDispose => _testBuilderContext.Events.OnDispose;
+    /// <summary>
+    /// The events container if it has been created, otherwise <c>null</c> (no subscribers).
+    /// </summary>
+    internal TestContextEvents? InternalEventsIfCreated => _testBuilderContext.EventsIfCreated;
 
     /// <inheritdoc/>
-    AsyncEvent<TestContext>? ITestEvents.OnTestRegistered => _testBuilderContext.Events.OnTestRegistered;
+    AsyncEvent<TestContext>? ITestEvents.OnDispose => _testBuilderContext.EventsIfCreated?.OnDispose;
 
     /// <inheritdoc/>
-    AsyncEvent<TestContext>? ITestEvents.OnInitialize => _testBuilderContext.Events.OnInitialize;
+    AsyncEvent<TestContext>? ITestEvents.OnTestRegistered => _testBuilderContext.EventsIfCreated?.OnTestRegistered;
 
     /// <inheritdoc/>
-    AsyncEvent<TestContext>? ITestEvents.OnTestStart => _testBuilderContext.Events.OnTestStart;
+    AsyncEvent<TestContext>? ITestEvents.OnInitialize => _testBuilderContext.EventsIfCreated?.OnInitialize;
 
     /// <inheritdoc/>
-    AsyncEvent<TestContext>? ITestEvents.OnTestEnd => _testBuilderContext.Events.OnTestEnd;
+    AsyncEvent<TestContext>? ITestEvents.OnTestStart => _testBuilderContext.EventsIfCreated?.OnTestStart;
 
     /// <inheritdoc/>
-    AsyncEvent<TestContext>? ITestEvents.OnTestSkipped => _testBuilderContext.Events.OnTestSkipped;
+    AsyncEvent<TestContext>? ITestEvents.OnTestEnd => _testBuilderContext.EventsIfCreated?.OnTestEnd;
 
     /// <inheritdoc/>
-    AsyncEvent<(TestContext TestContext, int RetryAttempt)>? ITestEvents.OnTestRetry => _testBuilderContext.Events.OnTestRetry;
+    AsyncEvent<TestContext>? ITestEvents.OnTestSkipped => _testBuilderContext.EventsIfCreated?.OnTestSkipped;
+
+    /// <inheritdoc/>
+    AsyncEvent<(TestContext TestContext, int RetryAttempt)>? ITestEvents.OnTestRetry => _testBuilderContext.EventsIfCreated?.OnTestRetry;
 }

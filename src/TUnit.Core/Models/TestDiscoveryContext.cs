@@ -7,11 +7,10 @@ namespace TUnit.Core;
 /// </summary>
 public class TestDiscoveryContext : Context
 {
-    private static readonly AsyncLocal<TestDiscoveryContext?> Contexts = new();
     public static new TestDiscoveryContext? Current
     {
-        get => Contexts.Value;
-        internal set => Contexts.Value = value;
+        get => AmbientContexts.Current?.Discovery;
+        internal set => AmbientContexts.SetDiscovery(value);
     }
 
     internal TestDiscoveryContext(BeforeTestDiscoveryContext parent) : base(parent)

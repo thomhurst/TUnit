@@ -275,18 +275,24 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
         var propertyBag = new PropertyBag();
 
-        foreach (var category in test.Context.Metadata.TestDetails.Categories)
+        if (test.Context.Metadata.TestDetails.CategoriesIfCreated is { } categories)
         {
-            propertyBag.Add(new TestMetadataProperty(category));
-            propertyBag.Add(new TestMetadataProperty("Category", category));
+            foreach (var category in categories)
+            {
+                propertyBag.Add(new TestMetadataProperty(category));
+                propertyBag.Add(new TestMetadataProperty("Category", category));
+            }
         }
 
         // Replace LINQ with manual loop for better performance in hot path
-        foreach (var propertyEntry in test.Context.Metadata.TestDetails.CustomProperties)
+        if (test.Context.Metadata.TestDetails.CustomPropertiesIfCreated is { } customProperties)
         {
-            foreach (var value in propertyEntry.Value)
+            foreach (var propertyEntry in customProperties)
             {
-                propertyBag.Add(new TestMetadataProperty(propertyEntry.Key, value));
+                foreach (var value in propertyEntry.Value)
+                {
+                    propertyBag.Add(new TestMetadataProperty(propertyEntry.Key, value));
+                }
             }
         }
 

@@ -42,6 +42,7 @@ internal class TestExecutor
     private readonly Func<CancellationToken, ValueTask> _beforeTestSessionHookFactory;
     private readonly Func<Assembly, CancellationToken, ValueTask> _beforeAssemblyHookFactory;
     private readonly Func<Assembly, ValueTask<List<Exception>>> _cancelledAfterAssemblyHookFactory;
+    private readonly Func<ValueTask<List<Exception>>> _cancelledAfterTestSessionHookFactory;
     private readonly AfterClassCleanup _cancelledAfterClassHookCleanup;
 #if NET
     private readonly Func<Assembly, ValueTask<List<Exception>>> _finishAssemblyActivityFactory;
@@ -66,6 +67,7 @@ internal class TestExecutor
         _beforeTestSessionHookFactory = ct => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(ct);
         _beforeAssemblyHookFactory = (assembly, ct) => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, ct);
         _cancelledAfterAssemblyHookFactory = assembly => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, CancellationToken.None);
+        _cancelledAfterTestSessionHookFactory = () => _hookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken.None);
         _cancelledAfterClassHookCleanup = AfterClassCleanup.ForHooks(_hookExecutor, CancellationToken.None);
 #if NET
         _finishAssemblyActivityFactory = _hookExecutor.FinishAssemblyActivityAsync;
@@ -94,7 +96,7 @@ internal class TestExecutor
         // Register After Session hook to run on cancellation (guarantees cleanup)
         _afterHookPairTracker.RegisterAfterTestSessionHook(
             cancellationToken,
-            () => _hookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken.None));
+            _cancelledAfterTestSessionHookFactory);
     }
 
     /// <summary>
@@ -368,7 +370,7 @@ internal class TestExecutor
                     var timeoutMessage = $"Test '{context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}";
 
                     await TimeoutHelper.ExecuteWithTimeoutAsync(
-                        ct => ExecuteTestAsync(executableTest, ct).AsTask(),
+                        CreateTimeoutTestInvoker(executableTest),
                         testTimeout.Value,
                         testBodyTimeoutCts,
                         testCancellationToken,
@@ -610,6 +612,18 @@ internal class TestExecutor
     }
 #endif
 
+    // Lambdas that capture a parameter make the compiler allocate their closure at method entry,
+    // on every call — even when the branch that creates the lambda never runs. Building them in
+    // small helpers keeps that closure off the per-test hot path.
+    private static Func<CancellationToken, Task> CreateTimeoutTestInvoker(AbstractExecutableTest executableTest)
+        => ct => ExecuteTestAsync(executableTest, ct).AsTask();
+
+    private static ValueTask ExecuteWithTestExecutorAsync(ITestExecutor testExecutor, AbstractExecutableTest executableTest)
+        => testExecutor.ExecuteTest(executableTest.Context,
+            () => new ValueTask(executableTest.InvokeTestAsync(
+                executableTest.Context.Metadata.TestDetails.ClassInstance,
+                executableTest.Context.Execution.CancellationToken)));
+
     private static async ValueTask ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {
         // Skip the actual test invocation for skipped tests
@@ -627,10 +641,7 @@ internal class TestExecutor
 
         if (executableTest.Context.InternalDiscoveredTest?.TestExecutor is { } testExecutor)
         {
-            await testExecutor.ExecuteTest(executableTest.Context,
-                () => new ValueTask(executableTest.InvokeTestAsync(
-                    executableTest.Context.Metadata.TestDetails.ClassInstance,
-                    executableTest.Context.Execution.CancellationToken))).ConfigureAwait(false);
+            await ExecuteWithTestExecutorAsync(testExecutor, executableTest).ConfigureAwait(false);
         }
         else
         {
@@ -720,7 +731,7 @@ internal class TestExecutor
             var afterAssemblyFactory = ResolveAssemblyCleanup(
                 testAssembly,
                 HasAssemblyHooks(testAssembly),
-                assembly => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, cancellationToken));
+                CreateAfterAssemblyHookFactory(cancellationToken));
 
             if (afterAssemblyFactory is not null)
             {
@@ -737,6 +748,9 @@ internal class TestExecutor
 
         return exceptions;
     }
+
+    private Func<Assembly, ValueTask<List<Exception>>> CreateAfterAssemblyHookFactory(CancellationToken cancellationToken)
+        => assembly => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, cancellationToken);
 
     /// <summary>
     /// Execute session-level after hooks once at the end of test execution.

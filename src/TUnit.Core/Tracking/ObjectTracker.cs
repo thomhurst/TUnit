@@ -78,12 +78,19 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// <summary>
     /// Counts total tracked objects across all depth levels without allocating a new collection.
     /// </summary>
-    private static int CountTrackedObjects(SortedList<int, HashSet<object>> trackedObjects)
+    private static int CountTrackedObjects(SortedList<int, HashSet<object>>? trackedObjects)
     {
-        var count = 0;
-        foreach (var kvp in trackedObjects)
+        if (trackedObjects is null || trackedObjects.Count == 0)
         {
-            count += kvp.Value.Count;
+            return 0;
+        }
+
+        // Indexed access: SortedList's enumerator is a class, so foreach would allocate.
+        var values = trackedObjects.Values;
+        var count = 0;
+        for (var i = 0; i < values.Count; i++)
+        {
+            count += values[i].Count;
         }
 
         return count;
@@ -93,10 +100,15 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// Takes a snapshot of currently tracked objects before new discovery mutates the dictionary.
     /// Uses ReferenceEqualityComparer to match object identity semantics.
     /// </summary>
-    private static HashSet<object> SnapshotTrackedObjects(SortedList<int, HashSet<object>> trackedObjects)
+    private static HashSet<object>? SnapshotTrackedObjects(SortedList<int, HashSet<object>>? trackedObjects)
     {
+        if (CountTrackedObjects(trackedObjects) == 0)
+        {
+            return null;
+        }
+
         var snapshot = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
-        foreach (var kvp in trackedObjects)
+        foreach (var kvp in trackedObjects!)
         {
             foreach (var obj in kvp.Value)
             {
@@ -109,10 +121,10 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public void TrackObjects(TestContext testContext)
     {
-        var alreadyTrackedSnapshot = SnapshotTrackedObjects(testContext.TrackedObjects);
+        var alreadyTrackedSnapshot = SnapshotTrackedObjects(testContext.TrackedObjectsIfCreated);
 
         var trackableDict = trackableObjectGraphProvider.GetTrackableObjects(testContext);
-        if (trackableDict.Count == 0 && alreadyTrackedSnapshot.Count == 0)
+        if (trackableDict.Count == 0 && alreadyTrackedSnapshot is null)
         {
             return;
         }
@@ -123,7 +135,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         {
             foreach (var obj in kvp.Value)
             {
-                if (!alreadyTrackedSnapshot.Contains(obj))
+                if (alreadyTrackedSnapshot?.Contains(obj) != true)
                 {
                     TrackObject(obj);
                 }
@@ -133,14 +145,14 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public ValueTask<List<Exception>?> UntrackObjects(TestContext testContext)
     {
-        var trackedObjects = testContext.TrackedObjects;
+        var trackedObjects = testContext.TrackedObjectsIfCreated;
 
         if (CountTrackedObjects(trackedObjects) == 0)
         {
             return new ValueTask<List<Exception>?>((List<Exception>?)null);
         }
 
-        return UntrackObjectsAsync(trackedObjects);
+        return UntrackObjectsAsync(trackedObjects!);
     }
 
     private async ValueTask<List<Exception>?> UntrackObjectsAsync(SortedList<int, HashSet<object>> trackedObjects)

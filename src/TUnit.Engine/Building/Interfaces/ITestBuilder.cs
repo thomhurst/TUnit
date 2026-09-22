@@ -15,7 +15,7 @@ internal interface ITestBuilder
     /// <param name="testData">The test data</param>
     /// <param name="testBuilderContext"></param>
     /// <returns>An executable test ready for execution</returns>
-    Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestBuilder.TestData testData, TestBuilderContext testBuilderContext, CancellationToken cancellationToken = default);
+    ValueTask<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestBuilder.TestData testData, TestBuilderContext testBuilderContext, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Builds all executable tests from a single TestMetadata using its DataCombinationGenerator delegate.
@@ -27,7 +27,7 @@ internal interface ITestBuilder
 #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
 #endif
-    Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext, CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Streaming version that yields tests as they're built without buffering

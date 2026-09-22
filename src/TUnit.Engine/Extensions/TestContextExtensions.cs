@@ -219,9 +219,10 @@ internal static class TestContextExtensions
             result[index++] = classInstance;
         }
 
-        foreach (var attr in attributes)
+        // Indexed loops over the interface-typed collections: foreach would box an enumerator.
+        for (var i = 0; i < attributes.Count; i++)
         {
-            result[index++] = attr;
+            result[index++] = attributes[i];
         }
 
         foreach (var arg in testMethodArgs)
@@ -232,11 +233,14 @@ internal static class TestContextExtensions
             }
         }
 
-        foreach (var prop in injectedProps)
+        if (injectedProps.Count > 0)
         {
-            if (prop.Value is { } value)
+            foreach (var prop in injectedProps)
             {
-                result[index++] = value;
+                if (prop.Value is { } value)
+                {
+                    result[index++] = value;
+                }
             }
         }
 
@@ -260,6 +264,11 @@ internal static class TestContextExtensions
 
     private static int CountNonNullValues(IDictionary<string, object?> props)
     {
+        if (props.Count == 0)
+        {
+            return 0;
+        }
+
         var count = 0;
         foreach (var prop in props)
         {

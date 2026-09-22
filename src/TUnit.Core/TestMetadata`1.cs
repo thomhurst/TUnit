@@ -26,10 +26,15 @@ public class TestMetadata<
             _instanceFactory = value;
             if (value != null)
             {
-                base.InstanceFactory = (typeArgs, args) => value(typeArgs, args);
+                base.InstanceFactory = AsUntypedFactory(value);
             }
         }
     }
+
+    // T is a reference type, so the typed factory is already a Func<..., object> via delegate
+    // covariance — reuse it instead of wrapping it in a closure per metadata instance.
+    private static Func<Type[], object?[], object> AsUntypedFactory(Func<Type[], object?[], T> factory)
+        => factory as Func<Type[], object?[], object> ?? ((typeArgs, args) => factory(typeArgs, args));
 
     /// <summary>
     /// Strongly typed test invoker

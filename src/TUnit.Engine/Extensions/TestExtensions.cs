@@ -86,28 +86,30 @@ internal static class TestExtensions
                 methodArity: testDetails.MethodMetadata.GenericTypeCount
             );
 
+            var categories = testDetails.CategoriesIfCreated;
             TestMetadataProperty[]? categoryProps = null;
-            if (testDetails.Categories.Count > 0)
+            if (categories is { Count: > 0 })
             {
-                categoryProps = new TestMetadataProperty[testDetails.Categories.Count];
-                for (var i = 0; i < testDetails.Categories.Count; i++)
+                categoryProps = new TestMetadataProperty[categories.Count];
+                for (var i = 0; i < categories.Count; i++)
                 {
-                    categoryProps[i] = new TestMetadataProperty(testDetails.Categories[i]);
+                    categoryProps[i] = new TestMetadataProperty(categories[i]);
                 }
             }
 
+            var customProperties = testDetails.CustomPropertiesIfCreated;
             TestMetadataProperty[]? customProps = null;
-            if (testDetails.CustomProperties.Count > 0)
+            if (customProperties is { Count: > 0 })
             {
                 var count = 0;
-                foreach (var prop in testDetails.CustomProperties)
+                foreach (var prop in customProperties)
                 {
                     count += prop.Value.Count;
                 }
 
                 customProps = new TestMetadataProperty[count];
                 var idx = 0;
-                foreach (var prop in testDetails.CustomProperties)
+                foreach (var prop in customProperties)
                 {
                     foreach (var value in prop.Value)
                     {
@@ -119,9 +121,9 @@ internal static class TestExtensions
             var trxTypeName = testDetails.MethodMetadata.Class.Type.FullName ?? testDetails.ClassType.FullName ?? "UnknownType";
 
             TrxCategoriesProperty? trxCategories = null;
-            if (testDetails.Categories.Count > 0)
+            if (categories is { Count: > 0 })
             {
-                trxCategories = new TrxCategoriesProperty([..testDetails.Categories]);
+                trxCategories = new TrxCategoriesProperty([..categories]);
             }
 
             return new CachedTestNodeProperties
@@ -292,8 +294,9 @@ internal static class TestExtensions
 
         var count = 3; // State + FileLocation + MethodIdentifier
 
-        count += testDetails.CustomProperties.Count;
-        count += testDetails.Categories.Count;
+        count += testDetails.CustomPropertiesIfCreated?.Count ?? 0;
+        var categoryCount = testDetails.CategoriesIfCreated?.Count ?? 0;
+        count += categoryCount;
 
         if (isFinalState)
         {
@@ -304,7 +307,7 @@ internal static class TestExtensions
         {
             count += 2; // TRX TypeName + TRX Messages
 
-            if (testDetails.Categories.Count > 0)
+            if (categoryCount > 0)
             {
                 count += 1; // TRX Categories
             }
@@ -350,11 +353,11 @@ internal static class TestExtensions
 
         var end = testContext.Execution.TestEnd ?? DateTimeOffset.Now;
         var timings = testContext.Timings;
-        var stepTimings = new StepTimingInfo[timings.Count];
-        var i = 0;
-        foreach (var timing in timings)
+        StepTimingInfo[] stepTimings = timings.Count == 0 ? [] : new StepTimingInfo[timings.Count];
+        for (var i = 0; i < stepTimings.Length; i++)
         {
-            stepTimings[i++] = new StepTimingInfo(timing.StepName, timing.StepName, new TimingInfo(timing.Start, timing.End, timing.Duration));
+            var timing = timings[i];
+            stepTimings[i] = new StepTimingInfo(timing.StepName, timing.StepName, new TimingInfo(timing.Start, timing.End, timing.Duration));
         }
 
         return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), stepTimings);

@@ -159,7 +159,10 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         {
             TryAddToHashSet(objectsByDepth, 0, rootObject);
 
-            DiscoverNestedObjects(rootObject, objectsByDepth, visitedObjects, currentDepth: 1, cancellationToken);
+            if (MayHaveNestedObjects(rootObject.GetType()))
+            {
+                DiscoverNestedObjects(rootObject, objectsByDepth, visitedObjects, currentDepth: 1, cancellationToken);
+            }
         }
 
         return new ObjectGraph(objectsByDepth);
@@ -175,6 +178,15 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     public SortedList<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default)
     {
         var visitedObjects = testContext.TrackedObjects;
+
+        var testDetails = testContext.Metadata.TestDetails;
+        if (testDetails.TestClassArguments.Length == 0
+            && testDetails.TestMethodArguments.Length == 0
+            && testDetails.TestClassInjectedPropertyArguments.Count == 0)
+        {
+            // No root objects, so nothing to discover — skip the traversal closures.
+            return visitedObjects;
+        }
 
         // Collect root-level objects and discover nested objects for tracking
         CollectRootObjects(
@@ -204,6 +216,23 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
 
         cancellationToken.ThrowIfCancellationRequested();
 
+        // Nothing can be found beneath this object (e.g. a primitive argument) — skip the
+        // traversal and its per-call closures.
+        if (!MayHaveNestedObjects(obj.GetType()))
+        {
+            return;
+        }
+
+        DiscoverNestedObjectsCore(obj, objectsByDepth, visitedObjects, currentDepth, cancellationToken);
+    }
+
+    private void DiscoverNestedObjectsCore(
+        object obj,
+        Dictionary<int, HashSet<object>> objectsByDepth,
+        HashSet<object> visitedObjects,
+        int currentDepth,
+        CancellationToken cancellationToken)
+    {
         // Standard mode add callback: visitedObjects + objectsByDepth + allObjects (thread-safe)
         bool TryAddStandard(object value, int depth)
         {
@@ -247,6 +276,22 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
 
         cancellationToken.ThrowIfCancellationRequested();
 
+        // Nothing can be found beneath this object (e.g. a primitive argument) — skip the
+        // traversal and its per-call closures.
+        if (!MayHaveNestedObjects(obj.GetType()))
+        {
+            return;
+        }
+
+        DiscoverNestedObjectsForTrackingCore(obj, visitedObjects, currentDepth, cancellationToken);
+    }
+
+    private void DiscoverNestedObjectsForTrackingCore(
+        object obj,
+        IDictionary<int, HashSet<object>> visitedObjects,
+        int currentDepth,
+        CancellationToken cancellationToken)
+    {
         // Tracking mode add callback: TryAddToHashSet only
         bool TryAddTracking(object value, int depth)
         {
@@ -275,8 +320,50 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         TypeHierarchyCache.Clear();
         ShouldSkipTypeCache.Clear();
         FlattenedInitializerPropertiesCache.Clear();
+        MayHaveNestedObjectsCache.Clear();
         ClearDiscoveryErrors();
     }
+
+    // Memoized per type: whether DiscoverNestedObjects could find anything beneath an instance.
+    private static readonly ConcurrentDictionary<Type, bool> MayHaveNestedObjectsCache = new();
+
+    /// <summary>
+    /// Returns <c>false</c> when <see cref="DiscoverNestedObjectGraph"/> is guaranteed to find nothing
+    /// beneath an instance of <paramref name="type"/> (no injectable properties and no property that
+    /// could hold an <see cref="IAsyncInitializer"/>). Lets callers skip building a graph — two
+    /// collections, a set and several closures — for the common plain test class.
+    /// Mirrors the traversal rules of <see cref="DiscoverNestedObjects"/> exactly.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Reflection fallback mirrors TraverseInitializerPropertiesViaReflection.")]
+    internal static bool MayHaveNestedObjects(Type type)
+        => MayHaveNestedObjectsCache.GetOrAdd(type, static t =>
+        {
+            if (PropertyInjectionCache.GetOrCreatePlan(t).HasProperties)
+            {
+                return true;
+            }
+
+            if (ShouldSkipType(t))
+            {
+                return false;
+            }
+
+            var flattened = GetFlattenedInitializerProperties(t);
+            if (flattened != null)
+            {
+                return flattened.Length > 0;
+            }
+
+            foreach (var property in PropertyCacheManager.GetCachedProperties(t))
+            {
+                if (typeof(IAsyncInitializer).IsAssignableFrom(property.PropertyType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        });
 
     /// <summary>
     /// Checks if a type should be skipped during discovery. Result is memoized per type —

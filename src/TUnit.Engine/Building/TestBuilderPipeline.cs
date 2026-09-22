@@ -120,7 +120,7 @@ internal sealed class TestBuilderPipeline
                 cancellationToken).ConfigureAwait(false);
         }
 
-        var testGroups = await ParallelMap.SelectParallelAsync(
+        var testGroups = await ParallelMap.SelectParallelValueAsync(
             metadataList,
             metadata => BuildTestsForMetadataAsync(metadata, buildingContext, cancellationToken),
             Environment.ProcessorCount,
@@ -146,7 +146,7 @@ internal sealed class TestBuilderPipeline
     /// placeholder test rather than propagating, so one bad data source cannot abort discovery.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
-    private async Task<IReadOnlyList<AbstractExecutableTest>> BuildTestsForMetadataAsync(
+    private async ValueTask<IReadOnlyList<AbstractExecutableTest>> BuildTestsForMetadataAsync(
         TestMetadata metadata,
         TestBuildingContext buildingContext,
         CancellationToken cancellationToken)

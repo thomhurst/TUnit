@@ -4,15 +4,11 @@ namespace TUnit.Core;
 
 public class TestSessionContext : Context
 {
-    private static readonly AsyncLocal<TestSessionContext?> Contexts = new();
     public static new TestSessionContext? Current
     {
-        get => Contexts.Value;
-        internal set
-        {
-            Contexts.Value = value;
-            TestDiscoveryContext.Current = value?.TestDiscoveryContext;
-        }
+        get => AmbientContexts.Current?.Session;
+        // Cascades to the discovery context in a single AsyncLocal write.
+        internal set => AmbientContexts.SetSession(value);
     }
 
     /// <summary>

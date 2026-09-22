@@ -46,6 +46,13 @@ public class ThreadSafeDictionary<TKey, [DynamicallyAccessedMembers(DynamicallyA
             return existingLazy.Value;
         }
 
+        return AddSlow(key, func);
+    }
+
+    // Kept separate from GetOrAdd: the lambda's captured key/func would otherwise be hoisted into a
+    // closure allocated on every call, including the (hot) fast path that never creates the Lazy.
+    private TValue AddSlow(TKey key, Func<TKey, TValue> func)
+    {
         var newLazy = new Lazy<TValue>(() => func(key), LazyThreadSafetyMode.ExecutionAndPublication);
         var winning = _innerDictionary.GetOrAdd(key, newLazy);
         return winning.Value;
@@ -62,6 +69,11 @@ public class ThreadSafeDictionary<TKey, [DynamicallyAccessedMembers(DynamicallyA
             return existingLazy.Value;
         }
 
+        return AddSlow(key, func, arg);
+    }
+
+    private TValue AddSlow<TArg>(TKey key, Func<TKey, TArg, TValue> func, TArg arg)
+    {
         var newLazy = new Lazy<TValue>(() => func(key, arg), LazyThreadSafetyMode.ExecutionAndPublication);
         var winning = _innerDictionary.GetOrAdd(key, newLazy);
         return winning.Value;
