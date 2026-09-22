@@ -62,9 +62,18 @@ public class EventReceiverRegistrationTests
             context.Metadata.TestDetails.ClassInstance = instance;
             orchestrator.RegisterClassInstanceReceiver(context);
 
+            // Each per-test event type must still set its presence flag, or dispatch is skipped.
             await orchestrator.InvokeTestStartEventReceiversAsync(context, CancellationToken.None);
-            await Assert.That(attribute.Calls).IsEqualTo(1);
-            await Assert.That(instance.Calls).IsEqualTo(1);
+            var endExceptions = await orchestrator.InvokeTestEndEventReceiversAsync(context, CancellationToken.None);
+            await orchestrator.InvokeTestSkippedEventReceiversAsync(context, CancellationToken.None);
+
+            await Assert.That(endExceptions).IsEmpty();
+            await Assert.That(attribute.StartCalls).IsEqualTo(1);
+            await Assert.That(instance.StartCalls).IsEqualTo(1);
+            await Assert.That(attribute.EndCalls).IsEqualTo(1);
+            await Assert.That(instance.EndCalls).IsEqualTo(1);
+            await Assert.That(attribute.SkippedCalls).IsEqualTo(1);
+            await Assert.That(instance.SkippedCalls).IsEqualTo(1);
         }
         finally
         {
@@ -98,14 +107,27 @@ public class EventReceiverRegistrationTests
         public override int GetHashCode() => throw new InvalidOperationException("Not an event receiver");
     }
 
-    private sealed class HashingForbiddenReceiverAttribute : Attribute, ITestStartEventReceiver
+    private sealed class HashingForbiddenReceiverAttribute : Attribute,
+        ITestStartEventReceiver, ITestEndEventReceiver, ITestSkippedEventReceiver
     {
-        public int Calls { get; private set; }
+        public int StartCalls { get; private set; }
+        public int EndCalls { get; private set; }
+        public int SkippedCalls { get; private set; }
         public override int GetHashCode() => throw new InvalidOperationException("Per-test receivers should not be hashed");
         public override bool Equals(object? obj) => throw new InvalidOperationException("Per-test receivers should not be compared");
         public ValueTask OnTestStart(TestContext context)
         {
-            Calls++;
+            StartCalls++;
+            return ValueTask.CompletedTask;
+        }
+        public ValueTask OnTestEnd(TestContext context)
+        {
+            EndCalls++;
+            return ValueTask.CompletedTask;
+        }
+        public ValueTask OnTestSkipped(TestContext context)
+        {
+            SkippedCalls++;
             return ValueTask.CompletedTask;
         }
     }
