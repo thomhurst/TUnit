@@ -31,6 +31,14 @@ public class CrossCompilationAttributeTests
             public void Inherited(int a, int b)
             {
             }
+
+            [Test]
+            [Arguments(123_999.00000000000000001, Skip = "from base", Categories = new[] { "slow" })]
+            [Arguments(-1.5)]
+            [Arguments(new object[] { 2.5 })]
+            public void InheritedDecimal(decimal value)
+            {
+            }
         }
         """;
 
@@ -116,6 +124,16 @@ public class CrossCompilationAttributeTests
         await Assert.That(generated).Contains("new global::TUnit.Core.TimeoutAttribute(5000)");
         await Assert.That(generated).Contains("new global::TUnit.Core.DisplayNameAttribute(\"Inherited $a $b\")");
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(1, 2)");
+
+        // [Arguments] from the referenced project: numeric literals for decimal parameters keep their
+        // source text (a double TypedConstant would round 123_999.00000000000000001), named arguments
+        // are preserved, and a non-literal argument such as the array form uses the typed constant.
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(123_999.00000000000000001m)");
+        await Assert.That(generated).Contains("Skip = \"from base\"");
+        await Assert.That(generated).Contains("Categories = ");
+        await Assert.That(generated).Contains("\"slow\"");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(-1.5m)");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(2.5m)");
 
         var compilationErrors = outputCompilation.GetDiagnostics()
             .Where(d => d.Severity == DiagnosticSeverity.Error)
