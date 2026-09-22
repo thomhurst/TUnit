@@ -52,32 +52,44 @@ public class AttributeWriter(Compilation compilation)
 
     public void WriteAttribute(ICodeWriter sourceCodeWriter, AttributeData attributeData)
     {
-        if (attributeData.ApplicationSyntaxReference is null)
+        var syntax = attributeData.GetApplicationSyntaxInCompilation(compilation);
+
+        if (syntax is null)
         {
-            // For attributes from other assemblies (like inherited methods),
-            // use the WriteAttributeWithoutSyntax approach
+            // Attributes from other assemblies (metadata references on the command line, or
+            // CompilationReferences to other projects in IDE workspaces) either have no syntax
+            // or have syntax in a tree this compilation cannot produce a semantic model for.
             WriteAttributeWithoutSyntax(sourceCodeWriter, attributeData);
         }
         else
         {
             // For attributes from the current compilation, use the syntax-based approach
-            sourceCodeWriter.Append(GetAttributeObjectInitializer(attributeData));
+            sourceCodeWriter.Append(GetAttributeObjectInitializer(attributeData, syntax));
         }
     }
 
     public string GetAttributeObjectInitializer(AttributeData attributeData)
     {
+        return GetAttributeObjectInitializer(attributeData, attributeData.GetApplicationSyntaxInCompilation(compilation));
+    }
+
+    private string GetAttributeObjectInitializer(AttributeData attributeData, AttributeSyntax? syntax)
+    {
+        if (syntax is null)
+        {
+            var sourceCodeWriter = new CodeWriter("", includeHeader: false);
+            WriteAttributeWithoutSyntax(sourceCodeWriter, attributeData);
+            return sourceCodeWriter.ToString();
+        }
+
         // Argument-free attributes such as [Test] have the same initializer at every
         // application site. Cache by type so large suites only format it once.
         if (attributeData.AttributeClass is { } attributeClass &&
-            attributeData.ApplicationSyntaxReference?.GetSyntax() is AttributeSyntax
-            {
-                ArgumentList: null or { Arguments.Count: 0 }
-            })
+            syntax.ArgumentList is null or { Arguments.Count: 0 })
         {
             if (!_argumentFreeAttributeInitializerCache.TryGetValue(attributeClass, out var argumentFreeInitializer))
             {
-                argumentFreeInitializer = GetAttributeObjectInitializerInner(compilation, attributeData);
+                argumentFreeInitializer = GetAttributeObjectInitializerInner(compilation, attributeData, syntax);
                 _argumentFreeAttributeInitializerCache.Add(attributeClass, argumentFreeInitializer);
             }
 
@@ -89,27 +101,16 @@ public class AttributeWriter(Compilation compilation)
             return initializer;
         }
 
-        initializer = GetAttributeObjectInitializerInner(compilation, attributeData);
+        initializer = GetAttributeObjectInitializerInner(compilation, attributeData, syntax);
         _attributeObjectInitializerCache.Add(attributeData, initializer);
         return initializer;
     }
 
-    private static string GetAttributeObjectInitializerInner(Compilation compilation, AttributeData attributeData)
+    private static string GetAttributeObjectInitializerInner(Compilation compilation, AttributeData attributeData, AttributeSyntax syntax)
     {
         var sourceCodeWriter = new CodeWriter("", includeHeader: false);
 
-        var syntax = attributeData.ApplicationSyntaxReference?.GetSyntax();
-
-        if (syntax is null)
-        {
-            WriteAttributeWithoutSyntax(sourceCodeWriter, attributeData);
-            return sourceCodeWriter.ToString();
-        }
-
-        var arguments = syntax.ChildNodes()
-            .OfType<AttributeArgumentListSyntax>()
-            .FirstOrDefault()
-            ?.Arguments ?? [];
+        var arguments = syntax.ArgumentList?.Arguments ?? [];
 
         var properties = arguments.Where(x => x.NameEquals != null);
 

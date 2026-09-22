@@ -1434,8 +1434,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var attrTypeName = attr.AttributeClass.GloballyQualified();
         var testMethodParameters = methodSymbol.Parameters;
 
-        // Get the attribute syntax to access source text (preserves precision for decimals)
-        var attributeSyntax = attr.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
+        // Get the attribute syntax to access source text (preserves precision for decimals).
+        // Null for metadata references and for CompilationReferences to other projects (IDE).
+        var attributeSyntax = attr.GetApplicationSyntaxInCompilation(compilation);
         if (attributeSyntax == null)
         {
             // No syntax available - fall back to TypedConstant-based formatting
