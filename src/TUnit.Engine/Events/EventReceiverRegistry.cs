@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces;
 
@@ -53,7 +54,9 @@ internal sealed class EventReceiverRegistry
     private readonly ConcurrentDictionary<Type, Array> _cachedTypedReceivers = new();
 
     /// <summary>
-    /// Register event receivers from a collection of objects.
+    /// Stores scope event receivers so they can be enumerated via <see cref="GetReceiversOfType{T}"/>.
+    /// Callers must have called <see cref="RegisterPresence"/> for each receiver first; its
+    /// presence flags are not recomputed here.
     /// </summary>
     public void RegisterReceivers(ReadOnlySpan<object> objects)
     {
@@ -81,7 +84,7 @@ internal sealed class EventReceiverRegistry
     }
 
     /// <summary>
-    /// Register a single event receiver.
+    /// Stores a single scope event receiver. Callers must have called <see cref="RegisterPresence"/> first.
     /// </summary>
     public void RegisterReceiver(object receiver)
     {
@@ -90,10 +93,12 @@ internal sealed class EventReceiverRegistry
 
     private void RegisterReceiverInternal(object receiver)
     {
-        UpdateEventFlags(receiver);
+        // Presence flags were already set by RegisterPresence; classifying again would be redundant.
+        Debug.Assert(((EventTypes)Volatile.Read(ref _registeredEvents)).HasFlag(Classify(receiver)),
+            "RegisterPresence must be called before storing a receiver.");
 
         // Only scope receivers are ever enumerated (see RegisterPresence); per-test receiver
-        // types need nothing beyond the presence flags set above.
+        // types need nothing beyond the presence flags.
         RegisterIfImplements<IFirstTestInTestSessionEventReceiver>(receiver);
         RegisterIfImplements<ILastTestInTestSessionEventReceiver>(receiver);
         RegisterIfImplements<IFirstTestInAssemblyEventReceiver>(receiver);
@@ -223,8 +228,6 @@ internal sealed class EventReceiverRegistry
         }
         return typedArray;
     }
-
-    private void UpdateEventFlags(object receiver) => SetFlags(Classify(receiver));
 
     private static EventTypes Classify(object receiver)
     {
