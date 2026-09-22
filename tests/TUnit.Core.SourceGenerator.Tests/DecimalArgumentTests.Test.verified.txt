@@ -19,73 +19,17 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.DecimalArgumentTests);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Transfer", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "debit", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Transfer", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal) }, null)!.GetParameters()[0]),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "credit", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Transfer", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal) }, null)!.GetParameters()[1])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_1 = global::TUnit.Core.MethodMetadataFactory.Create("SimpleDecimal", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "value", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("SimpleDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_2 = global::TUnit.Core.MethodMetadataFactory.Create("SmallDecimal", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "value", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("SmallDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_3 = global::TUnit.Core.MethodMetadataFactory.Create("MaxDecimal", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "value", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MaxDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_4 = global::TUnit.Core.MethodMetadataFactory.Create("MinDecimal", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "value", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MinDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_5 = global::TUnit.Core.MethodMetadataFactory.Create("ExplicitDecimalValue", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "value", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("ExplicitDecimalValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_6 = global::TUnit.Core.MethodMetadataFactory.Create("MultipleDecimals", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "a", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[0]),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "b", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[1]),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "c", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[2])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_7 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "test", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_8 = global::TUnit.Core.MethodMetadataFactory.Create("TransactionDiscountCalculations", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "amountPaying", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[0]),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "invoiceBalance", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[1]),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "invoiceBalanceDue", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[2]),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "discountAmount", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[3]),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "appliedDiscountAmount", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[4]),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "discountAllowedForUser", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[5])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_9 = global::TUnit.Core.MethodMetadataFactory.Create("Equality3", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "credit", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Equality3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_10 = global::TUnit.Core.MethodMetadataFactory.Create("Equality4", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "credit", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Equality4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_11 = global::TUnit.Core.MethodMetadataFactory.Create("TestMethod", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSize", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TestMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
-});
     private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.DecimalArgumentTests();
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.DecimalArgumentTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        switch (methodIndex)
+        try
         {
-            case 0:
+            switch (methodIndex)
             {
-                try
+                case 0:
                 {
                     switch (args.Length)
                     {
@@ -97,14 +41,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 1:
-            {
-                try
+                case 1:
                 {
                     switch (args.Length)
                     {
@@ -116,14 +53,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 2:
-            {
-                try
+                case 2:
                 {
                     switch (args.Length)
                     {
@@ -135,14 +65,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 3:
-            {
-                try
+                case 3:
                 {
                     switch (args.Length)
                     {
@@ -154,14 +77,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 4:
-            {
-                try
+                case 4:
                 {
                     switch (args.Length)
                     {
@@ -173,14 +89,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 5:
-            {
-                try
+                case 5:
                 {
                     switch (args.Length)
                     {
@@ -192,14 +101,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 6:
-            {
-                try
+                case 6:
                 {
                     switch (args.Length)
                     {
@@ -211,14 +113,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 7:
-            {
-                try
+                case 7:
                 {
                     switch (args.Length)
                     {
@@ -231,14 +126,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 8:
-            {
-                try
+                case 8:
                 {
                     switch (args.Length)
                     {
@@ -251,14 +139,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                             throw new global::System.ArgumentException($"Expected exactly 6 arguments, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 9:
-            {
-                try
+                case 9:
                 {
                     switch (args.Length)
                     {
@@ -270,14 +151,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 10:
-            {
-                try
+                case 10:
                 {
                     switch (args.Length)
                     {
@@ -289,14 +163,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 11:
-            {
-                try
+                case 11:
                 {
                     switch (args.Length)
                     {
@@ -308,13 +175,13 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
-            default:
-                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
     private static global::System.Attribute[] __Attributes(int groupIndex)
@@ -333,6 +200,9 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.DecimalArgumentTests> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.DecimalArgumentTests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.DecimalArgumentTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DecimalArgumentTests>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
@@ -347,11 +217,17 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
     new global::TUnit.Core.ArgumentsAttribute(2_000.00000000000000001m, 123_999m),
     new global::TUnit.Core.ArgumentsAttribute(2_000.00000000000000001m, 123_999.00000000000000001m),
 },
-            methodMetadata: __mm_0,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "debit", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Transfer", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal) }, null)!.GetParameters()[0]),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "credit", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Transfer", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal) }, null)!.GetParameters()[1])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 0,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "SimpleDecimal",
@@ -363,11 +239,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
 {
     new global::TUnit.Core.ArgumentsAttribute(123.456m),
 },
-            methodMetadata: __mm_1,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "value", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("SimpleDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 1,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "SmallDecimal",
@@ -379,11 +260,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
 {
     new global::TUnit.Core.ArgumentsAttribute(0.00000000000000001m),
 },
-            methodMetadata: __mm_2,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "value", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("SmallDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 2,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "MaxDecimal",
@@ -395,11 +281,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
 {
     new global::TUnit.Core.ArgumentsAttribute("79228162514264337593543950335"),
 },
-            methodMetadata: __mm_3,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "value", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MaxDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 3,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "MinDecimal",
@@ -411,11 +302,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
 {
     new global::TUnit.Core.ArgumentsAttribute("-79228162514264337593543950335"),
 },
-            methodMetadata: __mm_4,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "value", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MinDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 4,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "ExplicitDecimalValue",
@@ -427,11 +323,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
 {
     new global::TUnit.Core.ArgumentsAttribute("123.456"),
 },
-            methodMetadata: __mm_5,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "value", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("ExplicitDecimalValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 5,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "MultipleDecimals",
@@ -443,11 +344,18 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
 {
     new global::TUnit.Core.ArgumentsAttribute(1.1m, 2.2m, 3.3m),
 },
-            methodMetadata: __mm_6,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "a", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[0]),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "b", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[1]),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "c", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[2])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 6,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "Test",
@@ -461,11 +369,15 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
     new global::TUnit.Core.ArgumentsAttribute(0.75m),
     new global::TUnit.Core.ArgumentsAttribute(1m),
 },
-            methodMetadata: __mm_7,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "test", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 7,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "TransactionDiscountCalculations",
@@ -479,11 +391,20 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
     new global::TUnit.Core.ArgumentsAttribute(70m, 75m, 70m, 5m, 5m, true),
     new global::TUnit.Core.ArgumentsAttribute(70m, 75m, 70m, 5m, 0m, false),
 },
-            methodMetadata: __mm_8,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "amountPaying", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[0]),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "invoiceBalance", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[1]),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "invoiceBalanceDue", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[2]),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "discountAmount", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[3]),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "appliedDiscountAmount", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[4]),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "discountAllowedForUser", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[5])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 8,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "Equality3",
@@ -495,11 +416,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
 {
     new global::TUnit.Core.ArgumentsAttribute(2_000.00000000000000001m),
 },
-            methodMetadata: __mm_9,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "credit", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Equality3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 9,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "Equality4",
@@ -511,11 +437,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
 {
     new global::TUnit.Core.ArgumentsAttribute(123_999.00000000000000001m),
 },
-            methodMetadata: __mm_10,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "credit", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Equality4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 10,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "TestMethod",
@@ -527,11 +458,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
 {
     new global::TUnit.Core.ArgumentsAttribute(42),
 },
-            methodMetadata: __mm_11,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSize", new global::TUnit.Core.ConcreteType(typeof(decimal)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TestMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 11,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
 }

@@ -19,25 +19,17 @@ internal static class TUnit_TestProject_Bugs__2085_Tests__TestSource
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._2085.Tests);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Double_SpecialConsts", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(double), "d", new global::TUnit.Core.ConcreteType(typeof(double)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Double_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_1 = global::TUnit.Core.MethodMetadataFactory.Create("Float_SpecialConsts", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new global::TUnit.Core.ConcreteType(typeof(float)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Float_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0])
-});
     private static global::TUnit.TestProject.Bugs._2085.Tests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._2085.Tests();
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.Bugs._2085.Tests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        switch (methodIndex)
+        try
         {
-            case 0:
+            switch (methodIndex)
             {
-                try
+                case 0:
                 {
                     switch (args.Length)
                     {
@@ -49,14 +41,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new globa
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 1:
-            {
-                try
+                case 1:
                 {
                     switch (args.Length)
                     {
@@ -68,13 +53,13 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new globa
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
-            default:
-                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
     private static global::System.Attribute[] __Attributes(int groupIndex)
@@ -93,6 +78,9 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new globa
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.Bugs._2085.Tests> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.Bugs._2085.Tests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2085.Tests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2085.Tests>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2085.Tests>(
@@ -105,11 +93,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new globa
 {
     new global::TUnit.Core.MatrixDataSourceAttribute(),
 },
-            methodMetadata: __mm_0,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(double), "d", new global::TUnit.Core.ConcreteType(typeof(double)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Double_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 0,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2085.Tests>(
             methodName: "Float_SpecialConsts",
@@ -121,11 +114,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new globa
 {
     new global::TUnit.Core.MatrixDataSourceAttribute(),
 },
-            methodMetadata: __mm_1,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new global::TUnit.Core.ConcreteType(typeof(float)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Float_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 1,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
 }

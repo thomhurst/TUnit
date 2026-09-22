@@ -19,39 +19,22 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_1 = global::TUnit.Core.MethodMetadataFactory.Create("GenericMethodDataSource", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("GenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_2 = global::TUnit.Core.MethodMetadataFactory.Create("NonGenericMethodDataSource", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("NonGenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_3 = global::TUnit.Core.MethodMetadataFactory.Create("VerifyInheritedCategoriesAreAvailable", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests();
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        switch (methodIndex)
+        try
         {
-            case 0:
+            switch (methodIndex)
             {
-                try
+                case 0:
                 {
                     instance.Test();
                     return default(global::System.Threading.Tasks.ValueTask);
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 1:
-            {
-                try
+                case 1:
                 {
                     switch (args.Length)
                     {
@@ -64,14 +47,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 2:
-            {
-                try
+                case 2:
                 {
                     switch (args.Length)
                     {
@@ -84,24 +60,17 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 3:
-            {
-                try
+                case 3:
                 {
                     return new global::System.Threading.Tasks.ValueTask(instance.VerifyInheritedCategoriesAreAvailable());
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
-            default:
-                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
     private static global::System.Attribute[] __Attributes(int groupIndex)
@@ -122,6 +91,9 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(
@@ -129,11 +101,11 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
             fullyQualifiedName: "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.Test",
             filePath: "",
             lineNumber: 9,
-            methodMetadata: __mm_0,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 0,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(
             methodName: "GenericMethodDataSource",
@@ -148,11 +120,15 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.TestData.Foo()),
     },
 },
-            methodMetadata: __mm_1,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("GenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 1,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(
             methodName: "NonGenericMethodDataSource",
@@ -167,22 +143,27 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.TestData.Foo()),
     },
 },
-            methodMetadata: __mm_2,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("NonGenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 2,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(
             methodName: "VerifyInheritedCategoriesAreAvailable",
             fullyQualifiedName: "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.VerifyInheritedCategoriesAreAvailable",
             filePath: "",
             lineNumber: 26,
-            methodMetadata: __mm_3,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 3,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
 }

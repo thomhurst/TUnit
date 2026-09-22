@@ -19,28 +19,27 @@ internal static class TUnit_TestProject_TestDiscoveryHookTests__TestSource
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.TestDiscoveryHookTests);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("CustomNamedDiscoveryHooksWereRegisteredAndRan", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.TestDiscoveryHookTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.TestDiscoveryHookTests();
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.TestDiscoveryHookTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        switch (methodIndex)
+        try
         {
-            case 0:
+            switch (methodIndex)
             {
-                try
+                case 0:
                 {
                     return new global::System.Threading.Tasks.ValueTask(instance.CustomNamedDiscoveryHooksWereRegisteredAndRan());
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
-            default:
-                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
     private static global::System.Attribute[] __Attributes(int groupIndex)
@@ -59,6 +58,9 @@ internal static class TUnit_TestProject_TestDiscoveryHookTests__TestSource
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.TestDiscoveryHookTests> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.TestDiscoveryHookTests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.TestDiscoveryHookTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TestDiscoveryHookTests>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TestDiscoveryHookTests>(
@@ -66,11 +68,12 @@ internal static class TUnit_TestProject_TestDiscoveryHookTests__TestSource
             fullyQualifiedName: "TUnit.TestProject.TestDiscoveryHookTests.CustomNamedDiscoveryHooksWereRegisteredAndRan",
             filePath: "",
             lineNumber: 35,
-            methodMetadata: __mm_0,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 0,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
 }

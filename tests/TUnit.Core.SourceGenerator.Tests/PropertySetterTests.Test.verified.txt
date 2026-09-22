@@ -123,7 +123,6 @@ internal static class TUnit_TestProject_PropertySetterTests__TestSource
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.PropertySetterTests);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.PropertySetterTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.PropertySetterTests()
@@ -139,21 +138,21 @@ internal static class TUnit_TestProject_PropertySetterTests__TestSource
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.PropertySetterTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        switch (methodIndex)
+        try
         {
-            case 0:
+            switch (methodIndex)
             {
-                try
+                case 0:
                 {
                     return new global::System.Threading.Tasks.ValueTask(instance.Test());
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
-            default:
-                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
     private static global::System.Attribute[] __Attributes(int groupIndex)
@@ -173,6 +172,9 @@ internal static class TUnit_TestProject_PropertySetterTests__TestSource
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.PropertySetterTests> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.PropertySetterTests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.PropertySetterTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.PropertySetterTests>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.PropertySetterTests>(
@@ -180,11 +182,12 @@ internal static class TUnit_TestProject_PropertySetterTests__TestSource
             fullyQualifiedName: "TUnit.TestProject.PropertySetterTests.Test",
             filePath: "",
             lineNumber: 69,
-            methodMetadata: __mm_0,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 0,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
 }

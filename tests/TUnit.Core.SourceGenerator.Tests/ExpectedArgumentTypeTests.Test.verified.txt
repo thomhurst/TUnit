@@ -19,28 +19,17 @@ internal static class TUnit_TestProject_ExpectedArgumentTypeTests__TestSource
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("TypedArguments", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.ConcreteType(typeof(object)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests).GetMethod("TypedArguments", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object), typeof(global::System.Type) }, null)!.GetParameters()[0]),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), "expectedType", new global::TUnit.Core.ConcreteType(typeof(global::System.Type)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests).GetMethod("TypedArguments", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object), typeof(global::System.Type) }, null)!.GetParameters()[1])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_1 = global::TUnit.Core.MethodMetadataFactory.Create("EnumTypes", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.ConcreteType(typeof(object)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests).GetMethod("EnumTypes", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object), typeof(global::System.Type), typeof(global::System.Type) }, null)!.GetParameters()[0]),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), "expectedValueType", new global::TUnit.Core.ConcreteType(typeof(global::System.Type)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests).GetMethod("EnumTypes", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object), typeof(global::System.Type), typeof(global::System.Type) }, null)!.GetParameters()[1]),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), "expectedEnumUnderlyingType", new global::TUnit.Core.ConcreteType(typeof(global::System.Type)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests).GetMethod("EnumTypes", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object), typeof(global::System.Type), typeof(global::System.Type) }, null)!.GetParameters()[2])
-});
     private static global::TUnit.TestProject.ExpectedArgumentTypeTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.ExpectedArgumentTypeTests();
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.ExpectedArgumentTypeTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        switch (methodIndex)
+        try
         {
-            case 0:
+            switch (methodIndex)
             {
-                try
+                case 0:
                 {
                     switch (args.Length)
                     {
@@ -52,14 +41,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 1:
-            {
-                try
+                case 1:
                 {
                     switch (args.Length)
                     {
@@ -71,13 +53,13 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
-            default:
-                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
     private static global::System.Attribute[] __Attributes(int groupIndex)
@@ -96,6 +78,9 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.ExpectedArgumentTypeTests> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.ExpectedArgumentTypeTests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ExpectedArgumentTypeTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ExpectedArgumentTypeTests>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ExpectedArgumentTypeTests>(
@@ -120,11 +105,17 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
     new global::TUnit.Core.ArgumentsAttribute((ulong)0, typeof(ulong)),
     new global::TUnit.Core.ArgumentsAttribute(0UL, typeof(ulong)),
 },
-            methodMetadata: __mm_0,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.ConcreteType(typeof(object)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests).GetMethod("TypedArguments", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object), typeof(global::System.Type) }, null)!.GetParameters()[0]),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), "expectedType", new global::TUnit.Core.ConcreteType(typeof(global::System.Type)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests).GetMethod("TypedArguments", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object), typeof(global::System.Type) }, null)!.GetParameters()[1])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 0,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ExpectedArgumentTypeTests>(
             methodName: "EnumTypes",
@@ -143,11 +134,18 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
     new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Int64Enum.Default, typeof(global::TUnit.TestProject.Int64Enum), typeof(long)),
     new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.UInt64Enum.Default, typeof(global::TUnit.TestProject.UInt64Enum), typeof(ulong)),
 },
-            methodMetadata: __mm_1,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.ConcreteType(typeof(object)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests).GetMethod("EnumTypes", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object), typeof(global::System.Type), typeof(global::System.Type) }, null)!.GetParameters()[0]),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), "expectedValueType", new global::TUnit.Core.ConcreteType(typeof(global::System.Type)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests).GetMethod("EnumTypes", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object), typeof(global::System.Type), typeof(global::System.Type) }, null)!.GetParameters()[1]),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), "expectedEnumUnderlyingType", new global::TUnit.Core.ConcreteType(typeof(global::System.Type)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests).GetMethod("EnumTypes", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object), typeof(global::System.Type), typeof(global::System.Type) }, null)!.GetParameters()[2])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 1,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
 }

@@ -22,7 +22,6 @@ internal static class TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSou
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test1", __classType, typeof(void), __classMetadata);
     private static global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         // ClassConstructor attribute is present - instance creation handled at runtime
@@ -30,22 +29,22 @@ internal static class TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSou
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        switch (methodIndex)
+        try
         {
-            case 0:
+            switch (methodIndex)
             {
-                try
+                case 0:
                 {
                     instance.Test1();
                     return default(global::System.Threading.Tasks.ValueTask);
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
-            default:
-                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
     private static global::System.Attribute[] __Attributes(int groupIndex)
@@ -64,6 +63,9 @@ internal static class TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSou
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass>(
@@ -71,11 +73,11 @@ internal static class TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSou
             fullyQualifiedName: "TUnit.TestProject.Bugs._Issue2887.ActualTestClass.Test1",
             filePath: "",
             lineNumber: 26,
-            methodMetadata: __mm_0,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 0,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
 }

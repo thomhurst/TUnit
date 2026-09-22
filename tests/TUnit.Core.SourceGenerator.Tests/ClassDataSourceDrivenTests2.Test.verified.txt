@@ -22,42 +22,33 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Base_Derived1", __classType, typeof(void), __classMetadata);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_1 = global::TUnit.Core.MethodMetadataFactory.Create("Base_Derived2", __classType, typeof(void), __classMetadata);
     private static global::TUnit.TestProject.ClassDataSourceDrivenTests2 __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.ClassDataSourceDrivenTests2(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.ClassDataSourceDrivenTests2 instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        switch (methodIndex)
+        try
         {
-            case 0:
+            switch (methodIndex)
             {
-                try
+                case 0:
                 {
                     instance.Base_Derived1();
                     return default(global::System.Threading.Tasks.ValueTask);
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 1:
-            {
-                try
+                case 1:
                 {
                     instance.Base_Derived2();
                     return default(global::System.Threading.Tasks.ValueTask);
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
-            default:
-                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
     private static global::System.Attribute[] __Attributes(int groupIndex)
@@ -78,6 +69,9 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.ClassDataSourceDrivenTests2> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.ClassDataSourceDrivenTests2, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTests2>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTests2>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(
@@ -91,11 +85,11 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>(),
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>(),
 },
-            methodMetadata: __mm_0,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 0,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(
             methodName: "Base_Derived2",
@@ -108,11 +102,11 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>(),
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>(),
 },
-            methodMetadata: __mm_1,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 1,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
 }

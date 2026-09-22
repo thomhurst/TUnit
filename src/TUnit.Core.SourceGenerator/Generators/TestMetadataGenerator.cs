@@ -2536,12 +2536,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
-    private static void GenerateConcreteTestInvokerBody(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
+    private static void GenerateConcreteTestInvokerBody(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs, bool wrapInTryCatch = true)
     {
-        // Wrap entire body in try-catch to handle synchronous exceptions
-        writer.AppendLine("try");
-        writer.AppendLine("{");
-        writer.Indent();
+        // Wrap entire body in try-catch to handle synchronous exceptions. The class-level
+        // __Invoke switch opts out and wraps the whole switch in a single handler instead.
+        if (wrapInTryCatch)
+        {
+            writer.AppendLine("try");
+            writer.AppendLine("{");
+            writer.Indent();
+        }
 
         // Only declare context if it's needed (when hasCancellationToken is true and there are parameters)
         if (hasCancellationToken && parametersFromArgs.Length > 0)
@@ -2692,8 +2696,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("}");
         }
 
-        writer.Unindent();
-        writer.AppendLine("}");
+        if (wrapInTryCatch)
+        {
+            writer.Unindent();
+            writer.AppendLine("}");
+            WriteSynchronousExceptionHandler(writer);
+        }
+    }
+
+    private static void WriteSynchronousExceptionHandler(CodeWriter writer)
+    {
         writer.AppendLine("catch (global::System.Exception ex)");
         writer.AppendLine("{");
         writer.Indent();
@@ -3044,7 +3056,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"case {methodIndex}:");
         writer.AppendLine("{");
         writer.Indent();
-        GenerateConcreteTestInvokerBody(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs);
+        GenerateConcreteTestInvokerBody(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs, wrapInTryCatch: false);
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -3122,12 +3134,34 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Pre-generates a MethodMetadataFactory.Create(...) expression for one method.
+    /// Pre-generates the named arguments that let TestEntryFactory.Create build the method's
+    /// MethodMetadata itself (return type, generic arity, parameters), omitting factory defaults.
     /// Called during the transform step where ISymbol is available.
     /// </summary>
-    private static string PreGenerateMethodMetadataExpression(TestMethodMetadata testMethod)
+    private static string PreGenerateMethodMetadataArguments(IMethodSymbol methodSymbol)
     {
-        return GenerateMethodMetadataFactoryCall(testMethod.MethodSymbol);
+        var writer = new CodeWriter(includeHeader: false);
+
+        if (!methodSymbol.ReturnsVoid)
+        {
+            writer.AppendLine($"returnType: typeof({methodSymbol.ReturnType.GloballyQualified()}),");
+        }
+
+        if (methodSymbol.TypeParameters.Length > 0)
+        {
+            writer.AppendLine($"genericTypeCount: {methodSymbol.TypeParameters.Length},");
+        }
+
+        if (methodSymbol.Parameters.Length > 0)
+        {
+            var paramExpr = MetadataGenerationHelper.GenerateParameterMetadataArrayForMethodExpression(methodSymbol);
+            if (paramExpr != null)
+            {
+                writer.AppendLine($"parameters: {paramExpr},");
+            }
+        }
+
+        return writer.ToString();
     }
 
     /// <summary>
@@ -3420,7 +3454,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         MethodId = methodId,
                         MethodIndex = i,
                         AttributeGroupIndex = attrIndexMap[i],
-                        MethodMetadataCode = PreGenerateMethodMetadataExpression(m),
+                        MethodMetadataArgumentsCode = PreGenerateMethodMetadataArguments(m.MethodSymbol),
                         InvokeSwitchCaseCode = PreGenerateInvokeSwitchCase(m, i),
                         TestEntryDataFieldsCode = PreGenerateTestEntryDataFields(m),
                         TestDataSourcesCode = PreGenerateMethodDataSourcesExpression(m),
@@ -3465,12 +3499,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Shared ClassMetadata + classType as static fields (no separate method needed)
             writer.AppendRaw(classGroup.SharedFieldsCode);
 
-            // Per-method MethodMetadata as individual static fields (inlined, no array)
-            foreach (var method in classGroup.Methods)
-            {
-                writer.AppendLine($"private static readonly global::TUnit.Core.MethodMetadata __mm_{method.MethodIndex} = {method.MethodMetadataCode};");
-            }
-
             // CreateInstance — shared across all entries (1 per class)
             writer.AppendLine($"private static {classGroup.ClassFullyQualified} __CreateInstance(global::System.Type[] typeArgs, object?[] args)");
             writer.AppendLine("{");
@@ -3481,6 +3509,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Consolidated __Invoke switch — 1 method for ALL tests in this class
             writer.AppendLine($"private static global::System.Threading.Tasks.ValueTask __Invoke({classGroup.ClassFullyQualified} instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)");
+            writer.AppendLine("{");
+            writer.Indent();
+            // One exception handler around the whole switch: a handler per case multiplies the
+            // method's IL and exception clauses by the number of tests in the class.
+            writer.AppendLine("try");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("switch (methodIndex)");
@@ -3496,6 +3529,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.Unindent();
             writer.AppendLine("}");
+            writer.Unindent();
+            writer.AppendLine("}");
+            WriteSynchronousExceptionHandler(writer);
             writer.Unindent();
             writer.AppendLine("}");
 
@@ -3532,9 +3568,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
 
+            // The three class-shared delegates are created once. Converting the method groups at each
+            // entry would allocate three delegates per test and emit a ldftn/newobj pair for each in
+            // the static constructor, which dominated its JIT cost for large classes.
+            writer.AppendLine($"private static readonly global::System.Func<global::System.Type[], object?[], {classGroup.ClassFullyQualified}> __createInstance = __CreateInstance;");
+            writer.AppendLine($"private static readonly global::System.Func<{classGroup.ClassFullyQualified}, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;");
+            writer.AppendLine("private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;");
+
             // TestEntry<T>[] array — all entries share the same 3 delegates and are built via the
             // shared TestEntryFactory so each call site is a single factory call instead of a
-            // large object initializer (#6227)
+            // large object initializer (#6227). The factory also builds each entry's MethodMetadata.
             writer.AppendLine($"public static readonly global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>[] Entries = new global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>[]");
             writer.AppendLine("{");
             writer.Indent();
@@ -3555,11 +3598,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     writer.AppendLine($"dependencies: {method.DependenciesCode},");
                 }
-                writer.AppendLine($"methodMetadata: __mm_{method.MethodIndex},");
-                writer.AppendLine($"createInstance: __CreateInstance,");
-                writer.AppendLine($"invokeBody: __Invoke,");
+                writer.AppendRaw(method.MethodMetadataArgumentsCode);
+                writer.AppendLine("classMetadata: __classMetadata,");
+                writer.AppendLine("createInstance: __createInstance,");
+                writer.AppendLine("invokeBody: __invoke,");
                 writer.AppendLine($"methodIndex: {method.MethodIndex},");
-                writer.AppendLine($"createAttributes: __Attributes,");
+                writer.AppendLine("createAttributes: __attributes,");
                 writer.AppendLine($"attributeGroupIndex: {method.AttributeGroupIndex}),");
                 writer.Unindent();
             }

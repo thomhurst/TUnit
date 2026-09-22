@@ -19,21 +19,17 @@ internal static class TUnit_TestProject_Bugs__6150_Tests__TestSource
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._6150.Tests);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("JaggedArray", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte[][]), "data", new global::TUnit.Core.ConcreteType(typeof(byte[][])), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._6150.Tests).GetMethod("JaggedArray", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(byte[][]) }, null)!.GetParameters()[0])
-});
     private static global::TUnit.TestProject.Bugs._6150.Tests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._6150.Tests();
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.Bugs._6150.Tests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        switch (methodIndex)
+        try
         {
-            case 0:
+            switch (methodIndex)
             {
-                try
+                case 0:
                 {
                     switch (args.Length)
                     {
@@ -69,13 +65,13 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte[][]), "data", new
                             return new global::System.Threading.Tasks.ValueTask(instance.JaggedArray((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<byte[]>(args[i]))) : global::System.Array.Empty<byte[]>())));
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
-            default:
-                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
     private static global::System.Attribute[] __Attributes(int groupIndex)
@@ -94,6 +90,9 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte[][]), "data", new
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.Bugs._6150.Tests> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.Bugs._6150.Tests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._6150.Tests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._6150.Tests>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._6150.Tests>(
@@ -109,11 +108,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte[][]), "data", new
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._6150.Tests.Data()),
     },
 },
-            methodMetadata: __mm_0,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte[][]), "data", new global::TUnit.Core.ConcreteType(typeof(byte[][])), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._6150.Tests).GetMethod("JaggedArray", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(byte[][]) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 0,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
 }

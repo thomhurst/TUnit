@@ -9,7 +9,9 @@ public sealed record TestMethodSourceCode
     public required string MethodId { get; init; }
     public required int MethodIndex { get; init; }
     public required int AttributeGroupIndex { get; init; }
-    public required string MethodMetadataCode { get; init; }
+
+    /// <summary>Named TestEntryFactory arguments describing the method (return type, generic arity, parameters).</summary>
+    public required string MethodMetadataArgumentsCode { get; init; }
 
     /// <summary>Switch case body for the class-level __Invoke method.</summary>
     public required string InvokeSwitchCaseCode { get; init; }

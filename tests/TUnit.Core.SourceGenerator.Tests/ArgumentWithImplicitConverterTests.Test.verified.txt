@@ -19,25 +19,17 @@ internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests__Test
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Explicit", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.ExplicitInteger), "integer", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ExplicitInteger)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Explicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ExplicitInteger) }, null)!.GetParameters()[0])
-});
-    private static readonly global::TUnit.Core.MethodMetadata __mm_1 = global::TUnit.Core.MethodMetadataFactory.Create("Implicit", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
-{
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.ImplicitInteger), "integer", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ImplicitInteger)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Implicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ImplicitInteger) }, null)!.GetParameters()[0])
-});
     private static global::TUnit.TestProject.ArgumentWithImplicitConverterTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.ArgumentWithImplicitConverterTests();
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.ArgumentWithImplicitConverterTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        switch (methodIndex)
+        try
         {
-            case 0:
+            switch (methodIndex)
             {
-                try
+                case 0:
                 {
                     switch (args.Length)
                     {
@@ -50,14 +42,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 1:
-            {
-                try
+                case 1:
                 {
                     switch (args.Length)
                     {
@@ -70,13 +55,13 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
-            default:
-                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
     private static global::System.Attribute[] __Attributes(int groupIndex)
@@ -95,6 +80,9 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.ArgumentWithImplicitConverterTests> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.ArgumentWithImplicitConverterTests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(
@@ -109,11 +97,15 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
     new global::TUnit.Core.ArgumentsAttribute(2),
     new global::TUnit.Core.ArgumentsAttribute(3),
 },
-            methodMetadata: __mm_0,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.ExplicitInteger), "integer", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ExplicitInteger)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Explicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ExplicitInteger) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 0,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(
             methodName: "Implicit",
@@ -127,11 +119,15 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
     new global::TUnit.Core.ArgumentsAttribute(2),
     new global::TUnit.Core.ArgumentsAttribute(3),
 },
-            methodMetadata: __mm_1,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            parameters: new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.ImplicitInteger), "integer", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ImplicitInteger)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Implicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ImplicitInteger) }, null)!.GetParameters()[0])
+            },
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 1,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
 }
