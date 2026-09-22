@@ -112,6 +112,26 @@ dotnet run --configuration Release --coverage --coverage-settings coverage.confi
     arguments: '--configuration Release --coverage --coverage-output $(Agent.TempDirectory)/coverage/'
 ```
 
+## JetBrains dotCover[​](#jetbrains-dotcover "Direct link to JetBrains dotCover")
+
+dotCover (in Rider, ReSharper and the dotCover command-line tools) supports per-test coverage for TUnit projects. This requires the `JetBrains.dotCover.Framework` package, a small Microsoft.Testing.Platform extension that is inert when dotCover is not attached.
+
+When creating a new project from the `TUnit` template in C#, F# or VB, pass `--enable-dotcover` (lowercase; the option is case-sensitive):
+
+```
+dotnet new TUnit -n MyTests --enable-dotcover
+
+dotnet new TUnit -n MyTests --language F# --enable-dotcover
+
+dotnet new TUnit -n MyTests --language VB --enable-dotcover
+```
+
+Or add the package to an existing project:
+
+```
+dotnet add package JetBrains.dotCover.Framework
+```
+
 ## Troubleshooting[​](#troubleshooting "Direct link to Troubleshooting")
 
 **Coverage files not generated?**

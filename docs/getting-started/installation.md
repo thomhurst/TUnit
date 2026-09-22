@@ -10,6 +10,8 @@ Assuming you have the .NET SDK installed, run:
 
 A new test project will be created for you with some samples of different test types and tips. When you're ready to get going, delete them and create your own!
 
+Optional: add `--enable-dotcover` to include the `JetBrains.dotCover.Framework` package for per-test coverage in dotCover, Rider and ReSharper.
+
 ## Manually[​](#manually "Direct link to Manually")
 
 First create an empty .NET console application:
