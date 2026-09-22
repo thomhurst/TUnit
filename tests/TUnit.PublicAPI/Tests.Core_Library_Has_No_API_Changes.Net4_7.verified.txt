@@ -1519,6 +1519,33 @@ namespace
                     .IDataSourceAttribute[]? classDataSources = null,
                     .InjectableProperty[]? injectableProperties = null)
             where T :  class { }
+        public static .TestEntry<T> CreateWithClassMetadata<T>(
+                    string methodName,
+                    string fullyQualifiedName,
+                    string filePath,
+                    int lineNumber,
+                    .ClassMetadata classMetadata,
+                    <[], object?[], T> createInstance,
+                    <T, int, object?[], .CancellationToken, .> invokeBody,
+                    int methodIndex,
+                    <int, []> createAttributes,
+                    int attributeGroupIndex,
+                    ? returnType = null,
+                    int genericTypeCount = 0,
+                    .ParameterMetadata[]? parameters = null,
+                    int startColumnNumber = 0,
+                    int endLineNumber = 0,
+                    int endColumnNumber = 0,
+                    bool hasDataSource = false,
+                    int repeatCount = 0,
+                    string[]? categories = null,
+                    string[]? properties = null,
+                    string[]? dependsOn = null,
+                    .TestDependency[]? dependencies = null,
+                    .IDataSourceAttribute[]? testDataSources = null,
+                    .IDataSourceAttribute[]? classDataSources = null,
+                    .InjectableProperty[]? injectableProperties = null)
+            where T :  class { }
     }
     public readonly struct TestEntryFilterData
     {

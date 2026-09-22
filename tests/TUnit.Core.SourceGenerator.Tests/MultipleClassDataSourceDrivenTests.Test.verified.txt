@@ -26,42 +26,33 @@ internal static class TUnit_TestProject_MultipleClassDataSourceDrivenTests__Test
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test1", __classType, typeof(void), __classMetadata);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_1 = global::TUnit.Core.MethodMetadataFactory.Create("Test2", __classType, typeof(void), __classMetadata);
     private static global::TUnit.TestProject.MultipleClassDataSourceDrivenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>(args[4]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        switch (methodIndex)
+        try
         {
-            case 0:
+            switch (methodIndex)
             {
-                try
+                case 0:
                 {
                     instance.Test1();
                     return default(global::System.Threading.Tasks.ValueTask);
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            }
-            case 1:
-            {
-                try
+                case 1:
                 {
                     instance.Test2();
                     return default(global::System.Threading.Tasks.ValueTask);
                 }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
-            default:
-                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
     private static global::System.Attribute[] __Attributes(int groupIndex)
@@ -82,9 +73,12 @@ internal static class TUnit_TestProject_MultipleClassDataSourceDrivenTests__Test
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.MultipleClassDataSourceDrivenTests> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(
             methodName: "Test1",
             fullyQualifiedName: "TUnit.TestProject.MultipleClassDataSourceDrivenTests.Test1",
             filePath: "",
@@ -95,13 +89,13 @@ internal static class TUnit_TestProject_MultipleClassDataSourceDrivenTests__Test
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
 {Shared = new global::TUnit.Core.SharedType[]{global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None},},
 },
-            methodMetadata: __mm_0,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 0,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(
             methodName: "Test2",
             fullyQualifiedName: "TUnit.TestProject.MultipleClassDataSourceDrivenTests.Test2",
             filePath: "",
@@ -112,11 +106,11 @@ internal static class TUnit_TestProject_MultipleClassDataSourceDrivenTests__Test
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
 {Shared = new global::TUnit.Core.SharedType[]{global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None},},
 },
-            methodMetadata: __mm_1,
-            createInstance: __CreateInstance,
-            invokeBody: __Invoke,
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
             methodIndex: 1,
-            createAttributes: __Attributes,
+            createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
 }
