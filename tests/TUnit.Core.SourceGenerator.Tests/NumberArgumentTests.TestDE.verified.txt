@@ -137,7 +137,7 @@ internal static class TUnit_TestProject_NumberArgumentTests__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NumberArgumentTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.NumberArgumentTests>(
             methodName: "Int",
             fullyQualifiedName: "TUnit.TestProject.NumberArgumentTests.Int",
             filePath: "",
@@ -157,7 +157,7 @@ internal static class TUnit_TestProject_NumberArgumentTests__TestSource
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NumberArgumentTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.NumberArgumentTests>(
             methodName: "Double",
             fullyQualifiedName: "TUnit.TestProject.NumberArgumentTests.Double",
             filePath: "",
@@ -177,7 +177,7 @@ internal static class TUnit_TestProject_NumberArgumentTests__TestSource
             methodIndex: 1,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NumberArgumentTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.NumberArgumentTests>(
             methodName: "Float",
             fullyQualifiedName: "TUnit.TestProject.NumberArgumentTests.Float",
             filePath: "",
@@ -197,7 +197,7 @@ internal static class TUnit_TestProject_NumberArgumentTests__TestSource
             methodIndex: 2,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NumberArgumentTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.NumberArgumentTests>(
             methodName: "Long",
             fullyQualifiedName: "TUnit.TestProject.NumberArgumentTests.Long",
             filePath: "",
@@ -217,7 +217,7 @@ internal static class TUnit_TestProject_NumberArgumentTests__TestSource
             methodIndex: 3,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NumberArgumentTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.NumberArgumentTests>(
             methodName: "ULong",
             fullyQualifiedName: "TUnit.TestProject.NumberArgumentTests.ULong",
             filePath: "",
@@ -237,7 +237,7 @@ internal static class TUnit_TestProject_NumberArgumentTests__TestSource
             methodIndex: 4,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NumberArgumentTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.NumberArgumentTests>(
             methodName: "UInt",
             fullyQualifiedName: "TUnit.TestProject.NumberArgumentTests.UInt",
             filePath: "",

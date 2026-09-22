@@ -71,7 +71,7 @@ internal static class TUnit_TestProject_BasicTests__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.BasicTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.BasicTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.BasicTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.BasicTests>(
             methodName: "SynchronousTest",
             fullyQualifiedName: "TUnit.TestProject.BasicTests.SynchronousTest",
             filePath: "",
@@ -82,7 +82,7 @@ internal static class TUnit_TestProject_BasicTests__TestSource
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.BasicTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.BasicTests>(
             methodName: "AsynchronousTest",
             fullyQualifiedName: "TUnit.TestProject.BasicTests.AsynchronousTest",
             filePath: "",
@@ -94,7 +94,7 @@ internal static class TUnit_TestProject_BasicTests__TestSource
             methodIndex: 1,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.BasicTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.BasicTests>(
             methodName: "ValueTaskAsynchronousTest",
             fullyQualifiedName: "TUnit.TestProject.BasicTests.ValueTaskAsynchronousTest",
             filePath: "",

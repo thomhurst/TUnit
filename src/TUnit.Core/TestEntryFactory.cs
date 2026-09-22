@@ -81,7 +81,7 @@ public static class TestEntryFactory
     /// separate metadata factory call, and that IL is JIT-compiled once per test class at startup.
     /// <paramref name="returnType"/> defaults to <see cref="void"/>.
     /// </remarks>
-    public static TestEntry<T> Create<
+    public static TestEntry<T> CreateWithClassMetadata<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.PublicProperties
             | DynamicallyAccessedMemberTypes.PublicMethods)] T>(

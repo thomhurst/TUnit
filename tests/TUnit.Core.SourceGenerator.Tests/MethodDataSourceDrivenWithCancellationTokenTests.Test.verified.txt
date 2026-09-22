@@ -73,7 +73,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenWithCancellationTo
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(
             methodName: "MyTest",
             fullyQualifiedName: "TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest",
             filePath: "",

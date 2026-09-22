@@ -78,7 +78,7 @@ internal static class TUnit_TestProject_MultipleClassDataSourceDrivenTests__Test
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(
             methodName: "Test1",
             fullyQualifiedName: "TUnit.TestProject.MultipleClassDataSourceDrivenTests.Test1",
             filePath: "",
@@ -95,7 +95,7 @@ internal static class TUnit_TestProject_MultipleClassDataSourceDrivenTests__Test
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(
             methodName: "Test2",
             fullyQualifiedName: "TUnit.TestProject.MultipleClassDataSourceDrivenTests.Test2",
             filePath: "",

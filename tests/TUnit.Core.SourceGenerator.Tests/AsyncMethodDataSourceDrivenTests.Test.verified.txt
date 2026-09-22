@@ -143,7 +143,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
             methodName: "AsyncMethodDataSource_SingleValue",
             fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_SingleValue",
             filePath: "",
@@ -167,7 +167,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
             methodName: "AsyncMethodDataSource_Tuples",
             fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_Tuples",
             filePath: "",
@@ -192,7 +192,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             methodIndex: 1,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
             methodName: "AsyncMethodDataSource_Enumerable",
             fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_Enumerable",
             filePath: "",
@@ -216,7 +216,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             methodIndex: 2,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
             methodName: "AsyncMethodDataSource_Func",
             fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_Func",
             filePath: "",
@@ -240,7 +240,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             methodIndex: 3,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
             methodName: "AsyncMethodDataSource_WithArguments",
             fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_WithArguments",
             filePath: "",
@@ -264,7 +264,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             methodIndex: 4,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
             methodName: "AsyncMethodDataSource_ExternalClass",
             fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_ExternalClass",
             filePath: "",
@@ -288,7 +288,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             methodIndex: 5,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
             methodName: "ValueTaskMethodDataSource_SingleValue",
             fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.ValueTaskMethodDataSource_SingleValue",
             filePath: "",

@@ -554,7 +554,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgsAsArrayTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgsAsArrayTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "Params",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.Params",
             filePath: "",
@@ -574,7 +574,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "ParamsEnumerable",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable",
             filePath: "",
@@ -594,7 +594,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             methodIndex: 1,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "Following_Non_Params",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.Following_Non_Params",
             filePath: "",
@@ -615,7 +615,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             methodIndex: 2,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "NonParamsStringArray",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.NonParamsStringArray",
             filePath: "",
@@ -637,7 +637,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             methodIndex: 3,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "NonParamsStringArray_SingleValue",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.NonParamsStringArray_SingleValue",
             filePath: "",
@@ -658,7 +658,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             methodIndex: 4,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "NonParamsStringArray_MultipleValues",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.NonParamsStringArray_MultipleValues",
             filePath: "",
@@ -679,7 +679,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             methodIndex: 5,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "NonParamsIntArray",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.NonParamsIntArray",
             filePath: "",
@@ -700,7 +700,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             methodIndex: 6,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "GenericStringArray",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.GenericStringArray",
             filePath: "",
@@ -721,7 +721,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             methodIndex: 7,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "NonParamsStringArray_BeyondStaticCaseCap",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.NonParamsStringArray_BeyondStaticCaseCap",
             filePath: "",
@@ -742,7 +742,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             methodIndex: 8,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "TrailingArray_ObjectArrayFromMatrix",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.TrailingArray_ObjectArrayFromMatrix",
             filePath: "",
@@ -763,7 +763,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             methodIndex: 9,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "TrailingParamsArray_ObjectArrayFromMatrix",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.TrailingParamsArray_ObjectArrayFromMatrix",
             filePath: "",
@@ -784,7 +784,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             methodIndex: 10,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "TrailingArray_NonZeroLowerBoundArrayFromMatrix",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.TrailingArray_NonZeroLowerBoundArrayFromMatrix",
             filePath: "",
@@ -805,7 +805,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             methodIndex: 11,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgsAsArrayTests>(
             methodName: "ParamsObjectArray_ArrayArgumentStaysSingleElement",
             fullyQualifiedName: "TUnit.TestProject.ArgsAsArrayTests.ParamsObjectArray_ArrayArgumentStaysSingleElement",
             filePath: "",

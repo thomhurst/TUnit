@@ -141,7 +141,7 @@ internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests__TestSou
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(
             methodName: "DataSource_TupleMethod",
             fullyQualifiedName: "TUnit.TestProject.ClassTupleDataSourceDrivenTests.DataSource_TupleMethod",
             filePath: "",

@@ -173,7 +173,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.MethodDataSourceDrivenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.MethodDataSourceDrivenTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
             methodName: "DataSource_Method",
             fullyQualifiedName: "TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method",
             filePath: "",
@@ -196,7 +196,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
             methodName: "DataSource_Method2",
             fullyQualifiedName: "TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method2",
             filePath: "",
@@ -219,7 +219,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             methodIndex: 1,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
             methodName: "DataSource_Method_WithAction",
             fullyQualifiedName: "TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method_WithAction",
             filePath: "",
@@ -242,7 +242,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             methodIndex: 2,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
             methodName: "DataSource_Method3",
             fullyQualifiedName: "TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method3",
             filePath: "",
@@ -270,7 +270,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             methodIndex: 3,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
             methodName: "DataSource_Method4",
             fullyQualifiedName: "TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4",
             filePath: "",
@@ -307,7 +307,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             methodIndex: 4,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
             methodName: "DataSource_WithBaseReturn",
             fullyQualifiedName: "TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_WithBaseReturn",
             filePath: "",
@@ -330,7 +330,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             methodIndex: 5,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
             methodName: "EnumerableFuncArrayTest",
             fullyQualifiedName: "TUnit.TestProject.MethodDataSourceDrivenTests.EnumerableFuncArrayTest",
             filePath: "",

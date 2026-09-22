@@ -85,7 +85,7 @@ internal static class TUnit_TestProject_StringArgumentTests__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.StringArgumentTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.StringArgumentTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.StringArgumentTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.StringArgumentTests>(
             methodName: "Normal",
             fullyQualifiedName: "TUnit.TestProject.StringArgumentTests.Normal",
             filePath: "",
@@ -116,7 +116,7 @@ internal static class TUnit_TestProject_StringArgumentTests__TestSource
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.StringArgumentTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.StringArgumentTests>(
             methodName: "Nullable",
             fullyQualifiedName: "TUnit.TestProject.StringArgumentTests.Nullable",
             filePath: "",

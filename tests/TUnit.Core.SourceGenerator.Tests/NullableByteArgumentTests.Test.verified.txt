@@ -85,7 +85,7 @@ internal static class TUnit_TestProject_NullableByteArgumentTests__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.NullableByteArgumentTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NullableByteArgumentTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NullableByteArgumentTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.NullableByteArgumentTests>(
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.NullableByteArgumentTests.Test",
             filePath: "",
@@ -106,7 +106,7 @@ internal static class TUnit_TestProject_NullableByteArgumentTests__TestSource
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NullableByteArgumentTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.NullableByteArgumentTests>(
             methodName: "Test2",
             fullyQualifiedName: "TUnit.TestProject.NullableByteArgumentTests.Test2",
             filePath: "",

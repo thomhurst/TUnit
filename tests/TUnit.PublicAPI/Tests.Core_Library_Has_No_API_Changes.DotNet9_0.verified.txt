@@ -1577,7 +1577,7 @@ namespace
                     .IDataSourceAttribute[]? classDataSources = null,
                     .InjectableProperty[]? injectableProperties = null)
             where T :  class { }
-        public static .TestEntry<T> Create<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T>(
+        public static .TestEntry<T> CreateWithClassMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T>(
                     string methodName,
                     string fullyQualifiedName,
                     string filePath,

@@ -172,7 +172,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutCancellationTokenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutCancellationTokenTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
             methodName: "DefaultTest",
             fullyQualifiedName: "TUnit.TestProject.TimeoutCancellationTokenTests.DefaultTest",
             filePath: "",
@@ -197,7 +197,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
             methodName: "BasicTest",
             fullyQualifiedName: "TUnit.TestProject.TimeoutCancellationTokenTests.BasicTest",
             filePath: "",
@@ -222,7 +222,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             methodIndex: 1,
             createAttributes: __attributes,
             attributeGroupIndex: 1),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
             methodName: "InheritedTimeoutAttribute",
             fullyQualifiedName: "TUnit.TestProject.TimeoutCancellationTokenTests.InheritedTimeoutAttribute",
             filePath: "",
@@ -247,7 +247,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             methodIndex: 2,
             createAttributes: __attributes,
             attributeGroupIndex: 2),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
             methodName: "DataTest",
             fullyQualifiedName: "TUnit.TestProject.TimeoutCancellationTokenTests.DataTest",
             filePath: "",
@@ -277,7 +277,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             methodIndex: 3,
             createAttributes: __attributes,
             attributeGroupIndex: 3),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
             methodName: "DataSourceTest",
             fullyQualifiedName: "TUnit.TestProject.TimeoutCancellationTokenTests.DataSourceTest",
             filePath: "",
@@ -310,7 +310,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             methodIndex: 4,
             createAttributes: __attributes,
             attributeGroupIndex: 4),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
             methodName: "MatrixTest",
             fullyQualifiedName: "TUnit.TestProject.TimeoutCancellationTokenTests.MatrixTest",
             filePath: "",
@@ -421,7 +421,7 @@ internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutDoesNotFireTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutDoesNotFireTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutDoesNotFireTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.TimeoutDoesNotFireTests>(
             methodName: "QuickTestDoesNotTimeout",
             fullyQualifiedName: "TUnit.TestProject.TimeoutDoesNotFireTests.QuickTestDoesNotTimeout",
             filePath: "",
@@ -527,7 +527,7 @@ internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.CancellationTokenTriggeredTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.CancellationTokenTriggeredTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.CancellationTokenTriggeredTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.CancellationTokenTriggeredTests>(
             methodName: "CancellationTokenIsTriggered",
             fullyQualifiedName: "TUnit.TestProject.CancellationTokenTriggeredTests.CancellationTokenIsTriggered",
             filePath: "",

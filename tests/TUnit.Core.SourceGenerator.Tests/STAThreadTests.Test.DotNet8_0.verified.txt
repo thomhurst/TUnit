@@ -132,7 +132,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.STAThreadTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.STAThreadTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "With_STA",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.With_STA",
             filePath: "",
@@ -145,7 +145,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "Without_STA",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.Without_STA",
             filePath: "",
@@ -158,7 +158,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 1,
             createAttributes: __attributes,
             attributeGroupIndex: 1),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithSimpleAwait",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithSimpleAwait",
             filePath: "",
@@ -171,7 +171,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 2,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithTaskYield",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithTaskYield",
             filePath: "",
@@ -184,7 +184,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 3,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithConfigureAwaitTrue",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithConfigureAwaitTrue",
             filePath: "",
@@ -197,7 +197,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 4,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithNestedAsyncCalls",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithNestedAsyncCalls",
             filePath: "",
@@ -210,7 +210,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 5,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithTaskFromResult",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithTaskFromResult",
             filePath: "",
@@ -223,7 +223,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 6,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithCompletedTask",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithCompletedTask",
             filePath: "",
@@ -236,7 +236,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 7,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithTaskRun",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithTaskRun",
             filePath: "",
@@ -249,7 +249,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 8,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithMultipleAwaits",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithMultipleAwaits",
             filePath: "",
@@ -262,7 +262,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 9,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithAsyncEnumerable",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithAsyncEnumerable",
             filePath: "",
@@ -275,7 +275,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 10,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithTaskWhenAll",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithTaskWhenAll",
             filePath: "",
@@ -288,7 +288,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 11,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithExceptionHandling",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithExceptionHandling",
             filePath: "",
@@ -301,7 +301,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 12,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithThrowsNothingAssertion",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithThrowsNothingAssertion",
             filePath: "",
@@ -314,7 +314,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             methodIndex: 13,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.STAThreadTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.STAThreadTests>(
             methodName: "STA_WithFuncAssertion",
             fullyQualifiedName: "TUnit.TestProject.STAThreadTests.STA_WithFuncAssertion",
             filePath: "",

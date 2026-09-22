@@ -63,7 +63,7 @@ internal static class TUnit_TestProject_SimpleTestClass__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.SimpleTestClass>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.SimpleTestClass>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.SimpleTestClass>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.SimpleTestClass>(
             methodName: "NonGenericTest",
             fullyQualifiedName: "TUnit.TestProject.SimpleTestClass.NonGenericTest",
             filePath: "",

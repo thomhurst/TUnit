@@ -70,7 +70,7 @@ internal static class TUnit_TestProject_Bugs__5118_AsyncClassMethodDataSourceTes
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests>(
             methodName: "TestWithAsyncComplexData",
             fullyQualifiedName: "TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests.TestWithAsyncComplexData",
             filePath: "",

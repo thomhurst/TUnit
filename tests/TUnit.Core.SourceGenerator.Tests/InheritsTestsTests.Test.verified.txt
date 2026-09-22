@@ -92,7 +92,7 @@ internal static class TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.BaseClass>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.BaseClass>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1924.None.BaseClass>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._1924.None.BaseClass>(
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._1924.None.BaseClass.Test",
             filePath: "",

@@ -95,7 +95,7 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.RepeatTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.RepeatTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.RepeatTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.RepeatTests>(
             methodName: "One",
             fullyQualifiedName: "TUnit.TestProject.RepeatTests.One",
             filePath: "",
@@ -107,7 +107,7 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.RepeatTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.RepeatTests>(
             methodName: "Two",
             fullyQualifiedName: "TUnit.TestProject.RepeatTests.Two",
             filePath: "",
@@ -119,7 +119,7 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
             methodIndex: 1,
             createAttributes: __attributes,
             attributeGroupIndex: 1),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.RepeatTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.RepeatTests>(
             methodName: "Three",
             fullyQualifiedName: "TUnit.TestProject.RepeatTests.Three",
             filePath: "",

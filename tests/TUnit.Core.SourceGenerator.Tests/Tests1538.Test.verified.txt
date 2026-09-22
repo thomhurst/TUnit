@@ -85,7 +85,7 @@ internal static class TUnit_TestProject_Bugs__1538_Tests__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1538.Tests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1538.Tests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1538.Tests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._1538.Tests>(
             methodName: "Eight_Args",
             fullyQualifiedName: "TUnit.TestProject.Bugs._1538.Tests.Eight_Args",
             filePath: "",
@@ -115,7 +115,7 @@ internal static class TUnit_TestProject_Bugs__1538_Tests__TestSource
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1538.Tests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._1538.Tests>(
             methodName: "SixteenArgs",
             fullyQualifiedName: "TUnit.TestProject.Bugs._1538.Tests.SixteenArgs",
             filePath: "",

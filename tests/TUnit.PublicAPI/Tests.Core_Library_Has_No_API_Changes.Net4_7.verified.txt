@@ -1519,7 +1519,7 @@ namespace
                     .IDataSourceAttribute[]? classDataSources = null,
                     .InjectableProperty[]? injectableProperties = null)
             where T :  class { }
-        public static .TestEntry<T> Create<T>(
+        public static .TestEntry<T> CreateWithClassMetadata<T>(
                     string methodName,
                     string fullyQualifiedName,
                     string filePath,

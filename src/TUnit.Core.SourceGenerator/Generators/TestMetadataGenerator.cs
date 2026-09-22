@@ -3134,7 +3134,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Pre-generates the named arguments that let TestEntryFactory.Create build the method's
+    /// Pre-generates the named arguments that let TestEntryFactory.CreateWithClassMetadata build the method's
     /// MethodMetadata itself (return type, generic arity, parameters), omitting factory defaults.
     /// Called during the transform step where ISymbol is available.
     /// </summary>
@@ -3583,7 +3583,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Indent();
             foreach (var method in classGroup.Methods)
             {
-                writer.AppendLine($"global::TUnit.Core.TestEntryFactory.Create<{classGroup.ClassFullyQualified}>(");
+                writer.AppendLine($"global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<{classGroup.ClassFullyQualified}>(");
                 writer.Indent();
                 writer.AppendRaw(method.TestEntryDataFieldsCode);
                 if (method.TestDataSourcesCode != null)

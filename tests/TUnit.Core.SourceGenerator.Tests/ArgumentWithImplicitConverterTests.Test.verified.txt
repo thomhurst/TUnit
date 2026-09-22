@@ -85,7 +85,7 @@ internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests__Test
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(
             methodName: "Explicit",
             fullyQualifiedName: "TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit",
             filePath: "",
@@ -107,7 +107,7 @@ internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests__Test
             methodIndex: 0,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(
             methodName: "Implicit",
             fullyQualifiedName: "TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit",
             filePath: "",

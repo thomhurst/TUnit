@@ -177,7 +177,7 @@ internal static class TUnit_TestProject_PropertySetterTests__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.PropertySetterTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.PropertySetterTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.PropertySetterTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.PropertySetterTests>(
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.PropertySetterTests.Test",
             filePath: "",

@@ -68,7 +68,7 @@ internal static class TUnit_TestProject_Bugs__1589_MyTests__TestSource
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1589.MyTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1589.MyTests>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1589.MyTests>(
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._1589.MyTests>(
             methodName: "Test1",
             fullyQualifiedName: "TUnit.TestProject.Bugs._1589.MyTests.Test1",
             filePath: "",
