@@ -4,5 +4,17 @@
     "**/node_modules/**",
     "**/bower_components/**",
     "**/Snapshots/**"
+  ],
+  "packageRules": [
+    {
+      "description": "Microsoft.Build 18.10+ only ships net11.0/net472 runtime assets; our net10.0 consumers can't load it. Remove once the repo targets net11.0.",
+      "matchPackageNames": [
+        "Microsoft.Build",
+        "Microsoft.Build.Framework",
+        "Microsoft.Build.Utilities.Core",
+        "Microsoft.NET.StringTools"
+      ],
+      "allowedVersions": "<18.10.0"
+    }
   ]
 }
