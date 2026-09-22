@@ -35,8 +35,21 @@ public class CrossCompilationAttributeTests
             [Test]
             [Arguments(123_999.00000000000000001, Skip = "from base", Categories = new[] { "slow" })]
             [Arguments(-1.5)]
+            [Arguments(+0.5)]
+            [Arguments(1.5f)]
+            [Arguments(2e1)]
             [Arguments(new object[] { 2.5 })]
+            [Arguments(100L)]
+            [Arguments(100U)]
+            [Arguments(0x1F)]
+            [Arguments(0b1010)]
             public void InheritedDecimal(decimal value)
+            {
+            }
+
+            [Test]
+            [Arguments(null)]
+            public void InheritedNullable(decimal? value)
             {
             }
         }
@@ -133,7 +146,21 @@ public class CrossCompilationAttributeTests
         await Assert.That(generated).Contains("Categories = ");
         await Assert.That(generated).Contains("\"slow\"");
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(-1.5m)");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(0.5m)");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(1.5m)");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(2e1m)");
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(2.5m)");
+
+        // Hex/binary prefixes and integral suffixes have no decimal literal form: appending "m" to the
+        // source text would not compile, so these come from the typed constants.
+        await Assert.That(generated).DoesNotContain("100Lm");
+        await Assert.That(generated).DoesNotContain("100Um");
+        await Assert.That(generated).DoesNotContain("0x1Fm");
+        await Assert.That(generated).DoesNotContain("0x1m");
+        await Assert.That(generated).DoesNotContain("0b1010m");
+
+        // [Arguments(null)] binds null to the params array itself.
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(null)");
 
         var compilationErrors = outputCompilation.GetDiagnostics()
             .Where(d => d.Severity == DiagnosticSeverity.Error)

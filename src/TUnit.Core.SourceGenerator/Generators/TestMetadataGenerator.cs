@@ -1438,8 +1438,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // projects (IDE workspaces) it exists but lives in a tree this compilation does not own: its source
         // text is still usable for literal extraction, but only a tree in this compilation can provide the
         // semantic model needed to fully qualify identifiers.
-        var attributeSyntax = attr.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
-        var semanticModel = attributeSyntax is not null && compilation.ContainsSyntaxTree(attributeSyntax.SyntaxTree)
+        var attributeSyntax = attr.GetApplicationSyntax(compilation, out var syntaxIsInCompilation);
+        var semanticModel = attributeSyntax is not null && syntaxIsInCompilation
             ? compilation.GetSemanticModel(attributeSyntax.SyntaxTree)
             : null;
 
@@ -1544,6 +1544,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         ImmutableArray<IParameterSymbol> testMethodParameters,
         AttributeSyntax? foreignSyntax)
     {
+        // Build into a local buffer so a formatting failure part-way through leaves the shared writer
+        // untouched; the caller's catch block then appends its own fallback to a clean line.
+        var buffer = new CodeWriter(includeHeader: false);
+
+        WriteArgumentsAttributeFromTypedConstants(buffer, attrTypeName, attr, testMethodParameters, foreignSyntax);
+
+        writer.AppendRaw(buffer.ToString());
+    }
+
+    private static void WriteArgumentsAttributeFromTypedConstants(
+        CodeWriter writer,
+        string attrTypeName,
+        AttributeData attr,
+        ImmutableArray<IParameterSymbol> testMethodParameters,
+        AttributeSyntax? foreignSyntax)
+    {
         var formatter = new TypedConstantFormatter();
 
         writer.Append($"new {attrTypeName}(");
@@ -1573,10 +1589,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 if (syntaxAligned
                     && targetType?.SpecialType == SpecialType.System_Decimal
-                    && IsNumericLiteral(positionalSyntax![i].Expression))
+                    && TryGetDecimalLiteralText(positionalSyntax![i].Expression, out var decimalLiteral))
                 {
-                    var sourceText = positionalSyntax[i].Expression.ToString().TrimEnd('d', 'D', 'f', 'F', 'm', 'M').Trim();
-                    writer.Append($"{sourceText}m");
+                    writer.Append(decimalLiteral);
                 }
                 else
                 {
@@ -1621,14 +1636,57 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static bool IsNumericLiteral(ExpressionSyntax expression)
+    /// <summary>
+    /// Extracts a numeric literal (optionally signed) as a <see cref="decimal"/> literal with the
+    /// <c>m</c> suffix, keeping the exact digits from source. Only forms that C# allows for decimal
+    /// literals qualify: plain digits with optional separators, fraction, exponent and a real suffix
+    /// (<c>d</c>/<c>f</c>/<c>m</c>). Hex and binary prefixes and integral suffixes (<c>L</c>, <c>U</c>,
+    /// <c>UL</c>) have no decimal form and must be formatted from their typed constant instead.
+    /// </summary>
+    private static bool TryGetDecimalLiteralText(ExpressionSyntax expression, out string decimalLiteral)
     {
-        if (expression is PrefixUnaryExpressionSyntax unary && unary.IsKind(SyntaxKind.UnaryMinusExpression))
+        decimalLiteral = string.Empty;
+        var sign = string.Empty;
+
+        if (expression is PrefixUnaryExpressionSyntax unary)
         {
+            if (unary.IsKind(SyntaxKind.UnaryMinusExpression))
+            {
+                sign = "-";
+            }
+            else if (!unary.IsKind(SyntaxKind.UnaryPlusExpression))
+            {
+                return false;
+            }
+
             expression = unary.Operand;
         }
 
-        return expression.IsKind(SyntaxKind.NumericLiteralExpression);
+        if (expression is not LiteralExpressionSyntax literal || !literal.IsKind(SyntaxKind.NumericLiteralExpression))
+        {
+            return false;
+        }
+
+        var token = literal.Token.Text;
+
+        if (token.Length > 1 && token[0] == '0' && (token[1] is 'x' or 'X' or 'b' or 'B'))
+        {
+            return false;
+        }
+
+        if (token.Length > 0 && (token[token.Length - 1] is 'd' or 'D' or 'f' or 'F' or 'm' or 'M'))
+        {
+            token = token.Substring(0, token.Length - 1);
+        }
+
+        // Anything other than a digit left at the end is an integral suffix (L, U, UL, ...).
+        if (token.Length == 0 || !char.IsDigit(token[token.Length - 1]))
+        {
+            return false;
+        }
+
+        decimalLiteral = $"{sign}{token}m";
+        return true;
     }
 
     private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol)
