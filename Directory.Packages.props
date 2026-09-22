@@ -50,7 +50,6 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.62.0" />
     <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="10.0.401" />
-    <!-- 18.11.0 breaks Mono.Cecil framework-facade resolution in net472 PublicAPI tests. -->
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.11.2" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.4.1" />
     <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.4.1" />
@@ -90,7 +89,7 @@
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.8.0" />
-    <PackageVersion Include="Polyfill" Version="11.3.0" />
+    <PackageVersion Include="Polyfill" Version="11.4.0" />
     <PackageVersion Include="PublicApiGenerator" Version="11.5.4" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
