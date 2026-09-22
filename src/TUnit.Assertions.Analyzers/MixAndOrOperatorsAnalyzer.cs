@@ -34,8 +34,8 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
         // (it implements that interface), so it doesn't need a separate base-type check.
         var awaitedType = awaitOperation.Operation.Type;
         var isAssertionSource = awaitedType?.AllInterfaces.Any(x =>
-            x.GloballyQualifiedNonGeneric() is "global::TUnit.Assertions.Core.IAssertionSource"
-                                            or "global::TUnit.Assertions.Should.Core.IShouldSource") == true;
+            x.IsGloballyQualifiedNonGeneric("global::TUnit.Assertions.Core.IAssertionSource")
+            || x.IsGloballyQualifiedNonGeneric("global::TUnit.Assertions.Should.Core.IShouldSource")) == true;
         var isAssertion = awaitedType?.BaseType != null && IsAssertionType(awaitedType.BaseType);
 
         if (!isAssertionSource && !isAssertion)
@@ -60,7 +60,7 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         // Check if this type is Assertion<T>
-        if (type.GloballyQualifiedNonGeneric() is "global::TUnit.Assertions.Core.Assertion")
+        if (type.IsGloballyQualifiedNonGeneric("global::TUnit.Assertions.Core.Assertion"))
         {
             return true;
         }

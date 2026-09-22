@@ -32,6 +32,8 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
             return;
         }
 
+        var testMethodSet = new HashSet<IMethodSymbol>(testMethods, SymbolEqualityComparer.Default);
+
         // MethodKind.Ordinary excludes property accessors (PropertyGet/PropertySet),
         // event accessors (EventAdd/EventRemove), constructors, destructors, operators,
         // and other compiler-generated method kinds.
@@ -41,7 +43,7 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
                      .Where(x => !x.IsStatic)
                      .Where(x => !x.IsOverride)
                      .Where(x => x.DeclaredAccessibility == Accessibility.Public)
-                     .Where(x => !x.IsTestMethod(context.Compilation))
+                     .Where(x => !testMethodSet.Contains(x))
                      .Where(x => !x.IsStandardHookMethod(context.Compilation, out _, out _, out _))
                      .Where(x => !IsDisposableDispose(x))
                      .Where(x => !IsAsyncDisposableDispose(x))

@@ -30,6 +30,13 @@ public class XUnitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var methodSymbol = invocationOperation.TargetMethod;
 
+        // Cheap pre-filter: "global::Xunit.Assert.*" requires the outermost container to be named Xunit.
+        // Avoids building a display string for every invocation in the compilation.
+        if (methodSymbol.MethodKind == MethodKind.Ordinary && GetOutermostContainerName(methodSymbol) != "Xunit")
+        {
+            return;
+        }
+
         var fullyQualifiedNonGenericMethodName = methodSymbol.GloballyQualifiedNonGeneric();
 
         if (fullyQualifiedNonGenericMethodName.StartsWith("global::Xunit.Assert."))
@@ -38,5 +45,17 @@ public class XUnitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
                 Diagnostic.Create(Rules.XUnitAssertion, context.Operation.Syntax.GetLocation())
             );
         }
+    }
+
+    private static string GetOutermostContainerName(ISymbol symbol)
+    {
+        var current = symbol;
+
+        while (current.ContainingSymbol is { } parent && parent is not INamespaceSymbol { IsGlobalNamespace: true })
+        {
+            current = parent;
+        }
+
+        return current.Name;
     }
 }

@@ -9,6 +9,8 @@ namespace TUnit.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ForbidRedefiningAttributeUsageAnalyzer : ConcurrentDiagnosticAnalyzer
 {
+    private static readonly string AttributeUsageAttributeName = $"global::{typeof(AttributeUsageAttribute).FullName}";
+
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.DoNotOverrideAttributeUsageMetadata);
 
@@ -34,7 +36,7 @@ public class ForbidRedefiningAttributeUsageAnalyzer : ConcurrentDiagnosticAnalyz
             return;
         }
 
-        var attributeUsage = namedTypeSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.GloballyQualified() == $"global::{typeof(AttributeUsageAttribute).FullName}");
+        var attributeUsage = namedTypeSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsGloballyQualified(AttributeUsageAttributeName) == true);
 
         if (attributeUsage == null)
         {

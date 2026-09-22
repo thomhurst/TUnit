@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
@@ -9,8 +8,8 @@ using TUnit.Assertions.Analyzers.Extensions;
 namespace TUnit.Assertions.Analyzers;
 
 /// <summary>
-/// A sample analyzer that reports the company name being used in class declarations.
-/// Traverses through the Syntax Tree and checks the name (identifier) of each class node.
+/// Reports explicitly passed arguments for TUnit.Assertions parameters that the compiler is meant to populate
+/// (<c>[CallerMemberName]</c> / <c>[CallerArgumentExpression]</c>).
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class CompilerArgumentsPopulatedAnalyzer : ConcurrentDiagnosticAnalyzer
@@ -20,25 +19,22 @@ public class CompilerArgumentsPopulatedAnalyzer : ConcurrentDiagnosticAnalyzer
 
     public override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.Argument);
+        // An operation action reuses the operation tree the driver already builds, instead of calling
+        // SemanticModel.GetOperation for every ArgumentSyntax in the compilation.
+        context.RegisterOperationAction(AnalyzeArgument, OperationKind.Argument);
     }
 
-    /// <summary>
-    /// Executed for each Syntax Node with 'SyntaxKind' is 'ClassDeclaration'.
-    /// </summary>
-    /// <param name="context">Operation context.</param>
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private static void AnalyzeArgument(OperationAnalysisContext context)
     {
-        // The Roslyn architecture is based on inheritance.
-        // To get the required metadata, we should match the 'Node' object to the particular type: 'ClassDeclarationSyntax'.
-        if (context.Node is not ArgumentSyntax argumentSyntax)
+        if (context.Operation is not IArgumentOperation argumentOperation)
         {
             return;
         }
 
-        var operation = context.SemanticModel.GetOperation(argumentSyntax);
-
-        if (operation is not IArgumentOperation argumentOperation)
+        // Only arguments written in source: SemanticModel.GetOperation(ArgumentSyntax) maps to the single
+        // non-implicit operation for that syntax, so this matches exactly the arguments a syntax-node
+        // action on SyntaxKind.Argument would see.
+        if (argumentOperation.IsImplicit || argumentOperation.Syntax is not ArgumentSyntax argumentSyntax)
         {
             return;
         }
@@ -49,9 +45,9 @@ public class CompilerArgumentsPopulatedAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         if (argumentOperation.Parameter?.GetAttributes().Any(x =>
-                x.AttributeClass?.GloballyQualified()
-                    is "global::System.Runtime.CompilerServices.CallerMemberNameAttribute"
-                    or "global::System.Runtime.CompilerServices.CallerArgumentExpressionAttribute")
+                x.AttributeClass is { } attributeClass
+                && (attributeClass.IsGloballyQualified("global::System.Runtime.CompilerServices.CallerMemberNameAttribute")
+                    || attributeClass.IsGloballyQualified("global::System.Runtime.CompilerServices.CallerArgumentExpressionAttribute")))
             == true)
         {
             context.ReportDiagnostic(

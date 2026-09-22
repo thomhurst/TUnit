@@ -16,8 +16,7 @@ public static class AttributeExtensions
         }
 
         return attributeDatas.FirstOrDefault(x =>
-            x.AttributeClass?.GloballyQualifiedNonGeneric()
-            == fullyQualifiedName);
+            x.AttributeClass?.IsGloballyQualifiedNonGeneric(fullyQualifiedName) == true);
     }
 
     public static Location? GetLocation(this AttributeData attributeData)

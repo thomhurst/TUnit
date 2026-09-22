@@ -25,8 +25,8 @@ public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyze
         }
 
         var methodExplicitAttribute = methodSymbol.GetAttributes()
-            .FirstOrDefault(x => x.AttributeClass?.GloballyQualifiedNonGeneric()
-            == WellKnown.AttributeFullyQualifiedClasses.Explicit.WithGlobalPrefix);
+            .FirstOrDefault(x => x.AttributeClass?.IsGloballyQualifiedNonGeneric(
+            WellKnown.AttributeFullyQualifiedClasses.Explicit.WithGlobalPrefix) == true);
 
         if (methodExplicitAttribute == null)
         {
@@ -34,8 +34,8 @@ public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyze
         }
 
         var classExplicitAttribute = methodSymbol.ContainingType.GetAttributes()
-            .FirstOrDefault(x => x.AttributeClass?.GloballyQualifiedNonGeneric()
-                                 == WellKnown.AttributeFullyQualifiedClasses.Explicit.WithGlobalPrefix);
+            .FirstOrDefault(x => x.AttributeClass?.IsGloballyQualifiedNonGeneric(
+                                 WellKnown.AttributeFullyQualifiedClasses.Explicit.WithGlobalPrefix) == true);
 
         if (classExplicitAttribute == null)
         {

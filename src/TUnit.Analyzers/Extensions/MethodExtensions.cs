@@ -95,7 +95,6 @@ public static class MethodExtensions
 
         }
         return attributes.FirstOrDefault(x =>
-                x.AttributeClass?.GloballyQualifiedNonGeneric()
-                == fullyQualifiedNameWithGlobalPrefix);
+                x.AttributeClass?.IsGloballyQualifiedNonGeneric(fullyQualifiedNameWithGlobalPrefix) == true);
     }
 }

@@ -61,7 +61,7 @@ public class AbstractTestClassWithDataSourcesAnalyzer : ConcurrentDiagnosticAnal
 
                 // Check if it implements IDataSourceAttribute
                 return attributeClass.AllInterfaces.Any(i =>
-                    i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithGlobalPrefix);
+                    i.IsGloballyQualified(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithGlobalPrefix));
             });
         });
 
@@ -111,8 +111,8 @@ public class AbstractTestClassWithDataSourcesAnalyzer : ConcurrentDiagnosticAnal
 
                     // Check if this type has [InheritsTests] attribute
                     var hasInheritsTests = type.GetAttributes().Any(attr =>
-                        attr.AttributeClass?.GloballyQualified() ==
-                        WellKnown.AttributeFullyQualifiedClasses.InheritsTestsAttribute.WithGlobalPrefix);
+                        attr.AttributeClass?.IsGloballyQualified(
+                        WellKnown.AttributeFullyQualifiedClasses.InheritsTestsAttribute.WithGlobalPrefix) == true);
 
                     if (hasInheritsTests)
                     {

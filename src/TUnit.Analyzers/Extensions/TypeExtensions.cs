@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace TUnit.Analyzers.Extensions;
 
-public static class TypeExtensions
+public static partial class TypeExtensions
 {
     public static string GetMetadataName(this Type type)
     {
@@ -35,7 +35,7 @@ public static class TypeExtensions
     {
         return namedTypeSymbol
             .GetSelfAndBaseTypes()
-            .Any(x => x.GloballyQualified() == typeName);
+            .Any(x => x.IsGloballyQualified(typeName));
     }
 
     public static bool IsTestClass(this INamedTypeSymbol namedTypeSymbol, Compilation compilation)
@@ -70,14 +70,6 @@ public static class TypeExtensions
         innerType = null;
         return false;
     }
-
-    public static string GloballyQualified(this ISymbol typeSymbol)
-    {
-        return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-    }
-
-    public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
-        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
 
     public static bool IsGenericDefinition(this ITypeSymbol typeSymbol)
     {
@@ -192,7 +184,7 @@ public static class TypeExtensions
     public static bool IsAsyncDisposable(this ITypeSymbol type)
     {
         return type.AllInterfaces
-            .Any(x => x.GloballyQualifiedNonGeneric() == "global::System.IAsyncDisposable");
+            .Any(x => x.IsGloballyQualifiedNonGeneric("global::System.IAsyncDisposable"));
     }
 
     public static bool IsCollectionType(this ITypeSymbol typeSymbol, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)

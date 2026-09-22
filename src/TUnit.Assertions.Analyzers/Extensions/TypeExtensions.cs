@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.Analyzers.Extensions;
 
-public static class TypeExtensions
+public static partial class TypeExtensions
 {
     public static string GetFullNameWithoutGenericArity(this Type type)
     {
@@ -23,12 +23,6 @@ public static class TypeExtensions
             type = type.BaseType;
         }
     }
-
-    public static string GloballyQualified(this ISymbol typeSymbol) =>
-        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-
-    public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
-        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
 
     public static bool IsOrInherits(this ITypeSymbol namedTypeSymbol, ITypeSymbol typeSymbol)
     {
