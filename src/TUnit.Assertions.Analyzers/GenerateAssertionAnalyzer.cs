@@ -37,7 +37,8 @@ public class GenerateAssertionAnalyzer : DiagnosticAnalyzer
 
         // Check if method has [GenerateAssertion] attribute
         var hasGenerateAssertionAttribute = methodSymbol.GetAttributes()
-            .Any(attr => attr.AttributeClass?.ToDisplayString() == "TUnit.Assertions.Attributes.GenerateAssertionAttribute");
+            .Any(attr => attr.AttributeClass is { Name: "GenerateAssertionAttribute" } attributeClass
+                         && attributeClass.ToDisplayString() == "TUnit.Assertions.Attributes.GenerateAssertionAttribute");
 
         if (!hasGenerateAssertionAttribute)
         {

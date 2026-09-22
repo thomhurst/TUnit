@@ -34,8 +34,8 @@ public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes()
             .Concat(methodSymbol.ContainingType.GetAttributes());
 
-        var timeoutAttribute = attributes.FirstOrDefault(x => x.AttributeClass?.GloballyQualifiedNonGeneric()
-                                                             == "global::TUnit.Core.TimeoutAttribute");
+        var timeoutAttribute = attributes.FirstOrDefault(x => x.AttributeClass?.IsGloballyQualifiedNonGeneric(
+                                                             "global::TUnit.Core.TimeoutAttribute") == true);
 
         if (timeoutAttribute is null)
         {
@@ -53,7 +53,7 @@ public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var cancellationTokenType = context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!);
+        var cancellationTokenType = context.Compilation.GetTypeByMetadataName("System.Threading.CancellationToken");
 
         var cancellationTokenIndex = -1;
         for (var i = 0; i < parameters.Length; i++)

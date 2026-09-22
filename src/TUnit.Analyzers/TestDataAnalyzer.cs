@@ -289,7 +289,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             ? ImmutableArray.Create(default(TypedConstant))
             : argumentsAttribute.ConstructorArguments.First().Values;
 
-        var cancellationTokenType = context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!);
+        var cancellationTokenType = context.Compilation.GetTypeByMetadataName("System.Threading.CancellationToken");
 
         for (var i = 0; i < Math.Max(parameters.Length, arguments.Length); i++)
         {
@@ -847,7 +847,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }.AsReadOnly();
 
         var baseGeneratorAttribute = selfAndBaseTypes
-            .FirstOrDefault(x => x.AllInterfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithGlobalPrefix));
+            .FirstOrDefault(x => x.AllInterfaces.Any(i => i.IsGloballyQualified(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithGlobalPrefix)));
 
         // If interface check fails, use name-based detection as fallback
         if (baseGeneratorAttribute is null)
@@ -883,7 +883,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         // First, try the same approach as the source generator: look for ITypedDataSourceAttribute<T> interface
         var typedInterface = attribute.AttributeClass?.AllInterfaces
             .FirstOrDefault(i => i.IsGenericType && 
-                i.ConstructedFrom.GloballyQualifiedNonGeneric() == WellKnown.AttributeFullyQualifiedClasses.ITypedDataSourceAttribute.WithGlobalPrefix);
+                i.ConstructedFrom.IsGloballyQualifiedNonGeneric(WellKnown.AttributeFullyQualifiedClasses.ITypedDataSourceAttribute.WithGlobalPrefix));
                 
         if (typedInterface != null)
         {

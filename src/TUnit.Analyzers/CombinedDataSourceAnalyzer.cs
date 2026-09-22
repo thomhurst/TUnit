@@ -79,8 +79,8 @@ public class CombinedDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             // Filter out CancellationToken parameters as they're handled by the engine
             var nonCancellationTokenParams = parameters
-                .Where(p => p.Type.GloballyQualifiedNonGeneric() !=
-                           "global::System.Threading.CancellationToken");
+                .Where(p => !p.Type.IsGloballyQualifiedNonGeneric(
+                           "global::System.Threading.CancellationToken"));
 
             foreach (var parameter in nonCancellationTokenParams)
             {

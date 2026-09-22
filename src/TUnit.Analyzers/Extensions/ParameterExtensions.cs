@@ -13,8 +13,8 @@ public static class ParameterExtensions
             return parameterSymbols;
         }
 
-        if (parameterSymbols.Last().Type.GloballyQualifiedNonGeneric() ==
-            WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix)
+        if (parameterSymbols.Last().Type.IsGloballyQualifiedNonGeneric(
+            WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix))
         {
             return ImmutableArray.Create(parameterSymbols, 0, parameterSymbols.Length - 1);
         }
@@ -29,8 +29,8 @@ public static class ParameterExtensions
             return typeSymbols;
         }
 
-        if (typeSymbols.Last().GloballyQualified() ==
-            WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix)
+        if (typeSymbols.Last().IsGloballyQualified(
+            WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix))
         {
             return ImmutableArray.Create(typeSymbols, 0, typeSymbols.Length - 1);
         }

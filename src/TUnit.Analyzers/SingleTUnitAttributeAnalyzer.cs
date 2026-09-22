@@ -23,6 +23,12 @@ public class SingleTUnitAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var attributes = symbol.GetAttributes();
 
+        // A duplicate needs at least two attributes; most symbols have zero or one.
+        if (attributes.Length < 2)
+        {
+            return;
+        }
+
         var singleAttributes = attributes.Select(ToClassInheritingSingleAttribute).OfType<INamedTypeSymbol>();
 
         var notDistinctAttributes = singleAttributes.GroupBy(x => x, SymbolEqualityComparer.Default).Where(x => x.Count() > 1).Select(x => x.Key!);
@@ -37,7 +43,7 @@ public class SingleTUnitAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         var typeWithBases = attributeData.AttributeClass?.GetSelfAndBaseTypes().ToList();
 
-        var index = typeWithBases?.FindIndex(x => x?.GloballyQualified() == "global::TUnit.Core.SingleTUnitAttribute");
+        var index = typeWithBases?.FindIndex(x => x?.IsGloballyQualified("global::TUnit.Core.SingleTUnitAttribute") == true);
 
         if (index is null or -1 or 0)
         {

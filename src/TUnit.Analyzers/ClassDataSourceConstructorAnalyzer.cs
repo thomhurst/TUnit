@@ -76,11 +76,9 @@ public class ClassDataSourceConstructorAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         // Check if this is ClassDataSourceAttribute<T>
-        var attributeClassName = attribute.AttributeClass.Name;
-        var attributeFullName = attribute.AttributeClass.ToDisplayString();
-
-        if (!attributeClassName.StartsWith("ClassDataSourceAttribute") ||
-            !attributeFullName.StartsWith("TUnit.Core.ClassDataSourceAttribute<"))
+        // Cheap name check first: building the display string for every attribute is expensive.
+        if (!attribute.AttributeClass.Name.StartsWith("ClassDataSourceAttribute") ||
+            !attribute.AttributeClass.ToDisplayString().StartsWith("TUnit.Core.ClassDataSourceAttribute<"))
         {
             return;
         }

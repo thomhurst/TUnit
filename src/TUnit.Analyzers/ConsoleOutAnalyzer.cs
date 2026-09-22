@@ -31,7 +31,7 @@ public class ConsoleOutAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (methodSymbol.ContainingType.GloballyQualified() == "global::System.Console")
+        if (methodSymbol.ContainingType.IsGloballyQualified("global::System.Console"))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.OverwriteConsole,
                 context.Operation.Syntax.GetLocation()));

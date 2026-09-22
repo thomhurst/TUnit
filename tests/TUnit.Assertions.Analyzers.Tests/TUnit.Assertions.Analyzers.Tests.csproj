@@ -35,6 +35,8 @@
           Visible="false" />
     <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"
              Link="Shared\AnalyzerTestCompatibility.cs" />
+    <Compile Include="..\SharedTestHelpers\GloballyQualifiedComparisonCases.cs"
+             Link="Shared\GloballyQualifiedComparisonCases.cs" />
   </ItemGroup>
 
   <ItemGroup>

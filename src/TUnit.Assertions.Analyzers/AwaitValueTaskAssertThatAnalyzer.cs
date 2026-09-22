@@ -30,9 +30,7 @@ public class AwaitValueTaskAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var methodSymbol = invocationOperation.TargetMethod;
 
-        var fullyQualifiedNonGenericMethodName = methodSymbol.GloballyQualifiedNonGeneric();
-
-        if (fullyQualifiedNonGenericMethodName is not "global::TUnit.Assertions.Assert.That")
+        if (!methodSymbol.IsGloballyQualifiedNonGeneric("global::TUnit.Assertions.Assert.That"))
         {
             return;
         }
@@ -41,8 +39,8 @@ public class AwaitValueTaskAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var type = funcArgumentOperation.Parameter?.Type;
 
-        var valueTask = context.Compilation.GetTypeByMetadataName(typeof(ValueTask).FullName!)!;
-        var genericValueTask = context.Compilation.GetTypeByMetadataName(typeof(ValueTask<>).FullName!)!;
+        var valueTask = context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask")!;
+        var genericValueTask = context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask`1")!;
 
         if (type?.IsOrInherits(valueTask) is true || type?.OriginalDefinition?.IsOrInherits(genericValueTask) is true)
         {

@@ -30,6 +30,14 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var methodSymbol = invocationOperation.TargetMethod;
 
+        // Cheap pre-filter on the simple name: this runs for every invocation in the compilation,
+        // and building the fully qualified display string for each one is expensive.
+        if (methodSymbol.MethodKind == MethodKind.Ordinary
+            && methodSymbol.Name is not ("Multiple" or "That" or "Should"))
+        {
+            return;
+        }
+
         var fullyQualifiedNonGenericMethodName = methodSymbol.GloballyQualifiedNonGeneric();
 
         if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.Multiple")

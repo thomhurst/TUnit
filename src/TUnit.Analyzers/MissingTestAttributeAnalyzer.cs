@@ -30,7 +30,8 @@ public class MissingTestAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
             .Where(x => x.MethodKind == MethodKind.Ordinary)
             .Where(x => !x.IsStatic);
 
-        foreach (var method in methods.Where(x => x.HasDataDrivenAttributes() && !x.IsTestMethod(context.Compilation)))
+        // IsTestMethod is the cheaper check and rules out the vast majority of methods, so evaluate it first.
+        foreach (var method in methods.Where(x => !x.IsTestMethod(context.Compilation) && x.HasDataDrivenAttributes()))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MissingTestAttribute,
                 method.Locations.FirstOrDefault())

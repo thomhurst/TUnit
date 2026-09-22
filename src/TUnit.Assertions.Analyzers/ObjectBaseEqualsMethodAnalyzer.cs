@@ -37,8 +37,7 @@ public class ObjectBaseEqualsMethodAnalyzer : ConcurrentDiagnosticAnalyzer
 
         // Check if the instance implements IAssertionSource or inherits from Assertion<T>
         var isAssertionSource = instanceType?.AllInterfaces
-            .Select(x => x.GloballyQualifiedNonGeneric())
-            .Any(x => x is "global::TUnit.Assertions.Core.IAssertionSource") == true;
+            .Any(x => x.IsGloballyQualifiedNonGeneric("global::TUnit.Assertions.Core.IAssertionSource")) == true;
 
         var isAssertion = instanceType?.BaseType != null &&
             IsAssertionType(instanceType.BaseType);
@@ -61,7 +60,7 @@ public class ObjectBaseEqualsMethodAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         // Check if this type is Assertion<T>
-        if (type.GloballyQualifiedNonGeneric() is "global::TUnit.Assertions.Core.Assertion")
+        if (type.IsGloballyQualifiedNonGeneric("global::TUnit.Assertions.Core.Assertion"))
         {
             return true;
         }

@@ -25,8 +25,8 @@ public class InheritsTestsAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         if (namedTypeSymbol.GetAttributes().Any(x =>
-                x.AttributeClass?.GloballyQualified() ==
-                WellKnown.AttributeFullyQualifiedClasses.InheritsTestsAttribute.WithGlobalPrefix))
+                x.AttributeClass?.IsGloballyQualified(
+                WellKnown.AttributeFullyQualifiedClasses.InheritsTestsAttribute.WithGlobalPrefix) == true))
         {
             return;
         }

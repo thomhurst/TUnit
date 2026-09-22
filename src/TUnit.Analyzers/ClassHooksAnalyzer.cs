@@ -80,14 +80,14 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
         foreach (var parameter in methodSymbol.Parameters)
         {
-            if (parameter.Type.GloballyQualified() ==
-                WellKnown.AttributeFullyQualifiedClasses.ClassHookContext.WithGlobalPrefix)
+            if (parameter.Type.IsGloballyQualified(
+                WellKnown.AttributeFullyQualifiedClasses.ClassHookContext.WithGlobalPrefix))
             {
                 continue;
             }
 
-            if (parameter.Type.GloballyQualified() ==
-                WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix)
+            if (parameter.Type.IsGloballyQualified(
+                WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix))
             {
                 continue;
             }
@@ -102,10 +102,10 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         foreach (var parameter in methodSymbol.Parameters)
         {
-            if (parameter.Type.GloballyQualified() !=
-                WellKnown.AttributeFullyQualifiedClasses.ClassHookContext.WithGlobalPrefix &&
-                parameter.Type.GloballyQualified() !=
-                WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix)
+            if (!parameter.Type.IsGloballyQualified(
+                WellKnown.AttributeFullyQualifiedClasses.ClassHookContext.WithGlobalPrefix) &&
+                !parameter.Type.IsGloballyQualified(
+                WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix))
             {
                 return parameter;
             }

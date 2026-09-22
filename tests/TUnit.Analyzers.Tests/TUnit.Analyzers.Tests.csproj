@@ -49,6 +49,8 @@
              Link="Shared\AnalyzerTestCompatibility.cs" />
     <Compile Include="..\SharedTestHelpers\RulesDecouplingVerifier.cs"
              Link="Shared\RulesDecouplingVerifier.cs" />
+    <Compile Include="..\SharedTestHelpers\GloballyQualifiedComparisonCases.cs"
+             Link="Shared\GloballyQualifiedComparisonCases.cs" />
   </ItemGroup>
 
   <!-- Reference the VSTHRD analyzer assembly (Analyzer="false") so its analyzer types are

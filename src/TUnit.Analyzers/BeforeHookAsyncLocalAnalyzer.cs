@@ -13,6 +13,10 @@ public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.AsyncLocalCallFlowValues);
 
+    // Hoisted so the same string instance is passed every time: Compilation.GetTypeByMetadataName's
+    // result cache is keyed by string reference.
+    private static readonly string AsyncLocalMetadataName = typeof(AsyncLocal<object>).GetMetadataName();
+
     protected override void InitializeInternal(AnalysisContext context)
     {
         context.RegisterOperationAction(AnalyzeOperation, OperationKind.SimpleAssignment);
@@ -34,7 +38,7 @@ public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (!propertyContainingType.IsGenericType
             || !SymbolEqualityComparer.Default.Equals(propertyContainingType.OriginalDefinition,
-                context.Compilation.GetTypeByMetadataName(typeof(AsyncLocal<object>).GetMetadataName())))
+                context.Compilation.GetTypeByMetadataName(AsyncLocalMetadataName)))
         {
             return;
         }
