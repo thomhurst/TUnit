@@ -21,27 +21,7 @@ internal static class CodeGenerationHelpers
 
         if (attr.ConstructorArguments.Length > 0)
         {
-            var argStrings = new List<string>();
-
-            for (var i = 0; i < attr.ConstructorArguments.Length; i++)
-            {
-                var arg = attr.ConstructorArguments[i];
-
-                // Expand a params array into individual arguments. A null array (e.g. [Arguments(null)])
-                // falls through and is emitted as a single null, which binds to the params array itself.
-                if (i == attr.ConstructorArguments.Length - 1
-                    && arg.Kind == TypedConstantKind.Array
-                    && !arg.IsNull
-                    && IsParamsArrayArgument(attr))
-                {
-                    argStrings.AddRange(arg.Values.Select(v => TypedConstantParser.GetRawTypedConstantValue(v)));
-                }
-                else
-                {
-                    argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg));
-                }
-            }
-
+            var argStrings = attr.ConstructorArguments.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg));
             writer.AppendJoin(", ", argStrings);
         }
 
@@ -56,16 +36,6 @@ internal static class CodeGenerationHelpers
         }
 
         return writer.ToString().Trim();
-    }
-
-    /// <summary>
-    /// Determines if an argument is for a params array parameter.
-    /// </summary>
-    private static bool IsParamsArrayArgument(AttributeData attr)
-    {
-        var typeName = attr.AttributeClass!.GloballyQualified();
-
-        return typeName is "global::TUnit.Core.ArgumentsAttribute" or "global::TUnit.Core.InlineDataAttribute";
     }
 
     /// <summary>
