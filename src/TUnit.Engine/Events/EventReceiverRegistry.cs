@@ -34,6 +34,12 @@ internal sealed class EventReceiverRegistry
         All = ~0
     }
 
+    // Events whose receivers are enumerated from the registry rather than per test.
+    private const EventTypes ScopeEvents =
+        EventTypes.FirstTestInSession | EventTypes.LastTestInSession
+        | EventTypes.FirstTestInAssembly | EventTypes.LastTestInAssembly
+        | EventTypes.FirstTestInClass | EventTypes.LastTestInClass;
+
     // Accessed via Volatile.Read + Interlocked.CompareExchange to provide acquire/release
     // semantics without the cost of a volatile field on every write path.
     private int _registeredEvents;
@@ -58,23 +64,21 @@ internal sealed class EventReceiverRegistry
     }
 
     /// <summary>
-    /// Whether <paramref name="receiver"/> implements a first/last-in-scope receiver interface.
-    /// These are the only receivers enumerated from the registry; per-test receivers
-    /// (start/end/skipped/registered) are dispatched from each test's own eligible objects.
-    /// </summary>
-    public static bool IsScopeReceiver(object receiver) =>
-        receiver is IFirstTestInTestSessionEventReceiver
-            or ILastTestInTestSessionEventReceiver
-            or IFirstTestInAssemblyEventReceiver
-            or ILastTestInAssemblyEventReceiver
-            or IFirstTestInClassEventReceiver
-            or ILastTestInClassEventReceiver;
-
-    /// <summary>
-    /// Records the event types a per-test receiver handles without storing the receiver.
+    /// Records the event types <paramref name="receiver"/> handles without storing it.
     /// Idempotent and allocation-free, so callers need no deduplication.
     /// </summary>
-    public void RegisterPresence(object receiver) => UpdateEventFlags(receiver);
+    /// <returns>
+    /// Whether <paramref name="receiver"/> implements a first/last-in-scope receiver interface.
+    /// Only those receivers are enumerated from the registry, so only they need to be stored via
+    /// <see cref="RegisterReceiver"/>; per-test receivers (start/end/skipped/registered) are
+    /// dispatched from each test's own eligible objects.
+    /// </returns>
+    public bool RegisterPresence(object receiver)
+    {
+        var flags = Classify(receiver);
+        SetFlags(flags);
+        return (flags & ScopeEvents) != 0;
+    }
 
     /// <summary>
     /// Register a single event receiver.
@@ -88,7 +92,7 @@ internal sealed class EventReceiverRegistry
     {
         UpdateEventFlags(receiver);
 
-        // Only scope receivers are ever enumerated (see IsScopeReceiver); per-test receiver
+        // Only scope receivers are ever enumerated (see RegisterPresence); per-test receiver
         // types need nothing beyond the presence flags set above.
         RegisterIfImplements<IFirstTestInTestSessionEventReceiver>(receiver);
         RegisterIfImplements<ILastTestInTestSessionEventReceiver>(receiver);
@@ -220,7 +224,9 @@ internal sealed class EventReceiverRegistry
         return typedArray;
     }
 
-    private void UpdateEventFlags(object receiver)
+    private void UpdateEventFlags(object receiver) => SetFlags(Classify(receiver));
+
+    private static EventTypes Classify(object receiver)
     {
         var flags = EventTypes.None;
         if (receiver is ITestStartEventReceiver)
@@ -264,6 +270,11 @@ internal sealed class EventReceiverRegistry
             flags |= EventTypes.LastTestInClass;
         }
 
+        return flags;
+    }
+
+    private void SetFlags(EventTypes flags)
+    {
         if (flags == EventTypes.None)
         {
             return;

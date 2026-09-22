@@ -61,9 +61,8 @@ internal sealed class EventReceiverOrchestrator
             // attributes such as [Arguments] implement ITestRegisteredEventReceiver, and
             // System.Attribute's reflection-based Equals/GetHashCode (with colliding hashes)
             // made registering one per test quadratic.
-            if (!EventReceiverRegistry.IsScopeReceiver(obj))
+            if (!_registry.RegisterPresence(obj))
             {
-                _registry.RegisterPresence(obj);
                 continue;
             }
 
@@ -120,9 +119,8 @@ internal sealed class EventReceiverOrchestrator
         }
 
         // A fresh instance per test: tracking it in the dedup set would only retain it.
-        if (!EventReceiverRegistry.IsScopeReceiver(classInstance))
+        if (!_registry.RegisterPresence(classInstance))
         {
-            _registry.RegisterPresence(classInstance);
             return;
         }
 
