@@ -4,7 +4,7 @@
 
 Last Updated
 
-This benchmark was automatically generated on **2026-09-23** from the latest CI run.
+This benchmark was automatically generated on **2026-09-24** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.401
 
@@ -14,12 +14,12 @@ Mock instance creation performance:
 
 | Library         | Mean        | Error     | StdDev    | Allocated |
 | --------------- | ----------- | --------- | --------- | --------- |
-| **TUnit.Mocks** | 33.88 ns    | 0.724 ns  | 0.775 ns  | 200 B     |
-| Imposter        | 103.05 ns   | 0.780 ns  | 0.691 ns  | 440 B     |
-| Mockolate       | 19.88 ns    | 0.480 ns  | 0.449 ns  | 160 B     |
-| Moq             | 1,254.91 ns | 18.653 ns | 17.448 ns | 2048 B    |
-| NSubstitute     | 1,742.01 ns | 4.652 ns  | 3.885 ns  | 5000 B    |
-| FakeItEasy      | 1,773.81 ns | 19.091 ns | 17.857 ns | 2723 B    |
+| **TUnit.Mocks** | 30.15 ns    | 0.370 ns  | 0.346 ns  | 200 B     |
+| Imposter        | 93.10 ns    | 1.876 ns  | 2.568 ns  | 440 B     |
+| Mockolate       | 17.21 ns    | 0.402 ns  | 0.892 ns  | 160 B     |
+| Moq             | 1,331.11 ns | 20.203 ns | 18.898 ns | 2048 B    |
+| NSubstitute     | 1,850.97 ns | 26.023 ns | 24.342 ns | 5000 B    |
+| FakeItEasy      | 1,688.90 ns | 32.257 ns | 37.147 ns | 2715 B    |
 
 <!-- -->
 
@@ -29,12 +29,12 @@ Mock instance creation performance:
 
 | Library         | Mean        | Error     | StdDev    | Allocated |
 | --------------- | ----------- | --------- | --------- | --------- |
-| **TUnit.Mocks** | 33.35 ns    | 0.733 ns  | 1.003 ns  | 200 B     |
-| Imposter        | 165.83 ns   | 3.184 ns  | 3.127 ns  | 696 B     |
-| Mockolate       | 22.17 ns    | 0.382 ns  | 0.357 ns  | 176 B     |
-| Moq             | 1,314.12 ns | 3.606 ns  | 3.373 ns  | 1912 B    |
-| NSubstitute     | 1,864.02 ns | 16.024 ns | 14.989 ns | 5000 B    |
-| FakeItEasy      | 1,710.70 ns | 12.801 ns | 11.348 ns | 2723 B    |
+| **TUnit.Mocks** | 27.09 ns    | 0.210 ns  | 0.197 ns  | 200 B     |
+| Imposter        | 139.28 ns   | 2.627 ns  | 2.811 ns  | 696 B     |
+| Mockolate       | 17.17 ns    | 0.296 ns  | 0.277 ns  | 176 B     |
+| Moq             | 1,401.97 ns | 23.530 ns | 20.859 ns | 1912 B    |
+| NSubstitute     | 1,864.93 ns | 11.376 ns | 10.641 ns | 5000 B    |
+| FakeItEasy      | 1,659.61 ns | 14.174 ns | 12.565 ns | 2715 B    |
 
 <!-- -->
 
@@ -48,4 +48,4 @@ Methodology
 
 View the [mock benchmarks overview](/docs/benchmarks/mocks/.md) for methodology details and environment information.
 
-*Last generated: 2026-09-23T02:34:56.618Z*
+*Last generated: 2026-09-24T02:33:35.117Z*
