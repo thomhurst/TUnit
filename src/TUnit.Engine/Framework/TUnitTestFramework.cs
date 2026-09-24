@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
@@ -143,9 +144,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         // Same IDE fold as TUnitMessageBus.GetFailureStateProperty: server-mode clients only see
         // Exception.Message and Exception.StackTrace, so a discovery hook failure would otherwise
         // lose its cause (#1327).
+        var folded = FlattenedException.Wrap(exception);
         var reported = _frameworkServiceProvider.IsConsoleClient()
             ? exception
-            : FlattenedException.Wrap(exception);
+            : folded;
 
         await context.MessageBus.PublishAsync(
             dataProducer: this,
@@ -155,7 +157,13 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 {
                     DisplayName = $"Unhandled exception - {exception.GetType().Name}: {exception.Message}",
                     Uid = new TestNodeUid(Guid.NewGuid().ToString()),
-                    Properties = new PropertyBag(new ErrorTestNodeStateProperty(reported))
+                    // This synthetic node has no test method metadata. TRX still needs a type name
+                    // to write the report, and an explicit exception property to retain the cause.
+                    Properties = new PropertyBag(
+                        new ErrorTestNodeStateProperty(reported),
+                        new TrxFullyQualifiedTypeNameProperty(typeof(TUnitTestFramework).FullName!),
+                        new TrxExceptionProperty(folded.Message,
+                            string.IsNullOrEmpty(folded.StackTrace) ? null : folded.StackTrace))
                 }));
     }
 
