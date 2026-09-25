@@ -59,6 +59,139 @@ public class BeforeHookCancellationTokenAnalyzerTests
     }
 
     [Test]
+    [Arguments("return useCache ? Task.CompletedTask : Task.Delay(100, {|#0:context.Execution.CancellationToken|});")]
+    [Arguments("return useCache ? Task.Delay(100, {|#0:context.Execution.CancellationToken|}) : Task.CompletedTask;")]
+    [Arguments("return useCache ? Task.CompletedTask : Initialize({|#0:context.Execution.CancellationToken|});")]
+    [Arguments("return useCache ? Task.CompletedTask : (useCache ? Task.CompletedTask : Task.Delay(100, {|#0:context.Execution.CancellationToken|}));")]
+    public async Task Before_Hook_Returning_Conditional_Setup_With_Test_Token_Shows_Warning(string statement)
+    {
+        // Arrange
+        var source = $$"""
+            using TUnit.Core;
+            using System.Threading;
+            using System.Threading.Tasks;
+
+            public class TestClass
+            {
+                [Before(HookType.Test)]
+                public Task Setup(TestContext context)
+                {
+                    var useCache = false;
+                    {{statement}}
+                }
+
+                private static Task<int> Initialize(CancellationToken cancellationToken)
+                    => Task.FromResult(0);
+            }
+            """;
+
+        // Act
+        var verification = Verifier.VerifyAnalyzerAsync(source,
+            new DiagnosticResult("TUnit0075", DiagnosticSeverity.Warning).WithLocation(0));
+
+        // Assert
+        await verification;
+    }
+
+    [Test]
+    [Arguments("BaseTestClass", "")]
+    [Arguments("IntermediateTestClass", "")]
+    [Arguments("BaseTestClass", "[After(HookType.Test)]")]
+    public async Task Inherited_Before_Hook_With_Test_Token_Shows_Warning(string baseType, string attribute)
+    {
+        // Arrange
+        var source = $$"""
+            using TUnit.Core;
+            using System.Threading.Tasks;
+
+            public class BaseTestClass
+            {
+                [Before(HookType.Test)]
+                public virtual Task Setup(TestContext context) => Task.CompletedTask;
+            }
+
+            public abstract class IntermediateTestClass : BaseTestClass
+            {
+                public abstract override Task Setup(TestContext context);
+            }
+
+            public class TestClass : {{baseType}}
+            {
+                {{attribute}}
+                public override Task Setup(TestContext context)
+                    => Task.Delay(100, {|#0:context.Execution.CancellationToken|});
+            }
+            """;
+
+        // Act
+        var verification = Verifier.VerifyAnalyzerAsync(source,
+            new DiagnosticResult("TUnit0075", DiagnosticSeverity.Warning).WithLocation(0));
+
+        // Assert
+        await verification;
+    }
+
+    [Test]
+    [Arguments("[Before(HookType.Test)]", "new")]
+    [Arguments("[After(HookType.Test)]", "override")]
+    [Arguments("", "override")]
+    public async Task Method_Without_Inherited_Setup_With_Test_Token_Shows_No_Warning(string attribute, string modifier)
+    {
+        // Arrange
+        var source = $$"""
+            using TUnit.Core;
+            using System.Threading.Tasks;
+
+            public class BaseTestClass
+            {
+                {{attribute}}
+                public virtual Task Setup(TestContext context) => Task.CompletedTask;
+            }
+
+            public class TestClass : BaseTestClass
+            {
+                public {{modifier}} Task Setup(TestContext context)
+                    => Task.Delay(100, context.Execution.CancellationToken);
+            }
+            """;
+
+        // Act
+        var verification = Verifier.VerifyAnalyzerAsync(source);
+
+        // Assert
+        await verification;
+    }
+
+    [Test]
+    public async Task Before_Hook_Using_Test_Token_In_Conditional_Test_Shows_No_Warning()
+    {
+        // Arrange
+        const string source = """
+            using TUnit.Core;
+            using System.Threading;
+            using System.Threading.Tasks;
+
+            public class TestClass
+            {
+                [Before(HookType.Test)]
+                public Task Setup(TestContext context)
+                    => UseCachedResult(context.Execution.CancellationToken)
+                        ? Task.CompletedTask
+                        : Task.Delay(100, CancellationToken.None);
+
+                private static bool UseCachedResult(CancellationToken cancellationToken)
+                    => cancellationToken.IsCancellationRequested;
+            }
+            """;
+
+        // Act
+        var verification = Verifier.VerifyAnalyzerAsync(source);
+
+        // Assert
+        await verification;
+    }
+
+    [Test]
     [Arguments("Before", "", "")]
     [Arguments("Before", "", "[Timeout(100)]")]
     [Arguments("BeforeEvery", "static ", "")]

@@ -38,9 +38,7 @@ public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
             } argument
             || !IsDirectSetupOperation(invocation)
             || context.ContainingSymbol is not IMethodSymbol method
-            || !method.IsHookMethod(context.Compilation, out _, out var level, out var type)
-            || level != HookLevel.Test
-            || type != HookType.Before)
+            || !IsBeforeTestHook(method, context.Compilation))
         {
             return;
         }
@@ -59,13 +57,42 @@ public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
         context.ReportDiagnostic(Diagnostic.Create(Rules.UseHookCancellationToken, token.Syntax.GetLocation()));
     }
 
+    private static bool IsBeforeTestHook(IMethodSymbol method, Compilation compilation)
+    {
+        for (var current = method; current is not null; current = current.OverriddenMethod)
+        {
+            foreach (var attribute in current.GetAttributes())
+            {
+                if ((attribute.IsStandardHook(compilation, out _, out var level, out var type)
+                     || attribute.IsEveryHook(compilation, out _, out level, out type))
+                    && level == HookLevel.Test
+                    && type == HookType.Before)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private static bool IsDirectSetupOperation(IInvocationOperation invocation)
     {
         IOperation operation = invocation;
-        if (operation.Parent is IInvocationOperation { TargetMethod.Name: "ConfigureAwait" } configureAwait
-            && configureAwait.Instance == operation)
+        while (operation.Parent is { } parent)
         {
-            operation = configureAwait;
+            switch (parent)
+            {
+                case IConversionOperation { OperatorMethod: null }:
+                case IConditionalOperation conditional
+                    when conditional.WhenTrue == operation || conditional.WhenFalse == operation:
+                case IInvocationOperation { TargetMethod.Name: "ConfigureAwait" } configureAwait
+                    when configureAwait.Instance == operation:
+                    operation = parent;
+                    continue;
+            }
+
+            break;
         }
 
         if (operation.Parent is not (IAwaitOperation or IReturnOperation))

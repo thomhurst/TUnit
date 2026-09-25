@@ -14,8 +14,10 @@ The operation must cooperate with cancellation. Passing the correct token lets i
 
 ## Scope
 
-The rule checks the direct `context.Execution.CancellationToken` property chain, where `context` is the hook's `TestContext` parameter. It recognizes direct `await`, `await` with `ConfigureAwait`, and direct returns.
+The rule checks the direct `context.Execution.CancellationToken` property chain, where `context` is the hook's `TestContext` parameter. It recognizes direct `await`, `await` with `ConfigureAwait`, and returns, including branches of conditional expressions such as `return useCache ? Task.CompletedTask : InitializeAsync(context.Execution.CancellationToken)`.
 
-It does not follow tokens through local variables or helper methods, inspect nested lambdas or local functions, or check tokens from other contexts. It does not apply to ordinary tests or cleanup hooks. Reading cancellation state, such as `context.Execution.CancellationToken.IsCancellationRequested`, is not reported.
+Overrides of virtual setup hooks are checked even when the override does not repeat `[Before(Test)]`. The rule follows the override chain; a method that hides a base hook with `new` does not inherit that hook's role.
+
+It does not follow tokens through local variables or helper methods, inspect nested lambdas or local functions, or check tokens from other contexts. It does not apply to ordinary tests or methods used only for cleanup. Reading cancellation state, such as `context.Execution.CancellationToken.IsCancellationRequested`, is not reported.
 
 See [Hook Parameters](../writing-tests/hooks.md#hook-parameters) for the supported hook signatures.
