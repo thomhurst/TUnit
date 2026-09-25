@@ -237,6 +237,7 @@ const sidebars: SidebarsConfig = {
         'reference/command-line-flags',
         'reference/environment-variables',
         'reference/test-configuration',
+        'reference/tunit0075',
         {
           type: 'doc',
           id: 'guides/best-practices',

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
 using TUnit.Analyzers.Extensions;
 
 namespace TUnit.Analyzers;
@@ -11,11 +12,76 @@ public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(
             Rules.MissingTimeoutCancellationTokenAttributes,
-            Rules.CancellationTokenMustBeLastParameter);
+            Rules.CancellationTokenMustBeLastParameter,
+            Rules.UseHookCancellationToken);
 
     protected override void InitializeInternal(AnalysisContext context)
     {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
+        context.RegisterOperationAction(AnalyzeSetupArgument, OperationKind.Argument);
+    }
+
+    private static void AnalyzeSetupArgument(OperationAnalysisContext context)
+    {
+        if (context.Operation is not IArgumentOperation
+            {
+                Value: IPropertyReferenceOperation
+                {
+                    Property.Name: "CancellationToken",
+                    Instance: IPropertyReferenceOperation
+                    {
+                        Property.Name: "Execution",
+                        Instance: IParameterReferenceOperation parameter
+                    } execution
+                } token,
+                Parent: IInvocationOperation invocation
+            } argument
+            || !IsDirectSetupOperation(invocation)
+            || context.ContainingSymbol is not IMethodSymbol method
+            || !method.IsHookMethod(context.Compilation, out _, out var level, out var type)
+            || level != HookLevel.Test
+            || type != HookType.Before)
+        {
+            return;
+        }
+
+        if (!SymbolEqualityComparer.Default.Equals(argument.Parameter?.Type,
+                context.Compilation.GetTypeByMetadataName("System.Threading.CancellationToken"))
+            || !SymbolEqualityComparer.Default.Equals(token.Property.ContainingType,
+                context.Compilation.GetTypeByMetadataName("TUnit.Core.Interfaces.ITestExecution"))
+            || !SymbolEqualityComparer.Default.Equals(execution.Property.ContainingType,
+                context.Compilation.GetTypeByMetadataName("TUnit.Core.TestContext"))
+            || !SymbolEqualityComparer.Default.Equals(parameter.Parameter.ContainingSymbol, method))
+        {
+            return;
+        }
+
+        context.ReportDiagnostic(Diagnostic.Create(Rules.UseHookCancellationToken, token.Syntax.GetLocation()));
+    }
+
+    private static bool IsDirectSetupOperation(IInvocationOperation invocation)
+    {
+        IOperation operation = invocation;
+        if (operation.Parent is IInvocationOperation { TargetMethod.Name: "ConfigureAwait" } configureAwait
+            && configureAwait.Instance == operation)
+        {
+            operation = configureAwait;
+        }
+
+        if (operation.Parent is not (IAwaitOperation or IReturnOperation))
+        {
+            return false;
+        }
+
+        for (var parent = operation.Parent; parent is not null; parent = parent.Parent)
+        {
+            if (parent is IAnonymousFunctionOperation or ILocalFunctionOperation)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void AnalyzeSymbol(SymbolAnalysisContext context)
