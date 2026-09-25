@@ -6,6 +6,20 @@ namespace TUnit.Engine.Tests;
 public class UnhandledExceptionTrxTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
+    public async Task Passing_Test_Does_Not_Fail_Session_Without_Disposal_OptIn()
+    {
+        await RunTestsWithFilter(
+            "/*/*/UnhandledExceptionTrxTestCases/PassingTest",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ],
+            new RunOptions().WithEnvironmentVariable("TUNIT_TEST_THROW_ON_STATIC_RESOURCE_DISPOSAL", null));
+    }
+
+    [Test]
     public async Task Trx_Preserves_Test_Results_And_Shared_Resource_Disposal_Error()
     {
         await RunTestsWithFilter(
@@ -35,6 +49,8 @@ public class UnhandledExceptionTrxTests(TestMode testMode) : InvokableTestBase(t
                     errorInfo.StackTrace.ShouldContain("ThrowingResource.DisposeAsync()");
                 }
             ],
-            new RunOptions().WithArgument("--detailed-stacktrace"));
+            new RunOptions()
+                .WithArgument("--detailed-stacktrace")
+                .WithEnvironmentVariable("TUNIT_TEST_THROW_ON_STATIC_RESOURCE_DISPOSAL", "1"));
     }
 }

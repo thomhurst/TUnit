@@ -29,7 +29,8 @@ public class UnhandledExceptionTrxTestCases
         public ValueTask DisposeAsync()
         {
             // Static data sources can be initialized even when this class is filtered out.
-            if (_used)
+            // Only the regression's child process opts in to the deliberate cleanup failure.
+            if (_used && Environment.GetEnvironmentVariable("TUNIT_TEST_THROW_ON_STATIC_RESOURCE_DISPOSAL") == "1")
             {
                 throw new InvalidOperationException("Shared resource disposal failure");
             }
