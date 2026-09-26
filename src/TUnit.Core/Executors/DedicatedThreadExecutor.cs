@@ -21,20 +21,14 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         var thread = new Thread(static state =>
         {
             var (threadExecutor, action, tcs) = (ValueTuple<DedicatedThreadExecutor, Func<ValueTask>, TaskCompletionSource<object?>>)state!;
+            Task? completedTask = null;
             Exception? capturedException = null;
+            Exception? cleanUpException = null;
 
             try
             {
                 threadExecutor.Initialize();
-
-                try
-                {
-                    threadExecutor.ExecuteAsyncActionWithMessagePump(action, tcs);
-                }
-                catch (Exception e)
-                {
-                    capturedException = e;
-                }
+                completedTask = threadExecutor.ExecuteAsyncActionWithMessagePump(action);
             }
             catch (Exception e)
             {
@@ -42,12 +36,18 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
             }
             finally
             {
-                threadExecutor.CleanUp();
-
-                if (capturedException != null && !tcs.Task.IsCompleted)
+                try
                 {
-                    tcs.SetException(capturedException);
+                    threadExecutor.CleanUp();
                 }
+                catch (Exception e)
+                {
+                    cleanUpException = e;
+                }
+
+                // Complete only after CleanUp() has returned, so the engine cannot start the next
+                // test while this test's CleanUp() is still running on this thread.
+                CompleteTest(tcs, completedTask, capturedException, cleanUpException);
             }
         });
 
@@ -59,126 +59,140 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         return new ValueTask(tcs.Task);
     }
 
-    private void ExecuteAsyncActionWithMessagePump(Func<ValueTask> action, TaskCompletionSource<object?> tcs)
+    /// <summary>
+    /// Runs <paramref name="action"/> on the current thread, pumping its continuations until it completes.
+    /// Returns the completed task. Throws <see cref="TimeoutException"/> if it does not complete in time.
+    /// </summary>
+    private Task ExecuteAsyncActionWithMessagePump(Func<ValueTask> action)
     {
+        var previousContext = SynchronizationContext.Current;
+        ManualResetEventSlim? workAvailableEvent = null;
+#if NET5_0_OR_GREATER
+        if (!OperatingSystem.IsBrowser())
+        {
+            workAvailableEvent = new ManualResetEventSlim(false);
+        }
+#else
+        workAvailableEvent = new ManualResetEventSlim(false);
+#endif
+        var taskScheduler = new DedicatedThreadTaskScheduler(Thread.CurrentThread, workAvailableEvent);
+        var dedicatedContext = new DedicatedThreadSynchronizationContext(workAvailableEvent);
+
+        SynchronizationContext.SetSynchronizationContext(dedicatedContext);
+
         try
         {
-            var previousContext = SynchronizationContext.Current;
-            ManualResetEventSlim? workAvailableEvent = null;
-#if NET5_0_OR_GREATER
-            if (!OperatingSystem.IsBrowser())
+            var task = Task.Factory.StartNew(
+                static action => ((Func<ValueTask>)action!)().AsTask(),
+                action, CancellationToken.None, TaskCreationOptions.None, taskScheduler)
+                .Unwrap();
+
+            // Try fast path first - many tests complete quickly
+            // Use IsCompleted to avoid synchronous wait
+            if (task.IsCompleted)
             {
-                workAvailableEvent = new ManualResetEventSlim(false);
+                return task;
             }
-#else
-            workAvailableEvent = new ManualResetEventSlim(false);
-#endif
-            var taskScheduler = new DedicatedThreadTaskScheduler(Thread.CurrentThread, workAvailableEvent);
-            var dedicatedContext = new DedicatedThreadSynchronizationContext(workAvailableEvent);
 
-            SynchronizationContext.SetSynchronizationContext(dedicatedContext);
+            // Pump messages until the task completes with event-driven signaling
+            var deadline = DateTime.UtcNow.AddMinutes(5);
+            var spinWait = new SpinWait();
+            const int MaxSpinCount = 50;
+            const int WaitTimeoutMs = 100;
 
-            try
+            while (!task.IsCompleted)
             {
-                var task = Task.Factory.StartNew(
-                    static action => ((Func<ValueTask>)action!)().AsTask(),
-                    action, CancellationToken.None, TaskCreationOptions.None, taskScheduler)
-                    .Unwrap();
+                var hadWork = dedicatedContext.ProcessPendingWork();
+                hadWork |= taskScheduler.ProcessPendingTasks();
 
-                // Try fast path first - many tests complete quickly
-                // Use IsCompleted to avoid synchronous wait
-                if (task.IsCompleted)
+                if (!hadWork)
                 {
-                    HandleTaskCompletion(task, tcs);
-                    return;
-                }
-
-                // Pump messages until the task completes with event-driven signaling
-                var deadline = DateTime.UtcNow.AddMinutes(5);
-                var spinWait = new SpinWait();
-                const int MaxSpinCount = 50;
-                const int WaitTimeoutMs = 100;
-
-                while (!task.IsCompleted)
-                {
-                    var hadWork = dedicatedContext.ProcessPendingWork();
-                    hadWork |= taskScheduler.ProcessPendingTasks();
-
-                    if (!hadWork)
+                    // Fast path: spin briefly for immediate continuations
+                    if (spinWait.Count < MaxSpinCount)
                     {
-                        // Fast path: spin briefly for immediate continuations
-                        if (spinWait.Count < MaxSpinCount)
-                        {
-                            spinWait.SpinOnce();
-                        }
-                        else
-                        {
-#if NET5_0_OR_GREATER
-                            if (workAvailableEvent != null && !OperatingSystem.IsBrowser())
-                            {
-                                // No work after spinning - use event-driven wait (eliminates Thread.Sleep)
-                                // Thread blocks efficiently in kernel, wakes instantly when work queued
-                                workAvailableEvent.Wait(WaitTimeoutMs);
-                                workAvailableEvent.Reset();
-                                spinWait.Reset();
-                            }
-                            else
-                            {
-                                // Fallback for browser or null event
-                                Thread.Yield();
-                                spinWait.Reset();
-                            }
-#else
-                            if (workAvailableEvent != null)
-                            {
-                                workAvailableEvent.Wait(WaitTimeoutMs);
-                                workAvailableEvent.Reset();
-                                spinWait.Reset();
-                            }
-                            else
-                            {
-                                Thread.Yield();
-                                spinWait.Reset();
-                            }
-#endif
-                            // Check timeout after waiting
-                            if (DateTime.UtcNow >= deadline)
-                            {
-                                tcs.SetException(new TimeoutException("Async operation timed out after 5 minutes"));
-                                return;
-                            }
-                        }
+                        spinWait.SpinOnce();
                     }
                     else
                     {
-                        // Had work, reset spin counter
-                        spinWait.Reset();
+#if NET5_0_OR_GREATER
+                        if (workAvailableEvent != null && !OperatingSystem.IsBrowser())
+                        {
+                            // No work after spinning - use event-driven wait (eliminates Thread.Sleep)
+                            // Thread blocks efficiently in kernel, wakes instantly when work queued
+                            workAvailableEvent.Wait(WaitTimeoutMs);
+                            workAvailableEvent.Reset();
+                            spinWait.Reset();
+                        }
+                        else
+                        {
+                            // Fallback for browser or null event
+                            Thread.Yield();
+                            spinWait.Reset();
+                        }
+#else
+                        if (workAvailableEvent != null)
+                        {
+                            workAvailableEvent.Wait(WaitTimeoutMs);
+                            workAvailableEvent.Reset();
+                            spinWait.Reset();
+                        }
+                        else
+                        {
+                            Thread.Yield();
+                            spinWait.Reset();
+                        }
+#endif
+                        // Check timeout after waiting
+                        if (DateTime.UtcNow >= deadline)
+                        {
+                            throw new TimeoutException("Async operation timed out after 5 minutes");
+                        }
                     }
                 }
+                else
+                {
+                    // Had work, reset spin counter
+                    spinWait.Reset();
+                }
+            }
 
-                HandleTaskCompletion(task, tcs);
-            }
-            finally
-            {
-                workAvailableEvent?.Dispose();
-                SynchronizationContext.SetSynchronizationContext(previousContext);
-            }
+            return task;
         }
-        catch (Exception ex)
+        finally
         {
-            tcs.SetException(ex);
+            workAvailableEvent?.Dispose();
+            SynchronizationContext.SetSynchronizationContext(previousContext);
         }
     }
 
-    private static void HandleTaskCompletion(Task task, TaskCompletionSource<object?> tcs)
+    private static void CompleteTest(TaskCompletionSource<object?> tcs, Task? completedTask, Exception? exception, Exception? cleanUpException)
     {
-        if (task.IsFaulted)
+        if (exception is null && completedTask is { IsFaulted: true })
         {
-            tcs.SetException(task.Exception!.InnerExceptions.Count == 1
-                ? task.Exception.InnerException!
-                : task.Exception);
+            exception = completedTask.Exception!.InnerExceptions.Count == 1
+                ? completedTask.Exception.InnerException!
+                : completedTask.Exception;
         }
-        else if (task.IsCanceled)
+
+        if (cleanUpException is not null)
+        {
+            if (exception is null && completedTask is { IsCanceled: true })
+            {
+                exception = new TaskCanceledException(completedTask);
+            }
+
+            // A failing CleanUp() fails the test, like a failing [After] hook. When the test also
+            // failed, report both, with the test's own exception first.
+            exception = exception is null
+                ? cleanUpException
+                : new AggregateException(exception, cleanUpException);
+        }
+
+        if (exception is not null)
+        {
+            tcs.SetException(exception);
+        }
+        else if (completedTask is { IsCanceled: true })
         {
             tcs.SetCanceled();
         }
