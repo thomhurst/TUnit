@@ -33,19 +33,18 @@ jobs:
             workload: android
             experimental: false
           - platform: iOS
-            os: macos-26
+            os: macos-26-intel
             workload: ios
             target: ios-simulator-64
             experimental: false
           - platform: tvOS
-            os: macos-26
+            os: macos-26-intel
             workload: tvos
             target: tvos-simulator
             experimental: false
           - platform: MacCatalyst
-            os: macos-26
+            os: macos-26-intel
             workload: maccatalyst
-            target: maccatalyst
             experimental: false
           - platform: WASI
             os: ubuntu-latest
@@ -61,6 +60,7 @@ jobs:
           global-json-file: global.json
       - run: dotnet workload install ${{ matrix.workload }}
       - name: Install XHarness
+        if: matrix.platform != 'MacCatalyst' && matrix.platform != 'WASI'
         run: >-
           dotnet tool install Microsoft.DotNet.XHarness.CLI --global
           --version 10.0.0-prerelease.26471.3
@@ -95,14 +95,19 @@ jobs:
           script: |
             adb install tests/TUnit.PlatformSmoke/bin/mobile/Android/bin/TUnitSmoke.apk
             xharness android run --package-name=net.dot.TUnitSmoke --instrumentation=net.dot.MonoRunner --arg=--minimum-expected-tests=1 --expected-exit-code=0 --timeout=00:02:00 --output-directory=artifacts/platform-smoke/Android
-      - name: Execute the TUnit smoke test on Apple
-        if: runner.os == 'macOS'
+      - name: Execute the TUnit smoke test on Apple simulators
+        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
         run: >-
           xharness apple run
           --app="$(find tests/TUnit.PlatformSmoke/bin/mobile/${{ matrix.platform }} -name TUnitSmoke.app -type d -print -quit)"
           --target=${{ matrix.target }} --expected-exit-code=0 --timeout=00:10:00
           --output-directory=artifacts/platform-smoke/${{ matrix.platform }}
           -- --minimum-expected-tests 1
+      - name: Execute the TUnit smoke test on Mac Catalyst
+        if: matrix.platform == 'MacCatalyst'
+        run: >-
+          "$(find tests/TUnit.PlatformSmoke/bin/mobile/MacCatalyst -name TUnitSmoke.app -type d -print -quit)/Contents/MacOS/TUnitSmoke"
+          --minimum-expected-tests 1
       - uses: bytecodealliance/actions/wasmtime/setup@v1.1.3
         if: matrix.platform == 'WASI'
         with:

@@ -22,9 +22,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(_SmokeMobile)' == 'true'">
     <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'Android'">android-x64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'iOS'">iossimulator-arm64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'tvOS'">tvossimulator-arm64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'MacCatalyst'">maccatalyst-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'iOS'">iossimulator-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'tvOS'">tvossimulator-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'MacCatalyst'">maccatalyst-x64</RuntimeIdentifier>
     <DefineConstants>$(DefineConstants);$(SmokePlatform.ToUpperInvariant())</DefineConstants>
     <UseMonoRuntime>true</UseMonoRuntime>
     <SelfContained>true</SelfContained>
@@ -84,7 +84,7 @@
                           OutputDir="$(_SmokeBundleDir)" Assemblies="@(_SmokeAssemblies)" />
     <AppleAppBuilderTask Condition="'$(SmokePlatform)' != 'Android'"
                         ProjectName="TUnitSmoke" AppDir="$(_SmokePublishDir)" MainLibraryFileName="$(TargetFileName)"
-                        TargetOS="$(_SmokeTargetOS)" Arch="arm64" MonoRuntimeHeaders="$(_SmokeHeaders)"
+                        TargetOS="$(_SmokeTargetOS)" Arch="x64" MonoRuntimeHeaders="$(_SmokeHeaders)"
                         OutputDirectory="$(_SmokeBundleDir)" Assemblies="@(_SmokeAssemblies)"
                         ForceInterpreter="true" GenerateXcodeProject="true" BuildAppBundle="true" DevTeamProvisioning="adhoc" />
   </Target>
