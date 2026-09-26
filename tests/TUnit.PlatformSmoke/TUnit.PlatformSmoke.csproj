@@ -86,6 +86,6 @@
                         ProjectName="TUnitSmoke" AppDir="$(_SmokePublishDir)" MainLibraryFileName="$(TargetFileName)"
                         TargetOS="$(_SmokeTargetOS)" Arch="arm64" MonoRuntimeHeaders="$(_SmokeHeaders)"
                         OutputDirectory="$(_SmokeBundleDir)" Assemblies="@(_SmokeAssemblies)"
-                        ForceInterpreter="true" GenerateXcodeProject="true" BuildAppBundle="true" />
+                        ForceInterpreter="true" GenerateXcodeProject="true" BuildAppBundle="true" DevTeamProvisioning="adhoc" />
   </Target>
 </Project>
