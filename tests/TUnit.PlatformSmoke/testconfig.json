@@ -1,0 +1,7 @@
+{
+  "commandLineOptions": {
+    "minimum-expected-tests": 1,
+    "report-trx": true,
+    "results-directory": "TestResults"
+  }
+}

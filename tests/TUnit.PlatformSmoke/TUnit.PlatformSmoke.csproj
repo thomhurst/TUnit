@@ -1,0 +1,59 @@
+<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="'$(SmokePlatform)' != 'Browser'" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="'$(SmokePlatform)' == 'Browser'" />
+  <Import Project="../../eng/TestProject.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks />
+    <TargetFramework>net11.0</TargetFramework>
+    <TargetFramework Condition="'$(SmokePlatform)' == 'Android'">net11.0-android</TargetFramework>
+    <TargetFramework Condition="'$(SmokePlatform)' == 'iOS'">net11.0-ios</TargetFramework>
+    <TargetFramework Condition="'$(SmokePlatform)' == 'tvOS'">net11.0-tvos</TargetFramework>
+    <TargetFramework Condition="'$(SmokePlatform)' == 'MacCatalyst'">net11.0-maccatalyst</TargetFramework>
+    <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
+    <GenerateTestingPlatformEntryPoint>true</GenerateTestingPlatformEntryPoint>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(SmokePlatform)' == 'Android' or '$(SmokePlatform)' == 'iOS' or '$(SmokePlatform)' == 'tvOS' or '$(SmokePlatform)' == 'MacCatalyst'">
+    <ApplicationId>net.dot.TUnitSmoke</ApplicationId>
+    <ApplicationTitle>TUnit smoke test</ApplicationTitle>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'Android'">android-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'iOS'">iossimulator-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'tvOS'">tvossimulator-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'MacCatalyst'">maccatalyst-arm64</RuntimeIdentifier>
+    <RunWithOpen>false</RunWithOpen>
+    <MtouchLink Condition="'$(SmokePlatform)' != 'Android'">None</MtouchLink>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(SmokePlatform)' == 'Android'">
+    <AndroidUseInstrumentation>true</AndroidUseInstrumentation>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(SmokePlatform)' == 'Browser' or '$(SmokePlatform)' == 'WASI'">
+    <RuntimeFrameworkVersion>11.0.0-rc.1.26425.128</RuntimeFrameworkVersion>
+    <UseMonoRuntime>true</UseMonoRuntime>
+    <SelfContained>true</SelfContained>
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(SmokePlatform)' == 'WASI'">
+    <RuntimeIdentifier>wasi-wasm</RuntimeIdentifier>
+    <DefineConstants>$(DefineConstants);WASI</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(SmokePlatform)' == 'Browser'">
+    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+    <DefineConstants>$(DefineConstants);BROWSER</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/TUnit/TUnit.csproj" />
+  </ItemGroup>
+  <Import Project="../../eng/TestProject.targets" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" Condition="'$(SmokePlatform)' != 'Browser'" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="'$(SmokePlatform)' == 'Browser'" />
+</Project>
