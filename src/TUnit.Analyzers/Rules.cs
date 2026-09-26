@@ -173,6 +173,9 @@ public static class Rules
     public static readonly DiagnosticDescriptor RedundantHookAttributeOnOverride =
         CreateDescriptor(DiagnosticIds.RedundantHookAttributeOnOverride, UsageCategory, DiagnosticSeverity.Error);
 
+    public static readonly DiagnosticDescriptor UseHookCancellationToken =
+        CreateDescriptor(DiagnosticIds.UseHookCancellationToken, UsageCategory, DiagnosticSeverity.Warning);
+
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity,
         string[]? customTags = null, string? helpLinkUri = null)
     {

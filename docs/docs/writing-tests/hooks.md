@@ -57,6 +57,10 @@ public async Task Setup(TestContext context, CancellationToken cancellationToken
 - CancellationToken only: `public async Task Hook(CancellationToken ct) { }`
 - Both: `public async Task Hook(TestContext context, CancellationToken ct) { }`
 
+In setup hooks, pass the injected `CancellationToken` to setup operations, including operations returned directly from a hook. It observes the hook's `[Timeout]` or `TUnitSettings.Default.Timeouts.DefaultHookTimeout` when no explicit timeout is set. `context.Execution.CancellationToken` represents test cancellation and does not include that hook timeout, so using it for setup can leave the operation running after the hook's token is cancelled.
+
+[TUnit0075](../reference/tunit0075.md) warns about directly passing the test context's token to an operation awaited or returned by a `[Before(Test)]` or `[BeforeEvery(Test)]` hook, including conditional branches and overrides of virtual setup hooks. Reading test cancellation state, such as `context.Execution.CancellationToken.IsCancellationRequested`, is still valid.
+
 **Context types by hook level:**
 
 | Hook Level | Context Type |
