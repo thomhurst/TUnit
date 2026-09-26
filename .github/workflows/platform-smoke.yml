@@ -36,11 +36,13 @@ jobs:
             os: macos-26-intel
             workload: ios
             target: ios-simulator-64
+            device: iPhone
             experimental: false
           - platform: tvOS
             os: macos-26-intel
             workload: tvos
             target: tvos-simulator
+            device: Apple TV
             experimental: false
           - platform: MacCatalyst
             os: macos-26-intel
@@ -95,12 +97,20 @@ jobs:
           script: |
             adb install tests/TUnit.PlatformSmoke/bin/mobile/Android/bin/TUnitSmoke.apk
             xharness android run --package-name=net.dot.TUnitSmoke --instrumentation=net.dot.MonoRunner --arg=--minimum-expected-tests=1 --expected-exit-code=0 --timeout=00:02:00 --output-directory=artifacts/platform-smoke/Android
+      - name: Boot the Apple simulator
+        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
+        timeout-minutes: 10
+        run: |
+          device=$(xcrun simctl list devices available --json | jq -r '[.devices[][] | select(.name | startswith("${{ matrix.device }}"))][0].udid')
+          xcrun simctl bootstatus "$device" -b
+          echo "SMOKE_DEVICE=$device" >> "$GITHUB_ENV"
       - name: Execute the TUnit smoke test on Apple simulators
         if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
         run: >-
           xharness apple run
           --app="$(find tests/TUnit.PlatformSmoke/bin/mobile/${{ matrix.platform }} -name TUnitSmoke.app -type d -print -quit)"
-          --target=${{ matrix.target }} --expected-exit-code=0 --timeout=00:10:00
+          --target=${{ matrix.target }} --device="$SMOKE_DEVICE"
+          --expected-exit-code=0 --timeout=00:10:00
           --output-directory=artifacts/platform-smoke/${{ matrix.platform }}
           -- --minimum-expected-tests 1
       - name: Execute the TUnit smoke test on Mac Catalyst
