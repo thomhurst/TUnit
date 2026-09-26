@@ -118,6 +118,15 @@ jobs:
           fi
           dotnet test --project "$GITHUB_WORKSPACE/tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj" --no-build "${device_args[@]}" --minimum-expected-tests 1 \
             2>&1 | tee "$GITHUB_WORKSPACE/artifacts/platform-smoke/${{ matrix.platform }}/test.log"
+      - name: Collect Apple simulator test reports
+        if: always() && (matrix.platform == 'iOS' || matrix.platform == 'tvOS')
+        run: |
+          if container=$(xcrun simctl get_app_container "$Device" net.dot.TUnitSmoke data 2>/dev/null); then
+            if [[ -d "$container/Documents/TestResults" ]]; then
+              mkdir -p "artifacts/platform-smoke/${{ matrix.platform }}"
+              cp -R "$container/Documents/TestResults" "artifacts/platform-smoke/${{ matrix.platform }}/"
+            fi
+          fi
       - uses: bytecodealliance/actions/wasmtime/setup@v1.1.3
         if: matrix.platform == 'WASI'
         with:
