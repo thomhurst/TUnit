@@ -114,7 +114,8 @@ jobs:
       - name: Verify the Apple application completed successfully
         if: runner.os == 'macOS'
         # mlaunch can return zero after a native crash; require the app's own exit code.
-        run: grep -RE 'DOTNET\.APP_EXIT_CODE: 0$' artifacts/platform-smoke/${{ matrix.platform }}
+        run: >-
+          grep -RE 'DOTNET\.APP_EXIT_CODE: 0$' artifacts/platform-smoke/${{ matrix.platform }}
       - uses: bytecodealliance/actions/wasmtime/setup@v1.1.3
         if: matrix.platform == 'WASI'
         with:
