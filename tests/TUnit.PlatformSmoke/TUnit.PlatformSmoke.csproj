@@ -43,6 +43,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(SmokePlatform)' == 'Browser'">
     <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+    <WasmGenerateAppBundle>true</WasmGenerateAppBundle>
     <WasmMainJSPath>wwwroot/main.js</WasmMainJSPath>
     <WasmMainHTMLPath>wwwroot/index.html</WasmMainHTMLPath>
     <DefineConstants>$(DefineConstants);BROWSER</DefineConstants>
