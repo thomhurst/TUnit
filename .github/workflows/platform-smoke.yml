@@ -35,13 +35,11 @@ jobs:
           - platform: iOS
             os: macos-26-intel
             workload: ios
-            target: ios-simulator-64
             device: iPhone
             experimental: false
           - platform: tvOS
             os: macos-26-intel
             workload: tvos
-            target: tvos-simulator
             device: Apple TV
             experimental: false
           - platform: MacCatalyst
@@ -62,7 +60,7 @@ jobs:
           global-json-file: global.json
       - run: dotnet workload install ${{ matrix.workload }}
       - name: Install XHarness
-        if: matrix.platform != 'WASI'
+        if: matrix.platform == 'Browser' || matrix.platform == 'Android'
         run: >-
           dotnet tool install Microsoft.DotNet.XHarness.CLI --global
           --version 10.0.0-prerelease.26471.3
@@ -106,25 +104,26 @@ jobs:
           echo "SMOKE_DEVICE=$device" >> "$GITHUB_ENV"
       - name: Execute the TUnit smoke test on Apple simulators
         if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
-        run: >-
-          xharness apple run
-          --app="$(find tests/TUnit.PlatformSmoke/bin/mobile/${{ matrix.platform }} -name TUnitSmoke.app -type d -print -quit)"
-          --target=${{ matrix.target }} --device="$SMOKE_DEVICE"
-          --expected-exit-code=0 --timeout=00:10:00
-          --output-directory=artifacts/platform-smoke/${{ matrix.platform }}
-          -- --minimum-expected-tests 1
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          mkdir -p artifacts/platform-smoke/${{ matrix.platform }}
+          xcrun simctl install "$SMOKE_DEVICE" "$(find tests/TUnit.PlatformSmoke/bin/mobile/${{ matrix.platform }} -name TUnitSmoke.app -type d -print -quit)"
+          SIMCTL_CHILD_OS_ACTIVITY_DT_MODE=YES SIMCTL_CHILD_NSUnbufferedIO=YES \
+            xcrun simctl launch --console --terminate-running-process "$SMOKE_DEVICE" net.dot.TUnitSmoke \
+            --minimum-expected-tests 1 2>&1 | tee artifacts/platform-smoke/${{ matrix.platform }}/test.log
       - name: Execute the TUnit smoke test on Mac Catalyst
         if: matrix.platform == 'MacCatalyst'
-        run: >-
-          xharness apple run
-          --app="$(find tests/TUnit.PlatformSmoke/bin/mobile/MacCatalyst -name TUnitSmoke.app -type d -print -quit)"
-          --target=maccatalyst --expected-exit-code=0 --timeout=00:02:00
-          --output-directory=artifacts/platform-smoke/MacCatalyst
-          -- --args --minimum-expected-tests 1
-          --results-directory "$HOME/Library/Containers/net.dot.TUnitSmoke/Data/TestResults"
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          mkdir -p artifacts/platform-smoke/MacCatalyst
+          "$(find tests/TUnit.PlatformSmoke/bin/mobile/MacCatalyst -name TUnitSmoke.app -type d -print -quit)/Contents/MacOS/TUnitSmoke" \
+            --minimum-expected-tests 1 --results-directory "$HOME/Library/Containers/net.dot.TUnitSmoke/Data/TestResults" \
+            2>&1 | tee artifacts/platform-smoke/MacCatalyst/test.log
       - name: Verify the Apple application completed successfully
-        if: runner.os == 'macOS'
-        # mlaunch can return zero after a native crash; require the app's own exit code.
+        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
+        # simctl can return zero after a native crash; require the app's own exit code.
         run: >-
           grep -RE 'DOTNET\.APP_EXIT_CODE: 0$' artifacts/platform-smoke/${{ matrix.platform }}
       - uses: bytecodealliance/actions/wasmtime/setup@v1.1.3
