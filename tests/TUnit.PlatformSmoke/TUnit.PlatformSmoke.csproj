@@ -53,9 +53,6 @@
   <ItemGroup>
     <ProjectReference Include="../../src/TUnit/TUnit.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(SmokePlatform)' == 'iOS' or '$(SmokePlatform)' == 'tvOS' or '$(SmokePlatform)' == 'MacCatalyst'">
-    <BundleResource Include="testconfig.json" LogicalName="TUnit.PlatformSmoke.testconfig.json" />
-  </ItemGroup>
   <Import Project="../../eng/TestProject.targets" />
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" Condition="'$(SmokePlatform)' != 'Browser'" />
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="'$(SmokePlatform)' == 'Browser'" />

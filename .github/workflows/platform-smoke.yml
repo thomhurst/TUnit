@@ -105,19 +105,31 @@ jobs:
         timeout-minutes: 10
         run: |
           xcrun simctl bootstatus "$Device" -b
-      - name: Execute the TUnit smoke test on Apple
-        if: runner.os == 'macOS'
+      - name: Execute the TUnit smoke test on Mac Catalyst
+        if: matrix.platform == 'MacCatalyst'
         working-directory: tests/TUnit.PlatformSmoke
         timeout-minutes: 10
         shell: bash
         run: |
           mkdir -p "$GITHUB_WORKSPACE/artifacts/platform-smoke/${{ matrix.platform }}"
-          device_args=()
-          if [[ -n "${Device:-}" ]]; then
-            device_args=(--device "$Device")
-          fi
-          dotnet test --project "$GITHUB_WORKSPACE/tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj" --no-build "${device_args[@]}" --minimum-expected-tests 1 \
+          dotnet test --project "$GITHUB_WORKSPACE/tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj" --no-build --minimum-expected-tests 1 \
             2>&1 | tee "$GITHUB_WORKSPACE/artifacts/platform-smoke/${{ matrix.platform }}/test.log"
+      - name: Execute the TUnit smoke test in the Apple simulator
+        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          mkdir -p "artifacts/platform-smoke/${{ matrix.platform }}"
+          platform=$(echo "$SmokePlatform" | tr '[:upper:]' '[:lower:]')
+          app="tests/TUnit.PlatformSmoke/bin/Debug/net11.0-$platform/${platform}simulator-arm64/TUnit.PlatformSmoke.app"
+          xcrun simctl install "$Device" "$app"
+          container=$(xcrun simctl get_app_container "$Device" net.dot.TUnitSmoke data)
+          xcrun simctl launch --console "$Device" net.dot.TUnitSmoke --connection-mode=none \
+            --app-arg=--minimum-expected-tests --app-arg=1 \
+            --app-arg=--report-trx --app-arg=--report-trx-filename --app-arg=smoke.trx \
+            --app-arg=--results-directory "--app-arg=$container/Documents/TestResults" \
+            2>&1 | tee "artifacts/platform-smoke/${{ matrix.platform }}/test.log"
+          test "$(xmllint --xpath 'boolean(/*[local-name()="TestRun"]/*[local-name()="ResultSummary"]/*[local-name()="Counters"][@total="1" and @passed="1" and @failed="0"])' "$container/Documents/TestResults/smoke.trx")" = true
       - name: Collect Apple simulator test reports
         if: always() && (matrix.platform == 'iOS' || matrix.platform == 'tvOS')
         run: |
