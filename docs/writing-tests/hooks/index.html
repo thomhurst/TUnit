@@ -8,8 +8,8 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.5eaca93b.css">
-<script src="/assets/js/runtime~main.b587db52.js" defer="defer"></script>
-<script src="/assets/js/main.14b0703e.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.f4a9e3a9.js" defer="defer"></script>
+<script src="/assets/js/main.c2003ce9.js" defer="defer"></script>
 </head>
 <body>
 <svg style="display: none;"><defs>
@@ -35,6 +35,8 @@
 <li class="">CancellationToken only: <code>public async Task Hook(CancellationToken ct) { }</code></li>
 <li class="">Both: <code>public async Task Hook(TestContext context, CancellationToken ct) { }</code></li>
 </ul>
+<p>In setup hooks, pass the injected <code>CancellationToken</code> to setup operations, including operations returned directly from a hook. It observes the hook&#x27;s <code>[Timeout]</code> or <code>TUnitSettings.Default.Timeouts.DefaultHookTimeout</code> when no explicit timeout is set. <code>context.Execution.CancellationToken</code> represents test cancellation and does not include that hook timeout, so using it for setup can leave the operation running after the hook&#x27;s token is cancelled.</p>
+<p><a class="" href="/docs/reference/tunit0075">TUnit0075</a> warns about directly passing the test context&#x27;s token to an operation awaited or returned by a <code>[Before(Test)]</code> or <code>[BeforeEvery(Test)]</code> hook, including conditional branches and overrides of virtual setup hooks. Reading test cancellation state, such as <code>context.Execution.CancellationToken.IsCancellationRequested</code>, is still valid.</p>
 <p><strong>Context types by hook level:</strong></p>
 <table><thead><tr><th>Hook Level</th><th>Context Type</th></tr></thead><tbody><tr><td><code>[Before(Test)]</code> / <code>[After(Test)]</code></td><td><code>TestContext</code></td></tr><tr><td><code>[Before(Class)]</code> / <code>[After(Class)]</code></td><td><code>ClassHookContext</code></td></tr><tr><td><code>[Before(Assembly)]</code> / <code>[After(Assembly)]</code></td><td><code>AssemblyHookContext</code></td></tr><tr><td><code>[Before(TestSession)]</code> / <code>[After(TestSession)]</code></td><td><code>TestSessionContext</code></td></tr><tr><td><code>[Before(TestDiscovery)]</code> / <code>[After(TestDiscovery)]</code></td><td><code>BeforeTestDiscoveryContext</code></td></tr></tbody></table>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="checking-test-results-in-cleanup">Checking Test Results in Cleanup<a href="#checking-test-results-in-cleanup" class="hash-link" aria-label="Direct link to Checking Test Results in Cleanup" title="Direct link to Checking Test Results in Cleanup" translate="no">​</a></h3>
