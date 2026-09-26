@@ -115,19 +115,17 @@ jobs:
       - name: Execute the TUnit smoke test on Mac Catalyst
         if: matrix.platform == 'MacCatalyst'
         timeout-minutes: 2
-        shell: bash
-        env:
-          # The sandbox can only write reports inside its own container.
-          TUNIT_DISABLE_GITHUB_REPORTER: 'true'
-          TUNIT_AGGREGATE_REPORTS: 'off'
         run: |
           mkdir -p artifacts/platform-smoke/MacCatalyst
-          "$(find tests/TUnit.PlatformSmoke/bin/mobile/MacCatalyst -name TUnitSmoke.app -type d -print -quit)/Contents/MacOS/TUnitSmoke" \
-            --minimum-expected-tests 1 --results-directory "$HOME/Library/Containers/net.dot.TUnitSmoke/Data/TestResults" \
-            2>&1 | tee artifacts/platform-smoke/MacCatalyst/test.log
+          open -n -W "$(find tests/TUnit.PlatformSmoke/bin/mobile/MacCatalyst -name TUnitSmoke.app -type d -print -quit)" \
+            --stdout "$PWD/artifacts/platform-smoke/MacCatalyst/stdout.log" \
+            --stderr "$PWD/artifacts/platform-smoke/MacCatalyst/test.log" \
+            --env OS_ACTIVITY_DT_MODE=YES --env NSUnbufferedIO=YES \
+            --args --minimum-expected-tests 1 \
+            --results-directory "$HOME/Library/Containers/net.dot.TUnitSmoke/Data/TestResults"
       - name: Verify the Apple application completed successfully
-        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
-        # simctl can return zero after a native crash; require the app's own exit code.
+        if: runner.os == 'macOS'
+        # Native launchers can return zero after a crash; require the app's own exit code.
         run: >-
           grep -RE 'DOTNET\.APP_EXIT_CODE: 0$' artifacts/platform-smoke/${{ matrix.platform }}
       - uses: bytecodealliance/actions/wasmtime/setup@v1.1.3
@@ -137,7 +135,11 @@ jobs:
       - name: Execute the TUnit smoke test on WASI (experimental)
         if: matrix.platform == 'WASI'
         working-directory: tests/TUnit.PlatformSmoke/bin/Debug/net10.0/wasi-wasm/AppBundle
-        run: wasmtime run -S http --dir . dotnet.wasm TUnit.PlatformSmoke
+        shell: bash
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/platform-smoke/WASI"
+          wasmtime run -S http --dir . dotnet.wasm TUnit.PlatformSmoke \
+            2>&1 | tee "$GITHUB_WORKSPACE/artifacts/platform-smoke/WASI/run.log"
       - uses: actions/upload-artifact@v7.0.1
         if: always()
         with:
