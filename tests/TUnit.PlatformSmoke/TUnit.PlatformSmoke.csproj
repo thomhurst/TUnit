@@ -1,4 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="'$(SmokePlatform)' != 'Browser'" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="'$(SmokePlatform)' == 'Browser'" />
   <Import Project="../../eng/TestProject.props" />
 
   <PropertyGroup>
@@ -43,18 +45,15 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(SmokePlatform)' == 'Browser'">
     <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
-    <WasmGenerateAppBundle>true</WasmGenerateAppBundle>
-    <WasmMainJSPath>wwwroot/main.js</WasmMainJSPath>
-    <WasmMainHTMLPath>wwwroot/index.html</WasmMainHTMLPath>
+    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
     <DefineConstants>$(DefineConstants);BROWSER</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <ItemGroup Condition="'$(SmokePlatform)' == 'Browser'">
-    <WasmExtraFilesToDeploy Include="wwwroot/*" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../src/TUnit/TUnit.csproj" />
   </ItemGroup>
   <Import Project="../../eng/TestProject.targets" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" Condition="'$(SmokePlatform)' != 'Browser'" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="'$(SmokePlatform)' == 'Browser'" />
 </Project>

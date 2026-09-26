@@ -73,20 +73,17 @@ jobs:
           dotnet tool install Microsoft.DotNet.XHarness.CLI --global
           --version 10.0.0-prerelease.26471.3
           --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
-      - name: Build the smoke test for WebAssembly
-        if: matrix.platform == 'Browser' || matrix.platform == 'WASI'
-        run: dotnet build tests/TUnit.PlatformSmoke -p:SmokePlatform=${{ matrix.platform }}
-      - name: Package the smoke test for Android
-        if: matrix.platform == 'Android'
-        run: dotnet build tests/TUnit.PlatformSmoke -c Debug
-      - name: Package the smoke test for Apple
-        if: runner.os == 'macOS'
+      - name: Publish the browser smoke test
+        if: matrix.platform == 'Browser'
+        run: dotnet publish tests/TUnit.PlatformSmoke -c Debug
+      - name: Build the smoke test
+        if: matrix.platform != 'Browser'
         run: dotnet build tests/TUnit.PlatformSmoke -c Debug
       - name: Execute the TUnit smoke test in Chrome
         if: matrix.platform == 'Browser'
         run: >-
           xharness wasm test-browser
-          --app=tests/TUnit.PlatformSmoke/bin/Debug/net11.0/browser-wasm/AppBundle
+          --app=tests/TUnit.PlatformSmoke/bin/Debug/net11.0/publish/wwwroot
           --browser=chrome --expected-exit-code=0 --timeout=00:02:00
           --output-directory=artifacts/platform-smoke/browser
       - name: Enable KVM
@@ -110,16 +107,17 @@ jobs:
           xcrun simctl bootstatus "$Device" -b
       - name: Execute the TUnit smoke test on Apple
         if: runner.os == 'macOS'
+        working-directory: tests/TUnit.PlatformSmoke
         timeout-minutes: 10
         shell: bash
         run: |
-          mkdir -p artifacts/platform-smoke/${{ matrix.platform }}
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/platform-smoke/${{ matrix.platform }}"
           device_args=()
           if [[ -n "${Device:-}" ]]; then
             device_args=(--device "$Device")
           fi
           dotnet test --project "$GITHUB_WORKSPACE/tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj" --no-build "${device_args[@]}" --minimum-expected-tests 1 \
-            2>&1 | tee artifacts/platform-smoke/${{ matrix.platform }}/test.log
+            2>&1 | tee "$GITHUB_WORKSPACE/artifacts/platform-smoke/${{ matrix.platform }}/test.log"
       - uses: bytecodealliance/actions/wasmtime/setup@v1.1.3
         if: matrix.platform == 'WASI'
         with:
