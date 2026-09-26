@@ -1,3 +1,4 @@
+using System.Runtime.Versioning;
 using TUnit.Core.Settings;
 
 namespace TUnit.Core;
@@ -20,6 +21,7 @@ public class EngineCancellationToken : IDisposable
     private int _initialised;
     private volatile bool _forcefulExitStarted;
     private CancellationTokenRegistration _platformRegistration;
+    private bool _cancelKeyPressSubscribed;
 
     public EngineCancellationToken()
     {
@@ -60,12 +62,38 @@ public class EngineCancellationToken : IDisposable
         if (!OperatingSystem.IsBrowser())
         {
 #endif
-            Console.CancelKeyPress += OnCancelKeyPress;
+            _cancelKeyPressSubscribed = TrySubscribeCancelKeyPress();
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 #if NET5_0_OR_GREATER
         }
 #endif
     }
+
+    /// <summary>
+    /// Subscribes to <see cref="Console.CancelKeyPress"/>. Platforms without console signals
+    /// (such as Android, iOS and tvOS) throw <see cref="PlatformNotSupportedException"/>; there the
+    /// run is cancelled only through the platform token.
+    /// </summary>
+    [UnsupportedOSPlatform("browser")]
+    private bool TrySubscribeCancelKeyPress()
+    {
+        try
+        {
+            SubscribeCancelKeyPress();
+            return true;
+        }
+        catch (PlatformNotSupportedException)
+        {
+            return false;
+        }
+    }
+
+    // Virtual so tests can simulate a platform without console signals.
+    [UnsupportedOSPlatform("browser")]
+    internal virtual void SubscribeCancelKeyPress() => Console.CancelKeyPress += OnCancelKeyPress;
+
+    [UnsupportedOSPlatform("browser")]
+    internal virtual void UnsubscribeCancelKeyPress() => Console.CancelKeyPress -= OnCancelKeyPress;
 
     private void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
     {
@@ -137,7 +165,12 @@ public class EngineCancellationToken : IDisposable
         if (!OperatingSystem.IsBrowser())
         {
 #endif
-            Console.CancelKeyPress -= OnCancelKeyPress;
+            if (_cancelKeyPressSubscribed)
+            {
+                _cancelKeyPressSubscribed = false;
+                UnsubscribeCancelKeyPress();
+            }
+
             AppDomain.CurrentDomain.ProcessExit -= OnProcessExit;
 #if NET5_0_OR_GREATER
         }
