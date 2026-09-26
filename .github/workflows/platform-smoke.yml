@@ -121,6 +121,7 @@ jobs:
             --stdout "$PWD/artifacts/platform-smoke/MacCatalyst/stdout.log" \
             --stderr "$PWD/artifacts/platform-smoke/MacCatalyst/test.log" \
             --env OS_ACTIVITY_DT_MODE=YES --env NSUnbufferedIO=YES \
+            --env TUNIT_DISABLE_GITHUB_REPORTER=true --env TUNIT_AGGREGATE_REPORTS=off \
             --args --minimum-expected-tests 1 \
             --results-directory "$HOME/Library/Containers/net.dot.TUnitSmoke/Data/TestResults"
       - name: Verify the Apple application completed successfully
