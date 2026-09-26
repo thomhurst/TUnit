@@ -17,9 +17,6 @@ jobs:
     name: ${{ matrix.platform }} smoke test
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
-    # WASI currently fails at the generated async Main on its threadless runtime.
-    # Keep executing it on PRs so progress is visible without blocking supported platforms.
-    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
@@ -27,37 +24,37 @@ jobs:
           - platform: Browser
             os: ubuntu-latest
             workload: wasm-tools
-            experimental: false
           - platform: Android
             os: ubuntu-latest
             workload: android
-            experimental: false
           - platform: iOS
             os: macos-26-intel
             workload: ios
             device: iPhone
-            experimental: false
           - platform: tvOS
             os: macos-26-intel
             workload: tvos
             device: Apple TV
-            experimental: false
           - platform: MacCatalyst
             os: macos-26-intel
             workload: maccatalyst
-            experimental: false
           - platform: WASI
             os: ubuntu-latest
             workload: wasi-experimental
-            experimental: true
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       TESTINGPLATFORM_TELEMETRY_OPTOUT: 1
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-dotnet@v6.0.0
+        if: matrix.platform != 'WASI'
         with:
           global-json-file: global.json
+      - uses: actions/setup-dotnet@v6.0.0
+        if: matrix.platform == 'WASI'
+        with:
+          # .NET 11 drives the WASI event loop for the normal generated async Main.
+          dotnet-version: 11.0.100-rc.1.26425.128
       - run: dotnet workload install ${{ matrix.workload }}
       - name: Install XHarness
         if: matrix.platform == 'Browser' || matrix.platform == 'Android'
@@ -133,9 +130,9 @@ jobs:
         if: matrix.platform == 'WASI'
         with:
           version: v49.0.1
-      - name: Execute the TUnit smoke test on WASI (experimental)
+      - name: Execute the TUnit smoke test on WASI
         if: matrix.platform == 'WASI'
-        working-directory: tests/TUnit.PlatformSmoke/bin/Debug/net10.0/wasi-wasm/AppBundle
+        working-directory: tests/TUnit.PlatformSmoke/bin/Debug/net11.0/wasi-wasm
         shell: bash
         run: |
           mkdir -p "$GITHUB_WORKSPACE/artifacts/platform-smoke/WASI"

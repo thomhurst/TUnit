@@ -4,8 +4,10 @@
   <PropertyGroup>
     <TargetFrameworks />
     <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework Condition="'$(SmokePlatform)' == 'WASI'">net11.0</TargetFramework>
     <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
     <SmokeRuntimeVersion>10.0.12</SmokeRuntimeVersion>
+    <SmokeRuntimeVersion Condition="'$(SmokePlatform)' == 'WASI'">11.0.0-rc.1.26425.128</SmokeRuntimeVersion>
     <RuntimeFrameworkVersion Condition="'$(SmokePlatform)' != ''">$(SmokeRuntimeVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
   <ItemGroup Condition="'$(SmokePlatform)' == 'Browser'">
@@ -13,6 +15,7 @@
   </ItemGroup>
   <PropertyGroup Condition="'$(SmokePlatform)' == 'WASI'">
     <RuntimeIdentifier>wasi-wasm</RuntimeIdentifier>
+    <UseMonoRuntime>true</UseMonoRuntime>
     <SelfContained>true</SelfContained>
     <PublishTrimmed>false</PublishTrimmed>
     <DefineConstants>$(DefineConstants);WASI</DefineConstants>
