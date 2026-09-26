@@ -60,7 +60,7 @@ jobs:
           global-json-file: global.json
       - run: dotnet workload install ${{ matrix.workload }}
       - name: Install XHarness
-        if: matrix.platform != 'MacCatalyst' && matrix.platform != 'WASI'
+        if: matrix.platform != 'WASI'
         run: >-
           dotnet tool install Microsoft.DotNet.XHarness.CLI --global
           --version 10.0.0-prerelease.26471.3
@@ -106,8 +106,11 @@ jobs:
       - name: Execute the TUnit smoke test on Mac Catalyst
         if: matrix.platform == 'MacCatalyst'
         run: >-
-          "$(find tests/TUnit.PlatformSmoke/bin/mobile/MacCatalyst -name TUnitSmoke.app -type d -print -quit)/Contents/MacOS/TUnitSmoke"
-          --minimum-expected-tests 1
+          xharness apple run
+          --app="$(find tests/TUnit.PlatformSmoke/bin/mobile/MacCatalyst -name TUnitSmoke.app -type d -print -quit)"
+          --target=maccatalyst --expected-exit-code=0 --timeout=00:02:00
+          --output-directory=artifacts/platform-smoke/MacCatalyst
+          -- --args --minimum-expected-tests 1
       - uses: bytecodealliance/actions/wasmtime/setup@v1.1.3
         if: matrix.platform == 'WASI'
         with:
