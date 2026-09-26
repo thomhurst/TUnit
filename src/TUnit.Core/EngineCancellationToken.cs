@@ -74,7 +74,9 @@ public class EngineCancellationToken : IDisposable
     /// (such as Android, iOS and tvOS) throw <see cref="PlatformNotSupportedException"/>; there the
     /// run is cancelled only through the platform token.
     /// </summary>
+#if NET5_0_OR_GREATER
     [UnsupportedOSPlatform("browser")]
+#endif
     private bool TrySubscribeCancelKeyPress()
     {
         try
@@ -89,10 +91,14 @@ public class EngineCancellationToken : IDisposable
     }
 
     // Virtual so tests can simulate a platform without console signals.
+#if NET5_0_OR_GREATER
     [UnsupportedOSPlatform("browser")]
+#endif
     internal virtual void SubscribeCancelKeyPress() => Console.CancelKeyPress += OnCancelKeyPress;
 
+#if NET5_0_OR_GREATER
     [UnsupportedOSPlatform("browser")]
+#endif
     internal virtual void UnsubscribeCancelKeyPress() => Console.CancelKeyPress -= OnCancelKeyPress;
 
     private void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
