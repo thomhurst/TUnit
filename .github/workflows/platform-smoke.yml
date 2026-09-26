@@ -111,6 +111,7 @@ jobs:
           --target=maccatalyst --expected-exit-code=0 --timeout=00:02:00
           --output-directory=artifacts/platform-smoke/MacCatalyst
           -- --args --minimum-expected-tests 1
+          --results-directory "$HOME/Library/Containers/net.dot.TUnitSmoke/Data/TestResults"
       - name: Verify the Apple application completed successfully
         if: runner.os == 'macOS'
         # mlaunch can return zero after a native crash; require the app's own exit code.

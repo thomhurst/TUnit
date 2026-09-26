@@ -82,6 +82,7 @@
                           ProjectName="TUnitSmoke" AppDir="$(_SmokePublishDir)" MainLibraryFileName="$(TargetFileName)"
                           RuntimeIdentifier="$(RuntimeIdentifier)" RuntimeHeaders="$(_SmokeHeaders)"
                           OutputDir="$(_SmokeBundleDir)" Assemblies="@(_SmokeAssemblies)" />
+    <!-- Sandbox packaging includes the native dylibs needed by interpreter builds. -->
     <AppleAppBuilderTask Condition="'$(SmokePlatform)' != 'Android'"
                         ProjectName="TUnitSmoke" AppDir="$(_SmokePublishDir)" MainLibraryFileName="$(TargetFileName)"
                         TargetOS="$(_SmokeTargetOS)" Arch="x64" MonoRuntimeHeaders="$(_SmokeHeaders)"
