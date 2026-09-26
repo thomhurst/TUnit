@@ -116,6 +116,10 @@ jobs:
         if: matrix.platform == 'MacCatalyst'
         timeout-minutes: 2
         shell: bash
+        env:
+          # The sandbox can only write reports inside its own container.
+          TUNIT_DISABLE_GITHUB_REPORTER: 'true'
+          TUNIT_AGGREGATE_REPORTS: 'off'
         run: |
           mkdir -p artifacts/platform-smoke/MacCatalyst
           "$(find tests/TUnit.PlatformSmoke/bin/mobile/MacCatalyst -name TUnitSmoke.app -type d -print -quit)/Contents/MacOS/TUnitSmoke" \
