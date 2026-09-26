@@ -3,12 +3,15 @@
 
   <PropertyGroup>
     <TargetFrameworks />
-    <TargetFramework>net10.0</TargetFramework>
-    <TargetFramework Condition="'$(SmokePlatform)' == 'WASI'">net11.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
+    <TargetFramework Condition="'$(SmokePlatform)' == 'Browser' or '$(SmokePlatform)' == 'Android'">net10.0</TargetFramework>
+    <TargetFramework Condition="'$(SmokePlatform)' == 'iOS'">net11.0-ios</TargetFramework>
+    <TargetFramework Condition="'$(SmokePlatform)' == 'tvOS'">net11.0-tvos</TargetFramework>
+    <TargetFramework Condition="'$(SmokePlatform)' == 'MacCatalyst'">net11.0-maccatalyst</TargetFramework>
     <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
     <SmokeRuntimeVersion>10.0.12</SmokeRuntimeVersion>
     <SmokeRuntimeVersion Condition="'$(SmokePlatform)' == 'WASI'">11.0.0-rc.1.26425.128</SmokeRuntimeVersion>
-    <RuntimeFrameworkVersion Condition="'$(SmokePlatform)' != ''">$(SmokeRuntimeVersion)</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion Condition="'$(SmokePlatform)' == 'Browser' or '$(SmokePlatform)' == 'WASI' or '$(SmokePlatform)' == 'Android'">$(SmokeRuntimeVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
   <ItemGroup Condition="'$(SmokePlatform)' == 'Browser'">
     <WasmExtraFilesToDeploy Include="wwwroot/*" />
@@ -21,13 +24,23 @@
     <DefineConstants>$(DefineConstants);WASI</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
-    <_SmokeMobile Condition="'$(SmokePlatform)' == 'Android' or '$(SmokePlatform)' == 'iOS' or '$(SmokePlatform)' == 'tvOS' or '$(SmokePlatform)' == 'MacCatalyst'">true</_SmokeMobile>
+    <_SmokeMobile Condition="'$(SmokePlatform)' == 'Android'">true</_SmokeMobile>
+    <_SmokeApple Condition="'$(SmokePlatform)' == 'iOS' or '$(SmokePlatform)' == 'tvOS' or '$(SmokePlatform)' == 'MacCatalyst'">true</_SmokeApple>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(_SmokeApple)' == 'true'">
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'iOS'">iossimulator-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'tvOS'">tvossimulator-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'MacCatalyst'">maccatalyst-arm64</RuntimeIdentifier>
+    <ApplicationId>net.dot.TUnitSmoke</ApplicationId>
+    <ApplicationTitle>TUnit smoke test</ApplicationTitle>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <GenerateTestingPlatformEntryPoint>true</GenerateTestingPlatformEntryPoint>
+    <RunWithOpen>false</RunWithOpen>
+    <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
   <PropertyGroup Condition="'$(_SmokeMobile)' == 'true'">
     <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'Android'">android-x64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'iOS'">iossimulator-x64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'tvOS'">tvossimulator-x64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'MacCatalyst'">maccatalyst-x64</RuntimeIdentifier>
     <DefineConstants>$(DefineConstants);$(SmokePlatform.ToUpperInvariant())</DefineConstants>
     <UseMonoRuntime>true</UseMonoRuntime>
     <SelfContained>true</SelfContained>
@@ -57,11 +70,8 @@
                       GeneratePathProperty="true" PrivateAssets="all" ExcludeAssets="all" />
     <PackageReference Include="Microsoft.NET.Runtime.Android.Sample.Mono" VersionOverride="$(SmokeRuntimeVersion)"
                       GeneratePathProperty="true" PrivateAssets="all" ExcludeAssets="all" Condition="'$(SmokePlatform)' == 'Android'" />
-    <PackageReference Include="Microsoft.NET.Runtime.iOS.Sample.Mono" VersionOverride="$(SmokeRuntimeVersion)"
-                      GeneratePathProperty="true" PrivateAssets="all" ExcludeAssets="all" Condition="'$(SmokePlatform)' != 'Android'" />
   </ItemGroup>
   <UsingTask TaskName="AndroidAppBuilderTask" AssemblyFile="$(_SmokeBuilderDir)/AndroidAppBuilder.dll" Condition="'$(SmokePlatform)' == 'Android'" />
-  <UsingTask TaskName="AppleAppBuilderTask" AssemblyFile="$(_SmokeBuilderDir)/AppleAppBuilder.dll" Condition="'$(_SmokeMobile)' == 'true' and '$(SmokePlatform)' != 'Android'" />
   <Target Name="PackageMobileSmokeTest" AfterTargets="Publish" Condition="'$(_SmokeMobile)' == 'true'">
     <PropertyGroup>
       <_SmokePublishDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))</_SmokePublishDir>
@@ -71,26 +81,16 @@
       <_SmokeAssemblies Include="$(_SmokePublishDir)*.dll" />
       <_SmokeBuilderFiles Include="$(PkgMicrosoft_NET_Runtime_LibraryBuilder_Sdk)/tasks/net10.0/MobileBuildTasks.dll" />
       <_SmokeBuilderFiles Include="$(PkgMicrosoft_NET_Runtime_Android_Sample_Mono)/tools/net10.0/AndroidAppBuilder.dll" Condition="'$(SmokePlatform)' == 'Android'" />
-      <_SmokeBuilderFiles Include="$(PkgMicrosoft_NET_Runtime_iOS_Sample_Mono)/tools/net10.0/AppleAppBuilder.dll" Condition="'$(SmokePlatform)' != 'Android'" />
     </ItemGroup>
     <Copy SourceFiles="@(_SmokeBuilderFiles)" DestinationFolder="$(_SmokeBuilderDir)" SkipUnchangedFiles="true" />
     <PropertyGroup>
       <_SmokeHeaders>@(_SmokeRuntimePack->'%(PackageDirectory)')/runtimes/$(RuntimeIdentifier)/native/include/mono-2.0</_SmokeHeaders>
       <_SmokeBundleDir>$(MSBuildProjectDirectory)/bin/mobile/$(SmokePlatform)</_SmokeBundleDir>
-      <_SmokeTargetOS>$(SmokePlatform.ToLowerInvariant())simulator</_SmokeTargetOS>
-      <_SmokeTargetOS Condition="'$(SmokePlatform)' == 'MacCatalyst'">maccatalyst</_SmokeTargetOS>
     </PropertyGroup>
     <Delete Files="$(_SmokeBundleDir)/assets/assets.zip" Condition="'$(SmokePlatform)' == 'Android'" />
     <AndroidAppBuilderTask Condition="'$(SmokePlatform)' == 'Android'"
                           ProjectName="TUnitSmoke" AppDir="$(_SmokePublishDir)" MainLibraryFileName="$(TargetFileName)"
                           RuntimeIdentifier="$(RuntimeIdentifier)" RuntimeHeaders="$(_SmokeHeaders)"
                           OutputDir="$(_SmokeBundleDir)" Assemblies="@(_SmokeAssemblies)" />
-    <!-- Sandbox packaging includes the native dylibs needed by interpreter builds. -->
-    <AppleAppBuilderTask Condition="'$(SmokePlatform)' != 'Android'"
-                        ProjectName="TUnitSmoke" AppDir="$(_SmokePublishDir)" MainLibraryFileName="$(TargetFileName)"
-                        TargetOS="$(_SmokeTargetOS)" Arch="x64" MonoRuntimeHeaders="$(_SmokeHeaders)"
-                        OutputDirectory="$(_SmokeBundleDir)" Assemblies="@(_SmokeAssemblies)"
-                        ForceInterpreter="true" EnableAppSandbox="true"
-                        GenerateXcodeProject="true" BuildAppBundle="true" DevTeamProvisioning="adhoc" />
   </Target>
 </Project>

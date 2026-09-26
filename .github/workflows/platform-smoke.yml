@@ -28,15 +28,17 @@ jobs:
             os: ubuntu-latest
             workload: android
           - platform: iOS
-            os: macos-26-intel
+            os: macos-26
             workload: ios
-            device: iPhone
+            device: iPhone 17
+            simulator: iOS-26-5
           - platform: tvOS
-            os: macos-26-intel
+            os: macos-26
             workload: tvos
             device: Apple TV
+            simulator: tvOS-26-5
           - platform: MacCatalyst
-            os: macos-26-intel
+            os: macos-26
             workload: maccatalyst
           - platform: WASI
             os: ubuntu-latest
@@ -44,17 +46,31 @@ jobs:
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       TESTINGPLATFORM_TELEMETRY_OPTOUT: 1
+      SmokePlatform: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-dotnet@v6.0.0
-        if: matrix.platform != 'WASI'
+        if: matrix.platform == 'Browser' || matrix.platform == 'Android'
         with:
           global-json-file: global.json
       - uses: actions/setup-dotnet@v6.0.0
-        if: matrix.platform == 'WASI'
+        if: matrix.platform != 'Browser' && matrix.platform != 'Android'
         with:
-          # .NET 11 drives the WASI event loop for the normal generated async Main.
           dotnet-version: 11.0.100-rc.1.26425.128
+      - uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: platform-smoke-${{ runner.os }}-${{ runner.arch }}-${{ matrix.platform }}-${{ hashFiles('global.json', 'Directory.Packages.props', 'tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj') }}
+          restore-keys: platform-smoke-${{ runner.os }}-${{ runner.arch }}-${{ matrix.platform }}-
+      - name: Select the installed Xcode
+        if: runner.os == 'macOS'
+        run: sudo xcode-select --switch /Applications/Xcode_26.6.app
+      - name: Start the installed Apple simulator
+        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
+        run: |
+          device=$(xcrun simctl list devices available --json | jq -er '.devices["com.apple.CoreSimulator.SimRuntime.${{ matrix.simulator }}"] | map(select(.name == "${{ matrix.device }}")) | first | .udid // error("Required preinstalled simulator is missing")')
+          xcrun simctl boot "$device"
+          echo "Device=$device" >> "$GITHUB_ENV"
       - run: dotnet workload install ${{ matrix.workload }}
       - name: Install XHarness
         if: matrix.platform == 'Browser' || matrix.platform == 'Android'
@@ -70,7 +86,7 @@ jobs:
         run: dotnet publish tests/TUnit.PlatformSmoke -c Debug -p:SmokePlatform=Android
       - name: Package the smoke test for Apple
         if: runner.os == 'macOS'
-        run: dotnet publish tests/TUnit.PlatformSmoke -c Debug -p:SmokePlatform=${{ matrix.platform }}
+        run: dotnet build tests/TUnit.PlatformSmoke -c Debug
       - name: Execute the TUnit smoke test in Chrome
         if: matrix.platform == 'Browser'
         run: >-
@@ -92,40 +108,19 @@ jobs:
           script: |
             adb install tests/TUnit.PlatformSmoke/bin/mobile/Android/bin/TUnitSmoke.apk
             xharness android run --package-name=net.dot.TUnitSmoke --instrumentation=net.dot.MonoRunner --arg=--minimum-expected-tests=1 --expected-exit-code=0 --timeout=00:02:00 --output-directory=artifacts/platform-smoke/Android
-      - name: Boot the Apple simulator
+      - name: Wait for the Apple simulator
         if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
         timeout-minutes: 10
         run: |
-          device=$(xcrun simctl list devices available --json | jq -r '[.devices[][] | select(.name | startswith("${{ matrix.device }}"))][0].udid')
-          xcrun simctl bootstatus "$device" -b
-          echo "SMOKE_DEVICE=$device" >> "$GITHUB_ENV"
-      - name: Execute the TUnit smoke test on Apple simulators
-        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
+          xcrun simctl bootstatus "$Device" -b
+      - name: Execute the TUnit smoke test on Apple
+        if: runner.os == 'macOS'
         timeout-minutes: 10
         shell: bash
         run: |
           mkdir -p artifacts/platform-smoke/${{ matrix.platform }}
-          xcrun simctl install "$SMOKE_DEVICE" "$(find tests/TUnit.PlatformSmoke/bin/mobile/${{ matrix.platform }} -name TUnitSmoke.app -type d -print -quit)"
-          SIMCTL_CHILD_OS_ACTIVITY_DT_MODE=YES SIMCTL_CHILD_NSUnbufferedIO=YES \
-            xcrun simctl launch --console --terminate-running-process "$SMOKE_DEVICE" net.dot.TUnitSmoke \
-            --minimum-expected-tests 1 2>&1 | tee artifacts/platform-smoke/${{ matrix.platform }}/test.log
-      - name: Execute the TUnit smoke test on Mac Catalyst
-        if: matrix.platform == 'MacCatalyst'
-        timeout-minutes: 2
-        run: |
-          mkdir -p artifacts/platform-smoke/MacCatalyst
-          open -n -W "$(find tests/TUnit.PlatformSmoke/bin/mobile/MacCatalyst -name TUnitSmoke.app -type d -print -quit)" \
-            --stdout "$PWD/artifacts/platform-smoke/MacCatalyst/stdout.log" \
-            --stderr "$PWD/artifacts/platform-smoke/MacCatalyst/test.log" \
-            --env OS_ACTIVITY_DT_MODE=YES --env NSUnbufferedIO=YES \
-            --env TUNIT_DISABLE_GITHUB_REPORTER=true --env TUNIT_AGGREGATE_REPORTS=off \
-            --args --minimum-expected-tests 1 \
-            --results-directory "$HOME/Library/Containers/net.dot.TUnitSmoke/Data/TestResults"
-      - name: Verify the Apple application completed successfully
-        if: runner.os == 'macOS'
-        # Native launchers can return zero after a crash; require the app's own exit code.
-        run: >-
-          grep -RE 'DOTNET\.APP_EXIT_CODE: 0$' artifacts/platform-smoke/${{ matrix.platform }}
+          dotnet test --project tests/TUnit.PlatformSmoke --no-build --minimum-expected-tests 1 \
+            2>&1 | tee artifacts/platform-smoke/${{ matrix.platform }}/test.log
       - uses: bytecodealliance/actions/wasmtime/setup@v1.1.3
         if: matrix.platform == 'WASI'
         with:
