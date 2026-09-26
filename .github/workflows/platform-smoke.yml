@@ -50,11 +50,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-dotnet@v6.0.0
-        if: matrix.platform == 'Browser' || matrix.platform == 'Android'
-        with:
-          global-json-file: global.json
-      - uses: actions/setup-dotnet@v6.0.0
-        if: matrix.platform != 'Browser' && matrix.platform != 'Android'
         with:
           dotnet-version: 11.0.100-rc.1.26425.128
       - uses: actions/cache@v6
@@ -73,7 +68,7 @@ jobs:
           echo "Device=$device" >> "$GITHUB_ENV"
       - run: dotnet workload install ${{ matrix.workload }}
       - name: Install XHarness
-        if: matrix.platform == 'Browser' || matrix.platform == 'Android'
+        if: matrix.platform == 'Browser'
         run: >-
           dotnet tool install Microsoft.DotNet.XHarness.CLI --global
           --version 10.0.0-prerelease.26471.3
@@ -83,7 +78,7 @@ jobs:
         run: dotnet build tests/TUnit.PlatformSmoke -p:SmokePlatform=${{ matrix.platform }}
       - name: Package the smoke test for Android
         if: matrix.platform == 'Android'
-        run: dotnet publish tests/TUnit.PlatformSmoke -c Debug -p:SmokePlatform=Android
+        run: dotnet build tests/TUnit.PlatformSmoke -c Debug
       - name: Package the smoke test for Apple
         if: runner.os == 'macOS'
         run: dotnet build tests/TUnit.PlatformSmoke -c Debug
@@ -91,7 +86,7 @@ jobs:
         if: matrix.platform == 'Browser'
         run: >-
           xharness wasm test-browser
-          --app=tests/TUnit.PlatformSmoke/bin/Debug/net10.0/browser-wasm/AppBundle
+          --app=tests/TUnit.PlatformSmoke/bin/Debug/net11.0/browser-wasm/AppBundle
           --browser=chrome --expected-exit-code=0 --timeout=00:02:00
           --output-directory=artifacts/platform-smoke/browser
       - name: Enable KVM
@@ -106,8 +101,8 @@ jobs:
           target: google_apis
           disable-animations: true
           script: |
-            adb install tests/TUnit.PlatformSmoke/bin/mobile/Android/bin/TUnitSmoke.apk
-            xharness android run --package-name=net.dot.TUnitSmoke --instrumentation=net.dot.MonoRunner --arg=--minimum-expected-tests=1 --expected-exit-code=0 --timeout=00:02:00 --output-directory=artifacts/platform-smoke/Android
+            mkdir -p artifacts/platform-smoke/Android
+            bash -o pipefail -c 'dotnet test --project tests/TUnit.PlatformSmoke --no-build 2>&1 | tee artifacts/platform-smoke/Android/test.log'
       - name: Wait for the Apple simulator
         if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
         timeout-minutes: 10

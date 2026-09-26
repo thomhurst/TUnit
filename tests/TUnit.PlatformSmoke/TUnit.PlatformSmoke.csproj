@@ -4,93 +4,56 @@
   <PropertyGroup>
     <TargetFrameworks />
     <TargetFramework>net11.0</TargetFramework>
-    <TargetFramework Condition="'$(SmokePlatform)' == 'Browser' or '$(SmokePlatform)' == 'Android'">net10.0</TargetFramework>
+    <TargetFramework Condition="'$(SmokePlatform)' == 'Android'">net11.0-android</TargetFramework>
     <TargetFramework Condition="'$(SmokePlatform)' == 'iOS'">net11.0-ios</TargetFramework>
     <TargetFramework Condition="'$(SmokePlatform)' == 'tvOS'">net11.0-tvos</TargetFramework>
     <TargetFramework Condition="'$(SmokePlatform)' == 'MacCatalyst'">net11.0-maccatalyst</TargetFramework>
     <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
-    <SmokeRuntimeVersion>10.0.12</SmokeRuntimeVersion>
-    <SmokeRuntimeVersion Condition="'$(SmokePlatform)' == 'WASI'">11.0.0-rc.1.26425.128</SmokeRuntimeVersion>
-    <RuntimeFrameworkVersion Condition="'$(SmokePlatform)' == 'Browser' or '$(SmokePlatform)' == 'WASI' or '$(SmokePlatform)' == 'Android'">$(SmokeRuntimeVersion)</RuntimeFrameworkVersion>
+    <GenerateTestingPlatformEntryPoint>true</GenerateTestingPlatformEntryPoint>
   </PropertyGroup>
-  <ItemGroup Condition="'$(SmokePlatform)' == 'Browser'">
-    <WasmExtraFilesToDeploy Include="wwwroot/*" />
-  </ItemGroup>
-  <PropertyGroup Condition="'$(SmokePlatform)' == 'WASI'">
-    <RuntimeIdentifier>wasi-wasm</RuntimeIdentifier>
-    <UseMonoRuntime>true</UseMonoRuntime>
-    <SelfContained>true</SelfContained>
-    <PublishTrimmed>false</PublishTrimmed>
-    <DefineConstants>$(DefineConstants);WASI</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup>
-    <_SmokeMobile Condition="'$(SmokePlatform)' == 'Android'">true</_SmokeMobile>
-    <_SmokeApple Condition="'$(SmokePlatform)' == 'iOS' or '$(SmokePlatform)' == 'tvOS' or '$(SmokePlatform)' == 'MacCatalyst'">true</_SmokeApple>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(_SmokeApple)' == 'true'">
-    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'iOS'">iossimulator-arm64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'tvOS'">tvossimulator-arm64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'MacCatalyst'">maccatalyst-arm64</RuntimeIdentifier>
+
+  <PropertyGroup Condition="'$(SmokePlatform)' == 'Android' or '$(SmokePlatform)' == 'iOS' or '$(SmokePlatform)' == 'tvOS' or '$(SmokePlatform)' == 'MacCatalyst'">
     <ApplicationId>net.dot.TUnitSmoke</ApplicationId>
     <ApplicationTitle>TUnit smoke test</ApplicationTitle>
     <ApplicationVersion>1</ApplicationVersion>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-    <GenerateTestingPlatformEntryPoint>true</GenerateTestingPlatformEntryPoint>
-    <RunWithOpen>false</RunWithOpen>
-    <PublishTrimmed>false</PublishTrimmed>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(_SmokeMobile)' == 'true'">
     <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'Android'">android-x64</RuntimeIdentifier>
-    <DefineConstants>$(DefineConstants);$(SmokePlatform.ToUpperInvariant())</DefineConstants>
-    <UseMonoRuntime>true</UseMonoRuntime>
-    <SelfContained>true</SelfContained>
-    <UseAppHost>false</UseAppHost>
-    <PublishTrimmed>false</PublishTrimmed>
-    <_SmokeBuilderDir>$(MSBuildProjectDirectory)/obj/mobile/$(SmokePlatform)</_SmokeBuilderDir>
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'iOS'">iossimulator-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'tvOS'">tvossimulator-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'MacCatalyst'">maccatalyst-arm64</RuntimeIdentifier>
+    <RunWithOpen>false</RunWithOpen>
+    <MtouchLink Condition="'$(SmokePlatform)' != 'Android'">None</MtouchLink>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(SmokePlatform)' == 'Browser'">
-    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+  <PropertyGroup Condition="'$(SmokePlatform)' == 'Android'">
+    <AndroidUseInstrumentation>true</AndroidUseInstrumentation>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(SmokePlatform)' == 'Browser' or '$(SmokePlatform)' == 'WASI'">
+    <RuntimeFrameworkVersion>11.0.0-rc.1.26425.128</RuntimeFrameworkVersion>
+    <UseMonoRuntime>true</UseMonoRuntime>
     <SelfContained>true</SelfContained>
     <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(SmokePlatform)' == 'WASI'">
+    <RuntimeIdentifier>wasi-wasm</RuntimeIdentifier>
+    <DefineConstants>$(DefineConstants);WASI</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(SmokePlatform)' == 'Browser'">
+    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
     <WasmMainJSPath>wwwroot/main.js</WasmMainJSPath>
     <WasmMainHTMLPath>wwwroot/index.html</WasmMainHTMLPath>
     <DefineConstants>$(DefineConstants);BROWSER</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <ItemGroup Condition="'$(SmokePlatform)' == 'Browser'">
+    <WasmExtraFilesToDeploy Include="wwwroot/*" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="../../src/TUnit/TUnit.csproj" />
   </ItemGroup>
-
   <Import Project="../../eng/TestProject.targets" />
-
-  <!-- The stock .NET native launchers execute this project's normal generated entry point. -->
-  <ItemGroup Condition="'$(_SmokeMobile)' == 'true'">
-    <PackageReference Include="Microsoft.NET.Runtime.LibraryBuilder.Sdk" VersionOverride="$(SmokeRuntimeVersion)"
-                      GeneratePathProperty="true" PrivateAssets="all" ExcludeAssets="all" />
-    <PackageReference Include="Microsoft.NET.Runtime.Android.Sample.Mono" VersionOverride="$(SmokeRuntimeVersion)"
-                      GeneratePathProperty="true" PrivateAssets="all" ExcludeAssets="all" Condition="'$(SmokePlatform)' == 'Android'" />
-  </ItemGroup>
-  <UsingTask TaskName="AndroidAppBuilderTask" AssemblyFile="$(_SmokeBuilderDir)/AndroidAppBuilder.dll" Condition="'$(SmokePlatform)' == 'Android'" />
-  <Target Name="PackageMobileSmokeTest" AfterTargets="Publish" Condition="'$(_SmokeMobile)' == 'true'">
-    <PropertyGroup>
-      <_SmokePublishDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))</_SmokePublishDir>
-    </PropertyGroup>
-    <ItemGroup>
-      <_SmokeRuntimePack Include="@(ResolvedRuntimePack)" Condition="'%(ResolvedRuntimePack.FrameworkName)' == 'Microsoft.NETCore.App'" />
-      <_SmokeAssemblies Include="$(_SmokePublishDir)*.dll" />
-      <_SmokeBuilderFiles Include="$(PkgMicrosoft_NET_Runtime_LibraryBuilder_Sdk)/tasks/net10.0/MobileBuildTasks.dll" />
-      <_SmokeBuilderFiles Include="$(PkgMicrosoft_NET_Runtime_Android_Sample_Mono)/tools/net10.0/AndroidAppBuilder.dll" Condition="'$(SmokePlatform)' == 'Android'" />
-    </ItemGroup>
-    <Copy SourceFiles="@(_SmokeBuilderFiles)" DestinationFolder="$(_SmokeBuilderDir)" SkipUnchangedFiles="true" />
-    <PropertyGroup>
-      <_SmokeHeaders>@(_SmokeRuntimePack->'%(PackageDirectory)')/runtimes/$(RuntimeIdentifier)/native/include/mono-2.0</_SmokeHeaders>
-      <_SmokeBundleDir>$(MSBuildProjectDirectory)/bin/mobile/$(SmokePlatform)</_SmokeBundleDir>
-    </PropertyGroup>
-    <Delete Files="$(_SmokeBundleDir)/assets/assets.zip" Condition="'$(SmokePlatform)' == 'Android'" />
-    <AndroidAppBuilderTask Condition="'$(SmokePlatform)' == 'Android'"
-                          ProjectName="TUnitSmoke" AppDir="$(_SmokePublishDir)" MainLibraryFileName="$(TargetFileName)"
-                          RuntimeIdentifier="$(RuntimeIdentifier)" RuntimeHeaders="$(_SmokeHeaders)"
-                          OutputDir="$(_SmokeBundleDir)" Assemblies="@(_SmokeAssemblies)" />
-  </Target>
 </Project>
