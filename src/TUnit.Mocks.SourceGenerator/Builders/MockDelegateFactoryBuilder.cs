@@ -52,6 +52,7 @@ internal static class MockDelegateFactoryBuilder
                     {
                         // void delegate (Action<...>)
                         writer.AppendLine($"engine.HandleCall({invokeMethod.MemberId}, \"Invoke\", {argsArray});");
+                        EmitOutRefReadback(writer, invokeMethod, model);
                     }
                     else if (invokeMethod.IsAsync)
                     {
@@ -59,12 +60,14 @@ internal static class MockDelegateFactoryBuilder
                         // IsVoid is also true for a non-generic Task/ValueTask, so this branch must be
                         // checked before the synchronous-return one or the lambda returns nothing (#6887).
                         // Mirror interface members: the setup surface is keyed on the unwrapped type.
-                        EmitAsyncBody(writer, invokeMethod, argsArray);
+                        EmitAsyncBody(writer, invokeMethod, model, argsArray);
                     }
                     else
                     {
                         // returning delegate (Func<..., TReturn>)
-                        writer.AppendLine($"return engine.HandleCallWithReturn<{invokeMethod.ReturnType}>({invokeMethod.MemberId}, \"Invoke\", {argsArray}, {invokeMethod.SmartDefault});");
+                        writer.AppendLine($"var __result = engine.HandleCallWithReturn<{invokeMethod.ReturnType}>({invokeMethod.MemberId}, \"Invoke\", {argsArray}, {invokeMethod.SmartDefault});");
+                        EmitOutRefReadback(writer, invokeMethod, model);
+                        writer.AppendLine("return __result;");
                     }
 
                     writer.DecreaseIndent();
@@ -79,7 +82,7 @@ internal static class MockDelegateFactoryBuilder
         return writer.ToString();
     }
 
-    private static void EmitAsyncBody(CodeWriter writer, MockMemberModel method, string argsArray)
+    private static void EmitAsyncBody(CodeWriter writer, MockMemberModel method, MockTypeModel model, string argsArray)
     {
         var taskType = method.IsValueTask ? "global::System.Threading.Tasks.ValueTask" : "global::System.Threading.Tasks.Task";
 
@@ -88,6 +91,7 @@ internal static class MockDelegateFactoryBuilder
             using (writer.Block("try"))
             {
                 writer.AppendLine($"engine.HandleCall({method.MemberId}, \"Invoke\", {argsArray});");
+                EmitOutRefReadback(writer, method, model);
                 MockImplBuilder.EmitRawReturnCheck(writer, method);
                 writer.AppendLine(method.IsValueTask
                     ? $"return default({taskType});"
@@ -106,6 +110,7 @@ internal static class MockDelegateFactoryBuilder
         using (writer.Block("try"))
         {
             writer.AppendLine($"var __result = engine.HandleCallWithReturn<{unwrapped}>({method.MemberId}, \"Invoke\", {argsArray}, {method.UnwrappedSmartDefault});");
+            EmitOutRefReadback(writer, method, model);
             MockImplBuilder.EmitRawReturnCheck(writer, method);
             writer.AppendLine(method.IsValueTask
                 ? $"return new {taskType}<{unwrapped}>(__result);"
@@ -118,6 +123,10 @@ internal static class MockDelegateFactoryBuilder
                 : $"return global::System.Threading.Tasks.Task.FromException<{unwrapped}>(__ex);");
         }
     }
+
+    // Copies SetsOut/SetsRef values configured on the matched setup back to the lambda's parameters.
+    private static void EmitOutRefReadback(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+        => MockImplBuilder.EmitOutRefReadback(writer, method, model, GetLambdaParameterName);
 
     // Lambda parameter names need not match the delegate's, so use positional names the generator
     // owns. A declared name such as `engine`, `del` or `__result` would otherwise shadow a captured
@@ -140,11 +149,17 @@ internal static class MockDelegateFactoryBuilder
         }));
     }
 
+    // Out parameters are not matchable, so they are left out of the arguments, as for interface
+    // members; including them misaligned the arguments with the setup's matchers.
     private static string BuildArgsArray(MockMemberModel method)
     {
-        if (method.Parameters.Length == 0)
+        var args = method.Parameters
+            .Select((p, i) => (p, i))
+            .Where(x => x.p.Direction != ParameterDirection.Out)
+            .Select(x => GetLambdaParameterName(x.i))
+            .ToList();
+        if (args.Count == 0)
             return "global::System.Array.Empty<object?>()";
-        var args = string.Join(", ", method.Parameters.Select((_, i) => GetLambdaParameterName(i)));
-        return $"new object?[] {{ {args} }}";
+        return $"new object?[] {{ {string.Join(", ", args)} }}";
     }
 }

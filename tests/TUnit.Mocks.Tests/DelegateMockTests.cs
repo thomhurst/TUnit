@@ -1,6 +1,10 @@
 namespace TUnit.Mocks.Tests;
 
 public delegate int Calculator(int a, int b);
+public delegate bool TryLookup(string key, out int value);
+public delegate void Bump(ref int value);
+public delegate Task<bool> TryLookupAsync(string key, out int value);
+public delegate Task FillAsync(out string text);
 
 public class DelegateMockTests
 {
@@ -238,5 +242,52 @@ public class DelegateMockTests
         var result = await mock.Object(1);
 
         await Assert.That(result).IsEqualTo(7);
+    }
+
+    [Test]
+    public async Task Custom_Delegate_Sets_Out_Parameter()
+    {
+        var mock = Mock.OfDelegate<TryLookup>();
+        mock.Invoke("key").Returns(true).SetsOutValue(42);
+
+        var found = mock.Object("key", out var value);
+
+        await Assert.That(found).IsTrue();
+        await Assert.That(value).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Custom_Delegate_Sets_Ref_Parameter()
+    {
+        var mock = Mock.OfDelegate<Bump>();
+        mock.Invoke(Any()).SetsRefValue(99);
+
+        var value = 1;
+        mock.Object(ref value);
+
+        await Assert.That(value).IsEqualTo(99);
+    }
+
+    [Test]
+    public async Task Async_Custom_Delegate_Sets_Out_Parameter()
+    {
+        var mock = Mock.OfDelegate<TryLookupAsync>();
+        mock.Invoke("key").Returns(true).SetsOutValue(7);
+
+        var found = await mock.Object("key", out var value);
+
+        await Assert.That(found).IsTrue();
+        await Assert.That(value).IsEqualTo(7);
+    }
+
+    [Test]
+    public async Task Async_Void_Custom_Delegate_Sets_Out_Parameter()
+    {
+        var mock = Mock.OfDelegate<FillAsync>();
+        mock.Invoke().SetsOutText("filled");
+
+        await mock.Object(out var text);
+
+        await Assert.That(text).IsEqualTo("filled");
     }
 }
