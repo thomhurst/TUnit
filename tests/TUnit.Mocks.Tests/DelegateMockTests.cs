@@ -188,6 +188,48 @@ public class DelegateMockTests
     }
 
     [Test]
+    public async Task Func_Returning_Task_Of_T_ReturnsAsync_Returns_Pending_Task()
+    {
+        var mock = Mock.OfDelegate<Func<int, Task<int>>>();
+        var tcs = new TaskCompletionSource<int>();
+        mock.Invoke(Any()).ReturnsAsync(tcs.Task);
+
+        var task = mock.Object(1);
+
+        await Assert.That(task.IsCompleted).IsFalse();
+        tcs.SetResult(5);
+        await Assert.That(await task).IsEqualTo(5);
+    }
+
+    [Test]
+    public async Task Func_Returning_ValueTask_Of_T_ReturnsAsync_Returns_Pending_Task()
+    {
+        var mock = Mock.OfDelegate<Func<int, ValueTask<int>>>();
+        var tcs = new TaskCompletionSource<int>();
+        mock.Invoke(Any()).ReturnsAsync(new ValueTask<int>(tcs.Task));
+
+        var task = mock.Object(1);
+
+        await Assert.That(task.IsCompleted).IsFalse();
+        tcs.SetResult(9);
+        await Assert.That(await task).IsEqualTo(9);
+    }
+
+    [Test]
+    public async Task Func_Returning_ValueTask_ReturnsAsync_Returns_Pending_Task()
+    {
+        var mock = Mock.OfDelegate<Func<ValueTask>>();
+        var tcs = new TaskCompletionSource();
+        mock.Invoke().ReturnsAsync(new ValueTask(tcs.Task));
+
+        var task = mock.Object();
+
+        await Assert.That(task.IsCompleted).IsFalse();
+        tcs.SetResult();
+        await task;
+    }
+
+    [Test]
     public async Task Func_Returning_ValueTask_Of_T_Returns_Configured_Value()
     {
         var mock = Mock.OfDelegate<Func<int, ValueTask<int>>>();

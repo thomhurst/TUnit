@@ -195,11 +195,11 @@ namespace System
         private static global::TUnit.Mocks.Mock<global::System.Func<int, global::System.Threading.Tasks.Task>> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
         {
             var engine = new global::TUnit.Mocks.MockEngine<global::System.Func<int, global::System.Threading.Tasks.Task>>(behavior);
-            global::System.Func<int, global::System.Threading.Tasks.Task> del = (int arg) =>
+            global::System.Func<int, global::System.Threading.Tasks.Task> del = (int arg0) =>
             {
                 try
                 {
-                    engine.HandleCall(0, "Invoke", new object?[] { arg });
+                    engine.HandleCall(0, "Invoke", new object?[] { arg0 });
                     if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))
                     {
                         if (__rawAsync is global::System.Threading.Tasks.Task __typedAsync) return __typedAsync;
@@ -394,11 +394,11 @@ namespace System
         private static global::TUnit.Mocks.Mock<global::System.Func<int, global::System.Threading.Tasks.Task<int>>> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
         {
             var engine = new global::TUnit.Mocks.MockEngine<global::System.Func<int, global::System.Threading.Tasks.Task<int>>>(behavior);
-            global::System.Func<int, global::System.Threading.Tasks.Task<int>> del = (int arg) =>
+            global::System.Func<int, global::System.Threading.Tasks.Task<int>> del = (int arg0) =>
             {
                 try
                 {
-                    var __result = engine.HandleCallWithReturn<int>(0, "Invoke", new object?[] { arg }, default);
+                    var __result = engine.HandleCallWithReturn<int>(0, "Invoke", new object?[] { arg0 }, default);
                     if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))
                     {
                         if (__rawAsync is global::System.Threading.Tasks.Task<int> __typedAsync) return __typedAsync;
@@ -651,11 +651,11 @@ namespace System
         private static global::TUnit.Mocks.Mock<global::System.Func<string, global::System.Threading.Tasks.ValueTask<string>>> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
         {
             var engine = new global::TUnit.Mocks.MockEngine<global::System.Func<string, global::System.Threading.Tasks.ValueTask<string>>>(behavior);
-            global::System.Func<string, global::System.Threading.Tasks.ValueTask<string>> del = (string arg) =>
+            global::System.Func<string, global::System.Threading.Tasks.ValueTask<string>> del = (string arg0) =>
             {
                 try
                 {
-                    var __result = engine.HandleCallWithReturn<string>(0, "Invoke", new object?[] { arg }, "");
+                    var __result = engine.HandleCallWithReturn<string>(0, "Invoke", new object?[] { arg0 }, "");
                     if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))
                     {
                         if (__rawAsync is global::System.Threading.Tasks.ValueTask<string> __typedAsync) return __typedAsync;

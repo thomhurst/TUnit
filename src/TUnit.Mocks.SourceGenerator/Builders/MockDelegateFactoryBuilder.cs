@@ -40,9 +40,12 @@ internal static class MockDelegateFactoryBuilder
                     writer.AppendLine($"{model.FullyQualifiedName} del = ({paramList}) =>");
                     writer.AppendLine("{");
                     writer.IncreaseIndent();
-                    foreach (var p in invokeMethod.Parameters.Where(p => p.Direction == ParameterDirection.Out))
+                    for (var i = 0; i < invokeMethod.Parameters.Length; i++)
                     {
-                        writer.AppendLine($"{p.Name} = default!;");
+                        if (invokeMethod.Parameters[i].Direction == ParameterDirection.Out)
+                        {
+                            writer.AppendLine($"{GetLambdaParameterName(i)} = default!;");
+                        }
                     }
 
                     if (invokeMethod.IsVoid && !invokeMethod.IsAsync)
@@ -116,10 +119,15 @@ internal static class MockDelegateFactoryBuilder
         }
     }
 
+    // Lambda parameter names need not match the delegate's, so use positional names the generator
+    // owns. A declared name such as `engine`, `del` or `__result` would otherwise shadow a captured
+    // local or collide with a local declared in the lambda body (CS0136).
+    private static string GetLambdaParameterName(int index) => $"arg{index}";
+
     private static string BuildLambdaParameterList(MockMemberModel method)
     {
         if (method.Parameters.Length == 0) return "";
-        return string.Join(", ", method.Parameters.Select(p =>
+        return string.Join(", ", method.Parameters.Select((p, i) =>
         {
             var direction = p.Direction switch
             {
@@ -128,7 +136,7 @@ internal static class MockDelegateFactoryBuilder
                 ParameterDirection.In_Readonly => "in ",
                 _ => ""
             };
-            return $"{direction}{p.FullyQualifiedType} {p.Name}";
+            return $"{direction}{p.FullyQualifiedType} {GetLambdaParameterName(i)}";
         }));
     }
 
@@ -136,7 +144,7 @@ internal static class MockDelegateFactoryBuilder
     {
         if (method.Parameters.Length == 0)
             return "global::System.Array.Empty<object?>()";
-        var args = string.Join(", ", method.Parameters.Select(p => p.Name));
+        var args = string.Join(", ", method.Parameters.Select((_, i) => GetLambdaParameterName(i)));
         return $"new object?[] {{ {args} }}";
     }
 }
