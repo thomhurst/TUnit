@@ -64,6 +64,34 @@ public class TestRegisteredContext
         TestContext.ParallelLimiter = _explicitParallelLimiter ?? parallelLimit;
     }
 
+    /// <summary>
+    /// Removes the parallel limiter of the test, including a limiter set by a
+    /// <see cref="ParallelLimiterAttribute{TParallelLimit}"/> or by <see cref="SetParallelLimiter"/>.
+    /// </summary>
+    /// <remarks>
+    /// Only limiters set before this call are removed. A receiver that runs later can set a limiter again,
+    /// so give the calling receiver a higher <see cref="IEventReceiver.Order"/> than the receivers it overrides.
+    /// </remarks>
+    public void ClearParallelLimiter()
+    {
+        _explicitParallelLimiter = null;
+        TestContext.ParallelLimiter = null;
+    }
+
+    /// <summary>
+    /// Removes every parallel constraint of the test, for example the constraints added by
+    /// <see cref="NotInParallelAttribute"/> and <see cref="ParallelGroupAttribute"/>.
+    /// The test can then run in parallel with any other test.
+    /// </summary>
+    /// <remarks>
+    /// Only constraints added before this call are removed. A receiver that runs later can add a constraint again,
+    /// so give the calling receiver a higher <see cref="IEventReceiver.Order"/> than the receivers it overrides.
+    /// </remarks>
+    public void ClearParallelConstraints()
+    {
+        TestContext.ClearParallelConstraints();
+    }
+
     internal void SetExplicitParallelLimiter(IParallelLimit parallelLimit)
     {
         _explicitParallelLimiter = parallelLimit;

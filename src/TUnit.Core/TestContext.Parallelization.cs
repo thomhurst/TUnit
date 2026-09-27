@@ -27,4 +27,9 @@ public partial class TestContext
             _parallelConstraints.Add(constraint);
         }
     }
+
+    internal void ClearParallelConstraints()
+    {
+        _parallelConstraints?.Clear();
+    }
 }
