@@ -239,11 +239,7 @@ internal static class TypeSymbolExtensions
         if (fqn == "System.Threading.Tasks.ValueTask")
             return true;
 
-        if (type is INamedTypeSymbol { IsGenericType: true } named)
-        {
-            return named.ConstructedFrom.Name == "ValueTask";
-        }
-        return false;
+        return type.IsFrameworkGenericTask(out var name) && name == "ValueTask";
     }
 
     /// <summary>
@@ -255,12 +251,31 @@ internal static class TypeSymbolExtensions
         if (fqn == "System.Threading.Tasks.Task" || fqn == "System.Threading.Tasks.ValueTask")
             return true;
 
-        if (type is INamedTypeSymbol { IsGenericType: true } named)
+        return type.IsFrameworkGenericTask(out _);
+    }
+
+    /// <summary>
+    /// Whether <paramref name="type"/> is <c>System.Threading.Tasks.Task{T}</c> or <c>ValueTask{T}</c>.
+    /// Matching on the simple name alone would treat a user-defined <c>Task{T}</c> as a framework
+    /// task and emit <c>Task.FromResult</c> where the declared type is required.
+    /// </summary>
+    private static bool IsFrameworkGenericTask(this ITypeSymbol type, out string name)
+    {
+        name = "";
+        if (type is not INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } named)
         {
-            var name = named.ConstructedFrom.Name;
-            return name is "Task" or "ValueTask";
+            return false;
         }
-        return false;
+
+        var definition = named.ConstructedFrom;
+        if (definition.Name is not ("Task" or "ValueTask")
+            || definition.ContainingNamespace?.ToDisplayString() != "System.Threading.Tasks")
+        {
+            return false;
+        }
+
+        name = definition.Name;
+        return true;
     }
 
     /// <summary>
@@ -268,15 +283,9 @@ internal static class TypeSymbolExtensions
     /// </summary>
     public static ITypeSymbol? GetAsyncInnerTypeSymbol(this ITypeSymbol type)
     {
-        if (type is INamedTypeSymbol { IsGenericType: true } named)
-        {
-            var name = named.ConstructedFrom.Name;
-            if ((name == "Task" || name == "ValueTask") && named.TypeArguments.Length == 1)
-            {
-                return named.TypeArguments[0];
-            }
-        }
-        return null;
+        return type.IsFrameworkGenericTask(out _)
+            ? ((INamedTypeSymbol)type).TypeArguments[0]
+            : null;
     }
 
     /// <summary>
@@ -289,13 +298,9 @@ internal static class TypeSymbolExtensions
         if (fqn == "System.Threading.Tasks.Task" || fqn == "System.Threading.Tasks.ValueTask")
             return ("void", true);
 
-        if (type is INamedTypeSymbol { IsGenericType: true } named)
+        if (type.IsFrameworkGenericTask(out _))
         {
-            var name = named.ConstructedFrom.Name;
-            if ((name == "Task" || name == "ValueTask") && named.TypeArguments.Length == 1)
-            {
-                return (named.TypeArguments[0].GetFullyQualifiedNameWithNullability(), false);
-            }
+            return (((INamedTypeSymbol)type).TypeArguments[0].GetFullyQualifiedNameWithNullability(), false);
         }
         return (type.GetFullyQualifiedNameWithNullability(), false);
     }

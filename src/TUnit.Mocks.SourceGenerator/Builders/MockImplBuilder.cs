@@ -1526,14 +1526,18 @@ internal static class MockImplBuilder
     /// <summary>
     /// Emits code to read back out/ref parameter values from OutRefContext after an engine call.
     /// </summary>
-    internal static void EmitOutRefReadback(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    /// <param name="parameterName">
+    /// Maps a parameter index to the identifier it has in the emitting scope. Defaults to the
+    /// declared name; the delegate factory passes its positional lambda parameter names.
+    /// </param>
+    internal static void EmitOutRefReadback(CodeWriter writer, MockMemberModel method, MockTypeModel model, Func<int, string>? parameterName = null)
     {
         if (!HasOutRefParams(method)) return;
 
         writer.AppendLine("var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();");
         using (writer.Block("if (__outRef is not null)"))
         {
-            EmitOutRefParamAssignments(writer, method, model);
+            EmitOutRefParamAssignments(writer, method, model, parameterName);
         }
     }
 
@@ -1541,7 +1545,7 @@ internal static class MockImplBuilder
     /// For async methods: emits code to check <see cref="TUnit.Mocks.Setup.RawReturnContext"/>
     /// and return the raw Task/ValueTask directly if one was set by a <c>ReturnsAsync</c> setup.
     /// </summary>
-    private static void EmitRawReturnCheck(CodeWriter writer, MockMemberModel method)
+    internal static void EmitRawReturnCheck(CodeWriter writer, MockMemberModel method)
     {
         if (!method.IsAsync) return;
 
@@ -1585,7 +1589,7 @@ internal static class MockImplBuilder
     /// Emits individual out/ref parameter assignments from the __outRef dictionary.
     /// Shared by <see cref="EmitOutRefReadback"/> and <see cref="EmitSpanReturnReadback"/>.
     /// </summary>
-    private static void EmitOutRefParamAssignments(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    private static void EmitOutRefParamAssignments(CodeWriter writer, MockMemberModel method, MockTypeModel model, Func<int, string>? parameterName = null)
     {
         var canInvokeRefStructSetter = SupportsClosedRefStructSetter(model, method);
         string? safeName = null;
@@ -1595,6 +1599,7 @@ internal static class MockImplBuilder
         {
             var p = method.Parameters[i];
             if (p.Direction != ParameterDirection.Out && p.Direction != ParameterDirection.Ref) continue;
+            var name = parameterName?.Invoke(i) ?? p.Name;
 
             if (p.IsNonSpanRefStruct)
             {
@@ -1602,15 +1607,15 @@ internal static class MockImplBuilder
                 safeName ??= GetCompositeShortSafeName(model);
                 nsPrefix ??= GetGlobalMockNamespacePrefix(model);
                 var delegateFqn = nsPrefix + GetOutRefSetterDelegateName(safeName, method, p);
-                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i}) && __v{i} is {delegateFqn} __d{i}) __d{i}({p.Direction.RefKeyword()} {p.Name});");
+                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i}) && __v{i} is {delegateFqn} __d{i}) __d{i}({p.Direction.RefKeyword()} {name});");
             }
             else if (p.SpanElementType is not null)
             {
-                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
+                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
             }
             else
             {
-                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
+                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {name} = ({p.FullyQualifiedType})__v{i}!;");
             }
         }
     }
