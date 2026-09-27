@@ -37,42 +37,35 @@ internal static class MockDelegateFactoryBuilder
                     var paramList = BuildLambdaParameterList(invokeMethod);
                     var argsArray = BuildArgsArray(invokeMethod);
 
-                    var hasOutParams = invokeMethod.Parameters.Any(p => p.Direction == ParameterDirection.Out);
+                    writer.AppendLine($"{model.FullyQualifiedName} del = ({paramList}) =>");
+                    writer.AppendLine("{");
+                    writer.IncreaseIndent();
+                    foreach (var p in invokeMethod.Parameters.Where(p => p.Direction == ParameterDirection.Out))
+                    {
+                        writer.AppendLine($"{p.Name} = default!;");
+                    }
 
-                    if (invokeMethod.IsVoid)
+                    if (invokeMethod.IsVoid && !invokeMethod.IsAsync)
                     {
                         // void delegate (Action<...>)
-                        writer.AppendLine($"{model.FullyQualifiedName} del = ({paramList}) =>");
-                        writer.AppendLine("{");
-                        writer.IncreaseIndent();
-                        if (hasOutParams)
-                        {
-                            foreach (var p in invokeMethod.Parameters.Where(p => p.Direction == ParameterDirection.Out))
-                            {
-                                writer.AppendLine($"{p.Name} = default!;");
-                            }
-                        }
                         writer.AppendLine($"engine.HandleCall({invokeMethod.MemberId}, \"Invoke\", {argsArray});");
-                        writer.DecreaseIndent();
-                        writer.AppendLine("};");
+                    }
+                    else if (invokeMethod.IsAsync)
+                    {
+                        // Task/ValueTask-returning delegate (Func<..., Task>, Func<..., Task<T>>, ...).
+                        // IsVoid is also true for a non-generic Task/ValueTask, so this branch must be
+                        // checked before the synchronous-return one or the lambda returns nothing (#6887).
+                        // Mirror interface members: the setup surface is keyed on the unwrapped type.
+                        EmitAsyncBody(writer, invokeMethod, argsArray);
                     }
                     else
                     {
                         // returning delegate (Func<..., TReturn>)
-                        writer.AppendLine($"{model.FullyQualifiedName} del = ({paramList}) =>");
-                        writer.AppendLine("{");
-                        writer.IncreaseIndent();
-                        if (hasOutParams)
-                        {
-                            foreach (var p in invokeMethod.Parameters.Where(p => p.Direction == ParameterDirection.Out))
-                            {
-                                writer.AppendLine($"{p.Name} = default!;");
-                            }
-                        }
                         writer.AppendLine($"return engine.HandleCallWithReturn<{invokeMethod.ReturnType}>({invokeMethod.MemberId}, \"Invoke\", {argsArray}, {invokeMethod.SmartDefault});");
-                        writer.DecreaseIndent();
-                        writer.AppendLine("};");
                     }
+
+                    writer.DecreaseIndent();
+                    writer.AppendLine("};");
 
                     writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(del, engine);");
                     writer.AppendLine("return mock;");
@@ -81,6 +74,46 @@ internal static class MockDelegateFactoryBuilder
         }
 
         return writer.ToString();
+    }
+
+    private static void EmitAsyncBody(CodeWriter writer, MockMemberModel method, string argsArray)
+    {
+        var taskType = method.IsValueTask ? "global::System.Threading.Tasks.ValueTask" : "global::System.Threading.Tasks.Task";
+
+        if (method.IsVoid)
+        {
+            using (writer.Block("try"))
+            {
+                writer.AppendLine($"engine.HandleCall({method.MemberId}, \"Invoke\", {argsArray});");
+                MockImplBuilder.EmitRawReturnCheck(writer, method);
+                writer.AppendLine(method.IsValueTask
+                    ? $"return default({taskType});"
+                    : $"return {taskType}.CompletedTask;");
+            }
+            using (writer.Block("catch (global::System.Exception __ex)"))
+            {
+                writer.AppendLine(method.IsValueTask
+                    ? $"return new {taskType}(global::System.Threading.Tasks.Task.FromException(__ex));"
+                    : $"return {taskType}.FromException(__ex);");
+            }
+            return;
+        }
+
+        var unwrapped = method.UnwrappedReturnType;
+        using (writer.Block("try"))
+        {
+            writer.AppendLine($"var __result = engine.HandleCallWithReturn<{unwrapped}>({method.MemberId}, \"Invoke\", {argsArray}, {method.UnwrappedSmartDefault});");
+            MockImplBuilder.EmitRawReturnCheck(writer, method);
+            writer.AppendLine(method.IsValueTask
+                ? $"return new {taskType}<{unwrapped}>(__result);"
+                : $"return {taskType}.FromResult<{unwrapped}>(__result);");
+        }
+        using (writer.Block("catch (global::System.Exception __ex)"))
+        {
+            writer.AppendLine(method.IsValueTask
+                ? $"return new {taskType}<{unwrapped}>(global::System.Threading.Tasks.Task.FromException<{unwrapped}>(__ex));"
+                : $"return global::System.Threading.Tasks.Task.FromException<{unwrapped}>(__ex);");
+        }
     }
 
     private static string BuildLambdaParameterList(MockMemberModel method)

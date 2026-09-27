@@ -121,4 +121,80 @@ public class DelegateMockTests
 
         await Assert.That(result).IsEqualTo(99);
     }
+
+    [Test]
+    public async Task Func_Returning_Task_Completes_When_No_Setup()
+    {
+        var mock = Mock.OfDelegate<Func<int, Task>>();
+
+        await mock.Object(1);
+
+        mock.Invoke(1).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task Func_Returning_Task_Faults_When_Configured_To_Throw()
+    {
+        var mock = Mock.OfDelegate<Func<int, Task>>();
+        mock.Invoke(Any()).Throws<InvalidOperationException>();
+
+        var task = mock.Object(1);
+
+        await Assert.That(task.IsFaulted).IsTrue();
+        await Assert.That(async () => await task).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Func_Returning_ValueTask_Completes_When_No_Setup()
+    {
+        var mock = Mock.OfDelegate<Func<string, ValueTask>>();
+
+        await mock.Object("a");
+
+        mock.Invoke("a").WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task Func_Returning_Task_Of_T_Returns_Configured_Value()
+    {
+        var mock = Mock.OfDelegate<Func<int, Task<int>>>();
+        mock.Invoke(Any()).Returns(42);
+
+        var result = await mock.Object(1);
+
+        await Assert.That(result).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Func_Returning_Task_Of_T_Returns_Default_When_No_Setup()
+    {
+        var mock = Mock.OfDelegate<Func<int, Task<string>>>();
+
+        var result = await mock.Object(1);
+
+        await Assert.That(result).IsEqualTo("");
+    }
+
+    [Test]
+    public async Task Func_Returning_Task_ReturnsAsync_Returns_Configured_Task()
+    {
+        var mock = Mock.OfDelegate<Func<int, Task>>();
+        var tcs = new TaskCompletionSource();
+        mock.Invoke(Any()).ReturnsAsync(tcs.Task);
+
+        var task = mock.Object(1);
+
+        await Assert.That(task).IsSameReferenceAs(tcs.Task);
+    }
+
+    [Test]
+    public async Task Func_Returning_ValueTask_Of_T_Returns_Configured_Value()
+    {
+        var mock = Mock.OfDelegate<Func<int, ValueTask<int>>>();
+        mock.Invoke(Any()).Returns(7);
+
+        var result = await mock.Object(1);
+
+        await Assert.That(result).IsEqualTo(7);
+    }
 }

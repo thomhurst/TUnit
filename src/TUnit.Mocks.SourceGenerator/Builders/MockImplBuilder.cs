@@ -1541,7 +1541,7 @@ internal static class MockImplBuilder
     /// For async methods: emits code to check <see cref="TUnit.Mocks.Setup.RawReturnContext"/>
     /// and return the raw Task/ValueTask directly if one was set by a <c>ReturnsAsync</c> setup.
     /// </summary>
-    private static void EmitRawReturnCheck(CodeWriter writer, MockMemberModel method)
+    internal static void EmitRawReturnCheck(CodeWriter writer, MockMemberModel method)
     {
         if (!method.IsAsync) return;
 
