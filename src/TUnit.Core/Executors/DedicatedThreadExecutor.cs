@@ -16,7 +16,10 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         }
 #endif
 
-        var tcs = new TaskCompletionSource<object?>();
+        // The task is completed from the dedicated thread after its SynchronizationContext has been
+        // restored, so continuations must not run inline there: the engine would carry on (and start
+        // other tests) on this STA/dedicated thread.
+        var tcs = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         var thread = new Thread(static state =>
         {

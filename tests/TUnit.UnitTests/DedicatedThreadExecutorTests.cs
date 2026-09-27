@@ -143,6 +143,21 @@ public class DedicatedThreadExecutorTests
         await Assert.That(exception.InnerExceptions[1]).IsSameReferenceAs(cleanUpException);
     }
 
+    [Test]
+    public async Task Continuation_DoesNotRunOnDedicatedThread()
+    {
+        var executor = new RecordingExecutor();
+        Thread? dedicatedThread = null;
+
+        await executor.ExecuteTest(TestContext.Current!, () =>
+        {
+            dedicatedThread = Thread.CurrentThread;
+            return default;
+        }).ConfigureAwait(false);
+
+        await Assert.That(Thread.CurrentThread).IsNotSameReferenceAs(dedicatedThread);
+    }
+
     private sealed class RecordingExecutor : DedicatedThreadExecutor
     {
         private volatile bool _cleanUpFinished;
