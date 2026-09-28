@@ -138,8 +138,8 @@ internal static class ReportDataJson
         var buffer = new SegmentedBufferWriter();
         try
         {
-            using var w = new Utf8JsonWriter(buffer, new JsonWriterOptions { Indented = false });
-            Write(w, data);
+            using var w = new Utf8JsonWriter(buffer, WriterOptions);
+            Write(w, buffer, data);
         }
         catch
         {
@@ -159,7 +159,14 @@ internal static class ReportDataJson
     internal static string Serialize(ReportData data)
         => Encoding.UTF8.GetString(SerializeToBytes(data));
 
-    private static void Write(Utf8JsonWriter w, ReportData data)
+    private static readonly JsonWriterOptions WriterOptions = new() { Indented = false };
+
+    // Minimum elements a thread serializes when an array is split across threads (see
+    // ParallelJsonArrayWriter). Below twice these counts the array is written sequentially.
+    private const int MinGroupsPerSlice = 8;
+    private const int MinSpansPerSlice = 2000;
+
+    private static void Write(Utf8JsonWriter w, SegmentedBufferWriter buffer, ReportData data)
     {
         w.WriteStartObject();
         w.WriteNumber("schemaVersion", SchemaVersion);
@@ -194,29 +201,34 @@ internal static class ReportDataJson
 
         w.WritePropertyName("groups");
         w.WriteStartArray();
-        foreach (var g in data.Groups)
-        {
-            w.WriteStartObject();
-            w.WriteString("className", g.ClassName);
-            w.WriteString("namespace", g.Namespace);
-            w.WritePropertyName("summary");
-            WriteSummary(w, g.Summary);
-            w.WritePropertyName("tests");
-            w.WriteStartArray();
-            foreach (var t in g.Tests) WriteTest(w, t);
-            w.WriteEndArray();
-            w.WriteEndObject();
-        }
+        var groups = data.Groups;
+        ParallelJsonArrayWriter.WriteElements(w, buffer, WriterOptions, groups.Length, MinGroupsPerSlice,
+            (writer, i) => WriteGroup(writer, groups[i]));
         w.WriteEndArray();
 
         if (data.Spans is { Length: > 0 } spans)
         {
             w.WritePropertyName("spans");
             w.WriteStartArray();
-            foreach (var s in spans) WriteSpan(w, s);
+            ParallelJsonArrayWriter.WriteElements(w, buffer, WriterOptions, spans.Length, MinSpansPerSlice,
+                (writer, i) => WriteSpan(writer, spans[i]));
             w.WriteEndArray();
         }
 
+        w.WriteEndObject();
+    }
+
+    private static void WriteGroup(Utf8JsonWriter w, ReportTestGroup g)
+    {
+        w.WriteStartObject();
+        w.WriteString("className", g.ClassName);
+        w.WriteString("namespace", g.Namespace);
+        w.WritePropertyName("summary");
+        WriteSummary(w, g.Summary);
+        w.WritePropertyName("tests");
+        w.WriteStartArray();
+        foreach (var t in g.Tests) WriteTest(w, t);
+        w.WriteEndArray();
         w.WriteEndObject();
     }
 
@@ -233,6 +245,10 @@ internal static class ReportDataJson
         w.WriteEndObject();
     }
 
+    #if NET
+    // Runs once per process over every test, so tier-0 code would do the whole job unoptimized.
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
+#endif
     private static void WriteTest(Utf8JsonWriter w, ReportTestResult t)
     {
         w.WriteStartObject();
@@ -313,6 +329,9 @@ internal static class ReportDataJson
         w.WriteEndObject();
     }
 
+    #if NET
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
+#endif
     private static void WriteSpan(Utf8JsonWriter w, SpanData s)
     {
         w.WriteStartObject();
