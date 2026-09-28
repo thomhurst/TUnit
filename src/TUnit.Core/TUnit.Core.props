@@ -33,4 +33,13 @@
         <CompilerVisibleProperty Include="EnableTUnitSourceGeneration" />
     </ItemGroup>
 
+    <!--
+        Declares the TUnit.Generated namespace before the project's own files (items added here precede the SDK's
+        default Compile glob) so the compiler writes the source-generated types at the end of the assembly rather
+        than the start, where Microsoft Defender scans them far more slowly. See TUnit.Core.GeneratedNamespace.cs.
+    -->
+    <ItemGroup Condition="'$(Language)' == 'C#' and '$(EnableTUnitSourceGeneration)' != 'false'">
+        <Compile Include="$(MSBuildThisFileDirectory)TUnit.Core.GeneratedNamespace.cs" Visible="false" />
+    </ItemGroup>
+
 </Project>
