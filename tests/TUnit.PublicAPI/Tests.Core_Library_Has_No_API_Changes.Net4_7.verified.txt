@@ -1675,6 +1675,8 @@ namespace
         public .TestContext TestContext { get; }
         public .TestDetails TestDetails { get; }
         public string TestName { get; }
+        public void ClearParallelConstraints() { }
+        public void ClearParallelLimiter() { }
         public void SetHookExecutor(. executor) { }
         public void SetParallelLimiter(. parallelLimit) { }
         public void SetSkipped(string reason) { }

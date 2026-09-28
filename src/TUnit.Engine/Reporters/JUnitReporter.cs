@@ -98,8 +98,9 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
                 : GetDefaultOutputPath();
         }
 
-        // Write to file with retry logic
-        await WriteXmlFileAsync(_outputPath, xmlContent, cancellation);
+        // MTP passes an already-cancelled token after a session timeout or Ctrl+C.
+        // Persist the results received so far even when test execution was cancelled.
+        await WriteXmlFileAsync(_outputPath, xmlContent, CancellationToken.None);
     }
 
     public string? Filter { get; set; }

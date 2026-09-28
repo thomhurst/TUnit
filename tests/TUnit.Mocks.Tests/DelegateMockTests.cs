@@ -1,6 +1,10 @@
 namespace TUnit.Mocks.Tests;
 
 public delegate int Calculator(int a, int b);
+public delegate bool TryLookup(string key, out int value);
+public delegate void Bump(ref int value);
+public delegate Task<bool> TryLookupAsync(string key, out int value);
+public delegate Task FillAsync(out string text);
 
 public class DelegateMockTests
 {
@@ -120,5 +124,170 @@ public class DelegateMockTests
         var result = func(5);
 
         await Assert.That(result).IsEqualTo(99);
+    }
+
+    [Test]
+    public async Task Func_Returning_Task_Completes_When_No_Setup()
+    {
+        var mock = Mock.OfDelegate<Func<int, Task>>();
+
+        await mock.Object(1);
+
+        mock.Invoke(1).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task Func_Returning_Task_Faults_When_Configured_To_Throw()
+    {
+        var mock = Mock.OfDelegate<Func<int, Task>>();
+        mock.Invoke(Any()).Throws<InvalidOperationException>();
+
+        var task = mock.Object(1);
+
+        await Assert.That(task.IsFaulted).IsTrue();
+        await Assert.That(async () => await task).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Func_Returning_ValueTask_Completes_When_No_Setup()
+    {
+        var mock = Mock.OfDelegate<Func<string, ValueTask>>();
+
+        await mock.Object("a");
+
+        mock.Invoke("a").WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task Func_Returning_Task_Of_T_Returns_Configured_Value()
+    {
+        var mock = Mock.OfDelegate<Func<int, Task<int>>>();
+        mock.Invoke(Any()).Returns(42);
+
+        var result = await mock.Object(1);
+
+        await Assert.That(result).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Func_Returning_Task_Of_T_Returns_Default_When_No_Setup()
+    {
+        var mock = Mock.OfDelegate<Func<int, Task<string>>>();
+
+        var result = await mock.Object(1);
+
+        await Assert.That(result).IsEqualTo("");
+    }
+
+    [Test]
+    public async Task Func_Returning_Task_ReturnsAsync_Returns_Configured_Task()
+    {
+        var mock = Mock.OfDelegate<Func<int, Task>>();
+        var tcs = new TaskCompletionSource();
+        mock.Invoke(Any()).ReturnsAsync(tcs.Task);
+
+        var task = mock.Object(1);
+
+        await Assert.That(task).IsSameReferenceAs(tcs.Task);
+    }
+
+    [Test]
+    public async Task Func_Returning_Task_Of_T_ReturnsAsync_Returns_Pending_Task()
+    {
+        var mock = Mock.OfDelegate<Func<int, Task<int>>>();
+        var tcs = new TaskCompletionSource<int>();
+        mock.Invoke(Any()).ReturnsAsync(tcs.Task);
+
+        var task = mock.Object(1);
+
+        await Assert.That(task.IsCompleted).IsFalse();
+        tcs.SetResult(5);
+        await Assert.That(await task).IsEqualTo(5);
+    }
+
+    [Test]
+    public async Task Func_Returning_ValueTask_Of_T_ReturnsAsync_Returns_Pending_Task()
+    {
+        var mock = Mock.OfDelegate<Func<int, ValueTask<int>>>();
+        var tcs = new TaskCompletionSource<int>();
+        mock.Invoke(Any()).ReturnsAsync(new ValueTask<int>(tcs.Task));
+
+        var task = mock.Object(1);
+
+        await Assert.That(task.IsCompleted).IsFalse();
+        tcs.SetResult(9);
+        await Assert.That(await task).IsEqualTo(9);
+    }
+
+    [Test]
+    public async Task Func_Returning_ValueTask_ReturnsAsync_Returns_Pending_Task()
+    {
+        var mock = Mock.OfDelegate<Func<ValueTask>>();
+        var tcs = new TaskCompletionSource();
+        mock.Invoke().ReturnsAsync(new ValueTask(tcs.Task));
+
+        var task = mock.Object();
+
+        await Assert.That(task.IsCompleted).IsFalse();
+        tcs.SetResult();
+        await task;
+    }
+
+    [Test]
+    public async Task Func_Returning_ValueTask_Of_T_Returns_Configured_Value()
+    {
+        var mock = Mock.OfDelegate<Func<int, ValueTask<int>>>();
+        mock.Invoke(Any()).Returns(7);
+
+        var result = await mock.Object(1);
+
+        await Assert.That(result).IsEqualTo(7);
+    }
+
+    [Test]
+    public async Task Custom_Delegate_Sets_Out_Parameter()
+    {
+        var mock = Mock.OfDelegate<TryLookup>();
+        mock.Invoke("key").Returns(true).SetsOutValue(42);
+
+        var found = mock.Object("key", out var value);
+
+        await Assert.That(found).IsTrue();
+        await Assert.That(value).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Custom_Delegate_Sets_Ref_Parameter()
+    {
+        var mock = Mock.OfDelegate<Bump>();
+        mock.Invoke(Any()).SetsRefValue(99);
+
+        var value = 1;
+        mock.Object(ref value);
+
+        await Assert.That(value).IsEqualTo(99);
+    }
+
+    [Test]
+    public async Task Async_Custom_Delegate_Sets_Out_Parameter()
+    {
+        var mock = Mock.OfDelegate<TryLookupAsync>();
+        mock.Invoke("key").Returns(true).SetsOutValue(7);
+
+        var found = await mock.Object("key", out var value);
+
+        await Assert.That(found).IsTrue();
+        await Assert.That(value).IsEqualTo(7);
+    }
+
+    [Test]
+    public async Task Async_Void_Custom_Delegate_Sets_Out_Parameter()
+    {
+        var mock = Mock.OfDelegate<FillAsync>();
+        mock.Invoke().SetsOutText("filled");
+
+        await mock.Object(out var text);
+
+        await Assert.That(text).IsEqualTo("filled");
     }
 }

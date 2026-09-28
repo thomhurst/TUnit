@@ -1,3 +1,7 @@
+using System.Xml.Linq;
+using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.TestHost;
+using Shouldly;
 using TUnit.Core;
 using TUnit.Engine.Reporters;
 
@@ -6,6 +10,61 @@ namespace TUnit.Engine.Tests;
 [NotInParallel]
 public class JUnitReporterTests
 {
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task AfterRunAsync_Should_Preserve_Results_When_Run_Is_Cancelled(bool cancelRun)
+    {
+        // Arrange
+        var directory = Path.Combine(Path.GetTempPath(), "TUnit-JUnit-" + Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(directory, "results.xml");
+        Environment.SetEnvironmentVariable("TUNIT_ENABLE_JUNIT_REPORTER", "true");
+        Environment.SetEnvironmentVariable("JUNIT_XML_OUTPUT_PATH", path);
+        var reporter = new JUnitReporter(new MockExtension());
+        using var cancellation = new CancellationTokenSource();
+
+        try
+        {
+            (await reporter.IsEnabledAsync()).ShouldBeTrue();
+            await AddResult("Passed", PassedTestNodeStateProperty.CachedInstance);
+            await AddResult("Failed", new FailedTestNodeStateProperty(new InvalidOperationException("Test body failure")));
+            await AddResult("Unfinished", new InProgressTestNodeStateProperty());
+            if (cancelRun)
+            {
+                cancellation.Cancel();
+            }
+
+            // Act
+            await reporter.AfterRunAsync(exitCode: 3, cancellation.Token);
+
+            // Assert
+            var cases = XDocument.Load(path).Descendants("testcase").ToArray();
+            cases.Length.ShouldBe(3);
+            cases.Single(x => (string?)x.Attribute("name") == "Passed").HasElements.ShouldBeFalse();
+            cases.Single(x => (string?)x.Attribute("name") == "Failed").Element("failure")!
+                .Attribute("message")!.Value.ShouldContain("Test body failure");
+            cases.Single(x => (string?)x.Attribute("name") == "Unfinished").Element("error")!
+                .Attribute("message")!.Value.ShouldContain("Test never finished");
+        }
+        finally
+        {
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, recursive: true);
+            }
+        }
+
+        Task AddResult(string name, TestNodeStateProperty state) => reporter.ConsumeAsync(
+            null!,
+            new TestNodeUpdateMessage(new SessionUid("cancelled-session"), new TestNode
+            {
+                Uid = new TestNodeUid(name),
+                DisplayName = name,
+                Properties = new PropertyBag(state)
+            }),
+            CancellationToken.None);
+    }
+
     [After(Test)]
     public void Cleanup()
     {

@@ -1,0 +1,159 @@
+name: Platform smoke tests
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: ${{ matrix.platform }} smoke test
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: Browser
+            os: ubuntu-latest
+            workload: wasm-tools
+          - platform: Android
+            os: ubuntu-latest
+            workload: android
+          - platform: iOS
+            os: macos-26
+            workload: ios
+            device: iPhone 17
+            simulator: iOS-26-5
+          - platform: tvOS
+            os: macos-26
+            workload: tvos
+            device: Apple TV
+            simulator: tvOS-26-5
+          - platform: MacCatalyst
+            os: macos-26
+            workload: maccatalyst
+          - platform: WASI
+            os: ubuntu-latest
+            workload: wasi-experimental
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      TESTINGPLATFORM_TELEMETRY_OPTOUT: 1
+      SmokePlatform: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: 11.0.100-rc.1.26425.128
+      - uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: platform-smoke-${{ runner.os }}-${{ runner.arch }}-${{ matrix.platform }}-${{ hashFiles('global.json', 'Directory.Packages.props', 'tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj') }}
+          restore-keys: platform-smoke-${{ runner.os }}-${{ runner.arch }}-${{ matrix.platform }}-
+      - name: Select the installed Xcode
+        if: runner.os == 'macOS'
+        run: sudo xcode-select --switch /Applications/Xcode_26.6.app
+      - name: Start the installed Apple simulator
+        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
+        run: |
+          device=$(xcrun simctl list devices available --json | jq -er '.devices["com.apple.CoreSimulator.SimRuntime.${{ matrix.simulator }}"] | map(select(.name == "${{ matrix.device }}")) | first | .udid // error("Required preinstalled simulator is missing")')
+          xcrun simctl boot "$device"
+          echo "Device=$device" >> "$GITHUB_ENV"
+      - run: dotnet workload install ${{ matrix.workload }}
+      - name: Install XHarness
+        if: matrix.platform == 'Browser'
+        run: >-
+          dotnet tool install Microsoft.DotNet.XHarness.CLI --global
+          --version 10.0.0-prerelease.26471.3
+          --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
+      - name: Publish the browser smoke test
+        if: matrix.platform == 'Browser'
+        run: dotnet publish tests/TUnit.PlatformSmoke -c Debug
+      - name: Build the smoke test
+        if: matrix.platform != 'Browser'
+        run: dotnet build tests/TUnit.PlatformSmoke -c Debug
+      - name: Execute the TUnit smoke test in Chrome
+        if: matrix.platform == 'Browser'
+        run: >-
+          xharness wasm test-browser
+          --app=tests/TUnit.PlatformSmoke/bin/Debug/net11.0/publish/wwwroot
+          --browser=chrome --expected-exit-code=0 --timeout=00:02:00
+          --output-directory=artifacts/platform-smoke/browser
+      - name: Enable KVM
+        if: matrix.platform == 'Android'
+        run: sudo chmod 666 /dev/kvm
+      - name: Execute the TUnit smoke test on Android
+        if: matrix.platform == 'Android'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: |
+            mkdir -p artifacts/platform-smoke/Android
+            bash -o pipefail -c 'dotnet test --project "$GITHUB_WORKSPACE/tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj" --no-build 2>&1 | tee artifacts/platform-smoke/Android/test.log'
+      - name: Wait for the Apple simulator
+        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
+        timeout-minutes: 10
+        run: |
+          xcrun simctl bootstatus "$Device" -b
+      - name: Execute the TUnit smoke test on Mac Catalyst
+        if: matrix.platform == 'MacCatalyst'
+        working-directory: tests/TUnit.PlatformSmoke
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/platform-smoke/${{ matrix.platform }}"
+          dotnet test --project "$GITHUB_WORKSPACE/tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj" --no-build --minimum-expected-tests 1 \
+            2>&1 | tee "$GITHUB_WORKSPACE/artifacts/platform-smoke/${{ matrix.platform }}/test.log"
+      - name: Execute the TUnit smoke test in the Apple simulator
+        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          mkdir -p "artifacts/platform-smoke/${{ matrix.platform }}"
+          platform=$(echo "$SmokePlatform" | tr '[:upper:]' '[:lower:]')
+          app="tests/TUnit.PlatformSmoke/bin/Debug/net11.0-$platform/${platform}simulator-arm64/TUnit.PlatformSmoke.app"
+          xcrun simctl install "$Device" "$app"
+          container=$(xcrun simctl get_app_container "$Device" net.dot.TUnitSmoke data)
+          xcrun simctl launch --console "$Device" net.dot.TUnitSmoke --connection-mode=none \
+            --app-arg=--minimum-expected-tests --app-arg=1 \
+            --app-arg=--report-trx --app-arg=--report-trx-filename --app-arg=smoke.trx \
+            --app-arg=--results-directory "--app-arg=$container/Documents/TestResults" \
+            2>&1 | tee "artifacts/platform-smoke/${{ matrix.platform }}/test.log"
+          test "$(xmllint --xpath 'boolean(/*[local-name()="TestRun"]/*[local-name()="ResultSummary"]/*[local-name()="Counters"][@total="1" and @passed="1" and @failed="0"])' "$container/Documents/TestResults/smoke.trx")" = true
+      - name: Collect Apple simulator test reports
+        if: always() && (matrix.platform == 'iOS' || matrix.platform == 'tvOS')
+        run: |
+          if container=$(xcrun simctl get_app_container "$Device" net.dot.TUnitSmoke data 2>/dev/null); then
+            if [[ -d "$container/Documents/TestResults" ]]; then
+              mkdir -p "artifacts/platform-smoke/${{ matrix.platform }}"
+              cp -R "$container/Documents/TestResults" "artifacts/platform-smoke/${{ matrix.platform }}/"
+            fi
+          fi
+      - uses: bytecodealliance/actions/wasmtime/setup@v1.1.3
+        if: matrix.platform == 'WASI'
+        with:
+          version: v49.0.1
+      - name: Execute the TUnit smoke test on WASI
+        if: matrix.platform == 'WASI'
+        working-directory: tests/TUnit.PlatformSmoke/bin/Debug/net11.0/wasi-wasm
+        shell: bash
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/platform-smoke/WASI"
+          wasmtime run -S http --dir . dotnet.wasm TUnit.PlatformSmoke \
+            2>&1 | tee "$GITHUB_WORKSPACE/artifacts/platform-smoke/WASI/run.log"
+      - uses: actions/upload-artifact@v7.0.1
+        if: always()
+        with:
+          name: platform-smoke-${{ matrix.platform }}
+          path: artifacts/platform-smoke
+          if-no-files-found: ignore
