@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Equality;
@@ -34,7 +35,8 @@ public class PreventCompilationTriggerOnEveryKeystrokeComparer : IEqualityCompar
 
         return x.Language == y.Language
                && x.AssemblyName == y.AssemblyName
-               && ReferencesEqual(x.References, y.References);
+               && ReferencesEqual(x.ExternalReferences, y.ExternalReferences)
+               && ReferencesEqual(x.DirectiveReferences, y.DirectiveReferences);
     }
 
     public int GetHashCode(Compilation obj)
@@ -45,35 +47,32 @@ public class PreventCompilationTriggerOnEveryKeystrokeComparer : IEqualityCompar
         }
     }
 
-    private static bool ReferencesEqual(IEnumerable<MetadataReference> x, IEnumerable<MetadataReference> y)
+    private static bool ReferencesEqual(ImmutableArray<MetadataReference> x, ImmutableArray<MetadataReference> y)
     {
-        using var xEnumerator = x.GetEnumerator();
-        using var yEnumerator = y.GetEnumerator();
-
-        while (true)
+        // Syntax-only edits usually keep the same backing array, so this avoids the element walk.
+        if (x == y)
         {
-            var xHasNext = xEnumerator.MoveNext();
-            var yHasNext = yEnumerator.MoveNext();
+            return true;
+        }
 
-            if (xHasNext != yHasNext)
-            {
-                return false;
-            }
+        if (x.Length != y.Length)
+        {
+            return false;
+        }
 
-            if (!xHasNext)
-            {
-                return true;
-            }
-
+        for (var i = 0; i < x.Length; i++)
+        {
             // Hosts reuse reference instances while the referenced file or project is unchanged.
             // A new instance means the reference was added, rebuilt or (for an IDE project
             // reference) its source was edited, which can change the types and dependencies the
             // reference walk selects. Rerun extraction then; AssemblyInfoModel equality keeps the
             // generated source cached when the extracted model is unchanged.
-            if (!ReferenceEquals(xEnumerator.Current, yEnumerator.Current))
+            if (!ReferenceEquals(x[i], y[i]))
             {
                 return false;
             }
         }
+
+        return true;
     }
 }
