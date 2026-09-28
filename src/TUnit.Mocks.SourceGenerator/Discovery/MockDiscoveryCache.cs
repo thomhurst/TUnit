@@ -46,11 +46,10 @@ internal sealed class MockDiscoveryCache
     public ConcurrentDictionary<TypeListKey, ImmutableArray<MockTypeModel>> MultiTypeModels { get; } = new();
 
     /// <summary>
-    /// Whether any type named <c>*_MockStaticExtension</c> is visible in the <c>TUnit.Mocks</c>
-    /// namespace of the compilation. A generator never sees its own output, so such a type can
-    /// only come from a referenced assembly (or hand-written source); when there is none, a
-    /// <c>T.Mock()</c> call cannot already bind to a generated extension and the per-site binding
-    /// check can be skipped.
+    /// Whether the compilation can see any type named <c>*_MockStaticExtension</c>, in any
+    /// namespace. A generator never sees its own output, so such a type can only be declared in
+    /// source or come from a referenced assembly; when there is none, a <c>T.Mock()</c> call
+    /// cannot already bind to one and the per-site binding check can be skipped.
     /// </summary>
     public bool MayReferenceGeneratedStaticExtensions(Compilation compilation)
     {
@@ -66,15 +65,17 @@ internal sealed class MockDiscoveryCache
 
     private static bool ScanForStaticExtensions(Compilation compilation)
     {
-        var mocksNamespace = FindChildNamespace(FindChildNamespace(compilation.GlobalNamespace, "TUnit"), "Mocks");
-        if (mocksNamespace is null)
+        // Source declarations: answered from the declaration table, no symbols are created.
+        if (compilation.ContainsSymbolsWithName(IsStaticExtensionName, SymbolFilter.Type))
         {
-            return false;
+            return true;
         }
 
-        foreach (var type in mocksNamespace.GetTypeMembers())
+        // Referenced assemblies: an extension producing TUnit.Mocks mocks has to reference
+        // TUnit.Mocks, so only those assemblies (a handful) are walked, across every namespace.
+        foreach (var assembly in compilation.SourceModule.ReferencedAssemblySymbols)
         {
-            if (type.Name.EndsWith("_MockStaticExtension", System.StringComparison.Ordinal))
+            if (ReferencesTUnitMocks(assembly) && ContainsStaticExtension(assembly.GlobalNamespace))
             {
                 return true;
             }
@@ -83,22 +84,50 @@ internal sealed class MockDiscoveryCache
         return false;
     }
 
-    private static INamespaceSymbol? FindChildNamespace(INamespaceSymbol? parent, string name)
+    private static bool IsStaticExtensionName(string name)
+        => name.EndsWith("_MockStaticExtension", System.StringComparison.Ordinal);
+
+    private static bool ReferencesTUnitMocks(IAssemblySymbol assembly)
     {
-        if (parent is null)
+        if (assembly.Name == "TUnit.Mocks")
         {
-            return null;
+            return true;
         }
 
-        foreach (var child in parent.GetNamespaceMembers())
+        foreach (var module in assembly.Modules)
         {
-            if (child.Name == name)
+            foreach (var reference in module.ReferencedAssemblies)
             {
-                return child;
+                if (reference.Name == "TUnit.Mocks")
+                {
+                    return true;
+                }
             }
         }
 
-        return null;
+        return false;
+    }
+
+    private static bool ContainsStaticExtension(INamespaceSymbol ns)
+    {
+        // Extension classes are top-level static classes, so nested types need no visit.
+        foreach (var type in ns.GetTypeMembers())
+        {
+            if (IsStaticExtensionName(type.Name))
+            {
+                return true;
+            }
+        }
+
+        foreach (var child in ns.GetNamespaceMembers())
+        {
+            if (ContainsStaticExtension(child))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 

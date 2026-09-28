@@ -718,9 +718,9 @@ internal static class MockTypeDiscovery
         // extension lives in a class named *_MockStaticExtension in the TUnit.Mocks namespace.
         // This covers both interfaces (wrapper return type in TUnit.Mocks.Generated) and
         // classes (Mock<T> return type in TUnit.Mocks). A generator never sees its own output,
-        // so such an extension can only come from a referenced assembly (or hand-written
-        // source); binding the whole invocation is only worth it when the compilation can see
-        // one at all.
+        // so such an extension can only come from a referenced assembly or hand-written source
+        // (in any namespace); binding the whole invocation is only worth it when the compilation
+        // can see one at all.
         if (MockDiscoveryCache.For(compilation).MayReferenceGeneratedStaticExtensions(compilation))
         {
             var invocationSymbol = context.SemanticModel.GetSymbolInfo(invocation, ct);
