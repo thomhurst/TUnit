@@ -8,11 +8,8 @@ public sealed class DynamicTestModel : IEquatable<DynamicTestModel>
 {
     public required string FullyQualifiedTypeName { get; init; }
     public required string MinimalTypeName { get; init; }
-    public required string Namespace { get; init; }
     public required string MethodName { get; init; }
     public required bool IsStatic { get; init; }
-    public required bool IsAsync { get; init; }
-    public required string ReturnType { get; init; }
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
 
@@ -28,15 +25,12 @@ public sealed class DynamicTestModel : IEquatable<DynamicTestModel>
             return true;
         }
 
-        // FilePath and LineNumber feed both the hint name and the generated body, so they
-        // must be compared along with everything else that is emitted.
+        // Every field feeds the generated source (FilePath and LineNumber also feed the hint name),
+        // so all of them must be compared.
         return FullyQualifiedTypeName == other.FullyQualifiedTypeName
                && MinimalTypeName == other.MinimalTypeName
-               && Namespace == other.Namespace
                && MethodName == other.MethodName
                && IsStatic == other.IsStatic
-               && IsAsync == other.IsAsync
-               && ReturnType == other.ReturnType
                && FilePath == other.FilePath
                && LineNumber == other.LineNumber;
     }
