@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Helpers;
 
@@ -12,7 +11,12 @@ public record CompilationContext(CSharpCompilation Compilation, AttributeWriter 
 /// <summary>
 /// Contains all the metadata about a test method discovered by the source generator.
 /// </summary>
-public class TestMethodMetadata : IEquatable<TestMethodMetadata>
+/// <remarks>
+/// This is a working object used while generating code for one test. It holds symbols from a single
+/// compilation, so it must never be used as an incremental pipeline value: the pipeline carries the
+/// equatable <see cref="TestMethodGenerationResult"/> produced from it instead.
+/// </remarks>
+public sealed class TestMethodMetadata
 {
     public required IMethodSymbol MethodSymbol { get; init; }
     public required INamedTypeSymbol TypeSymbol { get; init; }
@@ -21,10 +25,7 @@ public class TestMethodMetadata : IEquatable<TestMethodMetadata>
     public required int StartColumnNumber { get; init; }
     public required int EndLineNumber { get; init; }
     public required int EndColumnNumber { get; init; }
-    public required AttributeData TestAttribute { get; init; }
-    public GeneratorAttributeSyntaxContext? Context { get; init; }
     public required CompilationContext CompilationContext { get; init; }
-    public required MethodDeclarationSyntax? MethodSyntax { get; init; }
     public bool IsGenericType { get; init; }
     public bool IsGenericMethod { get; init; }
 
@@ -40,48 +41,4 @@ public class TestMethodMetadata : IEquatable<TestMethodMetadata>
     /// 2 = method is inherited from base's base class, etc.
     /// </summary>
     public int InheritanceDepth { get; init; } = 0;
-
-    public bool Equals(TestMethodMetadata? other)
-    {
-        if (ReferenceEquals(null, other))
-            return false;
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return SymbolEqualityComparer.Default.Equals(MethodSymbol, other.MethodSymbol) &&
-               SymbolEqualityComparer.Default.Equals(TypeSymbol, other.TypeSymbol) &&
-               FilePath == other.FilePath &&
-               LineNumber == other.LineNumber &&
-               StartColumnNumber == other.StartColumnNumber &&
-               EndLineNumber == other.EndLineNumber &&
-               EndColumnNumber == other.EndColumnNumber &&
-               IsGenericType == other.IsGenericType &&
-               IsGenericMethod == other.IsGenericMethod &&
-               InheritanceDepth == other.InheritanceDepth;
-               // Note: Skipping MethodAttributes comparison to avoid complexity - these rarely change independently
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return Equals(obj as TestMethodMetadata);
-    }
-
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            var hashCode = SymbolEqualityComparer.Default.GetHashCode(MethodSymbol);
-            hashCode = (hashCode * 397) ^ SymbolEqualityComparer.Default.GetHashCode(TypeSymbol);
-            hashCode = (hashCode * 397) ^ FilePath.GetHashCode();
-            hashCode = (hashCode * 397) ^ LineNumber;
-            hashCode = (hashCode * 397) ^ StartColumnNumber;
-            hashCode = (hashCode * 397) ^ EndLineNumber;
-            hashCode = (hashCode * 397) ^ EndColumnNumber;
-            hashCode = (hashCode * 397) ^ IsGenericType.GetHashCode();
-            hashCode = (hashCode * 397) ^ IsGenericMethod.GetHashCode();
-            hashCode = (hashCode * 397) ^ InheritanceDepth;
-            return hashCode;
-        }
-    }
-
 }
