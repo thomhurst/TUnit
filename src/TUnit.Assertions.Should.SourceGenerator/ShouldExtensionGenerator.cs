@@ -617,6 +617,14 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             return null;
         }
 
+        // A partial declaration emitted into a generated file can never join a file-local type,
+        // so a wrapper that is (or is nested in) a `file` type can't be augmented. Emitting would
+        // declare an unrelated type whose members reference a missing Context and break the build.
+        if (isCurrentAssembly && IsFileLocalOrNestedInFileLocal(type))
+        {
+            return null;
+        }
+
         // Wrappers from referenced assemblies are still collected — their return-type keys
         // feed the dedup set so the main extension-method scan skips already-baked extensions.
         // The IsCurrentAssembly flag on WrapperData controls whether the emission step actually
@@ -644,9 +652,9 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         return new WrapperData(
             ContainingNamespace: type.ContainingNamespace?.ToDisplayString(NoGlobalFormat) ?? string.Empty,
             ContainingTypeDeclarations: GetContainingTypeDeclarations(type),
-            ClassName: type.Name,
+            ClassName: EscapeIdentifier(type.Name),
             ClassGenericParams: new EquatableArray<GenericParamData>(type.TypeParameters.Select(tp => GenericParamData.From(tp, NoGlobalFormat)).ToList()),
-            ClassGenericSuffix: type.IsGenericType ? "<" + string.Join(", ", type.TypeParameters.Select(tp => tp.Name)) + ">" : string.Empty,
+            ClassGenericSuffix: type.IsGenericType ? "<" + string.Join(", ", type.TypeParameters.Select(tp => EscapeIdentifier(tp.Name))) + ">" : string.Empty,
             AssertionTypeArgDisplay: wrappedAssertionTypeArg.ToDisplayString(NoGlobalFormat),
             Methods: new EquatableArray<WrapperMethodData>(methods),
             IsCurrentAssembly: isCurrentAssembly);
@@ -675,13 +683,32 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
                 _ => "class",
             };
             var typeParameters = containing.TypeParameters.Length > 0
-                ? "<" + string.Join(", ", containing.TypeParameters.Select(tp => tp.Name)) + ">"
+                ? "<" + string.Join(", ", containing.TypeParameters.Select(tp => EscapeIdentifier(tp.Name))) + ">"
                 : string.Empty;
-            declarations.Add($"partial {keyword} {containing.Name}{typeParameters}");
+            declarations.Add($"partial {keyword} {EscapeIdentifier(containing.Name)}{typeParameters}");
         }
         declarations.Reverse();
         return new EquatableArray<string>(declarations.ToArray());
     }
+
+    private static bool IsFileLocalOrNestedInFileLocal(INamedTypeSymbol type)
+    {
+        for (INamedTypeSymbol? current = type; current is not null; current = current.ContainingType)
+        {
+            if (current.IsFileLocal)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Prefixes reserved keywords with '@' so names such as <c>@event</c> stay valid when
+    /// written back into generated declarations. <see cref="ISymbol.Name"/> drops the escape.
+    /// </summary>
+    private static string EscapeIdentifier(string name)
+        => SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
 
     /// <summary>
     /// Closes <paramref name="declared"/> against <paramref name="wrapper"/>'s type parameters.
@@ -1321,11 +1348,12 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             sb.AppendLine("}");
         }
 
-        var hint = $"{wrapper.ClassName}.Generated.g.cs";
+        var hintName = wrapper.ClassName.TrimStart('@');
+        var hint = $"{hintName}.Generated.g.cs";
         var suffix = 0;
         while (!emittedHints.Add(hint))
         {
-            hint = $"{wrapper.ClassName}_{++suffix}.Generated.g.cs";
+            hint = $"{hintName}_{++suffix}.Generated.g.cs";
         }
         ctx.AddSource(hint, sb.ToString());
     }
@@ -2140,9 +2168,10 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
                 break;
             }
 
+            var name = EscapeIdentifier(tp.Name);
             return new GenericParamData(
-                tp.Name,
-                constraints.Count > 0 ? $"where {tp.Name} : {string.Join(", ", constraints)}" : null,
+                name,
+                constraints.Count > 0 ? $"where {name} : {string.Join(", ", constraints)}" : null,
                 damAttr);
         }
     }
