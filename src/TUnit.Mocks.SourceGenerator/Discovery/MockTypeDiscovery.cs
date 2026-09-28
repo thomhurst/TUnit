@@ -383,7 +383,7 @@ internal static class MockTypeDiscovery
         // Matches the definitions System.Threading.Tasks.Task<TResult> and ValueTask<TResult> by
         // name, without formatting the symbol to a display string for every member.
         if (type is INamedTypeSymbol { IsGenericType: true, Arity: 1, ContainingType: null } named
-            && named.Name is "Task" or "ValueTask"
+            && named.Name is ("Task" or "ValueTask")
             && named.ConstructedFrom.TypeParameters[0].Name == "TResult"
             && IsNamespace(named.ContainingNamespace, "Tasks", "Threading", "System"))
         {

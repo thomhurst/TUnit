@@ -22,6 +22,12 @@ namespace TUnit.Mocks.SourceGenerator.Discovery;
 /// The cache is keyed on the <see cref="Compilation"/> instance and never outlives it, so there is
 /// no cross-compilation state to invalidate: a new compilation (any edit) starts empty.
 /// </para>
+/// <para>
+/// Values are computed before <c>GetOrAdd</c> runs, so two transforms that miss on the same key
+/// at the same time can both build a model and one of them is discarded. The computation is pure,
+/// so the outcome is the same either way; downstream consumers rely on value equality, not on
+/// reference identity. A cancelled computation throws before storing, so it is never memoized.
+/// </para>
 /// </summary>
 internal sealed class MockDiscoveryCache
 {
