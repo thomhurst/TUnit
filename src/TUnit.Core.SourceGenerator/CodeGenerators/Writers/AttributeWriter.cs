@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
@@ -12,6 +13,23 @@ public class AttributeWriter(Compilation compilation)
     private readonly Dictionary<AttributeData, string> _attributeObjectInitializerCache = new();
     private readonly Dictionary<INamedTypeSymbol, string> _argumentFreeAttributeInitializerCache = new(SymbolEqualityComparer.Default);
     private readonly Dictionary<INamedTypeSymbol, bool> _tunitRelatedCache = new(SymbolEqualityComparer.Default);
+
+    // Compilation.GetSemanticModel builds a fresh model (with empty binder caches) on every call.
+    // This writer is per-compilation, so share one model per tree across all attribute arguments.
+    private readonly ConcurrentDictionary<SyntaxTree, SemanticModel> _semanticModelCache = new();
+
+    /// <summary>
+    /// Gets a semantic model for a syntax tree owned by this writer's compilation, reusing one model per tree.
+    /// </summary>
+    public SemanticModel GetSemanticModel(SyntaxTree syntaxTree)
+    {
+        if (_semanticModelCache.TryGetValue(syntaxTree, out var semanticModel))
+        {
+            return semanticModel;
+        }
+
+        return _semanticModelCache.GetOrAdd(syntaxTree, tree => compilation.GetSemanticModel(tree));
+    }
 
     public void WriteAttributes(ICodeWriter sourceCodeWriter,
         IEnumerable<AttributeData> attributeDatas)
@@ -89,7 +107,7 @@ public class AttributeWriter(Compilation compilation)
         {
             if (!_argumentFreeAttributeInitializerCache.TryGetValue(attributeClass, out var argumentFreeInitializer))
             {
-                argumentFreeInitializer = GetAttributeObjectInitializerInner(compilation, attributeData, syntax);
+                argumentFreeInitializer = GetAttributeObjectInitializerInner(attributeData, syntax);
                 _argumentFreeAttributeInitializerCache.Add(attributeClass, argumentFreeInitializer);
             }
 
@@ -101,12 +119,12 @@ public class AttributeWriter(Compilation compilation)
             return initializer;
         }
 
-        initializer = GetAttributeObjectInitializerInner(compilation, attributeData, syntax);
+        initializer = GetAttributeObjectInitializerInner(attributeData, syntax);
         _attributeObjectInitializerCache.Add(attributeData, initializer);
         return initializer;
     }
 
-    private static string GetAttributeObjectInitializerInner(Compilation compilation, AttributeData attributeData, AttributeSyntax syntax)
+    private string GetAttributeObjectInitializerInner(AttributeData attributeData, AttributeSyntax syntax)
     {
         var sourceCodeWriter = new CodeWriter("", includeHeader: false);
 
@@ -118,9 +136,9 @@ public class AttributeWriter(Compilation compilation)
 
         var attributeName = attributeData.AttributeClass!.GloballyQualified();
 
-        var formattedConstructorArgs = string.Join(", ", constructorArgs.Select(x => FormatConstructorArgument(compilation, x)));
+        var formattedConstructorArgs = string.Join(", ", constructorArgs.Select(x => FormatConstructorArgument(x)));
 
-        var formattedProperties = properties.Select(x => FormatProperty(compilation, x)).ToArray();
+        var formattedProperties = properties.Select(x => FormatProperty(x)).ToArray();
 
         sourceCodeWriter.Append($"new {attributeName}({formattedConstructorArgs})");
 
@@ -143,19 +161,19 @@ public class AttributeWriter(Compilation compilation)
         return sourceCodeWriter.ToString();
     }
 
-    private static string FormatConstructorArgument(Compilation compilation, AttributeArgumentSyntax attributeArgumentSyntax)
+    private string FormatConstructorArgument(AttributeArgumentSyntax attributeArgumentSyntax)
     {
         if (attributeArgumentSyntax.NameColon is not null)
         {
-            return $"{attributeArgumentSyntax.NameColon!.Name}: {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(compilation.GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString()}";
+            return $"{attributeArgumentSyntax.NameColon!.Name}: {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString()}";
         }
 
-        return attributeArgumentSyntax.Accept(new FullyQualifiedWithGlobalPrefixRewriter(compilation.GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString();
+        return attributeArgumentSyntax.Accept(new FullyQualifiedWithGlobalPrefixRewriter(GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString();
     }
 
-    private static string FormatProperty(Compilation compilation, AttributeArgumentSyntax attributeArgumentSyntax)
+    private string FormatProperty(AttributeArgumentSyntax attributeArgumentSyntax)
     {
-        return $"{attributeArgumentSyntax.NameEquals!.Name} = {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(compilation.GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString()}";
+        return $"{attributeArgumentSyntax.NameEquals!.Name} = {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString()}";
     }
 
     public static void WriteAttributeWithoutSyntax(ICodeWriter sourceCodeWriter, AttributeData attributeData)

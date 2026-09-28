@@ -1,4 +1,6 @@
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,6 +19,10 @@ namespace TUnit.Core.SourceGenerator.Generators;
 [Generator]
 public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 {
+    public const string PropertyDataSourcesStep = "PropertyInjection_PropertyDataSources";
+    public const string AsyncInitializersStep = "PropertyInjection_AsyncInitializers";
+    public const string ConcreteGenericTypesStep = "PropertyInjection_ConcreteGenericTypes";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var enabledProvider = context.AnalyzerConfigOptionsProvider
@@ -34,7 +40,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                     && (property.AttributeLists.Count > 0 || property.Modifiers.Any(SyntaxKind.PartialKeyword)),
                 transform: static (ctx, _) => ExtractPropertyDataSource(ctx))
             .Where(static x => x is not null)
-            .Select(static (x, _) => x!);
+            .Select(static (x, _) => x!)
+            .WithTrackingName(PropertyDataSourcesStep);
 
         // Collect and group by class
         var groupedByClass = propertyDataSources
@@ -52,12 +59,14 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         });
 
         // Pipeline 2: Find IAsyncInitializer types with properties returning IAsyncInitializer
+        // A type can only implement an interface through a base list on one of its declarations.
         var asyncInitializers = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (node, _) => node is TypeDeclarationSyntax,
+                predicate: static (node, _) => node is TypeDeclarationSyntax { BaseList: not null },
                 transform: static (ctx, _) => ExtractAsyncInitializerModel(ctx))
             .Where(static x => x is not null)
-            .Select(static (x, _) => x!);
+            .Select(static (x, _) => x!)
+            .WithTrackingName(AsyncInitializersStep);
 
         var asyncInitializersWithEnabled = asyncInitializers
             .Collect()
@@ -75,10 +84,11 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         // Pipeline 3: Discover concrete generic types from inheritance chains and IDataSourceAttribute type arguments
         var concreteGenericTypes = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (node, _) => node is TypeDeclarationSyntax or PropertyDeclarationSyntax,
+                predicate: static (node, _) => IsConcreteGenericTypeCandidate(node),
                 transform: static (ctx, _) => ExtractConcreteGenericTypes(ctx))
             .Where(static x => x.Count > 0)
-            .SelectMany(static (types, _) => types);
+            .SelectMany(static (types, _) => types)
+            .WithTrackingName(ConcreteGenericTypesStep);
 
         // Collect and deduplicate by fully qualified type name
         var distinctConcreteGenerics = concreteGenericTypes
@@ -144,7 +154,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             return null;
 
         // Find IDataSourceAttribute
-        var dataSourceInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.IDataSourceAttribute");
+        var dataSourceInterface = GetCompilationContext(semanticModel.Compilation).DataSourceInterface;
         if (dataSourceInterface == null)
             return null;
 
@@ -278,7 +288,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         if (typeSymbol.IsUnboundGenericType || typeSymbol.TypeParameters.Length > 0)
             return null;
 
-        var asyncInitializerInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.Interfaces.IAsyncInitializer");
+        var asyncInitializerInterface = GetCompilationContext(semanticModel.Compilation).AsyncInitializerInterface;
         if (asyncInitializerInterface == null)
             return null;
 
@@ -333,9 +343,10 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static List<ConcreteGenericTypeModel> ExtractConcreteGenericTypes(GeneratorSyntaxContext context)
     {
         var semanticModel = context.SemanticModel;
+        var compilationContext = GetCompilationContext(semanticModel.Compilation);
 
-        var dataSourceInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.IDataSourceAttribute");
-        var asyncInitializerInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.Interfaces.IAsyncInitializer");
+        var dataSourceInterface = compilationContext.DataSourceInterface;
+        var asyncInitializerInterface = compilationContext.AsyncInitializerInterface;
 
         if (dataSourceInterface == null || asyncInitializerInterface == null)
             return [];
@@ -352,7 +363,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 {
                     if (IsConcreteGenericType(baseType))
                     {
-                        var model = CreateConcreteGenericModel(baseType, dataSourceInterface, asyncInitializerInterface);
+                        var model = GetConcreteGenericModel(compilationContext, baseType);
                         if (model != null)
                         {
                             results.Add(model);
@@ -366,7 +377,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 {
                     if (IsConcreteGenericType(iface))
                     {
-                        var model = CreateConcreteGenericModel(iface, dataSourceInterface, asyncInitializerInterface);
+                        var model = GetConcreteGenericModel(compilationContext, iface);
                         if (model != null)
                         {
                             results.Add(model);
@@ -391,7 +402,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                         continue;
 
                     // Check attribute type arguments for concrete generic types
-                    DiscoverGenericTypesFromTypeArguments(attr.AttributeClass, dataSourceInterface, asyncInitializerInterface, results);
+                    DiscoverGenericTypesFromTypeArguments(attr.AttributeClass, compilationContext, results);
 
                     // Check constructor arguments for type parameters
                     foreach (var ctorArg in attr.ConstructorArguments)
@@ -403,7 +414,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                             {
                                 if (arrayElement.Value is INamedTypeSymbol elementType && IsConcreteGenericType(elementType))
                                 {
-                                    var model = CreateConcreteGenericModel(elementType, dataSourceInterface, asyncInitializerInterface);
+                                    var model = GetConcreteGenericModel(compilationContext, elementType);
                                     if (model != null)
                                     {
                                         results.Add(model);
@@ -415,7 +426,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
                         if (ctorArg.Value is INamedTypeSymbol argType && IsConcreteGenericType(argType))
                         {
-                            var model = CreateConcreteGenericModel(argType, dataSourceInterface, asyncInitializerInterface);
+                            var model = GetConcreteGenericModel(compilationContext, argType);
                             if (model != null)
                             {
                                 results.Add(model);
@@ -427,7 +438,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 // Also check if the property type itself is a concrete generic
                 if (propertySymbol.Type is INamedTypeSymbol propertyType && IsConcreteGenericType(propertyType))
                 {
-                    var model = CreateConcreteGenericModel(propertyType, dataSourceInterface, asyncInitializerInterface);
+                    var model = GetConcreteGenericModel(compilationContext, propertyType);
                     if (model != null)
                     {
                         results.Add(model);
@@ -444,8 +455,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     /// </summary>
     private static void DiscoverGenericTypesFromTypeArguments(
         INamedTypeSymbol typeSymbol,
-        INamedTypeSymbol dataSourceInterface,
-        INamedTypeSymbol asyncInitializerInterface,
+        InjectionCompilationContext compilationContext,
         List<ConcreteGenericTypeModel> results)
     {
         if (!typeSymbol.IsGenericType)
@@ -457,7 +467,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             {
                 if (IsConcreteGenericType(namedTypeArg))
                 {
-                    var model = CreateConcreteGenericModel(namedTypeArg, dataSourceInterface, asyncInitializerInterface);
+                    var model = GetConcreteGenericModel(compilationContext, namedTypeArg);
                     if (model != null)
                     {
                         results.Add(model);
@@ -467,7 +477,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 // Recurse into nested type arguments
                 if (namedTypeArg.IsGenericType)
                 {
-                    DiscoverGenericTypesFromTypeArguments(namedTypeArg, dataSourceInterface, asyncInitializerInterface, results);
+                    DiscoverGenericTypesFromTypeArguments(namedTypeArg, compilationContext, results);
                 }
             }
         }
@@ -482,14 +492,30 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     }
 
     /// <summary>
+    /// Gets the ConcreteGenericTypeModel for a discovered concrete generic type, computing it once per compilation.
+    /// Returns null if the type doesn't have any relevant properties or interfaces.
+    /// </summary>
+    private static ConcreteGenericTypeModel? GetConcreteGenericModel(InjectionCompilationContext compilationContext, INamedTypeSymbol concreteType)
+    {
+        if (compilationContext.ConcreteGenericModels.TryGetValue(concreteType, out var model))
+        {
+            return model;
+        }
+
+        return compilationContext.ConcreteGenericModels.GetOrAdd(concreteType, CreateConcreteGenericModel(compilationContext, concreteType));
+    }
+
+    /// <summary>
     /// Creates a ConcreteGenericTypeModel for a discovered concrete generic type.
     /// Returns null if the type doesn't have any relevant properties or interfaces.
     /// </summary>
     private static ConcreteGenericTypeModel? CreateConcreteGenericModel(
-        INamedTypeSymbol concreteType,
-        INamedTypeSymbol dataSourceInterface,
-        INamedTypeSymbol asyncInitializerInterface)
+        InjectionCompilationContext compilationContext,
+        INamedTypeSymbol concreteType)
     {
+        var dataSourceInterface = compilationContext.DataSourceInterface!;
+        var asyncInitializerInterface = compilationContext.AsyncInitializerInterface!;
+
         // Check if this type implements IAsyncInitializer
         var implementsIAsyncInitializer = concreteType.AllInterfaces.Contains(asyncInitializerInterface, SymbolEqualityComparer.Default);
 
@@ -500,13 +526,23 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var currentType = concreteType;
         while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
         {
+            // Types from assemblies that cannot see IDataSourceAttribute (such as BCL generics like
+            // List<T>) cannot declare data source properties, so their members only matter when
+            // looking for IAsyncInitializer properties.
+            var canDeclareDataSourceProperties = compilationContext.CanDeclareDataSourceProperties(currentType.ContainingAssembly);
+            if (!canDeclareDataSourceProperties && !implementsIAsyncInitializer)
+            {
+                currentType = currentType.BaseType;
+                continue;
+            }
+
             foreach (var member in currentType.GetMembers())
             {
                 if (member is not IPropertySymbol property)
                     continue;
 
                 // Check for IDataSourceAttribute on property
-                if (property.SetMethod != null)
+                if (canDeclareDataSourceProperties && property.SetMethod != null)
                 {
                     foreach (var attr in property.GetAttributes())
                     {
@@ -572,6 +608,117 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             {
                 yield return type;
             }
+        }
+    }
+
+    /// <summary>
+    /// Cheap syntactic filter for <see cref="ExtractConcreteGenericTypes"/>. Only a declaration with a base
+    /// list can have a generic base type or interface (an implicit record IEquatable&lt;T&gt; has no
+    /// relevant properties), and only an attributed property or one whose type can name a generic type
+    /// can yield a concrete generic type.
+    /// </summary>
+    private static bool IsConcreteGenericTypeCandidate(SyntaxNode node)
+    {
+        return node switch
+        {
+            TypeDeclarationSyntax typeDeclaration => typeDeclaration.BaseList is not null,
+            PropertyDeclarationSyntax property => property.AttributeLists.Count > 0 || MayNameConcreteGenericType(property.Type),
+            _ => false
+        };
+    }
+
+    private static bool MayNameConcreteGenericType(TypeSyntax type)
+    {
+        return type switch
+        {
+            NullableTypeSyntax nullable => MayNameConcreteGenericType(nullable.ElementType),
+            RefTypeSyntax refType => MayNameConcreteGenericType(refType.Type),
+            // Keywords, arrays, pointers and function pointers never bind to a named generic type;
+            // tuples bind to System.ValueTuple, which has no data source or initializer properties.
+            PredefinedTypeSyntax or ArrayTypeSyntax or PointerTypeSyntax or FunctionPointerTypeSyntax or TupleTypeSyntax => false,
+            // Any other name may be generic, directly or through a using alias.
+            _ => true
+        };
+    }
+
+    #endregion
+
+    #region Compilation Context
+
+    private static readonly ConditionalWeakTable<Compilation, InjectionCompilationContext> CompilationContexts = new();
+
+    private static InjectionCompilationContext GetCompilationContext(Compilation compilation) =>
+        CompilationContexts.GetValue(compilation, static c => new InjectionCompilationContext(c));
+
+    /// <summary>
+    /// Per-compilation symbol lookups and caches shared by every node transform of this generator.
+    /// </summary>
+    private sealed class InjectionCompilationContext(Compilation compilation)
+    {
+        private readonly ConcurrentDictionary<IAssemblySymbol, bool> _canDeclareDataSourceProperties = new(SymbolEqualityComparer.Default);
+
+        public INamedTypeSymbol? DataSourceInterface { get; } = compilation.GetTypeByMetadataName("TUnit.Core.IDataSourceAttribute");
+
+        public INamedTypeSymbol? AsyncInitializerInterface { get; } = compilation.GetTypeByMetadataName("TUnit.Core.Interfaces.IAsyncInitializer");
+
+        // Keyed including nullability because the models contain nullable-annotated display strings.
+        public ConcurrentDictionary<INamedTypeSymbol, ConcreteGenericTypeModel?> ConcreteGenericModels { get; } = new(SymbolEqualityComparer.IncludeNullability);
+
+        /// <summary>
+        /// An attribute in an assembly's metadata requires a (transitive) reference to the assembly that
+        /// declares its interfaces, so an assembly that cannot reach IDataSourceAttribute's assembly cannot
+        /// declare a property with a data source attribute.
+        /// </summary>
+        public bool CanDeclareDataSourceProperties(IAssemblySymbol? assembly)
+        {
+            var dataSourceAssembly = DataSourceInterface?.ContainingAssembly;
+            if (assembly is null || dataSourceAssembly is null)
+            {
+                return true;
+            }
+
+            if (_canDeclareDataSourceProperties.TryGetValue(assembly, out var canDeclare))
+            {
+                return canDeclare;
+            }
+
+            return _canDeclareDataSourceProperties.GetOrAdd(assembly, ReferencesAssembly(assembly, dataSourceAssembly.Identity.Name));
+        }
+
+        private bool ReferencesAssembly(IAssemblySymbol assembly, string targetAssemblyName)
+        {
+            if (SymbolEqualityComparer.Default.Equals(assembly, compilation.Assembly))
+            {
+                return true;
+            }
+
+            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var pending = new Stack<IAssemblySymbol>();
+            pending.Push(assembly);
+
+            while (pending.Count > 0)
+            {
+                var current = pending.Pop();
+                if (!visited.Add(current.Identity.Name))
+                {
+                    continue;
+                }
+
+                if (string.Equals(current.Identity.Name, targetAssemblyName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                foreach (var module in current.Modules)
+                {
+                    foreach (var referencedAssembly in module.ReferencedAssemblySymbols)
+                    {
+                        pending.Push(referencedAssembly);
+                    }
+                }
+            }
+
+            return false;
         }
     }
 

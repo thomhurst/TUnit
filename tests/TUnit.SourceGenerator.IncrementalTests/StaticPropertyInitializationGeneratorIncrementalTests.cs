@@ -40,7 +40,7 @@ public class StaticPropertyInitializationGeneratorIncrementalTests
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
         AssertRunParseLength(driver2,2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Unchanged);
+        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached);
     }
 
     [Fact]
@@ -92,6 +92,45 @@ public class StaticPropertyInitializationGeneratorIncrementalTests
             """));
         var driver2 = driver1.RunGenerators(compilation2);
         AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void HiddenBaseStaticPropertyIsInitializedRegardlessOfDeclarationOrder(bool derivedFirst)
+    {
+        const string baseClass =
+            """
+            using TUnit.Core;
+
+            public class HidingBase
+            {
+                [Arguments("base")]
+                public static string? Value { get; set; }
+            }
+            """;
+
+        const string derivedClass =
+            """
+            using TUnit.Core;
+
+            public class HidingDerived : HidingBase
+            {
+                [Arguments("derived")]
+                public new static string? Value { get; set; }
+            }
+            """;
+
+        var baseTree = CSharpSyntaxTree.ParseText(baseClass, CSharpParseOptions.Default);
+        var derivedTree = CSharpSyntaxTree.ParseText(derivedClass, CSharpParseOptions.Default);
+        var compilation = derivedFirst
+            ? Fixture.CreateLibrary(derivedTree, baseTree)
+            : Fixture.CreateLibrary(baseTree, derivedTree);
+
+        var driver = TestHelper.GenerateTracked<StaticPropertyInitializationGenerator>(compilation);
+
+        // Both HidingDerived.Value and the hidden HidingBase.Value need initializing
+        AssertRunParseLength(driver, 2);
     }
 
     private static void AssertRunReasons(

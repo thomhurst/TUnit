@@ -101,6 +101,41 @@ public class AotConverterGeneratorIncrementalTests
         AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified, 1);
     }
 
+    [Fact]
+    public void EditNonTestMethodShouldNotRegenerate()
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(DefaultConverter, CSharpParseOptions.Default);
+        var compilation1 = Fixture.CreateLibrary(syntaxTree);
+
+        var driver1 = TestHelper.GenerateTracked<AotConverterGenerator>(compilation1);
+        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 1);
+
+        var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "Data",
+            "public static IEnumerable<Foo> Data() => [new(), new()];");
+        var driver2 = driver1.RunGenerators(compilation2);
+        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached, 1);
+    }
+
+    [Fact]
+    public void ChangeTestParameterShouldRegenerate()
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(DefaultConverter, CSharpParseOptions.Default);
+        var compilation1 = Fixture.CreateLibrary(syntaxTree);
+
+        var driver1 = TestHelper.GenerateTracked<AotConverterGenerator>(compilation1);
+        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 1);
+
+        var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "Test1",
+            """
+            [Test]
+            public void Test1(int data)
+            {
+            }
+            """);
+        var driver2 = driver1.RunGenerators(compilation2);
+        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified, 0);
+    }
+
     private static void AssertRunReasons(
         GeneratorDriver driver,
         IncrementalGeneratorRunReasons reasons,

@@ -1,6 +1,9 @@
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -25,114 +28,168 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
                 return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
             });
 
-        var testClasses = context.SyntaxProvider
+        // Only classes that can contribute a static data-source property are inspected semantically:
+        // classes declaring an attributed static property, classes with a base list (which may inherit
+        // such properties, including from other assemblies), and partial classes (whose other parts may
+        // declare either). Every other class only walks to System.Object without finding anything.
+        var classChains = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (s, _) => s is ClassDeclarationSyntax,
-                transform: static (ctx, _) => ctx)
+                predicate: static (node, _) => IsCandidateClass(node),
+                transform: static (ctx, ct) => GetStaticPropertyChain(ctx, ct))
+            .Where(static chain => chain.Length > 0);
+
+        var testClasses = classChains
             .Collect()
             .Combine(enabledProvider)
-            .Select((classesProviderPair, _) =>
+            .Select(static (classesProviderPair, _) =>
                 ParseStaticPropertyInitializers(classesProviderPair.Left, classesProviderPair.Right))
             .WithTrackingName(ParseStaticProperties);
 
         context.RegisterSourceOutput(testClasses, GenerateStaticPropertyInitialization);
     }
 
-    private static EquatableArray<PropertyWithDataSourceModel> ParseStaticPropertyInitializers(ImmutableArray<GeneratorSyntaxContext> classesContext, bool enabledProvider)
+    /// <summary>
+    /// The static data-source properties declared directly on one type of an inheritance chain.
+    /// </summary>
+    /// <param name="TypeKey">Identity of the type, matching <see cref="SymbolEqualityComparer.Default"/>.</param>
+    /// <param name="Properties">The type's public static data-source properties, in member order.</param>
+    internal sealed record StaticPropertyTypeSegment(string TypeKey, EquatableArray<StaticPropertyEntry> Properties);
+
+    internal sealed record StaticPropertyEntry(string Name, PropertyWithDataSourceModel Model);
+
+    // Base types are shared by many classes. Cache each type's segment per compilation so chain
+    // walks read the members and attributes of a common base (or BCL) type only once.
+    private static readonly ConditionalWeakTable<Compilation, ConcurrentDictionary<INamedTypeSymbol, StaticPropertyTypeSegment>> SegmentCaches = new();
+
+    private static bool IsCandidateClass(SyntaxNode node)
+    {
+        if (node is not ClassDeclarationSyntax classDeclaration)
+        {
+            return false;
+        }
+
+        if (classDeclaration.BaseList is not null || classDeclaration.Modifiers.Any(SyntaxKind.PartialKeyword))
+        {
+            return true;
+        }
+
+        foreach (var member in classDeclaration.Members)
+        {
+            if (member is PropertyDeclarationSyntax { AttributeLists.Count: > 0 } property
+                && property.Modifiers.Any(SyntaxKind.StaticKeyword))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static EquatableArray<StaticPropertyTypeSegment> GetStaticPropertyChain(GeneratorSyntaxContext context, CancellationToken cancellationToken)
+    {
+        if (context.SemanticModel.GetDeclaredSymbol(context.Node, cancellationToken) is not INamedTypeSymbol typeSymbol)
+        {
+            return EquatableArray<StaticPropertyTypeSegment>.Empty;
+        }
+
+        // Skip open generic types - we can't generate code for types with unbound type parameters
+        // The initialization will happen in the consuming assembly that provides concrete type arguments
+        if (typeSymbol.IsGenericType && typeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
+        {
+            return EquatableArray<StaticPropertyTypeSegment>.Empty;
+        }
+
+        var cache = SegmentCaches.GetValue(context.SemanticModel.Compilation,
+            static _ => new ConcurrentDictionary<INamedTypeSymbol, StaticPropertyTypeSegment>(SymbolEqualityComparer.IncludeNullability));
+
+        // Walk inheritance hierarchy to include base class static properties
+        var segments = new List<StaticPropertyTypeSegment>();
+        for (var currentType = typeSymbol; currentType != null; currentType = currentType.BaseType)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (!cache.TryGetValue(currentType, out var segment))
+            {
+                segment = cache.GetOrAdd(currentType, static type => CreateSegment(type));
+            }
+
+            segments.Add(segment);
+        }
+
+        return segments.ToEquatableArray();
+    }
+
+    private static StaticPropertyTypeSegment CreateSegment(INamedTypeSymbol type)
+    {
+        List<StaticPropertyEntry>? properties = null;
+
+        foreach (var member in type.GetMembers())
+        {
+            if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: true } property) // Only static properties for session initialization
+            {
+                var dataSourceAttr = property.GetAttributes()
+                    .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
+
+                if (dataSourceAttr != null)
+                {
+                    properties ??= [];
+                    properties.Add(new StaticPropertyEntry(
+                        property.Name,
+                        ToPropertyWithDataSourceModel(new PropertyWithDataSource
+                        {
+                            Property = property,
+                            DataSourceAttribute = dataSourceAttr
+                        })));
+                }
+            }
+        }
+
+        return new StaticPropertyTypeSegment(
+            type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            properties is null ? EquatableArray<StaticPropertyEntry>.Empty : properties.ToEquatableArray());
+    }
+
+    private static EquatableArray<PropertyWithDataSourceModel> ParseStaticPropertyInitializers(ImmutableArray<EquatableArray<StaticPropertyTypeSegment>> classChains, bool enabledProvider)
     {
         if (!enabledProvider)
         {
             return EquatableArray<PropertyWithDataSourceModel>.Empty;
         }
 
-        // Use a dictionary to deduplicate static properties by their declaring type and name
+        // Use a set to deduplicate static properties by their declaring type and name
         // This prevents duplicate initialization when derived classes inherit static properties
-        var uniqueStaticProperties = new Dictionary<(INamedTypeSymbol DeclaringType, string Name), PropertyWithDataSource>(SymbolEqualityComparer.Default.ToTupleComparer());
-        var visitedTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-        var properties = new List<PropertyWithDataSource>();
+        var uniqueStaticProperties = new HashSet<(string DeclaringType, string Name)>();
+        var walkPropertyNames = new HashSet<string>();
+        var result = new List<PropertyWithDataSourceModel>();
 
-        foreach (var context in classesContext)
+        foreach (var chain in classChains)
         {
-            if (context.SemanticModel.GetDeclaredSymbol(context.Node) is not INamedTypeSymbol typeSymbol)
-            {
-                continue;
-            }
+            walkPropertyNames.Clear();
 
-            // Skip open generic types - we can't generate code for types with unbound type parameters
-            // The initialization will happen in the consuming assembly that provides concrete type arguments
-            if (typeSymbol.IsGenericType && typeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
+            // Every chain is walked in full, even through types an earlier chain reached: a property
+            // hidden by a derived type in one walk must still be added when its declaring type's own
+            // chain is walked, whatever the order of the chains. uniqueStaticProperties dedupes.
+            foreach (var segment in chain)
             {
-                continue;
-            }
-
-            // Check if this type has any static properties with data source attributes
-            foreach (var prop in GetStaticPropertyDataSources(typeSymbol, visitedTypes, properties))
-            {
-                // Static properties belong to their declaring type, not derived types
-                // Only add if we haven't seen this exact property before
-                var key = (prop.Property.ContainingType, prop.Property.Name);
-                if (!uniqueStaticProperties.ContainsKey(key))
+                foreach (var property in segment.Properties)
                 {
-                    uniqueStaticProperties[key] = prop;
-                }
-            }
-        }
-
-        return uniqueStaticProperties.Values.Select(ToPropertyWithDataSourceModel).ToEquatableArray();
-    }
-
-    private static List<PropertyWithDataSource> GetStaticPropertyDataSources(
-        INamedTypeSymbol typeSymbol,
-        HashSet<INamedTypeSymbol> visitedType,
-        List<PropertyWithDataSource> properties
-        )
-    {
-        properties.Clear();
-
-        // Walk inheritance hierarchy to include base class static properties
-        var currentType = typeSymbol;
-        while (currentType != null)
-        {
-            if (!visitedType.Add(currentType))
-            {
-                break;
-            }
-
-            foreach (var member in currentType.GetMembers())
-            {
-                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: true } property) // Only static properties for session initialization
-                {
-                    var dataSourceAttr = property.GetAttributes()
-                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
-
-                    if (dataSourceAttr != null)
+                    // Check if we already have this property (in case of overrides)
+                    if (!walkPropertyNames.Add(property.Name))
                     {
-                        // Check if we already have this property (in case of overrides)
-                        bool newProperty = true;
-                        foreach (var p in properties)
-                        {
-                            if (p.Property.Name == property.Name)
-                            {
-                                newProperty = false;
-                                break;
-                            }
-                        }
+                        continue;
+                    }
 
-                        if (newProperty)
-                        {
-                            properties.Add(new PropertyWithDataSource
-                            {
-                                Property = property,
-                                DataSourceAttribute = dataSourceAttr
-                            });
-                        }
+                    // Static properties belong to their declaring type, not derived types
+                    // Only add if we haven't seen this exact property before
+                    if (uniqueStaticProperties.Add((segment.TypeKey, property.Name)))
+                    {
+                        result.Add(property.Model);
                     }
                 }
             }
-            currentType = currentType.BaseType;
         }
 
-        return properties;
+        return result.ToEquatableArray();
     }
 
     private static PropertyWithDataSourceModel ToPropertyWithDataSourceModel(PropertyWithDataSource staticProperty)
