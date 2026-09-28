@@ -290,7 +290,7 @@ await Assert.That(text).EndsWith(suffix);
 ```csharp
 // NUnit
 Assert.Throws<InvalidOperationException>(() => DoSomething());
-Assert.ThrowsAsync<InvalidOperationException>(async () => await DoSomethingAsync());
+await Assert.ThrowsAsync<InvalidOperationException>(async () => await DoSomethingAsync()); // NUnit 3/4: not awaited
 
 // TUnit
 Assert.Throws<InvalidOperationException>(() => DoSomething());

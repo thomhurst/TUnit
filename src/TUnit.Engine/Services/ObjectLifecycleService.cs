@@ -41,7 +41,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 #if NET
     // Gates span creation so only the first caller for a given object creates a trace span.
     // Subsequent callers (concurrent tests sharing the same object) skip span creation
-    // and just await ObjectInitializer's deduplicated Lazy<Task>.
+    // and just await ObjectInitializer's deduplicated initialization task.
     // Uses ConditionalWeakTable so per-test objects can be GC'd after their test completes.
     private readonly ConditionalWeakTable<object, StrongBox<int>> _spannedObjects = new();
 #endif
