@@ -106,6 +106,61 @@ internal static class TestHelper
         return compilation.ReplaceSyntaxTree(compilation.SyntaxTrees.First(), newTree);
     }
 
+    /// <summary>
+    /// Asserts every output of the tracked step <paramref name="stepName"/> has one of the
+    /// <paramref name="allowedReasons"/>, and that the step produced at least one output.
+    /// </summary>
+    public static void AssertAllRunReasons(
+        GeneratorRunResult runResult,
+        string stepName,
+        params IncrementalStepRunReason[] allowedReasons
+    )
+    {
+        var outputs = runResult.TrackedSteps[stepName]
+            .SelectMany(x => x.Outputs)
+            .ToArray();
+
+        Xunit.Assert.NotEmpty(outputs);
+        foreach (var output in outputs)
+        {
+            Xunit.Assert.Contains(output.Reason, allowedReasons);
+        }
+    }
+
+    /// <summary>
+    /// Asserts at least one output of the tracked step <paramref name="stepName"/> has <paramref name="expectedReason"/>.
+    /// </summary>
+    public static void AssertAnyRunReason(
+        GeneratorRunResult runResult,
+        string stepName,
+        IncrementalStepRunReason expectedReason
+    )
+    {
+        var reasons = runResult.TrackedSteps[stepName]
+            .SelectMany(x => x.Outputs)
+            .Select(x => x.Reason)
+            .ToArray();
+
+        Xunit.Assert.Contains(expectedReason, reasons);
+    }
+
+    /// <summary>
+    /// Asserts no source output was re-run, i.e. nothing was regenerated.
+    /// </summary>
+    public static void AssertSourceOutputsCached(GeneratorRunResult runResult)
+    {
+        var outputs = runResult.TrackedOutputSteps
+            .SelectMany(x => x.Value)
+            .SelectMany(x => x.Outputs)
+            .ToArray();
+
+        Xunit.Assert.NotEmpty(outputs);
+        foreach (var output in outputs)
+        {
+            Xunit.Assert.Equal(IncrementalStepRunReason.Cached, output.Reason);
+        }
+    }
+
     public static void AssertRunReason(
         GeneratorRunResult runResult,
         string stepName,

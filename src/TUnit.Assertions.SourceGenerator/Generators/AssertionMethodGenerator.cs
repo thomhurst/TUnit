@@ -4,52 +4,57 @@ using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Assertions.SourceGenerator.Models;
 
 namespace TUnit.Assertions.SourceGenerator.Generators;
 
 [Generator]
 public sealed class AssertionMethodGenerator : IIncrementalGenerator
 {
+    public const string NonGenericAssertionFromStep = "NonGenericAssertionFrom";
+    public const string GenericAssertionFromStep = "GenericAssertionFrom";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        // Both transforms render the generated snippets eagerly and return string-only models,
+        // so no symbols (and no compilation) are rooted by the pipeline and unchanged classes
+        // compare equal across edits.
+
         // Handle non-generic AssertionFromAttribute
         var nonGenericAssertionFromData = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Assertions.Attributes.AssertionFromAttribute",
-                predicate: (node, _) => true,
-                transform: (ctx, _) => GetCreateAssertionAttributeData(ctx))
-            .Where(x => x != null);
+                predicate: static (node, _) => true,
+                transform: static (ctx, _) => GetCreateAssertionAttributeData(ctx))
+            .Where(static x => x != null)
+            .Select(static (x, _) => x!)
+            .WithTrackingName(NonGenericAssertionFromStep);
 
         // Handle generic AssertionFromAttribute<T>
         var genericAssertionFromData = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                predicate: (node, _) => node is ClassDeclarationSyntax,
-                transform: (ctx, _) => GetGenericCreateAssertionAttributeData(ctx, "AssertionFromAttribute"))
-            .Where(x => x != null)
-            .SelectMany((x, _) => x!);
+            .ForAttributeWithMetadataName(
+                "TUnit.Assertions.Attributes.AssertionFromAttribute`1",
+                predicate: static (node, _) => node is ClassDeclarationSyntax,
+                transform: static (ctx, _) => GetGenericCreateAssertionAttributeData(ctx, "AssertionFromAttribute"))
+            .Where(static x => x != null)
+            .Select(static (x, _) => x!)
+            .WithTrackingName(GenericAssertionFromStep);
 
         // Combine all sources
         var allAttributeData = nonGenericAssertionFromData.Collect()
-            .Combine(genericAssertionFromData.Collect())
-            .Select((data, _) =>
-            {
-                var result = new List<AttributeWithClassData>();
-                result.AddRange(data.Left.Where(x => x != null).SelectMany(x => x!));
-                result.AddRange(data.Right);
-                return result.AsEnumerable();
-            });
+            .Combine(genericAssertionFromData.Collect());
 
-        context.RegisterSourceOutput(allAttributeData, GenerateAssertionsForClass);
+        context.RegisterSourceOutput(allAttributeData, static (ctx, data) => GenerateAssertionsForClass(ctx, data.Left, data.Right));
     }
 
-    private static IEnumerable<AttributeWithClassData>? GetCreateAssertionAttributeData(GeneratorAttributeSyntaxContext context)
+    private static AssertionClassModel? GetCreateAssertionAttributeData(GeneratorAttributeSyntaxContext context)
     {
         if (context.TargetSymbol is not INamedTypeSymbol classSymbol)
         {
             return null;
         }
 
-        var attributeDataList = new List<AttributeWithClassData>();
+        var attributeDataList = new List<CreateAssertionAttributeData>();
 
         foreach (var attributeData in context.Attributes)
         {
@@ -131,31 +136,23 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     isUnboundGeneric
                 );
 
-                attributeDataList.Add(new AttributeWithClassData(classSymbol, createAssertionAttributeData));
+                attributeDataList.Add(createAssertionAttributeData);
             }
         }
 
-        return attributeDataList.Count > 0 ? attributeDataList : null;
+        return attributeDataList.Count > 0 ? BuildClassModel(classSymbol, attributeDataList) : null;
     }
 
-    private static IEnumerable<AttributeWithClassData>? GetGenericCreateAssertionAttributeData(GeneratorSyntaxContext context, string attributeName)
+    private static AssertionClassModel? GetGenericCreateAssertionAttributeData(GeneratorAttributeSyntaxContext context, string attributeName)
     {
-        if (context.Node is not ClassDeclarationSyntax classDeclaration)
+        if (context.TargetSymbol is not INamedTypeSymbol classSymbol)
         {
             return null;
         }
 
-        var semanticModel = context.SemanticModel;
-        var classSymbol = semanticModel.GetDeclaredSymbol(classDeclaration) as INamedTypeSymbol;
-        
-        if (classSymbol == null)
-        {
-            return null;
-        }
+        var attributeDataList = new List<CreateAssertionAttributeData>();
 
-        var attributeDataList = new List<AttributeWithClassData>();
-
-        foreach (var attributeData in classSymbol.GetAttributes())
+        foreach (var attributeData in context.Attributes)
         {
             var attributeClass = attributeData.AttributeClass;
             if (attributeClass == null || !attributeClass.IsGenericType)
@@ -247,11 +244,11 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     isUnboundGeneric
                 );
 
-                attributeDataList.Add(new AttributeWithClassData(classSymbol, createAssertionAttributeData));
+                attributeDataList.Add(createAssertionAttributeData);
             }
         }
 
-        return attributeDataList.Count > 0 ? attributeDataList : null;
+        return attributeDataList.Count > 0 ? BuildClassModel(classSymbol, attributeDataList) : null;
     }
 
     private static bool IsValidReturnType(ITypeSymbol returnType, out ReturnTypeKind kind)
@@ -311,10 +308,12 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         TaskAssertionResult
     }
 
-    private static void GenerateAssertionsForClass(SourceProductionContext context, IEnumerable<AttributeWithClassData> classAttributeData)
+    private static void GenerateAssertionsForClass(
+        SourceProductionContext context,
+        ImmutableArray<AssertionClassModel> nonGenericData,
+        ImmutableArray<AssertionClassModel> genericData)
     {
-        var allData = classAttributeData.ToArray();
-        if (!allData.Any())
+        if (nonGenericData.IsDefaultOrEmpty && genericData.IsDefaultOrEmpty)
         {
             return;
         }
@@ -322,26 +321,44 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         // Track all generated classes globally to avoid duplicates across different extension classes
         var allGeneratedClasses = new HashSet<string>();
 
-        // Group by class and generate one file per class
-        foreach (var classGroup in allData.GroupBy(x => x.ClassSymbol, SymbolEqualityComparer.Default))
+        // Group by class and generate one file per class. Non-generic attribute data comes first,
+        // then generic, so a class using both keeps its existing member order.
+        var allData = nonGenericData.Concat(genericData)
+            .SelectMany(model => model.Entries.Select(entry => (Model: model, Entry: entry)));
+
+        foreach (var classGroup in allData.GroupBy(x => x.Model.ClassKey, StringComparer.Ordinal))
         {
-            GenerateAssertionsForSpecificClass(context, classGroup.Key as INamedTypeSymbol, classGroup.ToArray(), allGeneratedClasses);
+            var first = classGroup.First().Model;
+            GenerateAssertionsForSpecificClass(context, first.ClassName, first.OriginalNamespace, classGroup.Select(x => x.Entry).ToArray(), allGeneratedClasses);
         }
     }
 
-    private static void GenerateAssertionsForSpecificClass(SourceProductionContext context, INamedTypeSymbol? classSymbol, AttributeWithClassData[] dataList, HashSet<string> allGeneratedClasses)
+    private static AssertionClassModel BuildClassModel(INamedTypeSymbol classSymbol, List<CreateAssertionAttributeData> attributeDataList)
     {
-        if (classSymbol == null || !dataList.Any())
+        var entries = new List<AssertionEntryModel>(attributeDataList.Count);
+        foreach (var attributeData in attributeDataList)
         {
-            return;
+            entries.Add(RenderEntry(attributeData));
         }
+
+        return new AssertionClassModel(
+            classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            classSymbol.Name,
+            classSymbol.ContainingNamespace?.ToDisplayString(),
+            entries.ToImmutableEquatableArray());
+    }
+
+    private static void GenerateAssertionsForSpecificClass(
+        SourceProductionContext context,
+        string className,
+        string? originalNamespace,
+        AssertionEntryModel[] entries,
+        HashSet<string> allGeneratedClasses)
+    {
         var sourceBuilder = new StringBuilder();
         // Always generate extension methods in TUnit.Assertions.Extensions namespace
         // so they're available via implicit usings in consuming projects
         var namespaceName = "TUnit.Assertions.Extensions";
-
-        // Get the original namespace where the helper methods/properties are defined
-        var originalNamespace = classSymbol.ContainingNamespace?.ToDisplayString();
 
         sourceBuilder.AppendLine("// <auto-generated/>");
         sourceBuilder.AppendLine("#pragma warning disable");
@@ -367,158 +384,197 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         }
 
         // Generate all assert condition classes first
-        foreach (var attributeWithClassData in dataList)
+        foreach (var entry in entries)
         {
-            var attributeData = attributeWithClassData.AttributeData;
-
-            // For unbound generic types, we need to temporarily construct them for member lookup
-            var typeForMemberLookup = attributeData.ContainingType;
-            if (attributeData.IsUnboundGeneric && typeForMemberLookup.IsUnboundGenericType)
+            if (entry.MissingMethodMessage is not null)
             {
-                // Get System.Object by searching through the type's containing assembly references
-                INamedTypeSymbol? objectType = null;
-
-                // Look through the referenced assemblies to find System.Object
-                foreach (var refAssembly in typeForMemberLookup.ContainingAssembly.Modules.FirstOrDefault()?.ReferencedAssemblySymbols ?? Enumerable.Empty<IAssemblySymbol>())
-                {
-                    var systemNs = refAssembly.GlobalNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "System");
-                    if (systemNs != null)
-                    {
-                        objectType = systemNs.GetTypeMembers("Object").FirstOrDefault();
-                        if (objectType != null) break;
-                    }
-                }
-
-                if (objectType != null)
-                {
-                    var typeArgs = Enumerable.Repeat<ITypeSymbol>(objectType, typeForMemberLookup.TypeParameters.Length).ToArray();
-                    typeForMemberLookup = typeForMemberLookup.Construct(typeArgs);
-                }
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "TU0001",
+                        "Method not found",
+                        entry.MissingMethodMessage,
+                        "TUnit.Assertions",
+                        DiagnosticSeverity.Error,
+                        true),
+                    Location.None));
             }
 
-            // First try to find methods
-            var methodMembers = typeForMemberLookup.GetMembers(attributeData.MethodName)
-                .OfType<IMethodSymbol>()
-                .Where(m => IsValidReturnType(m.ReturnType, out _) &&
-                           (attributeData.TreatAsInstance ?
-                               // If treating as instance and containing type is different, look for static methods that take target as first param
-                               (!SymbolEqualityComparer.Default.Equals(attributeData.ContainingType, attributeData.TargetType) ?
-                                   m.IsStatic && m.Parameters.Length > 0 && 
-                                   SymbolEqualityComparer.Default.Equals(m.Parameters[0].Type, attributeData.TargetType) :
-                                   !m.IsStatic) :
-                               m.IsStatic ?
-                                   // Static method: check first parameter matches target type or is generic Type
-                                   m.Parameters.Length > 0 &&
-                                   (attributeData.RequiresGenericTypeParameter ?
-                                       m.Parameters[0].Type.Name == "Type" && m.Parameters[0].Type.ContainingNamespace.Name == "System" :
-                                       SymbolEqualityComparer.Default.Equals(m.Parameters[0].Type, attributeData.TargetType)) :
-                                   // Instance method: method must be on the target type
-                                   SymbolEqualityComparer.Default.Equals(m.ContainingType, attributeData.TargetType)))
-                .OrderBy(m => m.Parameters.Length)
-                .ToArray();
-
-            // If no methods found, try properties
-            var propertyMembers = new List<IPropertySymbol>();
-            if (!methodMembers.Any())
+            foreach (var conditionClass in entry.ConditionClasses)
             {
-                propertyMembers = typeForMemberLookup.GetMembers(attributeData.MethodName)
-                    .OfType<IPropertySymbol>()
-                    .Where(p => p.Type.SpecialType == SpecialType.System_Boolean &&
-                        p is { GetMethod: not null, IsStatic: false })
-                    .ToList();
-            }
-
-            var matchingMethods = methodMembers.ToList();
-
-            // Convert properties to method-like representation for uniform handling
-            foreach (var property in propertyMembers)
-            {
-                if (property.GetMethod != null)
-                {
-                    matchingMethods.Add(property.GetMethod);
-                }
-            }
-
-            if (!matchingMethods.Any())
-            {
-                // For unbound generic types, we'll generate generic methods even if we can't find the property now
-                // The property will exist on the constructed type at runtime
-                if (!attributeData.IsUnboundGeneric)
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        new DiagnosticDescriptor(
-                            "TU0001",
-                            "Method not found",
-                            $"No boolean method '{attributeData.MethodName}' found on type '{attributeData.ContainingType.ToDisplayString()}'",
-                            "TUnit.Assertions",
-                            DiagnosticSeverity.Error,
-                            true),
-                        Location.None));
-                }
-                continue;
-            }
-
-            foreach (var method in matchingMethods)
-            {
-                var className = GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, attributeData.MethodName, method);
-
-                if (!allGeneratedClasses.Add(className))
+                if (!allGeneratedClasses.Add(conditionClass.ClassName))
                 {
                     continue;
                 }
 
-                GenerateAssertConditionClassForMethod(context, sourceBuilder, attributeData, method);
+                sourceBuilder.Append(conditionClass.Source);
             }
         }
 
         // Generate extension methods class
-        sourceBuilder.AppendLine($"public static partial class {classSymbol.Name}");
+        sourceBuilder.AppendLine($"public static partial class {className}");
         sourceBuilder.AppendLine("{");
 
-        foreach (var attributeWithClassData in dataList)
+        foreach (var entry in entries)
         {
-            var attributeData = attributeWithClassData.AttributeData;
-
-            // Try to find methods first
-            var methodMembers = attributeData.ContainingType.GetMembers(attributeData.MethodName)
-                .OfType<IMethodSymbol>()
-                .Where(m => IsValidReturnType(m.ReturnType, out _) &&
-                           (m.IsStatic ?
-                               m.Parameters.Length > 0 &&
-                               (attributeData.RequiresGenericTypeParameter ?
-                                   m.Parameters[0].Type.Name == "Type" && m.Parameters[0].Type.ContainingNamespace.Name == "System" :
-                                   SymbolEqualityComparer.Default.Equals(m.Parameters[0].Type, attributeData.TargetType)) :
-                               SymbolEqualityComparer.Default.Equals(m.ContainingType, attributeData.TargetType)))
-                .OrderBy(m => m.Parameters.Length)
-                .ToArray();
-
-            var propertyMembers = attributeData.ContainingType.GetMembers(attributeData.MethodName)
-                .OfType<IPropertySymbol>()
-                .Where(p => p.Type.SpecialType == SpecialType.System_Boolean &&
-                    p is { GetMethod: not null, IsStatic: false } &&
-                    SymbolEqualityComparer.Default.Equals(p.ContainingType, attributeData.TargetType));
-
-            var matchingMethods = methodMembers.ToList();
-
-            // Convert properties to method-like representation
-            foreach (var property in propertyMembers)
-            {
-                if (property.GetMethod != null)
-                {
-                    matchingMethods.Add(property.GetMethod);
-                }
-            }
-
-            foreach (var method in matchingMethods)
-            {
-                GenerateMethodsForSpecificOverload(context, sourceBuilder, attributeData, method);
-            }
+            sourceBuilder.Append(entry.ExtensionMethodsSource);
         }
 
         sourceBuilder.AppendLine("}");
 
-        var fileName = $"{classSymbol.Name}.g.cs";
+        var fileName = $"{className}.g.cs";
         context.AddSource(fileName, sourceBuilder.ToString());
+    }
+
+    /// <summary>
+    /// Renders every snippet one attribute contributes, while its symbols are still available,
+    /// so the incremental pipeline only carries strings.
+    /// </summary>
+    private static AssertionEntryModel RenderEntry(CreateAssertionAttributeData attributeData)
+    {
+        var conditionClasses = RenderConditionClasses(attributeData, out var missingMethodMessage);
+        var extensionMethodsSource = RenderExtensionMethods(attributeData);
+
+        return new AssertionEntryModel(conditionClasses, missingMethodMessage, extensionMethodsSource);
+    }
+
+    private static ImmutableEquatableArray<ConditionClassModel> RenderConditionClasses(CreateAssertionAttributeData attributeData, out string? missingMethodMessage)
+    {
+        missingMethodMessage = null;
+        var conditionClasses = new List<ConditionClassModel>();
+
+        // For unbound generic types, we need to temporarily construct them for member lookup
+        var typeForMemberLookup = attributeData.ContainingType;
+        if (attributeData.IsUnboundGeneric && typeForMemberLookup.IsUnboundGenericType)
+        {
+            // Get System.Object by searching through the type's containing assembly references
+            INamedTypeSymbol? objectType = null;
+
+            // Look through the referenced assemblies to find System.Object
+            foreach (var refAssembly in typeForMemberLookup.ContainingAssembly.Modules.FirstOrDefault()?.ReferencedAssemblySymbols ?? Enumerable.Empty<IAssemblySymbol>())
+            {
+                var systemNs = refAssembly.GlobalNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "System");
+                if (systemNs != null)
+                {
+                    objectType = systemNs.GetTypeMembers("Object").FirstOrDefault();
+                    if (objectType != null) break;
+                }
+            }
+
+            if (objectType != null)
+            {
+                var typeArgs = Enumerable.Repeat<ITypeSymbol>(objectType, typeForMemberLookup.TypeParameters.Length).ToArray();
+                typeForMemberLookup = typeForMemberLookup.Construct(typeArgs);
+            }
+        }
+
+        // First try to find methods
+        var methodMembers = typeForMemberLookup.GetMembers(attributeData.MethodName)
+            .OfType<IMethodSymbol>()
+            .Where(m => IsValidReturnType(m.ReturnType, out _) &&
+                       (attributeData.TreatAsInstance ?
+                           // If treating as instance and containing type is different, look for static methods that take target as first param
+                           (!SymbolEqualityComparer.Default.Equals(attributeData.ContainingType, attributeData.TargetType) ?
+                               m.IsStatic && m.Parameters.Length > 0 && 
+                               SymbolEqualityComparer.Default.Equals(m.Parameters[0].Type, attributeData.TargetType) :
+                               !m.IsStatic) :
+                           m.IsStatic ?
+                               // Static method: check first parameter matches target type or is generic Type
+                               m.Parameters.Length > 0 &&
+                               (attributeData.RequiresGenericTypeParameter ?
+                                   m.Parameters[0].Type.Name == "Type" && m.Parameters[0].Type.ContainingNamespace.Name == "System" :
+                                   SymbolEqualityComparer.Default.Equals(m.Parameters[0].Type, attributeData.TargetType)) :
+                               // Instance method: method must be on the target type
+                               SymbolEqualityComparer.Default.Equals(m.ContainingType, attributeData.TargetType)))
+            .OrderBy(m => m.Parameters.Length)
+            .ToArray();
+
+        // If no methods found, try properties
+        var propertyMembers = new List<IPropertySymbol>();
+        if (!methodMembers.Any())
+        {
+            propertyMembers = typeForMemberLookup.GetMembers(attributeData.MethodName)
+                .OfType<IPropertySymbol>()
+                .Where(p => p.Type.SpecialType == SpecialType.System_Boolean &&
+                    p is { GetMethod: not null, IsStatic: false })
+                .ToList();
+        }
+
+        var matchingMethods = methodMembers.ToList();
+
+        // Convert properties to method-like representation for uniform handling
+        foreach (var property in propertyMembers)
+        {
+            if (property.GetMethod != null)
+            {
+                matchingMethods.Add(property.GetMethod);
+            }
+        }
+
+        if (!matchingMethods.Any())
+        {
+            // For unbound generic types, we'll generate generic methods even if we can't find the property now
+            // The property will exist on the constructed type at runtime
+            if (!attributeData.IsUnboundGeneric)
+            {
+                missingMethodMessage = $"No boolean method '{attributeData.MethodName}' found on type '{attributeData.ContainingType.ToDisplayString()}'";
+            }
+            return ImmutableEquatableArray<ConditionClassModel>.Empty;
+        }
+
+        foreach (var method in matchingMethods)
+        {
+            var className = GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, attributeData.MethodName, method);
+
+            // Duplicate class names are dropped at emit time, where the set of classes
+            // already written across every extension class is known.
+            var classBuilder = new StringBuilder();
+            GenerateAssertConditionClassForMethod(classBuilder, attributeData, method);
+            conditionClasses.Add(new ConditionClassModel(className, classBuilder.ToString()));
+        }
+
+        return conditionClasses.ToImmutableEquatableArray();
+    }
+
+    private static string RenderExtensionMethods(CreateAssertionAttributeData attributeData)
+    {
+        var sourceBuilder = new StringBuilder();
+
+        // Try to find methods first
+        var methodMembers = attributeData.ContainingType.GetMembers(attributeData.MethodName)
+            .OfType<IMethodSymbol>()
+            .Where(m => IsValidReturnType(m.ReturnType, out _) &&
+                       (m.IsStatic ?
+                           m.Parameters.Length > 0 &&
+                           (attributeData.RequiresGenericTypeParameter ?
+                               m.Parameters[0].Type.Name == "Type" && m.Parameters[0].Type.ContainingNamespace.Name == "System" :
+                               SymbolEqualityComparer.Default.Equals(m.Parameters[0].Type, attributeData.TargetType)) :
+                           SymbolEqualityComparer.Default.Equals(m.ContainingType, attributeData.TargetType)))
+            .OrderBy(m => m.Parameters.Length)
+            .ToArray();
+
+        var propertyMembers = attributeData.ContainingType.GetMembers(attributeData.MethodName)
+            .OfType<IPropertySymbol>()
+            .Where(p => p.Type.SpecialType == SpecialType.System_Boolean &&
+                p is { GetMethod: not null, IsStatic: false } &&
+                SymbolEqualityComparer.Default.Equals(p.ContainingType, attributeData.TargetType));
+
+        var matchingMethods = methodMembers.ToList();
+
+        // Convert properties to method-like representation
+        foreach (var property in propertyMembers)
+        {
+            if (property.GetMethod != null)
+            {
+                matchingMethods.Add(property.GetMethod);
+            }
+        }
+
+        foreach (var method in matchingMethods)
+        {
+            GenerateMethodsForSpecificOverload(sourceBuilder, attributeData, method);
+        }
+
+        return sourceBuilder.ToString();
     }
 
     private static void GenerateNonGenericTaskMethod(StringBuilder sourceBuilder, string targetTypeName, string generatedMethodName, string assertConditionClassName, bool negated, CreateAssertionAttributeData attributeData)
@@ -535,7 +591,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine();
     }
 
-    private static void GenerateAssertConditionClassForMethod(SourceProductionContext context, StringBuilder sourceBuilder, CreateAssertionAttributeData attributeData, IMethodSymbol staticMethod)
+    private static void GenerateAssertConditionClassForMethod(StringBuilder sourceBuilder, CreateAssertionAttributeData attributeData, IMethodSymbol staticMethod)
     {
         var targetTypeName = attributeData.TargetType.ToDisplayString();
         var containingType = attributeData.ContainingType;
@@ -1054,7 +1110,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         return constraints;
     }
 
-    private static void GenerateMethodsForSpecificOverload(SourceProductionContext context, StringBuilder sourceBuilder, CreateAssertionAttributeData attributeData, IMethodSymbol staticMethod)
+    private static void GenerateMethodsForSpecificOverload(StringBuilder sourceBuilder, CreateAssertionAttributeData attributeData, IMethodSymbol staticMethod)
     {
         var targetTypeName = attributeData.TargetType.ToDisplayString();
         var methodName = attributeData.MethodName;
@@ -1221,11 +1277,40 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine();
     }
 
-    private record AttributeWithClassData(
-        INamedTypeSymbol ClassSymbol,
-        CreateAssertionAttributeData AttributeData
+    /// <summary>
+    /// Pipeline model for one attributed class. Holds only strings so it compares by value
+    /// across compilations and never roots a compilation.
+    /// </summary>
+    private sealed record AssertionClassModel(
+        string ClassKey,
+        string ClassName,
+        string? OriginalNamespace,
+        ImmutableEquatableArray<AssertionEntryModel> Entries
     );
 
+    /// <summary>
+    /// Pre-rendered output for one [AssertionFrom] attribute: its assertion condition classes,
+    /// the "method not found" message when nothing matched, and its extension methods.
+    /// </summary>
+    /// <remarks>
+    /// Rendering in the transform is deliberate: the emission code is bound to symbols, and
+    /// strings give cheap value equality. The rendered text must stay deterministic (no
+    /// timestamps, no hash-ordered collections), or every run would compare as modified.
+    /// </remarks>
+    private sealed record AssertionEntryModel(
+        ImmutableEquatableArray<ConditionClassModel> ConditionClasses,
+        string? MissingMethodMessage,
+        string ExtensionMethodsSource
+    );
+
+    private sealed record ConditionClassModel(
+        string ClassName,
+        string Source
+    );
+
+    /// <summary>
+    /// Symbol-based attribute data. Only used inside the transform; never flows through the pipeline.
+    /// </summary>
     private record CreateAssertionAttributeData(
         INamedTypeSymbol TargetType,
         INamedTypeSymbol ContainingType,

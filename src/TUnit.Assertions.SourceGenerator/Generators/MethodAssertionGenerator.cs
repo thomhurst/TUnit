@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using TUnit.Assertions.SourceGenerator.Models;
 
 namespace TUnit.Assertions.SourceGenerator.Generators;
@@ -18,6 +19,7 @@ namespace TUnit.Assertions.SourceGenerator.Generators;
 public sealed class MethodAssertionGenerator : IIncrementalGenerator
 {
     public static string BuildAssertion = "MethodAssertionData";
+    public const string BuildAssertionGroup = "MethodAssertionGroup";
 
     private static readonly DiagnosticDescriptor MethodMustBeStaticRule = new DiagnosticDescriptor(
         id: "TUNITGEN001",
@@ -74,20 +76,53 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             .Where(x => x.Diagnostic != null)
             .Select((x, _) => x.Diagnostic!);
 
-        // Report diagnostics
-        context.RegisterSourceOutput(diagnostics, static (context, diagnostic) =>
+        // Report diagnostics. Each one is located in the current compilation's syntax tree so that
+        // #pragma and per-file .editorconfig severities still apply; an external-file location
+        // has no SourceTree to read them from. Pairing each diagnostic (not the collected array)
+        // with the compilation means this output only re-runs while there are diagnostics.
+        context.RegisterSourceOutput(diagnostics.Combine(context.CompilationProvider), static (context, data) =>
         {
-            context.ReportDiagnostic(diagnostic);
+            context.ReportDiagnostic(data.Left.ToDiagnostic(data.Right));
         });
 
+        // Group methods by containing type so an edit to one type only re-emits that type's file.
+        // The grouping itself is cheap; each group compares by value, so unchanged groups stay cached.
+        var methodGroups = methods.Collect()
+            .SelectMany(static (methods, _) => GroupByContainingType(methods))
+            .WithTrackingName(BuildAssertionGroup);
+
         // Generate assertion classes and extension methods
-        context.RegisterSourceOutput(methods.Collect(), static (context, methods) =>
+        context.RegisterSourceOutput(methodGroups, static (context, group) =>
         {
-            GenerateAssertions(context, methods);
+            GenerateAssertions(context, group);
         });
     }
 
-    private static (AssertionMethodData? Data, Diagnostic? Diagnostic) GetAssertionMethodData(
+    private static ImmutableArray<ContainingTypeGroup> GroupByContainingType(ImmutableArray<AssertionMethodData> methods)
+    {
+        if (methods.IsEmpty)
+        {
+            return ImmutableArray<ContainingTypeGroup>.Empty;
+        }
+
+        var builder = ImmutableArray.CreateBuilder<ContainingTypeGroup>();
+        foreach (var methodGroup in methods.GroupBy(m => m.Method.ContainingType?.FullContainingType))
+        {
+            // FullContainingType is the fully qualified name, so every method in the group comes
+            // from the same type and carries identical containing-type data; any one can stand in.
+            var containingType = methodGroup.First().Method.ContainingType;
+            if (containingType == null)
+            {
+                continue;
+            }
+
+            builder.Add(new ContainingTypeGroup(containingType, methodGroup.ToImmutableEquatableArray()));
+        }
+
+        return builder.ToImmutable();
+    }
+
+    private static (AssertionMethodData? Data, DiagnosticInfo? Diagnostic) GetAssertionMethodData(
         GeneratorAttributeSyntaxContext context,
         CancellationToken cancellationToken)
     {
@@ -101,7 +136,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // Validate method is static
         if (!methodSymbol.IsStatic)
         {
-            var diagnostic = Diagnostic.Create(
+            var diagnostic = DiagnosticInfo.Create(
                 MethodMustBeStaticRule,
                 location,
                 methodSymbol.Name);
@@ -111,7 +146,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // Validate method has at least one parameter
         if (methodSymbol.Parameters.Length == 0)
         {
-            var diagnostic = Diagnostic.Create(
+            var diagnostic = DiagnosticInfo.Create(
                 MethodMustHaveParametersRule,
                 location,
                 methodSymbol.Name);
@@ -122,7 +157,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var returnTypeInfo = AnalyzeReturnType(methodSymbol.ReturnType);
         if (returnTypeInfo == null)
         {
-            var diagnostic = Diagnostic.Create(
+            var diagnostic = DiagnosticInfo.Create(
                 UnsupportedReturnTypeRule,
                 location,
                 methodSymbol.Name,
@@ -301,7 +336,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         {
             if (param.IsRefStruct && string.IsNullOrEmpty(methodBody))
             {
-                var diagnostic = Diagnostic.Create(
+                var diagnostic = DiagnosticInfo.Create(
                     RefStructRequiresInliningRule,
                     location,
                     methodSymbol.Name,
@@ -546,86 +581,74 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
     private static void GenerateAssertions(
         SourceProductionContext context,
-        ImmutableArray<AssertionMethodData> methods)
+        ContainingTypeGroup group)
     {
-        if (methods.IsEmpty)
+        var containingType = group.ContainingType;
+        var methodGroup = group.Methods;
+
+        var sourceBuilder = new StringBuilder();
+        // Always generate extension methods in TUnit.Assertions.Extensions namespace
+        // so they're available via implicit usings in consuming projects
+        var namespaceName = "TUnit.Assertions.Extensions";
+
+        // Get the original namespace where the helper methods are defined
+        var originalNamespace = containingType.ContainingNamespace;
+
+        // File header
+        sourceBuilder.AppendLine("// <auto-generated/>");
+        sourceBuilder.AppendLine("#pragma warning disable");
+        sourceBuilder.AppendLine("#nullable enable");
+        sourceBuilder.AppendLine();
+        sourceBuilder.AppendLine("using System;");
+        sourceBuilder.AppendLine("using System.Runtime.CompilerServices;");
+        sourceBuilder.AppendLine("using System.Threading.Tasks;");
+        sourceBuilder.AppendLine("using TUnit.Assertions.Core;");
+
+        // Add using for the original namespace to access helper methods
+        if (!string.IsNullOrEmpty(originalNamespace) && originalNamespace != namespaceName)
         {
-            return;
+            sourceBuilder.AppendLine($"using {originalNamespace};");
         }
 
-        // Group by containing class to generate one file per class
-        foreach (var methodGroup in methods.GroupBy(m => m.Method.ContainingType?.FullContainingType))
+        sourceBuilder.AppendLine();
+
+        if (!string.IsNullOrEmpty(namespaceName))
         {
-            var containingType = methodGroup.First().Method.ContainingType;
-            if (containingType == null)
-            {
-                continue;
-            }
-
-            var sourceBuilder = new StringBuilder();
-            // Always generate extension methods in TUnit.Assertions.Extensions namespace
-            // so they're available via implicit usings in consuming projects
-            var namespaceName = "TUnit.Assertions.Extensions";
-
-            // Get the original namespace where the helper methods are defined
-            var originalNamespace = containingType.ContainingNamespace;
-
-            // File header
-            sourceBuilder.AppendLine("// <auto-generated/>");
-            sourceBuilder.AppendLine("#pragma warning disable");
-            sourceBuilder.AppendLine("#nullable enable");
+            sourceBuilder.AppendLine($"namespace {namespaceName};");
             sourceBuilder.AppendLine();
-            sourceBuilder.AppendLine("using System;");
-            sourceBuilder.AppendLine("using System.Runtime.CompilerServices;");
-            sourceBuilder.AppendLine("using System.Threading.Tasks;");
-            sourceBuilder.AppendLine("using TUnit.Assertions.Core;");
-
-            // Add using for the original namespace to access helper methods
-            if (!string.IsNullOrEmpty(originalNamespace) && originalNamespace != namespaceName)
-            {
-                sourceBuilder.AppendLine($"using {originalNamespace};");
-            }
-
-            sourceBuilder.AppendLine();
-
-            if (!string.IsNullOrEmpty(namespaceName))
-            {
-                sourceBuilder.AppendLine($"namespace {namespaceName};");
-                sourceBuilder.AppendLine();
-            }
-
-            // Generate assertion classes
-            foreach (var methodData in methodGroup)
-            {
-                GenerateAssertionClass(sourceBuilder, methodData);
-                sourceBuilder.AppendLine();
-            }
-
-            // Generate extension methods class
-            // For file-scoped types, we can't use partial classes, so create a standalone public class
-            // For non-file-scoped types, we use partial classes to combine with the source definition
-            var isFileScopedType = methodGroup.Any(m => m.IsFileScoped);
-
-            var extensionClassName = isFileScopedType
-                ? $"{containingType.Name}Extensions"  // Standalone class for file-scoped types
-                : containingType.Name;                 // Partial class for public types
-
-            var partialModifier = isFileScopedType ? "" : "partial ";
-            sourceBuilder.AppendLine($"public static {partialModifier}class {extensionClassName}");
-            sourceBuilder.AppendLine("{");
-
-            foreach (var methodData in methodGroup)
-            {
-                GenerateExtensionMethod(sourceBuilder, methodData);
-                sourceBuilder.AppendLine();
-            }
-
-            sourceBuilder.AppendLine("}");
-
-            // Add source to compilation
-            var fileName = $"{containingType.Name}.GeneratedAssertions.g.cs";
-            context.AddSource(fileName, sourceBuilder.ToString());
         }
+
+        // Generate assertion classes
+        foreach (var methodData in methodGroup)
+        {
+            GenerateAssertionClass(sourceBuilder, methodData);
+            sourceBuilder.AppendLine();
+        }
+
+        // Generate extension methods class
+        // For file-scoped types, we can't use partial classes, so create a standalone public class
+        // For non-file-scoped types, we use partial classes to combine with the source definition
+        var isFileScopedType = methodGroup.Any(m => m.IsFileScoped);
+
+        var extensionClassName = isFileScopedType
+            ? $"{containingType.Name}Extensions"  // Standalone class for file-scoped types
+            : containingType.Name;                 // Partial class for public types
+
+        var partialModifier = isFileScopedType ? "" : "partial ";
+        sourceBuilder.AppendLine($"public static {partialModifier}class {extensionClassName}");
+        sourceBuilder.AppendLine("{");
+
+        foreach (var methodData in methodGroup)
+        {
+            GenerateExtensionMethod(sourceBuilder, methodData);
+            sourceBuilder.AppendLine();
+        }
+
+        sourceBuilder.AppendLine("}");
+
+        // Add source to compilation
+        var fileName = $"{containingType.Name}.GeneratedAssertions.g.cs";
+        context.AddSource(fileName, sourceBuilder.ToString());
     }
 
     private static void GenerateAssertionClass(StringBuilder sb, AssertionMethodData data)
@@ -1350,6 +1373,96 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         ImmutableEquatableArray<string> SuppressionAttributesForCheckAsync,
         ImmutableEquatableArray<string> DiagnosticAttributesForExtensionMethod
     );
+
+    /// <summary>
+    /// All [GenerateAssertion] methods of one containing type; emitted as a single file.
+    /// </summary>
+    private sealed record ContainingTypeGroup(
+        ContainingTypeData ContainingType,
+        ImmutableEquatableArray<AssertionMethodData> Methods
+    );
+
+    /// <summary>
+    /// Equatable stand-in for a <see cref="Diagnostic"/>. A <see cref="Diagnostic"/> holds a
+    /// <see cref="Location"/> that references its <see cref="SyntaxTree"/>, which would keep old
+    /// compilations alive in the incremental cache; this captures only primitive location data.
+    /// </summary>
+    private sealed record DiagnosticInfo(
+        DiagnosticDescriptor Descriptor,
+        string? FilePath,
+        string? SourceChecksum,
+        TextSpan TextSpan,
+        LinePositionSpan LineSpan,
+        ImmutableEquatableArray<string> MessageArgs)
+    {
+        public static DiagnosticInfo Create(DiagnosticDescriptor descriptor, Location location, params string[] messageArgs)
+        {
+            var lineSpan = location.GetLineSpan();
+            return new DiagnosticInfo(
+                descriptor,
+                lineSpan.Path,
+                location.SourceTree is { } tree ? GetChecksum(tree) : null,
+                location.SourceSpan,
+                lineSpan.Span,
+                messageArgs.ToImmutableEquatableArray());
+        }
+
+        private static string GetChecksum(SyntaxTree tree)
+            => Convert.ToBase64String(tree.GetText().GetChecksum().ToArray());
+
+        public Diagnostic ToDiagnostic(Compilation compilation)
+        {
+            if (FilePath is null)
+            {
+                return Diagnostic.Create(Descriptor, Location.None, MessageArgs.Cast<object?>().ToArray());
+            }
+
+            // Reattach to the tree with the same path. Paths need not be unique (trees parsed without
+            // a path all share an empty one), so when several match, the text checksum picks the tree.
+            SyntaxTree? match = null;
+            var ambiguous = false;
+            foreach (var tree in compilation.SyntaxTrees)
+            {
+                if (!string.Equals(tree.FilePath, FilePath, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                if (match is null)
+                {
+                    match = tree;
+                }
+                else
+                {
+                    ambiguous = true;
+                    break;
+                }
+            }
+
+            if (ambiguous)
+            {
+                match = null;
+                if (SourceChecksum is not null)
+                {
+                    foreach (var tree in compilation.SyntaxTrees)
+                    {
+                        if (string.Equals(tree.FilePath, FilePath, StringComparison.Ordinal)
+                            && string.Equals(GetChecksum(tree), SourceChecksum, StringComparison.Ordinal))
+                        {
+                            match = tree;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            var location = match is not null && TextSpan.End <= match.Length
+                ? Location.Create(match, TextSpan)
+                : Location.Create(FilePath, TextSpan, LineSpan);
+
+            return Diagnostic.Create(Descriptor, location, MessageArgs.Cast<object?>().ToArray());
+        }
+    }
 
      private record ContainingTypeData(
         string Name,

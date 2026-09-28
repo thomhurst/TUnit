@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Assertions.SourceGenerator.Models;
 
 namespace TUnit.Assertions.SourceGenerator.Generators;
 
@@ -18,6 +19,8 @@ namespace TUnit.Assertions.SourceGenerator.Generators;
 [Generator]
 public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 {
+    public const string AssertionExtensionStep = "AssertionExtensionData";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Find all classes decorated with [AssertionExtension]
@@ -27,7 +30,8 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
                 predicate: static (node, _) => node is ClassDeclarationSyntax,
                 transform: static (ctx, ct) => GetAssertionExtensionData(ctx, ct))
             .Where(static x => x != null)
-            .Select(static (x, _) => x!);
+            .Select(static (x, _) => x!)
+            .WithTrackingName(AssertionExtensionStep);
 
         // Generate extension methods for each assertion class
         context.RegisterSourceOutput(assertionClasses, static (context, data) => GenerateExtensionMethods(context, data));
@@ -101,15 +105,152 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             RequiresUnreferencedCodeMessage = RequiresUnreferencedCodeAttr.ConstructorArguments[0].Value?.ToString();
         }
 
+        // Everything below is flattened to strings so the pipeline model compares by value and
+        // doesn't keep symbols (and their compilation) alive between runs.
+        var typeParam = assertionBaseType.TypeArguments[0];
+        var genericParams = new List<string>();
+        var typeConstraints = new List<string>();
+
+        if (classSymbol.IsGenericType && classSymbol.TypeParameters.Length > 0)
+        {
+            // The assertion class defines its own generic type parameters
+            // e.g., GreaterThanAssertion<TValue> or CollectionContainsAssertion<TCollection, TItem>
+            foreach (var typeParameter in classSymbol.TypeParameters)
+            {
+                genericParams.Add(typeParameter.Name);
+                AddTypeConstraint(typeParameter, typeConstraints);
+            }
+        }
+        else if (typeParam is ITypeParameterSymbol typeParamSymbol)
+        {
+            // The assertion class is not generic, but inherits from Assertion<T>
+            // where T is a type parameter from the base class
+            genericParams.Add(typeParamSymbol.Name);
+            AddTypeConstraint(typeParamSymbol, typeConstraints);
+        }
+
+        var genericParamsString = genericParams.Count > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
+        var returnType = classSymbol.IsGenericType
+            ? $"{classSymbol.Name}{genericParamsString}"
+            : classSymbol.Name;
+
+        var typeParamDisplay = typeParam.ToDisplayString();
+        var receiverIsCovariantType = CovarianceHelper.IsCovariantCandidate(typeParam);
+        var receiver = new ReceiverTypeData(
+            typeParamDisplay,
+            (typeParam as ITypeParameterSymbol)?.Name,
+            receiverIsCovariantType,
+            receiverIsCovariantType ? CovarianceHelper.GetConstraintTypeName(typeParamDisplay, typeParam) : null);
+
+        // When the receiver type is a covariance candidate AND the assertion class declares its
+        // own generic parameter(s), the covariant method signature is <TActual, T...>. Callers
+        // that name the class's own arguments (e.g. a non-inferable lambda type) must then also
+        // spell out the covariant TActual, because C# forbids partial type-argument specification.
+        // To restore inference for the common exact-receiver call site, additionally emit a
+        // pinned-receiver overload (IAssertionSource<TConcrete>) that omits TActual. The covariant
+        // overload is kept so a more-derived static receiver can still bind. See issue #5922.
+        //
+        // The pinned overload is only emitted when at least one of the class's own type parameters
+        // is NOT inferable from the constructor's value arguments. If every own type parameter is
+        // inferable (e.g. a `T tag` value parameter), the caller writes no type arguments at all and
+        // the covariant overload binds on its own — the pinned overload would be pure dead weight.
+        // Excluding that case also keeps the two overloads arity-disjoint (pinned <T...> vs covariant
+        // <TActual, T...>), so they are never both applicable and no OverloadResolutionPriority
+        // tiebreaker is required.
+        var hasOwnGenerics = classSymbol.IsGenericType && classSymbol.TypeParameters.Length > 0;
+        var receiverIsCovariantCandidate = receiverIsCovariantType && hasOwnGenerics;
+        var ownTypeParameters = classSymbol.TypeParameters;
+
+        var constructorData = new List<ConstructorData>();
+        foreach (var constructor in constructors)
+        {
+            if (!IsValidConstructor(constructor))
+            {
+                continue;
+            }
+
+            // The pinned overload only earns its place when a non-inferable own type parameter forces
+            // the caller to name type arguments; otherwise it is redundant with the covariant overload.
+            var emitPinned = receiverIsCovariantCandidate
+                && !CovarianceHelper.OwnGenericsAreInferable(constructor, ownTypeParameters);
+
+            constructorData.Add(new ConstructorData(
+                constructor.Parameters.Skip(1).Select(p => new ParameterData(
+                    p.Name,
+                    p.Type.ToDisplayString(),
+                    p.HasExplicitDefaultValue ? DefaultValueFormatter.FormatDefaultValue(p.ExplicitDefaultValue, p.Type) : null)).ToImmutableEquatableArray(),
+                GetRequiresUnreferencedCodeMessage(constructor, RequiresUnreferencedCodeMessage),
+                emitPinned));
+        }
+
         return new AssertionExtensionData(
-            classSymbol,
+            classSymbol.Name,
+            classSymbol.ContainingNamespace?.ToDisplayString(),
             methodName!,
             negatedMethodName,
-            assertionBaseType,
-            constructors,
             overloadPriority,
-            RequiresUnreferencedCodeMessage
+            returnType,
+            genericParams.ToImmutableEquatableArray(),
+            typeConstraints.ToImmutableEquatableArray(),
+            receiver,
+            constructorData.ToImmutableEquatableArray()
         );
+    }
+
+    private static void AddTypeConstraint(ITypeParameterSymbol typeParameter, List<string> typeConstraints)
+    {
+        var constraints = new List<string>();
+        if (typeParameter.HasReferenceTypeConstraint)
+        {
+            constraints.Add("class");
+        }
+        // 'unmanaged' also sets HasValueTypeConstraint; 'struct, unmanaged' is CS0449 (#6471)
+        if (typeParameter.HasValueTypeConstraint && !typeParameter.HasUnmanagedTypeConstraint)
+        {
+            constraints.Add("struct");
+        }
+        if (typeParameter.HasUnmanagedTypeConstraint)
+        {
+            constraints.Add("unmanaged");
+        }
+        if (typeParameter.HasNotNullConstraint)
+        {
+            constraints.Add("notnull");
+        }
+        foreach (var constraintType in typeParameter.ConstraintTypes)
+        {
+            constraints.Add(constraintType.ToDisplayString());
+        }
+        if (typeParameter.HasConstructorConstraint)
+        {
+            constraints.Add("new()");
+        }
+
+        if (constraints.Count > 0)
+        {
+            typeConstraints.Add($"where {typeParameter.Name} : {string.Join(", ", constraints)}");
+        }
+    }
+
+    private static string? GetRequiresUnreferencedCodeMessage(IMethodSymbol constructor, string? classLevelMessage)
+    {
+        // Check for RequiresUnreferencedCode attribute on the constructor first, then fall back to class-level
+        var constructorRequiresUnreferencedCodeAttr = constructor.GetAttributes()
+            .FirstOrDefault(attr => attr.AttributeClass?.Name == "RequiresUnreferencedCodeAttribute");
+
+        if (constructorRequiresUnreferencedCodeAttr != null && constructorRequiresUnreferencedCodeAttr.ConstructorArguments.Length > 0)
+        {
+            // Constructor-level attribute takes precedence
+            return constructorRequiresUnreferencedCodeAttr.ConstructorArguments[0].Value?.ToString();
+        }
+
+        if (!string.IsNullOrEmpty(classLevelMessage))
+        {
+            // Fall back to class-level attribute
+            return classLevelMessage;
+        }
+
+        return null;
     }
 
     private static INamedTypeSymbol? GetAssertionBaseType(INamedTypeSymbol classSymbol)
@@ -143,7 +284,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("using TUnit.Assertions.Enums;");
 
         // Add using for the assertion class's namespace if different
-        var assertionNamespace = data.ClassSymbol.ContainingNamespace?.ToDisplayString();
+        var assertionNamespace = data.ClassNamespace;
         if (!string.IsNullOrEmpty(assertionNamespace) && assertionNamespace != "TUnit.Assertions.Extensions")
         {
             sourceBuilder.AppendLine($"using {assertionNamespace};");
@@ -157,60 +298,31 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine();
 
         // Extension class
-        var extensionClassName = $"{data.ClassSymbol.Name}Extensions";
+        var extensionClassName = $"{data.ClassName}Extensions";
         sourceBuilder.AppendLine($"/// <summary>");
-        sourceBuilder.AppendLine($"/// Generated extension methods for {data.ClassSymbol.Name}.");
+        sourceBuilder.AppendLine($"/// Generated extension methods for {data.ClassName}.");
         sourceBuilder.AppendLine($"/// </summary>");
         sourceBuilder.AppendLine($"public static partial class {extensionClassName}");
         sourceBuilder.AppendLine("{");
 
-        // When the receiver type is a covariance candidate AND the assertion class declares its
-        // own generic parameter(s), the covariant method signature is <TActual, T...>. Callers
-        // that name the class's own arguments (e.g. a non-inferable lambda type) must then also
-        // spell out the covariant TActual, because C# forbids partial type-argument specification.
-        // To restore inference for the common exact-receiver call site, additionally emit a
-        // pinned-receiver overload (IAssertionSource<TConcrete>) that omits TActual. The covariant
-        // overload is kept so a more-derived static receiver can still bind. See issue #5922.
-        //
-        // The pinned overload is only emitted when at least one of the class's own type parameters
-        // is NOT inferable from the constructor's value arguments. If every own type parameter is
-        // inferable (e.g. a `T tag` value parameter), the caller writes no type arguments at all and
-        // the covariant overload binds on its own — the pinned overload would be pure dead weight.
-        // Excluding that case also keeps the two overloads arity-disjoint (pinned <T...> vs covariant
-        // <TActual, T...>), so they are never both applicable and no OverloadResolutionPriority
-        // tiebreaker is required.
-        var receiverType = data.AssertionBaseType.TypeArguments[0];
-        var hasOwnGenerics = data.ClassSymbol.IsGenericType && data.ClassSymbol.TypeParameters.Length > 0;
-        var receiverIsCovariantCandidate = CovarianceHelper.IsCovariantCandidate(receiverType) && hasOwnGenerics;
-        var ownTypeParameters = data.ClassSymbol.TypeParameters;
-
-        // Generate extension methods for each constructor
+        // Generate extension methods for each (valid) constructor. The pinned-receiver decision
+        // is made in the transform; see GetAssertionExtensionData.
         foreach (var constructor in data.Constructors)
         {
-            if (!IsValidConstructor(constructor))
-            {
-                continue;
-            }
-
-            // The pinned overload only earns its place when a non-inferable own type parameter forces
-            // the caller to name type arguments; otherwise it is redundant with the covariant overload.
-            var emitPinned = receiverIsCovariantCandidate
-                && !CovarianceHelper.OwnGenericsAreInferable(constructor, ownTypeParameters);
-
             // Generate positive assertion method
-            EmitMethod(sourceBuilder, data, constructor, negated: false, emitPinned);
+            EmitMethod(sourceBuilder, data, constructor, negated: false, constructor.EmitPinned);
 
             // Generate negated assertion method if requested
             if (!string.IsNullOrEmpty(data.NegatedMethodName))
             {
-                EmitMethod(sourceBuilder, data, constructor, negated: true, emitPinned);
+                EmitMethod(sourceBuilder, data, constructor, negated: true, constructor.EmitPinned);
             }
         }
 
         sourceBuilder.AppendLine("}");
 
         // Add source to compilation
-        var fileName = $"{data.ClassSymbol.Name}.Extensions.g.cs";
+        var fileName = $"{data.ClassName}.Extensions.g.cs";
         context.AddSource(fileName, sourceBuilder.ToString());
     }
 
@@ -221,7 +333,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
     private static void EmitMethod(
         StringBuilder sourceBuilder,
         AssertionExtensionData data,
-        IMethodSymbol constructor,
+        ConstructorData constructor,
         bool negated,
         bool emitPinned)
     {
@@ -255,125 +367,24 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
     private static void GenerateExtensionMethod(
         StringBuilder sourceBuilder,
         AssertionExtensionData data,
-        IMethodSymbol constructor,
+        ConstructorData constructor,
         bool negated,
         bool isNullableOverload,
         bool pinnedReceiver = false)
     {
         var methodName = negated ? data.NegatedMethodName : data.MethodName;
-        var assertionType = data.ClassSymbol;
-        var typeParam = data.AssertionBaseType.TypeArguments[0];
+        var receiver = data.ReceiverType;
 
-        // Skip the first parameter (AssertionContext<T>)
-        var additionalParams = constructor.Parameters.Skip(1).ToArray();
-
-        // Check for RequiresUnreferencedCode attribute on the constructor first, then fall back to class-level
-        var constructorRequiresUnreferencedCodeAttr = constructor.GetAttributes()
-            .FirstOrDefault(attr => attr.AttributeClass?.Name == "RequiresUnreferencedCodeAttribute");
-
-        string? requiresUnreferencedCodeMessage = null;
-        if (constructorRequiresUnreferencedCodeAttr != null && constructorRequiresUnreferencedCodeAttr.ConstructorArguments.Length > 0)
-        {
-            // Constructor-level attribute takes precedence
-            requiresUnreferencedCodeMessage = constructorRequiresUnreferencedCodeAttr.ConstructorArguments[0].Value?.ToString();
-        }
-        else if (!string.IsNullOrEmpty(data.RequiresUnreferencedCodeMessage))
-        {
-            // Fall back to class-level attribute
-            requiresUnreferencedCodeMessage = data.RequiresUnreferencedCodeMessage;
-        }
-
-        var genericParams = new List<string>();
-        var typeConstraints = new List<string>();
-
-        if (assertionType.IsGenericType && assertionType.TypeParameters.Length > 0)
-        {
-            // The assertion class defines its own generic type parameters
-            // e.g., GreaterThanAssertion<TValue> or CollectionContainsAssertion<TCollection, TItem>
-            foreach (var typeParameter in assertionType.TypeParameters)
-            {
-                genericParams.Add(typeParameter.Name);
-
-                // Collect constraints for each type parameter
-                var constraints = new List<string>();
-                if (typeParameter.HasReferenceTypeConstraint)
-                {
-                    constraints.Add("class");
-                }
-                // 'unmanaged' also sets HasValueTypeConstraint; 'struct, unmanaged' is CS0449 (#6471)
-                if (typeParameter.HasValueTypeConstraint && !typeParameter.HasUnmanagedTypeConstraint)
-                {
-                    constraints.Add("struct");
-                }
-                if (typeParameter.HasUnmanagedTypeConstraint)
-                {
-                    constraints.Add("unmanaged");
-                }
-                if (typeParameter.HasNotNullConstraint)
-                {
-                    constraints.Add("notnull");
-                }
-                foreach (var constraintType in typeParameter.ConstraintTypes)
-                {
-                    constraints.Add(constraintType.ToDisplayString());
-                }
-                if (typeParameter.HasConstructorConstraint)
-                {
-                    constraints.Add("new()");
-                }
-
-                if (constraints.Count > 0)
-                {
-                    typeConstraints.Add($"where {typeParameter.Name} : {string.Join(", ", constraints)}");
-                }
-            }
-        }
-        else if (typeParam is ITypeParameterSymbol typeParamSymbol)
-        {
-            // The assertion class is not generic, but inherits from Assertion<T>
-            // where T is a type parameter from the base class
-            genericParams.Add(typeParamSymbol.Name);
-
-            // Collect constraints
-            var constraints = new List<string>();
-            if (typeParamSymbol.HasReferenceTypeConstraint)
-            {
-                constraints.Add("class");
-            }
-            // 'unmanaged' also sets HasValueTypeConstraint; 'struct, unmanaged' is CS0449 (#6471)
-            if (typeParamSymbol.HasValueTypeConstraint && !typeParamSymbol.HasUnmanagedTypeConstraint)
-            {
-                constraints.Add("struct");
-            }
-            if (typeParamSymbol.HasUnmanagedTypeConstraint)
-            {
-                constraints.Add("unmanaged");
-            }
-            if (typeParamSymbol.HasNotNullConstraint)
-            {
-                constraints.Add("notnull");
-            }
-            foreach (var constraintType in typeParamSymbol.ConstraintTypes)
-            {
-                constraints.Add(constraintType.ToDisplayString());
-            }
-            if (typeParamSymbol.HasConstructorConstraint)
-            {
-                constraints.Add("new()");
-            }
-
-            if (constraints.Count > 0)
-            {
-                typeConstraints.Add($"where {typeParamSymbol.Name} : {string.Join(", ", constraints)}");
-            }
-        }
-
-        var genericParamsString = genericParams.Count > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
+        // The first parameter (AssertionContext<T>) is already skipped by the transform
+        var additionalParams = constructor.Parameters;
+        var requiresUnreferencedCodeMessage = constructor.RequiresUnreferencedCodeMessage;
+        var genericParams = data.GenericParams;
+        var typeConstraints = data.TypeConstraints;
 
         // Build method signature
         sourceBuilder.AppendLine();
         sourceBuilder.AppendLine("    /// <summary>");
-        sourceBuilder.AppendLine($"    /// Extension method for {assertionType.Name}.");
+        sourceBuilder.AppendLine($"    /// Extension method for {data.ClassName}.");
         sourceBuilder.AppendLine("    /// </summary>");
 
         // Add RequiresUnreferencedCode attribute if present (from constructor or class level)
@@ -401,9 +412,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         }
 
         // Method declaration
-        var returnType = assertionType.IsGenericType
-            ? $"{assertionType.Name}{genericParamsString}"
-            : assertionType.Name;
+        var returnType = data.ReturnType;
 
         // The extension method extends IAssertionSource<T> where T is the type argument
         // from the Assertion<T> base class.
@@ -414,8 +423,8 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         // pinnedReceiver suppresses covariance so the receiver is pinned to the concrete type
         // (IAssertionSource<TConcrete>), dropping the TActual parameter for inference-friendly call sites.
         var isCovariantCandidate = !isNullableOverload && !pinnedReceiver
-            && CovarianceHelper.IsCovariantCandidate(typeParam);
-        var typeParamDisplay = typeParam.ToDisplayString();
+            && receiver.IsCovariantCandidate;
+        var typeParamDisplay = receiver.Display;
 
         if (isNullableOverload)
         {
@@ -426,16 +435,16 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             genericTypeParam = null;
             genericConstraint = null;
         }
-        else if (typeParam is ITypeParameterSymbol baseTypeParam)
+        else if (receiver.TypeParameterName is { } baseTypeParamName)
         {
-            sourceType = $"IAssertionSource<{baseTypeParam.Name}>";
+            sourceType = $"IAssertionSource<{baseTypeParamName}>";
         }
         else if (isCovariantCandidate)
         {
             var covariantParam = CovarianceHelper.GetCovariantTypeParamName(genericParams);
             sourceType = $"IAssertionSource<{covariantParam}>";
             genericTypeParam = covariantParam;
-            genericConstraint = $"where {covariantParam} : {CovarianceHelper.GetConstraintTypeName(typeParamDisplay, typeParam)}";
+            genericConstraint = $"where {covariantParam} : {receiver.CovariantConstraintTypeName}";
         }
         else
         {
@@ -465,18 +474,17 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         // Add additional parameters
         foreach (var param in additionalParams)
         {
-            sourceBuilder.Append($", {param.Type.ToDisplayString()} {param.Name}");
+            sourceBuilder.Append($", {param.Type} {param.Name}");
 
             // Add default value if present
-            if (param.HasExplicitDefaultValue)
+            if (param.DefaultValue is { } defaultValue)
             {
-                var defaultValue = DefaultValueFormatter.FormatDefaultValue(param.ExplicitDefaultValue, param.Type);
                 sourceBuilder.Append($" = {defaultValue}");
             }
         }
 
         // Add CallerArgumentExpression parameters for better error messages
-        for (int i = 0; i < additionalParams.Length; i++)
+        for (int i = 0; i < additionalParams.Count; i++)
         {
             var param = additionalParams[i];
             sourceBuilder.Append($", [CallerArgumentExpression(nameof({param.Name}))] string? {param.Name}Expression = null");
@@ -503,12 +511,12 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         // Build expression string for error messages
         // Only include parameters that were actually provided (non-null expressions)
         sourceBuilder.Append($"        source.Context.ExpressionBuilder.Append(\".{methodName}(\");");
-        if (additionalParams.Length == 1)
+        if (additionalParams.Count == 1)
         {
             sourceBuilder.AppendLine();
             sourceBuilder.AppendLine($"        source.Context.ExpressionBuilder.Append({additionalParams[0].Name}Expression);");
         }
-        else if (additionalParams.Length > 0)
+        else if (additionalParams.Count > 0)
         {
             sourceBuilder.AppendLine();
             sourceBuilder.AppendLine("        var added = false;");
@@ -526,7 +534,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("        source.Context.ExpressionBuilder.Append(\")\");");
 
         // Construct and return the assertion
-        sourceBuilder.Append($"        return new {assertionType.Name}");
+        sourceBuilder.Append($"        return new {data.ClassName}");
         if (genericParams.Count > 0)
         {
             sourceBuilder.Append($"<{string.Join(", ", genericParams)}>");
@@ -555,13 +563,45 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("    }");
     }
 
-    private record AssertionExtensionData(
-        INamedTypeSymbol ClassSymbol,
+    /// <summary>
+    /// Pipeline model for one [AssertionExtension] class. Holds only strings and value types so
+    /// it compares by value across compilations and never roots a compilation.
+    /// </summary>
+    private sealed record AssertionExtensionData(
+        string ClassName,
+        string? ClassNamespace,
         string MethodName,
         string? NegatedMethodName,
-        INamedTypeSymbol AssertionBaseType,
-        ImmutableArray<IMethodSymbol> Constructors,
         int OverloadResolutionPriority,
-        string? RequiresUnreferencedCodeMessage
+        string ReturnType,
+        ImmutableEquatableArray<string> GenericParams,
+        ImmutableEquatableArray<string> TypeConstraints,
+        ReceiverTypeData ReceiverType,
+        ImmutableEquatableArray<ConstructorData> Constructors
+    );
+
+    /// <summary>
+    /// The <c>T</c> of the <c>Assertion&lt;T&gt;</c> base type, i.e. the extension receiver type.
+    /// </summary>
+    private sealed record ReceiverTypeData(
+        string Display,
+        string? TypeParameterName,
+        bool IsCovariantCandidate,
+        string? CovariantConstraintTypeName
+    );
+
+    /// <summary>
+    /// A valid public constructor, with its leading <c>AssertionContext&lt;T&gt;</c> parameter removed.
+    /// </summary>
+    private sealed record ConstructorData(
+        ImmutableEquatableArray<ParameterData> Parameters,
+        string? RequiresUnreferencedCodeMessage,
+        bool EmitPinned
+    );
+
+    private sealed record ParameterData(
+        string Name,
+        string Type,
+        string? DefaultValue
     );
 }
