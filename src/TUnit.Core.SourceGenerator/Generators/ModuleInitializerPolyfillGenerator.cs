@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
@@ -106,26 +107,60 @@ public sealed class ModuleInitializerPolyfillGenerator : IIncrementalGenerator
     private static bool HasAccessibleAttribute(Compilation compilation)
     {
         // GetTypeByMetadataName returns null when several references declare the type (common with
-        // polyfill packages), so inspect every candidate. Two accessible definitions from references are
-        // ambiguous (CS0433), even when one is in the core library. A declaration in source takes precedence
-        // over referenced ones, so in that case we still declare our own.
+        // polyfill packages), so inspect every candidate. The compiler ignores [Embedded] types from other
+        // assemblies, which is how Polyfill declares them, even when InternalsVisibleTo makes them accessible.
+        INamedTypeSymbol? accessible = null;
         var accessibleCount = 0;
 
         foreach (var type in compilation.GetTypesByMetadataName(AttributeMetadataName))
         {
-            if (!compilation.IsSymbolAccessibleWithin(type, compilation.Assembly))
+            if (compilation.IsSymbolAccessibleWithin(type, compilation.Assembly)
+                && !IsEmbeddedFromReference(type, compilation))
             {
-                continue;
+                accessible = type;
+                accessibleCount++;
             }
+        }
 
-            if (SymbolEqualityComparer.Default.Equals(type.ContainingAssembly, compilation.Assembly))
+        if (accessibleCount <= 1)
+        {
+            return accessible != null;
+        }
+
+        // Several accessible definitions are not always ambiguous (a declaration in source wins, for example).
+        // Only the compiler's own lookup gives the right answer, so bind the name the generated code uses and
+        // declare our own attribute only when that fails (CS0433). Ours is then in source, so it takes precedence
+        // over the referenced ones.
+        var tree = compilation.SyntaxTrees.FirstOrDefault();
+
+        if (tree is null)
+        {
+            return true;
+        }
+
+        var typeInfo = compilation.GetSemanticModel(tree).GetSpeculativeTypeInfo(
+            0,
+            SyntaxFactory.ParseTypeName("global::" + AttributeMetadataName),
+            SpeculativeBindingOption.BindAsTypeOrNamespace);
+
+        return typeInfo.Type is { TypeKind: not TypeKind.Error };
+    }
+
+    private static bool IsEmbeddedFromReference(INamedTypeSymbol type, Compilation compilation)
+    {
+        if (SymbolEqualityComparer.Default.Equals(type.ContainingAssembly, compilation.Assembly))
+        {
+            return false;
+        }
+
+        foreach (var attribute in type.GetAttributes())
+        {
+            if (attribute.AttributeClass is { Name: "EmbeddedAttribute", ContainingNamespace: { Name: "CodeAnalysis", ContainingNamespace: { Name: "Microsoft", ContainingNamespace.IsGlobalNamespace: true } } })
             {
                 return true;
             }
-
-            accessibleCount++;
         }
 
-        return accessibleCount == 1;
+        return false;
     }
 }

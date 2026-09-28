@@ -40,6 +40,29 @@ internal class ModuleInitializerPolyfillGeneratorTests
         }
         """;
 
+    // What Polyfill emits with PolyUseEmbeddedAttribute: the compiler ignores [Embedded] types from other
+    // assemblies during lookup, even when InternalsVisibleTo makes them accessible.
+    private const string EmbeddedAttributeVisibleToTests =
+        """
+        [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ModuleInitializerPolyfill")]
+
+        namespace Microsoft.CodeAnalysis
+        {
+            [Embedded]
+            internal sealed class EmbeddedAttribute : System.Attribute
+            {
+            }
+        }
+
+        namespace System.Runtime.CompilerServices
+        {
+            [Microsoft.CodeAnalysis.Embedded]
+            internal sealed class ModuleInitializerAttribute : Attribute
+            {
+            }
+        }
+        """;
+
     [Test]
     public async Task Declares_attribute_when_compilation_lacks_it()
     {
@@ -105,14 +128,35 @@ internal class ModuleInitializerPolyfillGeneratorTests
         MetadataReference[] references =
         [
             ..ReferencesHelper.References,
-            CreatePublicAttributeReference("PolyfillOne"),
-            CreatePublicAttributeReference("PolyfillTwo"),
+            CreateAttributeReference("PolyfillOne", PublicAttribute),
+            CreateAttributeReference("PolyfillTwo", PublicAttribute),
         ];
 
         var errors = CompileWithGenerator(references);
 
         await Assert.That(errors).IsEmpty();
     }
+
+#if NET
+    // The Roslyn version the .NET Framework target runs against predates user-declared EmbeddedAttribute (CS8336).
+    [Test]
+    public async Task Ignores_embedded_attribute_from_reference_visible_through_InternalsVisibleTo()
+    {
+        // A test project for a library that uses Polyfill sees the library's internal, [Embedded] polyfill through
+        // InternalsVisibleTo. The compiler ignores it, so on .NET the core library's attribute is the only usable
+        // one and declaring our own would break Polyfill's [TypeForwardedTo] for the attribute (CS0729).
+        MetadataReference[] references =
+        [
+            ..ReferencesHelper.References,
+            CreateAttributeReference("PolyfilledLibrary", EmbeddedAttributeVisibleToTests),
+        ];
+
+        var generated = RunGenerator(CreateCompilation(references, ModuleInitializerUsage), buildProperties: null);
+
+        await Assert.That(generated).IsEmpty();
+        await Assert.That(CompileWithGenerator(references)).IsEmpty();
+    }
+#endif
 
     private static string[] CompileWithGenerator(IEnumerable<MetadataReference> references)
     {
@@ -134,11 +178,11 @@ internal class ModuleInitializerPolyfillGeneratorTests
             .ToArray();
     }
 
-    private static MetadataReference CreatePublicAttributeReference(string assemblyName)
+    private static MetadataReference CreateAttributeReference(string assemblyName, string source)
     {
         var compilation = CSharpCompilation.Create(
             assemblyName,
-            [CSharpSyntaxTree.ParseText(PublicAttribute)],
+            [CSharpSyntaxTree.ParseText(source)],
             ReferencesHelper.References,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
