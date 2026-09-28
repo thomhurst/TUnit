@@ -107,6 +107,9 @@ internal static class ObjectInitializer
         InitializationTasks.Clear();
     }
 
+    // Kept async (rather than returning the WaitAsync task as a ValueTask) so that an
+    // OperationCanceledException thrown by InitializeAsync still completes callers' tasks as
+    // Canceled, as it did before, instead of Faulted.
     private static async ValueTask InitializeCoreAsync(
         object obj,
         IAsyncInitializer asyncInitializer,
@@ -114,34 +117,14 @@ internal static class ObjectInitializer
     {
         if (!InitializationTasks.TryGetValue(obj, out var initializationTask))
         {
-            // RunContinuationsAsynchronously: when the initialization completes, the continuations of
-            // callers waiting on a shared object are queued, rather than run one after another inline
-            // on the thread that completed it.
-            var completionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var completionSource = new TaskCompletionSource<bool>();
             initializationTask = InitializationTasks.GetOrAdd(obj, completionSource.Task);
 
             if (ReferenceEquals(initializationTask, completionSource.Task))
             {
-                // Only the caller that published the task runs InitializeAsync - inline, as before - and it
-                // awaits it directly, so it pays no extra thread-pool hop or async frame for publishing it.
-                var initializerTask = StartInitializer(asyncInitializer);
-
-                try
-                {
-                    // ConfigureAwait(false): publishing the result for other callers mustn't wait for this
-                    // caller's context; this caller's own await still resumes on it.
-                    await initializerTask.WaitAsync(cancellationToken).ConfigureAwait(false);
-                }
-                catch
-                {
-                    // Publish the initialization's own outcome - not this caller's cancellation - now,
-                    // or once it completes if only this caller stopped waiting.
-                    _ = PublishOutcomeAsync(initializerTask, completionSource);
-                    throw;
-                }
-
-                completionSource.SetResult(true);
-                return;
+                // Only the caller that published the task runs InitializeAsync - inline up to its
+                // first await, as before, but with no lock held (#6904).
+                _ = RunInitializerAsync(asyncInitializer, completionSource);
             }
         }
 
@@ -152,36 +135,17 @@ internal static class ObjectInitializer
         await initializationTask.WaitAsync(cancellationToken);
     }
 
-    private static Task StartInitializer(IAsyncInitializer asyncInitializer)
+    private static async Task RunInitializerAsync(IAsyncInitializer asyncInitializer, TaskCompletionSource<bool> completionSource)
     {
         try
         {
-            return asyncInitializer.InitializeAsync()
-                ?? throw new InvalidOperationException($"{asyncInitializer.GetType().FullName}.InitializeAsync() returned null.");
-        }
-        catch (Exception ex)
-        {
-            // Non-async implementations can throw synchronously (and a null task is a bug in the
-            // initializer) - treat either like a faulted initialization.
-            return Task.FromException(ex);
-        }
-    }
-
-    private static async Task PublishOutcomeAsync(Task initializerTask, TaskCompletionSource<bool> completionSource)
-    {
-        try
-        {
-            await initializerTask.ConfigureAwait(false);
+            await asyncInitializer.InitializeAsync().ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             // SetException rather than SetCanceled, so callers get the original exception object -
             // including an OperationCanceledException thrown by InitializeAsync.
             completionSource.SetException(ex);
-
-            // The failure itself was observed above; this copy exists for other callers, so don't report
-            // it as unobserved if none of them ever awaits it.
-            _ = completionSource.Task.Exception;
             return;
         }
 

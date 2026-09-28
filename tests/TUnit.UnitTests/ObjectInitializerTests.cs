@@ -49,61 +49,48 @@ public class ObjectInitializerTests
     }
 
     [Test]
-    public async Task Waiting_Caller_Observes_Its_Cancellation_While_InitializeAsync_Runs_Synchronously()
+    public async Task InitializeAsync_Runs_Once_Under_Contention()
     {
-        using var fixture = new BlockingPrefixInitializer();
-        using var cancellationTokenSource = new CancellationTokenSource();
-        var initialization = Task.Run(() => ObjectInitializer.InitializeAsync(fixture).AsTask());
-        Task waiter = Task.CompletedTask;
-        bool waiterFinishedWhilePrefixBlocked;
+        var fixtures = Enumerable.Range(0, 100).Select(_ => new YieldingInitializer()).ToArray();
 
-        try
+        var callers = fixtures
+            .SelectMany(fixture => Enumerable.Range(0, 8).Select(_ => Task.Run(() => ObjectInitializer.InitializeAsync(fixture).AsTask())))
+            .ToArray();
+        await Task.WhenAll(callers).WaitAsync(HangTimeout);
+
+        foreach (var fixture in fixtures)
         {
-            await fixture.PrefixEntered.Task.WaitAsync(HangTimeout);
-
-            waiter = Task.Run(() => ObjectInitializer.InitializeAsync(fixture, cancellationTokenSource.Token).AsTask());
-            cancellationTokenSource.Cancel();
-
-            waiterFinishedWhilePrefixBlocked = await Task.WhenAny(waiter, Task.Delay(HangTimeout)) == waiter;
+            await Assert.That(fixture.InitializeCount).IsEqualTo(1);
+            await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsTrue();
         }
-        finally
-        {
-            fixture.ReleasePrefix();
-        }
-
-        await initialization.WaitAsync(HangTimeout);
-
-        await Assert.That(waiterFinishedWhilePrefixBlocked).IsTrue();
-        await Assert.That(async () => await waiter.WaitAsync(HangTimeout)).Throws<OperationCanceledException>();
-        await Assert.That(fixture.InitializeCount).IsEqualTo(1);
-        await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsTrue();
     }
 
     [Test]
-    public async Task Cancelling_A_Waiting_Caller_Does_Not_Cancel_The_Shared_Initialization()
+    [Arguments(false, true)]
+    [Arguments(false, false)]
+    [Arguments(true, true)]
+    [Arguments(true, false)]
+    public async Task Failure_Is_Cached_And_Rethrown_As_The_Same_Exception(bool cancellation, bool throwSynchronously)
     {
-        var fixture = new GatedInitializer();
-        using var cancellationTokenSource = new CancellationTokenSource();
-        var initializingCaller = ObjectInitializer.InitializeAsync(fixture).AsTask();
-        var cancelledWaiter = ObjectInitializer.InitializeAsync(fixture, cancellationTokenSource.Token).AsTask();
+        Exception failure = cancellation ? new OperationCanceledException("initializer gave up") : new InvalidOperationException("initialization failed");
+        var fixture = new ThrowingInitializer(failure, throwSynchronously);
 
-        cancellationTokenSource.Cancel();
+        var first = ObjectInitializer.InitializeAsync(fixture).AsTask();
+        var second = ObjectInitializer.InitializeAsync(fixture).AsTask();
 
-        await Assert.That(async () => await cancelledWaiter.WaitAsync(HangTimeout)).Throws<OperationCanceledException>();
-        await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsFalse();
-
-        fixture.Complete();
-        await initializingCaller.WaitAsync(HangTimeout);
-        await ObjectInitializer.InitializeAsync(fixture);
-
+        await Assert.That(await CaptureAsync(first)).IsSameReferenceAs(failure);
+        await Assert.That(await CaptureAsync(second)).IsSameReferenceAs(failure);
+        // An OperationCanceledException from the initializer still cancels callers' tasks, as before.
+        await Assert.That(first.IsCanceled).IsEqualTo(cancellation);
+        await Assert.That(second.IsCanceled).IsEqualTo(cancellation);
         await Assert.That(fixture.InitializeCount).IsEqualTo(1);
-        await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsTrue();
+        await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsFalse();
     }
 
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task Cancelling_The_Initializing_Caller_Does_Not_Cancel_The_Shared_Initialization(bool initializationFails)
+    public async Task Cancelling_The_Initializing_Caller_Does_Not_Poison_The_Result(bool initializationFails)
     {
         var fixture = new GatedInitializer();
         var failure = new InvalidOperationException("initialization failed");
@@ -133,104 +120,37 @@ public class ObjectInitializerTests
     }
 
     [Test]
-    [Arguments(true)]
-    [Arguments(false)]
-    public async Task Waiters_Do_Not_Resume_Inline_On_The_Thread_That_Completes_Initialization(bool cancellableWait)
+    public async Task Cancelling_A_Waiting_Caller_Does_Not_Cancel_The_Initialization()
     {
         var fixture = new GatedInitializer();
         using var cancellationTokenSource = new CancellationTokenSource();
-        var cancellationToken = cancellableWait ? cancellationTokenSource.Token : CancellationToken.None;
-        var initializingCaller = ObjectInitializer.InitializeAsync(fixture, cancellationToken).AsTask();
+        var initializingCaller = ObjectInitializer.InitializeAsync(fixture).AsTask();
+        var cancelledWaiter = ObjectInitializer.InitializeAsync(fixture, cancellationTokenSource.Token).AsTask();
 
-        var completingThreadId = 0;
-        var completeReturned = false;
+        cancellationTokenSource.Cancel();
 
-        // Registers its continuation before the initialization is completed below.
-        var waiterResumedInline = ResumedInlineAsync(ObjectInitializer.InitializeAsync(fixture, cancellationToken));
+        await Assert.That(async () => await cancelledWaiter.WaitAsync(HangTimeout)).Throws<OperationCanceledException>();
+        await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsFalse();
 
-        await Task.Run(() =>
-        {
-            Volatile.Write(ref completingThreadId, Environment.CurrentManagedThreadId);
-            fixture.Complete();
-            Volatile.Write(ref completeReturned, true);
-        });
-
+        fixture.Complete();
         await initializingCaller.WaitAsync(HangTimeout);
+        await ObjectInitializer.InitializeAsync(fixture);
 
-        // Precondition: InitializeAsync itself finished inline on the completing thread, so the result
-        // is published there too - which is where waiters would run if their continuations were inlined.
-        await Assert.That(fixture.ResumedOnThreadId).IsEqualTo(completingThreadId);
-        await Assert.That(await waiterResumedInline.WaitAsync(HangTimeout)).IsFalse();
+        await Assert.That(fixture.InitializeCount).IsEqualTo(1);
+        await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsTrue();
+    }
 
-        async Task<bool> ResumedInlineAsync(ValueTask pending)
+    private static async Task<Exception?> CaptureAsync(Task task)
+    {
+        try
         {
-            await pending.ConfigureAwait(false);
-            return !Volatile.Read(ref completeReturned)
-                   && Environment.CurrentManagedThreadId == Volatile.Read(ref completingThreadId);
+            await task.WaitAsync(HangTimeout);
+            return null;
         }
-    }
-
-    [Test]
-    public async Task InitializeAsync_Runs_Once_Under_Contention()
-    {
-        var fixtures = Enumerable.Range(0, 100).Select(_ => new YieldingInitializer()).ToArray();
-
-        var callers = fixtures
-            .SelectMany(fixture => Enumerable.Range(0, 8).Select(_ => Task.Run(() => ObjectInitializer.InitializeAsync(fixture).AsTask())))
-            .ToArray();
-        await Task.WhenAll(callers).WaitAsync(HangTimeout);
-
-        foreach (var fixture in fixtures)
+        catch (Exception ex)
         {
-            await Assert.That(fixture.InitializeCount).IsEqualTo(1);
-            await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsTrue();
+            return ex;
         }
-    }
-
-    [Test]
-    [Arguments(true)]
-    [Arguments(false)]
-    public async Task Failure_Is_Cached_And_Rethrown_To_Every_Caller(bool throwSynchronously)
-    {
-        var fixture = new ThrowingInitializer(new InvalidOperationException("initialization failed"), throwSynchronously);
-
-        var first = await Assert.That(async () => await ObjectInitializer.InitializeAsync(fixture)).Throws<InvalidOperationException>();
-        var second = await Assert.That(async () => await ObjectInitializer.InitializeAsync(fixture)).Throws<InvalidOperationException>();
-
-        await Assert.That(first).IsSameReferenceAs(fixture.Exception);
-        await Assert.That(second).IsSameReferenceAs(fixture.Exception);
-        await Assert.That(fixture.InitializeCount).IsEqualTo(1);
-        await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsFalse();
-    }
-
-    [Test]
-    [Arguments(true)]
-    [Arguments(false)]
-    public async Task OperationCanceledException_From_InitializeAsync_Reaches_Callers_Unchanged(bool throwSynchronously)
-    {
-        var fixture = new ThrowingInitializer(new OperationCanceledException("initializer gave up"), throwSynchronously);
-
-        var first = await Assert.That(async () => await ObjectInitializer.InitializeAsync(fixture)).Throws<OperationCanceledException>();
-        var second = await Assert.That(async () => await ObjectInitializer.InitializeAsync(fixture)).Throws<OperationCanceledException>();
-
-        await Assert.That(first).IsSameReferenceAs(fixture.Exception);
-        await Assert.That(second).IsSameReferenceAs(fixture.Exception);
-        await Assert.That(fixture.InitializeCount).IsEqualTo(1);
-        await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsFalse();
-    }
-
-    [Test]
-    public async Task InitializeAsync_Returning_Null_Fails_Every_Caller_With_The_Same_Exception()
-    {
-        var fixture = new NullReturningInitializer();
-
-        var first = await Assert.That(async () => await ObjectInitializer.InitializeAsync(fixture)).Throws<InvalidOperationException>();
-        var second = await Assert.That(async () => await ObjectInitializer.InitializeAsync(fixture)).Throws<InvalidOperationException>();
-
-        await Assert.That(second).IsSameReferenceAs(first);
-        await Assert.That(first!.Message).Contains(nameof(NullReturningInitializer));
-        await Assert.That(fixture.InitializeCount).IsEqualTo(1);
-        await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsFalse();
     }
 
     /// <summary>
@@ -260,18 +180,14 @@ public class ObjectInitializerTests
     }
 
     /// <summary>
-    /// Suspends until <see cref="Complete"/> or <see cref="Fail"/> is called; the rest of
-    /// InitializeAsync then runs inline on the calling thread.
+    /// Suspends until <see cref="Complete"/> or <see cref="Fail"/> is called.
     /// </summary>
     private sealed class GatedInitializer : IAsyncInitializer
     {
         private readonly TaskCompletionSource<bool> _gate = new();
         private int _initializeCount;
-        private int _resumedOnThreadId;
 
         public int InitializeCount => Volatile.Read(ref _initializeCount);
-
-        public int ResumedOnThreadId => Volatile.Read(ref _resumedOnThreadId);
 
         public void Complete() => _gate.SetResult(true);
 
@@ -280,15 +196,7 @@ public class ObjectInitializerTests
         public async Task InitializeAsync()
         {
             Interlocked.Increment(ref _initializeCount);
-
-            try
-            {
-                await _gate.Task;
-            }
-            finally
-            {
-                Volatile.Write(ref _resumedOnThreadId, Environment.CurrentManagedThreadId);
-            }
+            await _gate.Task;
         }
     }
 
@@ -305,37 +213,22 @@ public class ObjectInitializerTests
         }
     }
 
-    private sealed class NullReturningInitializer : IAsyncInitializer
-    {
-        private int _initializeCount;
-
-        public int InitializeCount => Volatile.Read(ref _initializeCount);
-
-        public Task InitializeAsync()
-        {
-            Interlocked.Increment(ref _initializeCount);
-            return null!;
-        }
-    }
-
     private sealed class ThrowingInitializer(Exception exception, bool throwSynchronously) : IAsyncInitializer
     {
         private int _initializeCount;
 
-        public Exception Exception { get; } = exception;
-
         public int InitializeCount => Volatile.Read(ref _initializeCount);
 
         public Task InitializeAsync()
         {
             Interlocked.Increment(ref _initializeCount);
-            return throwSynchronously ? throw Exception : ThrowAfterYieldAsync();
+            return throwSynchronously ? throw exception : ThrowAfterYieldAsync();
         }
 
         private async Task ThrowAfterYieldAsync()
         {
             await Task.Yield();
-            throw Exception;
+            throw exception;
         }
     }
 }
