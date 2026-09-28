@@ -32,7 +32,7 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 
         // Cheap pre-filter on the simple name: this runs for every invocation in the compilation,
         // and building the fully qualified display string for each one is expensive.
-        if (methodSymbol.MethodKind == MethodKind.Ordinary
+        if (methodSymbol.RendersNameAsLastSegment()
             && methodSymbol.Name is not ("Multiple" or "That" or "Should"))
         {
             return;

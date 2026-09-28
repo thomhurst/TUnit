@@ -104,6 +104,81 @@ public class WebApplicationFactoryAccessAnalyzerTests
     }
 
     [Test]
+    public async Task Error_When_Accessing_Factory_In_Lambda_And_Local_Function_Inside_Constructor()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+                {{WebApplicationTestStub}}
+
+                public class MyFactory { }
+                public class Program { }
+
+                public class MyTests : TUnit.AspNetCore.WebApplicationTest<MyFactory, Program>
+                {
+                    public MyTests()
+                    {
+                        System.Func<object> getFactory = () => {|#0:Factory|};
+                        getFactory();
+
+                        Local();
+
+                        void Local()
+                        {
+                            var services = {|#1:Services|};
+                        }
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.FactoryAccessedTooEarly)
+                    .WithLocation(0)
+                    .WithArguments("Factory", "constructor"),
+                Verifier.Diagnostic(Rules.FactoryAccessedTooEarly)
+                    .WithLocation(1)
+                    .WithArguments("Services", "constructor")
+            );
+    }
+
+    [Test]
+    public async Task Error_When_Accessing_Factory_In_Lambda_Inside_SetupAsync()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+                {{WebApplicationTestStub}}
+
+                public class MyFactory { }
+                public class Program { }
+
+                public class MyTests : TUnit.AspNetCore.WebApplicationTest<MyFactory, Program>
+                {
+                    protected override System.Threading.Tasks.Task SetupAsync()
+                    {
+                        System.Func<object> getFactory = () => {|#0:Factory|};
+                        getFactory();
+                        return System.Threading.Tasks.Task.CompletedTask;
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.FactoryAccessedTooEarly)
+                    .WithLocation(0)
+                    .WithArguments("Factory", "SetupAsync")
+            );
+    }
+
+    [Test]
     public async Task Error_When_Accessing_Services_In_Constructor()
     {
         await Verifier

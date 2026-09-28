@@ -25,13 +25,30 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (!TryGetParentMethodBody(assignmentOperation, out var methodBodyOperation))
+        // Cheapest checks first: only assignments to instance fields/properties can be reported.
+        var targetSymbol = GetTarget(assignmentOperation);
+
+        if (targetSymbol is null || targetSymbol.IsStatic)
         {
             return;
         }
 
-        if (context.Operation.SemanticModel?.GetDeclaredSymbol(methodBodyOperation.Syntax) is not IMethodSymbol
-            methodSymbol)
+        // Only assignments inside a method body (including lambdas and local functions within it).
+        if (!TryGetParentMethodBody(assignmentOperation, out _))
+        {
+            return;
+        }
+
+        // The operation block's owner is the method whose body we're in; no need to re-bind its declaration.
+        if (context.ContainingSymbol is not IMethodSymbol methodSymbol)
+        {
+            return;
+        }
+
+        var testClass = methodSymbol.ContainingType;
+
+        // The target must be a member of the test class itself.
+        if (!SymbolEqualityComparer.Default.Equals(targetSymbol.ContainingType, testClass))
         {
             return;
         }
@@ -41,31 +58,9 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var testClass = methodSymbol.ContainingType;
-
-        var typeMembers = testClass.GetMembers();
-
-        var fieldsAndProperties = typeMembers
-            .OfType<IFieldSymbol>()
-            .Concat<ISymbol>(typeMembers.OfType<IPropertySymbol>())
-            .Where(x => !x.IsStatic);
-
-        foreach (var fieldOrProperty in fieldsAndProperties)
-        {
-            var targetSymbol = GetTarget(assignmentOperation);
-
-            if (!SymbolEqualityComparer.Default.Equals(targetSymbol?.ContainingType, testClass))
-            {
-                continue;
-            }
-
-            if (SymbolEqualityComparer.Default.Equals(targetSymbol, fieldOrProperty))
-            {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.InstanceAssignmentInTestClass,
-                        assignmentOperation.Syntax.GetLocation()));
-            }
-        }
+        context.ReportDiagnostic(
+            Diagnostic.Create(Rules.InstanceAssignmentInTestClass,
+                assignmentOperation.Syntax.GetLocation()));
     }
 
     private static ISymbol? GetTarget(IAssignmentOperation assignmentOperation)

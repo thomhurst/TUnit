@@ -14,6 +14,8 @@ namespace TUnit.Tests.Shared;
 public static class GloballyQualifiedComparisonCases
 {
     private const string Source = """
+        using System.Linq;
+
         namespace Ns.Inner
         {
             public class Plain
@@ -61,6 +63,30 @@ public static class GloballyQualifiedComparisonCases
         public class _Underscore1 { }
 
         public static class Extensions { public static void Ext(this Ns.Inner.Plain p) { } }
+
+        namespace TUnit.Assertions
+        {
+            public static class Invocations
+            {
+                // Invoked methods of every kind an IInvocationOperation / GetSymbolInfo can produce:
+                // ordinary, reduced extension, delegate Invoke and local functions.
+                public static void Run(System.Func<int> f, Ns.Inner.D d)
+                {
+                    f();
+                    d();
+                    That();
+                    Local<int>(1);
+                    Should<string>("");
+                    new Ns.Inner.Plain().Ext();
+                    System.Linq.Enumerable.Range(0, 1).Select(x => x).Where(x => x > 0).ToList();
+                    Xunit.Assert.Equal(1, 1);
+
+                    static void That() { }
+                    static T Local<T>(T t) => t;
+                    static void Should<T>(T t) { }
+                }
+            }
+        }
         """;
 
     private static readonly string[] ExtraCandidates =
@@ -75,6 +101,10 @@ public static class GloballyQualifiedComparisonCases
         "global::TUnit.Core.TestAttribute", "global::TUnit.Core.SingleTUnitAttribute", "global::TUnit.Core.DependsOnAttribute",
         "global::TUnit.Core.IDataSourceAttribute", "global::TUnit.Core.TimeoutAttribute",
         "global::System.Runtime.CompilerServices.CallerArgumentExpressionAttribute",
+        "global::TUnit.Assertions.Assert.That", "global::TUnit.Assertions.Assert.Multiple",
+        "global::TUnit.Assertions.Should.ShouldExtensions.Should", "global::TUnit.Assertions.Invocations.That",
+        "global::TUnit.Assertions.Invocations.Run.That", "global::System.Linq.Enumerable.Select", "global::System.Func.Invoke",
+        "global::System.Func<TResult>.Invoke", "global::Ns.Inner.D.Invoke", "global::Extensions.Ext", "Local", "That",
         "global::@class.@int", "global::class.int", "global::_Underscore1", "global::Missing.Type", "global::Missing",
     ];
 
@@ -95,8 +125,10 @@ public static class GloballyQualifiedComparisonCases
             .Select(p => MetadataReference.CreateFromFile(p))
             .ToList();
 
+        var syntaxTree = CSharpSyntaxTree.ParseText(Source, new CSharpParseOptions(LanguageVersion.Preview));
+
         var compilation = CSharpCompilation.Create("Test",
-            [CSharpSyntaxTree.ParseText(Source, new CSharpParseOptions(LanguageVersion.Preview))],
+            [syntaxTree],
             references,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary,
                 nullableContextOptions: NullableContextOptions.Enable, allowUnsafe: true));
@@ -167,6 +199,23 @@ public static class GloballyQualifiedComparisonCases
             compilation.GetTypeByMetadataName("Extensions")!.GetMembers("Ext").OfType<IMethodSymbol>().Single()
                 .ReduceExtensionMethod(plain)!,
         ]);
+
+        // Symbols as they come back from binding invocations (reduced extensions, local functions, delegate Invoke).
+        var semanticModel = compilation.GetSemanticModel(syntaxTree);
+
+        foreach (var node in syntaxTree.GetRoot().DescendantNodes())
+        {
+            if (node is Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax invocation
+                && semanticModel.GetSymbolInfo(invocation).Symbol is { } invoked)
+            {
+                symbols.Add(invoked);
+            }
+            else if (node is Microsoft.CodeAnalysis.CSharp.Syntax.LocalFunctionStatementSyntax localFunction
+                     && semanticModel.GetDeclaredSymbol(localFunction) is { } localFunctionSymbol)
+            {
+                symbols.Add(localFunctionSymbol);
+            }
+        }
 
         var candidates = symbols
             .SelectMany(s => new[] { globallyQualified(s), globallyQualifiedNonGeneric(s) })

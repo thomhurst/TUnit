@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Migrators.Base;
 
 namespace TUnit.Analyzers;
 
@@ -14,10 +15,23 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.CompilationUnit);
+        context.RegisterCompilationStartAction(compilationStartContext =>
+        {
+            // Every semantic check below matches symbols whose namespace name starts with "Xunit". When no such
+            // namespace exists in the compilation, only the syntactic using-directive checks can report,
+            // so skip binding every class in the project.
+            var canContainXunitSymbols = MigrationNamespaceHelper.ContainsNamespace(
+                compilationStartContext.Compilation,
+                "Xunit",
+                ns => ns.Name.StartsWith("Xunit"));
+
+            compilationStartContext.RegisterSyntaxNodeAction(
+                syntaxNodeContext => AnalyzeSyntax(syntaxNodeContext, canContainXunitSymbols),
+                SyntaxKind.CompilationUnit);
+        });
     }
 
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context, bool canContainXunitSymbols)
     {
         if (context.Node is not CompilationUnitSyntax compilationUnitSyntax)
         {
@@ -30,6 +44,18 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
         foreach (var classDeclarationSyntax in classDeclarationSyntaxes)
         {
+            if (!canContainXunitSymbols)
+            {
+                // The symbol checks can only match Xunit namespaces, so only the using directives remain.
+                if (HasXunitUsing(classDeclarationSyntax))
+                {
+                    Flag(context);
+                    return;
+                }
+
+                continue;
+            }
+
             var symbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
 
             if (symbol is null)
@@ -56,29 +82,13 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 }
             }
 
-            var usingDirectiveSyntaxes = classDeclarationSyntax
-                .SyntaxTree
-                .GetCompilationUnitRoot()
-                .Usings;
-
-            foreach (var usingDirectiveSyntax in usingDirectiveSyntaxes)
+            if (HasXunitUsing(classDeclarationSyntax))
             {
-                if (usingDirectiveSyntax.Name is QualifiedNameSyntax { Left: IdentifierNameSyntax { Identifier.Text: "Xunit" } }
-                    or IdentifierNameSyntax { Identifier.Text: "Xunit" })
-                {
-                    Flag(context);
-                    return;
-                }
-            }
-
-            var namedTypeSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
-
-            if (namedTypeSymbol is null)
-            {
+                Flag(context);
                 return;
             }
 
-            var members = namedTypeSymbol.GetMembers();
+            var members = symbol.GetMembers();
 
             var types = members.OfType<IPropertySymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.Type)
                 .Concat(members.OfType<IMethodSymbol>().Where(x => x.ReturnType.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.ReturnType))
@@ -113,6 +123,25 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
             context.ReportDiagnostic(Diagnostic.Create(Rules.XunitMigration, usingDirective.GetLocation()));
             return;
         }
+    }
+
+    private static bool HasXunitUsing(ClassDeclarationSyntax classDeclarationSyntax)
+    {
+        var usingDirectiveSyntaxes = classDeclarationSyntax
+            .SyntaxTree
+            .GetCompilationUnitRoot()
+            .Usings;
+
+        foreach (var usingDirectiveSyntax in usingDirectiveSyntaxes)
+        {
+            if (usingDirectiveSyntax.Name is QualifiedNameSyntax { Left: IdentifierNameSyntax { Identifier.Text: "Xunit" } }
+                or IdentifierNameSyntax { Identifier.Text: "Xunit" })
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private bool AnalyzeAttributes(SyntaxNodeAnalysisContext context, ISymbol symbol)

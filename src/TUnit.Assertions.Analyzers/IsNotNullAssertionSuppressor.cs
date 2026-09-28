@@ -112,27 +112,38 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         }
 
         // Look for Assert.That(variable).IsNotNull() patterns before this usage
-        var allStatements = containingMethod.DescendantNodes().OfType<StatementSyntax>().ToList();
         var identifierStatement = targetExpression.FirstAncestorOrSelf<StatementSyntax>();
 
-        if (identifierStatement is null)
+        if (identifierStatement is null || !IsStrictDescendantOf(identifierStatement, containingMethod))
         {
             return false;
         }
 
-        var identifierStatementIndex = allStatements.IndexOf(identifierStatement);
-        if (identifierStatementIndex < 0)
+        // Semantically this checks every invocation inside any statement of the scope that precedes the
+        // usage's statement in document (pre-)order, which includes the statements that enclose it.
+        // Rather than scanning the descendants of each such statement (quadratic in nesting depth),
+        // visit each invocation once and test its outermost enclosing statement instead: an invocation is
+        // inside some preceding statement exactly when its outermost statement within the scope precedes
+        // (or encloses) the usage's statement.
+        foreach (var node in containingMethod.DescendantNodes())
         {
-            return false;
-        }
+            if (node is not InvocationExpressionSyntax
+                {
+                    Expression: MemberAccessExpressionSyntax { Name.Identifier.Text: "IsNotNull" or "NotBeNull" }
+                } invocation)
+            {
+                continue;
+            }
 
-        // Check all statements before the current one
-        for (int i = 0; i < identifierStatementIndex; i++)
-        {
-            var statement = allStatements[i];
+            if (GetOutermostStatement(invocation, containingMethod) is not { } outermostStatement
+                || outermostStatement == identifierStatement
+                || outermostStatement.SpanStart > identifierStatement.SpanStart)
+            {
+                continue;
+            }
 
             // Look for await Assert.That(x).IsNotNull() pattern
-            if (IsNotNullAssertion(statement, targetExpression, semanticModel, cancellationToken))
+            if (IsNotNullAssertion(invocation, targetExpression, semanticModel, cancellationToken))
             {
                 return true;
             }
@@ -141,8 +152,36 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         return false;
     }
 
+    private static bool IsStrictDescendantOf(SyntaxNode node, SyntaxNode ancestor)
+    {
+        for (var current = node.Parent; current is not null; current = current.Parent)
+        {
+            if (current == ancestor)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static StatementSyntax? GetOutermostStatement(SyntaxNode node, SyntaxNode scope)
+    {
+        StatementSyntax? outermost = null;
+
+        for (var current = node.Parent; current is not null && current != scope; current = current.Parent)
+        {
+            if (current is StatementSyntax statement)
+            {
+                outermost = statement;
+            }
+        }
+
+        return outermost;
+    }
+
     private bool IsNotNullAssertion(
-        StatementSyntax statement,
+        InvocationExpressionSyntax invocation,
         ExpressionSyntax targetExpression,
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
@@ -153,31 +192,20 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         //   Assert.That(variable).IsNotNull().GetAwaiter().GetResult()
         //   await variable.Should().NotBeNull()
         //   await variable.Should().Contain("test").And.NotBeNull()
-
-        var invocations = statement.DescendantNodes().OfType<InvocationExpressionSyntax>();
-
-        foreach (var invocation in invocations)
+        if (invocation.Expression is not MemberAccessExpressionSyntax { Name.Identifier.Text: var calledName })
         {
-            if (invocation.Expression is not MemberAccessExpressionSyntax { Name.Identifier.Text: var calledName })
-            {
-                continue;
-            }
-
-            ExpressionSyntax? targetArgument = calledName switch
-            {
-                "IsNotNull" => GetAssertThatArgument(invocation, semanticModel, cancellationToken),
-                "NotBeNull" => GetShouldReceiver(invocation, semanticModel, cancellationToken),
-                _ => null,
-            };
-
-            if (targetArgument is not null
-                && ExpressionsMatch(targetArgument, targetExpression, semanticModel, cancellationToken))
-            {
-                return true;
-            }
+            return false;
         }
 
-        return false;
+        ExpressionSyntax? targetArgument = calledName switch
+        {
+            "IsNotNull" => GetAssertThatArgument(invocation, semanticModel, cancellationToken),
+            "NotBeNull" => GetShouldReceiver(invocation, semanticModel, cancellationToken),
+            _ => null,
+        };
+
+        return targetArgument is not null
+            && ExpressionsMatch(targetArgument, targetExpression, semanticModel, cancellationToken);
     }
 
     private static ExpressionSyntax? GetAssertThatArgument(

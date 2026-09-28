@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
+using TUnit.Assertions.Analyzers.Extensions;
 using Microsoft.CodeAnalysis.Text;
 
 namespace TUnit.Assertions.Analyzers;
@@ -51,8 +52,7 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var containingNamespace = method.ContainingType?.ContainingNamespace?.ToDisplayString();
-        if (containingNamespace is null || !containingNamespace.StartsWith("TUnit.Assertions"))
+        if (method.ContainingType?.ContainingNamespace.IsInTUnitAssertionsNamespace() != true)
         {
             return;
         }
@@ -115,7 +115,7 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
     private static bool TryGetAssertionSourceArg(INamedTypeSymbol type, out ITypeSymbol? arg)
     {
         if (type.Name == "IAssertionSource"
-            && type.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core"
+            && type.ContainingNamespace is { Name: "Core", ContainingNamespace: { Name: "Assertions", ContainingNamespace: { Name: "TUnit", ContainingNamespace.IsGlobalNamespace: true } } }
             && type.TypeArguments.Length == 1)
         {
             arg = type.TypeArguments[0];
@@ -133,11 +133,12 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
             return false;
         }
 
-        var unconstructedName = (type as INamedTypeSymbol)?.ConstructedFrom?.ToDisplayString();
-        if (unconstructedName is "System.Memory<T>"
-            or "System.ReadOnlyMemory<T>"
-            or "System.Span<T>"
-            or "System.ReadOnlySpan<T>")
+        // Name check first so the display string is only built for the handful of candidate types.
+        if (type is INamedTypeSymbol { Name: "Memory" or "ReadOnlyMemory" or "Span" or "ReadOnlySpan" } namedType
+            && namedType.ConstructedFrom?.ToDisplayString() is "System.Memory<T>"
+                or "System.ReadOnlyMemory<T>"
+                or "System.Span<T>"
+                or "System.ReadOnlySpan<T>")
         {
             return false;
         }
@@ -176,7 +177,7 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
         foreach (var iface in type.AllInterfaces)
         {
             if (iface.Name == "IEquatable"
-                && iface.ContainingNamespace?.ToDisplayString() == "System"
+                && iface.ContainingNamespace is { Name: "System", ContainingNamespace.IsGlobalNamespace: true }
                 && iface.TypeArguments.Length == 1
                 && SymbolEqualityComparer.Default.Equals(iface.TypeArguments[0], type))
             {

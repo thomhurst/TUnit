@@ -5734,6 +5734,52 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_Using_Flagged_When_NUnit_Is_Not_Referenced()
+    {
+        // Without an NUnit reference the analyzer skips all semantic checks; a leftover using must still be reported.
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            {|#0:using NUnit.Framework;|}
+
+            public class MyClass
+            {
+                public void MyMethod() { }
+            }
+            """,
+            test => test.CompilerDiagnostics = CompilerDiagnostics.None,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0)
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Global_Using_Flagged_When_NUnit_Is_Not_Referenced()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            {|#0:global using NUnit.Framework;|}
+            """,
+            test => test.CompilerDiagnostics = CompilerDiagnostics.None,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0)
+        );
+    }
+
+    [Test]
+    public async Task No_Diagnostic_When_NUnit_Is_Not_Referenced_And_Not_Used()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+
+            public class MyClass
+            {
+                [TUnit.Core.Test]
+                public void MyMethod() => Console.WriteLine();
+            }
+            """
+        );
+    }
+
     // NUnit 5 ships a net10.0 build referencing System.Runtime 10.0, which raises CS1705 against the
     // verifiers' Net90 reference assemblies when the test runs on net10.0. The csproj copies NUnit's
     // net8.0 build into the output directory; reference that instead of the runtime-loaded assembly.

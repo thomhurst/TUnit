@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
+using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -63,15 +64,13 @@ public class PreferIsNullAnalyzer : ConcurrentDiagnosticAnalyzer
     private static bool IsTUnitAssertionMethod(IMethodSymbol method)
     {
         // Check if the return type is in the TUnit.Assertions namespace
-        var returnTypeNamespace = method.ReturnType?.ContainingNamespace?.ToDisplayString();
-        if (returnTypeNamespace != null && returnTypeNamespace.StartsWith("TUnit.Assertions"))
+        if (method.ReturnType?.ContainingNamespace.IsInTUnitAssertionsNamespace() == true)
         {
             return true;
         }
 
         // Check if the containing type is in the TUnit.Assertions namespace
-        var containingNamespace = method.ContainingType?.ContainingNamespace?.ToDisplayString();
-        if (containingNamespace != null && containingNamespace.StartsWith("TUnit.Assertions"))
+        if (method.ContainingType?.ContainingNamespace.IsInTUnitAssertionsNamespace() == true)
         {
             return true;
         }

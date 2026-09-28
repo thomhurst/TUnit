@@ -36,6 +36,12 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
             return;
         }
 
+        // Cheap syntactic check before binding: only Mock.Of<...>() / T.Mock() are of interest.
+        if (!InvocationNameFilter.MayInvoke(invocation, "Of", "Mock"))
+        {
+            return;
+        }
+
         ReportUnmockableTargets(context, ResolveMockTargets(context, invocation), invocation.GetLocation());
     }
 
@@ -47,6 +53,14 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeGenerateMockAttribute(SyntaxNodeAnalysisContext context)
     {
         if (context.Node is not AttributeSyntax attribute)
+        {
+            return;
+        }
+
+        // GenerateMockAttribute is [AttributeUsage(AttributeTargets.Assembly)], so only assembly-level
+        // attributes can bind to it. Skip binding every other attribute in the compilation.
+        if (attribute.Parent is not AttributeListSyntax { Target: { } attributeTarget }
+            || attributeTarget.Identifier.ValueText != "assembly")
         {
             return;
         }

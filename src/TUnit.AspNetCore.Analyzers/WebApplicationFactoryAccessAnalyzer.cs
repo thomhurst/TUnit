@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
@@ -73,9 +72,9 @@ public class WebApplicationFactoryAccessAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        // Check if we're in a constructor or SetupAsync method
-        var containingMethod = GetContainingMethod(context.Operation);
-        if (containingMethod == null)
+        // Check if we're in a constructor or SetupAsync method. The operation block's owning symbol is the
+        // enclosing member (also for lambdas and local functions inside it), so no need to re-bind its declaration.
+        if (context.ContainingSymbol is not IMethodSymbol containingMethod)
         {
             return;
         }
@@ -147,18 +146,10 @@ public class WebApplicationFactoryAccessAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         while (type != null)
         {
-            var typeName = type.Name;
-            var namespaceName = type.ContainingNamespace?.ToDisplayString();
-
             // Check for WebApplicationTest or WebApplicationTest<TFactory, TEntryPoint>
-            if (typeName == "WebApplicationTest" && namespaceName == "TUnit.AspNetCore")
-            {
-                return true;
-            }
-
-            // Also check the generic version
-            if (type.OriginalDefinition?.Name == "WebApplicationTest" &&
-                type.OriginalDefinition.ContainingNamespace?.ToDisplayString() == "TUnit.AspNetCore")
+            // (a constructed generic shares its definition's name and namespace).
+            if (type.Name == "WebApplicationTest"
+                && type.ContainingNamespace is { Name: "AspNetCore", ContainingNamespace: { Name: "TUnit", ContainingNamespace.IsGlobalNamespace: true } })
             {
                 return true;
             }
@@ -167,37 +158,5 @@ public class WebApplicationFactoryAccessAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         return false;
-    }
-
-    private static IMethodSymbol? GetContainingMethod(IOperation operation)
-    {
-        var current = operation;
-        while (current != null)
-        {
-            if (current is IMethodBodyOperation or IBlockOperation)
-            {
-                // Get the semantic model to find the containing method
-                var syntax = current.Syntax;
-                while (syntax != null)
-                {
-                    if (syntax is MethodDeclarationSyntax or ConstructorDeclarationSyntax)
-                    {
-                        var semanticModel = operation.SemanticModel;
-                        if (semanticModel != null)
-                        {
-                            var symbol = semanticModel.GetDeclaredSymbol(syntax);
-                            if (symbol is IMethodSymbol methodSymbol)
-                            {
-                                return methodSymbol;
-                            }
-                        }
-                    }
-                    syntax = syntax.Parent;
-                }
-            }
-            current = current.Parent;
-        }
-
-        return null;
     }
 }

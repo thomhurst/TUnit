@@ -31,6 +31,43 @@ public class InstanceValuesInTestClassAnalyzerTests
     }
 
     [Test]
+    public async Task Flag_When_Assigning_ClassInstance_Data_Inside_Lambda_And_Local_Function()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    private int _value;
+
+                    [Test]
+                    public void MyTest(string value)
+                    {
+                        Action action = () => {|#0:_value = 99|};
+                        action();
+
+                        Local();
+
+                        void Local()
+                        {
+                            {|#1:_value = 100|};
+                        }
+                    }
+
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.InstanceAssignmentInTestClass)
+                    .WithLocation(0),
+                Verifier.Diagnostic(Rules.InstanceAssignmentInTestClass)
+                    .WithLocation(1)
+            );
+    }
+
+    [Test]
     public async Task Do_Not_Flag_When_Not_Assigning_ClassInstance_Data()
     {
         await Verifier

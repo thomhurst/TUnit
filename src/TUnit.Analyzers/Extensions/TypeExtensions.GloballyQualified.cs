@@ -32,11 +32,24 @@ public static partial class TypeExtensions
     public static bool IsGloballyQualifiedNonGeneric(this ISymbol symbol, string expected)
         => CanHaveGloballyQualifiedName(symbol, expected) && symbol.GloballyQualifiedNonGeneric() == expected;
 
+    /// <summary>
+    /// True for method kinds whose fully qualified display string (when it matches a <c>global::</c> path at all)
+    /// always ends with the method's <see cref="ISymbol.Name"/>. Lets callers reject by simple name before
+    /// building a display string. Covers the kinds an invoked method usually has: ordinary and extension
+    /// methods (reduced when bound from syntax), delegate <c>Invoke</c> and local functions.
+    /// Constructors, operators, accessors etc. render differently and are excluded.
+    /// </summary>
+    public static bool RendersNameAsLastSegment(this IMethodSymbol method)
+        => method.MethodKind is MethodKind.Ordinary
+            or MethodKind.ReducedExtension
+            or MethodKind.DelegateInvoke
+            or MethodKind.LocalFunction;
+
     // Returns false only when the display string can't possibly equal `expected`.
     private static bool CanHaveGloballyQualifiedName(ISymbol symbol, string expected)
     {
-        // Named types and ordinary methods always render their Name as the last segment of the display string.
-        if (symbol is not INamedTypeSymbol and not IMethodSymbol { MethodKind: MethodKind.Ordinary })
+        // Named types and the method kinds above always render their Name as the last segment of the display string.
+        if (symbol is not INamedTypeSymbol && (symbol is not IMethodSymbol method || !method.RendersNameAsLastSegment()))
         {
             return true;
         }

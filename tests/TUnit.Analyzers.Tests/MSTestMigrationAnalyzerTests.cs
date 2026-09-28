@@ -2080,6 +2080,24 @@ public class MSTestMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task MSTest_Using_Flagged_When_MSTest_Is_Not_Referenced()
+    {
+        // Without an MSTest reference the analyzer skips all semantic checks; a leftover using must still be reported.
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            {|#0:using Microsoft.VisualStudio.TestTools.UnitTesting;|}
+
+            public class MyClass
+            {
+                public void MyMethod() { }
+            }
+            """,
+            test => test.CompilerDiagnostics = CompilerDiagnostics.None,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0)
+        );
+    }
+
     private static void ConfigureMSTestTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);

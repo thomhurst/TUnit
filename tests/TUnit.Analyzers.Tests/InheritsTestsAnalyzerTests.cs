@@ -68,4 +68,33 @@ public class InheritsTestsAnalyzerTests
                     .WithLocation(0)
             );
     }
+
+    [Test]
+    public async Task Warning_For_Base_Class_With_Tests_In_Referenced_Assembly()
+    {
+        // Base types from referenced assemblies that reference TUnit.Core must still be inspected.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                public class {|#0:Tests|} : TUnit.TestProject.Library.AsyncBaseTests
+                {
+                }
+                """,
+                Verifier.Diagnostic(Rules.DoesNotInheritTestsWarning)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
+    public async Task No_Error_For_Base_Class_From_Assembly_Without_TUnit()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                public class Tests : System.Collections.Generic.List<int>
+                {
+                }
+                """
+            );
+    }
 }

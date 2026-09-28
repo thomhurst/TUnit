@@ -34,31 +34,31 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var methods = namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(x => x.GetMembers()).OfType<IMethodSymbol>().ToArray();
+        // Only methods declared in source have bodies to inspect; metadata base types (e.g. System.Object) contribute nothing.
+        var methods = namedTypeSymbol.GetSelfAndBaseTypes()
+            .SelectMany(x => x.GetMembers())
+            .OfType<IMethodSymbol>()
+            .Where(x => !x.DeclaringSyntaxReferences.IsDefaultOrEmpty)
+            .ToArray();
 
-        CheckMethods(context, methods, true);
-        CheckMethods(context, methods, false);
+        var semanticModels = new SemanticModelCache(context.SemanticModel);
+
+        CheckMethods(context, semanticModels, methods, true);
+        CheckMethods(context, semanticModels, methods, false);
     }
 
-    private static void CheckMethods(SyntaxNodeAnalysisContext context, IMethodSymbol[] methods, bool isStaticMethod)
+    private static void CheckMethods(SyntaxNodeAnalysisContext context, SemanticModelCache semanticModels, IMethodSymbol[] methods, bool isStaticMethod)
     {
         var createdObjects = new ConcurrentDictionary<ISymbol, HookLevel?>(SymbolEqualityComparer.Default);
 
         var methodSymbols = methods.Where(x => x.IsStatic == isStaticMethod).ToArray();
 
         // Check field initializers first
-        if (context.Node is ClassDeclarationSyntax classDeclarationSyntax)
-        {
-            var namedTypeSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
-            if (namedTypeSymbol != null)
-            {
-                CheckFieldInitializers(context, namedTypeSymbol, isStaticMethod, createdObjects);
-            }
-        }
+        CheckFieldInitializers(context, isStaticMethod, createdObjects);
 
         foreach (var methodSymbol in methodSymbols)
         {
-            CheckSetUps(context, methodSymbol, createdObjects);
+            CheckSetUps(context, semanticModels, methodSymbol, createdObjects);
         }
 
         // Teardown analysis can only remove members discovered during setup.
@@ -69,7 +69,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 
         foreach (var methodSymbol in methodSymbols)
         {
-            CheckTeardowns(context, methodSymbol, createdObjects);
+            CheckTeardowns(context, semanticModels, methodSymbol, createdObjects);
         }
 
         foreach (var kvp in createdObjects)
@@ -81,7 +81,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private static void CheckFieldInitializers(SyntaxNodeAnalysisContext context, INamedTypeSymbol namedTypeSymbol, bool isStatic, ConcurrentDictionary<ISymbol, HookLevel?> createdObjects)
+    private static void CheckFieldInitializers(SyntaxNodeAnalysisContext context, bool isStatic, ConcurrentDictionary<ISymbol, HookLevel?> createdObjects)
     {
         // Directly traverse the class syntax to find field declarations
         if (context.Node is not ClassDeclarationSyntax classDeclaration)
@@ -166,7 +166,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private static void CheckSetUps(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, ConcurrentDictionary<ISymbol, HookLevel?> createdObjects)
+    private static void CheckSetUps(SyntaxNodeAnalysisContext context, SemanticModelCache semanticModels, IMethodSymbol methodSymbol, ConcurrentDictionary<ISymbol, HookLevel?> createdObjects)
     {
         var syntaxNodes = methodSymbol.DeclaringSyntaxReferences
             .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf());
@@ -199,7 +199,14 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         foreach (var assignment in syntaxNodes
                      .Where(x => x.IsKind(SyntaxKind.SimpleAssignmentExpression)))
         {
-            var assignmentOperation = assignment.GetOperation(context.SemanticModel) as IAssignmentOperation;
+            // Only assignments containing an object creation can be reported; skip binding the rest.
+            // (Every IObjectCreationOperation comes from an ObjectCreation or ImplicitObjectCreation expression.)
+            if (!assignment.DescendantNodes().Any(x => x is BaseObjectCreationExpressionSyntax))
+            {
+                continue;
+            }
+
+            var assignmentOperation = semanticModels.GetOperation(assignment) as IAssignmentOperation;
 
             if (assignmentOperation?.Target is not IFieldReferenceOperation and not IPropertyReferenceOperation)
             {
@@ -230,20 +237,37 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private static void CheckTeardowns(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, ConcurrentDictionary<ISymbol, HookLevel?> createdObjects)
+    private static void CheckTeardowns(SyntaxNodeAnalysisContext context, SemanticModelCache semanticModels, IMethodSymbol methodSymbol, ConcurrentDictionary<ISymbol, HookLevel?> createdObjects)
     {
+        // Independent of the invocation, so decide it once rather than per Dispose call.
+        HookLevel? level = null;
+        bool? isValidTearDownMethod = null;
+
         var syntaxNodes = methodSymbol.DeclaringSyntaxReferences
             .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf());
 
         foreach (var assignment in syntaxNodes
                      .Where(x => x.IsKind(SyntaxKind.InvocationExpression)))
         {
-            if (assignment.GetOperation(context.SemanticModel) is not IInvocationOperation invocationOperation)
+            // IsDisposeInvocation only accepts methods named Dispose/DisposeAsync; skip binding every other call.
+            if (!IsPossibleDisposeInvocation((InvocationExpressionSyntax) assignment))
             {
                 continue;
             }
 
-            if (!IsDisposeInvocation(context, invocationOperation) || !IsValidTearDownMethod(context, methodSymbol, out var level))
+            if (semanticModels.GetOperation(assignment) is not IInvocationOperation invocationOperation)
+            {
+                continue;
+            }
+
+            if (!IsDisposeInvocation(context, invocationOperation))
+            {
+                continue;
+            }
+
+            isValidTearDownMethod ??= IsValidTearDownMethod(context, methodSymbol, out level);
+
+            if (isValidTearDownMethod != true)
             {
                 continue;
             }
@@ -260,6 +284,20 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
                 createdObjects.TryRemove(propertyReferenceOperation.Property, out _);
             }
         }
+    }
+
+    private static bool IsPossibleDisposeInvocation(InvocationExpressionSyntax invocation)
+    {
+        var name = invocation.Expression switch
+        {
+            MemberAccessExpressionSyntax memberAccess => memberAccess.Name,
+            MemberBindingExpressionSyntax memberBinding => memberBinding.Name,
+            SimpleNameSyntax simpleName => simpleName,
+            _ => null,
+        };
+
+        // Other shapes (e.g. an invoked parenthesized expression) are rare; bind them to be safe.
+        return name is null || name.Identifier.ValueText is "Dispose" or "DisposeAsync";
     }
 
     private static bool IsValidTearDownMethod(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, out HookLevel? hookLevel)
@@ -350,5 +388,36 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Methods of base classes can be declared in other syntax trees. Creating a semantic model is expensive,
+    /// so reuse one per tree for the duration of a single analysis callback.
+    /// </summary>
+    private sealed class SemanticModelCache(SemanticModel semanticModel)
+    {
+        private Dictionary<SyntaxTree, SemanticModel?>? _otherTrees;
+
+        public IOperation? GetOperation(SyntaxNode syntaxNode)
+        {
+            var tree = syntaxNode.SyntaxTree;
+
+            if (tree == semanticModel.SyntaxTree)
+            {
+                return semanticModel.GetOperation(syntaxNode);
+            }
+
+            _otherTrees ??= new Dictionary<SyntaxTree, SemanticModel?>();
+
+            if (!_otherTrees.TryGetValue(tree, out var model))
+            {
+                model = semanticModel.Compilation.ContainsSyntaxTree(tree)
+                    ? semanticModel.Compilation.GetSemanticModel(tree)
+                    : null;
+                _otherTrees[tree] = model;
+            }
+
+            return model?.GetOperation(syntaxNode);
+        }
     }
 }

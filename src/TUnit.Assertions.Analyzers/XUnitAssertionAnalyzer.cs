@@ -32,7 +32,7 @@ public class XUnitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 
         // Cheap pre-filter: "global::Xunit.Assert.*" requires the outermost container to be named Xunit.
         // Avoids building a display string for every invocation in the compilation.
-        if (methodSymbol.MethodKind == MethodKind.Ordinary && GetOutermostContainerName(methodSymbol) != "Xunit")
+        if (methodSymbol.RendersNameAsLastSegment() && GetOutermostContainerName(methodSymbol) != "Xunit")
         {
             return;
         }
