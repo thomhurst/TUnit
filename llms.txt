@@ -20,7 +20,7 @@
 - [Chaining and Converting](/docs/assertions/extensibility/extensibility-chaining-and-converting.md): TUnit allows you to chain assertions that change the type being asserted, enabling fluent and expressive test code.
 - [Returning Data via await](/docs/assertions/extensibility/extensibility-returning-items-from-await.md): Sometimes, you may want your assertion to return a value, such as an item found in a collection, so you can use it in further assertions or logic.
 - [Source Generator Assertions](/docs/assertions/extensibility/source-generator-assertions.md): TUnit provides source generators to simplify creating custom assertions. Instead of manually writing assertion classes and extension methods, you can decorate your methods with attributes and let the generator do the work.
-- [FSharp](/docs/assertions/fsharp.md): As awaiting doesn't work quite the same in F#, the syntax instead looks like this:
+- [FSharp](/docs/assertions/fsharp.md): The F# helpers ship in a separate package. Add it to your F# test project alongside TUnit:
 - [Getting Started with Assertions](/docs/assertions/getting-started.md): TUnit provides a comprehensive, fluent assertion library that makes your tests readable and expressive. This guide introduces the core concepts and gets you started with writing assertions.
 - [Assertions Library](/docs/assertions/library.md): Searchable library of all TUnit assertions
 - [Member Assertions](/docs/assertions/member-assertions.md): The .Member() method allows you to assert on object properties while maintaining the parent object's context for chaining. This is useful when you need to validate multiple properties of the same object.

@@ -146,10 +146,16 @@ If you're used to other testing frameworks, you're probably used to the package 
 
 ## .NET Framework[​](#net-framework "Direct link to .NET Framework")
 
-If you are still targeting .NET Framework, TUnit relies on some types that are not available in the base class library (such as `ModuleInitializerAttribute`). We recommend installing a polyfill package such as [`Polyfill`](https://github.com/SimonCropp/Polyfill) to provide these missing types:
+If you are still targeting .NET Framework, TUnit's generated code needs `ModuleInitializerAttribute`, which isn't in the base class library. When nothing in your project provides it, TUnit's source generator declares it for you as an internal type, so no extra package is required.
+
+Newer C# features such as `init` accessors, `required` members and records need further types that .NET Framework lacks. To use them, install a polyfill package such as [`Polyfill`](https://github.com/SimonCropp/Polyfill):
 
 ```
 <PackageReference Include="Polyfill" Version="*" PrivateAssets="all" />
 ```
+
+TUnit doesn't declare the attribute when the project already has one, whether from `Polyfill`, `PolySharp` or your own code. To turn TUnit's declaration off entirely, set `<EnableTUnitPolyfills>false</EnableTUnitPolyfills>`.
+
+Source generators can't see each other's output, so TUnit detects PolySharp through its `PolySharpIncludeGeneratedTypes` and `PolySharpExcludeGeneratedTypes` MSBuild properties. If you see a duplicate `ModuleInitializerAttribute` error with PolySharp installed, set `EnableTUnitPolyfills` to `false`.
 
 **Next:** [Write Your First Test →](/docs/getting-started/writing-your-first-test.md)

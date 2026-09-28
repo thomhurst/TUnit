@@ -205,6 +205,8 @@ public class CounterComponentTests : BunitContext
 }
 ```
 
+With this property set to `false`, TUnit removes its source generator from the compilation entirely, so it does no work at all during builds or in the IDE. TUnit's analyzers still run.
+
 **Benefits:**
 
 * **Faster Builds**: Eliminates source generator execution at compile time

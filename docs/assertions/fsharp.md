@@ -1,5 +1,11 @@
 # FSharp
 
+The F# helpers ship in a separate package. Add it to your F# test project alongside TUnit:
+
+```
+<PackageReference Include="TUnit.Assertions.FSharp" Version="*" />
+```
+
 As awaiting doesn't work quite the same in F#, the syntax instead looks like this:
 
 ```
