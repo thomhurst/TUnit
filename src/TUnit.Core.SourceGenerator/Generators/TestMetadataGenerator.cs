@@ -3579,7 +3579,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // shared TestEntryFactory so each call site is a single factory call instead of a
             // large object initializer (#6227). The factory also builds each entry's MethodMetadata.
             var entryType = $"global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>";
-            if (HasNestedEntryConstruction(classGroup))
+            if (ShouldChunkEntries(classGroup))
             {
                 WriteChunkedEntries(writer, classGroup, entryType);
             }
@@ -3620,31 +3620,37 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    // Entries per __FillEntriesN method when entries contain nested construction. Measured on a
-    // 10,000 test data-driven suite: 10 minimised total JIT time (5 and 25 were both slower).
-    private const int EntriesPerFillMethod = 10;
+    // Nested-construction entries per __FillEntriesN method. Measured on a 10,000 test
+    // data-driven suite: 10 minimised total JIT time (5 and 25 were both slower).
+    private const int NestedEntriesPerFillMethod = 10;
 
     /// <summary>
     /// True when an entry builds nested objects (data source attributes, parameter metadata,
     /// dependencies, return types) while the outer factory call's arguments are still on the
     /// evaluation stack. The JIT spills those pending arguments into fresh temporaries at every
-    /// nested call, so the temporaries grow with the number of entries in the method and its
+    /// nested call, so the temporaries grow with the number of such entries in the method and its
     /// JIT time grows faster than linearly (~60ms per 100-entry class for [Arguments] tests).
+    /// Plain entries pass only constants and cached fields, so they add no spill temporaries.
     /// </summary>
-    private static bool HasNestedEntryConstruction(ClassTestGroup classGroup)
+    private static bool HasNestedConstruction(TestMethodSourceCode method)
     {
-        // A class with no more entries than one fill method holds is already bounded.
-        if (classGroup.Methods.Length <= EntriesPerFillMethod)
-        {
-            return false;
-        }
+        return method.TestDataSourcesCode != null
+            || method.ClassDataSourcesCode != null
+            || method.DependenciesCode != null
+            || method.MethodMetadataArgumentsCode.Length > 0;
+    }
 
+    /// <summary>
+    /// True when the class has more nested-construction entries than one fill method holds.
+    /// Plain entries never trigger chunking, so a large class of plain tests with a few
+    /// data-driven ones keeps its single array initializer.
+    /// </summary>
+    private static bool ShouldChunkEntries(ClassTestGroup classGroup)
+    {
+        var nested = 0;
         foreach (var method in classGroup.Methods)
         {
-            if (method.TestDataSourcesCode != null
-                || method.ClassDataSourcesCode != null
-                || method.DependenciesCode != null
-                || method.MethodMetadataArgumentsCode.Length > 0)
+            if (HasNestedConstruction(method) && ++nested > NestedEntriesPerFillMethod)
             {
                 return true;
             }
@@ -3654,20 +3660,41 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Builds the Entries array in small fill methods instead of one static constructor array
-    /// initializer, keeping every JIT-compiled method bounded regardless of the class's test count.
+    /// Builds the Entries array in fill methods instead of one static constructor array initializer.
+    /// Each fill method holds at most <see cref="NestedEntriesPerFillMethod"/> nested-construction
+    /// entries; runs of plain entries stay in the current fill method, since they do not add to
+    /// the JIT cost that chunking bounds. A new fill method starts only when a nested entry would
+    /// exceed the budget, so the method count is ceil(nestedEntries / budget).
     /// </summary>
     private static void WriteChunkedEntries(CodeWriter writer, ClassTestGroup classGroup, string entryType)
     {
         var methods = classGroup.Methods.AsArray();
-        var chunkCount = (methods.Length + EntriesPerFillMethod - 1) / EntriesPerFillMethod;
+
+        // Start index of each fill method, in entry order.
+        var chunkStarts = new List<int> { 0 };
+        var nestedInChunk = 0;
+        for (var i = 0; i < methods.Length; i++)
+        {
+            if (!HasNestedConstruction(methods[i]))
+            {
+                continue;
+            }
+
+            if (nestedInChunk == NestedEntriesPerFillMethod)
+            {
+                chunkStarts.Add(i);
+                nestedInChunk = 0;
+            }
+
+            nestedInChunk++;
+        }
 
         writer.AppendLine($"public static readonly {entryType}[] Entries = __CreateEntries();");
         writer.AppendLine($"private static {entryType}[] __CreateEntries()");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine($"var entries = new {entryType}[{methods.Length}];");
-        for (var chunk = 0; chunk < chunkCount; chunk++)
+        for (var chunk = 0; chunk < chunkStarts.Count; chunk++)
         {
             writer.AppendLine($"__FillEntries{chunk}(entries);");
         }
@@ -3675,13 +3702,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
 
-        for (var chunk = 0; chunk < chunkCount; chunk++)
+        for (var chunk = 0; chunk < chunkStarts.Count; chunk++)
         {
             writer.AppendLine($"private static void __FillEntries{chunk}({entryType}[] entries)");
             writer.AppendLine("{");
             writer.Indent();
-            var end = Math.Min(methods.Length, (chunk + 1) * EntriesPerFillMethod);
-            for (var i = chunk * EntriesPerFillMethod; i < end; i++)
+            var end = chunk + 1 < chunkStarts.Count ? chunkStarts[chunk + 1] : methods.Length;
+            for (var i = chunkStarts[chunk]; i < end; i++)
             {
                 writer.Append($"entries[{i}] = ");
                 WriteTestEntryFactoryCall(writer, classGroup, methods[i], ";");
