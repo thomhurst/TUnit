@@ -106,62 +106,6 @@ internal static class TestHelper
         return compilation.ReplaceSyntaxTree(compilation.SyntaxTrees.First(), newTree);
     }
 
-    /// <summary>
-    /// Replaces the source text of one syntax tree in a compilation that may contain several.
-    /// </summary>
-    internal static CSharpCompilation ReplaceSyntaxTreeText(
-        CSharpCompilation compilation,
-        SyntaxTree syntaxTree,
-        string oldText,
-        string newText
-    )
-    {
-        var source = syntaxTree.GetText().ToString();
-        if (!source.Contains(oldText))
-        {
-            throw new ArgumentException($"The syntax tree does not contain '{oldText}'.", nameof(oldText));
-        }
-
-        var newTree = CSharpSyntaxTree.ParseText(source.Replace(oldText, newText), (CSharpParseOptions)syntaxTree.Options, syntaxTree.FilePath);
-
-        return compilation.ReplaceSyntaxTree(syntaxTree, newTree);
-    }
-
-    /// <summary>
-    /// Returns the run reason of every output of a tracked step.
-    /// </summary>
-    internal static IncrementalStepRunReason[] GetStepReasons(GeneratorRunResult runResult, string stepName)
-    {
-        return runResult
-            .TrackedSteps[stepName]
-            .SelectMany(x => x.Outputs)
-            .Select(x => x.Reason)
-            .ToArray();
-    }
-
-    /// <summary>
-    /// Returns the run reason of every output of a tracked step, paired with the output value.
-    /// </summary>
-    internal static (object Value, IncrementalStepRunReason Reason)[] GetStepOutputs(GeneratorRunResult runResult, string stepName)
-    {
-        return runResult
-            .TrackedSteps[stepName]
-            .SelectMany(x => x.Outputs)
-            .ToArray();
-    }
-
-    /// <summary>
-    /// Returns the run reason of every source output step (RegisterSourceOutput) of the generator.
-    /// </summary>
-    internal static IncrementalStepRunReason[] GetSourceOutputReasons(GeneratorRunResult runResult)
-    {
-        return runResult
-            .TrackedOutputSteps["SourceOutput"]
-            .SelectMany(x => x.Outputs)
-            .Select(x => x.Reason)
-            .ToArray();
-    }
-
     public static void AssertRunReason(
         GeneratorRunResult runResult,
         string stepName,
