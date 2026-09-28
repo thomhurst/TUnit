@@ -34,7 +34,9 @@ public class CombinedDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = namedTypeSymbol.GetAttributes();
         var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
 
-        // With no constructor parameters and no class attributes no rule can fire; cheaper than IsTestClass, so test it first.
+        // Every class-level rule in CheckCombinedDataSourceErrors inspects either the class attributes or the constructor
+        // parameters, so with neither no rule can fire. This is cheaper than IsTestClass, so test it first.
+        // A new class-level rule that needs neither input must move below this early return.
         if (constructorParameters.IsEmpty && attributes.IsEmpty)
         {
             return;

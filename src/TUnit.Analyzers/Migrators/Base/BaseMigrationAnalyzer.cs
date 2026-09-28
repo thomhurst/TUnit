@@ -41,7 +41,7 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
             var canContainFrameworkSymbols = MigrationNamespaceHelper.ContainsNamespace(
                 compilationStartContext.Compilation,
                 TargetFrameworkNamespace,
-                ns => ns.Name.StartsWith(TargetFrameworkNamespace));
+                ns => ns.Name.StartsWith(TargetFrameworkNamespace, StringComparison.Ordinal));
 
             compilationStartContext.RegisterSyntaxNodeAction(
                 syntaxNodeContext => AnalyzeSyntax(syntaxNodeContext, canContainFrameworkSymbols),
@@ -299,7 +299,7 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected virtual bool IsFrameworkType(ITypeSymbol type)
     {
-        return type.ContainingNamespace?.Name.StartsWith(TargetFrameworkNamespace) is true ||
+        return type.ContainingNamespace?.Name.StartsWith(TargetFrameworkNamespace, StringComparison.Ordinal) is true ||
                IsFrameworkNamespaceSymbol(type.ContainingNamespace);
     }
 

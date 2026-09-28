@@ -23,7 +23,7 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
             var canContainXunitSymbols = MigrationNamespaceHelper.ContainsNamespace(
                 compilationStartContext.Compilation,
                 "Xunit",
-                ns => ns.Name.StartsWith("Xunit"));
+                ns => ns.Name.StartsWith("Xunit", StringComparison.Ordinal));
 
             compilationStartContext.RegisterSyntaxNodeAction(
                 syntaxNodeContext => AnalyzeSyntax(syntaxNodeContext, canContainXunitSymbols),
@@ -63,7 +63,7 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            if (symbol.AllInterfaces.Any(i => i.ContainingNamespace?.Name.StartsWith("Xunit") is true))
+            if (symbol.AllInterfaces.Any(i => i.ContainingNamespace?.Name.StartsWith("Xunit", StringComparison.Ordinal) is true))
             {
                 Flag(context);
                 return;
@@ -90,9 +90,9 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
             var members = symbol.GetMembers();
 
-            var types = members.OfType<IPropertySymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.Type)
-                .Concat(members.OfType<IMethodSymbol>().Where(x => x.ReturnType.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.ReturnType))
-                .Concat(members.OfType<IFieldSymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.Type))
+            var types = members.OfType<IPropertySymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit", StringComparison.Ordinal) is true).Select(x => x.Type)
+                .Concat(members.OfType<IMethodSymbol>().Where(x => x.ReturnType.ContainingNamespace?.Name.StartsWith("Xunit", StringComparison.Ordinal) is true).Select(x => x.ReturnType))
+                .Concat(members.OfType<IFieldSymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit", StringComparison.Ordinal) is true).Select(x => x.Type))
                 .ToArray();
 
             if (types.Any())

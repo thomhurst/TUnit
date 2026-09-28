@@ -68,6 +68,37 @@ public class InstanceValuesInTestClassAnalyzerTests
     }
 
     [Test]
+    public async Task Do_Not_Flag_When_Assigning_ClassInstance_Data_Inside_Property_Accessors()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    private int _value;
+
+                    public int Value
+                    {
+                        get
+                        {
+                            _value = 1;
+                            return _value;
+                        }
+                        set => _value = value;
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
     public async Task Do_Not_Flag_When_Not_Assigning_ClassInstance_Data()
     {
         await Verifier

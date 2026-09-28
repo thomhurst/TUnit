@@ -146,6 +146,36 @@ public class WebApplicationFactoryAccessAnalyzerTests
     }
 
     [Test]
+    public async Task No_Error_When_Accessing_Factory_In_Property_Accessors()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+                {{WebApplicationTestStub}}
+
+                public class MyFactory { }
+                public class Program { }
+
+                public class MyTests : TUnit.AspNetCore.WebApplicationTest<MyFactory, Program>
+                {
+                    public object CurrentFactory => Factory;
+
+                    public System.IServiceProvider CurrentServices
+                    {
+                        get { return Services; }
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
     public async Task Error_When_Accessing_Factory_In_Lambda_Inside_SetupAsync()
     {
         await Verifier

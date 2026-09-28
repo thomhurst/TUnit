@@ -393,6 +393,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
     /// <summary>
     /// Methods of base classes can be declared in other syntax trees. Creating a semantic model is expensive,
     /// so reuse one per tree for the duration of a single analysis callback.
+    /// Not thread-safe and holds semantic models alive: never store it in a field or share it across callbacks.
     /// </summary>
     private sealed class SemanticModelCache(SemanticModel semanticModel)
     {
