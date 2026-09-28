@@ -20,10 +20,12 @@ namespace TUnit.Core;
 /// </remarks>
 internal static class ObjectInitializer
 {
-    // Use Lazy<Task> pattern to ensure InitializeAsync is called exactly once per object,
-    // even under contention. GetOrAdd's factory can be called multiple times, but with
-    // Lazy<Task> + ExecutionAndPublication mode, only one initialization actually runs.
-    private static readonly ConcurrentDictionary<object, Lazy<Task>> InitializationTasks =
+    // One task per object, published before any user code runs, so InitializeAsync is called
+    // exactly once per object even under contention. No lock is held while InitializeAsync runs:
+    // Lazy<Task> + ExecutionAndPublication ran its synchronous part under a lock, so every other
+    // caller blocked a thread-pool thread until it finished, starving the pool when that part
+    // blocked on async work itself (#6904).
+    private static readonly ConcurrentDictionary<object, Task> InitializationTasks =
         new(Helpers.ReferenceEqualityComparer.Instance);
 
     /// <summary>
@@ -88,12 +90,10 @@ internal static class ObjectInitializer
             return false;
         }
 
-        // Use Status == RanToCompletion to ensure we don't return true for faulted/canceled tasks
+        // Use Status == RanToCompletion to ensure we don't return true for pending/faulted/canceled tasks
         // (IsCompletedSuccessfully is not available in netstandard2.0)
-        // With Lazy<Task>, we need to check if the Lazy has a value AND that value completed successfully
-        return InitializationTasks.TryGetValue(obj, out var lazyTask) &&
-               lazyTask.IsValueCreated &&
-               lazyTask.Value.Status == TaskStatus.RanToCompletion;
+        return InitializationTasks.TryGetValue(obj, out var initializationTask) &&
+               initializationTask.Status == TaskStatus.RanToCompletion;
     }
 
     /// <summary>
@@ -112,32 +112,43 @@ internal static class ObjectInitializer
         IAsyncInitializer asyncInitializer,
         CancellationToken cancellationToken)
     {
-        // Use Lazy<Task> with ExecutionAndPublication mode to ensure InitializeAsync
-        // is called exactly once, even under contention. GetOrAdd's factory may be
-        // called multiple times, but Lazy ensures only one initialization runs.
-        var lazyTask = InitializationTasks.GetOrAdd(obj,
-            static (_, asyncInitializer) => new Lazy<Task>(
-                asyncInitializer.InitializeAsync,
-                LazyThreadSafetyMode.ExecutionAndPublication)
-            , asyncInitializer);
+        if (!InitializationTasks.TryGetValue(obj, out var initializationTask))
+        {
+            // RunContinuationsAsynchronously: when the initialization completes, callers waiting on
+            // a shared object resume on their own thread-pool threads instead of one after another
+            // inline on the thread that completed it.
+            var completionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            initializationTask = InitializationTasks.GetOrAdd(obj, completionSource.Task);
 
+            if (ReferenceEquals(initializationTask, completionSource.Task))
+            {
+                // Only the caller that published the task runs InitializeAsync - inline, as before - and
+                // it resumes straight from it, without the thread-pool hop the completion source gives waiters.
+                await RunInitializerAsync(asyncInitializer, completionSource).WaitAsync(cancellationToken);
+            }
+        }
+
+        // Do NOT remove faulted tasks from the cache - subsequent callers get the same error
+        // immediately. Removing and retrying can cause hangs when InitializeAsync partially
+        // initialized resources (e.g. started ports/processes) that block re-initialization (#4715).
+        // The cancellation token only stops this caller waiting; the initialization keeps running.
+        await initializationTask.WaitAsync(cancellationToken);
+    }
+
+    private static async Task RunInitializerAsync(IAsyncInitializer asyncInitializer, TaskCompletionSource<bool> completionSource)
+    {
         try
         {
-            // Wait for initialization with cancellation support
-            await lazyTask.Value.WaitAsync(cancellationToken);
+            // The synchronous part of InitializeAsync still runs on the caller's thread and context;
+            // only publishing the result doesn't need to return there.
+            await asyncInitializer.InitializeAsync().ConfigureAwait(false);
+            completionSource.SetResult(true);
         }
-        catch (OperationCanceledException)
+        catch (Exception ex)
         {
-            // Propagate cancellation without modification
-            throw;
-        }
-        catch
-        {
-            // Do NOT remove from cache - the faulted Lazy<Task> stays so subsequent
-            // callers get the same error immediately via .WaitAsync() on the faulted task.
-            // Removing and retrying can cause hangs when InitializeAsync partially initialized
-            // resources (e.g. started ports/processes) that block re-initialization (#4715).
-            throw;
+            // SetException rather than SetCanceled, so callers get the original exception object -
+            // including an OperationCanceledException thrown by InitializeAsync.
+            completionSource.SetException(ex);
         }
     }
 }
