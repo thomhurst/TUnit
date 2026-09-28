@@ -28,6 +28,45 @@ public class NUnitMigrationAnalyzerTests
         );
     }
     
+    // The compilation-start gate and the semantic checks must use the same (ordinal) namespace comparison.
+    // These names are chosen so a culture-sensitive StartsWith("NUnit") disagrees with ordinal: a combining
+    // mark after "NUnit" (U+0301) makes it a non-match, and an ignorable U+034F inside "NUnit" makes it a match.
+    // No NUnit reference is added, so the gate's outcome depends only on these source namespaces.
+    [Test]
+    public async Task NUnit_Prefixed_Namespace_With_Trailing_Combining_Mark_Flagged()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+                namespace NUnit\u0301Extras
+                {
+                    public interface IMarker { }
+                }
+
+                {|#0:public class MyClass : NUnit\u0301Extras.IMarker
+                {
+                }|}
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0)
+        );
+    }
+
+    [Test]
+    public async Task Namespace_Matching_NUnit_Only_Culturally_Not_Flagged()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+                namespace NU\u034Fnit
+                {
+                    public interface IMarker { }
+                }
+
+                public class MyClass : NU\u034Fnit.IMarker
+                {
+                }
+                """
+        );
+    }
+
     [Test]
     [Arguments("NUnit.Framework.Test", "Test")]
     [Arguments("NUnit.Framework.SetUp", "Before(HookType.Test)")]

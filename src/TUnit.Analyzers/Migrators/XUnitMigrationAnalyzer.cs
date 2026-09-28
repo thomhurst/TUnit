@@ -23,7 +23,7 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
             var canContainXunitSymbols = MigrationNamespaceHelper.ContainsNamespace(
                 compilationStartContext.Compilation,
                 "Xunit",
-                ns => ns.Name.StartsWith("Xunit"));
+                IsXunitNamespace);
 
             compilationStartContext.RegisterSyntaxNodeAction(
                 syntaxNodeContext => AnalyzeSyntax(syntaxNodeContext, canContainXunitSymbols),
@@ -63,7 +63,7 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            if (symbol.AllInterfaces.Any(i => i.ContainingNamespace?.Name.StartsWith("Xunit") is true))
+            if (symbol.AllInterfaces.Any(i => IsXunitNamespace(i.ContainingNamespace)))
             {
                 Flag(context);
                 return;
@@ -90,9 +90,9 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
             var members = symbol.GetMembers();
 
-            var types = members.OfType<IPropertySymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.Type)
-                .Concat(members.OfType<IMethodSymbol>().Where(x => x.ReturnType.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.ReturnType))
-                .Concat(members.OfType<IFieldSymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.Type))
+            var types = members.OfType<IPropertySymbol>().Where(x => IsXunitNamespace(x.Type.ContainingNamespace)).Select(x => x.Type)
+                .Concat(members.OfType<IMethodSymbol>().Where(x => IsXunitNamespace(x.ReturnType.ContainingNamespace)).Select(x => x.ReturnType))
+                .Concat(members.OfType<IFieldSymbol>().Where(x => IsXunitNamespace(x.Type.ContainingNamespace)).Select(x => x.Type))
                 .ToArray();
 
             if (types.Any())
@@ -158,6 +158,16 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// The single namespace test shared by the compilation-start gate and the semantic checks, so they cannot drift apart.
+    /// Ordinal on purpose: a culture-sensitive comparison ignores or combines some characters, so its result would
+    /// depend on the current culture and not match the exact namespace names the gate walks.
+    /// </summary>
+    private static bool IsXunitNamespace(INamespaceSymbol? ns)
+    {
+        return ns?.Name.StartsWith("Xunit", StringComparison.Ordinal) is true;
     }
 
     private static void Flag(SyntaxNodeAnalysisContext context)

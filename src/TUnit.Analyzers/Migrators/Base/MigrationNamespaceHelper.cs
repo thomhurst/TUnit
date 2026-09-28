@@ -47,16 +47,25 @@ internal static class MigrationNamespaceHelper
     /// Returns true when the namespace <paramref name="dottedPath"/> exists in the compilation's source or in any
     /// referenced assembly (including extern-aliased ones), or when any of their namespaces satisfies <paramref name="predicate"/>.
     /// </summary>
+    /// <remarks>
+    /// This gates the migration analyzers' semantic checks, so it must never return false when those checks could match.
+    /// The <paramref name="predicate"/> walk is deliberately exhaustive (every namespace at every depth, not only roots):
+    /// the semantic checks test a symbol's leaf namespace name (e.g. <c>Name.StartsWith("Xunit")</c>), which also matches
+    /// nested namespaces such as <c>Foo.XunitExtras</c>. Referenced assemblies are enumerated directly rather than through
+    /// <see cref="Compilation.GlobalNamespace"/>, so extern-aliased references are included too.
+    /// </remarks>
     public static bool ContainsNamespace(Compilation compilation, string dottedPath, Func<INamespaceSymbol, bool> predicate)
     {
-        if (ContainsNamespace(compilation.Assembly.GlobalNamespace, dottedPath, predicate))
+        var segments = dottedPath.Split('.');
+
+        if (ContainsNamespace(compilation.Assembly.GlobalNamespace, segments, predicate))
         {
             return true;
         }
 
         foreach (var assembly in compilation.SourceModule.ReferencedAssemblySymbols)
         {
-            if (ContainsNamespace(assembly.GlobalNamespace, dottedPath, predicate))
+            if (ContainsNamespace(assembly.GlobalNamespace, segments, predicate))
             {
                 return true;
             }
@@ -65,16 +74,16 @@ internal static class MigrationNamespaceHelper
         return false;
     }
 
-    private static bool ContainsNamespace(INamespaceSymbol globalNamespace, string dottedPath, Func<INamespaceSymbol, bool> predicate)
+    private static bool ContainsNamespace(INamespaceSymbol globalNamespace, string[] segments, Func<INamespaceSymbol, bool> predicate)
     {
-        return PathExists(globalNamespace, dottedPath) || AnyNamespace(globalNamespace, predicate);
+        return PathExists(globalNamespace, segments) || AnyNamespace(globalNamespace, predicate);
     }
 
-    private static bool PathExists(INamespaceSymbol globalNamespace, string dottedPath)
+    private static bool PathExists(INamespaceSymbol globalNamespace, string[] segments)
     {
         var current = globalNamespace;
 
-        foreach (var segment in dottedPath.Split('.'))
+        foreach (var segment in segments)
         {
             INamespaceSymbol? next = null;
 
