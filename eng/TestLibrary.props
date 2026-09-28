@@ -1,6 +1,23 @@
 <Project>
     <Import Project="$(MSBuildThisFileDirectory)..\src\TUnit.Core\TUnit.Core.props" />
 
+    <!--
+        TUnit.Core.props adds TUnit.Core.GeneratedNamespace.cs so the compiler emits the source-generated
+        TUnit.Generated types after the project's own types (see that file). From a NuGet package the props is
+        imported before the SDK's default Compile glob, so the file is already first. Repo projects import this
+        file from their project body, after the glob, so the file lands last and has no effect. Move it to the
+        front just before compiling. This only reorders the Compile items passed to Csc, so evaluation (and
+        Visual Studio's view of globbed items) is unchanged.
+    -->
+    <Target Name="_TUnitCompileGeneratedNamespaceFirst" BeforeTargets="CoreCompile" Condition="'$(Language)' == 'C#'">
+        <ItemGroup>
+            <_TUnitGeneratedNamespaceCompile Include="@(Compile)" Condition="'%(Filename)%(Extension)' == 'TUnit.Core.GeneratedNamespace.cs'" />
+            <_TUnitOtherCompile Include="@(Compile)" Exclude="@(_TUnitGeneratedNamespaceCompile)" Condition="'@(_TUnitGeneratedNamespaceCompile)' != ''" />
+            <Compile Remove="@(Compile)" Condition="'@(_TUnitGeneratedNamespaceCompile)' != ''" />
+            <Compile Include="@(_TUnitGeneratedNamespaceCompile);@(_TUnitOtherCompile)" Condition="'@(_TUnitGeneratedNamespaceCompile)' != ''" />
+        </ItemGroup>
+    </Target>
+
     <PropertyGroup>
         <OutputType>Library</OutputType>
 

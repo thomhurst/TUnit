@@ -35,6 +35,18 @@
             <Pack>true</Pack>
             <PackagePath>$(BuildPath)</PackagePath>
         </None>
+
+        <!-- Compiled into consuming test projects by TUnit.Core.props, never into TUnit.Core itself. -->
+        <Compile Remove="TUnit.Core.GeneratedNamespace.cs" />
+        <TfmSpecificPackageFile Include="TUnit.Core.GeneratedNamespace.cs">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
+        </TfmSpecificPackageFile>
+
+        <None Include="TUnit.Core.GeneratedNamespace.cs">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildPath)</PackagePath>
+        </None>
     </ItemGroup>
     <ItemGroup>
         <None
