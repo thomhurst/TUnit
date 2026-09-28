@@ -157,8 +157,8 @@ public class ObjectInitializerTests
 
         await initializingCaller.WaitAsync(HangTimeout);
 
-        // Precondition: InitializeAsync itself finished inline on the completing thread, so its
-        // completion is what would drag waiters along with it.
+        // Precondition: InitializeAsync itself finished inline on the completing thread, so the result
+        // is published there too - which is where waiters would run if their continuations were inlined.
         await Assert.That(fixture.ResumedOnThreadId).IsEqualTo(completingThreadId);
         await Assert.That(await waiterResumedInline.WaitAsync(HangTimeout)).IsFalse();
 
@@ -215,6 +215,20 @@ public class ObjectInitializerTests
 
         await Assert.That(first).IsSameReferenceAs(fixture.Exception);
         await Assert.That(second).IsSameReferenceAs(fixture.Exception);
+        await Assert.That(fixture.InitializeCount).IsEqualTo(1);
+        await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsFalse();
+    }
+
+    [Test]
+    public async Task InitializeAsync_Returning_Null_Fails_Every_Caller_With_The_Same_Exception()
+    {
+        var fixture = new NullReturningInitializer();
+
+        var first = await Assert.That(async () => await ObjectInitializer.InitializeAsync(fixture)).Throws<InvalidOperationException>();
+        var second = await Assert.That(async () => await ObjectInitializer.InitializeAsync(fixture)).Throws<InvalidOperationException>();
+
+        await Assert.That(second).IsSameReferenceAs(first);
+        await Assert.That(first!.Message).Contains(nameof(NullReturningInitializer));
         await Assert.That(fixture.InitializeCount).IsEqualTo(1);
         await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsFalse();
     }
@@ -288,6 +302,19 @@ public class ObjectInitializerTests
         {
             Interlocked.Increment(ref _initializeCount);
             await Task.Yield();
+        }
+    }
+
+    private sealed class NullReturningInitializer : IAsyncInitializer
+    {
+        private int _initializeCount;
+
+        public int InitializeCount => Volatile.Read(ref _initializeCount);
+
+        public Task InitializeAsync()
+        {
+            Interlocked.Increment(ref _initializeCount);
+            return null!;
         }
     }
 
