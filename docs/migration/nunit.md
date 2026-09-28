@@ -350,7 +350,7 @@ await Assert.That(text).EndsWith(suffix);
 
 Assert.Throws<InvalidOperationException>(() => DoSomething());
 
-Assert.ThrowsAsync<InvalidOperationException>(async () => await DoSomethingAsync());
+await Assert.ThrowsAsync<InvalidOperationException>(async () => await DoSomethingAsync()); // NUnit 3/4: not awaited
 
 
 
