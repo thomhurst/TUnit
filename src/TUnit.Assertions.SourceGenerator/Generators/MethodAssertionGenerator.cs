@@ -108,6 +108,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var builder = ImmutableArray.CreateBuilder<ContainingTypeGroup>();
         foreach (var methodGroup in methods.GroupBy(m => m.Method.ContainingType?.FullContainingType))
         {
+            // FullContainingType is the fully qualified name, so every method in the group comes
+            // from the same type and carries identical containing-type data; any one can stand in.
             var containingType = methodGroup.First().Method.ContainingType;
             if (containingType == null)
             {

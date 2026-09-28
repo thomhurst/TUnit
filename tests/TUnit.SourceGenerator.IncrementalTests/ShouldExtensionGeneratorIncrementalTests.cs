@@ -180,6 +180,65 @@ public class ShouldExtensionGeneratorIncrementalTests
         Xunit.Assert.DoesNotContain(runResult.GeneratedSources, x => x.HintName == "ShouldFooExtensions.g.cs");
     }
 
+    [Fact]
+    public void PartialContainerSplitAcrossFilesGeneratesAllMethodsOnce()
+    {
+        var compilation1 = Fixture.CreateLibrary(
+            SplitAssertionTree(SplitAssertion),
+            PartialContainerTree("IsFoo", "FooExtensions.Part1.cs"),
+            PartialContainerTree("IsBar", "FooExtensions.Part2.cs"),
+            HelperPartTree("1"));
+        var driver1 = TestHelper.GenerateTracked<ShouldExtensionGenerator>(compilation1);
+
+        var source = GetSource(driver1, "ShouldFooExtensions.g.cs");
+        Xunit.Assert.Single(System.Text.RegularExpressions.Regex.Matches(source, @"> BeFoo\("));
+        Xunit.Assert.Single(System.Text.RegularExpressions.Regex.Matches(source, @"> BeBar\("));
+
+        // Editing the part without extension methods changes nothing the generator reads.
+        var compilation2 = compilation1.ReplaceSyntaxTree(compilation1.SyntaxTrees.Last(), HelperPartTree("2"));
+        var driver2 = driver1.RunGenerators(compilation2);
+
+        // No [ShouldGeneratePartial] here, so the wrappers step never runs and is not asserted.
+        var runResult = driver2.GetRunResult().Results[0];
+        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalContainersStep,
+            IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
+        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalDeclarationsStep,
+            IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
+        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.PayloadStep,
+            IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
+        TestHelper.AssertSourceOutputsCached(runResult);
+    }
+
+    private static SyntaxTree HelperPartTree(string value) =>
+        CSharpSyntaxTree.ParseText(
+            $$"""
+            namespace MyTests
+            {
+                public static partial class FooExtensions
+                {
+                    public static int Helper() => {{value}};
+                }
+            }
+            """,
+            path: "FooExtensions.Part3.cs");
+
+    private static SyntaxTree PartialContainerTree(string methodName, string path) =>
+        CSharpSyntaxTree.ParseText(
+            $$"""
+            using System.Runtime.CompilerServices;
+            using TUnit.Assertions.Core;
+
+            namespace MyTests
+            {
+                public static partial class FooExtensions
+                {
+                    public static FooAssertion {{methodName}}(this IAssertionSource<int> source, int expected, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
+                        => new FooAssertion(source.Context, expected);
+                }
+            }
+            """,
+            path: path);
+
     private const string SplitAssertion =
         """
         using System.Threading.Tasks;

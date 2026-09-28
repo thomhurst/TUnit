@@ -1292,6 +1292,11 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     /// Pre-rendered output for one [AssertionFrom] attribute: its assertion condition classes,
     /// the "method not found" message when nothing matched, and its extension methods.
     /// </summary>
+    /// <remarks>
+    /// Rendering in the transform is deliberate: the emission code is bound to symbols, and
+    /// strings give cheap value equality. The rendered text must stay deterministic (no
+    /// timestamps, no hash-ordered collections), or every run would compare as modified.
+    /// </remarks>
     private sealed record AssertionEntryModel(
         ImmutableEquatableArray<ConditionClassModel> ConditionClasses,
         string? MissingMethodMessage,
