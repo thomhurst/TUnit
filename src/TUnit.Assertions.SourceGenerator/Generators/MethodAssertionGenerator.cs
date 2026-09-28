@@ -76,10 +76,13 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             .Where(x => x.Diagnostic != null)
             .Select((x, _) => x.Diagnostic!);
 
-        // Report diagnostics
-        context.RegisterSourceOutput(diagnostics, static (context, diagnostic) =>
+        // Report diagnostics. Each one is located in the current compilation's syntax tree so that
+        // #pragma and per-file .editorconfig severities still apply; an external-file location
+        // has no SourceTree to read them from. Pairing each diagnostic (not the collected array)
+        // with the compilation means this output only re-runs while there are diagnostics.
+        context.RegisterSourceOutput(diagnostics.Combine(context.CompilationProvider), static (context, data) =>
         {
-            context.ReportDiagnostic(diagnostic.ToDiagnostic());
+            context.ReportDiagnostic(data.Left.ToDiagnostic(data.Right));
         });
 
         // Group methods by containing type so an edit to one type only re-emits that type's file.
@@ -1400,10 +1403,31 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 messageArgs.ToImmutableEquatableArray());
         }
 
-        public Diagnostic ToDiagnostic()
+        public Diagnostic ToDiagnostic(Compilation compilation)
         {
-            var location = FilePath is null
-                ? Location.None
+            if (FilePath is null)
+            {
+                return Diagnostic.Create(Descriptor, Location.None, MessageArgs.Cast<object?>().ToArray());
+            }
+
+            // Reattach to the tree only when the path identifies it; trees parsed without a path
+            // all share an empty one.
+            SyntaxTree? match = null;
+            foreach (var tree in compilation.SyntaxTrees)
+            {
+                if (string.Equals(tree.FilePath, FilePath, StringComparison.Ordinal))
+                {
+                    if (match is not null)
+                    {
+                        match = null;
+                        break;
+                    }
+                    match = tree;
+                }
+            }
+
+            var location = match is not null && TextSpan.End <= match.Length
+                ? Location.Create(match, TextSpan)
                 : Location.Create(FilePath, TextSpan, LineSpan);
 
             return Diagnostic.Create(Descriptor, location, MessageArgs.Cast<object?>().ToArray());

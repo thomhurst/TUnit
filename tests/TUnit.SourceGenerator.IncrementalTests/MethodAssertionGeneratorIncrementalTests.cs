@@ -164,8 +164,7 @@ public class MethodAssertionGeneratorIncrementalTests
     [Fact]
     public void UnrelatedEditWithDiagnosticShouldNotRegenerate()
     {
-        var compilation1 = Fixture.CreateLibrary(
-            DefaultAssertion,
+        var brokenTree = CSharpSyntaxTree.ParseText(
             """
             using TUnit.Assertions.Attributes;
 
@@ -174,7 +173,11 @@ public class MethodAssertionGeneratorIncrementalTests
                 [GenerateAssertion]
                 public bool IsBroken(int value) => value > 0;
             }
-            """);
+            """,
+            path: "BrokenAssertionExtensions.cs");
+        var compilation1 = Fixture.CreateLibrary(
+            CSharpSyntaxTree.ParseText(DefaultAssertion, path: "DefaultAssertion.cs"),
+            brokenTree);
 
         var driver1 = TestHelper.GenerateTracked<MethodAssertionGenerator>(compilation1);
         Xunit.Assert.Contains(driver1.GetRunResult().Diagnostics, d => d.Id == "TUNITGEN001");
@@ -183,9 +186,23 @@ public class MethodAssertionGeneratorIncrementalTests
         var driver2 = driver1.RunGenerators(compilation2);
 
         var runResult = driver2.GetRunResult().Results[0];
-        TestHelper.AssertSourceOutputsCached(runResult);
+        TestHelper.AssertAllRunReasons(runResult, MethodAssertionGenerator.BuildAssertionGroup,
+            IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
+
+        // Only the diagnostic reporter re-runs (it is paired with the compilation); the generated file stays cached.
+        var sourceOutputReasons = runResult.TrackedOutputSteps
+            .SelectMany(x => x.Value)
+            .SelectMany(x => x.Outputs)
+            .Select(x => x.Reason)
+            .ToArray();
+        Xunit.Assert.Single(sourceOutputReasons, reason => reason != IncrementalStepRunReason.Cached);
+
         var diagnostic = Xunit.Assert.Single(runResult.Diagnostics, d => d.Id == "TUNITGEN001");
         Xunit.Assert.Equal(4, diagnostic.Location.GetLineSpan().StartLinePosition.Line);
+
+        // The location must stay tied to the syntax tree so #pragma and per-file severities apply.
+        Xunit.Assert.True(diagnostic.Location.IsInSource);
+        Xunit.Assert.Same(brokenTree, diagnostic.Location.SourceTree);
     }
 
     private static void AssertRunReasons(
