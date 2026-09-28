@@ -110,7 +110,7 @@ internal sealed class ActivityCollector : IDisposable
         {
             if (options.Parent.TraceId != default)
             {
-                _knownTraceIds.TryAdd(options.Parent.TraceId.ToString(), 0);
+                MarkTraceKnown(options.Parent.TraceId.ToString());
             }
 
             return ActivitySamplingResult.AllDataAndRecorded;
@@ -133,7 +133,7 @@ internal sealed class ActivityCollector : IDisposable
         // Trace registered via TestContext.RegisterTrace
         if (TraceRegistry.IsRegistered(parentTraceId))
         {
-            _knownTraceIds.TryAdd(parentTraceId, 0);
+            MarkTraceKnown(parentTraceId);
             return ActivitySamplingResult.AllDataAndRecorded;
         }
 
@@ -155,7 +155,7 @@ internal sealed class ActivityCollector : IDisposable
             var traceIdStr = parentId.Substring(3, 32);
             if (_knownTraceIds.ContainsKey(traceIdStr) || TraceRegistry.IsRegistered(traceIdStr))
             {
-                _knownTraceIds.TryAdd(traceIdStr, 0);
+                MarkTraceKnown(traceIdStr);
                 return ActivitySamplingResult.AllDataAndRecorded;
             }
         }
@@ -182,7 +182,7 @@ internal sealed class ActivityCollector : IDisposable
     /// </summary>
     internal void RegisterExternalTrace(string traceId)
     {
-        _knownTraceIds.TryAdd(traceId, 0);
+        MarkTraceKnown(traceId);
     }
 
     /// <summary>
@@ -199,7 +199,7 @@ internal sealed class ActivityCollector : IDisposable
                 return;
             }
 
-            _knownTraceIds.TryAdd(span.TraceId, 0);
+            MarkTraceKnown(span.TraceId);
         }
 
         // Prefer per-test cap when the span's direct parent is a known test case span.
@@ -289,7 +289,7 @@ internal sealed class ActivityCollector : IDisposable
         // since their traceId is only assigned by the runtime after StartActivity returns.
         if (IsTUnitSource(activity.Source.Name))
         {
-            _knownTraceIds.TryAdd(activity.TraceId.ToString(), 0);
+            MarkTraceKnown(activity.TraceId.ToString());
 
             // Register test case span IDs early so they're available for child span lookups.
             // Children stop before parents in Activity ordering, so we need this pre-registered.
@@ -331,6 +331,17 @@ internal sealed class ActivityCollector : IDisposable
         return null;
     }
 
+    // ConcurrentDictionary.TryAdd takes a bucket lock even when the key is already present.
+    // Nearly every call here repeats a known trace (each span reports its trace at sample,
+    // start and stop), so check lock-free first to keep parallel tests off the lock stripes.
+    private void MarkTraceKnown(string traceId)
+    {
+        if (!_knownTraceIds.ContainsKey(traceId))
+        {
+            _knownTraceIds.TryAdd(traceId, 0);
+        }
+    }
+
     private static bool IsTUnitSource(string sourceName) =>
         sourceName.StartsWith("TUnit", StringComparison.Ordinal) ||
         sourceName.StartsWith("Microsoft.Testing", StringComparison.Ordinal);
@@ -370,7 +381,7 @@ internal sealed class ActivityCollector : IDisposable
         // so it couldn't be registered in SampleActivity where only the parent TraceId is known.
         if (isTUnit)
         {
-            _knownTraceIds.TryAdd(traceId, 0);
+            MarkTraceKnown(traceId);
         }
         else if (!_knownTraceIds.ContainsKey(traceId))
         {
