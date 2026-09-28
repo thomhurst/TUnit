@@ -123,6 +123,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// Per-compilation state shared by every test generated from one compilation.
+    /// It holds symbols and semantic models, so it must never be captured by a value that flows through the
+    /// incremental pipeline: that would keep the compilation alive and break the pipeline's value equality.
     /// </summary>
     private sealed class GenerationState
     {
@@ -144,6 +146,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         public SemanticModel? GetSemanticModel(SyntaxTree syntaxTree)
         {
             var compilation = CompilationContext.Compilation;
+            // The node comes from this compilation's own attribute pipeline, so its tree should always be
+            // present. The guard avoids an ArgumentException from GetSemanticModel if that ever changes.
             if (!compilation.ContainsSyntaxTree(syntaxTree))
             {
                 return null;
