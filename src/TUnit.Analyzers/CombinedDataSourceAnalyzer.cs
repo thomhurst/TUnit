@@ -36,7 +36,8 @@ public class CombinedDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
 
         // Every class-level rule in CheckCombinedDataSourceErrors inspects either the class attributes or the constructor
         // parameters, so with neither no rule can fire. This is cheaper than IsTestClass, so test it first.
-        // A new class-level rule that needs neither input must move below this early return.
+        // Any code after this return is skipped when both inputs are empty, so a new class-level rule that needs
+        // neither input must run before this early return (or this early return must be removed).
         if (constructorParameters.IsEmpty && attributes.IsEmpty)
         {
             return;
