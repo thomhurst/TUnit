@@ -11,12 +11,14 @@ namespace TUnit.Core;
 /// </summary>
 internal static class TraceRegistry
 {
-    // traceId → testNodeUids (uses ConcurrentDictionary as a set to prevent duplicates)
-    private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> TraceToTests =
+    // traceId → testNodeUids and testNodeUid → traceIds. Each value is an immutable,
+    // duplicate-free set replaced copy-on-write. Every test registers its own trace, so both
+    // sides almost always hold a single element; a ConcurrentDictionary per key (bucket and
+    // lock arrays) cost ~2KB per test for the same information.
+    private static readonly ConcurrentDictionary<string, string[]> TraceToTests =
         new(StringComparer.OrdinalIgnoreCase);
 
-    // testNodeUid → traceIds (uses ConcurrentDictionary as a set to prevent duplicates)
-    private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> TestToTraces =
+    private static readonly ConcurrentDictionary<string, string[]> TestToTraces =
         new(StringComparer.OrdinalIgnoreCase);
 
     // traceId → TestContext.Id (GUID) for cross-process OTLP correlation.
@@ -30,8 +32,42 @@ internal static class TraceRegistry
     /// </summary>
     internal static void Register(string traceId, string testNodeUid)
     {
-        TraceToTests.GetOrAdd(traceId, static _ => new(StringComparer.OrdinalIgnoreCase)).TryAdd(testNodeUid, 0);
-        TestToTraces.GetOrAdd(testNodeUid, static _ => new(StringComparer.OrdinalIgnoreCase)).TryAdd(traceId, 0);
+        AddToSet(TraceToTests, traceId, testNodeUid);
+        AddToSet(TestToTraces, testNodeUid, traceId);
+    }
+
+    private static void AddToSet(ConcurrentDictionary<string, string[]> map, string key, string value)
+    {
+        while (true)
+        {
+            if (!map.TryGetValue(key, out var existing))
+            {
+                if (map.TryAdd(key, [value]))
+                {
+                    return;
+                }
+
+                continue;
+            }
+
+            foreach (var item in existing)
+            {
+                if (string.Equals(item, value, StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+            }
+
+            var updated = new string[existing.Length + 1];
+            existing.CopyTo(updated, 0);
+            updated[existing.Length] = value;
+
+            // Compares against the array instance read above, so a concurrent add retries.
+            if (map.TryUpdate(key, updated, existing))
+            {
+                return;
+            }
+        }
     }
 
     /// <summary>
@@ -97,7 +133,7 @@ internal static class TraceRegistry
 
         foreach (var testNodeUid in testNodeUids)
         {
-            Register(derivedTraceId, testNodeUid.Key);
+            Register(derivedTraceId, testNodeUid);
         }
 
         if (TraceToContextId.TryGetValue(sourceTraceId, out var contextId))
@@ -123,8 +159,9 @@ internal static class TraceRegistry
     /// </summary>
     internal static string[] GetTraceIds(string testNodeUid)
     {
+        // The stored arrays are never mutated after publication, so they can be shared.
         return TestToTraces.TryGetValue(testNodeUid, out var set)
-            ? set.Keys.ToArray()
+            ? set
             : [];
     }
 

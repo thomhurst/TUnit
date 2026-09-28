@@ -93,6 +93,29 @@ public class TraceRegistryTests
     }
 
     [Test]
+    public async Task Register_DuplicateTraceIdDifferingOnlyInCase_IsStoredOnce()
+    {
+        var traceId = Guid.NewGuid().ToString("N");
+        var testNodeUid = $"node-{Guid.NewGuid():N}";
+
+        TraceRegistry.Register(traceId, testNodeUid);
+        TraceRegistry.Register(traceId.ToUpperInvariant(), testNodeUid);
+
+        await Assert.That(TraceRegistry.GetTraceIds(testNodeUid)).IsEquivalentTo([traceId]);
+    }
+
+    [Test]
+    public async Task Register_ConcurrentTracesForOneTest_KeepsEveryTrace()
+    {
+        var testNodeUid = $"node-{Guid.NewGuid():N}";
+        var traceIds = Enumerable.Range(0, 200).Select(_ => Guid.NewGuid().ToString("N")).ToArray();
+
+        Parallel.ForEach(traceIds, traceId => TraceRegistry.Register(traceId, testNodeUid));
+
+        await Assert.That(TraceRegistry.GetTraceIds(testNodeUid)).IsEquivalentTo(traceIds);
+    }
+
+    [Test]
     public async Task Register_WithContextId_OverwritesPreviousContextId()
     {
         var traceId = Guid.NewGuid().ToString("N");
