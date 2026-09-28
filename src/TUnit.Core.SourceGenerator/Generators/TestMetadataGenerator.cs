@@ -3624,6 +3624,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     // data-driven suite: 10 minimised total JIT time (5 and 25 were both slower).
     private const int NestedEntriesPerFillMethod = 10;
 
+    // Total entries per __FillEntriesN method, bounding runs of plain entries in a chunked class.
+    // Plain entries JIT at roughly linear cost (~6ms per 100-entry plain class), while each extra
+    // fill method costs roughly 0.15ms (from the 1-entry-per-method measurement), so 100 keeps
+    // plain runs at the measured plain-class shape for about 2.5% extra method overhead.
+    private const int EntriesPerFillMethod = 100;
+
     /// <summary>
     /// True when an entry builds nested objects (data source attributes, parameter metadata,
     /// dependencies, return types) while the outer factory call's arguments are still on the
@@ -3662,9 +3668,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// Builds the Entries array in fill methods instead of one static constructor array initializer.
     /// Each fill method holds at most <see cref="NestedEntriesPerFillMethod"/> nested-construction
-    /// entries; runs of plain entries stay in the current fill method, since they do not add to
-    /// the JIT cost that chunking bounds. A new fill method starts only when a nested entry would
-    /// exceed the budget, so the method count is ceil(nestedEntries / budget).
+    /// entries and at most <see cref="EntriesPerFillMethod"/> entries in total. Plain entries are
+    /// cheap, so runs of them share a fill method with nested entries up to the larger total cap.
+    /// A new fill method starts when the next entry would exceed either limit.
     /// </summary>
     private static void WriteChunkedEntries(CodeWriter writer, ClassTestGroup classGroup, string entryType)
     {
@@ -3673,20 +3679,23 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Start index of each fill method, in entry order.
         var chunkStarts = new List<int> { 0 };
         var nestedInChunk = 0;
+        var entriesInChunk = 0;
         for (var i = 0; i < methods.Length; i++)
         {
-            if (!HasNestedConstruction(methods[i]))
-            {
-                continue;
-            }
-
-            if (nestedInChunk == NestedEntriesPerFillMethod)
+            var nested = HasNestedConstruction(methods[i]);
+            if (entriesInChunk == EntriesPerFillMethod
+                || (nested && nestedInChunk == NestedEntriesPerFillMethod))
             {
                 chunkStarts.Add(i);
                 nestedInChunk = 0;
+                entriesInChunk = 0;
             }
 
-            nestedInChunk++;
+            entriesInChunk++;
+            if (nested)
+            {
+                nestedInChunk++;
+            }
         }
 
         writer.AppendLine($"public static readonly {entryType}[] Entries = __CreateEntries();");
