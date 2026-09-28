@@ -203,9 +203,17 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
     private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.DecimalArgumentTests> __createInstance = __CreateInstance;
     private static readonly global::System.Func<global::TUnit.TestProject.DecimalArgumentTests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
-    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.DecimalArgumentTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DecimalArgumentTests>[]
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.DecimalArgumentTests>[] Entries = __CreateEntries();
+    private static global::TUnit.Core.TestEntry<global::TUnit.TestProject.DecimalArgumentTests>[] __CreateEntries()
     {
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
+        var entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DecimalArgumentTests>[12];
+        __FillEntries0(entries);
+        __FillEntries1(entries);
+        return entries;
+    }
+    private static void __FillEntries0(global::TUnit.Core.TestEntry<global::TUnit.TestProject.DecimalArgumentTests>[] entries)
+    {
+        entries[0] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "Transfer",
             fullyQualifiedName: "TUnit.TestProject.DecimalArgumentTests.Transfer",
             filePath: "",
@@ -228,8 +236,8 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             invokeBody: __invoke,
             methodIndex: 0,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
+            attributeGroupIndex: 0);
+        entries[1] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "SimpleDecimal",
             fullyQualifiedName: "TUnit.TestProject.DecimalArgumentTests.SimpleDecimal",
             filePath: "",
@@ -249,8 +257,8 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             invokeBody: __invoke,
             methodIndex: 1,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
+            attributeGroupIndex: 0);
+        entries[2] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "SmallDecimal",
             fullyQualifiedName: "TUnit.TestProject.DecimalArgumentTests.SmallDecimal",
             filePath: "",
@@ -270,8 +278,8 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             invokeBody: __invoke,
             methodIndex: 2,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
+            attributeGroupIndex: 0);
+        entries[3] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "MaxDecimal",
             fullyQualifiedName: "TUnit.TestProject.DecimalArgumentTests.MaxDecimal",
             filePath: "",
@@ -291,8 +299,8 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             invokeBody: __invoke,
             methodIndex: 3,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
+            attributeGroupIndex: 0);
+        entries[4] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "MinDecimal",
             fullyQualifiedName: "TUnit.TestProject.DecimalArgumentTests.MinDecimal",
             filePath: "",
@@ -312,8 +320,8 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             invokeBody: __invoke,
             methodIndex: 4,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
+            attributeGroupIndex: 0);
+        entries[5] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "ExplicitDecimalValue",
             fullyQualifiedName: "TUnit.TestProject.DecimalArgumentTests.ExplicitDecimalValue",
             filePath: "",
@@ -333,8 +341,8 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             invokeBody: __invoke,
             methodIndex: 5,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
+            attributeGroupIndex: 0);
+        entries[6] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "MultipleDecimals",
             fullyQualifiedName: "TUnit.TestProject.DecimalArgumentTests.MultipleDecimals",
             filePath: "",
@@ -356,8 +364,8 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             invokeBody: __invoke,
             methodIndex: 6,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
+            attributeGroupIndex: 0);
+        entries[7] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.DecimalArgumentTests.Test",
             filePath: "",
@@ -378,8 +386,8 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             invokeBody: __invoke,
             methodIndex: 7,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
+            attributeGroupIndex: 0);
+        entries[8] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "TransactionDiscountCalculations",
             fullyQualifiedName: "TUnit.TestProject.DecimalArgumentTests.TransactionDiscountCalculations",
             filePath: "",
@@ -405,8 +413,8 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             invokeBody: __invoke,
             methodIndex: 8,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
+            attributeGroupIndex: 0);
+        entries[9] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "Equality3",
             fullyQualifiedName: "TUnit.TestProject.DecimalArgumentTests.Equality3",
             filePath: "",
@@ -426,8 +434,11 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             invokeBody: __invoke,
             methodIndex: 9,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
+            attributeGroupIndex: 0);
+    }
+    private static void __FillEntries1(global::TUnit.Core.TestEntry<global::TUnit.TestProject.DecimalArgumentTests>[] entries)
+    {
+        entries[10] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "Equality4",
             fullyQualifiedName: "TUnit.TestProject.DecimalArgumentTests.Equality4",
             filePath: "",
@@ -447,8 +458,8 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             invokeBody: __invoke,
             methodIndex: 10,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
+            attributeGroupIndex: 0);
+        entries[11] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.DecimalArgumentTests>(
             methodName: "TestMethod",
             fullyQualifiedName: "TUnit.TestProject.DecimalArgumentTests.TestMethod",
             filePath: "",
@@ -468,8 +479,8 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             invokeBody: __invoke,
             methodIndex: 11,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-    };
+            attributeGroupIndex: 0);
+    }
 }
 internal static partial class TUnit_TestRegistration
 {

@@ -3578,37 +3578,23 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // TestEntry<T>[] array — all entries share the same 3 delegates and are built via the
             // shared TestEntryFactory so each call site is a single factory call instead of a
             // large object initializer (#6227). The factory also builds each entry's MethodMetadata.
-            writer.AppendLine($"public static readonly global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>[] Entries = new global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>[]");
-            writer.AppendLine("{");
-            writer.Indent();
-            foreach (var method in classGroup.Methods)
+            var entryType = $"global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>";
+            if (HasNestedEntryConstruction(classGroup))
             {
-                writer.AppendLine($"global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<{classGroup.ClassFullyQualified}>(");
-                writer.Indent();
-                writer.AppendRaw(method.TestEntryDataFieldsCode);
-                if (method.TestDataSourcesCode != null)
-                {
-                    writer.AppendLine($"testDataSources: {method.TestDataSourcesCode},");
-                }
-                if (method.ClassDataSourcesCode != null)
-                {
-                    writer.AppendLine($"classDataSources: {method.ClassDataSourcesCode},");
-                }
-                if (method.DependenciesCode != null)
-                {
-                    writer.AppendLine($"dependencies: {method.DependenciesCode},");
-                }
-                writer.AppendRaw(method.MethodMetadataArgumentsCode);
-                writer.AppendLine("classMetadata: __classMetadata,");
-                writer.AppendLine("createInstance: __createInstance,");
-                writer.AppendLine("invokeBody: __invoke,");
-                writer.AppendLine($"methodIndex: {method.MethodIndex},");
-                writer.AppendLine("createAttributes: __attributes,");
-                writer.AppendLine($"attributeGroupIndex: {method.AttributeGroupIndex}),");
-                writer.Unindent();
+                WriteChunkedEntries(writer, classGroup, entryType);
             }
-            writer.Unindent();
-            writer.AppendLine("};");
+            else
+            {
+                writer.AppendLine($"public static readonly {entryType}[] Entries = new {entryType}[]");
+                writer.AppendLine("{");
+                writer.Indent();
+                foreach (var method in classGroup.Methods)
+                {
+                    WriteTestEntryFactoryCall(writer, classGroup, method, ",");
+                }
+                writer.Unindent();
+                writer.AppendLine("};");
+            }
 
             writer.Unindent();
             writer.AppendLine("}");
@@ -3632,6 +3618,107 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 classGroup.ClassFullyQualified,
                 ex.ToString()));
         }
+    }
+
+    // Entries per __FillEntriesN method when entries contain nested construction. Measured on a
+    // 10,000 test data-driven suite: 10 minimised total JIT time (5 and 25 were both slower).
+    private const int EntriesPerFillMethod = 10;
+
+    /// <summary>
+    /// True when an entry builds nested objects (data source attributes, parameter metadata,
+    /// dependencies, return types) while the outer factory call's arguments are still on the
+    /// evaluation stack. The JIT spills those pending arguments into fresh temporaries at every
+    /// nested call, so the temporaries grow with the number of entries in the method and its
+    /// JIT time grows faster than linearly (~60ms per 100-entry class for [Arguments] tests).
+    /// </summary>
+    private static bool HasNestedEntryConstruction(ClassTestGroup classGroup)
+    {
+        // A class with no more entries than one fill method holds is already bounded.
+        if (classGroup.Methods.Length <= EntriesPerFillMethod)
+        {
+            return false;
+        }
+
+        foreach (var method in classGroup.Methods)
+        {
+            if (method.TestDataSourcesCode != null
+                || method.ClassDataSourcesCode != null
+                || method.DependenciesCode != null
+                || method.MethodMetadataArgumentsCode.Length > 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Builds the Entries array in small fill methods instead of one static constructor array
+    /// initializer, keeping every JIT-compiled method bounded regardless of the class's test count.
+    /// </summary>
+    private static void WriteChunkedEntries(CodeWriter writer, ClassTestGroup classGroup, string entryType)
+    {
+        var methods = classGroup.Methods.AsArray();
+        var chunkCount = (methods.Length + EntriesPerFillMethod - 1) / EntriesPerFillMethod;
+
+        writer.AppendLine($"public static readonly {entryType}[] Entries = __CreateEntries();");
+        writer.AppendLine($"private static {entryType}[] __CreateEntries()");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"var entries = new {entryType}[{methods.Length}];");
+        for (var chunk = 0; chunk < chunkCount; chunk++)
+        {
+            writer.AppendLine($"__FillEntries{chunk}(entries);");
+        }
+        writer.AppendLine("return entries;");
+        writer.Unindent();
+        writer.AppendLine("}");
+
+        for (var chunk = 0; chunk < chunkCount; chunk++)
+        {
+            writer.AppendLine($"private static void __FillEntries{chunk}({entryType}[] entries)");
+            writer.AppendLine("{");
+            writer.Indent();
+            var end = Math.Min(methods.Length, (chunk + 1) * EntriesPerFillMethod);
+            for (var i = chunk * EntriesPerFillMethod; i < end; i++)
+            {
+                writer.Append($"entries[{i}] = ");
+                WriteTestEntryFactoryCall(writer, classGroup, methods[i], ";");
+            }
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+    }
+
+    /// <summary>
+    /// Writes one TestEntryFactory.CreateWithClassMetadata call followed by <paramref name="terminator"/>.
+    /// </summary>
+    private static void WriteTestEntryFactoryCall(CodeWriter writer, ClassTestGroup classGroup, TestMethodSourceCode method, string terminator)
+    {
+        writer.AppendLine($"global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<{classGroup.ClassFullyQualified}>(");
+        writer.Indent();
+        writer.AppendRaw(method.TestEntryDataFieldsCode);
+        if (method.TestDataSourcesCode != null)
+        {
+            writer.AppendLine($"testDataSources: {method.TestDataSourcesCode},");
+        }
+        if (method.ClassDataSourcesCode != null)
+        {
+            writer.AppendLine($"classDataSources: {method.ClassDataSourcesCode},");
+        }
+        if (method.DependenciesCode != null)
+        {
+            writer.AppendLine($"dependencies: {method.DependenciesCode},");
+        }
+        writer.AppendRaw(method.MethodMetadataArgumentsCode);
+        writer.AppendLine("classMetadata: __classMetadata,");
+        writer.AppendLine("createInstance: __createInstance,");
+        writer.AppendLine("invokeBody: __invoke,");
+        writer.AppendLine($"methodIndex: {method.MethodIndex},");
+        writer.AppendLine("createAttributes: __attributes,");
+        writer.AppendLine($"attributeGroupIndex: {method.AttributeGroupIndex}){terminator}");
+        writer.Unindent();
     }
 
     private enum TestReturnPattern
