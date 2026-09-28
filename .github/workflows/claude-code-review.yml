@@ -50,7 +50,8 @@ jobs:
         with:
           fetch-depth: 1
 
-      # Untrusted PR head, kept in a subdirectory and exposed read-only via --add-dir.
+      # Keep the untrusted PR head separate from the trusted base. --add-dir only
+      # makes it visible to Claude; tool permissions govern access, not this flag.
       - name: Checkout pull request head
         uses: actions/checkout@v7.0.1
         with:
