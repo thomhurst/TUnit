@@ -39,11 +39,6 @@ jobs:
       contents: read
       pull-requests: write
 
-    env:
-      # Preserve the existing model-side cap. It does not limit the separate CI
-      # publisher, which makes one helper call and never retries automatically.
-      CLAUDE_CODE_SCRIPT_CAPS: '{"pr-review-comment.sh":2}'
-
     steps:
       # Trusted base ref at the workspace root - this is what Claude runs in.
       - name: Checkout base repository
@@ -51,8 +46,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      # Keep the untrusted PR head separate from the trusted base. --add-dir only
-      # makes it visible to Claude; tool permissions govern access, not this flag.
+      # Untrusted PR head, kept in a subdirectory and exposed read-only via --add-dir.
       - name: Checkout pull request head
         uses: actions/checkout@v7.0.1
         with:
@@ -83,8 +77,6 @@ jobs:
           # permissions above.
           github_token: ${{ secrets.GITHUB_TOKEN }}
           allowed_non_write_users: "*"
-          show_full_output: false
-          display_report: false
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           prompt: |
@@ -100,11 +92,8 @@ jobs:
             `pr-head/`. Use `gh pr diff` for the change set.
 
             Instructions:
-            - Return the final review as Markdown, including when no issues are found.
-              If the skill skips the review, return its reason for skipping.
-              CI publishes your final response after validating the execution result.
-            - Do not publish comments yourself: do not call the posting helper,
-              `gh pr comment`, or GitHub MCP tools that publish reviews or comments.
+            - Return the final review as Markdown, even if no issues are found. If the code is good, acknowledge it.
+              Do not post it yourself; a later workflow step posts your final response.
             - Compare the current state of the PR against any previous PR comments to make sure they have been addressed.
             - When you find issues, ALWAYS suggest better approaches or architectural improvements, not just minor optimizations.
             - Focus on:
@@ -117,18 +106,16 @@ jobs:
 
             Use the code review skill to run this review: /code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr_number }}
           claude_args: |
-            --add-dir pr-head
-            --allowedTools "Read,Glob,Grep,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*)"
-            --disallowedTools "Bash(.github/scripts/pr-review-comment.sh:*),Bash(gh pr comment:*),mcp__github_inline_comment__*,mcp__github_comment__*,mcp__github__*"
+            --add-dir pr-head --allowedTools "Read,Glob,Grep,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*)"
 
-      # Run trusted base code even after an analysis failure, so missing or invalid
-      # results are visible. Never execute scripts from pr-head/ in this job.
-      - name: Publish Claude review and summarize diagnostics
-        if: ${{ always() && !cancelled() && steps.claude-review.outcome != 'skipped' }}
+      # Post Claude's final response from trusted base code, so publication does
+      # not depend on the model choosing to call the helper.
+      - name: Post review
         env:
-          CLAUDE_EXECUTION_FILE: ${{ steps.claude-review.outputs.execution_file }}
-          CLAUDE_ACTION_OUTCOME: ${{ steps.claude-review.outcome }}
+          EXECUTION_FILE: ${{ steps.claude-review.outputs.execution_file }}
           PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
           GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
-        run: node .github/scripts/publish-claude-review.mjs
+        run: |
+          body=$(jq -r '[.[] | select(.type == "result")] | last | .result // empty' "$EXECUTION_FILE")
+          .github/scripts/pr-review-comment.sh "$body"
