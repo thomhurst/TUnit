@@ -22,6 +22,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 {
     private const string GeneratedNamespace = "TUnit.Generated";
 
+    private static readonly DiagnosticDescriptor GenerationErrorDescriptor = new(
+        "TUNIT0999",
+        "Source Generation Error",
+        "Failed to generate test metadata for {0}.{1}: {2}",
+        "TUnit",
+        DiagnosticSeverity.Error,
+        true);
+
     /// <summary>Tracking name of the step that finds [Test] method declarations.</summary>
     public const string TestMethodSyntaxStep = "TestMethodSyntax";
 
@@ -202,13 +210,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else if (result.Error is { } error)
         {
             context.ReportDiagnostic(Diagnostic.Create(
-                new DiagnosticDescriptor(
-                    "TUNIT0999",
-                    "Source Generation Error",
-                    "Failed to generate test metadata for {0}.{1}: {2}",
-                    "TUnit",
-                    DiagnosticSeverity.Error,
-                    true),
+                GenerationErrorDescriptor,
                 error.ToLocation(),
                 error.ClassName,
                 error.MethodName,
