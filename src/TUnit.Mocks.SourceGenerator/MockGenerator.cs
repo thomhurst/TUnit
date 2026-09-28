@@ -9,13 +9,13 @@ namespace TUnit.Mocks.SourceGenerator;
 [Generator(LanguageNames.CSharp)]
 public class MockGenerator : IIncrementalGenerator
 {
-    private readonly Action<SourceProductionContext, MockTypeModel> _emitSources;
+    private readonly Action<MockSourceSink, MockTypeModel> _emitSources;
 
     public MockGenerator() : this(EmitSources)
     {
     }
 
-    internal MockGenerator(Action<SourceProductionContext, MockTypeModel> emitSources)
+    internal MockGenerator(Action<MockSourceSink, MockTypeModel> emitSources)
     {
         _emitSources = emitSources;
     }
@@ -41,7 +41,8 @@ public class MockGenerator : IIncrementalGenerator
                 transform: static (ctx, ct) => CreateRequests(
                     MockTypeDiscovery.TransformToModels(ctx, ct),
                     ctx.Node.GetLocation()))
-            .SelectMany((requests, _) => requests);
+            .WithTrackingName(MockTrackingNames.MockOfInvocations)
+            .SelectMany((requests, _) => requests.AsImmutableArray());
 
         // Step 1b: Find all [assembly: GenerateMock(typeof(T))] attributes
         var attributeTypes = context.SyntaxProvider
@@ -49,7 +50,8 @@ public class MockGenerator : IIncrementalGenerator
                 "TUnit.Mocks.GenerateMockAttribute",
                 predicate: static (node, _) => true,
                 transform: MockTypeDiscovery.TransformGenerateMockAttribute)
-            .SelectMany((requests, _) => requests);
+            .WithTrackingName(MockTrackingNames.GenerateMockAttributes)
+            .SelectMany((requests, _) => requests.AsImmutableArray());
 
         // Attribute-only requests have no invocation for the TM006 analyzer to inspect.
         context.RegisterSourceOutput(attributeTypes, static (spc, request) =>
@@ -72,10 +74,11 @@ public class MockGenerator : IIncrementalGenerator
                 transform: static (ctx, ct) => CreateRequests(
                     MockTypeDiscovery.TransformMockExtensionInvocation(ctx, ct),
                     ctx.Node.GetLocation()))
-            .SelectMany((requests, _) => requests);
+            .WithTrackingName(MockTrackingNames.MockExtensionInvocations)
+            .SelectMany((requests, _) => requests.AsImmutableArray());
 
         // Step 2: Merge all sources and deduplicate
-        var distinctTypes = mockTypes
+        var distinctRequests = mockTypes
             .Collect()
             .Combine(attributeTypes.Collect())
             .Combine(extensionTypes.Collect())
@@ -96,36 +99,98 @@ public class MockGenerator : IIncrementalGenerator
                 // collision — it just has to agree on who emits the shared member surface (#6834).
                 return SharedMemberSurfaceResolver.Resolve(
                     GeneratedNameCollisionDetector.Annotate(requests));
-            });
+            })
+            .WithTrackingName(MockTrackingNames.DistinctRequests);
 
-        // Step 3: Generate source for each unique type
-        context.RegisterSourceOutput(distinctTypes, GenerateMockSafely);
+        // Step 3: Generate source for each unique type. The request's location is dropped first,
+        // so a call site that merely moves (an edit above it) leaves the model — and with it the
+        // generated source — cached.
+        var emitResults = distinctRequests
+            .Select(static (request, _) => request.Model)
+            .WithTrackingName(MockTrackingNames.DistinctModels)
+            .Select((model, _) => Emit(model))
+            .WithTrackingName(MockTrackingNames.EmitResults);
+
+        context.RegisterSourceOutput(emitResults, AddEmittedSources);
+
+        // Step 4: TM009 needs the location of the request that produced a failed model. Pairing
+        // happens here rather than in the emit step so locations never invalidate emitted source.
+        var failures = emitResults
+            .Where(static result => result.Failed)
+            .Collect()
+            .Combine(distinctRequests.Collect());
+
+        context.RegisterSourceOutput(failures, ReportGenerationFailures);
     }
 
-    private void GenerateMockSafely(SourceProductionContext spc, MockGenerationRequest request)
+    private MockEmitResult Emit(MockTypeModel model)
     {
+        var sink = new MockSourceSink();
+
         try
         {
-            _emitSources(spc, request.Model);
+            _emitSources(sink, model);
+            return new MockEmitResult(model, sink.ToEquatableArray(), null, null);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            spc.ReportDiagnostic(Diagnostic.Create(
-                Diagnostics.TM009_GenerationFailed,
-                request.SourceLocation.ToLocation(),
-                request.Model.FullyQualifiedName,
-                exception.GetType().Name,
-                exception.Message));
+            // Sources added before the failure are still emitted, as they were when generation
+            // wrote straight to the SourceProductionContext.
+            return new MockEmitResult(model, sink.ToEquatableArray(), exception.GetType().Name, exception.Message);
         }
     }
 
-    private static ImmutableArray<MockGenerationRequest> CreateRequests(
+    private static void AddEmittedSources(SourceProductionContext spc, MockEmitResult result)
+    {
+        var model = result.Model;
+        if (model.CollidesWith is not null)
+        {
+            spc.ReportDiagnostic(Diagnostic.Create(
+                Diagnostics.TM008_GeneratedNameCollision,
+                Location.None,
+                model.FullyQualifiedName,
+                MockImplBuilder.GetCompositeSafeName(model),
+                model.CollidesWith));
+        }
+
+        foreach (var source in result.Sources)
+        {
+            spc.AddSource(source.HintName, source.Source);
+        }
+    }
+
+    private static void ReportGenerationFailures(
+        SourceProductionContext spc,
+        (ImmutableArray<MockEmitResult> Failures, ImmutableArray<MockGenerationRequest> Requests) input)
+    {
+        foreach (var failure in input.Failures)
+        {
+            var location = Location.None;
+            foreach (var request in input.Requests)
+            {
+                if (request.Model.Equals(failure.Model))
+                {
+                    location = request.SourceLocation.ToLocation();
+                    break;
+                }
+            }
+
+            spc.ReportDiagnostic(Diagnostic.Create(
+                Diagnostics.TM009_GenerationFailed,
+                location,
+                failure.Model.FullyQualifiedName,
+                failure.FailureExceptionType,
+                failure.FailureMessage));
+        }
+    }
+
+    private static EquatableArray<MockGenerationRequest> CreateRequests(
         ImmutableArray<MockTypeModel> models,
         Location location)
     {
         if (models.IsDefaultOrEmpty)
         {
-            return ImmutableArray<MockGenerationRequest>.Empty;
+            return EquatableArray<MockGenerationRequest>.Empty;
         }
 
         var sourceLocation = MockSourceLocation.From(location);
@@ -135,7 +200,7 @@ public class MockGenerator : IIncrementalGenerator
             requests.Add(new MockGenerationRequest(model, sourceLocation));
         }
 
-        return requests.MoveToImmutable();
+        return new EquatableArray<MockGenerationRequest>(requests.MoveToImmutable());
     }
 
     private static void AddDistinctRequests(
@@ -154,16 +219,11 @@ public class MockGenerator : IIncrementalGenerator
         }
     }
 
-    internal static void EmitSources(SourceProductionContext spc, MockTypeModel model)
+    internal static void EmitSources(MockSourceSink spc, MockTypeModel model)
     {
         if (model.CollidesWith is not null)
         {
-            spc.ReportDiagnostic(Diagnostic.Create(
-                Diagnostics.TM008_GeneratedNameCollision,
-                Location.None,
-                model.FullyQualifiedName,
-                MockImplBuilder.GetCompositeSafeName(model),
-                model.CollidesWith));
+            // TM008 is reported when the (empty) result is added to the compilation.
             return;
         }
 
@@ -205,7 +265,7 @@ public class MockGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateSingleTypeMock(SourceProductionContext spc, MockTypeModel model)
+    private static void GenerateSingleTypeMock(MockSourceSink spc, MockTypeModel model)
     {
         var fileName = GetSafeFileName(model);
 
@@ -244,7 +304,7 @@ public class MockGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateUnconstructableClassStub(SourceProductionContext spc, MockTypeModel model)
+    private static void GenerateUnconstructableClassStub(MockSourceSink spc, MockTypeModel model)
     {
         var extensionSource = MockStaticExtensionBuilder.BuildForPartialMock(model);
         if (!string.IsNullOrEmpty(extensionSource))
@@ -253,7 +313,7 @@ public class MockGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateDelegateMock(SourceProductionContext spc, MockTypeModel model)
+    private static void GenerateDelegateMock(MockSourceSink spc, MockTypeModel model)
     {
         var fileName = GetSafeFileName(model);
 
@@ -264,7 +324,7 @@ public class MockGenerator : IIncrementalGenerator
         spc.AddSource($"{fileName}_MockDelegateFactory.g.cs", factorySource);
     }
 
-    private static void GenerateWrapMock(SourceProductionContext spc, MockTypeModel model)
+    private static void GenerateWrapMock(MockSourceSink spc, MockTypeModel model)
     {
         var fileName = GetSafeFileName(model);
 
@@ -281,14 +341,14 @@ public class MockGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateMultiInterfaceMock(SourceProductionContext spc, MockTypeModel model)
+    private static void GenerateMultiInterfaceMock(MockSourceSink spc, MockTypeModel model)
     {
         var fileName = GetSafeFileName(model);
         var implFactorySource = BuildCombinedImplAndFactory(model);
         spc.AddSource($"{fileName}_MockImplFactory.g.cs", implFactorySource);
     }
 
-    private static void GenerateImplFactoryMembersAndEvents(SourceProductionContext spc, MockTypeModel model, string fileName)
+    private static void GenerateImplFactoryMembersAndEvents(MockSourceSink spc, MockTypeModel model, string fileName)
     {
         var implFactorySource = BuildCombinedImplAndFactory(model);
         spc.AddSource($"{fileName}_MockImplFactory.g.cs", implFactorySource);
@@ -296,7 +356,7 @@ public class MockGenerator : IIncrementalGenerator
         GenerateMembersAndEvents(spc, model, fileName);
     }
 
-    private static void GenerateMembersAndEvents(SourceProductionContext spc, MockTypeModel model, string fileName)
+    private static void GenerateMembersAndEvents(MockSourceSink spc, MockTypeModel model, string fileName)
     {
         var membersSource = MockMembersBuilder.Build(model);
         spc.AddSource($"{fileName}_MockMembers.g.cs", membersSource);

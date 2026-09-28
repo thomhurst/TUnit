@@ -27,6 +27,8 @@ internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnu
         if (_array.IsDefault && other._array.IsDefault) return true;
         if (_array.IsDefault || other._array.IsDefault) return false;
         if (_array.Length != other._array.Length) return false;
+        // Shared backing array (e.g. a memoized model reused by several call sites).
+        if (_array == other._array) return true;
 
         for (int i = 0; i < _array.Length; i++)
         {

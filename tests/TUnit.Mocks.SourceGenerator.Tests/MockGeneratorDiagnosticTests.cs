@@ -86,7 +86,7 @@ public class MockGeneratorDiagnosticTests : SnapshotTestBase
     }
 
     private static void EmitWithInjectedFailure(
-        SourceProductionContext context,
+        MockSourceSink context,
         MockTypeModel model)
     {
         if (model.FullyQualifiedName == "global::IBroken")
