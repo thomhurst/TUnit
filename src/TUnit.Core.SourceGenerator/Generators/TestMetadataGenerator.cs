@@ -130,6 +130,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Test methods arrive grouped by syntax tree, so remembering the last semantic model avoids
         // creating one per method without holding a model for every tree for the compilation's lifetime.
+        // Unsynchronized on purpose: a race only costs an extra GetSemanticModel call, because the value is
+        // read into a local and its syntax tree is checked before use.
         private SemanticModel? _lastSemanticModel;
 
         public GenerationState(CSharpCompilation compilation)
@@ -234,10 +236,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return GenerateTestMethodSource(testMethod);
         }
 
-        return new TestMethodGenerationResult
+        try
         {
-            PerClassMethod = PreGeneratePerClassMethodCode(testMethod, state.GetClassLevelCode(testMethod.TypeSymbol))
-        };
+            return new TestMethodGenerationResult
+            {
+                PerClassMethod = PreGeneratePerClassMethodCode(testMethod, state.GetClassLevelCode(testMethod.TypeSymbol))
+            };
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return new TestMethodGenerationResult
+            {
+                Error = TestGenerationError.Create(
+                    testMethod.TypeSymbol.Name,
+                    testMethod.MethodSymbol.Name,
+                    ex.ToString(),
+                    testMethod.MethodSymbol.Locations.FirstOrDefault())
+            };
+        }
     }
 
     private static InheritsTestsClassResult? GenerateInheritedTests(
