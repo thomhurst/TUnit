@@ -25,11 +25,13 @@ public static class AttributeExtensions
     }
 
     public static bool IsStandardHook(this AttributeData attributeData, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
+        => IsStandardHook(attributeData, TUnitSymbols.For(compilation), out type, out hookLevel, out hookType);
+
+    internal static bool IsStandardHook(this AttributeData attributeData, TUnitSymbols symbols, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
-        if (
-            SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute
-                    .WithoutGlobalPrefix)))
+        // The null check stops an unresolved attribute class matching a hook symbol that is missing from the compilation.
+        if (attributeData.AttributeClass is not null
+            && SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass, symbols.BeforeAttribute))
         {
             hookType = HookType.Before;
             type = attributeData.AttributeClass!;
@@ -37,9 +39,8 @@ public static class AttributeExtensions
             return true;
         }
 
-        if (SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterAttribute
-                    .WithoutGlobalPrefix)))
+        if (attributeData.AttributeClass is not null
+            && SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass, symbols.AfterAttribute))
         {
             hookType = HookType.After;
             type = attributeData.AttributeClass!;
@@ -54,11 +55,12 @@ public static class AttributeExtensions
     }
 
     public static bool IsEveryHook(this AttributeData attributeData, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
+        => IsEveryHook(attributeData, TUnitSymbols.For(compilation), out type, out hookLevel, out hookType);
+
+    internal static bool IsEveryHook(this AttributeData attributeData, TUnitSymbols symbols, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
-        if (
-            SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.BeforeEveryAttribute
-                    .WithoutGlobalPrefix)))
+        if (attributeData.AttributeClass is not null
+            && SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass, symbols.BeforeEveryAttribute))
         {
             hookType = HookType.Before;
             type = attributeData.AttributeClass!;
@@ -67,9 +69,8 @@ public static class AttributeExtensions
             return true;
         }
 
-        if (SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterEveryAttribute
-                    .WithoutGlobalPrefix)))
+        if (attributeData.AttributeClass is not null
+            && SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass, symbols.AfterEveryAttribute))
         {
             hookType = HookType.After;
             type = attributeData.AttributeClass!;

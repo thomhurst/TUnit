@@ -14,10 +14,21 @@ public class AbstractTestClassWithDataSourcesAnalyzer : ConcurrentDiagnosticAnal
 
     protected override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
+        context.RegisterCompilationStartAction(compilationStartContext =>
+        {
+            // Built at most once per compilation, and only if some abstract test class needs it,
+            // instead of walking every type in the assembly for each candidate.
+            var subclassInfo = new Lazy<Dictionary<INamedTypeSymbol, ConcreteSubclassInfo>>(
+                () => BuildConcreteSubclassInfo(compilationStartContext.Compilation),
+                LazyThreadSafetyMode.ExecutionAndPublication);
+
+            compilationStartContext.RegisterSymbolAction(
+                symbolContext => AnalyzeSymbol(symbolContext, subclassInfo),
+                SymbolKind.NamedType);
+        });
     }
 
-    private void AnalyzeSymbol(SymbolAnalysisContext context)
+    private void AnalyzeSymbol(SymbolAnalysisContext context, Lazy<Dictionary<INamedTypeSymbol, ConcreteSubclassInfo>> subclassInfo)
     {
         if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
@@ -68,12 +79,12 @@ public class AbstractTestClassWithDataSourcesAnalyzer : ConcurrentDiagnosticAnal
         if (hasDataSourceAttributes)
         {
             // Check if there are any concrete classes that inherit from this abstract class with [InheritsTests]
-            var hasInheritingClassesWithAttribute = HasConcreteInheritingClassesWithInheritsTests(context, namedTypeSymbol, out var hasAnyConcreteSubclasses);
+            subclassInfo.Value.TryGetValue(namedTypeSymbol, out var info);
 
             // Only report the diagnostic if:
             // 1. There ARE concrete subclasses in the source (if none exist, this is likely a library class meant to be subclassed externally)
             // 2. None of those subclasses have [InheritsTests]
-            if (hasAnyConcreteSubclasses && !hasInheritingClassesWithAttribute)
+            if (info.HasAnyConcreteSubclasses && !info.HasSubclassWithInheritsTests)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                     Rules.AbstractTestClassWithDataSources,
@@ -84,15 +95,15 @@ public class AbstractTestClassWithDataSourcesAnalyzer : ConcurrentDiagnosticAnal
         }
     }
 
-    private static bool HasConcreteInheritingClassesWithInheritsTests(SymbolAnalysisContext context, INamedTypeSymbol abstractClass, out bool hasAnyConcreteSubclasses)
+    /// <summary>
+    /// For every abstract base class of a concrete type declared in the source assembly (not referenced assemblies),
+    /// records whether it has any such concrete subclass and whether any of those carries <c>[InheritsTests]</c>.
+    /// </summary>
+    private static Dictionary<INamedTypeSymbol, ConcreteSubclassInfo> BuildConcreteSubclassInfo(Compilation compilation)
     {
-        hasAnyConcreteSubclasses = false;
+        var result = new Dictionary<INamedTypeSymbol, ConcreteSubclassInfo>(SymbolEqualityComparer.Default);
 
-        // Get all named types in the source assembly only (not referenced assemblies)
-        var allTypes = GetAllNamedTypes(context.Compilation.Assembly.GlobalNamespace);
-
-        // Check if any concrete class inherits from the abstract class and has [InheritsTests]
-        foreach (var type in allTypes)
+        foreach (var type in GetAllNamedTypes(compilation.Assembly.GlobalNamespace))
         {
             // Skip abstract classes
             if (type.IsAbstract)
@@ -100,34 +111,31 @@ public class AbstractTestClassWithDataSourcesAnalyzer : ConcurrentDiagnosticAnal
                 continue;
             }
 
-            // Check if this type inherits from our abstract class
-            var baseType = type.BaseType;
-            while (baseType != null)
+            bool? hasInheritsTests = null;
+
+            for (var baseType = type.BaseType; baseType != null; baseType = baseType.BaseType)
             {
-                if (SymbolEqualityComparer.Default.Equals(baseType, abstractClass))
+                // Only abstract classes are ever looked up.
+                if (!baseType.IsAbstract)
                 {
-                    // Found a concrete subclass in the source
-                    hasAnyConcreteSubclasses = true;
-
-                    // Check if this type has [InheritsTests] attribute
-                    var hasInheritsTests = type.GetAttributes().Any(attr =>
-                        attr.AttributeClass?.IsGloballyQualified(
-                        WellKnown.AttributeFullyQualifiedClasses.InheritsTestsAttribute.WithGlobalPrefix) == true);
-
-                    if (hasInheritsTests)
-                    {
-                        return true;
-                    }
-
-                    break;
+                    continue;
                 }
 
-                baseType = baseType.BaseType;
+                hasInheritsTests ??= type.GetAttributes().Any(attr =>
+                    attr.AttributeClass?.IsGloballyQualified(
+                    WellKnown.AttributeFullyQualifiedClasses.InheritsTestsAttribute.WithGlobalPrefix) == true);
+
+                result.TryGetValue(baseType, out var existing);
+                result[baseType] = new ConcreteSubclassInfo(
+                    HasAnyConcreteSubclasses: true,
+                    HasSubclassWithInheritsTests: existing.HasSubclassWithInheritsTests || hasInheritsTests.Value);
             }
         }
 
-        return false;
+        return result;
     }
+
+    private readonly record struct ConcreteSubclassInfo(bool HasAnyConcreteSubclasses, bool HasSubclassWithInheritsTests);
 
     private static IEnumerable<INamedTypeSymbol> GetAllNamedTypes(INamespaceSymbol namespaceSymbol)
     {

@@ -74,6 +74,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var attributes = propertySymbol.GetAttributes();
 
+        // Only data source attributes are analyzed; most properties have none at all.
+        if (attributes.IsEmpty)
+        {
+            return;
+        }
+
         Analyze(context, attributes, ImmutableArray<IParameterSymbol>.Empty, propertySymbol,
             propertySymbol.ContainingType);
     }
@@ -91,8 +97,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
+        var attributes = namedTypeSymbol.GetAttributes();
+
+        // Only data source attributes are analyzed; without any attributes there is nothing to check.
+        if (attributes.IsEmpty)
+        {
+            return;
+        }
+
         // Check if it's a test class or has data source attributes
-        var hasDataSourceAttribute = namedTypeSymbol.GetAttributes().Any(a => 
+        var hasDataSourceAttribute = attributes.Any(a => 
         {
             var currentType = a.AttributeClass;
             while (currentType != null)
@@ -106,12 +120,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return false;
         });
         
-        if (!namedTypeSymbol.IsTestClass(context.Compilation) && !hasDataSourceAttribute)
+        if (!hasDataSourceAttribute && !namedTypeSymbol.IsTestClass(context.Compilation))
         {
             return;
         }
-
-        var attributes = namedTypeSymbol.GetAttributes();
 
         var parameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ??
                          ImmutableArray<IParameterSymbol>.Empty;
@@ -125,8 +137,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         IPropertySymbol? propertySymbol,
         INamedTypeSymbol testClassType)
     {
-        var types = GetTypes(parameters, propertySymbol);
-
         var dataSourceInterface = context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithoutGlobalPrefix);
         
         var dataAttributes = attributes.Where(x =>
@@ -180,6 +190,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
+
+        var types = GetTypes(parameters, propertySymbol);
 
         CheckPropertyAccessor(context, propertySymbol);
 

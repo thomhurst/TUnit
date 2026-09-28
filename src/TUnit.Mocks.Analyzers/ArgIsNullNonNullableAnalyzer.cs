@@ -27,6 +27,12 @@ public class ArgIsNullNonNullableAnalyzer : DiagnosticAnalyzer
             return;
         }
 
+        // Cheap syntactic check before binding: only Arg.IsNull<T>() / Arg.IsNotNull<T>() are of interest.
+        if (!InvocationNameFilter.MayInvoke(invocation, "IsNull", "IsNotNull"))
+        {
+            return;
+        }
+
         var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken);
 
         if (symbolInfo.Symbol is not IMethodSymbol methodSymbol)

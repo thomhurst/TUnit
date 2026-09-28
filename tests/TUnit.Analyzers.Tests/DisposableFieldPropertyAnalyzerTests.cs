@@ -1614,4 +1614,74 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task Base_Class_In_Other_File_Flags_Undisposed_Member()
+    {
+        // The base class's hook lives in a different syntax tree from the analyzed test class.
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using TUnit.Core;
+
+            public class MyTest : BaseTest
+            {
+                [Test]
+                public void Test() { }
+            }
+            """,
+            test => test.TestState.Sources.Add(("BaseTest.cs", """
+                using System.Net.Http;
+                using TUnit.Core;
+
+                public abstract class BaseTest
+                {
+                    protected HttpClient? {|#0:_client|};
+
+                    [Before(HookType.Test)]
+                    public void Setup()
+                    {
+                        _client = new HttpClient();
+                    }
+                }
+                """)),
+            Verifier.Diagnostic(Rules.Dispose_Member_In_Cleanup).WithLocation(0).WithArguments("_client"));
+    }
+
+    [Test]
+    public async Task Base_Class_In_Other_File_No_Issue_When_Disposed_In_Derived_Class()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using TUnit.Core;
+
+            public class MyTest : BaseTest
+            {
+                [After(HookType.Test)]
+                public void Cleanup()
+                {
+                    System.Console.WriteLine();
+                    _client?.Dispose();
+                }
+
+                [Test]
+                public void Test() { }
+            }
+            """,
+            test => test.TestState.Sources.Add(("BaseTest.cs", """
+                using System.Net.Http;
+                using TUnit.Core;
+
+                public abstract class BaseTest
+                {
+                    protected HttpClient? _client;
+
+                    [Before(HookType.Test)]
+                    public void Setup()
+                    {
+                        var unrelated = System.Guid.NewGuid();
+                        _client = new HttpClient();
+                    }
+                }
+                """)));
+    }
 }

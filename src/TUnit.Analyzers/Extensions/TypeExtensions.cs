@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers.Extensions;
 
@@ -40,10 +41,7 @@ public static partial class TypeExtensions
 
     public static bool IsTestClass(this INamedTypeSymbol namedTypeSymbol, Compilation compilation)
     {
-        return namedTypeSymbol
-            .GetMembers()
-            .OfType<IMethodSymbol>()
-            .Any(x => x.IsTestMethod(compilation));
+        return TUnitSymbols.For(compilation).IsTestClass(namedTypeSymbol);
     }
 
     public static bool IsEnumerable(this ITypeSymbol type, SymbolAnalysisContext context, [NotNullWhen(true)] out ITypeSymbol? innerType)

@@ -5734,6 +5734,52 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_Using_Flagged_When_NUnit_Is_Not_Referenced()
+    {
+        // Without an NUnit reference the analyzer skips all semantic checks; a leftover using must still be reported.
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            {|#0:using NUnit.Framework;|}
+
+            public class MyClass
+            {
+                public void MyMethod() { }
+            }
+            """,
+            test => test.CompilerDiagnostics = CompilerDiagnostics.None,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0)
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Global_Using_Flagged_When_NUnit_Is_Not_Referenced()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            {|#0:global using NUnit.Framework;|}
+            """,
+            test => test.CompilerDiagnostics = CompilerDiagnostics.None,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0)
+        );
+    }
+
+    [Test]
+    public async Task No_Diagnostic_When_NUnit_Is_Not_Referenced_And_Not_Used()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+
+            public class MyClass
+            {
+                [TUnit.Core.Test]
+                public void MyMethod() => Console.WriteLine();
+            }
+            """
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);

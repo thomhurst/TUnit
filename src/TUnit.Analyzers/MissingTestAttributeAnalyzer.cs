@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Analyzers.Extensions;
+using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 
@@ -23,15 +24,20 @@ public class MissingTestAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
+        var symbols = TUnitSymbols.For(context.Compilation);
+
+        // Base types from assemblies that don't reference TUnit.Core (e.g. BCL types) can't carry TUnit data
+        // source attributes, so don't decode the attributes of all their members.
         var methods = namedTypeSymbol
             .GetSelfAndBaseTypes()
+            .Where(symbols.MayContainTUnitMembers)
             .SelectMany(x => x.GetMembers())
             .OfType<IMethodSymbol>()
             .Where(x => x.MethodKind == MethodKind.Ordinary)
             .Where(x => !x.IsStatic);
 
         // IsTestMethod is the cheaper check and rules out the vast majority of methods, so evaluate it first.
-        foreach (var method in methods.Where(x => !x.IsTestMethod(context.Compilation) && x.HasDataDrivenAttributes()))
+        foreach (var method in methods.Where(x => !symbols.IsTestMethod(x) && x.HasDataDrivenAttributes()))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MissingTestAttribute,
                 method.Locations.FirstOrDefault())

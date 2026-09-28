@@ -17,12 +17,39 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(DiagnosticRule);
 
-    protected override void InitializeInternal(AnalysisContext context)
+    /// <summary>
+    /// The first segment of every namespace accepted by <see cref="IsFrameworkNamespace"/>
+    /// (e.g. <c>NUnit</c> for <c>NUnit.Framework</c>). Used to skip building namespace display strings
+    /// for symbols that obviously live elsewhere.
+    /// </summary>
+    protected virtual string FrameworkRootNamespace
     {
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.CompilationUnit);
+        get
+        {
+            var dot = TargetFrameworkNamespace.IndexOf('.');
+            return dot < 0 ? TargetFrameworkNamespace : TargetFrameworkNamespace.Substring(0, dot);
+        }
     }
 
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    protected override void InitializeInternal(AnalysisContext context)
+    {
+        context.RegisterCompilationStartAction(compilationStartContext =>
+        {
+            // Every semantic check below matches symbols by namespace. When no namespace in the compilation
+            // (source or references) could match, only the syntactic using-directive checks can report,
+            // so skip binding every class, attribute and invocation in the project.
+            var canContainFrameworkSymbols = MigrationNamespaceHelper.ContainsNamespace(
+                compilationStartContext.Compilation,
+                TargetFrameworkNamespace,
+                ns => ns.Name.StartsWith(TargetFrameworkNamespace));
+
+            compilationStartContext.RegisterSyntaxNodeAction(
+                syntaxNodeContext => AnalyzeSyntax(syntaxNodeContext, canContainFrameworkSymbols),
+                SyntaxKind.CompilationUnit);
+        });
+    }
+
+    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context, bool canContainFrameworkSymbols)
     {
         if (context.Node is not CompilationUnitSyntax compilationUnitSyntax)
         {
@@ -35,6 +62,19 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
         foreach (var classDeclarationSyntax in classDeclarationSyntaxes)
         {
+            if (!canContainFrameworkSymbols)
+            {
+                // Priorities 1-4 can only match framework symbols, so only the using directives remain.
+                var location = CheckUsingDirectives(classDeclarationSyntax);
+                if (location != null)
+                {
+                    Flag(context, location);
+                    return;
+                }
+
+                continue;
+            }
+
             var symbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
 
             if (symbol is null)
@@ -141,9 +181,7 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected virtual bool HasFrameworkInterfaces(INamedTypeSymbol symbol)
     {
-        return symbol.AllInterfaces.Any(i =>
-            i.ContainingNamespace?.Name.StartsWith(TargetFrameworkNamespace) is true ||
-            IsFrameworkNamespace(i.ContainingNamespace?.ToDisplayString()));
+        return symbol.AllInterfaces.Any(i => IsFrameworkType(i));
     }
 
     protected virtual Location? CheckUsingDirectives(ClassDeclarationSyntax classDeclarationSyntax)
@@ -213,14 +251,11 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (methodSymbol != null)
             {
-                var namespaceName = methodSymbol.ContainingNamespace?.ToDisplayString();
+                var containingNamespace = methodSymbol.ContainingNamespace;
 
                 // Explicitly exclude TUnit types (already converted code)
-                if (namespaceName != null &&
-                    (namespaceName == "TUnit.Assertions" ||
-                     namespaceName.StartsWith("TUnit.Assertions.") ||
-                     namespaceName == "TUnit.Core" ||
-                     namespaceName.StartsWith("TUnit.Core.")))
+                if (MigrationNamespaceHelper.IsNamespaceOrNested(containingNamespace, "TUnit", "Assertions") ||
+                    MigrationNamespaceHelper.IsNamespaceOrNested(containingNamespace, "TUnit", "Core"))
                 {
                     continue; // Skip TUnit types - they're not framework types to migrate
                 }
@@ -265,7 +300,26 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
     protected virtual bool IsFrameworkType(ITypeSymbol type)
     {
         return type.ContainingNamespace?.Name.StartsWith(TargetFrameworkNamespace) is true ||
-               IsFrameworkNamespace(type.ContainingNamespace?.ToDisplayString());
+               IsFrameworkNamespaceSymbol(type.ContainingNamespace);
+    }
+
+    /// <summary>
+    /// Equivalent to <c>IsFrameworkNamespace(ns?.ToDisplayString())</c>, but only builds the display string
+    /// when the namespace's root segment is <see cref="FrameworkRootNamespace"/>.
+    /// </summary>
+    private bool IsFrameworkNamespaceSymbol(INamespaceSymbol? ns)
+    {
+        if (ns is null)
+        {
+            return IsFrameworkNamespace(null);
+        }
+
+        if (ns.IsGlobalNamespace || MigrationNamespaceHelper.GetRootNamespace(ns).Name != FrameworkRootNamespace)
+        {
+            return false;
+        }
+
+        return IsFrameworkNamespace(ns.ToDisplayString());
     }
 
     protected virtual Location? AnalyzeAttributes(SyntaxNodeAnalysisContext context, ISymbol symbol, SyntaxNode syntaxNode)
@@ -275,10 +329,9 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
         for (var i = 0; i < attributes.Length; i++)
         {
             var attributeData = attributes[i];
-            var namespaceName = attributeData.AttributeClass?.ContainingNamespace?.Name;
-            var fullNamespace = attributeData.AttributeClass?.ContainingNamespace?.ToDisplayString();
+            var containingNamespace = attributeData.AttributeClass?.ContainingNamespace;
 
-            if (namespaceName == TargetFrameworkNamespace || IsFrameworkNamespace(fullNamespace))
+            if (containingNamespace?.Name == TargetFrameworkNamespace || IsFrameworkNamespaceSymbol(containingNamespace))
             {
                 // Get the attribute syntax for this specific attribute
                 var attributeSyntax = attributeData.ApplicationSyntaxReference?.GetSyntax();
@@ -312,8 +365,7 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
         // Check class-level attributes
         foreach (var attribute in namedTypeSymbol.GetAttributes())
         {
-            var ns = attribute.AttributeClass?.ContainingNamespace?.ToDisplayString();
-            if (ns == "TUnit.Core" || (ns?.StartsWith("TUnit.Core.") ?? false))
+            if (MigrationNamespaceHelper.IsNamespaceOrNested(attribute.AttributeClass?.ContainingNamespace, "TUnit", "Core"))
             {
                 return true;
             }
@@ -324,8 +376,7 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             foreach (var attribute in member.GetAttributes())
             {
-                var ns = attribute.AttributeClass?.ContainingNamespace?.ToDisplayString();
-                if (ns == "TUnit.Core" || (ns?.StartsWith("TUnit.Core.") ?? false))
+                if (MigrationNamespaceHelper.IsNamespaceOrNested(attribute.AttributeClass?.ContainingNamespace, "TUnit", "Core"))
                 {
                     return true;
                 }

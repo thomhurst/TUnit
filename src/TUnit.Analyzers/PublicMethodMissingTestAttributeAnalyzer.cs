@@ -23,6 +23,12 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
             return;
         }
 
+        // Memoized and shared with other analyzers; rules out non-test classes before materializing anything.
+        if (!namedTypeSymbol.IsTestClass(context.Compilation))
+        {
+            return;
+        }
+
         var methods = namedTypeSymbol.GetMembers().OfType<IMethodSymbol>().ToArray();
 
         var testMethods = methods.Where(x => x.IsTestMethod(context.Compilation)).ToArray();

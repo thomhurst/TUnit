@@ -2818,6 +2818,40 @@ public class XUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task Xunit_Using_Flagged_When_Xunit_Is_Not_Referenced()
+    {
+        // Without an xUnit reference the analyzer skips all semantic checks; a leftover using must still be reported.
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            {|#0:using Xunit;
+
+            public class MyClass
+            {
+                public void MyMethod() { }
+            }|}
+            """,
+            test => test.CompilerDiagnostics = CompilerDiagnostics.None,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
+        );
+    }
+
+    [Test]
+    public async Task No_Diagnostic_When_Xunit_Is_Not_Referenced_And_Not_Used()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+
+            public class MyClass
+            {
+                [TUnit.Core.Test]
+                public void MyMethod() => Console.WriteLine();
+            }
+            """
+        );
+    }
+
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));

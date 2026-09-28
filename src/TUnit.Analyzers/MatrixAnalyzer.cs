@@ -27,12 +27,20 @@ public class MatrixAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
+        var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
+
+        // Nothing to check without constructor parameters; cheaper than IsTestClass, so test it first.
+        if (constructorParameters.IsEmpty)
+        {
+            return;
+        }
+
         if (!namedTypeSymbol.IsTestClass(context.Compilation))
         {
             return;
         }
 
-        CheckMatrixErrors(context, namedTypeSymbol.GetAttributes(), namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty);
+        CheckMatrixErrors(context, namedTypeSymbol.GetAttributes(), constructorParameters);
     }
 
     private void AnalyzeMethod(SymbolAnalysisContext context)

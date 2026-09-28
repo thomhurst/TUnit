@@ -21,6 +21,13 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         var method = (IMethodSymbol) context.Symbol;
 
+        // FindCycleBackTo never reports for a non-test method, so skip reading the method's and its type's
+        // attributes for every other method in the compilation.
+        if (!method.IsTestMethod(context.Compilation))
+        {
+            return;
+        }
+
         var dependsOnAttributes = GetDependsOnAttributes(method).Concat(GetDependsOnAttributes(method.ReceiverType ?? method.ContainingType)).ToArray();
 
         if (dependsOnAttributes.Length == 0)

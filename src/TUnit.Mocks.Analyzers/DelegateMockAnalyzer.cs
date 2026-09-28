@@ -27,6 +27,12 @@ public class DelegateMockAnalyzer : DiagnosticAnalyzer
             return;
         }
 
+        // Cheap syntactic check before binding: only Mock.OfDelegate<T>() is of interest.
+        if (!InvocationNameFilter.MayInvoke(invocation, "OfDelegate"))
+        {
+            return;
+        }
+
         var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken);
 
         if (symbolInfo.Symbol is not IMethodSymbol methodSymbol)

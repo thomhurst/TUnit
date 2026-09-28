@@ -33,6 +33,12 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
             return;
         }
 
+        // Cheap syntactic check before binding: only Mock.Of<T>() / Mock.Wrap<T>() / T.Mock() are of interest.
+        if (!InvocationNameFilter.MayInvoke(invocation, "Of", "Wrap", "Mock"))
+        {
+            return;
+        }
+
         var target = ResolveMockTarget(context, invocation, out var isWrapMock);
 
         if (target is not { TypeKind: TypeKind.Class } namedType)

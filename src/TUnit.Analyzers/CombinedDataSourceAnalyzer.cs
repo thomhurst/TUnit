@@ -31,13 +31,21 @@ public class CombinedDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
+        var attributes = namedTypeSymbol.GetAttributes();
+        var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
+
+        // With no constructor parameters and no class attributes no rule can fire; cheaper than IsTestClass, so test it first.
+        if (constructorParameters.IsEmpty && attributes.IsEmpty)
+        {
+            return;
+        }
+
         if (!namedTypeSymbol.IsTestClass(context.Compilation))
         {
             return;
         }
 
-        CheckCombinedDataSourceErrors(context, namedTypeSymbol.GetAttributes(),
-            namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty);
+        CheckCombinedDataSourceErrors(context, attributes, constructorParameters);
     }
 
     private void AnalyzeMethod(SymbolAnalysisContext context)

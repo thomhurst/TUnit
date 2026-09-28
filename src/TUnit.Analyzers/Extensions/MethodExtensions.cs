@@ -16,8 +16,7 @@ public static class MethodExtensions
     /// </remarks>
     public static bool IsTestMethod(this IMethodSymbol methodSymbol, Compilation compilation)
     {
-        var testAttribute = compilation.GetTypeByMetadataName("TUnit.Core.TestAttribute")!;
-        return methodSymbol.GetAttributes().Any(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, testAttribute));
+        return TUnitSymbols.For(compilation).IsTestMethod(methodSymbol);
     }
 
     /// <summary>
@@ -45,9 +44,11 @@ public static class MethodExtensions
 
     public static bool IsStandardHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
+        var symbols = TUnitSymbols.For(compilation);
+
         foreach (var attributeData in methodSymbol.GetAttributes())
         {
-            if (attributeData.IsStandardHook(compilation, out type, out hookLevel, out hookType))
+            if (attributeData.IsStandardHook(symbols, out type, out hookLevel, out hookType))
             {
                 return true;
             }
@@ -61,9 +62,11 @@ public static class MethodExtensions
 
     public static bool IsEveryHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
+        var symbols = TUnitSymbols.For(compilation);
+
         foreach (var attributeData in methodSymbol.GetAttributes())
         {
-            if (attributeData.IsEveryHook(compilation, out type, out hookLevel, out hookType))
+            if (attributeData.IsEveryHook(symbols, out type, out hookLevel, out hookType))
             {
                 return true;
             }

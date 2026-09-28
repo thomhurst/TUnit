@@ -38,20 +38,18 @@ public class MultipleConstructorsAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        // Only analyze test classes
-        if (!namedTypeSymbol.IsTestClass(compilation))
+        // Get all instance constructors
+        var constructors = namedTypeSymbol.InstanceConstructors;
+
+        // If there's only one constructor or no constructors, no ambiguity.
+        // Checked first: it's far cheaper than IsTestClass and rules out almost every type.
+        if (constructors.Length <= 1)
         {
             return;
         }
 
-        // Get all instance constructors
-        var constructors = namedTypeSymbol.GetMembers()
-            .OfType<IMethodSymbol>()
-            .Where(m => m.MethodKind == MethodKind.Constructor && !m.IsStatic)
-            .ToList();
-
-        // If there's only one constructor or no constructors, no ambiguity
-        if (constructors.Count <= 1)
+        // Only analyze test classes
+        if (!namedTypeSymbol.IsTestClass(compilation))
         {
             return;
         }
@@ -59,7 +57,8 @@ public class MultipleConstructorsAnalyzer : ConcurrentDiagnosticAnalyzer
         // Check if any constructor has [TestConstructor] attribute
         var hasTestConstructorAttribute = constructors.Any(c =>
             c.GetAttributes().Any(a =>
-                a.AttributeClass?.ToDisplayString() == "TUnit.Core.TestConstructorAttribute"));
+                a.AttributeClass is { Name: "TestConstructorAttribute" } attributeClass
+                && attributeClass.ToDisplayString() == "TUnit.Core.TestConstructorAttribute"));
 
         // If multiple constructors but no [TestConstructor] attribute, report warning
         if (!hasTestConstructorAttribute)
