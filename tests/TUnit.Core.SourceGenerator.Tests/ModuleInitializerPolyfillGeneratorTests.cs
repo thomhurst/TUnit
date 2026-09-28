@@ -30,6 +30,16 @@ internal class ModuleInitializerPolyfillGeneratorTests
         }
         """;
 
+    private const string PublicAttribute =
+        """
+        namespace System.Runtime.CompilerServices
+        {
+            public sealed class ModuleInitializerAttribute : Attribute
+            {
+            }
+        }
+        """;
+
     [Test]
     public async Task Declares_attribute_when_compilation_lacks_it()
     {
@@ -37,7 +47,7 @@ internal class ModuleInitializerPolyfillGeneratorTests
         var generated = RunGenerator(CreateCompilation(references: []), buildProperties: null);
 
         await Assert.That(generated).HasSingleItem();
-        await Assert.That(generated[0]).Contains("internal sealed class ModuleInitializerAttribute");
+        await Verify(generated);
     }
 
     [Test]
@@ -82,11 +92,35 @@ internal class ModuleInitializerPolyfillGeneratorTests
     {
         // On .NET Framework the runtime has no ModuleInitializerAttribute, so the generator must supply it;
         // on .NET it exists and a second declaration would be ambiguous. Either way the result must compile.
+        var errors = CompileWithGenerator(ReferencesHelper.References);
+
+        await Assert.That(errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task Module_initializer_compiles_when_several_references_declare_public_attribute()
+    {
+        // Several accessible definitions from references are ambiguous (CS0433), including the core library's
+        // on .NET, so the generator must declare its own, which takes precedence over the referenced ones.
+        MetadataReference[] references =
+        [
+            ..ReferencesHelper.References,
+            CreatePublicAttributeReference("PolyfillOne"),
+            CreatePublicAttributeReference("PolyfillTwo"),
+        ];
+
+        var errors = CompileWithGenerator(references);
+
+        await Assert.That(errors).IsEmpty();
+    }
+
+    private static string[] CompileWithGenerator(IEnumerable<MetadataReference> references)
+    {
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
         var compilation = CSharpCompilation.Create(
             "ModuleInitializerPolyfill",
             [CSharpSyntaxTree.ParseText(ModuleInitializerUsage, parseOptions)],
-            ReferencesHelper.References,
+            references,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
@@ -94,12 +128,29 @@ internal class ModuleInitializerPolyfillGeneratorTests
             parseOptions: parseOptions);
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out _);
 
-        var errors = output.GetDiagnostics()
+        return output.GetDiagnostics()
             .Where(d => d.Severity == DiagnosticSeverity.Error)
             .Select(d => d.ToString())
             .ToArray();
+    }
 
-        await Assert.That(errors).IsEmpty();
+    private static MetadataReference CreatePublicAttributeReference(string assemblyName)
+    {
+        var compilation = CSharpCompilation.Create(
+            assemblyName,
+            [CSharpSyntaxTree.ParseText(PublicAttribute)],
+            ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        using var stream = new MemoryStream();
+        var result = compilation.Emit(stream);
+
+        if (!result.Success)
+        {
+            throw new InvalidOperationException(string.Join(Environment.NewLine, result.Diagnostics));
+        }
+
+        return MetadataReference.CreateFromImage(stream.ToArray());
     }
 
     private static CSharpCompilation CreateCompilation(MetadataReference[] references, params string[] sources)
