@@ -37,6 +37,11 @@
         Declares the TUnit.Generated namespace before the project's own files (items added here precede the SDK's
         default Compile glob) so the compiler writes the source-generated types at the end of the assembly rather
         than the start, where Microsoft Defender scans them far more slowly. See TUnit.Core.GeneratedNamespace.cs.
+
+        This must stay in the .props: items added from a .targets land after the default glob. The condition is safe
+        here even though Language is set later by the C# targets and EnableTUnitSourceGeneration may be set in the
+        project body, because MSBuild evaluates every property before any item, so item conditions see final values.
+        Guarded by TUnit.NugetTester's GeneratedTypeOrderTests.
     -->
     <ItemGroup Condition="'$(Language)' == 'C#' and '$(EnableTUnitSourceGeneration)' != 'false'">
         <Compile Include="$(MSBuildThisFileDirectory)TUnit.Core.GeneratedNamespace.cs" Visible="false" />
