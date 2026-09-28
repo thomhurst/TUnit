@@ -9,7 +9,7 @@
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
     <PackageReference Include="Polly" />
     <PackageReference Include="MSTest.TestFramework" />
-    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit" GeneratePathProperty="true" />
     <PackageReference Include="xunit.v3.extensibility.core" />
     <PackageReference Include="xunit.v3.assert" />
     <PackageReference Include="System.Text.Json" Condition="'$(TargetFramework)' == 'net8.0'" GeneratePathProperty="true" PrivateAssets="all" />
@@ -43,6 +43,16 @@
     <None Include="$(PkgSystem_Text_Json)\lib\net8.0\System.Text.Json.dll"
           Condition="'$(TargetFramework)' == 'net8.0'"
           Link="System.Text.Json.9.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <!-- NUnit 5 ships a net10.0 build that references System.Runtime 10.0; referencing it from
+         the Net90 analyzer-test compilation raises CS1705. Use NUnit's net8.0 build instead. -->
+    <None Include="$(PkgNUnit)\lib\net8.0\nunit.framework.dll"
+          Link="nunit.framework.net8.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="$(PkgNUnit)\lib\net8.0\nunit.framework.legacy.dll"
+          Link="nunit.framework.legacy.net8.0.dll"
           CopyToOutputDirectory="PreserveNewest"
           Visible="false" />
     <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"

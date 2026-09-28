@@ -5734,16 +5734,32 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    // NUnit 5 ships a net10.0 build referencing System.Runtime 10.0, which raises CS1705 against the
+    // verifiers' Net90 reference assemblies when the test runs on net10.0. The csproj copies NUnit's
+    // net8.0 build into the output directory; reference that instead of the runtime-loaded assembly.
+    private static string GetNUnitDllPath(string assemblyName)
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.net8.0.dll");
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException(
+                $"net8.0 build of {assemblyName} not found at '{path}'. Run 'dotnet build' before running analyzer tests.",
+                path);
+        }
+
+        return path;
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
-        test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
+        test.TestState.AdditionalReferences.Add(GetNUnitDllPath("nunit.framework"));
     }
 
     private static void ConfigureNUnitTest(CodeFixer.Test test)
     {
         // Add NUnit assemblies to TestState (for input code compilation)
-        test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
-        test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.Legacy.ClassicAssert).Assembly);
+        test.TestState.AdditionalReferences.Add(GetNUnitDllPath("nunit.framework"));
+        test.TestState.AdditionalReferences.Add(GetNUnitDllPath("nunit.framework.legacy"));
 
         // FixedState: TUnit assemblies only (NO NUnit inheritance)
         // Use Explicit inheritance mode to prevent NUnit references from being inherited
