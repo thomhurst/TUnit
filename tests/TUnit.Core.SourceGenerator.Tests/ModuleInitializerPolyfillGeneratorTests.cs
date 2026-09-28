@@ -137,6 +137,65 @@ internal class ModuleInitializerPolyfillGeneratorTests
         await Assert.That(errors).IsEmpty();
     }
 
+    [Test]
+    public async Task Declared_when_compilation_without_sources_has_ambiguous_references()
+    {
+        // Other generators can still emit a module initializer into a project with no source files, so the
+        // ambiguity check must bind the name even when the compilation has no syntax trees of its own.
+        MetadataReference[] references =
+        [
+            ..ReferencesHelper.References,
+            CreateAttributeReference("PolyfillOne", PublicAttribute),
+            CreateAttributeReference("PolyfillTwo", PublicAttribute),
+        ];
+
+        var generated = RunGenerator(CreateCompilation(references), buildProperties: null);
+
+        await Assert.That(generated).HasSingleItem();
+    }
+
+    [Test]
+    public async Task Generated_module_initializer_compiles_with_warnings_as_errors_when_references_are_ambiguous()
+    {
+        // The fallback declaration takes precedence over the referenced ones, which the compiler reports as
+        // CS0436 at each use. TUnit's generated files disable warnings, so its own use must stay clean.
+        MetadataReference[] references =
+        [
+            ..ReferencesHelper.References,
+            CreateAttributeReference("PolyfillOne", PublicAttribute),
+            CreateAttributeReference("PolyfillTwo", PublicAttribute),
+        ];
+
+        var errors = CompileWithGenerator(references, "#pragma warning disable\n" + ModuleInitializerUsage, warningsAsErrors: true);
+
+        await Assert.That(errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task Project_module_initializer_downgrades_from_error_to_warning_when_references_are_ambiguous()
+    {
+        // A project's own [ModuleInitializer] cannot bind while two references declare the attribute (CS0433),
+        // whether or not TUnit is installed. With the fallback it binds to TUnit's declaration and gets CS0436,
+        // a warning that only the project itself can suppress.
+        MetadataReference[] references =
+        [
+            ..ReferencesHelper.References,
+            CreateAttributeReference("PolyfillOne", PublicAttribute),
+            CreateAttributeReference("PolyfillTwo", PublicAttribute),
+        ];
+
+        var withoutFallback = CreateCompilation(references, ModuleInitializerUsage).GetDiagnostics()
+            .Where(d => d.Severity == DiagnosticSeverity.Error)
+            .Select(d => d.Id)
+            .ToArray();
+        var withFallback = CompileWithGenerator(references, ModuleInitializerUsage, warningsAsErrors: true)
+            .Select(d => System.Text.RegularExpressions.Regex.Match(d, @"CS\d{4}").Value)
+            .ToArray();
+
+        await Assert.That(withoutFallback).Contains("CS0433");
+        await Assert.That(withFallback.Distinct()).IsEquivalentTo(["CS0436"]);
+    }
+
 #if NET
     // The Roslyn version the .NET Framework target runs against predates user-declared EmbeddedAttribute (CS8336).
     [Test]
@@ -158,14 +217,19 @@ internal class ModuleInitializerPolyfillGeneratorTests
     }
 #endif
 
-    private static string[] CompileWithGenerator(IEnumerable<MetadataReference> references)
+    private static string[] CompileWithGenerator(
+        IEnumerable<MetadataReference> references,
+        string source = ModuleInitializerUsage,
+        bool warningsAsErrors = false)
     {
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
         var compilation = CSharpCompilation.Create(
             "ModuleInitializerPolyfill",
-            [CSharpSyntaxTree.ParseText(ModuleInitializerUsage, parseOptions)],
+            [CSharpSyntaxTree.ParseText(source, parseOptions)],
             references,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            new CSharpCompilationOptions(
+                OutputKind.DynamicallyLinkedLibrary,
+                generalDiagnosticOption: warningsAsErrors ? ReportDiagnostic.Error : ReportDiagnostic.Default));
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
             [new ModuleInitializerPolyfillGenerator().AsSourceGenerator()],

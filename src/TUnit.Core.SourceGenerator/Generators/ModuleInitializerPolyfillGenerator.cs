@@ -135,7 +135,9 @@ public sealed class ModuleInitializerPolyfillGenerator : IIncrementalGenerator
 
         if (tree is null)
         {
-            return true;
+            // Speculative binding needs a tree, and other generators may still emit a module initializer.
+            tree = CSharpSyntaxTree.ParseText(string.Empty);
+            compilation = compilation.AddSyntaxTrees(tree);
         }
 
         var typeInfo = compilation.GetSemanticModel(tree).GetSpeculativeTypeInfo(
