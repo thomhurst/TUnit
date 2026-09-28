@@ -1,7 +1,9 @@
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
 
@@ -12,6 +14,16 @@ public class AotConverterGenerator : IIncrementalGenerator
 {
     public static string ParseAotConverter = "ParseCompilationMetadata";
 
+    // TestAttribute is sealed and BaseTestAttribute's constructor is internal to TUnit.Core, so these are
+    // the only attributes that make a method a test (DynamicTestsGenerator matches the same exact name).
+    private const string TestAttributeMetadataName = "TUnit.Core.TestAttribute";
+    private const string DynamicTestBuilderAttributeMetadataName = "TUnit.Core.DynamicTestBuilderAttribute";
+
+    // Per-compilation caches. Many tests share parameter types (and BCL types such as string), and
+    // every test in a class shares the class-level scan, so these are computed once per compilation
+    // instead of once per test method.
+    private static readonly ConditionalWeakTable<Compilation, CompilationCaches> Caches = new();
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var enabledProvider = context.AnalyzerConfigOptionsProvider
@@ -21,57 +33,23 @@ public class AotConverterGenerator : IIncrementalGenerator
                 return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
             });
 
-        var allTypes = context.CompilationProvider
-            .Select((compilation, ct) =>
-            {
-                try
-                {
-                    var conversionInfos = new List<ConversionInfo>();
-                    ScanTestParameters(compilation, conversionInfos, ct);
+        var testMethods = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                TestAttributeMetadataName,
+                predicate: static (node, _) => node is MethodDeclarationSyntax,
+                transform: static (ctx, ct) => GetTestMethodConversions(ctx, ct))
+            .Collect();
 
-                    // Deduplicate conversions based on source and target types
-                    var seenConversions = new HashSet<(ITypeSymbol Source, ITypeSymbol Target)>(
-                        new TypePairEqualityComparer());
-                    var uniqueConversions = new List<ConversionInfo>();
+        var dynamicTestBuilders = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                DynamicTestBuilderAttributeMetadataName,
+                predicate: static (node, _) => node is MethodDeclarationSyntax,
+                transform: static (ctx, ct) => GetTestMethodConversions(ctx, ct))
+            .Collect();
 
-                    foreach (var conversion in conversionInfos)
-                    {
-                        if (conversion == null)
-                        {
-                            continue;
-                        }
-
-                        var key = (conversion.SourceType, conversion.TargetType);
-                        if (seenConversions.Add(key))
-                        {
-                            uniqueConversions.Add(conversion);
-                        }
-                    }
-
-                    return uniqueConversions.Select(c =>
-                    {
-                        var sourceType = ToTypeMetadata(c.SourceType);
-                        var targetType = ToTypeMetadata(c.TargetType);
-
-                        return new ConversionMetadata()
-                        {
-                            SourceType = sourceType,
-                            TargetType = targetType,
-                            TypesAreDifferent = !SymbolEqualityComparer.Default.Equals(c.SourceType, c.TargetType),
-                            IsImplicit = c.IsImplicit,
-                        };
-                    }).ToEquatableArray();
-                }
-                catch (NullReferenceException ex)
-                {
-                    var stackTrace = ex.StackTrace ?? "No stack trace";
-                    throw new InvalidOperationException($"NullReferenceException in ScanTestParameters: {ex.Message}\nStack: {stackTrace}", ex);
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    throw new InvalidOperationException($"Error in AotConverterGenerator.ScanTestParameters: {ex.GetType().Name}: {ex.Message}", ex);
-                }
-            })
+        var allTypes = testMethods
+            .Combine(dynamicTestBuilders)
+            .Select(static (pair, _) => MergeConversions(pair.Left, pair.Right))
             .Combine(enabledProvider)
             .WithTrackingName(ParseAotConverter);
 
@@ -104,128 +82,103 @@ public class AotConverterGenerator : IIncrementalGenerator
         });
     }
 
-    private void ScanTestParameters(Compilation compilation, List<ConversionInfo> conversionInfos, CancellationToken cancellationToken)
+    private static TestMethodConversions? GetTestMethodConversions(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
     {
-        var typesToScan = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
-        var baseTestAttribute = compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithoutGlobalPrefix);
-
-        foreach (var tree in compilation.SyntaxTrees)
+        if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var semanticModel = compilation.GetSemanticModel(tree);
-            var root = tree.GetRoot();
-
-            // Conversions depend on declarations and their attributes, never executable bodies.
-            foreach (var nodes in root.DescendantNodes(static node => node is not
-                         (BaseMethodDeclarationSyntax or BasePropertyDeclarationSyntax or BaseFieldDeclarationSyntax)))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                if (nodes is MethodDeclarationSyntax method)
-                {
-                    if (method.AttributeLists.Count == 0)
-                    {
-                        continue;
-                    }
-
-                    var methodSymbol = semanticModel.GetDeclaredSymbol(method);
-                    if (methodSymbol == null)
-                    {
-                        continue;
-                    }
-
-                    if (!IsTestMethod(methodSymbol, baseTestAttribute))
-                    {
-                        continue;
-                    }
-
-                    foreach (var parameter in methodSymbol.Parameters)
-                    {
-                        typesToScan.Add(parameter.Type);
-                        ScanAttributesForTypes(parameter.GetAttributes(), typesToScan);
-                    }
-
-                    ScanAttributesForTypes(methodSymbol.GetAttributes(), typesToScan);
-                }
-                else if (nodes is ClassDeclarationSyntax classDecl)
-                {
-                    var classSymbol = semanticModel.GetDeclaredSymbol(classDecl);
-                    if (classSymbol == null)
-                    {
-                        continue;
-                    }
-
-                    if (!IsTestClass(classSymbol, baseTestAttribute))
-                    {
-                        continue;
-                    }
-
-                    ScanAttributesForTypes(classSymbol.GetAttributes(), typesToScan);
-
-                    foreach (var constructor in classSymbol.Constructors)
-                    {
-                        if (constructor.IsImplicitlyDeclared)
-                        {
-                            continue;
-                        }
-
-                        foreach (var parameter in constructor.Parameters)
-                        {
-                            typesToScan.Add(parameter.Type);
-                            ScanAttributesForTypes(parameter.GetAttributes(), typesToScan);
-                        }
-                    }
-                }
-            }
+            return null;
         }
 
-        foreach (var type in typesToScan)
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            CollectConversionsForType(type, conversionInfos, compilation);
+            var compilation = context.SemanticModel.Compilation;
+            var caches = Caches.GetValue(compilation, static c => new CompilationCaches(c));
+
+            // Types used by the test method's parameters and data source attributes.
+            var methodTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+            var orderedMethodTypes = new List<ITypeSymbol>();
+            foreach (var parameter in methodSymbol.Parameters)
+            {
+                AddType(parameter.Type, methodTypes, orderedMethodTypes);
+                ScanAttributesForTypes(parameter.GetAttributes(), methodTypes, orderedMethodTypes);
+            }
+
+            ScanAttributesForTypes(methodSymbol.GetAttributes(), methodTypes, orderedMethodTypes);
+
+            var classConversions = methodSymbol.ContainingType is { } containingType
+                ? caches.GetClassConversions(containingType, cancellationToken)
+                : null;
+
+            return new TestMethodConversions(
+                classConversions?.TreeIndex ?? -1,
+                classConversions?.Position ?? -1,
+                classConversions?.Conversions ?? EquatableArray<ConversionEntry>.Empty,
+                caches.GetTreeIndex(context.TargetNode.SyntaxTree),
+                context.TargetNode.SpanStart,
+                caches.GetConversions(orderedMethodTypes, cancellationToken));
+        }
+        catch (NullReferenceException ex)
+        {
+            var stackTrace = ex.StackTrace ?? "No stack trace";
+            throw new InvalidOperationException($"NullReferenceException in ScanTestParameters: {ex.Message}\nStack: {stackTrace}", ex);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            throw new InvalidOperationException($"Error in AotConverterGenerator.ScanTestParameters: {ex.GetType().Name}: {ex.Message}", ex);
         }
     }
 
-    private static bool IsTestMethod(IMethodSymbol method, INamedTypeSymbol? baseTestAttribute)
+    private static EquatableArray<ConversionMetadata> MergeConversions(
+        ImmutableArray<TestMethodConversions?> testMethods,
+        ImmutableArray<TestMethodConversions?> dynamicTestBuilders)
     {
-        foreach (var attr in method.GetAttributes())
+        // Rebuild the declaration order of a full syntax walk (a test class is scanned at its first
+        // declaration, a test method at its own position) so converter numbering stays stable.
+        var entries = new List<(int TreeIndex, int Position, EquatableArray<ConversionEntry> Conversions)>();
+
+        foreach (var method in testMethods.Concat(dynamicTestBuilders))
         {
-            var attrClass = attr.AttributeClass;
-            if (attrClass == null)
+            if (method is null)
             {
                 continue;
             }
 
-            var baseType = attrClass;
-            while (baseType != null)
+            if (method.ClassTreeIndex >= 0)
             {
-                if (SymbolEqualityComparer.Default.Equals(baseType, baseTestAttribute))
-                {
-                    return true;
-                }
-                baseType = baseType.BaseType;
+                entries.Add((method.ClassTreeIndex, method.ClassPosition, method.ClassConversions));
             }
 
+            entries.Add((method.MethodTreeIndex, method.MethodPosition, method.MethodConversions));
         }
 
-        return false;
-    }
+        // Stable sort (OrderBy) keeps duplicates of the same class entry together.
+        var seenConversions = new HashSet<string>();
+        var uniqueConversions = new List<ConversionMetadata>();
 
-    private static bool IsTestClass(INamedTypeSymbol classSymbol, INamedTypeSymbol? baseTestAttribute)
-    {
-        foreach (var member in classSymbol.GetMembers())
+        foreach (var entry in entries.OrderBy(static e => e.TreeIndex).ThenBy(static e => e.Position))
         {
-            if (member is IMethodSymbol method && IsTestMethod(method, baseTestAttribute))
+            foreach (var conversion in entry.Conversions)
             {
-                return true;
+                // Deduplicate conversions based on source and target types
+                if (seenConversions.Add(conversion.Key))
+                {
+                    uniqueConversions.Add(conversion.Metadata);
+                }
             }
         }
 
-        return false;
+        return uniqueConversions.ToEquatableArray();
     }
 
-    private void ScanAttributesForTypes(ImmutableArray<AttributeData> attributes, HashSet<ITypeSymbol> typesToScan)
+    private static void AddType(ITypeSymbol type, HashSet<ITypeSymbol> typesToScan, List<ITypeSymbol> orderedTypes)
+    {
+        if (typesToScan.Add(type))
+        {
+            orderedTypes.Add(type);
+        }
+    }
+
+    private static void ScanAttributesForTypes(ImmutableArray<AttributeData> attributes, HashSet<ITypeSymbol> typesToScan, List<ITypeSymbol> orderedTypes)
     {
         foreach (var attribute in attributes)
         {
@@ -234,7 +187,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                 continue;
             }
 
-            if (!IsDataSourceAttribute(attribute.AttributeClass))
+            if (!DataSourceAttributeHelper.IsDataSourceAttribute(attribute.AttributeClass))
             {
                 continue;
             }
@@ -243,48 +196,23 @@ public class AotConverterGenerator : IIncrementalGenerator
             {
                 foreach (var typeArg in attribute.AttributeClass.TypeArguments)
                 {
-                    typesToScan.Add(typeArg);
+                    AddType(typeArg, typesToScan, orderedTypes);
                 }
             }
 
             foreach (var arg in attribute.ConstructorArguments)
             {
-                ScanTypedConstantForTypes(arg, typesToScan);
+                ScanTypedConstantForTypes(arg, typesToScan, orderedTypes);
             }
 
             foreach (var namedArg in attribute.NamedArguments)
             {
-                ScanTypedConstantForTypes(namedArg.Value, typesToScan);
+                ScanTypedConstantForTypes(namedArg.Value, typesToScan, orderedTypes);
             }
         }
     }
 
-    private bool IsDataSourceAttribute(INamedTypeSymbol attributeClass)
-    {
-        var currentType = attributeClass;
-        while (currentType != null)
-        {
-            var fullName = currentType.ToDisplayString();
-            if (fullName == WellKnownFullyQualifiedClassNames.AsyncDataSourceGeneratorAttribute.WithoutGlobalPrefix ||
-                fullName == WellKnownFullyQualifiedClassNames.AsyncUntypedDataSourceGeneratorAttribute.WithoutGlobalPrefix ||
-                fullName == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithoutGlobalPrefix)
-            {
-                return true;
-            }
-
-            if (currentType.AllInterfaces.Any(i =>
-                i.ToDisplayString() == WellKnownFullyQualifiedClassNames.IDataSourceAttribute.WithoutGlobalPrefix))
-            {
-                return true;
-            }
-
-            currentType = currentType.BaseType;
-        }
-
-        return false;
-    }
-
-    private void ScanTypedConstantForTypes(TypedConstant constant, HashSet<ITypeSymbol> typesToScan)
+    private static void ScanTypedConstantForTypes(TypedConstant constant, HashSet<ITypeSymbol> typesToScan, List<ITypeSymbol> orderedTypes)
     {
         if (constant.IsNull)
         {
@@ -293,23 +221,23 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         if (constant is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeValue })
         {
-            typesToScan.Add(typeValue);
+            AddType(typeValue, typesToScan, orderedTypes);
         }
 
         else if (constant is { Kind: TypedConstantKind.Array, IsNull: false })
         {
             foreach (var element in constant.Values)
             {
-                ScanTypedConstantForTypes(element, typesToScan);
+                ScanTypedConstantForTypes(element, typesToScan, orderedTypes);
             }
         }
         else if (constant.Kind != TypedConstantKind.Array && constant is { Value: not null, Type: not null })
         {
-            typesToScan.Add(constant.Type);
+            AddType(constant.Type, typesToScan, orderedTypes);
         }
     }
 
-    private void CollectConversionsForType(ITypeSymbol type, List<ConversionInfo> conversionInfos, Compilation compilation)
+    private static void CollectConversionsForType(ITypeSymbol type, List<ConversionEntry> conversions, Compilation compilation)
     {
         if (type is not INamedTypeSymbol namedType)
         {
@@ -331,7 +259,7 @@ public class AotConverterGenerator : IIncrementalGenerator
             var conversionInfo = GetConversionInfoFromSymbol(method, compilation);
             if (conversionInfo != null)
             {
-                conversionInfos.Add(conversionInfo);
+                conversions.Add(ToConversionEntry(conversionInfo));
             }
         }
 
@@ -339,12 +267,29 @@ public class AotConverterGenerator : IIncrementalGenerator
         {
             foreach (var typeArg in namedType.TypeArguments)
             {
-                CollectConversionsForType(typeArg, conversionInfos, compilation);
+                CollectConversionsForType(typeArg, conversions, compilation);
             }
         }
     }
 
-    private bool ShouldIncludeType(INamedTypeSymbol type, Compilation compilation)
+    private static ConversionEntry ToConversionEntry(ConversionInfo conversion)
+    {
+        // FullyQualifiedFormat omits nullable reference annotations, so the key matches the
+        // SymbolEqualityComparer.Default identity of the (source, target) type pair.
+        var key = conversion.SourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                  + " -> "
+                  + conversion.TargetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+        return new ConversionEntry(key, new ConversionMetadata
+        {
+            SourceType = ToTypeMetadata(conversion.SourceType),
+            TargetType = ToTypeMetadata(conversion.TargetType),
+            TypesAreDifferent = !SymbolEqualityComparer.Default.Equals(conversion.SourceType, conversion.TargetType),
+            IsImplicit = conversion.IsImplicit,
+        });
+    }
+
+    private static bool ShouldIncludeType(INamedTypeSymbol type, Compilation compilation)
     {
         var typeAssembly = type.ContainingAssembly;
         var currentAssembly = compilation.Assembly;
@@ -375,7 +320,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         return false;
     }
 
-    private bool IsAccessibleType(ITypeSymbol type, Compilation compilation)
+    private static bool IsAccessibleType(ITypeSymbol type, Compilation compilation)
     {
         if (type == null || compilation == null)
         {
@@ -454,7 +399,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         return false;
     }
 
-    private ConversionInfo? GetConversionInfoFromSymbol(IMethodSymbol methodSymbol, Compilation compilation)
+    private static ConversionInfo? GetConversionInfoFromSymbol(IMethodSymbol methodSymbol, Compilation compilation)
     {
         var containingType = methodSymbol.ContainingType;
         if (containingType == null)
@@ -505,7 +450,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         };
     }
 
-    private bool TypeContainsGenericTypeParameters(ITypeSymbol type)
+    private static bool TypeContainsGenericTypeParameters(ITypeSymbol type)
     {
         if (type.TypeKind == TypeKind.TypeParameter)
         {
@@ -536,7 +481,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         return false;
     }
 
-    private void GenerateConverters(SourceProductionContext context, EquatableArray<ConversionMetadata> conversions)
+    private static void GenerateConverters(SourceProductionContext context, EquatableArray<ConversionMetadata> conversions)
     {
         var writer = new CodeWriter();
         writer.AppendLine("#nullable enable");
@@ -710,30 +655,140 @@ public class AotConverterGenerator : IIncrementalGenerator
         public required bool IsImplicit { get; init; }
     }
 
+    /// <summary>
+    /// The conversions needed by one test method, positioned so <see cref="MergeConversions"/> can restore
+    /// the order of a full syntax walk. The class entry is absent (tree index -1) when the containing type
+    /// has no class declaration (for example a record), which the full walk never scanned either.
+    /// </summary>
+    internal sealed record TestMethodConversions(
+        int ClassTreeIndex,
+        int ClassPosition,
+        EquatableArray<ConversionEntry> ClassConversions,
+        int MethodTreeIndex,
+        int MethodPosition,
+        EquatableArray<ConversionEntry> MethodConversions);
+
+    /// <param name="Key">Identity of the (source, target) type pair used for deduplication.</param>
+    /// <param name="Metadata">The conversion to generate.</param>
+    internal sealed record ConversionEntry(string Key, ConversionMetadata Metadata);
+
+    private sealed record ClassConversions(int TreeIndex, int Position, EquatableArray<ConversionEntry> Conversions);
+
+    private sealed class CompilationCaches(Compilation compilation)
+    {
+        private readonly ConcurrentDictionary<ITypeSymbol, ConversionEntry[]> _typeConversions = new(SymbolEqualityComparer.IncludeNullability);
+        private readonly ConcurrentDictionary<INamedTypeSymbol, ClassConversions?> _classConversions = new(SymbolEqualityComparer.Default);
+        private readonly object _treeIndicesLock = new();
+        private Dictionary<SyntaxTree, int>? _treeIndices;
+
+        public int GetTreeIndex(SyntaxTree tree)
+        {
+            var treeIndices = _treeIndices;
+            if (treeIndices is null)
+            {
+                lock (_treeIndicesLock)
+                {
+                    treeIndices = _treeIndices;
+                    if (treeIndices is null)
+                    {
+                        treeIndices = new Dictionary<SyntaxTree, int>();
+                        var index = 0;
+                        foreach (var syntaxTree in compilation.SyntaxTrees)
+                        {
+                            treeIndices[syntaxTree] = index++;
+                        }
+
+                        _treeIndices = treeIndices;
+                    }
+                }
+            }
+
+            return treeIndices.TryGetValue(tree, out var treeIndex) ? treeIndex : int.MaxValue;
+        }
+
+        public EquatableArray<ConversionEntry> GetConversions(List<ITypeSymbol> types, CancellationToken cancellationToken)
+        {
+            List<ConversionEntry>? conversions = null;
+
+            foreach (var type in types)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (!_typeConversions.TryGetValue(type, out var typeConversions))
+                {
+                    var collected = new List<ConversionEntry>();
+                    CollectConversionsForType(type, collected, compilation);
+                    typeConversions = _typeConversions.GetOrAdd(type, collected.ToArray());
+                }
+
+                if (typeConversions.Length > 0)
+                {
+                    conversions ??= [];
+                    conversions.AddRange(typeConversions);
+                }
+            }
+
+            return conversions is null ? EquatableArray<ConversionEntry>.Empty : conversions.ToEquatableArray();
+        }
+
+        public ClassConversions? GetClassConversions(INamedTypeSymbol classSymbol, CancellationToken cancellationToken)
+        {
+            if (_classConversions.TryGetValue(classSymbol, out var classConversions))
+            {
+                return classConversions;
+            }
+
+            return _classConversions.GetOrAdd(classSymbol, CreateClassConversions(classSymbol, cancellationToken));
+        }
+
+        private ClassConversions? CreateClassConversions(INamedTypeSymbol classSymbol, CancellationToken cancellationToken)
+        {
+            // A test class is scanned where its first class declaration appears.
+            ClassDeclarationSyntax? classDeclaration = null;
+            foreach (var reference in classSymbol.DeclaringSyntaxReferences)
+            {
+                if (reference.GetSyntax(cancellationToken) is ClassDeclarationSyntax declaration)
+                {
+                    classDeclaration = declaration;
+                    break;
+                }
+            }
+
+            if (classDeclaration is null)
+            {
+                return null;
+            }
+
+            var typesToScan = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+            var orderedTypes = new List<ITypeSymbol>();
+
+            ScanAttributesForTypes(classSymbol.GetAttributes(), typesToScan, orderedTypes);
+
+            foreach (var constructor in classSymbol.Constructors)
+            {
+                if (constructor.IsImplicitlyDeclared)
+                {
+                    continue;
+                }
+
+                foreach (var parameter in constructor.Parameters)
+                {
+                    AddType(parameter.Type, typesToScan, orderedTypes);
+                    ScanAttributesForTypes(parameter.GetAttributes(), typesToScan, orderedTypes);
+                }
+            }
+
+            return new ClassConversions(
+                GetTreeIndex(classDeclaration.SyntaxTree),
+                classDeclaration.SpanStart,
+                GetConversions(orderedTypes, cancellationToken));
+        }
+    }
+
     private class ConversionInfo
     {
         public required ITypeSymbol SourceType { get; init; }
         public required ITypeSymbol TargetType { get; init; }
         public required bool IsImplicit { get; init; }
-    }
-
-    private class TypePairEqualityComparer : IEqualityComparer<(ITypeSymbol Source, ITypeSymbol Target)>
-    {
-        public bool Equals((ITypeSymbol Source, ITypeSymbol Target) x, (ITypeSymbol Source, ITypeSymbol Target) y)
-        {
-            return SymbolEqualityComparer.Default.Equals(x.Source, y.Source) &&
-                   SymbolEqualityComparer.Default.Equals(x.Target, y.Target);
-        }
-
-        public int GetHashCode((ITypeSymbol Source, ITypeSymbol Target) obj)
-        {
-            unchecked
-            {
-                var hash = 17;
-                hash = hash * 31 + SymbolEqualityComparer.Default.GetHashCode(obj.Source);
-                hash = hash * 31 + SymbolEqualityComparer.Default.GetHashCode(obj.Target);
-                return hash;
-            }
-        }
     }
 }

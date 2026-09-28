@@ -40,7 +40,7 @@ public class StaticPropertyInitializationGeneratorIncrementalTests
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
         AssertRunParseLength(driver2,2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Unchanged);
+        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached);
     }
 
     [Fact]

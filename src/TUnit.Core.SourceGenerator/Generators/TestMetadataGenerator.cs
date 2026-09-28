@@ -1408,7 +1408,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             try
             {
-                GenerateArgumentsAttributeWithParameterTypes(writer, compilationContext.Compilation, attr, methodSymbol);
+                GenerateArgumentsAttributeWithParameterTypes(writer, compilationContext, attr, methodSymbol);
             }
             catch
             {
@@ -1424,8 +1424,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateArgumentsAttributeWithParameterTypes(CodeWriter writer, Compilation compilation, AttributeData attr, IMethodSymbol methodSymbol)
+    private static void GenerateArgumentsAttributeWithParameterTypes(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol methodSymbol)
     {
+        var compilation = compilationContext.Compilation;
+
         if (attr.AttributeClass == null)
         {
             return;
@@ -1440,7 +1442,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // semantic model needed to fully qualify identifiers.
         var attributeSyntax = attr.GetApplicationSyntax(compilation, out var syntaxIsInCompilation);
         var semanticModel = attributeSyntax is not null && syntaxIsInCompilation
-            ? compilation.GetSemanticModel(attributeSyntax.SyntaxTree)
+            ? compilationContext.AttributeWriter.GetSemanticModel(attributeSyntax.SyntaxTree)
             : null;
 
         if (semanticModel is null)
