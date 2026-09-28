@@ -159,7 +159,6 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         // Use a set to deduplicate static properties by their declaring type and name
         // This prevents duplicate initialization when derived classes inherit static properties
         var uniqueStaticProperties = new HashSet<(string DeclaringType, string Name)>();
-        var visitedTypes = new HashSet<string>();
         var walkPropertyNames = new HashSet<string>();
         var result = new List<PropertyWithDataSourceModel>();
 
@@ -167,14 +166,11 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         {
             walkPropertyNames.Clear();
 
+            // Every chain is walked in full, even through types an earlier chain reached: a property
+            // hidden by a derived type in one walk must still be added when its declaring type's own
+            // chain is walked, whatever the order of the chains. uniqueStaticProperties dedupes.
             foreach (var segment in chain)
             {
-                // A type reached by an earlier walk has already contributed its own and its bases' properties
-                if (!visitedTypes.Add(segment.TypeKey))
-                {
-                    break;
-                }
-
                 foreach (var property in segment.Properties)
                 {
                     // Check if we already have this property (in case of overrides)
