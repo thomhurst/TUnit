@@ -11,14 +11,19 @@ namespace TUnit.Core;
 /// </summary>
 internal static class TraceRegistry
 {
-    // traceId → testNodeUids and testNodeUid → traceIds. Each value is an immutable,
-    // duplicate-free set replaced copy-on-write. Every test registers its own trace, so both
-    // sides almost always hold a single element; a ConcurrentDictionary per key (bucket and
-    // lock arrays) cost ~2KB per test for the same information.
-    private static readonly ConcurrentDictionary<string, string[]> TraceToTests =
+    // traceId → testNodeUids and testNodeUid → traceIds. Each value is a duplicate-free set
+    // stored as either an immutable string[] replaced copy-on-write (small sets) or a
+    // ConcurrentDictionary<string, byte> (large sets). Every test registers its own trace, so
+    // both sides almost always hold a single element; a ConcurrentDictionary per key (bucket
+    // and lock arrays) cost ~2KB per test for the same information. A set is promoted to a
+    // dictionary once it outgrows SmallSetCapacity, so a trace shared by many tests (e.g. a
+    // fixture trace passed to TestContext.RegisterTrace) doesn't degrade to O(N^2) copying.
+    private const int SmallSetCapacity = 8;
+
+    private static readonly ConcurrentDictionary<string, object> TraceToTests =
         new(StringComparer.OrdinalIgnoreCase);
 
-    private static readonly ConcurrentDictionary<string, string[]> TestToTraces =
+    private static readonly ConcurrentDictionary<string, object> TestToTraces =
         new(StringComparer.OrdinalIgnoreCase);
 
     // traceId → TestContext.Id (GUID) for cross-process OTLP correlation.
@@ -36,13 +41,13 @@ internal static class TraceRegistry
         AddToSet(TestToTraces, testNodeUid, traceId);
     }
 
-    private static void AddToSet(ConcurrentDictionary<string, string[]> map, string key, string value)
+    private static void AddToSet(ConcurrentDictionary<string, object> map, string key, string value)
     {
         while (true)
         {
             if (!map.TryGetValue(key, out var existing))
             {
-                if (map.TryAdd(key, [value]))
+                if (map.TryAdd(key, new[] { value }))
                 {
                     return;
                 }
@@ -50,7 +55,15 @@ internal static class TraceRegistry
                 continue;
             }
 
-            foreach (var item in existing)
+            if (existing is ConcurrentDictionary<string, byte> large)
+            {
+                // Promotion is one-way, so once a key holds a dictionary it is mutated in place.
+                large.TryAdd(value, 0);
+                return;
+            }
+
+            var small = (string[])existing;
+            foreach (var item in small)
             {
                 if (string.Equals(item, value, StringComparison.OrdinalIgnoreCase))
                 {
@@ -58,16 +71,41 @@ internal static class TraceRegistry
                 }
             }
 
-            var updated = new string[existing.Length + 1];
-            existing.CopyTo(updated, 0);
-            updated[existing.Length] = value;
+            object updated;
+            if (small.Length < SmallSetCapacity)
+            {
+                var array = new string[small.Length + 1];
+                small.CopyTo(array, 0);
+                array[small.Length] = value;
+                updated = array;
+            }
+            else
+            {
+                var promoted = new ConcurrentDictionary<string, byte>(StringComparer.OrdinalIgnoreCase);
+                foreach (var item in small)
+                {
+                    promoted.TryAdd(item, 0);
+                }
 
-            // Compares against the array instance read above, so a concurrent add retries.
+                promoted.TryAdd(value, 0);
+                updated = promoted;
+            }
+
+            // Compares against the instance read above (reference equality), so a concurrent
+            // add or promotion makes this fail and retry against the newer value.
             if (map.TryUpdate(key, updated, existing))
             {
                 return;
             }
         }
+    }
+
+    private static string[] ToArray(object set)
+    {
+        // Always a fresh array: the stored small arrays are shared state and must not escape.
+        return set is string[] small
+            ? (string[])small.Clone()
+            : [.. ((ConcurrentDictionary<string, byte>)set).Keys];
     }
 
     /// <summary>
@@ -131,9 +169,19 @@ internal static class TraceRegistry
             return false;
         }
 
-        foreach (var testNodeUid in testNodeUids)
+        if (testNodeUids is string[] small)
         {
-            Register(derivedTraceId, testNodeUid);
+            foreach (var testNodeUid in small)
+            {
+                Register(derivedTraceId, testNodeUid);
+            }
+        }
+        else
+        {
+            foreach (var entry in (ConcurrentDictionary<string, byte>)testNodeUids)
+            {
+                Register(derivedTraceId, entry.Key);
+            }
         }
 
         if (TraceToContextId.TryGetValue(sourceTraceId, out var contextId))
@@ -159,9 +207,11 @@ internal static class TraceRegistry
     /// </summary>
     internal static string[] GetTraceIds(string testNodeUid)
     {
-        // The stored arrays are never mutated after publication, so they can be shared.
+        // Read once per test when the report is built. Copying keeps callers from mutating
+        // registry state; a one- or two-element copy is far cheaper than the per-key
+        // dictionaries this storage replaced.
         return TestToTraces.TryGetValue(testNodeUid, out var set)
-            ? set
+            ? ToArray(set)
             : [];
     }
 
