@@ -74,7 +74,7 @@ public class ObjectInitializerTests
         await initialization.WaitAsync(HangTimeout);
 
         await Assert.That(waiterFinishedWhilePrefixBlocked).IsTrue();
-        await Assert.That(async () => await waiter).Throws<OperationCanceledException>();
+        await Assert.That(async () => await waiter.WaitAsync(HangTimeout)).Throws<OperationCanceledException>();
         await Assert.That(fixture.InitializeCount).IsEqualTo(1);
         await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsTrue();
     }
@@ -89,7 +89,7 @@ public class ObjectInitializerTests
 
         cancellationTokenSource.Cancel();
 
-        await Assert.That(async () => await cancelledWaiter).Throws<OperationCanceledException>();
+        await Assert.That(async () => await cancelledWaiter.WaitAsync(HangTimeout)).Throws<OperationCanceledException>();
         await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsFalse();
 
         fixture.Complete();
@@ -113,7 +113,7 @@ public class ObjectInitializerTests
 
         cancellationTokenSource.Cancel();
 
-        await Assert.That(async () => await initializingCaller).Throws<OperationCanceledException>();
+        await Assert.That(async () => await initializingCaller.WaitAsync(HangTimeout)).Throws<OperationCanceledException>();
         await Assert.That(waiter.IsCompleted).IsFalse();
 
         if (initializationFails)
