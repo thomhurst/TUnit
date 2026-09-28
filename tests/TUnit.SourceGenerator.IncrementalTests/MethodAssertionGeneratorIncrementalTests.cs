@@ -205,6 +205,33 @@ public class MethodAssertionGeneratorIncrementalTests
         Xunit.Assert.Same(brokenTree, diagnostic.Location.SourceTree);
     }
 
+    [Fact]
+    public void DiagnosticInPathlessTreeKeepsSourceTree()
+    {
+        // Trees parsed without a path all share the empty path, so the path alone cannot identify the tree.
+        var brokenTree = CSharpSyntaxTree.ParseText(
+            """
+            using TUnit.Assertions.Attributes;
+
+            public static partial class BrokenAssertionExtensions
+            {
+                [GenerateAssertion]
+                public bool IsBroken(int value) => value > 0;
+            }
+            """);
+        var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultAssertion), brokenTree);
+
+        var driver1 = TestHelper.GenerateTracked<MethodAssertionGenerator>(compilation1);
+        Xunit.Assert.Same(brokenTree, Xunit.Assert.Single(driver1.GetRunResult().Diagnostics, d => d.Id == "TUNITGEN001").Location.SourceTree);
+
+        var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
+        var driver2 = driver1.RunGenerators(compilation2);
+
+        var diagnostic = Xunit.Assert.Single(driver2.GetRunResult().Diagnostics, d => d.Id == "TUNITGEN001");
+        Xunit.Assert.True(diagnostic.Location.IsInSource);
+        Xunit.Assert.Same(brokenTree, diagnostic.Location.SourceTree);
+    }
+
     private static void AssertRunReasons(
         GeneratorDriver driver,
         IncrementalGeneratorRunReasons reasons,

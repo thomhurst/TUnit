@@ -1388,6 +1388,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     private sealed record DiagnosticInfo(
         DiagnosticDescriptor Descriptor,
         string? FilePath,
+        string? SourceChecksum,
         TextSpan TextSpan,
         LinePositionSpan LineSpan,
         ImmutableEquatableArray<string> MessageArgs)
@@ -1398,10 +1399,14 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             return new DiagnosticInfo(
                 descriptor,
                 lineSpan.Path,
+                location.SourceTree is { } tree ? GetChecksum(tree) : null,
                 location.SourceSpan,
                 lineSpan.Span,
                 messageArgs.ToImmutableEquatableArray());
         }
+
+        private static string GetChecksum(SyntaxTree tree)
+            => Convert.ToBase64String(tree.GetText().GetChecksum().ToArray());
 
         public Diagnostic ToDiagnostic(Compilation compilation)
         {
@@ -1410,19 +1415,42 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 return Diagnostic.Create(Descriptor, Location.None, MessageArgs.Cast<object?>().ToArray());
             }
 
-            // Reattach to the tree only when the path identifies it; trees parsed without a path
-            // all share an empty one.
+            // Reattach to the tree with the same path. Paths need not be unique (trees parsed without
+            // a path all share an empty one), so when several match, the text checksum picks the tree.
             SyntaxTree? match = null;
+            var ambiguous = false;
             foreach (var tree in compilation.SyntaxTrees)
             {
-                if (string.Equals(tree.FilePath, FilePath, StringComparison.Ordinal))
+                if (!string.Equals(tree.FilePath, FilePath, StringComparison.Ordinal))
                 {
-                    if (match is not null)
-                    {
-                        match = null;
-                        break;
-                    }
+                    continue;
+                }
+
+                if (match is null)
+                {
                     match = tree;
+                }
+                else
+                {
+                    ambiguous = true;
+                    break;
+                }
+            }
+
+            if (ambiguous)
+            {
+                match = null;
+                if (SourceChecksum is not null)
+                {
+                    foreach (var tree in compilation.SyntaxTrees)
+                    {
+                        if (string.Equals(tree.FilePath, FilePath, StringComparison.Ordinal)
+                            && string.Equals(GetChecksum(tree), SourceChecksum, StringComparison.Ordinal))
+                        {
+                            match = tree;
+                            break;
+                        }
+                    }
                 }
             }
 
