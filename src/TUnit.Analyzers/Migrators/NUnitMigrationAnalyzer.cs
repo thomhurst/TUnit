@@ -48,6 +48,8 @@ public class NUnitMigrationAnalyzer : BaseMigrationAnalyzer
         // This prevents false positives after migration when NUnit assembly has been removed
         return compilation.GetTypeByMetadataName("NUnit.Framework.TestAttribute") != null ||
                compilation.GetTypeByMetadataName("NUnit.Framework.Legacy.ClassicAssert") != null ||
-               compilation.GetTypeByMetadataName("NUnit.Framework.Legacy.StringAssert") != null;
+               compilation.GetTypeByMetadataName("NUnit.Framework.Legacy.StringAssert") != null ||
+               // NUnit 5 moved StringAssert/CollectionAssert/FileAssert/DirectoryAssert back to NUnit.Framework
+               compilation.GetTypeByMetadataName("NUnit.Framework.StringAssert") != null;
     }
 }
