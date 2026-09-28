@@ -1,0 +1,46 @@
+name: Claude Review Validation
+
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/pr-review-comment.sh'
+      - '.github/scripts/publish-claude-review.mjs'
+      - '.github/scripts/publish-claude-review.test.mjs'
+      - '.github/workflows/claude-code-review.yml'
+      - '.github/workflows/claude-review-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+
+      - name: Test review publisher
+        run: node --test .github/scripts/publish-claude-review.test.mjs
+
+      - name: Check comment helper syntax
+        run: bash -n .github/scripts/pr-review-comment.sh
+
+      - name: Check review workflows
+        shell: bash
+        run: |
+          actionlint_dir="$RUNNER_TEMP/actionlint"
+          mkdir -p "$actionlint_dir"
+          curl --fail --location --silent --show-error \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz \
+            --output "$actionlint_dir/actionlint_1.7.12_linux_amd64.tar.gz"
+          printf '%s  %s\n' \
+            '8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8' \
+            "$actionlint_dir/actionlint_1.7.12_linux_amd64.tar.gz" | sha256sum --check
+          tar -xzf "$actionlint_dir/actionlint_1.7.12_linux_amd64.tar.gz" \
+            -C "$actionlint_dir" actionlint
+          "$actionlint_dir/actionlint" \
+            .github/workflows/claude-code-review.yml \
+            .github/workflows/claude-review-validation.yml
