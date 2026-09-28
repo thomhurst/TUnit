@@ -28,7 +28,7 @@ public class AttributeWriter(Compilation compilation)
             return semanticModel;
         }
 
-        return _semanticModelCache.GetOrAdd(syntaxTree, compilation.GetSemanticModel(syntaxTree));
+        return _semanticModelCache.GetOrAdd(syntaxTree, tree => compilation.GetSemanticModel(tree));
     }
 
     public void WriteAttributes(ICodeWriter sourceCodeWriter,

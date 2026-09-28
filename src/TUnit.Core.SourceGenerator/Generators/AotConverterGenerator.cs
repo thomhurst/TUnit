@@ -14,8 +14,9 @@ public class AotConverterGenerator : IIncrementalGenerator
 {
     public static string ParseAotConverter = "ParseCompilationMetadata";
 
-    // TestAttribute is sealed and BaseTestAttribute's constructor is internal to TUnit.Core, so these are
-    // the only attributes that make a method a test (DynamicTestsGenerator matches the same exact name).
+    // TestAttribute is sealed and BaseTestAttribute's constructor is internal to TUnit.Core. Subclasses of
+    // DynamicTestBuilderAttribute are not matched, consistent with DynamicTestsGenerator, which also matches
+    // this exact name, so such methods are never source-generated tests and need no converters.
     private const string TestAttributeMetadataName = "TUnit.Core.TestAttribute";
     private const string DynamicTestBuilderAttributeMetadataName = "TUnit.Core.DynamicTestBuilderAttribute";
 
@@ -120,11 +121,11 @@ public class AotConverterGenerator : IIncrementalGenerator
         catch (NullReferenceException ex)
         {
             var stackTrace = ex.StackTrace ?? "No stack trace";
-            throw new InvalidOperationException($"NullReferenceException in ScanTestParameters: {ex.Message}\nStack: {stackTrace}", ex);
+            throw new InvalidOperationException($"NullReferenceException in ScanTestParameters for {methodSymbol.ToDisplayString()}: {ex.Message}\nStack: {stackTrace}", ex);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            throw new InvalidOperationException($"Error in AotConverterGenerator.ScanTestParameters: {ex.GetType().Name}: {ex.Message}", ex);
+            throw new InvalidOperationException($"Error in AotConverterGenerator.ScanTestParameters for {methodSymbol.ToDisplayString()}: {ex.GetType().Name}: {ex.Message}", ex);
         }
     }
 

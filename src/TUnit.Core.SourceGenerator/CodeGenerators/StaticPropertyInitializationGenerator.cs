@@ -110,7 +110,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 
             if (!cache.TryGetValue(currentType, out var segment))
             {
-                segment = cache.GetOrAdd(currentType, CreateSegment(currentType));
+                segment = cache.GetOrAdd(currentType, static type => CreateSegment(type));
             }
 
             segments.Add(segment);
