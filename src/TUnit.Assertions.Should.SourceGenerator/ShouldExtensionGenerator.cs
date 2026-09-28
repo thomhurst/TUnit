@@ -641,12 +641,44 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         return new WrapperData(
             ContainingNamespace: type.ContainingNamespace?.ToDisplayString(NoGlobalFormat) ?? string.Empty,
+            ContainingTypeDeclarations: GetContainingTypeDeclarations(type),
             ClassName: type.Name,
             ClassGenericParams: new EquatableArray<GenericParamData>(type.TypeParameters.Select(tp => GenericParamData.From(tp, NoGlobalFormat)).ToList()),
             ClassGenericSuffix: type.IsGenericType ? "<" + string.Join(", ", type.TypeParameters.Select(tp => tp.Name)) + ">" : string.Empty,
             AssertionTypeArgDisplay: wrappedAssertionTypeArg.ToDisplayString(NoGlobalFormat),
             Methods: new EquatableArray<WrapperMethodData>(methods),
             IsCurrentAssembly: isCurrentAssembly);
+    }
+
+    /// <summary>
+    /// Partial declarations of the types enclosing a nested wrapper, outermost first, so the
+    /// emitted partial lands inside them rather than at namespace scope.
+    /// </summary>
+    private static EquatableArray<string> GetContainingTypeDeclarations(INamedTypeSymbol type)
+    {
+        if (type.ContainingType is null)
+        {
+            return new EquatableArray<string>(Array.Empty<string>());
+        }
+
+        var declarations = new List<string>();
+        for (var containing = type.ContainingType; containing is not null; containing = containing.ContainingType)
+        {
+            var keyword = containing switch
+            {
+                { IsRecord: true, TypeKind: TypeKind.Struct } => "record struct",
+                { IsRecord: true } => "record",
+                { TypeKind: TypeKind.Struct } => "struct",
+                { TypeKind: TypeKind.Interface } => "interface",
+                _ => "class",
+            };
+            var typeParameters = containing.TypeParameters.Length > 0
+                ? "<" + string.Join(", ", containing.TypeParameters.Select(tp => tp.Name)) + ">"
+                : string.Empty;
+            declarations.Add($"partial {keyword} {containing.Name}{typeParameters}");
+        }
+        declarations.Reverse();
+        return new EquatableArray<string>(declarations.ToArray());
     }
 
     /// <summary>
@@ -1266,6 +1298,12 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             ? "<" + string.Join(", ", wrapper.ClassGenericParams.Select(p => p.Name)) + ">"
             : string.Empty;
 
+        foreach (var declaration in wrapper.ContainingTypeDeclarations)
+        {
+            sb.AppendLine(declaration);
+            sb.AppendLine("{");
+        }
+
         sb.AppendLine($"partial class {wrapper.ClassName}{classGenericList}");
         sb.AppendLine("{");
 
@@ -1275,6 +1313,11 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         }
 
         sb.AppendLine("}");
+
+        for (var i = 0; i < wrapper.ContainingTypeDeclarations.Length; i++)
+        {
+            sb.AppendLine("}");
+        }
 
         var hint = $"{wrapper.ClassName}.Generated.g.cs";
         var suffix = 0;
@@ -1993,6 +2036,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
     private sealed record WrapperData(
         string ContainingNamespace,
+        EquatableArray<string> ContainingTypeDeclarations,
         string ClassName,
         EquatableArray<GenericParamData> ClassGenericParams,
         string ClassGenericSuffix,

@@ -243,7 +243,9 @@ public class ShouldExtensionGeneratorIncrementalTests
         var driver = TestHelper.GenerateTracked<ShouldExtensionGenerator>(compilation);
 
         Xunit.Assert.Contains("BeFooToo", GetSource(driver, "GenericWrapper.Generated.g.cs"));
-        Xunit.Assert.Contains("BeFooToo", GetSource(driver, "NestedWrapper.Generated.g.cs"));
+        var nestedSource = GetSource(driver, "NestedWrapper.Generated.g.cs");
+        Xunit.Assert.Contains("BeFooToo", nestedSource);
+        Xunit.Assert.Contains("partial class Outer<TOuter>", nestedSource);
     }
 
     private static SyntaxTree HelperPartTree(string value) =>
