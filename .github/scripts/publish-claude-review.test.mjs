@@ -71,6 +71,78 @@ test('publishes final Markdown once to the triggering PR through the real helper
 });
 
 for (const [name, markdown] of [
+    ['ASCII', 'x'.repeat(65536)],
+    ['multibyte UTF-8', '界'.repeat(21845) + 'x'],
+]) {
+    test(`publishes ${name} Markdown at the byte limit unchanged`, async t => {
+        const result = await runPublisher(t, [success(markdown)]);
+        assert.equal(result.status, 0, result.stderr);
+        assert.deepEqual(result.calls, [['pr', 'comment', '42', '--repo', 'example/repository', '--body', markdown]]);
+        assert.ok(result.summary.includes(markdown));
+    });
+}
+
+for (const [name, markdown] of [
+    ['ASCII', 'x'.repeat(65537)],
+    ['multibyte UTF-8', '界'.repeat(21845) + 'xx'],
+]) {
+    test(`rejects ${name} Markdown one byte over the limit before calling the helper`, async t => {
+        const result = await runPublisher(t, [success(markdown)]);
+        assert.equal(result.status, 1);
+        assert.deepEqual(result.calls, []);
+        assert.match(result.stderr, /65537 UTF-8 bytes, exceeding the 65536-byte publication limit/);
+        assert.match(result.summary, /No comment was posted/);
+        assert.match(result.summary, /full review is available in the workflow summary/);
+        assert.ok(result.summary.includes(markdown));
+    });
+}
+
+test('includes the permission-denial warning in the comment byte budget', async t => {
+    const withDenial = markdown => [{
+        ...success(markdown),
+        permission_denials: [{ tool_name: 'Bash', tool_input: {} }],
+    }];
+    // Obtain the actual appended warning without duplicating its wording here.
+    const probe = await runPublisher(t, withDenial('Review.'));
+    assert.equal(probe.status, 0, probe.stderr);
+    const warning = probe.calls[0][6].slice('Review.'.length);
+    assert.ok(warning.includes('Warning:'));
+    const markdown = 'x'.repeat(65536 - Buffer.byteLength(warning, 'utf8'));
+    const boundary = await runPublisher(t, withDenial(markdown));
+    assert.equal(boundary.status, 0, boundary.stderr);
+    assert.equal(boundary.calls.length, 1);
+    assert.equal(boundary.calls[0][6], markdown + warning);
+
+    const oversized = await runPublisher(t, withDenial(markdown + 'x'));
+    assert.equal(oversized.status, 1);
+    assert.deepEqual(oversized.calls, []);
+    assert.match(oversized.summary, /65537 UTF-8 bytes/);
+    assert.match(oversized.summary, /Tool permission denials: 1/);
+    assert.ok(oversized.summary.includes(markdown + 'x'));
+});
+
+for (const [name, env] of [
+    ['missing repository', { GH_REPO: '' }],
+    ['repository without owner', { GH_REPO: 'repository' }],
+    ['repository with an extra path', { GH_REPO: 'example/repository/other' }],
+    ['repository with whitespace', { GH_REPO: 'example/repository ' }],
+    ['repository with a newline', { GH_REPO: 'example/repository\n' }],
+    ['missing PR number', { PR_NUMBER: '' }],
+    ['zero PR number', { PR_NUMBER: '0' }],
+    ['negative PR number', { PR_NUMBER: '-1' }],
+    ['non-integer PR number', { PR_NUMBER: '1.5' }],
+    ['PR number with a newline', { PR_NUMBER: '42\n' }],
+]) {
+    test(`rejects ${name} before invoking the helper`, async t => {
+        const result = await runPublisher(t, [success('Review completed.')], { env });
+        assert.equal(result.status, 1);
+        assert.deepEqual(result.calls, []);
+        assert.match(result.stderr, /GH_REPO and PR_NUMBER must identify the triggering pull request/);
+        assert.match(result.summary, /Publication not confirmed/);
+    });
+}
+
+for (const [name, markdown] of [
     ['no findings', '## Code review\n\nNo issues found.'],
     ['plugin skip', 'This pull request is a draft, so I skipped the review.'],
 ]) {

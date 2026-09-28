@@ -40,7 +40,8 @@ jobs:
       pull-requests: write
 
     env:
-      # Retain the helper cap as defense in depth; only the CI publisher invokes it.
+      # Preserve the existing model-side cap. It does not limit the separate CI
+      # publisher, which makes one helper call and never retries automatically.
       CLAUDE_CODE_SCRIPT_CAPS: '{"pr-review-comment.sh":2}'
 
     steps:

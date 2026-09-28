@@ -2,6 +2,10 @@ import { spawn } from 'node:child_process';
 import { appendFile, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
+// Conservative UTF-8 budget for one comment, also below Linux's per-argument
+// size limit when the Markdown is passed to the Bash helper and gh.
+const MAX_COMMENT_BYTES = 64 * 1024;
+
 // Only these errors may reach logs or the summary. Parser errors, child output,
 // and intermediate SDK messages can contain private input and must stay private.
 class ReviewError extends Error {}
@@ -122,7 +126,12 @@ async function main() {
             const warning = denialCount > 0
                 ? `\n\n---\n\n> Warning: Claude encountered ${denialCount} tool permission denial(s). This review may be incomplete. See the workflow summary for tool names and counts; reasons for individual denials are not available in the execution result.`
                 : '';
-            const url = await publish(review + warning);
+            const body = review + warning;
+            const bodyBytes = Buffer.byteLength(body, 'utf8');
+            if (bodyBytes > MAX_COMMENT_BYTES) {
+                throw new ReviewError(`The comment body is ${bodyBytes} UTF-8 bytes, exceeding the ${MAX_COMMENT_BYTES}-byte publication limit. No comment was posted. The full review is available in the workflow summary.`);
+            }
+            const url = await publish(body);
             publication = `Published: ${url}`;
             console.log(publication);
             if (denialCount > 0) {
