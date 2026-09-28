@@ -5,21 +5,8 @@
         <TUnitImplicitUsings>true</TUnitImplicitUsings>
     </PropertyGroup>
 
-    <Target Name="DetectPolyfillReference" BeforeTargets="PrepareForBuild">
-        <!-- Check if Polyfill is already defined by user (via PackageReference or PackageVersion for CPM) -->
-        <ItemGroup>
-            <_PolyfillPackageReference Include="@(PackageReference)"
-                Condition="'%(PackageReference.Identity)' == 'Polyfill'" />
-            <_PolyfillPackageVersion Include="@(PackageVersion)"
-                Condition="'%(PackageVersion.Identity)' == 'Polyfill'" />
-        </ItemGroup>
-        <PropertyGroup>
-            <_PolyfillAlreadyDefined Condition="'@(_PolyfillPackageReference)' != '' Or '@(_PolyfillPackageVersion)' != ''">true</_PolyfillAlreadyDefined>
-        </PropertyGroup>
-    </Target>
-
     <PropertyGroup>
-        <EnableTUnitPolyfills Condition="'$(EnableTUnitPolyfills)' == '' and ('$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFrameworkIdentifier)' == '.NETFramework')">true</EnableTUnitPolyfills>
+        <!-- Applies to a Polyfill package the project references itself: keeps its types out of other assemblies' view. -->
         <PolyUseEmbeddedAttribute Condition="'$(PolyUseEmbeddedAttribute)' == ''">true</PolyUseEmbeddedAttribute>
     </PropertyGroup>
 
@@ -29,6 +16,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <!-- Set EnableTUnitPolyfills to false to stop the source generator declaring ModuleInitializerAttribute on
+             target frameworks that lack it (.NET Framework, .NET Standard). -->
         <CompilerVisibleProperty Include="EnableTUnitPolyfills" />
         <CompilerVisibleProperty Include="EnableTUnitSourceGeneration" />
     </ItemGroup>

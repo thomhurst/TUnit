@@ -6,37 +6,21 @@
         <Using Include="TUnit.Core" />
     </ItemGroup>
 
-    <!-- Auto-include Polyfill package for compile-time type generation -->
-    <PropertyGroup>
-        <_TUnitPolyfillVersion>11.4.1</_TUnitPolyfillVersion>
-        <_TUnitNeedsPolyfill Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFrameworkIdentifier)' == '.NETFramework'">true</_TUnitNeedsPolyfill>
-    </PropertyGroup>
+    <!--
+        EnableTUnitSourceGeneration=false (reflection mode) removes TUnit's source generator from the compilation
+        entirely. The generators also check the property, but only before emitting code, so without this they would
+        still analyse every test class on each build. TUnit.Analyzers stays enabled.
 
-    <!-- Add Polyfill for non-CPM projects -->
-    <ItemGroup Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(_TUnitNeedsPolyfill)' == 'true' and '$(ManagePackageVersionsCentrally)' != 'true' and '$(_PolyfillAlreadyDefined)' != 'true'">
-        <PackageReference Include="Polyfill" Version="$(_TUnitPolyfillVersion)">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>compile; analyzers</IncludeAssets>
-            <ExcludeAssets>runtime; native; contentfiles; build; buildtransitive</ExcludeAssets>
-        </PackageReference>
-    </ItemGroup>
-
-    <!-- Add Polyfill for CPM projects (using VersionOverride to bypass CPM requirement) -->
-    <ItemGroup Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(_TUnitNeedsPolyfill)' == 'true' and '$(ManagePackageVersionsCentrally)' == 'true' and '$(_PolyfillAlreadyDefined)' != 'true'">
-        <PackageReference Include="Polyfill" VersionOverride="$(_TUnitPolyfillVersion)">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>compile; analyzers</IncludeAssets>
-            <ExcludeAssets>runtime; native; contentfiles; build; buildtransitive</ExcludeAssets>
-        </PackageReference>
-    </ItemGroup>
-
-    <!-- Validate Polyfill availability and provide helpful messages if issues occur -->
-    <Target Name="_TUnitEnsurePolyfill"
-            BeforeTargets="GenerateBuildDependencyFile"
-            Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(_TUnitNeedsPolyfill)' == 'true' and '$(_PolyfillAlreadyDefined)' != 'true'">
-        <Warning Condition="!Exists('$(NuGetPackageRoot)polyfill')"
-                 Code="TUNIT001"
-                 Text="TUnit attempted to automatically add Polyfill package for $(TargetFramework) but it may not be available. If you encounter issues, you can manually add it or disable automatic injection with &lt;EnableTUnitPolyfills&gt;false&lt;/EnableTUnitPolyfills&gt;." />
+        Hooked after ResolveLockFileAnalyzers, where the SDK turns package analyzers into Analyzer items, so it also
+        applies to IDE design-time builds.
+    -->
+    <Target Name="_TUnitRemoveSourceGenerator"
+            AfterTargets="ResolveLockFileAnalyzers"
+            Condition="'$(EnableTUnitSourceGeneration)' == 'false'">
+        <ItemGroup>
+            <_TUnitSourceGeneratorAnalyzer Include="@(Analyzer)" Condition="'%(Filename)' == 'TUnit.Core.SourceGenerator'" />
+            <Analyzer Remove="@(_TUnitSourceGeneratorAnalyzer)" />
+        </ItemGroup>
     </Target>
 
 </Project>
