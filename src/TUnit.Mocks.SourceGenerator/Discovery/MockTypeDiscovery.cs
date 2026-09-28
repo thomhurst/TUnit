@@ -66,7 +66,7 @@ internal static class MockTypeDiscovery
         // Verify this is TUnit.Mocks.Mock.Of<T>() or TUnit.Mocks.MockRepository.Of<T>()
         var containingTypeName = method.ContainingType?.Name;
         if ((containingTypeName != "Mock" && containingTypeName != "MockRepository") ||
-            method.ContainingNamespace?.ToDisplayString() != "TUnit.Mocks")
+            !IsTUnitMocksNamespace(method.ContainingNamespace))
             return ImmutableArray<MockTypeModel>.Empty;
 
         var isDelegateMock = method.Name == "OfDelegate";
@@ -139,11 +139,29 @@ internal static class MockTypeDiscovery
                 ct);
         }
 
+        // Every Mock.Of<T1, T2, ...>() site naming the same combination produces the same models.
+        var cache = MockDiscoveryCache.For(compilation).MultiTypeModels;
+        var key = new TypeListKey(method.TypeArguments);
+        if (cache.TryGetValue(key, out var cached))
+            return cached;
+
+        return cache.GetOrAdd(key, BuildMultiTypeModels(
+            namedType, method.TypeArguments, isPartialMock, compilationAssembly, compilation, ct));
+    }
+
+    private static ImmutableArray<MockTypeModel> BuildMultiTypeModels(
+        INamedTypeSymbol namedType,
+        ImmutableArray<ITypeSymbol> typeArguments,
+        bool isPartialMock,
+        IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
+        CancellationToken ct)
+    {
         // Multi-type mock: validate additional type args are all interfaces
         var additionalTypes = new List<INamedTypeSymbol>();
-        for (int i = 1; i < method.TypeArguments.Length; i++)
+        for (int i = 1; i < typeArguments.Length; i++)
         {
-            if (method.TypeArguments[i] is not INamedTypeSymbol additionalType)
+            if (typeArguments[i] is not INamedTypeSymbol additionalType)
                 return ImmutableArray<MockTypeModel>.Empty;
             if (additionalType.TypeKind != TypeKind.Interface)
                 return ImmutableArray<MockTypeModel>.Empty;
@@ -325,18 +343,20 @@ internal static class MockTypeDiscovery
 
             // Skip BCL/system interfaces — they have members (indexers, explicit implementations)
             // that the mock generator cannot handle, and auto-mocking them is rarely useful.
-            var ns = namedReturn.ContainingNamespace?.ToDisplayString() ?? "";
-            if (IsFrameworkNamespace(ns))
+            if (IsInFrameworkNamespace(namedReturn))
                 continue;
+
+            // Add returns false if already discovered/visited — skip without re-walking. Checked
+            // before the static-abstract scan below: the same return type typically recurs across
+            // many members, and a type that fails that scan fails it every time, so recording it
+            // as visited first never changes which types are generated.
+            if (!visited.Add(namedReturn.GetFullyQualifiedName())) continue;
 
             // Skip interfaces that have static abstract members — using them as type arguments
             // in Mock<T>/MockEngine<T> triggers CS8920 because the static abstract members
             // don't have a most specific implementation in the interface.
             if (HasStaticAbstractMembers(namedReturn))
                 continue;
-
-            // Add returns false if already discovered/visited — skip without re-walking.
-            if (!visited.Add(namedReturn.GetFullyQualifiedName())) continue;
 
             var model = BuildSingleTypeModel(
                 namedReturn,
@@ -360,22 +380,53 @@ internal static class MockTypeDiscovery
     /// </summary>
     private static ITypeSymbol UnwrapAsyncType(ITypeSymbol type)
     {
-        if (type is INamedTypeSymbol { IsGenericType: true } named)
+        // Matches the definitions System.Threading.Tasks.Task<TResult> and ValueTask<TResult> by
+        // name, without formatting the symbol to a display string for every member.
+        if (type is INamedTypeSymbol { IsGenericType: true, Arity: 1, ContainingType: null } named
+            && named.Name is ("Task" or "ValueTask")
+            && named.ConstructedFrom.TypeParameters[0].Name == "TResult"
+            && IsNamespace(named.ContainingNamespace, "Tasks", "Threading", "System"))
         {
-            var constructedName = named.ConstructedFrom.ToDisplayString();
-            if (constructedName is "System.Threading.Tasks.Task<TResult>"
-                or "System.Threading.Tasks.ValueTask<TResult>")
-            {
-                return named.TypeArguments[0];
-            }
+            return named.TypeArguments[0];
         }
         return type;
     }
 
-    private static bool IsFrameworkNamespace(string ns) =>
-        ns == "System"    || ns.StartsWith("System.") ||
-        ns == "Microsoft" || ns.StartsWith("Microsoft.") ||
-        ns == "Windows"   || ns.StartsWith("Windows.");
+    /// <summary>
+    /// True for types under the <c>System</c>, <c>Microsoft</c> or <c>Windows</c> root namespaces.
+    /// </summary>
+    private static bool IsInFrameworkNamespace(INamedTypeSymbol type)
+    {
+        var ns = type.ContainingNamespace;
+        if (ns is null || ns.IsGlobalNamespace)
+            return false;
+
+        while (ns.ContainingNamespace is { IsGlobalNamespace: false } parent)
+        {
+            ns = parent;
+        }
+
+        return ns.Name is "System" or "Microsoft" or "Windows";
+    }
+
+    private static bool IsTUnitMocksNamespace(INamespaceSymbol? ns)
+        => IsNamespace(ns, "Mocks", "TUnit");
+
+    /// <summary>
+    /// True when <paramref name="ns"/> is exactly the namespace whose segments, innermost first,
+    /// are <paramref name="segmentsInnermostFirst"/>.
+    /// </summary>
+    private static bool IsNamespace(INamespaceSymbol? ns, params string[] segmentsInnermostFirst)
+    {
+        foreach (var segment in segmentsInnermostFirst)
+        {
+            if (ns is null || ns.IsGlobalNamespace || ns.Name != segment)
+                return false;
+            ns = ns.ContainingNamespace;
+        }
+
+        return ns is { IsGlobalNamespace: true };
+    }
 
     /// <summary>
     /// Returns true if the interface (or any of its base interfaces) has static abstract members
@@ -440,6 +491,22 @@ internal static class MockTypeDiscovery
         Compilation compilation,
         CancellationToken cancellationToken)
     {
+        var cache = MockDiscoveryCache.For(compilation).ModelsWithTransitiveDependencies;
+        var key = new SingleTypeKey(namedType, isPartialMock, isWrapMock: false);
+        if (cache.TryGetValue(key, out var cached))
+            return cached;
+
+        return cache.GetOrAdd(key, CreateModelWithTransitiveDependencies(
+            namedType, isPartialMock, compilationAssembly, compilation, cancellationToken));
+    }
+
+    private static ImmutableArray<MockTypeModel> CreateModelWithTransitiveDependencies(
+        INamedTypeSymbol namedType,
+        bool isPartialMock,
+        IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
+        CancellationToken cancellationToken)
+    {
         var model = BuildSingleTypeModel(
             namedType,
             isPartialMock,
@@ -464,6 +531,26 @@ internal static class MockTypeDiscovery
     }
 
     private static MockTypeModel? BuildSingleTypeModel(
+        INamedTypeSymbol namedType,
+        bool isPartialMock,
+        IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
+        bool isWrapMock,
+        CancellationToken cancellationToken)
+    {
+        // The model depends only on the symbol, the mode flags and the compilation
+        // (compilationAssembly is always compilation.Assembly), so it is shared by every call
+        // site and every transitive walk that reaches the same type.
+        var cache = MockDiscoveryCache.For(compilation).SingleTypeModels;
+        var key = new SingleTypeKey(namedType, isPartialMock, isWrapMock);
+        if (cache.TryGetValue(key, out var cached))
+            return cached;
+
+        return cache.GetOrAdd(key, CreateSingleTypeModel(
+            namedType, isPartialMock, compilationAssembly, compilation, isWrapMock, cancellationToken));
+    }
+
+    private static MockTypeModel? CreateSingleTypeModel(
         INamedTypeSymbol namedType,
         bool isPartialMock,
         IAssemblySymbol? compilationAssembly,
@@ -625,18 +712,25 @@ internal static class MockTypeDiscovery
         if (namedType.TypeKind is not (TypeKind.Interface or TypeKind.Class))
             return ImmutableArray<MockTypeModel>.Empty;
 
-        // Skip if .Mock() already resolves to a generated specialization (2nd incremental pass).
-        // The generated per-type extension lives in a class named *_MockStaticExtension.
+        var compilation = context.SemanticModel.Compilation;
+
+        // Skip if .Mock() already resolves to a generated specialization. The generated per-type
+        // extension lives in a class named *_MockStaticExtension in the TUnit.Mocks namespace.
         // This covers both interfaces (wrapper return type in TUnit.Mocks.Generated) and
-        // classes (Mock<T> return type in TUnit.Mocks).
-        var invocationSymbol = context.SemanticModel.GetSymbolInfo(invocation, ct);
-        if (invocationSymbol.Symbol is IMethodSymbol resolved
-            && resolved.ContainingType?.Name is { } containingName
-            && containingName.EndsWith("_MockStaticExtension"))
-            return ImmutableArray<MockTypeModel>.Empty;
+        // classes (Mock<T> return type in TUnit.Mocks). A generator never sees its own output,
+        // so such an extension can only come from a referenced assembly or hand-written source
+        // (in any namespace); binding the whole invocation is only worth it when the compilation
+        // can see one at all.
+        if (MockDiscoveryCache.For(compilation).MayReferenceGeneratedStaticExtensions(compilation))
+        {
+            var invocationSymbol = context.SemanticModel.GetSymbolInfo(invocation, ct);
+            if (invocationSymbol.Symbol is IMethodSymbol resolved
+                && resolved.ContainingType?.Name is { } containingName
+                && containingName.EndsWith("_MockStaticExtension"))
+                return ImmutableArray<MockTypeModel>.Empty;
+        }
 
         var isPartialMock = namedType.TypeKind == TypeKind.Class;
-        var compilation = context.SemanticModel.Compilation;
         var compilationAssembly = compilation.Assembly;
         return BuildModelWithTransitiveDependencies(
             NormalizeSingleMockType(namedType),
@@ -652,7 +746,7 @@ internal static class MockTypeDiscovery
     /// Semantic transform for <c>[assembly: GenerateMock(typeof(T))]</c>.
     /// Extracts the type argument and pairs each model with its attribute location.
     /// </summary>
-    public static ImmutableArray<MockGenerationRequest> TransformGenerateMockAttribute(
+    public static EquatableArray<MockGenerationRequest> TransformGenerateMockAttribute(
         GeneratorAttributeSyntaxContext context, CancellationToken ct)
     {
         // The target symbol for an assembly attribute is the assembly itself
@@ -664,7 +758,7 @@ internal static class MockTypeDiscovery
         {
             if (attr.AttributeClass?.Name is not ("GenerateMockAttribute" or "GenerateMock"))
                 continue;
-            if (attr.AttributeClass?.ContainingNamespace?.ToDisplayString() != "TUnit.Mocks")
+            if (!IsTUnitMocksNamespace(attr.AttributeClass?.ContainingNamespace))
                 continue;
 
             if (attr.ConstructorArguments.Length != 1)
@@ -696,6 +790,6 @@ internal static class MockTypeDiscovery
             }
         }
 
-        return requests.ToImmutable();
+        return new EquatableArray<MockGenerationRequest>(requests.ToImmutable());
     }
 }

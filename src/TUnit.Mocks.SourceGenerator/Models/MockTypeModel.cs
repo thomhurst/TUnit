@@ -98,6 +98,9 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     public bool Equals(MockTypeModel? other)
     {
         if (other is null) return false;
+        // Discovery memoizes models per compilation, so duplicates reaching dedup are usually the
+        // very same instance.
+        if (ReferenceEquals(this, other)) return true;
         return FullyQualifiedName == other.FullyQualifiedName
             && OpenGenericTypeOfExpression == other.OpenGenericTypeOfExpression
             && Name == other.Name
@@ -123,6 +126,13 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && SecondaryMemberIdMaps.Equals(other.SecondaryMemberIdMaps);
     }
 
+    /// <summary>
+    /// Shallow hash over the identity and shape of the model. The deep member arrays are left to
+    /// <see cref="Equals(MockTypeModel?)"/>: hashing them walked every member, parameter and
+    /// nested array of every model on each dedup pass, while the identity fields alone already
+    /// separate distinct models. Everything hashed here is also compared by Equals, so equal
+    /// models still hash equally.
+    /// </summary>
     public override int GetHashCode()
     {
         unchecked
@@ -135,15 +145,15 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             hash = hash * 31 + IsWrapMock.GetHashCode();
             hash = hash * 31 + IsPublic.GetHashCode();
             hash = hash * 31 + UseFallbackNamespace.GetHashCode();
-            hash = hash * 31 + TypeParameters.GetHashCode();
-            hash = hash * 31 + Methods.GetHashCode();
-            hash = hash * 31 + Properties.GetHashCode();
-            hash = hash * 31 + Events.GetHashCode();
+            hash = hash * 31 + TypeParameters.Length;
+            hash = hash * 31 + Methods.Length;
+            hash = hash * 31 + Properties.Length;
+            hash = hash * 31 + Events.Length;
             hash = hash * 31 + AdditionalInterfaceNames.GetHashCode();
             hash = hash * 31 + HasStaticAbstractMembers.GetHashCode();
             hash = hash * 31 + IsSecondaryMemberSurface.GetHashCode();
             hash = hash * 31 + (CollidesWith?.GetHashCode() ?? 0);
-            hash = hash * 31 + SecondaryMemberIdMaps.GetHashCode();
+            hash = hash * 31 + SecondaryMemberIdMaps.Length;
             return hash;
         }
     }
