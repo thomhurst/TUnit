@@ -16,8 +16,4 @@
     <PropertyGroup Condition="'$(TUnitAssertionsImplicitUsings)' == ''">
         <TUnitAssertionsImplicitUsings>true</TUnitAssertionsImplicitUsings>
     </PropertyGroup>
-
-    <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.fsproj'">
-        <PackageReference Include="TUnit.Assertions.FSharp" Version="*" VersionOverride="*" />
-    </ItemGroup>
 </Project>

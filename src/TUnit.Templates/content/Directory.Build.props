@@ -10,8 +10,9 @@
          to use exact versions as normal. -->
 
     <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.fsproj'">
-        <!-- TUnit.Assertions.props auto-adds TUnit.Assertions.FSharp for F# projects;
-             template fsproj files also include it explicitly with a pinned version -->
+        <!-- Template fsproj files reference TUnit.Assertions.FSharp explicitly. Published TUnit.Assertions
+             versions before #6915 also add it automatically for F# projects, which duplicates the reference
+             while the templates float to those versions -->
         <NoWarn>$(NoWarn);NU1504</NoWarn>
     </PropertyGroup>
 
