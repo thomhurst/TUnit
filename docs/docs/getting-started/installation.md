@@ -125,4 +125,6 @@ Newer C# features such as `init` accessors, `required` members and records need 
 
 TUnit doesn't declare the attribute when the project already has one, whether from `Polyfill`, `PolySharp` or your own code. To turn TUnit's declaration off entirely, set `<EnableTUnitPolyfills>false</EnableTUnitPolyfills>`.
 
+Source generators can't see each other's output, so TUnit detects PolySharp through its `PolySharpIncludeGeneratedTypes` and `PolySharpExcludeGeneratedTypes` MSBuild properties. If you see a duplicate `ModuleInitializerAttribute` error with PolySharp installed, set `EnableTUnitPolyfills` to `false`.
+
 **Next:** [Write Your First Test →](writing-your-first-test.md)

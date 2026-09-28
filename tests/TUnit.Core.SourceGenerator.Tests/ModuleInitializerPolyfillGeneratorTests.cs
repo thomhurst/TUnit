@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Generators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
@@ -158,7 +159,8 @@ internal class ModuleInitializerPolyfillGeneratorTests
     public async Task Generated_module_initializer_compiles_with_warnings_as_errors_when_references_are_ambiguous()
     {
         // The fallback declaration takes precedence over the referenced ones, which the compiler reports as
-        // CS0436 at each use. TUnit's generated files disable warnings, so its own use must stay clean.
+        // CS0436 at each use. TUnit's module initializer is emitted by InfrastructureGenerator, whose files
+        // disable warnings, so run that generator for real: its use of the attribute must stay clean.
         MetadataReference[] references =
         [
             ..ReferencesHelper.References,
@@ -166,7 +168,11 @@ internal class ModuleInitializerPolyfillGeneratorTests
             CreateAttributeReference("PolyfillTwo", PublicAttribute),
         ];
 
-        var errors = CompileWithGenerator(references, "#pragma warning disable\n" + ModuleInitializerUsage, warningsAsErrors: true);
+        var errors = CompileWithGenerator(
+            references,
+            "namespace MyTests;\n\npublic class Tests;",
+            warningsAsErrors: true,
+            includeInfrastructureGenerator: true);
 
         await Assert.That(errors).IsEmpty();
     }
@@ -220,7 +226,8 @@ internal class ModuleInitializerPolyfillGeneratorTests
     private static string[] CompileWithGenerator(
         IEnumerable<MetadataReference> references,
         string source = ModuleInitializerUsage,
-        bool warningsAsErrors = false)
+        bool warningsAsErrors = false,
+        bool includeInfrastructureGenerator = false)
     {
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
         var compilation = CSharpCompilation.Create(
@@ -231,10 +238,18 @@ internal class ModuleInitializerPolyfillGeneratorTests
                 OutputKind.DynamicallyLinkedLibrary,
                 generalDiagnosticOption: warningsAsErrors ? ReportDiagnostic.Error : ReportDiagnostic.Default));
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(
-            [new ModuleInitializerPolyfillGenerator().AsSourceGenerator()],
-            parseOptions: parseOptions);
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out _);
+        ISourceGenerator[] generators = includeInfrastructureGenerator
+            ? [new ModuleInitializerPolyfillGenerator().AsSourceGenerator(), new InfrastructureGenerator().AsSourceGenerator()]
+            : [new ModuleInitializerPolyfillGenerator().AsSourceGenerator()];
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generators, parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out _);
+
+        if (includeInfrastructureGenerator
+            && !driver.GetRunResult().GeneratedTrees.Any(t => t.GetText().ToString().Contains("[global::System.Runtime.CompilerServices.ModuleInitializer]")))
+        {
+            throw new InvalidOperationException("InfrastructureGenerator did not emit TUnit's module initializer.");
+        }
 
         return output.GetDiagnostics()
             .Where(d => d.Severity == DiagnosticSeverity.Error)
