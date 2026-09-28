@@ -4,7 +4,10 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Assertions.Should.SourceGenerator;
@@ -39,6 +42,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     private const string UnconditionalSuppressMessageAttributeName = "UnconditionalSuppressMessageAttribute";
     private const string DynamicallyAccessedMembersAttributeName = "DynamicallyAccessedMembersAttribute";
     private const string ShouldGeneratePartialAttributeFullName = "TUnit.Assertions.Should.Attributes.ShouldGeneratePartialAttribute";
+    private const string ShouldExtensionsTypeFullName = "TUnit.Assertions.Should.ShouldExtensions";
 
     private static readonly SymbolDisplayFormat NoGlobalFormat =
         SymbolDisplayFormat.FullyQualifiedFormat
@@ -50,16 +54,45 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)
             .WithGenericsOptions(SymbolDisplayGenericsOptions.None);
 
+    public const string LocalContainersStep = "ShouldLocalContainers";
+    public const string LocalWrappersStep = "ShouldLocalWrappers";
+    public const string CompilationDataStep = "ShouldCompilationData";
+    public const string PayloadStep = "ShouldPayload";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // CompilationProvider fires per-keystroke. Cross-assembly cost is absorbed by the
-        // ConditionalWeakTable cache below; the current-compilation walk still re-runs every
-        // keystroke. A SyntaxProvider-based pipeline (paired with ForAttributeWithMetadataName
-        // for [AssertionExtension] declarations and a custom-syntax filter for hand-rolled
-        // extensions on IAssertionSource<T>) would eliminate that cost. Deferred to a follow-up
-        // — the structural refactor is non-trivial and the current bound (~types-with-extension-
-        // methods in current compilation) is acceptable for v1.
-        var provider = context.CompilationProvider.Select((compilation, _) => Collect(compilation));
+        // The current compilation is scanned through syntax providers so an edit only re-examines
+        // candidate declarations instead of walking every type in the assembly:
+        //  - extension-method containers: top-level classes declaring a method with a `this` parameter
+        //  - wrappers: classes carrying [ShouldGeneratePartial]
+        // Referenced assemblies are still read from the CompilationProvider; that cost is absorbed
+        // by the per-MetadataReference ConditionalWeakTable caches below.
+        var localContainers = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => IsExtensionContainerCandidate(node),
+                transform: static (ctx, ct) => CollectLocalContainer(ctx, ct))
+            .Where(static x => x is not null)
+            .Select(static (x, _) => x!)
+            .WithTrackingName(LocalContainersStep);
+
+        var localWrappers = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                ShouldGeneratePartialAttributeFullName,
+                predicate: static (node, _) => node is ClassDeclarationSyntax,
+                transform: static (ctx, _) => CollectLocalWrapper(ctx))
+            .Where(static x => x is not null)
+            .Select(static (x, _) => x!)
+            .WithTrackingName(LocalWrappersStep);
+
+        var compilationData = context.CompilationProvider
+            .Select(static (compilation, _) => CollectCompilationData(compilation))
+            .WithTrackingName(CompilationDataStep);
+
+        var provider = compilationData
+            .Combine(localContainers.Collect())
+            .Combine(localWrappers.Collect())
+            .Select(static (data, _) => Merge(data.Left.Left, data.Left.Right, data.Right))
+            .WithTrackingName(PayloadStep);
 
         context.RegisterSourceOutput(provider, static (ctx, payload) =>
         {
@@ -112,7 +145,33 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         EquatableArray<string> AlreadyBakedNames,
         EquatableArray<string> BakedShouldEntryKeys);
 
-    private static GeneratorPayload Collect(Compilation compilation)
+    /// <summary>
+    /// Caches the <see cref="ReferencesAssertionsAssembly"/> pre-filter per referenced assembly,
+    /// so the references-of-references loop runs once per <see cref="MetadataReference"/> rather
+    /// than once per reference on every compilation. Keyed and weakly held like
+    /// <see cref="s_referenceCache"/>.
+    /// </summary>
+    private static readonly ConditionalWeakTable<MetadataReference, PrefilterResult> s_prefilterCache = new();
+
+    private sealed class PrefilterResult
+    {
+        public PrefilterResult(AssemblyIdentity assertionsIdentity, bool referencesAssertions)
+        {
+            AssertionsIdentity = assertionsIdentity;
+            ReferencesAssertions = referencesAssertions;
+        }
+
+        public AssemblyIdentity AssertionsIdentity { get; }
+        public bool ReferencesAssertions { get; }
+    }
+
+    /// <summary>
+    /// Everything the generator needs from the compilation as a whole: the merged data of every
+    /// referenced assembly plus the Should entry points. Computed on every compilation, but only
+    /// from cheap lookups and cached per-reference results, and it compares by value so the
+    /// downstream steps stay cached when nothing relevant changed.
+    /// </summary>
+    private static CompilationData CollectCompilationData(Compilation compilation)
     {
         var assertionSource = compilation.GetTypeByMetadataName(AssertionSourceFullName);
         var assertionBase = compilation.GetTypeByMetadataName(AssertionBaseFullName);
@@ -123,10 +182,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         if (assertionSource is null || assertionBase is null || assertionContext is null)
         {
-            return new GeneratorPayload(
-                new EquatableArray<MethodData>(Array.Empty<MethodData>()),
-                new EquatableArray<WrapperData>(Array.Empty<WrapperData>()),
-                new EquatableArray<ShouldEntryData>(Array.Empty<ShouldEntryData>()));
+            return CompilationData.Disabled;
         }
 
         // Phase 1 — per-reference scan, cached by MetadataReference identity.
@@ -137,12 +193,13 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         var refResults = new List<ReferenceData>();
         foreach (var refAssembly in compilation.SourceModule.ReferencedAssemblySymbols)
         {
-            if (!ReferencesAssertionsAssembly(refAssembly, assertionsAssembly))
+            var metadataRef = compilation.GetMetadataReference(refAssembly);
+            if (!ReferencesAssertionsAssemblyCached(metadataRef, refAssembly, assertionsAssembly))
             {
                 continue;
             }
             refResults.Add(GetOrComputeReferenceData(
-                compilation, refAssembly, assertionSource, assertionBase, assertionContext, shouldNameAttr, partialMarker, assertType));
+                compilation, metadataRef, refAssembly, assertionSource, assertionBase, assertionContext, shouldNameAttr, partialMarker, assertType));
         }
 
         // Phase 2 — union dedup sets across all references.
@@ -155,24 +212,8 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             }
         }
 
-        // Phase 3 — walk the current compilation (cannot be cached: changes on every edit).
-        var localMethods = ImmutableArray.CreateBuilder<MethodData>();
-        var localCtx = new CollectionContext(
-            compilation,
-            assertionSource,
-            assertionBase,
-            assertionContext,
-            shouldNameAttr,
-            alreadyBaked,
-            localMethods);
-        WalkNamespace(compilation.Assembly.GlobalNamespace, localCtx);
-
-        var localWrappers = new List<WrapperData>();
-        if (partialMarker is not null)
-        {
-            WalkForWrappers(compilation.Assembly.GlobalNamespace, partialMarker, assertionBase, assertionContext, localWrappers, isCurrentAssembly: true);
-        }
-
+        // Phase 3 — the parts of the current compilation that are single-type lookups. Extension
+        // containers and wrappers are collected by the syntax providers instead.
         var localEntries = ImmutableArray.CreateBuilder<ShouldEntryData>();
         if (assertType is not null && SymbolEqualityComparer.Default.Equals(assertType.ContainingAssembly, compilation.Assembly))
         {
@@ -180,7 +221,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         }
 
         var currentShouldEntryKeys = new HashSet<string>(StringComparer.Ordinal);
-        CollectExistingShouldEntryKeys(compilation.Assembly.GlobalNamespace, currentShouldEntryKeys);
+        CollectExistingShouldEntryKeys(compilation.Assembly, currentShouldEntryKeys);
 
         var bakedReferencedShouldEntryKeys = new HashSet<string>(StringComparer.Ordinal);
         foreach (var r in refResults)
@@ -191,18 +232,14 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             }
         }
 
-        // Phase 4 — merge and apply post-walk dedup. Wrapper instance methods and Should-flavored
-        // extensions co-exist by design: the wrapper's [ShouldGeneratePartial] only emits methods
-        // whose source overload exactly matches a public ctor on the inner assertion (the simple-
-        // factory rule), so overloads with optional/default parameters land only on the extension
-        // surface. Instance methods take overload-resolution precedence at call sites, so there's
-        // no ambiguity. References whose ShouldNameExtensions counterpart is already baked are
-        // dropped to prevent CS0121.
-        var allMethods = ImmutableArray.CreateBuilder<MethodData>();
-        foreach (var m in localMethods)
-        {
-            allMethods.Add(m);
-        }
+        // Phase 4 — apply post-walk dedup to the referenced data. Wrapper instance methods and
+        // Should-flavored extensions co-exist by design: the wrapper's [ShouldGeneratePartial] only
+        // emits methods whose source overload exactly matches a public ctor on the inner assertion
+        // (the simple-factory rule), so overloads with optional/default parameters land only on the
+        // extension surface. Instance methods take overload-resolution precedence at call sites, so
+        // there's no ambiguity. References whose ShouldNameExtensions counterpart is already baked
+        // are dropped to prevent CS0121.
+        var referenceMethods = ImmutableArray.CreateBuilder<MethodData>();
         foreach (var r in refResults)
         {
             foreach (var m in r.Methods)
@@ -211,7 +248,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
                 {
                     continue;
                 }
-                allMethods.Add(m);
+                referenceMethods.Add(m);
             }
         }
 
@@ -236,10 +273,131 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             }
         }
 
+        return new CompilationData(
+            IsEnabled: true,
+            new EquatableArray<MethodData>(referenceMethods.ToArray()),
+            new EquatableArray<ShouldEntryData>(DeduplicateEntries(allEntries.ToArray())));
+    }
+
+    private static GeneratorPayload Merge(
+        CompilationData compilationData,
+        ImmutableArray<LocalContainerData> localContainers,
+        ImmutableArray<WrapperData> localWrappers)
+    {
+        if (!compilationData.IsEnabled)
+        {
+            return GeneratorPayload.Empty;
+        }
+
+        // Current-compilation methods come first, as the namespace walk used to produce them.
+        // A partial container is reported once per declaration that holds an extension method,
+        // with identical data each time, so keep only the first.
+        var allMethods = new List<MethodData>();
+        var seenContainers = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var container in localContainers)
+        {
+            if (seenContainers.Add(container.ContainerKey))
+            {
+                allMethods.AddRange(container.Methods);
+            }
+        }
+        allMethods.AddRange(compilationData.ReferenceMethods);
+
+        var wrappers = new List<WrapperData>(localWrappers.Length);
+        var seenWrappers = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var wrapper in localWrappers)
+        {
+            if (seenWrappers.Add(wrapper.WrapperKey))
+            {
+                wrappers.Add(wrapper);
+            }
+        }
+
         return new GeneratorPayload(
             new EquatableArray<MethodData>(DeduplicateMethods(allMethods.ToArray())),
-            new EquatableArray<WrapperData>(localWrappers.ToArray()),
-            new EquatableArray<ShouldEntryData>(DeduplicateEntries(allEntries.ToArray())));
+            new EquatableArray<WrapperData>(wrappers.ToArray()),
+            compilationData.Entries);
+    }
+
+    /// <summary>
+    /// Syntactic gate for <see cref="CollectLocalContainer"/>: a top-level class declaring a method
+    /// whose first parameter carries <c>this</c>. Extension methods can only live in top-level
+    /// non-generic static classes, so every class the namespace walk could collect from passes.
+    /// </summary>
+    private static bool IsExtensionContainerCandidate(SyntaxNode node)
+    {
+        if (node is not ClassDeclarationSyntax classDeclaration
+            || classDeclaration.Parent is not (BaseNamespaceDeclarationSyntax or CompilationUnitSyntax))
+        {
+            return false;
+        }
+
+        foreach (var member in classDeclaration.Members)
+        {
+            if (member is MethodDeclarationSyntax { ParameterList.Parameters: { Count: > 0 } parameters }
+                && parameters[0].Modifiers.Any(SyntaxKind.ThisKeyword))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static LocalContainerData? CollectLocalContainer(GeneratorSyntaxContext context, CancellationToken cancellationToken)
+    {
+        if (context.SemanticModel.GetDeclaredSymbol(context.Node, cancellationToken) is not INamedTypeSymbol type)
+        {
+            return null;
+        }
+
+        var compilation = context.SemanticModel.Compilation;
+        var assertionSource = compilation.GetTypeByMetadataName(AssertionSourceFullName);
+        var assertionBase = compilation.GetTypeByMetadataName(AssertionBaseFullName);
+        var assertionContext = compilation.GetTypeByMetadataName(AssertionContextFullName);
+        if (assertionSource is null || assertionBase is null || assertionContext is null)
+        {
+            return null;
+        }
+
+        var methods = ImmutableArray.CreateBuilder<MethodData>();
+        var ctx = new CollectionContext(
+            compilation,
+            assertionSource,
+            assertionBase,
+            assertionContext,
+            compilation.GetTypeByMetadataName(ShouldNameAttributeFullName),
+            new HashSet<string>(StringComparer.Ordinal), // baked-name dedup never applies to the current assembly
+            methods);
+        CollectFromContainer(type, ctx);
+
+        if (methods.Count == 0)
+        {
+            return null;
+        }
+
+        return new LocalContainerData(
+            type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            new EquatableArray<MethodData>(methods.ToArray()));
+    }
+
+    private static WrapperData? CollectLocalWrapper(GeneratorAttributeSyntaxContext context)
+    {
+        if (context.TargetSymbol is not INamedTypeSymbol type
+            || context.Attributes.FirstOrDefault()?.AttributeClass is not { } marker)
+        {
+            return null;
+        }
+
+        var compilation = context.SemanticModel.Compilation;
+        var assertionBase = compilation.GetTypeByMetadataName(AssertionBaseFullName);
+        var assertionContext = compilation.GetTypeByMetadataName(AssertionContextFullName);
+        if (assertionBase is null || assertionContext is null)
+        {
+            return null;
+        }
+
+        return DescribeWrapper(type, marker, assertionBase, assertionContext, isCurrentAssembly: true);
     }
 
     /// <summary>
@@ -250,6 +408,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     /// </summary>
     private static ReferenceData GetOrComputeReferenceData(
         Compilation compilation,
+        MetadataReference? metadataRef,
         IAssemblySymbol refAssembly,
         INamedTypeSymbol assertionSource,
         INamedTypeSymbol assertionBase,
@@ -258,7 +417,6 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         INamedTypeSymbol? partialMarker,
         INamedTypeSymbol? assertType)
     {
-        var metadataRef = compilation.GetMetadataReference(refAssembly);
         if (metadataRef is null)
         {
             return ScanReference(refAssembly, compilation, assertionSource, assertionBase, assertionContext, shouldNameAttr, partialMarker, assertType);
@@ -329,7 +487,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         }
 
         var bakedShouldEntryKeys = new HashSet<string>(StringComparer.Ordinal);
-        CollectExistingShouldEntryKeys(refAssembly.GlobalNamespace, bakedShouldEntryKeys);
+        CollectExistingShouldEntryKeys(refAssembly, bakedShouldEntryKeys);
 
         return new ReferenceData(
             new EquatableArray<MethodData>(DeduplicateMethods(methods.ToArray())),
@@ -370,6 +528,19 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             CollectWrapper(nested, marker, assertionBase, assertionContext, builder, isCurrentAssembly);
         }
 
+        if (DescribeWrapper(type, marker, assertionBase, assertionContext, isCurrentAssembly) is { } wrapper)
+        {
+            builder.Add(wrapper);
+        }
+    }
+
+    private static WrapperData? DescribeWrapper(
+        INamedTypeSymbol type,
+        INamedTypeSymbol marker,
+        INamedTypeSymbol assertionBase,
+        INamedTypeSymbol assertionContext,
+        bool isCurrentAssembly)
+    {
         // Read the wrapped type from [ShouldGeneratePartial(typeof(...))]. The attribute's
         // single ctor argument names the wrapped definition explicitly, so the wrapper class
         // is free to construct its own AssertionContext rather than piggybacking on the
@@ -394,7 +565,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         if (wrappedType is null || wrappedAssertionTypeArg is null)
         {
-            return;
+            return null;
         }
 
         // Wrappers from referenced assemblies are still collected — their return-type keys
@@ -418,17 +589,18 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         if (methods.Count == 0 && isCurrentAssembly)
         {
-            return;
+            return null;
         }
 
-        builder.Add(new WrapperData(
+        return new WrapperData(
+            WrapperKey: type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             ContainingNamespace: type.ContainingNamespace?.ToDisplayString(NoGlobalFormat) ?? string.Empty,
             ClassName: type.Name,
             ClassGenericParams: new EquatableArray<GenericParamData>(type.TypeParameters.Select(tp => GenericParamData.From(tp, NoGlobalFormat)).ToList()),
             ClassGenericSuffix: type.IsGenericType ? "<" + string.Join(", ", type.TypeParameters.Select(tp => tp.Name)) + ">" : string.Empty,
             AssertionTypeArgDisplay: wrappedAssertionTypeArg.ToDisplayString(NoGlobalFormat),
             Methods: new EquatableArray<WrapperMethodData>(methods),
-            IsCurrentAssembly: isCurrentAssembly));
+            IsCurrentAssembly: isCurrentAssembly);
     }
 
     /// <summary>
@@ -608,6 +780,37 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     /// transitively-only-referenced assemblies is the single biggest perf win for the generator
     /// (otherwise it'd walk the entire BCL).
     /// </summary>
+    private static bool ReferencesAssertionsAssemblyCached(
+        MetadataReference? metadataRef,
+        IAssemblySymbol reference,
+        IAssemblySymbol assertionsAssembly)
+    {
+        if (metadataRef is null)
+        {
+            return ReferencesAssertionsAssembly(reference, assertionsAssembly);
+        }
+
+        // A reference's own metadata (and so its reference list) is fixed for a given
+        // MetadataReference, so the answer only changes if TUnit.Assertions itself does.
+        if (s_prefilterCache.TryGetValue(metadataRef, out var cached)
+            && cached.AssertionsIdentity.Equals(assertionsAssembly.Identity))
+        {
+            return cached.ReferencesAssertions;
+        }
+
+        var result = ReferencesAssertionsAssembly(reference, assertionsAssembly);
+        s_prefilterCache.Remove(metadataRef);
+        try
+        {
+            s_prefilterCache.Add(metadataRef, new PrefilterResult(assertionsAssembly.Identity, result));
+        }
+        catch (ArgumentException)
+        {
+            // Another compilation cached it concurrently; either result is equivalent.
+        }
+        return result;
+    }
+
     private static bool ReferencesAssertionsAssembly(IAssemblySymbol reference, IAssemblySymbol assertionsAssembly)
     {
         if (SymbolEqualityComparer.Default.Equals(reference, assertionsAssembly))
@@ -1299,35 +1502,14 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         return result.ToArray();
     }
 
-    private static void CollectExistingShouldEntryKeys(INamespaceSymbol ns, HashSet<string> keys)
+    private static void CollectExistingShouldEntryKeys(IAssemblySymbol assembly, HashSet<string> keys)
     {
-        foreach (var type in ns.GetTypeMembers())
-        {
-            CollectExistingShouldEntryKeys(type, keys);
-        }
-
-        foreach (var nested in ns.GetNamespaceMembers())
-        {
-            CollectExistingShouldEntryKeys(nested, keys);
-        }
-    }
-
-    private static void CollectExistingShouldEntryKeys(INamedTypeSymbol type, HashSet<string> keys)
-    {
-        foreach (var nested in type.GetTypeMembers())
-        {
-            CollectExistingShouldEntryKeys(nested, keys);
-        }
-
-        if (!string.Equals(type.Name, "ShouldExtensions", StringComparison.Ordinal)
+        // Extension methods can only be declared on top-level non-generic static classes, so the
+        // one type that can contribute keys is found by name instead of walking the assembly.
+        var type = assembly.GetTypeByMetadataName(ShouldExtensionsTypeFullName);
+        if (type is null
             || type.DeclaredAccessibility != Accessibility.Public
             || !type.IsStatic)
-        {
-            return;
-        }
-
-        var containingNamespace = type.ContainingNamespace?.ToDisplayString(NoGlobalFormat) ?? string.Empty;
-        if (!string.Equals(containingNamespace, "TUnit.Assertions.Should", StringComparison.Ordinal))
         {
             return;
         }
@@ -1718,7 +1900,34 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     private sealed record GeneratorPayload(
         EquatableArray<MethodData> Methods,
         EquatableArray<WrapperData> Wrappers,
-        EquatableArray<ShouldEntryData> Entries);
+        EquatableArray<ShouldEntryData> Entries)
+    {
+        public static GeneratorPayload Empty { get; } = new(
+            new EquatableArray<MethodData>(Array.Empty<MethodData>()),
+            new EquatableArray<WrapperData>(Array.Empty<WrapperData>()),
+            new EquatableArray<ShouldEntryData>(Array.Empty<ShouldEntryData>()));
+    }
+
+    /// <param name="IsEnabled">False when TUnit.Assertions isn't referenced; nothing is generated.</param>
+    /// <param name="ReferenceMethods">Extension methods from referenced assemblies, already filtered against baked Should containers.</param>
+    /// <param name="Entries">Final, deduplicated Should entry points.</param>
+    private sealed record CompilationData(
+        bool IsEnabled,
+        EquatableArray<MethodData> ReferenceMethods,
+        EquatableArray<ShouldEntryData> Entries)
+    {
+        public static CompilationData Disabled { get; } = new(
+            false,
+            new EquatableArray<MethodData>(Array.Empty<MethodData>()),
+            new EquatableArray<ShouldEntryData>(Array.Empty<ShouldEntryData>()));
+    }
+
+    /// <summary>
+    /// Extension methods collected from one current-compilation container declaration.
+    /// </summary>
+    private sealed record LocalContainerData(
+        string ContainerKey,
+        EquatableArray<MethodData> Methods);
 
     private sealed record ShouldEntryData(
         string ReceiverTypeName,
@@ -1732,6 +1941,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         EquatableArray<string> ForwardedAttributes);
 
     private sealed record WrapperData(
+        string WrapperKey,
         string ContainingNamespace,
         string ClassName,
         EquatableArray<GenericParamData> ClassGenericParams,
