@@ -224,9 +224,17 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
     private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.MatrixTests> __createInstance = __CreateInstance;
     private static readonly global::System.Func<global::TUnit.TestProject.MatrixTests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
-    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.MatrixTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.MatrixTests>[]
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.MatrixTests>[] Entries = __CreateEntries();
+    private static global::TUnit.Core.TestEntry<global::TUnit.TestProject.MatrixTests>[] __CreateEntries()
     {
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+        var entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.MatrixTests>[13];
+        __FillEntries0(entries);
+        __FillEntries1(entries);
+        return entries;
+    }
+    private static void __FillEntries0(global::TUnit.Core.TestEntry<global::TUnit.TestProject.MatrixTests>[] entries)
+    {
+        entries[0] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "MatrixTest_One",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.MatrixTest_One",
             filePath: "",
@@ -248,8 +256,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 0,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+            attributeGroupIndex: 0);
+        entries[1] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "MatrixTest_Two",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.MatrixTest_Two",
             filePath: "",
@@ -272,8 +280,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 1,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+            attributeGroupIndex: 0);
+        entries[2] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "MatrixTest_Enum",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.MatrixTest_Enum",
             filePath: "",
@@ -295,8 +303,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 2,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+            attributeGroupIndex: 0);
+        entries[3] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "AutoGenerateBools",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.AutoGenerateBools",
             filePath: "",
@@ -317,8 +325,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 3,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+            attributeGroupIndex: 0);
+        entries[4] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "AutoGenerateBools2",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.AutoGenerateBools2",
             filePath: "",
@@ -339,8 +347,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 4,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+            attributeGroupIndex: 0);
+        entries[5] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "ImplicitConversion",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.ImplicitConversion",
             filePath: "",
@@ -361,8 +369,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 5,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+            attributeGroupIndex: 0);
+        entries[6] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "ExcludingAutoGeneratedMatrixValues",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.ExcludingAutoGeneratedMatrixValues",
             filePath: "",
@@ -383,8 +391,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 6,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+            attributeGroupIndex: 0);
+        entries[7] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "Method1",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.Method1",
             filePath: "",
@@ -404,8 +412,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 7,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+            attributeGroupIndex: 0);
+        entries[8] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "Method2",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.Method2",
             filePath: "",
@@ -425,8 +433,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 8,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+            attributeGroupIndex: 0);
+        entries[9] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "Method3",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.Method3",
             filePath: "",
@@ -446,8 +454,11 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 9,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+            attributeGroupIndex: 0);
+    }
+    private static void __FillEntries1(global::TUnit.Core.TestEntry<global::TUnit.TestProject.MatrixTests>[] entries)
+    {
+        entries[10] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "Method4",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.Method4",
             filePath: "",
@@ -467,8 +478,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 10,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+            attributeGroupIndex: 0);
+        entries[11] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "Exclusion",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.Exclusion",
             filePath: "",
@@ -489,8 +500,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 11,
             createAttributes: __attributes,
-            attributeGroupIndex: 1),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
+            attributeGroupIndex: 1);
+        entries[12] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.MatrixTests>(
             methodName: "MatrixMethod_WithEnumParameter_UsesOnlyMethodValues",
             fullyQualifiedName: "TUnit.TestProject.MatrixTests.MatrixMethod_WithEnumParameter_UsesOnlyMethodValues",
             filePath: "",
@@ -511,8 +522,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             invokeBody: __invoke,
             methodIndex: 12,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-    };
+            attributeGroupIndex: 0);
+    }
 }
 internal static partial class TUnit_TestRegistration
 {
