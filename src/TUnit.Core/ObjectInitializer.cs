@@ -90,7 +90,7 @@ internal static class ObjectInitializer
             return false;
         }
 
-        // Use Status == RanToCompletion to ensure we don't return true for pending/faulted/canceled tasks
+        // Use Status == RanToCompletion to ensure we don't return true for pending or failed initializations
         // (IsCompletedSuccessfully is not available in netstandard2.0)
         return InitializationTasks.TryGetValue(obj, out var initializationTask) &&
                initializationTask.Status == TaskStatus.RanToCompletion;
@@ -114,9 +114,9 @@ internal static class ObjectInitializer
     {
         if (!InitializationTasks.TryGetValue(obj, out var initializationTask))
         {
-            // RunContinuationsAsynchronously: when the initialization completes, callers waiting on
-            // a shared object resume on their own thread-pool threads instead of one after another
-            // inline on the thread that completed it.
+            // RunContinuationsAsynchronously: when the initialization completes, the continuations of
+            // callers waiting on a shared object are queued, rather than run one after another inline
+            // on the thread that completed it.
             var completionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             initializationTask = InitializationTasks.GetOrAdd(obj, completionSource.Task);
 
@@ -142,13 +142,15 @@ internal static class ObjectInitializer
             // The synchronous part of InitializeAsync still runs on the caller's thread and context;
             // only publishing the result doesn't need to return there.
             await asyncInitializer.InitializeAsync().ConfigureAwait(false);
-            completionSource.SetResult(true);
         }
         catch (Exception ex)
         {
             // SetException rather than SetCanceled, so callers get the original exception object -
             // including an OperationCanceledException thrown by InitializeAsync.
             completionSource.SetException(ex);
+            return;
         }
+
+        completionSource.SetResult(true);
     }
 }

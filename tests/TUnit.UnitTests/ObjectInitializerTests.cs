@@ -14,23 +14,33 @@ public class ObjectInitializerTests
     [Test]
     public async Task Waiting_Caller_Does_Not_Block_While_InitializeAsync_Runs_Synchronously()
     {
-        var fixture = new BlockingPrefixInitializer();
+        using var fixture = new BlockingPrefixInitializer();
         var initialization = Task.Run(() => ObjectInitializer.InitializeAsync(fixture).AsTask());
-        await fixture.PrefixEntered.Task.WaitAsync(HangTimeout);
-
         var callReturned = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var waiter = Task.Run(() =>
+        Task waiter = Task.CompletedTask;
+        bool callReturnedWhilePrefixBlocked;
+        bool completedWhilePrefixBlocked;
+
+        try
         {
-            var pending = ObjectInitializer.InitializeAsync(fixture);
-            callReturned.SetResult(true);
-            return pending.AsTask();
-        });
+            await fixture.PrefixEntered.Task.WaitAsync(HangTimeout);
 
-        var callReturnedWhilePrefixBlocked = await Task.WhenAny(callReturned.Task, Task.Delay(HangTimeout)) == callReturned.Task;
-        var completedWhilePrefixBlocked = waiter.IsCompleted;
+            waiter = Task.Run(() =>
+            {
+                var pending = ObjectInitializer.InitializeAsync(fixture);
+                callReturned.SetResult(true);
+                return pending.AsTask();
+            });
 
-        fixture.ReleasePrefix();
-        await Task.WhenAll(initialization, waiter);
+            callReturnedWhilePrefixBlocked = await Task.WhenAny(callReturned.Task, Task.Delay(HangTimeout)) == callReturned.Task;
+            completedWhilePrefixBlocked = waiter.IsCompleted;
+        }
+        finally
+        {
+            fixture.ReleasePrefix();
+        }
+
+        await Task.WhenAll(initialization, waiter).WaitAsync(HangTimeout);
 
         await Assert.That(callReturnedWhilePrefixBlocked).IsTrue();
         await Assert.That(completedWhilePrefixBlocked).IsFalse();
@@ -41,18 +51,27 @@ public class ObjectInitializerTests
     [Test]
     public async Task Waiting_Caller_Observes_Its_Cancellation_While_InitializeAsync_Runs_Synchronously()
     {
-        var fixture = new BlockingPrefixInitializer();
-        var initialization = Task.Run(() => ObjectInitializer.InitializeAsync(fixture).AsTask());
-        await fixture.PrefixEntered.Task.WaitAsync(HangTimeout);
-
+        using var fixture = new BlockingPrefixInitializer();
         using var cancellationTokenSource = new CancellationTokenSource();
-        var waiter = Task.Run(() => ObjectInitializer.InitializeAsync(fixture, cancellationTokenSource.Token).AsTask());
-        cancellationTokenSource.Cancel();
+        var initialization = Task.Run(() => ObjectInitializer.InitializeAsync(fixture).AsTask());
+        Task waiter = Task.CompletedTask;
+        bool waiterFinishedWhilePrefixBlocked;
 
-        var waiterFinishedWhilePrefixBlocked = await Task.WhenAny(waiter, Task.Delay(HangTimeout)) == waiter;
+        try
+        {
+            await fixture.PrefixEntered.Task.WaitAsync(HangTimeout);
 
-        fixture.ReleasePrefix();
-        await initialization;
+            waiter = Task.Run(() => ObjectInitializer.InitializeAsync(fixture, cancellationTokenSource.Token).AsTask());
+            cancellationTokenSource.Cancel();
+
+            waiterFinishedWhilePrefixBlocked = await Task.WhenAny(waiter, Task.Delay(HangTimeout)) == waiter;
+        }
+        finally
+        {
+            fixture.ReleasePrefix();
+        }
+
+        await initialization.WaitAsync(HangTimeout);
 
         await Assert.That(waiterFinishedWhilePrefixBlocked).IsTrue();
         await Assert.That(async () => await waiter).Throws<OperationCanceledException>();
@@ -61,20 +80,20 @@ public class ObjectInitializerTests
     }
 
     [Test]
-    public async Task Cancelling_One_Waiter_Does_Not_Cancel_The_Shared_Initialization()
+    public async Task Cancelling_A_Waiting_Caller_Does_Not_Cancel_The_Shared_Initialization()
     {
         var fixture = new GatedInitializer();
-        var initialization = ObjectInitializer.InitializeAsync(fixture).AsTask();
-
         using var cancellationTokenSource = new CancellationTokenSource();
+        var initializingCaller = ObjectInitializer.InitializeAsync(fixture).AsTask();
         var cancelledWaiter = ObjectInitializer.InitializeAsync(fixture, cancellationTokenSource.Token).AsTask();
+
         cancellationTokenSource.Cancel();
 
         await Assert.That(async () => await cancelledWaiter).Throws<OperationCanceledException>();
         await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsFalse();
 
         fixture.Complete();
-        await initialization.WaitAsync(HangTimeout);
+        await initializingCaller.WaitAsync(HangTimeout);
         await ObjectInitializer.InitializeAsync(fixture);
 
         await Assert.That(fixture.InitializeCount).IsEqualTo(1);
@@ -82,17 +101,52 @@ public class ObjectInitializerTests
     }
 
     [Test]
-    public async Task Waiters_Do_Not_Resume_Inline_On_The_Thread_That_Completes_Initialization()
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Cancelling_The_Initializing_Caller_Does_Not_Cancel_The_Shared_Initialization(bool initializationFails)
+    {
+        var fixture = new GatedInitializer();
+        var failure = new InvalidOperationException("initialization failed");
+        using var cancellationTokenSource = new CancellationTokenSource();
+        var initializingCaller = ObjectInitializer.InitializeAsync(fixture, cancellationTokenSource.Token).AsTask();
+        var waiter = ObjectInitializer.InitializeAsync(fixture).AsTask();
+
+        cancellationTokenSource.Cancel();
+
+        await Assert.That(async () => await initializingCaller).Throws<OperationCanceledException>();
+        await Assert.That(waiter.IsCompleted).IsFalse();
+
+        if (initializationFails)
+        {
+            fixture.Fail(failure);
+            var observed = await Assert.That(async () => await waiter.WaitAsync(HangTimeout)).Throws<InvalidOperationException>();
+            await Assert.That(observed).IsSameReferenceAs(failure);
+        }
+        else
+        {
+            fixture.Complete();
+            await waiter.WaitAsync(HangTimeout);
+        }
+
+        await Assert.That(fixture.InitializeCount).IsEqualTo(1);
+        await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsEqualTo(!initializationFails);
+    }
+
+    [Test]
+    [Arguments(true)]
+    [Arguments(false)]
+    public async Task Waiters_Do_Not_Resume_Inline_On_The_Thread_That_Completes_Initialization(bool cancellableWait)
     {
         var fixture = new GatedInitializer();
         using var cancellationTokenSource = new CancellationTokenSource();
-        var initialization = ObjectInitializer.InitializeAsync(fixture, cancellationTokenSource.Token).AsTask();
+        var cancellationToken = cancellableWait ? cancellationTokenSource.Token : CancellationToken.None;
+        var initializingCaller = ObjectInitializer.InitializeAsync(fixture, cancellationToken).AsTask();
 
         var completingThreadId = 0;
         var completeReturned = false;
 
         // Registers its continuation before the initialization is completed below.
-        var resumedInline = ResumedInlineAsync(ObjectInitializer.InitializeAsync(fixture, cancellationTokenSource.Token));
+        var waiterResumedInline = ResumedInlineAsync(ObjectInitializer.InitializeAsync(fixture, cancellationToken));
 
         await Task.Run(() =>
         {
@@ -101,8 +155,12 @@ public class ObjectInitializerTests
             Volatile.Write(ref completeReturned, true);
         });
 
-        await initialization.WaitAsync(HangTimeout);
-        await Assert.That(await resumedInline.WaitAsync(HangTimeout)).IsFalse();
+        await initializingCaller.WaitAsync(HangTimeout);
+
+        // Precondition: InitializeAsync itself finished inline on the completing thread, so its
+        // completion is what would drag waiters along with it.
+        await Assert.That(fixture.ResumedOnThreadId).IsEqualTo(completingThreadId);
+        await Assert.That(await waiterResumedInline.WaitAsync(HangTimeout)).IsFalse();
 
         async Task<bool> ResumedInlineAsync(ValueTask pending)
         {
@@ -146,9 +204,11 @@ public class ObjectInitializerTests
     }
 
     [Test]
-    public async Task OperationCanceledException_From_InitializeAsync_Reaches_Callers_Unchanged()
+    [Arguments(true)]
+    [Arguments(false)]
+    public async Task OperationCanceledException_From_InitializeAsync_Reaches_Callers_Unchanged(bool throwSynchronously)
     {
-        var fixture = new ThrowingInitializer(new OperationCanceledException("initializer gave up"), throwSynchronously: false);
+        var fixture = new ThrowingInitializer(new OperationCanceledException("initializer gave up"), throwSynchronously);
 
         var first = await Assert.That(async () => await ObjectInitializer.InitializeAsync(fixture)).Throws<OperationCanceledException>();
         var second = await Assert.That(async () => await ObjectInitializer.InitializeAsync(fixture)).Throws<OperationCanceledException>();
@@ -163,7 +223,7 @@ public class ObjectInitializerTests
     /// Blocks inside the synchronous part of InitializeAsync (before its first await), like
     /// sync-over-async code in a third-party constructor would.
     /// </summary>
-    private sealed class BlockingPrefixInitializer : IAsyncInitializer
+    private sealed class BlockingPrefixInitializer : IAsyncInitializer, IDisposable
     {
         private readonly ManualResetEventSlim _prefixGate = new();
         private int _initializeCount;
@@ -177,29 +237,44 @@ public class ObjectInitializerTests
         public async Task InitializeAsync()
         {
             Interlocked.Increment(ref _initializeCount);
-            PrefixEntered.SetResult(true);
+            PrefixEntered.TrySetResult(true);
             _prefixGate.Wait(PrefixGateTimeout);
             await Task.Yield();
         }
+
+        public void Dispose() => _prefixGate.Dispose();
     }
 
     /// <summary>
-    /// Suspends until <see cref="Complete"/> is called; the rest of InitializeAsync then runs
-    /// inline on the calling thread.
+    /// Suspends until <see cref="Complete"/> or <see cref="Fail"/> is called; the rest of
+    /// InitializeAsync then runs inline on the calling thread.
     /// </summary>
     private sealed class GatedInitializer : IAsyncInitializer
     {
         private readonly TaskCompletionSource<bool> _gate = new();
         private int _initializeCount;
+        private int _resumedOnThreadId;
 
         public int InitializeCount => Volatile.Read(ref _initializeCount);
 
+        public int ResumedOnThreadId => Volatile.Read(ref _resumedOnThreadId);
+
         public void Complete() => _gate.SetResult(true);
+
+        public void Fail(Exception exception) => _gate.SetException(exception);
 
         public async Task InitializeAsync()
         {
             Interlocked.Increment(ref _initializeCount);
-            await _gate.Task;
+
+            try
+            {
+                await _gate.Task;
+            }
+            finally
+            {
+                Volatile.Write(ref _resumedOnThreadId, Environment.CurrentManagedThreadId);
+            }
         }
     }
 
