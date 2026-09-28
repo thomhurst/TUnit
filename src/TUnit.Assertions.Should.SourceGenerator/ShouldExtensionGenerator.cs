@@ -65,6 +65,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         // The current compilation is scanned through syntax providers so an edit only re-examines
         // candidate declarations instead of walking every type in the assembly:
         //  - extension-method containers: top-level classes declaring a method with a `this` parameter
+        //    or a C# 14 extension block
         //  - wrappers: classes carrying [ShouldGeneratePartial]
         // The syntax steps yield only metadata names. What a candidate contributes also depends on
         // other types (a container's return types, a wrapper's wrapped assertion), which may be
@@ -308,9 +309,19 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     }
 
     /// <summary>
+    /// Raw kind of a C# 14 <c>extension(T x) { ... }</c> block. The generator is built against a
+    /// Roslyn that predates the syntax, so the kind is looked up by name in the host compiler's
+    /// <see cref="SyntaxKind"/>; it stays null on compilers that can't parse extension blocks.
+    /// </summary>
+    private static readonly int? s_extensionBlockRawKind =
+        Enum.TryParse<SyntaxKind>("ExtensionBlockDeclaration", out var kind) ? (int)kind : null;
+
+    /// <summary>
     /// Syntactic gate for <see cref="GetDeclaredTypeMetadataName"/>: a top-level class declaring a method
-    /// whose first parameter carries <c>this</c>. Extension methods can only live in top-level
-    /// non-generic static classes, so every class the namespace walk could collect from passes.
+    /// whose first parameter carries <c>this</c>, or a C# 14 extension block. Extension methods can
+    /// only live in top-level non-generic static classes, so every class the namespace walk could
+    /// collect from passes. Extension-block members surface on the containing class as extension
+    /// methods, which the namespace walk collected, so blocks must pass the gate too.
     /// </summary>
     private static bool IsExtensionContainerCandidate(SyntaxNode node)
     {
@@ -324,6 +335,11 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         {
             if (member is MethodDeclarationSyntax { ParameterList.Parameters: { Count: > 0 } parameters }
                 && parameters[0].Modifiers.Any(SyntaxKind.ThisKeyword))
+            {
+                return true;
+            }
+
+            if (member.RawKind == s_extensionBlockRawKind)
             {
                 return true;
             }

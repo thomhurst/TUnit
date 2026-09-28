@@ -38,6 +38,29 @@ public static class OddCustomNameExtensions
         => new(source.Context);
 }
 
+public sealed class OddViaExtensionBlockAssertion : Assertion<int>
+{
+    public OddViaExtensionBlockAssertion(AssertionContext<int> context) : base(context) { }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+        => Task.FromResult(metadata.Value % 2 != 0
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"{metadata.Value} is even"));
+
+    protected override string GetExpectation() => "to be odd";
+}
+
+// C# 14 extension block: no member carries a `this` parameter syntactically, but the
+// generator must still pick the container up.
+public static class OddViaExtensionBlockExtensions
+{
+    extension(IAssertionSource<int> source)
+    {
+        public OddViaExtensionBlockAssertion IsOddViaExtensionBlock()
+            => new(source.Context);
+    }
+}
+
 public class UserDefinedAssertionTests
 {
     [Test]
@@ -53,5 +76,11 @@ public class UserDefinedAssertionTests
     public async Task User_assertion_can_override_Should_name()
     {
         await 3.Should().BeOddByCustomName();
+    }
+
+    [Test]
+    public async Task Extension_block_assertion_gets_Should_flavored_counterpart()
+    {
+        await 3.Should().BeOddViaExtensionBlock();
     }
 }

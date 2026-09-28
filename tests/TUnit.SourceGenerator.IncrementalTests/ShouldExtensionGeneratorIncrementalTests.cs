@@ -209,6 +209,43 @@ public class ShouldExtensionGeneratorIncrementalTests
         TestHelper.AssertSourceOutputsCached(runResult);
     }
 
+    [Fact]
+    public void GenericAndNestedWrappersResolveByMetadataName()
+    {
+        // The syntax step hands the resolver hand-built metadata names; a wrong name makes
+        // GetTypeByMetadataName return null and the wrapper silently disappears. Cover a
+        // dotted namespace, an arity suffix and a containing type ('+') in one go.
+        var compilation = Fixture.CreateLibrary(
+            SplitAssertionTree(SplitAssertion),
+            SplitDeclarationsTree(),
+            CSharpSyntaxTree.ParseText(
+                """
+                using TUnit.Assertions.Should.Attributes;
+
+                namespace MyTests.Deeper.Wrappers
+                {
+                    [ShouldGeneratePartial(typeof(MyTests.FooAssertion))]
+                    public partial class GenericWrapper<T>
+                    {
+                    }
+
+                    public partial class Outer<TOuter>
+                    {
+                        [ShouldGeneratePartial(typeof(MyTests.FooAssertion))]
+                        public partial class NestedWrapper
+                        {
+                        }
+                    }
+                }
+                """,
+                path: "Wrappers.cs"));
+
+        var driver = TestHelper.GenerateTracked<ShouldExtensionGenerator>(compilation);
+
+        Xunit.Assert.Contains("BeFooToo", GetSource(driver, "GenericWrapper.Generated.g.cs"));
+        Xunit.Assert.Contains("BeFooToo", GetSource(driver, "NestedWrapper.Generated.g.cs"));
+    }
+
     private static SyntaxTree HelperPartTree(string value) =>
         CSharpSyntaxTree.ParseText(
             $$"""
