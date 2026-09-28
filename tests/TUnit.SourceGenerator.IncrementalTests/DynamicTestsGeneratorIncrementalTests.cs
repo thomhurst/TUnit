@@ -84,6 +84,25 @@ public class DynamicTestsGeneratorIncrementalTests
         AssertRunReasons(driver2, IncrementalGeneratorRunReasons.New, 1);
     }
 
+    [Fact]
+    public void MoveDynamicMethodToDifferentLine_ShouldRegenerate()
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(DefaultConverter, CSharpParseOptions.Default);
+        var compilation1 = Fixture.CreateLibrary(syntaxTree);
+
+        var driver1 = TestHelper.GenerateTracked<DynamicTestsGenerator>(compilation1);
+        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+
+        // The [CallerLineNumber] captured by DynamicTestBuilder feeds the hint name and the
+        // generated DynamicTestBuilderContext, so shifting the method must regenerate.
+        var compilation2 = compilation1.ReplaceSyntaxTree(
+            syntaxTree,
+            CSharpSyntaxTree.ParseText(DefaultConverter.Replace("public class DynamicTestArgumentsTests", "\n\npublic class DynamicTestArgumentsTests"), CSharpParseOptions.Default));
+
+        var driver2 = driver1.RunGenerators(compilation2);
+        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified);
+    }
+
     private static void AssertRunReasons(
         GeneratorDriver driver,
         IncrementalGeneratorRunReasons reasons,

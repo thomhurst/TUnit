@@ -58,13 +58,37 @@ public sealed class HookModel : IEquatable<HookModel>
             return true;
         }
 
+        // Every field feeds the generated hook file (hint name, delegate body, or the hook
+        // object's metadata such as FilePath/LineNumber), so every field must be compared.
+        // Otherwise the incremental pipeline treats a changed hook as unchanged and the IDE
+        // keeps showing stale generated output.
         return FullyQualifiedTypeName == other.FullyQualifiedTypeName
+               && MinimalTypeName == other.MinimalTypeName
+               && Namespace == other.Namespace
+               && AssemblyName == other.AssemblyName
                && MethodName == other.MethodName
+               && FilePath == other.FilePath
+               && LineNumber == other.LineNumber
                && HookKind == other.HookKind
                && HookType == other.HookType
                && Order == other.Order
+               && HookExecutorTypeName == other.HookExecutorTypeName
+               && IsStatic == other.IsStatic
+               && IsAsync == other.IsAsync
+               && ReturnsVoid == other.ReturnsVoid
+               && ReturnType == other.ReturnType
                && ParameterCount == other.ParameterCount
-               && IsStatic == other.IsStatic;
+               && HasCancellationTokenOnly == other.HasCancellationTokenOnly
+               && HasContextOnly == other.HasContextOnly
+               && HasContextAndCancellationToken == other.HasContextAndCancellationToken
+               && FirstParameterTypeName == other.FirstParameterTypeName
+               && Parameters.Equals(other.Parameters)
+               && ClassIsGenericType == other.ClassIsGenericType
+               && ClassIsOpenGeneric == other.ClassIsOpenGeneric
+               && ClassTypeParameters.Equals(other.ClassTypeParameters)
+               && MethodInfoExpression == other.MethodInfoExpression
+               && HookAttribute.Equals(other.HookAttribute)
+               && MethodAttributes.Equals(other.MethodAttributes);
     }
 
     public override bool Equals(object? obj)
@@ -78,11 +102,17 @@ public sealed class HookModel : IEquatable<HookModel>
         {
             var hash = FullyQualifiedTypeName.GetHashCode();
             hash = (hash * 397) ^ MethodName.GetHashCode();
+            hash = (hash * 397) ^ FilePath.GetHashCode();
+            hash = (hash * 397) ^ LineNumber;
             hash = (hash * 397) ^ HookKind.GetHashCode();
             hash = (hash * 397) ^ HookType.GetHashCode();
             hash = (hash * 397) ^ Order;
             hash = (hash * 397) ^ ParameterCount;
             hash = (hash * 397) ^ IsStatic.GetHashCode();
+            hash = (hash * 397) ^ IsAsync.GetHashCode();
+            hash = (hash * 397) ^ ReturnType.GetHashCode();
+            hash = (hash * 397) ^ Parameters.GetHashCode();
+            hash = (hash * 397) ^ MethodAttributes.GetHashCode();
             return hash;
         }
     }
