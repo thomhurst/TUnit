@@ -89,6 +89,20 @@ internal sealed class SegmentedBufferWriter : IBufferWriter<byte>, IDisposable
         }
     }
 
+    /// <summary>Appends the written bytes to <paramref name="destination"/> in order.</summary>
+    public void WriteTo(IBufferWriter<byte> destination)
+    {
+        for (var i = 0; i < _completed.Count; i++)
+        {
+            destination.Write(_completed[i].AsSpan(0, _completedCounts[i]));
+        }
+
+        if (_index > 0)
+        {
+            destination.Write(_current.AsSpan(0, _index));
+        }
+    }
+
     public byte[] ToArray()
     {
         var result = new byte[checked((int)Length)];

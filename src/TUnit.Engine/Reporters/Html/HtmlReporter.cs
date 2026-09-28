@@ -593,6 +593,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         _resultsDirectory = path;
     }
 
+    #if NET
+    // Runs once per process over every test, so tier-0 code would do the whole job unoptimized.
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
+#endif
     internal ReportData BuildReportData()
     {
         var assemblyName = GetAssemblyName();
@@ -871,6 +875,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             : DateTimeOffset.MaxValue;
     }
 
+    #if NET
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
+#endif
     internal static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds, ReportAttempt[]? attempts = null, string? ciRepo = null, string? ciWorkspace = null)
     {
         IProperty? stateProperty = null;

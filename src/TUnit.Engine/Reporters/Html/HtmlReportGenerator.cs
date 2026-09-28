@@ -96,6 +96,12 @@ internal static class HtmlReportGenerator
     // Returns the renderer JSON as UTF-8 in pooled chunks: it is only ever compressed, so it
     // never needs to exist as one contiguous array or as a (twice as large) UTF-16 string.
     // The caller owns (and must dispose) the result.
+    private static readonly JsonWriterOptions WriterOptions = new() { Indented = false };
+
+    // Minimum tests a thread serializes when the tests array is split across threads (see
+    // ParallelJsonArrayWriter). Below twice this count the array is written sequentially.
+    private const int MinTestsPerSlice = 1000;
+
     private static SegmentedBufferWriter SerializeReport(ReportData data)
     {
         var totalTests = 0;
@@ -189,7 +195,7 @@ internal static class HtmlReportGenerator
         var buffer = new SegmentedBufferWriter();
         try
         {
-            using var w = new Utf8JsonWriter(buffer, new JsonWriterOptions { Indented = false });
+            using var w = new Utf8JsonWriter(buffer, WriterOptions);
             w.WriteStartObject();
             w.WriteString("project", data.AssemblyName);
             w.WriteString("when", data.Timestamp);
@@ -218,16 +224,24 @@ internal static class HtmlReportGenerator
             w.WriteNumber("wallMs", wallMs);
             w.WriteNumber("workers", workers);
 
-            w.WritePropertyName("tests");
-            w.WriteStartArray();
+            var flatTests = new (ReportTestResult Test, ReportTestGroup Group)[totalTests];
+            var fi = 0;
             foreach (var g in data.Groups)
             {
                 foreach (var t in g.Tests)
                 {
-                    var startRel = absStartByTestId[t.Id] is { } a ? a - runStartMs : 0L;
-                    WriteTest(w, t, g, runStartMs, startRel, testWorker, spansByTrace);
+                    flatTests[fi++] = (t, g);
                 }
             }
+
+            w.WritePropertyName("tests");
+            w.WriteStartArray();
+            ParallelJsonArrayWriter.WriteElements(w, buffer, WriterOptions, totalTests, MinTestsPerSlice, (writer, i) =>
+            {
+                var (t, g) = flatTests[i];
+                var startRel = absStartByTestId[t.Id] is { } a ? a - runStartMs : 0L;
+                WriteTest(writer, t, g, runStartMs, startRel, testWorker, spansByTrace);
+            });
             w.WriteEndArray();
 
 #if NET
@@ -502,6 +516,10 @@ internal static class HtmlReportGenerator
     }
 #endif
 
+    #if NET
+    // Runs once per process over every test, so tier-0 code would do the whole job unoptimized.
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
+#endif
     private static void WriteTest(
         Utf8JsonWriter w,
         ReportTestResult t,
@@ -625,6 +643,9 @@ internal static class HtmlReportGenerator
         }
     }
 
+    #if NET
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
+#endif
     private static void WriteSpan(Utf8JsonWriter w, SpanData s, long runStartMs, bool linked = false)
     {
         w.WriteStartObject();
