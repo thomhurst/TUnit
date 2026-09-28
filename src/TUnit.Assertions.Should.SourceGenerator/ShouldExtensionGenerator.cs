@@ -376,7 +376,9 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     /// <summary>
     /// Resolves the candidates found by the syntax providers against the current compilation.
     /// A partial type is reported once per declaration, so repeated names are skipped and the
-    /// first occurrence keeps its position.
+    /// first occurrence keeps its position. Equal metadata names are treated as the same type:
+    /// two distinct types cannot share one within an assembly (CS0101), and
+    /// <see cref="IAssemblySymbol.GetTypeByMetadataName"/> resolves the name to that type either way.
     /// </summary>
     private static LocalDeclarations ResolveLocalDeclarations(
         Compilation compilation,
