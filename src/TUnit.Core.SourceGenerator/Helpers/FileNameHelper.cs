@@ -152,32 +152,6 @@ internal static class FileNameHelper
     }
 
     /// <summary>
-    /// Generates a safe unique method identifier within a class.
-    /// Returns just the method name for non-overloaded methods,
-    /// or MethodName__ParamType1_ParamType2 for overloads.
-    /// </summary>
-    public static string GetSafeMethodId(IMethodSymbol methodSymbol)
-    {
-        var baseName = SanitizeForFileName(methodSymbol.Name);
-
-        if (methodSymbol.Parameters.Length == 0)
-        {
-            return baseName;
-        }
-
-        var sb = new StringBuilder(baseName);
-        sb.Append("__");
-        for (int i = 0; i < methodSymbol.Parameters.Length; i++)
-        {
-            if (i > 0) sb.Append('_');
-            sb.Append(SanitizeForFileName(
-                methodSymbol.Parameters[i].Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
-        }
-
-        return sb.ToString();
-    }
-
-    /// <summary>
     /// Computes a deterministic hash code for a string (FNV-1a).
     /// Unlike string.GetHashCode(), this is stable across processes and platforms,
     /// so it is safe to bake into generated identifiers and hint names that must stay
