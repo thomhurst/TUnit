@@ -140,6 +140,54 @@ public class ObjectInitializerTests
         await Assert.That(ObjectInitializer.IsInitialized(fixture)).IsTrue();
     }
 
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Waiting_Continuations_Do_Not_Run_On_The_Initializing_Thread(bool cancellableWait)
+    {
+        // Arrange
+        const int waiterCount = 4;
+        using var fixture = new BlockingPrefixInitializer(completeSynchronously: true);
+        using var cancellationTokenSource = new CancellationTokenSource();
+        var cancellationToken = cancellableWait ? cancellationTokenSource.Token : CancellationToken.None;
+        var initializingThreadId = 0;
+        Task<int>[] waiters = [];
+
+        // A dedicated thread cannot later pick up correctly queued waiter continuations.
+        var initialization = Task.Factory.StartNew(() =>
+        {
+            initializingThreadId = Environment.CurrentManagedThreadId;
+            return ObjectInitializer.InitializeAsync(fixture).AsTask();
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+
+        async Task<int> ObserveContinuationAsync()
+        {
+            await ObjectInitializer.InitializeAsync(fixture, cancellationToken).ConfigureAwait(false);
+            return Environment.CurrentManagedThreadId;
+        }
+
+        // Act
+        try
+        {
+            await fixture.PrefixEntered.Task.WaitAsync(HangTimeout);
+            waiters = Enumerable.Range(0, waiterCount).Select(_ => ObserveContinuationAsync()).ToArray();
+        }
+        finally
+        {
+            fixture.ReleasePrefix();
+            await initialization.WaitAsync(HangTimeout);
+        }
+
+        var continuationThreads = await Task.WhenAll(waiters).WaitAsync(HangTimeout);
+
+        // Assert
+        await Assert.That(continuationThreads.Length).IsEqualTo(waiterCount);
+        foreach (var threadId in continuationThreads)
+        {
+            await Assert.That(threadId).IsNotEqualTo(initializingThreadId);
+        }
+    }
+
     private static async Task<Exception?> CaptureAsync(Task task)
     {
         try
@@ -157,7 +205,7 @@ public class ObjectInitializerTests
     /// Blocks inside the synchronous part of InitializeAsync (before its first await), like
     /// sync-over-async code in a third-party constructor would.
     /// </summary>
-    private sealed class BlockingPrefixInitializer : IAsyncInitializer, IDisposable
+    private sealed class BlockingPrefixInitializer(bool completeSynchronously = false) : IAsyncInitializer, IDisposable
     {
         private readonly ManualResetEventSlim _prefixGate = new();
         private int _initializeCount;
@@ -173,7 +221,10 @@ public class ObjectInitializerTests
             Interlocked.Increment(ref _initializeCount);
             PrefixEntered.TrySetResult(true);
             _prefixGate.Wait(PrefixGateTimeout);
-            await Task.Yield();
+            if (!completeSynchronously)
+            {
+                await Task.Yield();
+            }
         }
 
         public void Dispose() => _prefixGate.Dispose();

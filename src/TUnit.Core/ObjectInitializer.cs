@@ -117,7 +117,8 @@ internal static class ObjectInitializer
     {
         if (!InitializationTasks.TryGetValue(obj, out var initializationTask))
         {
-            var completionSource = new TaskCompletionSource<bool>();
+            // Waiting tests must not run inline on the thread that completes initialization.
+            var completionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             initializationTask = InitializationTasks.GetOrAdd(obj, completionSource.Task);
 
             if (ReferenceEquals(initializationTask, completionSource.Task))
