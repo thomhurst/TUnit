@@ -8,11 +8,8 @@ public sealed class DynamicTestModel : IEquatable<DynamicTestModel>
 {
     public required string FullyQualifiedTypeName { get; init; }
     public required string MinimalTypeName { get; init; }
-    public required string Namespace { get; init; }
     public required string MethodName { get; init; }
     public required bool IsStatic { get; init; }
-    public required bool IsAsync { get; init; }
-    public required string ReturnType { get; init; }
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
 
@@ -28,9 +25,14 @@ public sealed class DynamicTestModel : IEquatable<DynamicTestModel>
             return true;
         }
 
+        // Every field feeds the generated source (FilePath and LineNumber also feed the hint name),
+        // so all of them must be compared.
         return FullyQualifiedTypeName == other.FullyQualifiedTypeName
+               && MinimalTypeName == other.MinimalTypeName
                && MethodName == other.MethodName
-               && IsStatic == other.IsStatic;
+               && IsStatic == other.IsStatic
+               && FilePath == other.FilePath
+               && LineNumber == other.LineNumber;
     }
 
     public override bool Equals(object? obj)
@@ -45,6 +47,8 @@ public sealed class DynamicTestModel : IEquatable<DynamicTestModel>
             var hash = FullyQualifiedTypeName.GetHashCode();
             hash = (hash * 397) ^ MethodName.GetHashCode();
             hash = (hash * 397) ^ IsStatic.GetHashCode();
+            hash = (hash * 397) ^ FilePath.GetHashCode();
+            hash = (hash * 397) ^ LineNumber;
             return hash;
         }
     }

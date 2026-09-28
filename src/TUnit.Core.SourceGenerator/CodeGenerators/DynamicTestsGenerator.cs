@@ -73,11 +73,8 @@ public class DynamicTestsGenerator : IIncrementalGenerator
         {
             FullyQualifiedTypeName = containingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             MinimalTypeName = containingType.Name,
-            Namespace = containingType.ContainingNamespace?.ToDisplayString() ?? string.Empty,
             MethodName = methodSymbol.Name,
             IsStatic = methodSymbol.IsStatic,
-            IsAsync = methodSymbol.IsAsync,
-            ReturnType = methodSymbol.ReturnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             FilePath = filePath,
             LineNumber = lineNumber
         };
