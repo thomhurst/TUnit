@@ -19,11 +19,7 @@ internal static class TUnit_TestProject_NonPublicTestMethodRootingTests_Internal
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Internal_Generic", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests), "Internal_Generic", false, 1,
-#if NET5_0_OR_GREATER
-[global::System.Diagnostics.CodeAnalysis.DynamicDependency("Internal_Generic``1(``0)", typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests))]
-#endif
-static () => { }, new global::TUnit.Core.ParameterMetadata[]
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Internal_Generic", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests), "Internal_Generic", false, 1, [global::System.Diagnostics.CodeAnalysis.DynamicDependency("Internal_Generic``1(``0)", typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests))] static () => { }, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, true, "T"), false)
 }));
@@ -187,11 +183,7 @@ internal static class TUnit_TestProject_NonPublicTestMethodRootingTests__TestSou
     new global::TUnit.Core.ArgumentsAttribute(1, "one"),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests), "Internal_Method", false, 0,
-            #if NET5_0_OR_GREATER
-            [global::System.Diagnostics.CodeAnalysis.DynamicDependency("Internal_Method(System.Int32,System.String)", typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests))]
-            #endif
-            static () => { }, new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests), "Internal_Method", false, 0, [global::System.Diagnostics.CodeAnalysis.DynamicDependency("Internal_Method(System.Int32,System.String)", typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests))] static () => { }, new global::TUnit.Core.ParameterMetadata[]
             {
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false),
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "text", new global::TUnit.Core.ConcreteType(typeof(string)), false)
@@ -213,11 +205,7 @@ internal static class TUnit_TestProject_NonPublicTestMethodRootingTests__TestSou
     new global::TUnit.Core.ArgumentsAttribute(3),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests), "Internal_Shares_Name", false, 0,
-            #if NET5_0_OR_GREATER
-            [global::System.Diagnostics.CodeAnalysis.DynamicDependency("Internal_Shares_Name(System.Int32)", typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests))]
-            #endif
-            static () => { }, new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests), "Internal_Shares_Name", false, 0, [global::System.Diagnostics.CodeAnalysis.DynamicDependency("Internal_Shares_Name(System.Int32)", typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests))] static () => { }, new global::TUnit.Core.ParameterMetadata[]
             {
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false)
             }),
@@ -238,11 +226,7 @@ internal static class TUnit_TestProject_NonPublicTestMethodRootingTests__TestSou
     new global::TUnit.Core.ArgumentsAttribute(4),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests), "Internal_Ref_Overload", false, 0,
-            #if NET5_0_OR_GREATER
-            [global::System.Diagnostics.CodeAnalysis.DynamicDependency("Internal_Ref_Overload(System.Int32)", typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests))]
-            #endif
-            static () => { }, new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests), "Internal_Ref_Overload", false, 0, [global::System.Diagnostics.CodeAnalysis.DynamicDependency("Internal_Ref_Overload(System.Int32)", typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests))] static () => { }, new global::TUnit.Core.ParameterMetadata[]
             {
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false)
             }),

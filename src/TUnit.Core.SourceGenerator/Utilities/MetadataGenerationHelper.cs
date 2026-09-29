@@ -242,13 +242,10 @@ internal static class MetadataGenerationHelper
             // ClassMetadata.Type already keeps. A non-public method is kept instead by a no-op delegate carrying
             // [DynamicDependency] with its exact signature. Annotating the type with NonPublicMethods would keep
             // every private helper, and a GetMethod(name, ...) intrinsic would keep every same-name overload; both
-            // report IL2111 for helpers with [DynamicallyAccessedMembers] parameters. Trimming only matters on
-            // .NET 5+, where the attribute exists.
-            writer.AppendLine($"global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof({containingType}), \"{method.Name}\", {method.IsStatic.ToString().ToLowerInvariant()}, {method.TypeParameters.Length},");
-            writer.AppendLine("#if NET5_0_OR_GREATER");
-            writer.AppendLine($"[global::System.Diagnostics.CodeAnalysis.DynamicDependency(\"{GetDynamicDependencySignature(method)}\", typeof({containingType}))]");
-            writer.AppendLine("#endif");
-            writer.Append("static () => { }, ");
+            // report IL2111 for helpers with [DynamicallyAccessedMembers] parameters. The attribute is emitted for every
+            // target: a .NET Standard test library can end up in a trimmed app, and DynamicDependencyPolyfillGenerator
+            // declares the attribute where the framework lacks it.
+            writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof({containingType}), \"{method.Name}\", {method.IsStatic.ToString().ToLowerInvariant()}, {method.TypeParameters.Length}, [global::System.Diagnostics.CodeAnalysis.DynamicDependency(\"{GetDynamicDependencySignature(method)}\", typeof({containingType}))] static () => {{ }}, ");
         }
         else if (method.TypeParameters.Length > 0 || usesTypeParameters)
         {
