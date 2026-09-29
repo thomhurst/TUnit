@@ -84,8 +84,9 @@ public class InfrastructureGenerator : IIncrementalGenerator
     /// Returns the memoized model while the compilation keeps the same reference list. Syntax-only
     /// edits reuse the backing array of <see cref="Compilation.ExternalReferences"/>; adding, removing,
     /// rebuilding or (for an IDE project reference) editing a reference produces a new array, so
-    /// extraction reruns. The table is keyed weakly on that array and its values hold only strings,
-    /// so no Compilation or MetadataReference is kept alive by the cache.
+    /// extraction reruns. The table is keyed weakly on that array and its values hold only strings and
+    /// the reference-binding option objects, so no Compilation or MetadataReference is kept alive by
+    /// the cache.
     /// <para>
     /// The selection is reference-derived except for one source dependency:
     /// <see cref="Compilation.GetTypeByMetadataName"/> prefers a source type over a referenced type with
@@ -104,11 +105,7 @@ public class InfrastructureGenerator : IIncrementalGenerator
             return ExtractAssemblyInfo(compilation, out _);
         }
 
-        // Deliberate layout assumption: ImmutableArray<T> is a struct wrapping a single T[] field
-        // (ImmutableCollectionsMarshal.AsArray does the same, but is not available to netstandard2.0
-        // analyzers). The incremental tests for added/replaced references guard this.
-        var references = compilation.ExternalReferences;
-        var key = Unsafe.As<ImmutableArray<MetadataReference>, MetadataReference[]?>(ref references);
+        var key = GetReferencesKey(compilation.ExternalReferences);
         if (key is null)
         {
             return ExtractAssemblyInfo(compilation, out _);
@@ -117,8 +114,7 @@ public class InfrastructureGenerator : IIncrementalGenerator
         var holder = AssemblyInfoCache.GetValue(key, static _ => new AssemblyInfoCacheEntry());
         var cached = holder.Value;
         if (cached is not null
-            && cached.Language == compilation.Language
-            && cached.AssemblyName == compilation.AssemblyName
+            && cached.Matches(compilation)
             && !IsAnyShadowedBySource(compilation, cached.SelectedMetadataNames))
         {
             return cached.Model;
@@ -127,10 +123,45 @@ public class InfrastructureGenerator : IIncrementalGenerator
         var model = ExtractAssemblyInfo(compilation, out var selectedMetadataNames);
         if (selectedMetadataNames is not null)
         {
-            holder.Value = new CachedAssemblyInfo(compilation.Language, compilation.AssemblyName, model, selectedMetadataNames);
+            holder.Value = new CachedAssemblyInfo(compilation, model, selectedMetadataNames);
         }
 
         return model;
+    }
+
+    /// <summary>
+    /// Returns the array backing <paramref name="references"/>, or <see langword="null"/> when the
+    /// layout check failed (memoization is then disabled, which costs speed but never correctness).
+    /// </summary>
+    private static MetadataReference[]? GetReferencesKey(ImmutableArray<MetadataReference> references)
+    {
+        // Deliberate layout assumption: ImmutableArray<T> is a struct wrapping a single T[] field
+        // (ImmutableCollectionsMarshal.AsArray does the same, but is not available to netstandard2.0
+        // analyzers). IsImmutableArrayLayoutAsExpected verifies it once at startup, and
+        // EditSource_ShouldNotRegenerate fails if the memo stops being used.
+        if (!IsImmutableArrayLayoutAsExpected)
+        {
+            return null;
+        }
+
+        return Unsafe.As<ImmutableArray<MetadataReference>, MetadataReference[]?>(ref references);
+    }
+
+    private static readonly bool IsImmutableArrayLayoutAsExpected = CheckImmutableArrayLayout();
+
+    private static bool CheckImmutableArrayLayout()
+    {
+        if (Unsafe.SizeOf<ImmutableArray<object>>() != Unsafe.SizeOf<object[]>())
+        {
+            return false;
+        }
+
+        var probe = ImmutableArray.Create(new object(), new object());
+        var array = Unsafe.As<ImmutableArray<object>, object[]?>(ref probe);
+        return array is not null
+            && array.Length == probe.Length
+            && ReferenceEquals(array[0], probe[0])
+            && ReferenceEquals(array[1], probe[1]);
     }
 
     private static bool IsAnyShadowedBySource(Compilation compilation, string[] selectedMetadataNames)
@@ -154,20 +185,44 @@ public class InfrastructureGenerator : IIncrementalGenerator
         public volatile CachedAssemblyInfo? Value;
     }
 
-    private sealed class CachedAssemblyInfo(string language, string? assemblyName, AssemblyInfoModel model, string[] selectedMetadataNames)
+    private sealed class CachedAssemblyInfo(Compilation compilation, AssemblyInfoModel model, string[] selectedMetadataNames)
     {
-        public string Language { get; } = language;
+        private readonly string _language = compilation.Language;
+        private readonly string? _assemblyName = compilation.AssemblyName;
 
-        public string? AssemblyName { get; } = assemblyName;
+        // Options that change how references bind to assembly symbols (unification, implicitly
+        // resolved missing assemblies, imported metadata), and so can change the selection even
+        // when the reference array is the same. Only the comparer and resolver objects are held,
+        // never the Compilation.
+        private readonly AssemblyIdentityComparer _assemblyIdentityComparer = compilation.Options.AssemblyIdentityComparer;
+        private readonly MetadataReferenceResolver? _metadataReferenceResolver = compilation.Options.MetadataReferenceResolver;
+        private readonly MetadataImportOptions _metadataImportOptions = compilation.Options.MetadataImportOptions;
 
         public AssemblyInfoModel Model { get; } = model;
 
         public string[] SelectedMetadataNames { get; } = selectedMetadataNames;
+
+        public bool Matches(Compilation compilation)
+        {
+            var options = compilation.Options;
+            return _language == compilation.Language
+                && _assemblyName == compilation.AssemblyName
+                && ReferenceEquals(_assemblyIdentityComparer, options.AssemblyIdentityComparer)
+                && Equals(_metadataReferenceResolver, options.MetadataReferenceResolver)
+                && _metadataImportOptions == options.MetadataImportOptions;
+        }
     }
 
     /// <summary>
     /// Extracts all needed data as primitives in the transform step.
     /// This enables proper incremental caching - the model contains only strings.
+    /// <para>
+    /// The result is memoized by <see cref="GetAssemblyInfo"/> across compilations and drivers, so it
+    /// must depend only on the references, their binding options, the language and the assembly name.
+    /// The one source dependency (a source type shadowing a candidate) is reported through
+    /// <paramref name="selectedMetadataNames"/> and re-checked on reuse. Any new input read here
+    /// must be added to <see cref="CachedAssemblyInfo.Matches"/>.
+    /// </para>
     /// </summary>
     /// <param name="compilation">The compilation to inspect.</param>
     /// <param name="selectedMetadataNames">

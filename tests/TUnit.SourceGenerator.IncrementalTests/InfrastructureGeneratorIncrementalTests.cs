@@ -196,6 +196,31 @@ public class InfrastructureGeneratorIncrementalTests
         Xunit.Assert.Contains("typeof(global::OtherTestLibrary.FirstHooks)", GenerateInfrastructure(driver3));
     }
 
+    [Fact]
+    public void FreshDriver_SameReferences_DifferentBindingOptions_ReExtracts()
+    {
+        var baseCompilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
+        var baseModel = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(baseCompilation));
+
+        // Same reference array, so the memo is hit, but options that change how references bind to
+        // assembly symbols must not reuse a model extracted under different options.
+        var withComparer = baseCompilation.WithOptions(
+            baseCompilation.Options.WithAssemblyIdentityComparer(DesktopAssemblyIdentityComparer.Default));
+        Xunit.Assert.Equal(baseCompilation.ExternalReferences, withComparer.ExternalReferences);
+        var comparerModel = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(withComparer));
+        Xunit.Assert.NotSame(baseModel, comparerModel);
+        Xunit.Assert.Equal(baseModel, comparerModel);
+
+        var withImportOptions = baseCompilation.WithOptions(
+            baseCompilation.Options.WithMetadataImportOptions(MetadataImportOptions.All));
+        var importModel = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(withImportOptions));
+        Xunit.Assert.NotSame(baseModel, importModel);
+
+        // The original options still reuse the memo once it holds their extraction again.
+        var again = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(baseCompilation));
+        Xunit.Assert.Same(again, GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(baseCompilation)));
+    }
+
     private static CSharpCompilation CreateWithTwoTypeLibrary()
     {
         var consumer = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
