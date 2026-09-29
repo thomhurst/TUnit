@@ -99,8 +99,11 @@ public class InfrastructureGenerator : IIncrementalGenerator
     /// </summary>
     private static AssemblyInfoModel GetAssemblyInfo(Compilation compilation)
     {
-        // Directive references (#r in scripts) are not part of the key; skip memoization for them.
-        if (!compilation.DirectiveReferences.IsEmpty)
+        // Script submissions are never memoized. Their #r directive references are not part of the
+        // key, and the scripting host binds them with CompilationOptions.ReferencesSupersedeLowerVersions,
+        // which is internal and so cannot be compared in Matches. Scripting is the only public API
+        // that sets it, so excluding scripts keeps the memo equal to a fresh extraction.
+        if (compilation.ScriptCompilationInfo is not null || !compilation.DirectiveReferences.IsEmpty)
         {
             return ExtractAssemblyInfo(compilation, out _);
         }
@@ -112,6 +115,9 @@ public class InfrastructureGenerator : IIncrementalGenerator
         }
 
         var holder = AssemblyInfoCache.GetValue(key, static _ => new AssemblyInfoCacheEntry());
+
+        // Racy by design: two threads can both miss, both extract and both store. Every stored model
+        // equals a fresh extraction, so the last write wins and nothing is lost but duplicate work.
         var cached = holder.Value;
         if (cached is not null
             && cached.Matches(compilation)
@@ -130,6 +136,16 @@ public class InfrastructureGenerator : IIncrementalGenerator
     }
 
     /// <summary>
+    /// Why the key is the backing array rather than something public:
+    /// <list type="bullet">
+    /// <item><see cref="Compilation.ExternalReferences"/> is an <see cref="ImmutableArray{T}"/>, a struct,
+    /// so it cannot be a <see cref="ConditionalWeakTable{TKey,TValue}"/> key. Boxing it would create a new
+    /// object each call and never hit. Its backing array is the stable identity Roslyn reuses across
+    /// source-only edits.</item>
+    /// <item>A value-type projection in the pipeline (or <c>MetadataReferencesProvider</c>) cannot replace
+    /// this: extraction needs the <see cref="Compilation"/> to bind referenced assembly symbols, and a node
+    /// that carries the Compilation into the transform is exactly what pinned it before.</item>
+    /// </list>
     /// Returns the array backing <paramref name="references"/>, or <see langword="null"/> when the
     /// layout check failed (memoization is then disabled, which costs speed but never correctness).
     /// </summary>

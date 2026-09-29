@@ -221,6 +221,26 @@ public class InfrastructureGeneratorIncrementalTests
         Xunit.Assert.Same(again, GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(baseCompilation)));
     }
 
+    [Fact]
+    public void ScriptCompilation_SameReferences_IsNeverMemoized()
+    {
+        var baseCompilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
+        var baseModel = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(baseCompilation));
+
+        // The scripting host binds submissions with the internal ReferencesSupersedeLowerVersions option,
+        // which Matches cannot compare, so script compilations must always extract fresh.
+        var script = CSharpCompilation.CreateScriptCompilation(
+            baseCompilation.AssemblyName!,
+            CSharpSyntaxTree.ParseText("var x = 1;", CSharpParseOptions.Default.WithKind(SourceCodeKind.Script)),
+            baseCompilation.ExternalReferences);
+        Xunit.Assert.Equal(baseCompilation.ExternalReferences, script.ExternalReferences);
+
+        var first = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(script));
+        var second = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(script));
+        Xunit.Assert.NotSame(baseModel, first);
+        Xunit.Assert.NotSame(first, second);
+    }
+
     private static CSharpCompilation CreateWithTwoTypeLibrary()
     {
         var consumer = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
