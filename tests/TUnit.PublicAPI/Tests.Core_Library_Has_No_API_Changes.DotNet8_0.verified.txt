@@ -1140,6 +1140,9 @@ namespace
     {
         [.("ReflectionAnalysis", "IL2067", Justification="Factory is only called from generated code that always passes concrete types")]
         public static .ParameterMetadata Create([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]  type, string name, .TypeInfo typeInfo, bool isNullable, <.ParameterInfo>? reflectionInfoFactory = null) { }
+        public static .ParameterMetadata[] ForConstructor([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..NonPublicMethods)]  declaringType, bool matchByParameterCount, params .ParameterMetadata[] parameters) { }
+        public static .ParameterMetadata[] ForGenericMethod([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..NonPublicMethods)]  declaringType, string methodName, params .ParameterMetadata[] parameters) { }
+        public static .ParameterMetadata[] ForMethod([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..NonPublicMethods)]  declaringType, string methodName, bool isStatic, params .ParameterMetadata[] parameters) { }
     }
     [.DebuggerDisplay("{Type} {Name}")]
     public class ParameterMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]  T> : .ParameterMetadata, <.ParameterMetadata<T>>
