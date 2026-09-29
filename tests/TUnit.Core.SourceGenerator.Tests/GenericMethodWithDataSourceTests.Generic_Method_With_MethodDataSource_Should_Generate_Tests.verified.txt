@@ -419,7 +419,7 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("GenericMethod_With_DataSource", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource), "GenericMethod_With_DataSource", new global::TUnit.Core.ParameterMetadata[]
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("GenericMethod_With_DataSource", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource), "GenericMethod_With_DataSource", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new global::TUnit.Core.ConcreteType(typeof(string)), false)
 }));
@@ -1253,7 +1253,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWith
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("FullyGeneric_With_DataSources", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>), "FullyGeneric_With_DataSources", new global::TUnit.Core.ParameterMetadata[]
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("FullyGeneric_With_DataSources", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>), "FullyGeneric_With_DataSources", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new global::TUnit.Core.ConcreteType(typeof(bool)), false)
 }));

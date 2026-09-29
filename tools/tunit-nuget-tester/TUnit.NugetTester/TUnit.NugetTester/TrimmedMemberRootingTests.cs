@@ -30,6 +30,18 @@ public class TrimmedMemberRootingTests
         await Assert.That(parameters[0].ReflectionInfo.Member.Name).IsEqualTo(nameof(Internal_Method_Parameters_Resolve));
     }
 
+    [Test]
+    [Arguments(3)]
+    internal async Task Internal_Generic_Method_Parameters_Resolve<T>(T value)
+    {
+        // Generic non-public methods must also be rooted by name only; enumerating the class's methods would keep
+        // CountInstanceFields and bring IL2111 back.
+        var parameter = TestContext.Current!.Metadata.TestDetails.MethodMetadata.Parameters[0];
+
+        await Assert.That(parameter.ReflectionInfo.Name).IsEqualTo(nameof(value));
+        await Assert.That(parameter.ReflectionInfo.Member.Name).IsEqualTo(nameof(Internal_Generic_Method_Parameters_Resolve));
+    }
+
     private static int CountInstanceFields(object owner,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.NonPublicFields)] Type ownerType)
     {

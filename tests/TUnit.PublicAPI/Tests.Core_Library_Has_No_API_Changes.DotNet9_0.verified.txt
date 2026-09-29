@@ -1142,8 +1142,9 @@ namespace
         public static .ParameterMetadata Create([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]  type, string name, .TypeInfo typeInfo, bool isNullable, <.ParameterInfo>? reflectionInfoFactory = null) { }
         public static .ParameterMetadata[] ForConstructor([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  declaringType, bool matchByParameterCount, params .ParameterMetadata[] parameters) { }
         public static .ParameterMetadata[] ForGenericMethod([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  declaringType, string methodName, params .ParameterMetadata[] parameters) { }
+        public static .ParameterMetadata[] ForGenericMethod([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  declaringType, string methodName, bool isStatic, int genericParameterCount, params .ParameterMetadata[] parameters) { }
         public static .ParameterMetadata[] ForMethod([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  declaringType, string methodName, bool isStatic, params .ParameterMetadata[] parameters) { }
-        public static .ParameterMetadata[] ForMethodLookup(string methodName, <.MethodBase?> lookup, params .ParameterMetadata[] parameters) { }
+        public static .ParameterMetadata[] ForMethodLookup( declaringType, string methodName, bool isStatic, int genericParameterCount, <.MethodInfo?> lookup, params .ParameterMetadata[] parameters) { }
     }
     [.DebuggerDisplay("{Type} {Name}")]
     public class ParameterMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]  T> : .ParameterMetadata, <.ParameterMetadata<T>>

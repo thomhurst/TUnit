@@ -16,7 +16,7 @@ public static class ParameterMetadataFactory
     /// Deliberately limited to what <see cref="ClassMetadata.Type"/> already keeps for a test class. Requesting
     /// non-public methods here would keep every private helper of the class and report IL2111 for any helper
     /// with <see cref="DynamicallyAccessedMembersAttribute"/> parameters. Non-public test methods go through
-    /// <see cref="ForMethodLookup"/>, whose generated lookup roots only that method.
+    /// <see cref="ForMethodLookup"/>, whose generated lookup keeps only the methods with that name.
     /// </remarks>
     internal const DynamicallyAccessedMemberTypes DeclaringTypeMembers =
         DynamicallyAccessedMemberTypes.PublicConstructors
@@ -45,7 +45,7 @@ public static class ParameterMetadataFactory
 
     /// <summary>
     /// Attaches lazy <see cref="ParameterMetadata.ReflectionInfo"/> resolution to the parameters of a
-    /// non-generic method. The method is looked up once, on first access, by name and the parameters' types.
+    /// non-generic public method. The method is looked up once, on first access, by name and the parameters' types.
     /// </summary>
     public static ParameterMetadata[] ForMethod(
         [DynamicallyAccessedMembers(DeclaringTypeMembers)] Type declaringType,
@@ -59,8 +59,8 @@ public static class ParameterMetadataFactory
 
     /// <summary>
     /// Attaches lazy <see cref="ParameterMetadata.ReflectionInfo"/> resolution to the parameters of a
-    /// generic method (or one whose parameters use type parameters). The method is looked up once, on first
-    /// access, by name and parameter count; with same-arity overloads the first match reflection returns wins.
+    /// generic public method (or one whose parameters use type parameters). The method is looked up once, on first
+    /// access, by name and parameter shape; with overloads of the same shape the first match reflection returns wins.
     /// </summary>
     public static ParameterMetadata[] ForGenericMethod(
         [DynamicallyAccessedMembers(DeclaringTypeMembers)] Type declaringType,
@@ -68,20 +68,41 @@ public static class ParameterMetadataFactory
         params ParameterMetadata[] parameters)
     {
         return Attach(parameters, new ParameterInfoResolver(declaringType, methodName,
-            ParameterInfoResolver.Kind.MethodByParameterCount, parameters));
+            ParameterInfoResolver.Kind.MethodByShape, parameters));
+    }
+
+    /// <summary>
+    /// Attaches lazy <see cref="ParameterMetadata.ReflectionInfo"/> resolution to the parameters of a
+    /// generic public method (or one whose parameters use type parameters). The method is looked up once, on first
+    /// access, by name, static-ness, generic arity and parameter shape.
+    /// </summary>
+    public static ParameterMetadata[] ForGenericMethod(
+        [DynamicallyAccessedMembers(DeclaringTypeMembers)] Type declaringType,
+        string methodName,
+        bool isStatic,
+        int genericParameterCount,
+        params ParameterMetadata[] parameters)
+    {
+        return Attach(parameters, new ParameterInfoResolver(declaringType, methodName,
+            ParameterInfoResolver.Kind.MethodByShape, parameters, isStatic, genericParameterCount));
     }
 
     /// <summary>
     /// Attaches lazy <see cref="ParameterMetadata.ReflectionInfo"/> resolution to the parameters of a non-public
-    /// method. <paramref name="lookup"/> runs once, on first access; the generator emits it as an intrinsic
-    /// reflection call so trimming keeps exactly that method.
+    /// method. <paramref name="lookup"/> runs once, on first access. The generator emits it as
+    /// <c>typeof(T).GetMethod(name, flags)</c>, which trimming treats as an intrinsic that keeps only the methods
+    /// with that name. When overloads make that call ambiguous, the method is chosen among them by static-ness,
+    /// generic arity and parameter shape.
     /// </summary>
     public static ParameterMetadata[] ForMethodLookup(
+        Type declaringType,
         string methodName,
-        Func<MethodBase?> lookup,
+        bool isStatic,
+        int genericParameterCount,
+        Func<MethodInfo?> lookup,
         params ParameterMetadata[] parameters)
     {
-        return Attach(parameters, new ParameterInfoResolver(lookup, methodName, parameters));
+        return Attach(parameters, new ParameterInfoResolver(declaringType, methodName, isStatic, genericParameterCount, lookup, parameters));
     }
 
     /// <summary>
@@ -125,19 +146,26 @@ internal sealed class ParameterInfoResolver
     {
         InstanceMethod,
         StaticMethod,
-        MethodByParameterCount,
+        MethodByShape,
         Constructor,
         ConstructorByParameterCount,
         Lookup,
     }
 
     private const BindingFlags PublicMethods = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
+    private const BindingFlags NonPublicMethods = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
 
     [DynamicallyAccessedMembers(ParameterMetadataFactory.DeclaringTypeMembers)]
     private readonly Type? _declaringType;
-    private readonly Func<MethodBase?>? _lookup;
+
+    // Declaring type of a Kind.Lookup resolver. It carries no annotation: the generated lookup delegate is what
+    // keeps the method under trimming.
+    private readonly Type? _lookupType;
+    private readonly Func<MethodInfo?>? _lookup;
     private readonly string? _methodName;
     private readonly Kind _kind;
+    private readonly bool? _isStatic;
+    private readonly int _genericParameterCount;
     private readonly ParameterMetadata[] _parameters;
     private ParameterInfo[]? _resolved;
 
@@ -145,19 +173,27 @@ internal sealed class ParameterInfoResolver
         [DynamicallyAccessedMembers(ParameterMetadataFactory.DeclaringTypeMembers)] Type declaringType,
         string? methodName,
         Kind kind,
-        ParameterMetadata[] parameters)
+        ParameterMetadata[] parameters,
+        bool? isStatic = null,
+        int genericParameterCount = -1)
     {
         _declaringType = declaringType;
         _methodName = methodName;
         _kind = kind;
         _parameters = parameters;
+        _isStatic = isStatic;
+        _genericParameterCount = genericParameterCount;
     }
 
-    public ParameterInfoResolver(Func<MethodBase?> lookup, string methodName, ParameterMetadata[] parameters)
+    public ParameterInfoResolver(Type declaringType, string methodName, bool isStatic, int genericParameterCount,
+        Func<MethodInfo?> lookup, ParameterMetadata[] parameters)
     {
+        _lookupType = declaringType;
         _lookup = lookup;
         _methodName = methodName;
         _kind = Kind.Lookup;
+        _isStatic = isStatic;
+        _genericParameterCount = genericParameterCount;
         _parameters = parameters;
     }
 
@@ -175,10 +211,10 @@ internal sealed class ParameterInfoResolver
         {
             Kind.InstanceMethod => $"instance method '{_declaringType!.FullName}.{_methodName}' with {_parameters.Length} parameter(s) matched by parameter types",
             Kind.StaticMethod => $"static method '{_declaringType!.FullName}.{_methodName}' with {_parameters.Length} parameter(s) matched by parameter types",
-            Kind.MethodByParameterCount => $"method '{_declaringType!.FullName}.{_methodName}' matched by parameter count ({_parameters.Length})",
+            Kind.MethodByShape => $"method '{_declaringType!.FullName}.{_methodName}' with {_parameters.Length} parameter(s) matched by parameter shape",
             Kind.Constructor => $"constructor of '{_declaringType!.FullName}' with {_parameters.Length} parameter(s) matched by parameter types",
             Kind.ConstructorByParameterCount => $"constructor of '{_declaringType!.FullName}' matched by parameter count ({_parameters.Length})",
-            _ => $"non-public method '{_methodName}' with {_parameters.Length} parameter(s)",
+            _ => $"{(_isStatic == true ? "static" : "instance")} method '{_lookupType!.FullName}.{_methodName}' with {_parameters.Length} parameter(s)",
         };
     }
 
@@ -186,29 +222,118 @@ internal sealed class ParameterInfoResolver
     {
         MethodBase? member = _kind switch
         {
-            Kind.InstanceMethod => _declaringType!.GetMethod(_methodName!, BindingFlags.Public | BindingFlags.Instance, null, GetParameterTypes(), null),
-            Kind.StaticMethod => _declaringType!.GetMethod(_methodName!, BindingFlags.Public | BindingFlags.Static, null, GetParameterTypes(), null),
-            Kind.MethodByParameterCount => FindByParameterCount(_declaringType!.GetMethods(PublicMethods)),
+            Kind.InstanceMethod => _declaringType!.GetMethod(_methodName!, BindingFlags.Public | BindingFlags.Instance, null, GetParameterTypes(), null)
+                ?? FindNonPublicMethod(),
+            Kind.StaticMethod => _declaringType!.GetMethod(_methodName!, BindingFlags.Public | BindingFlags.Static, null, GetParameterTypes(), null)
+                ?? FindNonPublicMethod(),
+            Kind.MethodByShape => FindBestMatch(_declaringType!.GetMethods(PublicMethods)) ?? FindNonPublicMethod(),
             Kind.Constructor => _declaringType!.GetConstructor(GetParameterTypes()),
-            Kind.ConstructorByParameterCount => FindByParameterCount(_declaringType!.GetConstructors()),
-            _ => _lookup!(),
+            Kind.ConstructorByParameterCount => FindBestMatch(_declaringType!.GetConstructors()),
+            _ => ResolveLookup(),
         };
 
         return member?.GetParameters() ?? [];
     }
 
-    private MethodBase? FindByParameterCount(MethodBase[] candidates)
+    private MethodBase? ResolveLookup()
     {
+        try
+        {
+            return _lookup!();
+        }
+        catch (AmbiguousMatchException)
+        {
+            return FindAmongOverloads();
+        }
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2080",
+        Justification = "Only reached when the generated typeof(T).GetMethod(name, flags) lookup is ambiguous. That " +
+                        "intrinsic call keeps every method with this name, and those are the only candidates matched here.")]
+    private MethodBase? FindAmongOverloads()
+    {
+        var flags = BindingFlags.Public | BindingFlags.NonPublic | (_isStatic == true ? BindingFlags.Static : BindingFlags.Instance);
+        return FindBestMatch(_lookupType!.GetMethods(flags));
+    }
+
+    /// <summary>
+    /// Generated code routes non-public methods through <see cref="ParameterMetadataFactory.ForMethodLookup"/>,
+    /// so this only serves direct callers of the public-method factories. Trimming does not keep non-public
+    /// methods for them, so in a trimmed app this finds nothing and ReflectionInfo reports the failed lookup.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2080",
+        Justification = "Best-effort fallback for direct callers; trimmed apps get a descriptive lookup failure instead.")]
+    private MethodBase? FindNonPublicMethod()
+    {
+        return _kind switch
+        {
+            Kind.InstanceMethod => _declaringType!.GetMethod(_methodName!, BindingFlags.NonPublic | BindingFlags.Instance, null, GetParameterTypes(), null),
+            Kind.StaticMethod => _declaringType!.GetMethod(_methodName!, BindingFlags.NonPublic | BindingFlags.Static, null, GetParameterTypes(), null),
+            _ => FindBestMatch(_declaringType!.GetMethods(NonPublicMethods)),
+        };
+    }
+
+    /// <summary>
+    /// Prefers a candidate whose static-ness, generic arity and parameter shape match. Otherwise falls back to the
+    /// first candidate with the right name and parameter count, which was the only rule before shape matching.
+    /// </summary>
+    private MethodBase? FindBestMatch(MethodBase[] candidates)
+    {
+        MethodBase? byCount = null;
+
         foreach (var candidate in candidates)
         {
-            if ((_methodName is null || candidate.Name == _methodName)
-                && candidate.GetParameters().Length == _parameters.Length)
+            if (_methodName is not null && candidate.Name != _methodName)
+            {
+                continue;
+            }
+
+            var candidateParameters = candidate.GetParameters();
+            if (candidateParameters.Length != _parameters.Length)
+            {
+                continue;
+            }
+
+            if (MatchesSignature(candidate, candidateParameters))
             {
                 return candidate;
             }
+
+            byCount ??= candidate;
         }
 
-        return null;
+        return byCount;
+    }
+
+    private bool MatchesSignature(MethodBase candidate, ParameterInfo[] candidateParameters)
+    {
+        if (_isStatic is { } isStatic && candidate.IsStatic != isStatic)
+        {
+            return false;
+        }
+
+        if (_genericParameterCount >= 0
+            && (candidate.IsGenericMethodDefinition ? candidate.GetGenericArguments().Length : 0) != _genericParameterCount)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < candidateParameters.Length; i++)
+        {
+            var parameterType = candidateParameters[i].ParameterType;
+            if (parameterType.IsByRef)
+            {
+                parameterType = parameterType.GetElementType()!;
+            }
+
+            // Parameters that use type parameters are emitted as object, so only concrete types can be compared.
+            if (!parameterType.ContainsGenericParameters && parameterType != _parameters[i].Type)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private Type[] GetParameterTypes()

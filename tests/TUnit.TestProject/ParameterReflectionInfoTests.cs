@@ -86,6 +86,28 @@ public class ParameterReflectionInfoTests(string first, int second)
     }
 
     [Test]
+    public async Task Generic_Method_Overload_Selected_By_Arity_And_Shape()
+    {
+        var parameters = ParameterMetadataFactory.ForGenericMethod(typeof(Helpers), nameof(Helpers.Pick), true, 1,
+            ParameterMetadataFactory.Create(typeof(object), "item", new ConcreteType(typeof(object)), false));
+
+        await Assert.That(((MethodInfo) parameters[0].ReflectionInfo.Member).IsGenericMethodDefinition).IsTrue();
+    }
+
+    [Test]
+    public async Task Non_Public_Method_Via_Public_Factory_Falls_Back()
+    {
+        var parameters = ParameterMetadataFactory.ForMethod(typeof(ParameterReflectionInfoTests), nameof(PrivateStaticHelper), true,
+            ParameterMetadataFactory.Create(typeof(int), "value", new ConcreteType(typeof(int)), false));
+
+        await Assert.That(parameters[0].ReflectionInfo.Member.Name).IsEqualTo(nameof(PrivateStaticHelper));
+    }
+
+    private static void PrivateStaticHelper(int value)
+    {
+    }
+
+    [Test]
     public async Task Open_Generic_Constructor_Matched_By_Parameter_Count()
     {
         var parameters = ParameterMetadataFactory.ForConstructor(typeof(GenericHolder<>), true,
@@ -129,6 +151,15 @@ public class ParameterReflectionInfoTests(string first, int second)
         public static void GenericHelper<T>(T item)
         {
         }
+
+        // Declared before the generic overload so the first same-count match reflection returns is the wrong one.
+        public static void Pick(object item)
+        {
+        }
+
+        public static void Pick<T>(T item)
+        {
+        }
     }
 
     public sealed class GenericHolder<T>
@@ -144,6 +175,42 @@ public class ParameterReflectionInfoTests(string first, int second)
         await Assert.That(info.Name).IsEqualTo(name);
         await Assert.That(info.Position).IsEqualTo(position);
         await Assert.That(info.ParameterType).IsEqualTo(type);
+    }
+
+    /// <summary>
+    /// Non-public generic test methods. Kept apart from the outer class, whose constructor arguments are not
+    /// supported together with generic test methods.
+    /// </summary>
+    [EngineTest(ExpectedResult.Pass)]
+    public class NonPublicGeneric
+    {
+        [Test]
+        [Arguments(5)]
+        internal async Task Internal_Generic_Method<T>(T value)
+        {
+            var parameter = TestContext.Current!.Metadata.TestDetails.MethodMetadata.Parameters[0];
+
+            await Assert.That(parameter.ReflectionInfo.Name).IsEqualTo(nameof(value));
+            await Assert.That(parameter.ReflectionInfo.Member.Name).IsEqualTo(nameof(Internal_Generic_Method));
+            await Assert.That(((MethodInfo) parameter.ReflectionInfo.Member).IsGenericMethodDefinition).IsTrue();
+        }
+
+        // Same name, parameter count and (erased) parameter shape as the generic test below, declared first, so
+        // only generic arity can tell them apart.
+        private void Internal_Overloaded(object value)
+        {
+        }
+
+        [Test]
+        [Arguments(5)]
+        internal async Task Internal_Overloaded<T>(T value)
+        {
+            // The non-generic overload above makes the generated GetMethod(name, flags) lookup ambiguous, so the
+            // resolver must pick this method among the same-name overloads by generic arity.
+            var parameter = TestContext.Current!.Metadata.TestDetails.MethodMetadata.Parameters[0];
+
+            await Assert.That(((MethodInfo) parameter.ReflectionInfo.Member).IsGenericMethodDefinition).IsTrue();
+        }
     }
 
     [EngineTest(ExpectedResult.Pass)]
