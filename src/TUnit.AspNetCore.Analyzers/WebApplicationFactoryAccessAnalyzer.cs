@@ -9,32 +9,54 @@ namespace TUnit.AspNetCore.Analyzers;
 public class WebApplicationFactoryAccessAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     // Properties not available in constructors OR SetupAsync (initialized in Before hook)
-    private static readonly ImmutableHashSet<string> RestrictedInConstructorAndSetup = ImmutableHashSet.Create(
-        "Factory",
-        "Services",
-        "HttpCapture"
-    );
+    private static bool IsRestrictedInConstructorAndSetup(string name) => name is "Factory" or "Services" or "HttpCapture";
 
     // Properties not available in constructors only (available after property injection, before SetupAsync)
-    private static readonly ImmutableHashSet<string> RestrictedInConstructorOnly = ImmutableHashSet.Create(
-        "GlobalFactory"
-    );
+    private static bool IsRestrictedInConstructorOnly(string name) => name is "GlobalFactory";
 
     // Members that should never be accessed on GlobalFactory (breaks test isolation)
-    private static readonly ImmutableHashSet<string> RestrictedGlobalFactoryMembers = ImmutableHashSet.Create(
-        "Services",
-        "Server",
-        "CreateClient",
-        "CreateDefaultClient"
-    );
+    private static bool IsRestrictedGlobalFactoryMember(string name) => name is "Services" or "Server" or "CreateClient" or "CreateDefaultClient";
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.FactoryAccessedTooEarly, Rules.GlobalFactoryMemberAccess);
 
     protected override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterOperationAction(AnalyzePropertyReference, OperationKind.PropertyReference);
-        context.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
+        context.RegisterCompilationStartAction(compilationContext =>
+        {
+            // Every diagnostic needs a member declared on TUnit.AspNetCore.WebApplicationTest (or a derived type),
+            // so skip compilations that can't see any type of that name.
+            if (!ReferencesWebApplicationTest(compilationContext.Compilation))
+            {
+                return;
+            }
+
+            compilationContext.RegisterOperationAction(AnalyzePropertyReference, OperationKind.PropertyReference);
+            compilationContext.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
+        });
+    }
+
+    private static bool ReferencesWebApplicationTest(Compilation compilation)
+    {
+        foreach (var tunitNamespace in compilation.GlobalNamespace.GetNamespaceMembers())
+        {
+            if (tunitNamespace.Name != "TUnit")
+            {
+                continue;
+            }
+
+            foreach (var aspNetCoreNamespace in tunitNamespace.GetNamespaceMembers())
+            {
+                // Matches every arity, like IsWebApplicationTestType's name check.
+                if (aspNetCoreNamespace.Name == "AspNetCore"
+                    && !aspNetCoreNamespace.GetTypeMembers("WebApplicationTest").IsEmpty)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private void AnalyzePropertyReference(OperationAnalysisContext context)
@@ -47,7 +69,7 @@ public class WebApplicationFactoryAccessAnalyzer : ConcurrentDiagnosticAnalyzer
         var propertyName = propertyReference.Property.Name;
 
         // Check for GlobalFactory.Services or GlobalFactory.Server access
-        if (RestrictedGlobalFactoryMembers.Contains(propertyName) &&
+        if (IsRestrictedGlobalFactoryMember(propertyName) &&
             IsGlobalFactoryAccess(propertyReference.Instance))
         {
             context.ReportDiagnostic(Diagnostic.Create(
@@ -57,8 +79,8 @@ public class WebApplicationFactoryAccessAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var isRestrictedInBoth = RestrictedInConstructorAndSetup.Contains(propertyName);
-        var isRestrictedInConstructorOnly = RestrictedInConstructorOnly.Contains(propertyName);
+        var isRestrictedInBoth = IsRestrictedInConstructorAndSetup(propertyName);
+        var isRestrictedInConstructorOnly = IsRestrictedInConstructorOnly(propertyName);
 
         if (!isRestrictedInBoth && !isRestrictedInConstructorOnly)
         {
@@ -116,7 +138,7 @@ public class WebApplicationFactoryAccessAnalyzer : ConcurrentDiagnosticAnalyzer
         var methodName = invocation.TargetMethod.Name;
 
         // Check for GlobalFactory.CreateClient() access
-        if (RestrictedGlobalFactoryMembers.Contains(methodName) &&
+        if (IsRestrictedGlobalFactoryMember(methodName) &&
             IsGlobalFactoryAccess(invocation.Instance))
         {
             context.ReportDiagnostic(Diagnostic.Create(

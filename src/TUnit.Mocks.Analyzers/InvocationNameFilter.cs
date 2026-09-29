@@ -17,15 +17,7 @@ internal static class InvocationNameFilter
     /// </summary>
     public static string? GetInvokedName(InvocationExpressionSyntax invocation)
     {
-        var name = invocation.Expression switch
-        {
-            MemberAccessExpressionSyntax memberAccess => memberAccess.Name,
-            MemberBindingExpressionSyntax memberBinding => memberBinding.Name,
-            SimpleNameSyntax simpleName => simpleName,
-            _ => null,
-        };
-
-        return name?.Identifier.ValueText;
+        return GetInvokedNameSyntax(invocation)?.Identifier.ValueText;
     }
 
     /// <summary>
@@ -49,12 +41,49 @@ internal static class InvocationNameFilter
     }
 
     /// <summary>
-    /// False only when the invocation certainly doesn't call a method with one of the given names.
+    /// Like <see cref="MayInvoke(InvocationExpressionSyntax, string)"/>, but also false when the call site
+    /// has no explicit type argument list. Only use it for generic methods whose type arguments can't be
+    /// inferred (no parameter mentions them, e.g. <c>Mock.Of&lt;T&gt;()</c> or <c>Arg.IsNull&lt;T&gt;()</c>):
+    /// every call to those is written <c>Name&lt;...&gt;(...)</c>, so a plain <c>Name(...)</c> call such
+    /// as an assertion's <c>.IsNotNull()</c> can be skipped without binding it.
     /// </summary>
-    public static bool MayInvoke(InvocationExpressionSyntax invocation, string name1, string name2, string name3)
+    public static bool MayInvokeGeneric(InvocationExpressionSyntax invocation, string name)
     {
-        var invokedName = GetInvokedName(invocation);
+        var invokedName = GetInvokedNameSyntax(invocation);
 
-        return invokedName is null || invokedName == name1 || invokedName == name2 || invokedName == name3;
+        return invokedName is null
+            || invokedName is GenericNameSyntax && invokedName.Identifier.ValueText == name;
+    }
+
+    /// <summary>
+    /// Two-name form of <see cref="MayInvokeGeneric(InvocationExpressionSyntax, string)"/>.
+    /// </summary>
+    public static bool MayInvokeGeneric(InvocationExpressionSyntax invocation, string name1, string name2)
+    {
+        var invokedName = GetInvokedNameSyntax(invocation);
+
+        if (invokedName is null)
+        {
+            return true;
+        }
+
+        if (invokedName is not GenericNameSyntax)
+        {
+            return false;
+        }
+
+        var text = invokedName.Identifier.ValueText;
+        return text == name1 || text == name2;
+    }
+
+    private static SimpleNameSyntax? GetInvokedNameSyntax(InvocationExpressionSyntax invocation)
+    {
+        return invocation.Expression switch
+        {
+            MemberAccessExpressionSyntax memberAccess => memberAccess.Name,
+            MemberBindingExpressionSyntax memberBinding => memberBinding.Name,
+            SimpleNameSyntax simpleName => simpleName,
+            _ => null,
+        };
     }
 }

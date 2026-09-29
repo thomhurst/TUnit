@@ -28,7 +28,7 @@ public class DelegateMockAnalyzer : DiagnosticAnalyzer
         }
 
         // Cheap syntactic check before binding: only Mock.OfDelegate<T>() is of interest.
-        if (!InvocationNameFilter.MayInvoke(invocation, "OfDelegate"))
+        if (!InvocationNameFilter.MayInvokeGeneric(invocation, "OfDelegate"))
         {
             return;
         }

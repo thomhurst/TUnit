@@ -37,7 +37,8 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
         }
 
         // Cheap syntactic check before binding: only Mock.Of<...>() / T.Mock() are of interest.
-        if (!InvocationNameFilter.MayInvoke(invocation, "Of", "Mock"))
+        if (!InvocationNameFilter.MayInvokeGeneric(invocation, "Of")
+            && !InvocationNameFilter.MayInvoke(invocation, "Mock"))
         {
             return;
         }
