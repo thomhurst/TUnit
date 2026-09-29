@@ -288,8 +288,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
         // Check the declaring assembly as well as the shared base: a custom subclass
         // can hide IsNotNull, but that does not make its method a TUnit null check.
-        if (collectionBase is null
-            || !SymbolEqualityComparer.Default.Equals(method.ContainingAssembly, collectionBase.ContainingAssembly))
+        if (!collectionBase.ContainsAssembly(method.ContainingAssembly))
         {
             return false;
         }
@@ -299,9 +298,11 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
         for (var type = method.ContainingType; type is not null; type = type.BaseType)
         {
-            if (SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, collectionBase)
-                || SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, asyncEnumerableBase)
-                || SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, asyncDelegate))
+            var definition = type.OriginalDefinition;
+
+            if (collectionBase.Contains(definition)
+                || asyncEnumerableBase.Contains(definition)
+                || asyncDelegate.Contains(definition))
             {
                 return true;
             }
@@ -545,11 +546,11 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
     private sealed class NullCheckTypes(Compilation compilation)
     {
         private bool _resolved;
-        private INamedTypeSymbol? _collectionBase;
-        private INamedTypeSymbol? _asyncEnumerableBase;
-        private INamedTypeSymbol? _asyncDelegate;
+        private TypeSymbolSet _collectionBase;
+        private TypeSymbolSet _asyncEnumerableBase;
+        private TypeSymbolSet _asyncDelegate;
 
-        public INamedTypeSymbol? CollectionBase
+        public TypeSymbolSet CollectionBase
         {
             get
             {
@@ -558,7 +559,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
             }
         }
 
-        public INamedTypeSymbol? AsyncEnumerableBase
+        public TypeSymbolSet AsyncEnumerableBase
         {
             get
             {
@@ -567,7 +568,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
             }
         }
 
-        public INamedTypeSymbol? AsyncDelegate
+        public TypeSymbolSet AsyncDelegate
         {
             get
             {
@@ -583,9 +584,10 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
                 return;
             }
 
-            _collectionBase = AssertionSymbols.ResolveType(compilation, "TUnit.Assertions.Sources.CollectionAssertionBase`2");
-            _asyncEnumerableBase = AssertionSymbols.ResolveType(compilation, "TUnit.Assertions.Sources.AsyncEnumerableAssertionBase`1");
-            _asyncDelegate = AssertionSymbols.ResolveType(compilation, "TUnit.Assertions.Sources.AsyncDelegateAssertion");
+            var hasExternAliasedReferences = TypeSymbolSet.HasExternAliasedReferences(compilation);
+            _collectionBase = TypeSymbolSet.Resolve(compilation, "TUnit.Assertions.Sources.CollectionAssertionBase`2", hasExternAliasedReferences);
+            _asyncEnumerableBase = TypeSymbolSet.Resolve(compilation, "TUnit.Assertions.Sources.AsyncEnumerableAssertionBase`1", hasExternAliasedReferences);
+            _asyncDelegate = TypeSymbolSet.Resolve(compilation, "TUnit.Assertions.Sources.AsyncDelegateAssertion", hasExternAliasedReferences);
             _resolved = true;
         }
     }

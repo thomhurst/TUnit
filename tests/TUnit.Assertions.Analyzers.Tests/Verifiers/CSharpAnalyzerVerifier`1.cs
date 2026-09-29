@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
@@ -71,6 +72,56 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
             {
                 throw new InvalidOperationException($"None of the references matched {string.Join(", ", aliasedReferenceFileNames)}.");
             }
+
+            return solution.WithProjectMetadataReferences(projectId, references);
+        });
+
+        test.ExpectedDiagnostics.AddRange(expected);
+        await test.RunAsync(CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Like <see cref="VerifyAnalyzerAsync(string, DiagnosticResult[])"/>, but also references a second assembly,
+    /// compiled from <paramref name="additionalAssemblySource"/> and only reachable through <c>extern alias</c>
+    /// <paramref name="additionalAssemblyAlias"/>. When <paramref name="assertionsAlias"/> is set, TUnit.Assertions
+    /// itself is also only reachable through that alias.
+    /// </summary>
+    public static async Task VerifyAnalyzerWithAdditionalAliasedAssemblyAsync(
+        [StringSyntax("c#-test")] string source,
+        [StringSyntax("c#-test")] string additionalAssemblySource,
+        string additionalAssemblyAlias,
+        string? assertionsAlias,
+        params DiagnosticResult[] expected)
+    {
+        var test = CreateTest(source);
+
+        test.SolutionTransforms.Add((solution, projectId) =>
+        {
+            var project = solution.GetProject(projectId)!;
+            var references = project.MetadataReferences
+                .Select(reference => assertionsAlias is not null
+                    && reference is PortableExecutableReference { FilePath: { } filePath } peReference
+                    && string.Equals(Path.GetFileName(filePath), "TUnit.Assertions.netstandard2.0.dll", StringComparison.OrdinalIgnoreCase)
+                        ? peReference.WithAliases([assertionsAlias])
+                        : reference)
+                .ToList();
+
+            var additionalCompilation = CSharpCompilation.Create(
+                "TUnit.Assertions.AdditionalCopy",
+                [CSharpSyntaxTree.ParseText(additionalAssemblySource)],
+                project.MetadataReferences,
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
+
+            using var image = new MemoryStream();
+            var emitResult = additionalCompilation.Emit(image);
+
+            if (!emitResult.Success)
+            {
+                throw new InvalidOperationException(
+                    "Additional assembly failed to compile: " + string.Join(Environment.NewLine, emitResult.Diagnostics));
+            }
+
+            references.Add(MetadataReference.CreateFromImage(image.ToArray()).WithAliases([additionalAssemblyAlias]));
 
             return solution.WithProjectMetadataReferences(projectId, references);
         });

@@ -22,7 +22,7 @@ public class DynamicInAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             var symbols = AssertionSymbols.For(compilationStart.Compilation);
 
-            if (symbols.Assert is null)
+            if (symbols.Assert.IsEmpty)
             {
                 return;
             }

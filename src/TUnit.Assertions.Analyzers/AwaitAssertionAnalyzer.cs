@@ -22,7 +22,7 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             var symbols = AssertionSymbols.For(compilationStart.Compilation);
 
-            if (symbols.Assert is null && symbols.ShouldExtensions is null)
+            if (symbols.Assert.IsEmpty && symbols.ShouldExtensions.IsEmpty)
             {
                 return;
             }
@@ -41,7 +41,7 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
         var methodSymbol = invocationOperation.TargetMethod;
 
         if (methodSymbol.Name == "Multiple"
-            && SymbolEqualityComparer.Default.Equals(methodSymbol.ContainingType, symbols.Assert))
+            && symbols.Assert.Contains(methodSymbol.ContainingType))
         {
             CheckMultipleInvocation(context, invocationOperation);
         }

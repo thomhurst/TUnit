@@ -23,9 +23,10 @@ public class CompilerArgumentsPopulatedAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         context.RegisterCompilationStartAction(compilationStart =>
         {
-            var assertionsAssembly = AssertionSymbols.For(compilationStart.Compilation).Assert?.ContainingAssembly;
+            // Every assembly defining TUnit.Assertions.Assert: a global reference plus any extern-aliased copies.
+            var assertionsAssemblies = AssertionSymbols.For(compilationStart.Compilation).Assert;
 
-            if (assertionsAssembly is null)
+            if (assertionsAssemblies.IsEmpty)
             {
                 return;
             }
@@ -39,13 +40,13 @@ public class CompilerArgumentsPopulatedAnalyzer : ConcurrentDiagnosticAnalyzer
             compilationStart.RegisterOperationAction(ctx =>
             {
                 var invocation = (IInvocationOperation)ctx.Operation;
-                AnalyzeArguments(ctx, invocation.TargetMethod, invocation.Arguments, assertionsAssembly, callerInfoParameters);
+                AnalyzeArguments(ctx, invocation.TargetMethod, invocation.Arguments, assertionsAssemblies, callerInfoParameters);
             }, OperationKind.Invocation);
 
             compilationStart.RegisterOperationAction(ctx =>
             {
                 var objectCreation = (IObjectCreationOperation)ctx.Operation;
-                AnalyzeArguments(ctx, objectCreation.Constructor, objectCreation.Arguments, assertionsAssembly, callerInfoParameters);
+                AnalyzeArguments(ctx, objectCreation.Constructor, objectCreation.Arguments, assertionsAssemblies, callerInfoParameters);
             }, OperationKind.ObjectCreation);
         });
     }
@@ -54,12 +55,12 @@ public class CompilerArgumentsPopulatedAnalyzer : ConcurrentDiagnosticAnalyzer
         OperationAnalysisContext context,
         IMethodSymbol? method,
         ImmutableArray<IArgumentOperation> arguments,
-        IAssemblySymbol assertionsAssembly,
+        TypeSymbolSet assertionsAssemblies,
         ConcurrentDictionary<IMethodSymbol, bool[]> callerInfoParameters)
     {
         if (method is null
             || arguments.IsEmpty
-            || !SymbolEqualityComparer.Default.Equals(method.ContainingAssembly, assertionsAssembly))
+            || !assertionsAssemblies.ContainsAssembly(method.ContainingAssembly))
         {
             return;
         }

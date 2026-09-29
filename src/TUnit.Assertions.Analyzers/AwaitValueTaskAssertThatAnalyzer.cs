@@ -25,7 +25,7 @@ public class AwaitValueTaskAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
             var valueTask = compilationStart.Compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask");
             var genericValueTask = compilationStart.Compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask`1");
 
-            if (symbols.Assert is null || valueTask is null || genericValueTask is null)
+            if (symbols.Assert.IsEmpty || valueTask is null || genericValueTask is null)
             {
                 return;
             }

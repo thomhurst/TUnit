@@ -202,4 +202,58 @@ public class CompilerArgumentsPopulatedAnalyzerTests
                     .WithLocation(0)
             );
     }
+
+    [Test]
+    public async Task Flagged_For_Global_And_Extern_Aliased_Assertion_Assemblies()
+    {
+        await Verifier
+            .VerifyAnalyzerWithAdditionalAliasedAssemblyAsync(
+                """
+                extern alias AssertionsCopy;
+
+                using System.Threading.Tasks;
+                using TUnit.Assertions;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    public async Task MyTest()
+                    {
+                        await Assert.That(1, {|#0:"expression"|}).IsEqualTo(1);
+                        await AssertionsCopy::TUnit.Assertions.Assert.That(1, {|#1:"expression"|}).IsEqualTo(1);
+                    }
+                }
+                """,
+                AwaitAssertionAnalyzerTests.AssertionsCopySource,
+                "AssertionsCopy",
+                assertionsAlias: null,
+
+                Verifier.Diagnostic(Rules.CompilerArgumentsPopulated).WithLocation(0),
+                Verifier.Diagnostic(Rules.CompilerArgumentsPopulated).WithLocation(1)
+            );
+    }
+
+    [Test]
+    public async Task Not_Flagged_For_Extern_Aliased_Copy_When_Not_Populated()
+    {
+        await Verifier
+            .VerifyAnalyzerWithAdditionalAliasedAssemblyAsync(
+                """
+                extern alias AssertionsCopy;
+
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public async Task MyTest()
+                    {
+                        await AssertionsCopy::TUnit.Assertions.Assert.That(1).IsEqualTo(1);
+                    }
+                }
+                """,
+                AwaitAssertionAnalyzerTests.AssertionsCopySource,
+                "AssertionsCopy",
+                assertionsAlias: null
+            );
+    }
 }

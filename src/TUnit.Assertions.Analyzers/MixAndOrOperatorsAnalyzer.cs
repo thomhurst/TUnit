@@ -23,7 +23,7 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             var symbols = AssertionSymbols.For(compilationStart.Compilation);
 
-            if (symbols.IAssertionSource is null && symbols.IShouldSource is null && symbols.AssertionOfT is null)
+            if (symbols.IAssertionSource.IsEmpty && symbols.IShouldSource.IsEmpty && symbols.AssertionOfT.IsEmpty)
             {
                 return;
             }
@@ -113,10 +113,10 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             var definition = @interface.OriginalDefinition;
 
-            if (SymbolEqualityComparer.Default.Equals(definition, symbols.IAssertionSource)
-                || SymbolEqualityComparer.Default.Equals(definition, symbols.IAssertionSourceOfT)
-                || SymbolEqualityComparer.Default.Equals(definition, symbols.IShouldSource)
-                || SymbolEqualityComparer.Default.Equals(definition, symbols.IShouldSourceOfT))
+            if (symbols.IAssertionSource.Contains(definition)
+                || symbols.IAssertionSourceOfT.Contains(definition)
+                || symbols.IShouldSource.Contains(definition)
+                || symbols.IShouldSourceOfT.Contains(definition))
             {
                 return true;
             }
@@ -125,16 +125,16 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
         return false;
     }
 
-    private static bool IsAssertionType(INamedTypeSymbol? type, INamedTypeSymbol? assertionOfT)
+    private static bool IsAssertionType(INamedTypeSymbol? type, TypeSymbolSet assertionOfT)
     {
-        if (assertionOfT is null)
+        if (assertionOfT.IsEmpty)
         {
             return false;
         }
 
         for (; type is not null; type = type.BaseType)
         {
-            if (SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, assertionOfT))
+            if (assertionOfT.Contains(type.OriginalDefinition))
             {
                 return true;
             }

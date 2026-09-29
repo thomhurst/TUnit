@@ -34,7 +34,7 @@ public class XUnitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 
     // Probes extern-alias-only references too (compilation.GlobalNamespace doesn't merge those in).
     private static bool HasXunitAssertType(Compilation compilation)
-        => AssertionSymbols.ResolveType(compilation, "Xunit.Assert") is not null;
+        => !TypeSymbolSet.Resolve(compilation, "Xunit.Assert").IsEmpty;
 
     private static void AnalyzeOperation(OperationAnalysisContext context)
     {
