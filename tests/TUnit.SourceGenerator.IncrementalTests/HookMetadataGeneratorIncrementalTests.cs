@@ -35,6 +35,53 @@ public class HookMetadataGeneratorIncrementalTests
     }
 
     [Fact]
+    public void TypesWithSameSanitizedName_ShouldGenerateDistinctFilesAndMembers()
+    {
+        // A_B.C and A.B_C both sanitize to A_B_C. Hint names and the members emitted into the shared
+        // TUnit_HookRegistration partial class must still be unique.
+        const string source =
+            """
+            using TUnit.Core;
+
+            namespace A_B
+            {
+                public class C
+                {
+                    [Before(HookType.Test)]
+                    public void Setup()
+                    {
+                    }
+                }
+            }
+
+            namespace A
+            {
+                public class B_C
+                {
+                    [Before(HookType.Test)]
+                    public void Setup()
+                    {
+                    }
+                }
+            }
+            """;
+
+        var compilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(source, CSharpParseOptions.Default));
+
+        var driver = TestHelper.GenerateTracked<HookMetadataGenerator>(compilation);
+        var runResult = driver.GetRunResult();
+
+        Xunit.Assert.Empty(runResult.Diagnostics);
+        var generatorResult = Xunit.Assert.Single(runResult.Results);
+        Xunit.Assert.Null(generatorResult.Exception);
+        Xunit.Assert.Equal(2, generatorResult.GeneratedSources.Length);
+        Xunit.Assert.Equal(2, generatorResult.GeneratedSources.Select(static s => s.HintName).Distinct().Count());
+
+        var outputCompilation = compilation.AddSyntaxTrees(generatorResult.GeneratedSources.Select(static s => s.SyntaxTree));
+        Xunit.Assert.Empty(outputCompilation.GetDiagnostics().Where(static d => d.Severity == DiagnosticSeverity.Error));
+    }
+
+    [Fact]
     public void ChangeHookInOneClass_ShouldOnlyModifyThatClassGroup()
     {
         const string source =

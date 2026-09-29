@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 using TUnit.Core.SourceGenerator.Models.Extracted;
 using TUnit.Core.SourceGenerator.Utilities;
@@ -116,7 +117,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
             WriteHookClassFileFooter(writer);
 
-            context.AddSource($"{SanitizeForFileName(group.FullyQualifiedTypeName)}.Hooks.g.cs", writer.ToString());
+            context.AddSource($"{GetUniqueName(group.FullyQualifiedTypeName, group.FullyQualifiedTypeName)}.Hooks.g.cs", writer.ToString());
         }
         catch (Exception ex)
         {
@@ -444,22 +445,32 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
     private static string GetSafeFileName(HookModel hook)
     {
-        // Create deterministic filename from full type name and method name
-        // Use fully qualified type name to ensure uniqueness across namespaces
+        // Readable name from full type name, method name, simple parameter type names and hook kind/type.
         var baseName = $"{hook.FullyQualifiedTypeName}_{hook.MethodName}";
 
-        // Add parameter types to ensure uniqueness for overloaded methods
-        // Only add if there are parameters (matches main branch behavior - no _0_ suffix for empty params)
         if (hook.Parameters.Length > 0)
         {
             var paramTypes = string.Join('_', hook.Parameters.Select(p => SanitizeForFileName(GetSimpleTypeName(p.TypeName))));
             baseName += $"__{paramTypes}";
         }
 
-        // Add hook kind and type
         baseName += $"_{hook.HookKind}_{hook.HookType}";
 
-        return SanitizeForFileName(baseName);
+        // Sanitizing is not injective (A_B.C and A.B_C both become A_B_C, and parameter types are
+        // shortened), so a stable hash of the exact hook identity keeps member names unique within the
+        // shared TUnit_HookRegistration partial class.
+        var identity = $"{hook.FullyQualifiedTypeName}.{hook.MethodName}({string.Join(",", hook.Parameters.Select(static p => p.TypeName))})|{hook.HookKind}|{hook.HookType}";
+
+        return GetUniqueName(baseName, identity);
+    }
+
+    /// <summary>
+    /// Returns a readable, sanitized name with a stable hash of <paramref name="identity"/> appended,
+    /// so distinct identities that sanitize to the same text still get distinct names.
+    /// </summary>
+    private static string GetUniqueName(string readableName, string identity)
+    {
+        return $"{SanitizeForFileName(readableName)}_{FileNameHelper.GetStableHashCode(identity):x8}";
     }
 
     private static string SanitizeForFileName(string input)
@@ -596,14 +607,12 @@ public class HookMetadataGenerator : IIncrementalGenerator
             return;
         }
 
-        // Direct call with no async state machine. Synchronous exceptions are returned as a faulted
-        // ValueTask, matching what the previous async body produced.
+        // Direct call with no async state machine or lambda. The hook classes in TUnit.Core invoke
+        // Body through HookBodyInvoker, an async wrapper that gives these bodies async-method
+        // semantics: synchronous exceptions become a faulted (or, for OperationCanceledException,
+        // canceled) task, and ExecutionContext changes made by the hook do not leak to the caller.
         using (writer.BeginBlock($"private static ValueTask {bodyName}({parameters})"))
         {
-            writer.AppendLine("try");
-            writer.AppendLine("{");
-            writer.Indent();
-
             if (isInstanceHook)
             {
                 writer.AppendLine($"var typedInstance = ({className})instance;");
@@ -622,15 +631,6 @@ public class HookMetadataGenerator : IIncrementalGenerator
                     writer.AppendLine($"return {methodCall};");
                     break;
             }
-
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("catch (Exception ex)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("return new ValueTask(Task.FromException(ex));");
-            writer.Unindent();
-            writer.AppendLine("}");
         }
 
         writer.AppendLine();

@@ -13,7 +13,7 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalBase1_AfterEach1_After_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalBase1), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalBase1_AfterEach1_After_Test_904b20c4 = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalBase1), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
             static __registrationIndex =>
             new InstanceHookMethod
             {
@@ -42,22 +42,15 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalBase1_AfterEach1_After_Test_Body
+                Body = TUnit_TestProject_AfterTests_GlobalBase1_AfterEach1_After_Test_904b20c4_Body
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalBase1_AfterEach1_After_Test_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalBase1_AfterEach1_After_Test_904b20c4_Body(object instance, TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalBase1)instance;
-                return new ValueTask(typedInstance.AfterEach1());
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalBase1)instance;
+            return new ValueTask(typedInstance.AfterEach1());
         }
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalBase1_AfterAll1__TestContext_AfterEvery_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalBase1_AfterAll1__TestContext_AfterEvery_Test_b567856a = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
             static __registrationIndex =>
             new AfterTestHookMethod
             {
@@ -88,21 +81,14 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalBase1_AfterAll1__TestContext_AfterEvery_Test_Body,
+                Body = TUnit_TestProject_AfterTests_GlobalBase1_AfterAll1__TestContext_AfterEvery_Test_b567856a_Body,
                 FilePath = "",
                 LineNumber = 5
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalBase1_AfterAll1__TestContext_AfterEvery_Test_Body(TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalBase1_AfterAll1__TestContext_AfterEvery_Test_b567856a_Body(TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalBase1.AfterAll1(context));
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalBase1.AfterAll1(context));
         }
     }
 }
@@ -125,7 +111,7 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalBase2_AfterEach2_After_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalBase2), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalBase2_AfterEach2_After_Test_ffd77f0e = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalBase2), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
             static __registrationIndex =>
             new InstanceHookMethod
             {
@@ -154,22 +140,15 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalBase2_AfterEach2_After_Test_Body
+                Body = TUnit_TestProject_AfterTests_GlobalBase2_AfterEach2_After_Test_ffd77f0e_Body
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalBase2_AfterEach2_After_Test_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalBase2_AfterEach2_After_Test_ffd77f0e_Body(object instance, TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalBase2)instance;
-                return new ValueTask(typedInstance.AfterEach2());
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalBase2)instance;
+            return new ValueTask(typedInstance.AfterEach2());
         }
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalBase2_AfterAll2__TestContext_AfterEvery_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalBase2_AfterAll2__TestContext_AfterEvery_Test_4d8bdc2a = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
             static __registrationIndex =>
             new AfterTestHookMethod
             {
@@ -200,21 +179,14 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalBase2_AfterAll2__TestContext_AfterEvery_Test_Body,
+                Body = TUnit_TestProject_AfterTests_GlobalBase2_AfterAll2__TestContext_AfterEvery_Test_4d8bdc2a_Body,
                 FilePath = "",
                 LineNumber = 20
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalBase2_AfterAll2__TestContext_AfterEvery_Test_Body(TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalBase2_AfterAll2__TestContext_AfterEvery_Test_4d8bdc2a_Body(TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalBase2.AfterAll2(context));
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalBase2.AfterAll2(context));
         }
     }
 }
@@ -237,7 +209,7 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalBase3_AfterEach3_After_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalBase3), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalBase3_AfterEach3_After_Test_9afe6ae4 = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalBase3), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
             static __registrationIndex =>
             new InstanceHookMethod
             {
@@ -266,22 +238,15 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalBase3_AfterEach3_After_Test_Body
+                Body = TUnit_TestProject_AfterTests_GlobalBase3_AfterEach3_After_Test_9afe6ae4_Body
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalBase3_AfterEach3_After_Test_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalBase3_AfterEach3_After_Test_9afe6ae4_Body(object instance, TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalBase3)instance;
-                return new ValueTask(typedInstance.AfterEach3());
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalBase3)instance;
+            return new ValueTask(typedInstance.AfterEach3());
         }
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalBase3_AfterAll3__TestContext_AfterEvery_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalBase3_AfterAll3__TestContext_AfterEvery_Test_ad2ba782 = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
             static __registrationIndex =>
             new AfterTestHookMethod
             {
@@ -312,21 +277,14 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalBase3_AfterAll3__TestContext_AfterEvery_Test_Body,
+                Body = TUnit_TestProject_AfterTests_GlobalBase3_AfterAll3__TestContext_AfterEvery_Test_ad2ba782_Body,
                 FilePath = "",
                 LineNumber = 35
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalBase3_AfterAll3__TestContext_AfterEvery_Test_Body(TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalBase3_AfterAll3__TestContext_AfterEvery_Test_ad2ba782_Body(TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalBase3.AfterAll3(context));
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalBase3.AfterAll3(context));
         }
     }
 }
@@ -349,7 +307,7 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp_After_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp_After_Test_4454235d = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
             static __registrationIndex =>
             new InstanceHookMethod
             {
@@ -378,22 +336,15 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp_After_Test_Body
+                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp_After_Test_4454235d_Body
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp_After_Test_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp_After_Test_4454235d_Body(object instance, TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)instance;
-                return new ValueTask(typedInstance.CleanUp());
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)instance;
+            return new ValueTask(typedInstance.CleanUp());
         }
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp__CancellationToken_After_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp__CancellationToken_After_Test_0df6ecc7 = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
             static __registrationIndex =>
             new InstanceHookMethod
             {
@@ -425,22 +376,15 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp__CancellationToken_After_Test_Body
+                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp__CancellationToken_After_Test_0df6ecc7_Body
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp__CancellationToken_After_Test_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp__CancellationToken_After_Test_0df6ecc7_Body(object instance, TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)instance;
-                return new ValueTask(typedInstance.CleanUp(cancellationToken));
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)instance;
+            return new ValueTask(typedInstance.CleanUp(cancellationToken));
         }
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_After_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_After_Test_304b58ad = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
             static __registrationIndex =>
             new InstanceHookMethod
             {
@@ -472,22 +416,15 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_After_Test_Body
+                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_After_Test_304b58ad_Body
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_After_Test_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_After_Test_304b58ad_Body(object instance, TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)instance;
-                return new ValueTask(typedInstance.CleanUpWithContext(context));
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)instance;
+            return new ValueTask(typedInstance.CleanUpWithContext(context));
         }
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_CancellationToken_After_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_CancellationToken_After_Test_1396b9cf = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
             static __registrationIndex =>
             new InstanceHookMethod
             {
@@ -520,22 +457,15 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_CancellationToken_After_Test_Body
+                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_CancellationToken_After_Test_1396b9cf_Body
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_CancellationToken_After_Test_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_CancellationToken_After_Test_1396b9cf_Body(object instance, TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)instance;
-                return new ValueTask(typedInstance.CleanUpWithContext(context, cancellationToken));
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            var typedInstance = (global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)instance;
+            return new ValueTask(typedInstance.CleanUpWithContext(context, cancellationToken));
         }
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_AfterEvery_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_AfterEvery_Test_0798971a = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
             static __registrationIndex =>
             new AfterTestHookMethod
             {
@@ -566,23 +496,16 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_AfterEvery_Test_Body,
+                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_AfterEvery_Test_0798971a_Body,
                 FilePath = "",
                 LineNumber = 50
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_AfterEvery_Test_Body(TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_AfterEvery_Test_0798971a_Body(TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUp(context));
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUp(context));
         }
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_CancellationToken_AfterEvery_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_CancellationToken_AfterEvery_Test_3861f668 = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
             static __registrationIndex =>
             new AfterTestHookMethod
             {
@@ -614,23 +537,16 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_CancellationToken_AfterEvery_Test_Body,
+                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_CancellationToken_AfterEvery_Test_3861f668_Body,
                 FilePath = "",
                 LineNumber = 56
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_CancellationToken_AfterEvery_Test_Body(TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_CancellationToken_AfterEvery_Test_3861f668_Body(TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUp(context, cancellationToken));
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUp(context, cancellationToken));
         }
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_AfterEvery_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_AfterEvery_Test_c1daeebf = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
             static __registrationIndex =>
             new AfterTestHookMethod
             {
@@ -661,23 +577,16 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_AfterEvery_Test_Body,
+                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_AfterEvery_Test_c1daeebf_Body,
                 FilePath = "",
                 LineNumber = 62
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_AfterEvery_Test_Body(TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_AfterEvery_Test_c1daeebf_Body(TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUpWithContext(context));
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUpWithContext(context));
         }
-        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_CancellationToken_AfterEvery_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_CancellationToken_AfterEvery_Test_8ae97ec3 = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterEveryTestHooks, global::TUnit.Core.HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
             static __registrationIndex =>
             new AfterTestHookMethod
             {
@@ -709,21 +618,14 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_CancellationToken_AfterEvery_Test_Body,
+                Body = TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_CancellationToken_AfterEvery_Test_8ae97ec3_Body,
                 FilePath = "",
                 LineNumber = 68
             }
         );
-        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_CancellationToken_AfterEvery_Test_Body(TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_CancellationToken_AfterEvery_Test_8ae97ec3_Body(TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUpWithContext(context, cancellationToken));
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            return new ValueTask(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUpWithContext(context, cancellationToken));
         }
     }
 }

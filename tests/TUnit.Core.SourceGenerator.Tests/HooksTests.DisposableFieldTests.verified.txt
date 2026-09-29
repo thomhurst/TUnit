@@ -13,7 +13,7 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_DisposableFieldTests_Setup_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.DisposableFieldTests), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_DisposableFieldTests_Setup_Before_Test_b28f2ec1 = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.DisposableFieldTests), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
             static __registrationIndex =>
             new InstanceHookMethod
             {
@@ -42,23 +42,16 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_DisposableFieldTests_Setup_Before_Test_Body
+                Body = TUnit_TestProject_DisposableFieldTests_Setup_Before_Test_b28f2ec1_Body
             }
         );
-        private static ValueTask TUnit_TestProject_DisposableFieldTests_Setup_Before_Test_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_DisposableFieldTests_Setup_Before_Test_b28f2ec1_Body(object instance, TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                var typedInstance = (global::TUnit.TestProject.DisposableFieldTests)instance;
-                typedInstance.Setup();
-                return default;
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            var typedInstance = (global::TUnit.TestProject.DisposableFieldTests)instance;
+            typedInstance.Setup();
+            return default;
         }
-        static readonly int _h_TUnit_TestProject_DisposableFieldTests_Blah_After_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.DisposableFieldTests), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
+        static readonly int _h_TUnit_TestProject_DisposableFieldTests_Blah_After_Test_7388f534 = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.AfterTestHooks, typeof(global::TUnit.TestProject.DisposableFieldTests), global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
             static __registrationIndex =>
             new InstanceHookMethod
             {
@@ -87,21 +80,14 @@ namespace TUnit.Generated
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
                 RegistrationIndex = __registrationIndex,
-                Body = TUnit_TestProject_DisposableFieldTests_Blah_After_Test_Body
+                Body = TUnit_TestProject_DisposableFieldTests_Blah_After_Test_7388f534_Body
             }
         );
-        private static ValueTask TUnit_TestProject_DisposableFieldTests_Blah_After_Test_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        private static ValueTask TUnit_TestProject_DisposableFieldTests_Blah_After_Test_7388f534_Body(object instance, TestContext context, CancellationToken cancellationToken)
         {
-            try
-            {
-                var typedInstance = (global::TUnit.TestProject.DisposableFieldTests)instance;
-                typedInstance.Blah();
-                return default;
-            }
-            catch (Exception ex)
-            {
-                return new ValueTask(Task.FromException(ex));
-            }
+            var typedInstance = (global::TUnit.TestProject.DisposableFieldTests)instance;
+            typedInstance.Blah();
+            return default;
         }
     }
 }

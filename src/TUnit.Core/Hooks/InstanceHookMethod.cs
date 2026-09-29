@@ -36,7 +36,7 @@ public record InstanceHookMethod : HookMethod, IExecutableHook<TestContext>
         }
 
         return ResolveEffectiveExecutor(context).ExecuteBeforeTestHook(MethodInfo, context,
-            () => Body!.Invoke(context.Metadata.TestDetails.ClassInstance, context, cancellationToken)
+            () => HookBodyInvoker.InvokeAsync(Body!, context.Metadata.TestDetails.ClassInstance, context, cancellationToken)
         );
     }
 }
