@@ -39,10 +39,19 @@ public sealed class TracedWebApplicationFactory<TEntryPoint> : IAsyncDisposable,
     public IServiceProvider Services => _inner.Services;
 
     /// <summary>
-    /// Creates an <see cref="HttpClient"/> with activity tracing and test context propagation.
+    /// Creates an <see cref="HttpClient"/> configured by the inner factory's
+    /// <see cref="WebApplicationFactory{TEntryPoint}.ClientOptions"/>, with activity tracing and
+    /// test context propagation.
     /// </summary>
-    public HttpClient CreateClient() =>
-        _inner.CreateDefaultClient(TUnitHttpClientFilter.PrependPropagationHandlers([]));
+    public HttpClient CreateClient() => CreateClient(_inner.ClientOptions);
+
+    /// <summary>
+    /// Creates an <see cref="HttpClient"/> configured by <paramref name="options"/>, with activity
+    /// tracing and test context propagation. Honors cookie handling, auto-redirect and base address
+    /// settings the same way as <see cref="WebApplicationFactory{TEntryPoint}.CreateClient(WebApplicationFactoryClientOptions)"/>.
+    /// </summary>
+    public HttpClient CreateClient(WebApplicationFactoryClientOptions options) =>
+        TUnitHttpClientFilter.CreateClient(_inner.CreateDefaultClient, options);
 
     /// <summary>
     /// Creates an <see cref="HttpClient"/> with the specified delegating handlers, plus
