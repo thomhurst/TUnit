@@ -2,7 +2,7 @@
 
 Last Updated
 
-These benchmarks were automatically generated on **2026-09-27** from the latest CI run.
+These benchmarks were automatically generated on **2026-09-29** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.401
 
@@ -29,9 +29,9 @@ These benchmarks compare TUnit against the most popular .NET testing frameworks:
 
 | Framework    | Version Tested |
 | ------------ | -------------- |
-| **TUnit**    | 1.69.21        |
+| **TUnit**    | 1.71.0         |
 | **xUnit v3** | 4.0.1          |
-| **NUnit**    | 4.6.1          |
+| **NUnit**    | 5.0.0          |
 | **MSTest**   | 4.4.1          |
 
 ### Test Scenarios[​](#test-scenarios "Direct link to Test Scenarios")
@@ -72,4 +72,4 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 
-*Last generated: 2026-09-27T00:42:59.274Z*
+*Last generated: 2026-09-29T16:54:28.496Z*
