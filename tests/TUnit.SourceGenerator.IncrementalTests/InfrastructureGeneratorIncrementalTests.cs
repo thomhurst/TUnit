@@ -27,14 +27,12 @@ public class InfrastructureGeneratorIncrementalTests
 
         var driver1 = TestHelper.GenerateTracked<InfrastructureGenerator>(compilation1);
         AssertRunReason(driver1, IncrementalStepRunReason.New);
-        var model1 = GetExtractedModel(driver1);
 
-        // Syntax-only edits rerun the cheap Select, which returns the memoized model (same instance,
-        // so the reference walk was skipped) and keeps the generated source cached.
+        // Syntax-only edits rerun the cheap Select, whose model is unchanged, so the generated source
+        // stays cached. Memo_SyntaxOnlyEdits_ReuseModel checks that the reference walk is skipped.
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
         AssertRunReason(driver2, IncrementalStepRunReason.Unchanged);
-        Xunit.Assert.Same(model1, GetExtractedModel(driver2));
         TestHelper.AssertSourceOutputsCached(driver2.GetRunResult().Results[0]);
 
         var compilation3 = TestHelper.ReplaceMethodDeclaration(compilation1, "Test1",
@@ -47,7 +45,6 @@ public class InfrastructureGeneratorIncrementalTests
             """);
         var driver3 = driver2.RunGenerators(compilation3);
         AssertRunReason(driver3, IncrementalStepRunReason.Unchanged);
-        Xunit.Assert.Same(model1, GetExtractedModel(driver3));
         TestHelper.AssertSourceOutputsCached(driver3.GetRunResult().Results[0]);
     }
 
@@ -149,34 +146,31 @@ public class InfrastructureGeneratorIncrementalTests
     private const string ShadowingSource = "namespace OtherTestLibrary { public class FirstHooks { } }";
 
     [Fact]
-    public void FreshDriver_SameReferences_SourceShadowsSelectedType_SelectsNextType()
+    public void FreshDriver_SameReferences_DoesNotShareMemo()
     {
-        var baseCompilation = CreateWithTwoTypeLibrary();
+        var compilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
-        // Populate the shared memo from an unrelated driver.
-        var unshadowed = GenerateInfrastructure(CSharpGeneratorDriver.Create(new InfrastructureGenerator()).RunGenerators(baseCompilation));
-        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.FirstHooks)", unshadowed);
-
-        // Same reference array, but a source type now takes FirstHooks' name, so typeof() would bind
-        // to the source type and never initialize OtherTestLibrary.
-        var shadowedCompilation = baseCompilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(ShadowingSource));
-        var shadowed = GenerateInfrastructure(CSharpGeneratorDriver.Create(new InfrastructureGenerator()).RunGenerators(shadowedCompilation));
-        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.SecondHooks)", shadowed);
-        Xunit.Assert.DoesNotContain("typeof(global::OtherTestLibrary.FirstHooks)", shadowed);
+        // The memo belongs to one driver, so an unrelated driver over the same reference list
+        // extracts fresh instead of reusing another driver's result.
+        var first = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(compilation));
+        var second = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(compilation));
+        Xunit.Assert.NotSame(first, second);
+        Xunit.Assert.Equal(first, second);
     }
 
     [Fact]
-    public void FreshDriver_SameReferences_SourceSensitiveSelectionIsNotReused()
+    public void EditSource_SourceSensitiveSelectionIsNotReused()
     {
         var baseCompilation = CreateWithTwoTypeLibrary();
         var shadowedCompilation = baseCompilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(ShadowingSource));
 
         // The shadowed run must not memoize its (source-dependent) choice for later compilations.
-        var shadowed = GenerateInfrastructure(CSharpGeneratorDriver.Create(new InfrastructureGenerator()).RunGenerators(shadowedCompilation));
-        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.SecondHooks)", shadowed);
+        var driver1 = TestHelper.GenerateTracked<InfrastructureGenerator>(shadowedCompilation);
+        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.SecondHooks)", GenerateInfrastructure(driver1));
 
-        var unshadowed = GenerateInfrastructure(CSharpGeneratorDriver.Create(new InfrastructureGenerator()).RunGenerators(baseCompilation));
-        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.FirstHooks)", unshadowed);
+        var driver2 = driver1.RunGenerators(baseCompilation);
+        AssertRunReason(driver2, IncrementalStepRunReason.Modified);
+        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.FirstHooks)", GenerateInfrastructure(driver2));
     }
 
     [Fact]
@@ -196,47 +190,96 @@ public class InfrastructureGeneratorIncrementalTests
         Xunit.Assert.Contains("typeof(global::OtherTestLibrary.FirstHooks)", GenerateInfrastructure(driver3));
     }
 
-    [Fact]
-    public void FreshDriver_SameReferences_DifferentBindingOptions_ReExtracts()
-    {
-        var baseCompilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
-        var baseModel = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(baseCompilation));
+    // The driver keeps the previous output instance whenever a rerun produces an equal model, so
+    // whether the walk was skipped is only observable on the memo itself: it returns the same
+    // instance on a hit and a new one after re-extracting.
 
-        // Same reference array, so the memo is hit, but options that change how references bind to
-        // assembly symbols must not reuse a model extracted under different options.
+    [Fact]
+    public void Memo_SyntaxOnlyEdits_ReuseModel()
+    {
+        var memo = new InfrastructureGenerator.AssemblyInfoMemo();
+        var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
+        var model1 = memo.GetAssemblyInfo(compilation1);
+
+        var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
+        Xunit.Assert.Same(model1, memo.GetAssemblyInfo(compilation2));
+
+        var compilation3 = TestHelper.ReplaceMethodDeclaration(compilation1, "Test1",
+            """
+            [Test]
+            public void Test1()
+            {
+                var x = 1;
+            }
+            """);
+        Xunit.Assert.Same(model1, memo.GetAssemblyInfo(compilation3));
+    }
+
+    [Fact]
+    public void Memo_ReferenceChange_ReExtracts()
+    {
+        var memo = new InfrastructureGenerator.AssemblyInfoMemo();
+        var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
+        var model1 = memo.GetAssemblyInfo(compilation1);
+
+        var compilation2 = compilation1.AddReferences(CreateHookLibrary(compilation1, "SharedHooks").ToMetadataReference());
+        var model2 = memo.GetAssemblyInfo(compilation2);
+        Xunit.Assert.NotSame(model1, model2);
+        Xunit.Assert.NotEqual(model1, model2);
+    }
+
+    [Fact]
+    public void Memo_OptionsOrAssemblyNameChange_ReExtracts()
+    {
+        var memo = new InfrastructureGenerator.AssemblyInfoMemo();
+        var baseCompilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
+        var baseModel = memo.GetAssemblyInfo(baseCompilation);
+
+        // Same reference list, but options can change how references bind to assembly symbols,
+        // so a new options instance must not reuse the model extracted under the old one.
         var withComparer = baseCompilation.WithOptions(
             baseCompilation.Options.WithAssemblyIdentityComparer(DesktopAssemblyIdentityComparer.Default));
-        Xunit.Assert.Equal(baseCompilation.ExternalReferences, withComparer.ExternalReferences);
-        var comparerModel = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(withComparer));
+        Xunit.Assert.True(baseCompilation.ExternalReferences == withComparer.ExternalReferences);
+        var comparerModel = memo.GetAssemblyInfo(withComparer);
         Xunit.Assert.NotSame(baseModel, comparerModel);
         Xunit.Assert.Equal(baseModel, comparerModel);
 
         var withImportOptions = baseCompilation.WithOptions(
             baseCompilation.Options.WithMetadataImportOptions(MetadataImportOptions.All));
-        var importModel = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(withImportOptions));
-        Xunit.Assert.NotSame(baseModel, importModel);
+        var importModel = memo.GetAssemblyInfo(withImportOptions);
+        Xunit.Assert.NotSame(comparerModel, importModel);
 
-        // The original options still reuse the memo once it holds their extraction again.
-        var again = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(baseCompilation));
-        Xunit.Assert.Same(again, GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(baseCompilation)));
+        // Syntax-only edits under the new options reuse the memo again.
+        Xunit.Assert.Same(importModel, memo.GetAssemblyInfo(
+            withImportOptions.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"))));
+
+        var renamed = withImportOptions.WithAssemblyName("Renamed");
+        Xunit.Assert.True(withImportOptions.ExternalReferences == renamed.ExternalReferences);
+        var renamedModel = memo.GetAssemblyInfo(renamed);
+        Xunit.Assert.NotSame(importModel, renamedModel);
+        Xunit.Assert.Equal("Renamed", renamedModel.AssemblyName);
     }
 
     [Fact]
-    public void ScriptCompilation_SameReferences_IsNeverMemoized()
+    public void Memo_ScriptCompilation_IsNeverMemoized()
     {
+        var memo = new InfrastructureGenerator.AssemblyInfoMemo();
         var baseCompilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
-        var baseModel = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(baseCompilation));
+        var baseModel = memo.GetAssemblyInfo(baseCompilation);
 
-        // The scripting host binds submissions with the internal ReferencesSupersedeLowerVersions option,
-        // which Matches cannot compare, so script compilations must always extract fresh.
+        // Script submissions read inputs outside the memo key (#r directives, the previous
+        // submission and the internal ReferencesSupersedeLowerVersions option), so they always
+        // extract fresh.
         var script = CSharpCompilation.CreateScriptCompilation(
             baseCompilation.AssemblyName!,
             CSharpSyntaxTree.ParseText("var x = 1;", CSharpParseOptions.Default.WithKind(SourceCodeKind.Script)),
             baseCompilation.ExternalReferences);
-        Xunit.Assert.Equal(baseCompilation.ExternalReferences, script.ExternalReferences);
+        Xunit.Assert.True(baseCompilation.ExternalReferences == script.ExternalReferences);
 
-        var first = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(script));
-        var second = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(script));
+        var first = memo.GetAssemblyInfo(script);
+        var second = memo.GetAssemblyInfo(script.ReplaceSyntaxTree(
+            script.SyntaxTrees.Single(),
+            CSharpSyntaxTree.ParseText("var y = 2;", CSharpParseOptions.Default.WithKind(SourceCodeKind.Script))));
         Xunit.Assert.NotSame(baseModel, first);
         Xunit.Assert.NotSame(first, second);
     }

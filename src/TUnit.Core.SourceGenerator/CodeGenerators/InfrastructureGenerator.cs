@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Models;
 using TUnit.Core.SourceGenerator.Models.Extracted;
@@ -62,9 +61,10 @@ public class InfrastructureGenerator : IIncrementalGenerator
         // keeps the generated source cached across keystrokes. No custom Compilation comparer here:
         // when a comparer reports "equal", the input node keeps the OLD compilation in its table,
         // pinning it (trees, bound state) until references change. The reference walk is memoized
-        // on the reference list instead, so syntax-only edits still skip it.
+        // per driver instead, so syntax-only edits still skip it.
+        var memo = new AssemblyInfoMemo();
         var assemblyInfoProvider = context.CompilationProvider
-            .Select((compilation, _) => GetAssemblyInfo(compilation))
+            .Select((compilation, _) => memo.GetAssemblyInfo(compilation))
             .WithTrackingName(ExtractAssemblyInfoStep)
             .Combine(enabledProvider);
 
@@ -81,103 +81,74 @@ public class InfrastructureGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Returns the memoized model while the compilation keeps the same reference list. Syntax-only
-    /// edits reuse the backing array of <see cref="Compilation.ExternalReferences"/>; adding, removing,
-    /// rebuilding or (for an IDE project reference) editing a reference produces a new array, so
-    /// extraction reruns. The table is keyed weakly on that array and its values hold only strings and
-    /// the reference-binding option objects, so no Compilation or MetadataReference is kept alive by
-    /// the cache.
+    /// Single-slot memo of the reference walk, created per <see cref="Initialize"/> and so owned by one
+    /// generator driver. The walk costs several milliseconds per run on a real test project (about
+    /// 6.5 ms for TUnit.TestProject's 211 references), and in the IDE it would otherwise run on every
+    /// keystroke.
     /// <para>
-    /// The selection is reference-derived except for one source dependency:
-    /// <see cref="Compilation.GetTypeByMetadataName"/> prefers a source type over a referenced type with
-    /// the same metadata name, so source can shadow a candidate. The memo is therefore only stored
-    /// when no candidate was shadowed (the selection then equals a purely reference-based one), and on
-    /// reuse each selected type is checked against the current source; if any is now shadowed,
-    /// extraction reruns. The table is static and can be hit by independent drivers that share a
-    /// reference array, so this keeps every returned model identical to a fresh extraction.
+    /// The key is every compilation input the walk reads except source:
+    /// <see cref="Compilation.ExternalReferences"/> (compared with <see cref="ImmutableArray{T}"/>
+    /// <c>==</c>, which compares the backing array by reference; syntax-only edits reuse it, while any
+    /// reference change produces a new one), the <see cref="Compilation.Options"/> instance and the
+    /// assembly name. Scripts are never memoized. The one source dependency, a source type shadowing a
+    /// selected type, is re-checked on every hit.
+    /// </para>
+    /// <para>
+    /// The slot only ever describes the latest compilation this driver saw: every miss replaces or
+    /// clears it. It holds that compilation's reference list and options (which the live compilation
+    /// holds anyway), never a <see cref="Compilation"/> or syntax tree, and it dies with the driver.
     /// </para>
     /// </summary>
-    private static AssemblyInfoModel GetAssemblyInfo(Compilation compilation)
+    internal sealed class AssemblyInfoMemo
     {
-        // Script submissions are never memoized. Their #r directive references are not part of the
-        // key, and the scripting host binds them with CompilationOptions.ReferencesSupersedeLowerVersions,
-        // which is internal and so cannot be compared in Matches. Scripting is the only public API
-        // that sets it, so excluding scripts keeps the memo equal to a fresh extraction.
-        if (compilation.ScriptCompilationInfo is not null || !compilation.DirectiveReferences.IsEmpty)
+        // Racy by design: concurrent runs may both miss, both extract and both store. Entries are
+        // immutable and each equals a fresh extraction for its key, so the only cost is duplicate work.
+        private volatile Entry? _last;
+
+        public AssemblyInfoModel GetAssemblyInfo(Compilation compilation)
         {
-            return ExtractAssemblyInfo(compilation, out _);
+            // Script submissions read inputs outside the key (#r directive references, the previous
+            // submission), so they always extract fresh.
+            if (compilation.ScriptCompilationInfo is not null || !compilation.DirectiveReferences.IsEmpty)
+            {
+                _last = null;
+                return ExtractAssemblyInfo(compilation, out _);
+            }
+
+            var last = _last;
+            if (last is not null
+                && last.References == compilation.ExternalReferences
+                && ReferenceEquals(last.Options, compilation.Options)
+                && last.AssemblyName == compilation.AssemblyName
+                && !IsAnyShadowedBySource(compilation, last.SelectedMetadataNames))
+            {
+                return last.Model;
+            }
+
+            var model = ExtractAssemblyInfo(compilation, out var selectedMetadataNames);
+            _last = selectedMetadataNames is null
+                ? null
+                : new Entry(compilation.ExternalReferences, compilation.Options, compilation.AssemblyName, model, selectedMetadataNames);
+            return model;
         }
 
-        var key = GetReferencesKey(compilation.ExternalReferences);
-        if (key is null)
+        private sealed class Entry(
+            ImmutableArray<MetadataReference> references,
+            CompilationOptions options,
+            string? assemblyName,
+            AssemblyInfoModel model,
+            string[] selectedMetadataNames)
         {
-            return ExtractAssemblyInfo(compilation, out _);
+            public ImmutableArray<MetadataReference> References { get; } = references;
+
+            public CompilationOptions Options { get; } = options;
+
+            public string? AssemblyName { get; } = assemblyName;
+
+            public AssemblyInfoModel Model { get; } = model;
+
+            public string[] SelectedMetadataNames { get; } = selectedMetadataNames;
         }
-
-        var holder = AssemblyInfoCache.GetValue(key, static _ => new AssemblyInfoCacheEntry());
-
-        // Racy by design: two threads can both miss, both extract and both store. Every stored model
-        // equals a fresh extraction, so the last write wins and nothing is lost but duplicate work.
-        var cached = holder.Value;
-        if (cached is not null
-            && cached.Matches(compilation)
-            && !IsAnyShadowedBySource(compilation, cached.SelectedMetadataNames))
-        {
-            return cached.Model;
-        }
-
-        var model = ExtractAssemblyInfo(compilation, out var selectedMetadataNames);
-        if (selectedMetadataNames is not null)
-        {
-            holder.Value = new CachedAssemblyInfo(compilation, model, selectedMetadataNames);
-        }
-
-        return model;
-    }
-
-    /// <summary>
-    /// Why the key is the backing array rather than something public:
-    /// <list type="bullet">
-    /// <item><see cref="Compilation.ExternalReferences"/> is an <see cref="ImmutableArray{T}"/>, a struct,
-    /// so it cannot be a <see cref="ConditionalWeakTable{TKey,TValue}"/> key. Boxing it would create a new
-    /// object each call and never hit. Its backing array is the stable identity Roslyn reuses across
-    /// source-only edits.</item>
-    /// <item>A value-type projection in the pipeline (or <c>MetadataReferencesProvider</c>) cannot replace
-    /// this: extraction needs the <see cref="Compilation"/> to bind referenced assembly symbols, and a node
-    /// that carries the Compilation into the transform is exactly what pinned it before.</item>
-    /// </list>
-    /// Returns the array backing <paramref name="references"/>, or <see langword="null"/> when the
-    /// layout check failed (memoization is then disabled, which costs speed but never correctness).
-    /// </summary>
-    private static MetadataReference[]? GetReferencesKey(ImmutableArray<MetadataReference> references)
-    {
-        // Deliberate layout assumption: ImmutableArray<T> is a struct wrapping a single T[] field
-        // (ImmutableCollectionsMarshal.AsArray does the same, but is not available to netstandard2.0
-        // analyzers). IsImmutableArrayLayoutAsExpected verifies it once at startup, and
-        // EditSource_ShouldNotRegenerate fails if the memo stops being used.
-        if (!IsImmutableArrayLayoutAsExpected)
-        {
-            return null;
-        }
-
-        return Unsafe.As<ImmutableArray<MetadataReference>, MetadataReference[]?>(ref references);
-    }
-
-    private static readonly bool IsImmutableArrayLayoutAsExpected = CheckImmutableArrayLayout();
-
-    private static bool CheckImmutableArrayLayout()
-    {
-        if (Unsafe.SizeOf<ImmutableArray<object>>() != Unsafe.SizeOf<object[]>())
-        {
-            return false;
-        }
-
-        var probe = ImmutableArray.Create(new object(), new object());
-        var array = Unsafe.As<ImmutableArray<object>, object[]?>(ref probe);
-        return array is not null
-            && array.Length == probe.Length
-            && ReferenceEquals(array[0], probe[0])
-            && ReferenceEquals(array[1], probe[1]);
     }
 
     private static bool IsAnyShadowedBySource(Compilation compilation, string[] selectedMetadataNames)
@@ -194,50 +165,13 @@ public class InfrastructureGenerator : IIncrementalGenerator
         return false;
     }
 
-    private static readonly ConditionalWeakTable<MetadataReference[], AssemblyInfoCacheEntry> AssemblyInfoCache = new();
-
-    private sealed class AssemblyInfoCacheEntry
-    {
-        public volatile CachedAssemblyInfo? Value;
-    }
-
-    private sealed class CachedAssemblyInfo(Compilation compilation, AssemblyInfoModel model, string[] selectedMetadataNames)
-    {
-        private readonly string _language = compilation.Language;
-        private readonly string? _assemblyName = compilation.AssemblyName;
-
-        // Options that change how references bind to assembly symbols (unification, implicitly
-        // resolved missing assemblies, imported metadata), and so can change the selection even
-        // when the reference array is the same. Only the comparer and resolver objects are held,
-        // never the Compilation.
-        private readonly AssemblyIdentityComparer _assemblyIdentityComparer = compilation.Options.AssemblyIdentityComparer;
-        private readonly MetadataReferenceResolver? _metadataReferenceResolver = compilation.Options.MetadataReferenceResolver;
-        private readonly MetadataImportOptions _metadataImportOptions = compilation.Options.MetadataImportOptions;
-
-        public AssemblyInfoModel Model { get; } = model;
-
-        public string[] SelectedMetadataNames { get; } = selectedMetadataNames;
-
-        public bool Matches(Compilation compilation)
-        {
-            var options = compilation.Options;
-            return _language == compilation.Language
-                && _assemblyName == compilation.AssemblyName
-                && ReferenceEquals(_assemblyIdentityComparer, options.AssemblyIdentityComparer)
-                && Equals(_metadataReferenceResolver, options.MetadataReferenceResolver)
-                && _metadataImportOptions == options.MetadataImportOptions;
-        }
-    }
-
     /// <summary>
     /// Extracts all needed data as primitives in the transform step.
     /// This enables proper incremental caching - the model contains only strings.
     /// <para>
-    /// The result is memoized by <see cref="GetAssemblyInfo"/> across compilations and drivers, so it
-    /// must depend only on the references, their binding options, the language and the assembly name.
-    /// The one source dependency (a source type shadowing a candidate) is reported through
-    /// <paramref name="selectedMetadataNames"/> and re-checked on reuse. Any new input read here
-    /// must be added to <see cref="CachedAssemblyInfo.Matches"/>.
+    /// The result is memoized by <see cref="AssemblyInfoMemo"/> across syntax-only edits, so any
+    /// dependency on source must be reported through <paramref name="selectedMetadataNames"/> (as the
+    /// shadowing check does) so that reuse can re-check it.
     /// </para>
     /// </summary>
     /// <param name="compilation">The compilation to inspect.</param>
