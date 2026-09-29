@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Mvc.Testing.Handlers;
 using Microsoft.Extensions.Http;
 
 namespace TUnit.AspNetCore.Http;
@@ -38,6 +40,35 @@ internal sealed class TUnitHttpClientFilter : IHttpMessageHandlerBuilderFilter
         all[0] = new ActivityPropagationHandler();
         all[1] = new TUnitTestIdHandler();
         Array.Copy(handlers, 0, all, 2, handlers.Length);
+        return all;
+    }
+
+    /// <summary>
+    /// Returns the TUnit propagation handlers followed by the handlers that
+    /// <see cref="WebApplicationFactoryClientOptions"/> requests: a <see cref="RedirectHandler"/>
+    /// when <see cref="WebApplicationFactoryClientOptions.AllowAutoRedirect"/> is set, then a
+    /// <see cref="CookieContainerHandler"/> when <see cref="WebApplicationFactoryClientOptions.HandleCookies"/>
+    /// is set. Mirrors the internal <c>WebApplicationFactoryClientOptions.CreateHandlers</c> used by
+    /// <c>WebApplicationFactory.CreateClient(WebApplicationFactoryClientOptions)</c>.
+    /// </summary>
+    internal static DelegatingHandler[] CreateClientOptionsHandlers(WebApplicationFactoryClientOptions options)
+    {
+        var count = 2 + (options.AllowAutoRedirect ? 1 : 0) + (options.HandleCookies ? 1 : 0);
+        var all = new DelegatingHandler[count];
+        var index = 0;
+        all[index++] = new ActivityPropagationHandler();
+        all[index++] = new TUnitTestIdHandler();
+
+        if (options.AllowAutoRedirect)
+        {
+            all[index++] = new RedirectHandler(options.MaxAutomaticRedirections);
+        }
+
+        if (options.HandleCookies)
+        {
+            all[index] = new CookieContainerHandler();
+        }
+
         return all;
     }
 }

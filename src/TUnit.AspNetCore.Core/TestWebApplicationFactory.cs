@@ -233,13 +233,23 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
     }
 
     /// <summary>
-    /// Creates an <see cref="HttpClient"/> with automatic Activity tracing and test context propagation.
-    /// Equivalent to calling <see cref="CreateDefaultClient(DelegatingHandler[])"/> with no additional handlers.
+    /// Creates an <see cref="HttpClient"/> configured by <see cref="WebApplicationFactory{TEntryPoint}.ClientOptions"/>,
+    /// with automatic Activity tracing and test context propagation.
     /// </summary>
-    public new HttpClient CreateClient()
+    public new HttpClient CreateClient() => CreateClient(ClientOptions);
+
+    /// <summary>
+    /// Creates an <see cref="HttpClient"/> configured by <paramref name="options"/>, with automatic
+    /// Activity tracing and test context propagation. Honors
+    /// <see cref="WebApplicationFactoryClientOptions.AllowAutoRedirect"/>,
+    /// <see cref="WebApplicationFactoryClientOptions.MaxAutomaticRedirections"/>,
+    /// <see cref="WebApplicationFactoryClientOptions.HandleCookies"/> and
+    /// <see cref="WebApplicationFactoryClientOptions.BaseAddress"/>.
+    /// </summary>
+    public new HttpClient CreateClient(WebApplicationFactoryClientOptions options)
     {
-        var client = CreateDefaultClient();
-        ConfigureClient(client);
+        var client = base.CreateDefaultClient(TUnitHttpClientFilter.CreateClientOptionsHandlers(options));
+        client.BaseAddress = options.BaseAddress;
         return client;
     }
 
