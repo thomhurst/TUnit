@@ -93,7 +93,8 @@ internal class ContextProvider(IServiceProvider serviceProvider, string testSess
         }
 
         // See GetOrCreateAssemblyContext: a lost GetOrAdd race would leave an orphaned class
-        // context in AssemblyHookContext.TestClasses.
+        // context in AssemblyHookContext.TestClasses. The assembly context is resolved before
+        // taking _creationLock on purpose, so the assembly and class paths never nest the lock.
         var assemblyContext = GetOrCreateAssemblyContext(classType.Assembly);
 
         lock (_creationLock)
