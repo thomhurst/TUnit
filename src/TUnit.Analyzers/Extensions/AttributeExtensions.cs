@@ -88,22 +88,19 @@ public static class AttributeExtensions
     public static bool IsMatrixAttribute(this AttributeData attributeData, Compilation compilation)
     {
         return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                   compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.Matrix
-                       .WithoutGlobalPrefix));
+            TUnitSymbols.For(compilation).MatrixAttribute);
     }
 
     public static bool IsMatrixDataSourceAttribute(this AttributeData attributeData, Compilation compilation)
     {
         return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-            compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.MatrixDataSourceAttribute
-                .WithoutGlobalPrefix));
+            TUnitSymbols.For(compilation).MatrixDataSourceAttribute);
     }
 
     public static bool IsCombinedDataSourceAttribute(this AttributeData attributeData, Compilation compilation)
     {
         return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-            compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.CombinedDataSourceAttribute
-                .WithoutGlobalPrefix));
+            TUnitSymbols.For(compilation).CombinedDataSourceAttribute);
     }
 
     public static bool IsDataSourceAttribute(this AttributeData? attributeData, Compilation compilation)
@@ -113,8 +110,7 @@ public static class AttributeExtensions
             return false;
         }
 
-        var dataAttributeInterface = compilation
-            .GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithoutGlobalPrefix)!;
+        var dataAttributeInterface = TUnitSymbols.For(compilation).DataSourceAttributeInterface!;
 
         return attributeData.AttributeClass.AllInterfaces.Contains(dataAttributeInterface, SymbolEqualityComparer.Default);
     }

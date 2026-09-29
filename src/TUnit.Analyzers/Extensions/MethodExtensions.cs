@@ -25,16 +25,7 @@ public static class MethodExtensions
     /// </summary>
     public static bool HasTestAttribute(this IMethodSymbol methodSymbol, Compilation compilation)
     {
-        var baseTestAttribute = compilation.GetTypeByMetadataName("TUnit.Core.BaseTestAttribute");
-
-        if (baseTestAttribute is null)
-        {
-            return false;
-        }
-
-        return methodSymbol.GetAttributes().Any(attribute =>
-            attribute.AttributeClass?.GetSelfAndBaseTypes()
-                .Contains(baseTestAttribute, SymbolEqualityComparer.Default) == true);
+        return TUnitSymbols.For(compilation).HasTestAttribute(methodSymbol);
     }
 
     public static bool IsHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
