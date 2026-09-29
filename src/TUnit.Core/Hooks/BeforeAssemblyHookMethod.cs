@@ -5,7 +5,7 @@ public record BeforeAssemblyHookMethod : StaticHookMethod<AssemblyHookContext>
     public override ValueTask ExecuteAsync(AssemblyHookContext context, CancellationToken cancellationToken)
     {
         return HookExecutor.ExecuteBeforeAssemblyHook(MethodInfo, context,
-            () => HookBodyInvoker.InvokeAsync(Body!, context, cancellationToken)
+            () => InvokeBodyAsync(context, cancellationToken)
         );
     }
 }

@@ -5,7 +5,7 @@ public record BeforeClassHookMethod : StaticHookMethod<ClassHookContext>
     public override ValueTask ExecuteAsync(ClassHookContext context, CancellationToken cancellationToken)
     {
         return HookExecutor.ExecuteBeforeClassHook(MethodInfo, context,
-            () => HookBodyInvoker.InvokeAsync(Body!, context, cancellationToken)
+            () => InvokeBodyAsync(context, cancellationToken)
         );
     }
 }

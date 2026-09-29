@@ -19,6 +19,10 @@ public record InstanceHookMethod : HookMethod, IExecutableHook<TestContext>
         init { _classType = value; }
     }
 
+    /// <summary>
+    /// The hook body. Source-generated bodies call the hook method directly, without an async state machine,
+    /// so invoke it only through <see cref="HookBodyInvoker"/> to keep async-method semantics.
+    /// </summary>
     public Func<object, TestContext, CancellationToken, ValueTask>? Body { get; init; }
 
     public ValueTask ExecuteAsync(TestContext context, CancellationToken cancellationToken)
