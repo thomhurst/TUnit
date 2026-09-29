@@ -35,6 +35,11 @@ internal sealed class TUnitSymbols
         AfterAttribute = compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterAttribute.WithoutGlobalPrefix);
         BeforeEveryAttribute = compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.BeforeEveryAttribute.WithoutGlobalPrefix);
         AfterEveryAttribute = compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterEveryAttribute.WithoutGlobalPrefix);
+        BaseTestAttribute = compilation.GetTypeByMetadataName("TUnit.Core.BaseTestAttribute");
+        MatrixAttribute = compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.Matrix.WithoutGlobalPrefix);
+        MatrixDataSourceAttribute = compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.MatrixDataSourceAttribute.WithoutGlobalPrefix);
+        CombinedDataSourceAttribute = compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.CombinedDataSourceAttribute.WithoutGlobalPrefix);
+        DataSourceAttributeInterface = compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithoutGlobalPrefix);
     }
 
     public Compilation Compilation { get; }
@@ -48,6 +53,16 @@ internal sealed class TUnitSymbols
     public INamedTypeSymbol? BeforeEveryAttribute { get; }
 
     public INamedTypeSymbol? AfterEveryAttribute { get; }
+
+    public INamedTypeSymbol? BaseTestAttribute { get; }
+
+    public INamedTypeSymbol? MatrixAttribute { get; }
+
+    public INamedTypeSymbol? MatrixDataSourceAttribute { get; }
+
+    public INamedTypeSymbol? CombinedDataSourceAttribute { get; }
+
+    public INamedTypeSymbol? DataSourceAttributeInterface { get; }
 
     public static TUnitSymbols For(Compilation compilation)
     {
@@ -89,6 +104,32 @@ internal sealed class TUnitSymbols
             if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, testAttribute))
             {
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Inheritance-aware test attribute check; see <see cref="Extensions.MethodExtensions.HasTestAttribute"/>.
+    /// </summary>
+    public bool HasTestAttribute(IMethodSymbol methodSymbol)
+    {
+        var baseTestAttribute = BaseTestAttribute;
+
+        if (baseTestAttribute is null)
+        {
+            return false;
+        }
+
+        foreach (var attribute in methodSymbol.GetAttributes())
+        {
+            for (var type = attribute.AttributeClass; type is not null && type.SpecialType != SpecialType.System_Object; type = type.BaseType)
+            {
+                if (SymbolEqualityComparer.Default.Equals(type, baseTestAttribute))
+                {
+                    return true;
+                }
             }
         }
 

@@ -14,10 +14,10 @@ internal static class TUnit_TestProject_ClassConstructorTest__TestSource
         Name = "ClassConstructorTest",
         Namespace = "TUnit.TestProject",
         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.ClassConstructorTest), false, new global::TUnit.Core.ParameterMetadata[]
         {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.DummyReferenceTypeClass), "dummyReferenceTypeClass", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DummyReferenceTypeClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassConstructorTest).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.DummyReferenceTypeClass) })!.GetParameters()[0])
-        },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.DummyReferenceTypeClass), "dummyReferenceTypeClass", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DummyReferenceTypeClass)), false)
+        }),
         Properties = new global::TUnit.Core.PropertyMetadata[]
         {
             new global::TUnit.Core.PropertyMetadata

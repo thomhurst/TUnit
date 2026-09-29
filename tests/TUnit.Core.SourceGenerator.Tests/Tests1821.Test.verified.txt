@@ -14,10 +14,10 @@ internal static class TUnit_TestProject_Bugs__1821_Tests__TestSource
         Name = "Tests",
         Namespace = "TUnit.TestProject.Bugs._1821",
         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._1821.Tests), false, new global::TUnit.Core.ParameterMetadata[]
         {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Bugs._1821.MyData), "data", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.MyData)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1821.MyData) })!.GetParameters()[0])
-        },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Bugs._1821.MyData), "data", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.MyData)), false)
+        }),
         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
         Parent = null
     });
@@ -102,10 +102,10 @@ internal static class TUnit_TestProject_Bugs__1821_Tests__TestSource
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>(),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._1821.Tests), "MethodDataSource", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetMethod("MethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
@@ -127,10 +127,10 @@ internal static class TUnit_TestProject_Bugs__1821_Tests__TestSource
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>(),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._1821.Tests), "MatrixDataSource", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetMethod("MatrixDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,

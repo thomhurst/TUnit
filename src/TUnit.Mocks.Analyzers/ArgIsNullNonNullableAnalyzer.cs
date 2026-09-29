@@ -28,7 +28,7 @@ public class ArgIsNullNonNullableAnalyzer : DiagnosticAnalyzer
         }
 
         // Cheap syntactic check before binding: only Arg.IsNull<T>() / Arg.IsNotNull<T>() are of interest.
-        if (!InvocationNameFilter.MayInvoke(invocation, "IsNull", "IsNotNull"))
+        if (!InvocationNameFilter.MayInvokeGeneric(invocation, "IsNull", "IsNotNull"))
         {
             return;
         }

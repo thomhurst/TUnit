@@ -34,7 +34,8 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
         }
 
         // Cheap syntactic check before binding: only Mock.Of<T>() / Mock.Wrap<T>() / T.Mock() are of interest.
-        if (!InvocationNameFilter.MayInvoke(invocation, "Of", "Wrap", "Mock"))
+        if (!InvocationNameFilter.MayInvokeGeneric(invocation, "Of")
+            && !InvocationNameFilter.MayInvoke(invocation, "Wrap", "Mock"))
         {
             return;
         }

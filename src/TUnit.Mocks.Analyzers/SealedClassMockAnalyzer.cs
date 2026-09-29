@@ -28,7 +28,7 @@ public class SealedClassMockAnalyzer : DiagnosticAnalyzer
         }
 
         // Cheap syntactic check before binding: only Mock.Of<T>() / MockRepository.Of<T>() are of interest.
-        if (!InvocationNameFilter.MayInvoke(invocation, "Of"))
+        if (!InvocationNameFilter.MayInvokeGeneric(invocation, "Of"))
         {
             return;
         }

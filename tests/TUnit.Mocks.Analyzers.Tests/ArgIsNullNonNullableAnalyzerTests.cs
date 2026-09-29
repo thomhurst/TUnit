@@ -146,6 +146,26 @@ public class ArgIsNullNonNullableAnalyzerTests
     }
 
     [Test]
+    public async Task IsNull_Via_Using_Static_Reports_TM005()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            "using static TUnit.Mocks.Arguments.Arg;\n\n" + ArgStub + """
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    {|#0:IsNull<int>()|};
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.TM005_ArgIsNullNonNullableValueType)
+                .WithLocation(0)
+                .WithArguments("IsNull", "int")
+        );
+    }
+
+    [Test]
     public async Task IsNotNull_With_Nullable_Reference_Type_Does_Not_Report()
     {
         await Verifier.VerifyAnalyzerAsync(

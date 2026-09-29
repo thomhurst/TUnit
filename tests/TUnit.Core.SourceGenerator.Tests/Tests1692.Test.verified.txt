@@ -83,10 +83,10 @@ internal static class TUnit_TestProject_Bugs__1692_Tests__TestSource
     new global::TUnit.Core.ArgumentsAttribute(null),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._1692.Tests), "NullTest", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "t", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1692.Tests).GetMethod("NullTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "t", new global::TUnit.Core.ConcreteType(typeof(string)), true)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,

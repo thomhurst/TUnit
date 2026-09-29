@@ -649,4 +649,55 @@ public class WebApplicationFactoryAccessAnalyzerTests
                     .WithArguments("Services")
             );
     }
+
+    [Test]
+    public async Task Error_When_WebApplicationTest_Is_Only_Referenced_Through_Extern_Alias()
+    {
+        // Compilation.GlobalNamespace omits extern-aliased references, so the compilation-start
+        // gate must still find WebApplicationTest in them or every diagnostic silently disappears.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                extern alias AspNet;
+                using TUnit.Core;
+
+                public class MyFactory { }
+                public class Program { }
+
+                public class MyTests : AspNet::TUnit.AspNetCore.WebApplicationTest<MyFactory, Program>
+                {
+                    public MyTests()
+                    {
+                        var factory = {|#0:Factory|};
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """,
+                test =>
+                {
+                    test.TestState.AdditionalProjects["AspNetStub"].Sources.Add(WebApplicationTestStub);
+                    test.TestState.AdditionalProjectReferences.Add("AspNetStub");
+                    test.SolutionTransforms.Add((solution, projectId) =>
+                    {
+                        var project = solution.GetProject(projectId)!;
+
+                        foreach (var reference in project.ProjectReferences)
+                        {
+                            solution = solution
+                                .RemoveProjectReference(projectId, reference)
+                                .AddProjectReference(projectId, new Microsoft.CodeAnalysis.ProjectReference(reference.ProjectId, ["AspNet"]));
+                        }
+
+                        return solution;
+                    });
+                },
+                Verifier.Diagnostic(Rules.FactoryAccessedTooEarly)
+                    .WithLocation(0)
+                    .WithArguments("Factory", "constructor")
+            );
+    }
 }

@@ -94,10 +94,10 @@ internal static class TUnit_TestProject_Bugs__2085_Tests__TestSource
     new global::TUnit.Core.MatrixDataSourceAttribute(),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._2085.Tests), "Double_SpecialConsts", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(double), "d", new global::TUnit.Core.ConcreteType(typeof(double)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Double_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(double), "d", new global::TUnit.Core.ConcreteType(typeof(double)), false)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
@@ -115,10 +115,10 @@ internal static class TUnit_TestProject_Bugs__2085_Tests__TestSource
     new global::TUnit.Core.MatrixDataSourceAttribute(),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._2085.Tests), "Float_SpecialConsts", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new global::TUnit.Core.ConcreteType(typeof(float)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Float_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new global::TUnit.Core.ConcreteType(typeof(float)), false)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,

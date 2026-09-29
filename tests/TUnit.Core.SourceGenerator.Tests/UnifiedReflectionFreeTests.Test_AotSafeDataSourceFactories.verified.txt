@@ -82,12 +82,12 @@ internal static class TUnit_TestProject_AotDataSourceTest__TestSource
     new global::TUnit.Core.ArgumentsAttribute(1, 2, 3),
     new global::TUnit.Core.ArgumentsAttribute(4, 5, 6),
 },
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.AotDataSourceTest), "TestWithDataSource", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "a", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[0]),
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "b", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[1]),
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "c", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[2])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "a", new global::TUnit.Core.ConcreteType(typeof(int)), false),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "b", new global::TUnit.Core.ConcreteType(typeof(int)), false),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "c", new global::TUnit.Core.ConcreteType(typeof(int)), false)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
