@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.TestProject.Attributes;
 
@@ -49,15 +50,39 @@ public class ParameterReflectionInfoTests(string first, int second)
     }
 
     [Test]
+    [Arguments(7, "seven")]
+    internal async Task Internal_Method(int value, string text)
+    {
+        var parameters = TestContext.Current!.Metadata.TestDetails.MethodMetadata.Parameters;
+
+        await AssertParameter(parameters[0], nameof(value), 0, typeof(int));
+        await AssertParameter(parameters[1], nameof(text), 1, typeof(string));
+        await Assert.That(parameters[0].ReflectionInfo.Member.Name).IsEqualTo(nameof(Internal_Method));
+    }
+
+    [Test]
+    public async Task Private_Helper_With_Annotated_Parameter()
+    {
+        // Regression for IL2111: generated metadata must not ask the trimmer to keep every non-public method of
+        // the test class, or a private helper like this one is reported as accessed via reflection.
+        await Assert.That(CountFields(typeof(ParameterReflectionInfoTests))).IsGreaterThanOrEqualTo(0);
+    }
+
+    private static int CountFields([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.NonPublicFields)] Type type)
+    {
+        return type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Length;
+    }
+
+    [Test]
     public async Task Static_Method_Via_Factory()
     {
-        var parameters = ParameterMetadataFactory.ForMethod(typeof(ParameterReflectionInfoTests), nameof(StaticHelper), true,
+        var parameters = ParameterMetadataFactory.ForMethod(typeof(Helpers), nameof(Helpers.StaticHelper), true,
             ParameterMetadataFactory.Create(typeof(int), "value", new ConcreteType(typeof(int)), false),
             ParameterMetadataFactory.Create(typeof(string), "text", new ConcreteType(typeof(string)), false));
 
         await AssertParameter(parameters[0], "value", 0, typeof(int));
         await AssertParameter(parameters[1], "text", 1, typeof(string));
-        await Assert.That(parameters[1].ReflectionInfo.Member.Name).IsEqualTo(nameof(StaticHelper));
+        await Assert.That(parameters[1].ReflectionInfo.Member.Name).IsEqualTo(nameof(Helpers.StaticHelper));
     }
 
     [Test]
@@ -76,11 +101,11 @@ public class ParameterReflectionInfoTests(string first, int second)
     [Test]
     public async Task Generic_Method_Via_Factory()
     {
-        var parameters = ParameterMetadataFactory.ForGenericMethod(typeof(ParameterReflectionInfoTests), nameof(GenericHelper),
+        var parameters = ParameterMetadataFactory.ForGenericMethod(typeof(Helpers), nameof(Helpers.GenericHelper),
             ParameterMetadataFactory.Create(typeof(object), "item", new ConcreteType(typeof(object)), false));
 
         await Assert.That(parameters[0].ReflectionInfo.Name).IsEqualTo("item");
-        await Assert.That(parameters[0].ReflectionInfo.Member.Name).IsEqualTo(nameof(GenericHelper));
+        await Assert.That(parameters[0].ReflectionInfo.Member.Name).IsEqualTo(nameof(Helpers.GenericHelper));
     }
 
     [Test]
@@ -95,15 +120,18 @@ public class ParameterReflectionInfoTests(string first, int second)
         await Assert.That(exception.Message).Contains(nameof(ParameterReflectionInfoTests));
     }
 
-    private static void StaticHelper(int value, string text)
+    public static class Helpers
     {
+        public static void StaticHelper(int value, string text)
+        {
+        }
+
+        public static void GenericHelper<T>(T item)
+        {
+        }
     }
 
-    private static void GenericHelper<T>(T item)
-    {
-    }
-
-    private sealed class GenericHolder<T>
+    public sealed class GenericHolder<T>
     {
         public GenericHolder(T value, int count)
         {

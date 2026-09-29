@@ -236,6 +236,13 @@ internal static class MetadataGenerationHelper
         {
             writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof({containingType}), {usesTypeParameters.ToString().ToLowerInvariant()}, ");
         }
+        else if (method.DeclaredAccessibility != Accessibility.Public)
+        {
+            // The factory's declaring-type annotation only keeps public methods, so trimming stays limited to what
+            // ClassMetadata.Type already keeps. A non-public method is rooted with its own intrinsic lookup instead
+            // of annotating the type with NonPublicMethods, which would keep (and warn about) every private helper.
+            writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForMethodLookup(\"{method.Name}\", static () => {GenerateNonPublicMethodLookup(method, containingType, usesTypeParameters)}, ");
+        }
         else if (method.TypeParameters.Length > 0 || usesTypeParameters)
         {
             writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof({containingType}), \"{method.Name}\", ");
@@ -244,6 +251,23 @@ internal static class MetadataGenerationHelper
         {
             writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof({containingType}), \"{method.Name}\", {method.IsStatic.ToString().ToLowerInvariant()}, ");
         }
+    }
+
+    private static string GenerateNonPublicMethodLookup(IMethodSymbol method, string containingType, bool usesTypeParameters)
+    {
+        if (method.TypeParameters.Length > 0 || usesTypeParameters)
+        {
+            return $"global::System.Linq.Enumerable.FirstOrDefault(typeof({containingType}).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == \"{method.Name}\" && m.GetParameters().Length == {method.Parameters.Length})";
+        }
+
+        var bindingFlags = method.IsStatic
+            ? "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static"
+            : "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance";
+        var parameterTypes = method.Parameters.Length == 0
+            ? "global::System.Type.EmptyTypes"
+            : $"new global::System.Type[] {{ {string.Join(", ", method.Parameters.Select(p => $"typeof({p.Type.GloballyQualified()})"))} }}";
+
+        return $"typeof({containingType}).GetMethod(\"{method.Name}\", {bindingFlags}, null, {parameterTypes}, null)";
     }
 
     /// <summary>

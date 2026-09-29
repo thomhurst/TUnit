@@ -12,10 +12,15 @@ namespace TUnit.Core;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class ParameterMetadataFactory
 {
+    /// <remarks>
+    /// Deliberately limited to what <see cref="ClassMetadata.Type"/> already keeps for a test class. Requesting
+    /// non-public methods here would keep every private helper of the class and report IL2111 for any helper
+    /// with <see cref="DynamicallyAccessedMembersAttribute"/> parameters. Non-public test methods go through
+    /// <see cref="ForMethodLookup"/>, whose generated lookup roots only that method.
+    /// </remarks>
     internal const DynamicallyAccessedMemberTypes DeclaringTypeMembers =
         DynamicallyAccessedMemberTypes.PublicConstructors
-        | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods;
+        | DynamicallyAccessedMemberTypes.PublicMethods;
 
     [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2067",
         Justification = "Factory is only called from generated code that always passes concrete types")]
@@ -67,6 +72,19 @@ public static class ParameterMetadataFactory
     }
 
     /// <summary>
+    /// Attaches lazy <see cref="ParameterMetadata.ReflectionInfo"/> resolution to the parameters of a non-public
+    /// method. <paramref name="lookup"/> runs once, on first access; the generator emits it as an intrinsic
+    /// reflection call so trimming keeps exactly that method.
+    /// </summary>
+    public static ParameterMetadata[] ForMethodLookup(
+        string methodName,
+        Func<MethodBase?> lookup,
+        params ParameterMetadata[] parameters)
+    {
+        return Attach(parameters, new ParameterInfoResolver(lookup, methodName, parameters));
+    }
+
+    /// <summary>
     /// Attaches lazy <see cref="ParameterMetadata.ReflectionInfo"/> resolution to the parameters of a public
     /// constructor. When <paramref name="matchByParameterCount"/> is true the constructor is matched by
     /// parameter count instead of parameter types.
@@ -110,12 +128,14 @@ internal sealed class ParameterInfoResolver
         MethodByParameterCount,
         Constructor,
         ConstructorByParameterCount,
+        Lookup,
     }
 
-    private const BindingFlags AllMethods = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+    private const BindingFlags PublicMethods = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 
     [DynamicallyAccessedMembers(ParameterMetadataFactory.DeclaringTypeMembers)]
-    private readonly Type _declaringType;
+    private readonly Type? _declaringType;
+    private readonly Func<MethodBase?>? _lookup;
     private readonly string? _methodName;
     private readonly Kind _kind;
     private readonly ParameterMetadata[] _parameters;
@@ -133,6 +153,14 @@ internal sealed class ParameterInfoResolver
         _parameters = parameters;
     }
 
+    public ParameterInfoResolver(Func<MethodBase?> lookup, string methodName, ParameterMetadata[] parameters)
+    {
+        _lookup = lookup;
+        _methodName = methodName;
+        _kind = Kind.Lookup;
+        _parameters = parameters;
+    }
+
     public ParameterInfo? Get(int index)
     {
         // Benign race: concurrent first accesses may each run Resolve(), but the lookup is idempotent and
@@ -145,11 +173,12 @@ internal sealed class ParameterInfoResolver
     {
         return _kind switch
         {
-            Kind.InstanceMethod => $"instance method '{_declaringType.FullName}.{_methodName}' with {_parameters.Length} parameter(s) matched by parameter types",
-            Kind.StaticMethod => $"static method '{_declaringType.FullName}.{_methodName}' with {_parameters.Length} parameter(s) matched by parameter types",
-            Kind.MethodByParameterCount => $"method '{_declaringType.FullName}.{_methodName}' matched by parameter count ({_parameters.Length})",
-            Kind.Constructor => $"constructor of '{_declaringType.FullName}' with {_parameters.Length} parameter(s) matched by parameter types",
-            _ => $"constructor of '{_declaringType.FullName}' matched by parameter count ({_parameters.Length})",
+            Kind.InstanceMethod => $"instance method '{_declaringType!.FullName}.{_methodName}' with {_parameters.Length} parameter(s) matched by parameter types",
+            Kind.StaticMethod => $"static method '{_declaringType!.FullName}.{_methodName}' with {_parameters.Length} parameter(s) matched by parameter types",
+            Kind.MethodByParameterCount => $"method '{_declaringType!.FullName}.{_methodName}' matched by parameter count ({_parameters.Length})",
+            Kind.Constructor => $"constructor of '{_declaringType!.FullName}' with {_parameters.Length} parameter(s) matched by parameter types",
+            Kind.ConstructorByParameterCount => $"constructor of '{_declaringType!.FullName}' matched by parameter count ({_parameters.Length})",
+            _ => $"non-public method '{_methodName}' with {_parameters.Length} parameter(s)",
         };
     }
 
@@ -157,11 +186,12 @@ internal sealed class ParameterInfoResolver
     {
         MethodBase? member = _kind switch
         {
-            Kind.InstanceMethod => _declaringType.GetMethod(_methodName!, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, GetParameterTypes(), null),
-            Kind.StaticMethod => _declaringType.GetMethod(_methodName!, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static, null, GetParameterTypes(), null),
-            Kind.MethodByParameterCount => FindByParameterCount(_declaringType.GetMethods(AllMethods)),
-            Kind.Constructor => _declaringType.GetConstructor(GetParameterTypes()),
-            _ => FindByParameterCount(_declaringType.GetConstructors()),
+            Kind.InstanceMethod => _declaringType!.GetMethod(_methodName!, BindingFlags.Public | BindingFlags.Instance, null, GetParameterTypes(), null),
+            Kind.StaticMethod => _declaringType!.GetMethod(_methodName!, BindingFlags.Public | BindingFlags.Static, null, GetParameterTypes(), null),
+            Kind.MethodByParameterCount => FindByParameterCount(_declaringType!.GetMethods(PublicMethods)),
+            Kind.Constructor => _declaringType!.GetConstructor(GetParameterTypes()),
+            Kind.ConstructorByParameterCount => FindByParameterCount(_declaringType!.GetConstructors()),
+            _ => _lookup!(),
         };
 
         return member?.GetParameters() ?? [];
