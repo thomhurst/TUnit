@@ -19,7 +19,7 @@ internal static class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.GenericMethodTests);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("AggregateBy_HasExpectedOutput", __classType, typeof(void), __classMetadata, genericTypeCount: 3, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.GenericMethodTests), "AggregateBy_HasExpectedOutput", new global::TUnit.Core.ParameterMetadata[]
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("AggregateBy_HasExpectedOutput", __classType, typeof(void), __classMetadata, genericTypeCount: 3, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.GenericMethodTests), "AggregateBy_HasExpectedOutput", false, 3, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "source", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.IEnumerable<>), [new global::TUnit.Core.GenericParameter(0, true, "TSource")]), false),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "keySelector", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Func<,>), [new global::TUnit.Core.GenericParameter(0, true, "TSource"), new global::TUnit.Core.GenericParameter(1, true, "TKey")]), false),

@@ -1102,7 +1102,9 @@ namespace
         public static .ParameterMetadata Create( type, string name, .TypeInfo typeInfo, bool isNullable, <.ParameterInfo>? reflectionInfoFactory = null) { }
         public static .ParameterMetadata[] ForConstructor( declaringType, bool matchByParameterCount, params .ParameterMetadata[] parameters) { }
         public static .ParameterMetadata[] ForGenericMethod( declaringType, string methodName, params .ParameterMetadata[] parameters) { }
+        public static .ParameterMetadata[] ForGenericMethod( declaringType, string methodName, bool isStatic, int genericParameterCount, params .ParameterMetadata[] parameters) { }
         public static .ParameterMetadata[] ForMethod( declaringType, string methodName, bool isStatic, params .ParameterMetadata[] parameters) { }
+        public static .ParameterMetadata[] ForNonPublicMethod( declaringType, string methodName, bool isStatic, int genericParameterCount,  rootMethod, params .ParameterMetadata[] parameters) { }
     }
     [.DebuggerDisplay("{Type} {Name}")]
     public class ParameterMetadata<T> : .ParameterMetadata, <.ParameterMetadata<T>>

@@ -19,7 +19,7 @@ internal static class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._2136.Tests);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("GenericArgumentsTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._2136.Tests), "GenericArgumentsTest", new global::TUnit.Core.ParameterMetadata[]
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("GenericArgumentsTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._2136.Tests), "GenericArgumentsTest", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, true, "T"), false),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", new global::TUnit.Core.ConcreteType(typeof(string)), false)

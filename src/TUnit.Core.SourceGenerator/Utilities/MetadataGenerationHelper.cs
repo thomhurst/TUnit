@@ -236,14 +236,43 @@ internal static class MetadataGenerationHelper
         {
             writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof({containingType}), {usesTypeParameters.ToString().ToLowerInvariant()}, ");
         }
+        else if (method.DeclaredAccessibility != Accessibility.Public)
+        {
+            // The factory's declaring-type annotation only keeps public methods, so trimming stays limited to what
+            // ClassMetadata.Type already keeps. A non-public method is kept instead by a no-op delegate carrying
+            // [DynamicDependency] with its exact signature. Annotating the type with NonPublicMethods would keep
+            // every private helper, and a GetMethod(name, ...) intrinsic would keep every same-name overload; both
+            // report IL2111 for helpers with [DynamicallyAccessedMembers] parameters. The attribute is emitted for every
+            // target: a .NET Standard test library can end up in a trimmed app, and DynamicDependencyPolyfillGenerator
+            // declares the attribute where the framework lacks it.
+            writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof({containingType}), \"{method.Name}\", {method.IsStatic.ToString().ToLowerInvariant()}, {method.TypeParameters.Length}, [global::System.Diagnostics.CodeAnalysis.DynamicDependency(\"{GetDynamicDependencySignature(method)}\", typeof({containingType}))] static () => {{ }}, ");
+        }
         else if (method.TypeParameters.Length > 0 || usesTypeParameters)
         {
-            writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof({containingType}), \"{method.Name}\", ");
+            writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof({containingType}), \"{method.Name}\", {method.IsStatic.ToString().ToLowerInvariant()}, {method.TypeParameters.Length}, ");
         }
         else
         {
             writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof({containingType}), \"{method.Name}\", {method.IsStatic.ToString().ToLowerInvariant()}, ");
         }
+    }
+
+    /// <summary>
+    /// Returns the method's signature in the documentation-comment ID form that
+    /// <see cref="System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> expects, e.g.
+    /// <c>Run``1(``0,System.Int32)</c>: the member's doc ID without its "M:" prefix and declaring type.
+    /// </summary>
+    private static string GetDynamicDependencySignature(IMethodSymbol method)
+    {
+        var methodId = method.OriginalDefinition.GetDocumentationCommentId();
+        var typeId = method.ContainingType.OriginalDefinition.GetDocumentationCommentId();
+
+        if (methodId is null || typeId is null || !methodId.StartsWith("M:" + typeId.Substring(2) + ".", StringComparison.Ordinal))
+        {
+            return method.Name;
+        }
+
+        return methodId.Substring(typeId.Length + 1);
     }
 
     /// <summary>
