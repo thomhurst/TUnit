@@ -1,5 +1,6 @@
+using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.CodeGenerators.Equality;
 using TUnit.Core.SourceGenerator.Models;
 using TUnit.Core.SourceGenerator.Models.Extracted;
 
@@ -57,11 +58,13 @@ public class InfrastructureGenerator : IIncrementalGenerator
                 return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
             });
 
-        // Extract assembly names as primitives in the transform step
-        // This enables proper incremental caching
+        // Extract assembly names as primitives in the transform step. AssemblyInfoModel equality
+        // keeps the generated source cached across keystrokes. No custom Compilation comparer here:
+        // when a comparer reports "equal", the input node keeps the OLD compilation in its table,
+        // pinning it (trees, bound state) until references change. The reference walk is memoized
+        // on the reference list instead, so syntax-only edits still skip it.
         var assemblyInfoProvider = context.CompilationProvider
-            .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer())
-            .Select((compilation, _) => ExtractAssemblyInfo(compilation))
+            .Select((compilation, _) => GetAssemblyInfo(compilation))
             .WithTrackingName(ExtractAssemblyInfoStep)
             .Combine(enabledProvider);
 
@@ -75,6 +78,58 @@ public class InfrastructureGenerator : IIncrementalGenerator
 
             GenerateCode(sourceContext, assemblyInfo);
         });
+    }
+
+    /// <summary>
+    /// Returns the memoized model while the compilation keeps the same reference list. Syntax-only
+    /// edits reuse the backing array of <see cref="Compilation.ExternalReferences"/>; adding, removing,
+    /// rebuilding or (for an IDE project reference) editing a reference produces a new array, so
+    /// extraction reruns. The table is keyed weakly on that array and its values hold only strings,
+    /// so no Compilation or MetadataReference is kept alive by the cache.
+    /// </summary>
+    private static AssemblyInfoModel GetAssemblyInfo(Compilation compilation)
+    {
+        // Directive references (#r in scripts) are not part of the key; skip memoization for them.
+        if (!compilation.DirectiveReferences.IsEmpty)
+        {
+            return ExtractAssemblyInfo(compilation);
+        }
+
+        var references = compilation.ExternalReferences;
+        var key = Unsafe.As<ImmutableArray<MetadataReference>, MetadataReference[]?>(ref references);
+        if (key is null)
+        {
+            return ExtractAssemblyInfo(compilation);
+        }
+
+        var holder = AssemblyInfoCache.GetValue(key, static _ => new AssemblyInfoCacheEntry());
+        var cached = holder.Value;
+        if (cached is not null
+            && cached.Language == compilation.Language
+            && cached.AssemblyName == compilation.AssemblyName)
+        {
+            return cached.Model;
+        }
+
+        var model = ExtractAssemblyInfo(compilation);
+        holder.Value = new CachedAssemblyInfo(compilation.Language, compilation.AssemblyName, model);
+        return model;
+    }
+
+    private static readonly ConditionalWeakTable<MetadataReference[], AssemblyInfoCacheEntry> AssemblyInfoCache = new();
+
+    private sealed class AssemblyInfoCacheEntry
+    {
+        public volatile CachedAssemblyInfo? Value;
+    }
+
+    private sealed class CachedAssemblyInfo(string language, string? assemblyName, AssemblyInfoModel model)
+    {
+        public string Language { get; } = language;
+
+        public string? AssemblyName { get; } = assemblyName;
+
+        public AssemblyInfoModel Model { get; } = model;
     }
 
     /// <summary>

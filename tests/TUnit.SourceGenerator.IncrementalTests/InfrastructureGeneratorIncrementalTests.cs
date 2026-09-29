@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.CodeGenerators;
@@ -26,10 +27,15 @@ public class InfrastructureGeneratorIncrementalTests
 
         var driver1 = TestHelper.GenerateTracked<InfrastructureGenerator>(compilation1);
         AssertRunReason(driver1, IncrementalStepRunReason.New);
+        var model1 = GetExtractedModel(driver1);
 
+        // Syntax-only edits rerun the cheap Select, which returns the memoized model (same instance,
+        // so the reference walk was skipped) and keeps the generated source cached.
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReason(driver2, IncrementalStepRunReason.Cached);
+        AssertRunReason(driver2, IncrementalStepRunReason.Unchanged);
+        Xunit.Assert.Same(model1, GetExtractedModel(driver2));
+        TestHelper.AssertSourceOutputsCached(driver2.GetRunResult().Results[0]);
 
         var compilation3 = TestHelper.ReplaceMethodDeclaration(compilation1, "Test1",
             """
@@ -40,8 +46,52 @@ public class InfrastructureGeneratorIncrementalTests
             }
             """);
         var driver3 = driver2.RunGenerators(compilation3);
-        AssertRunReason(driver3, IncrementalStepRunReason.Cached);
+        AssertRunReason(driver3, IncrementalStepRunReason.Unchanged);
+        Xunit.Assert.Same(model1, GetExtractedModel(driver3));
+        TestHelper.AssertSourceOutputsCached(driver3.GetRunResult().Results[0]);
     }
+
+    [Fact]
+    public void EditSource_DoesNotRetainPreviousCompilation()
+    {
+        var (driver, firstCompilation, latestCompilation) = RunSourceEdits(10);
+
+        for (var i = 0; i < 3; i++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        // A comparer that reports the new compilation as equal makes the input node keep the old
+        // one, pinning its syntax trees and bound state for as long as the driver lives.
+        Xunit.Assert.False(firstCompilation.IsAlive, "The generator driver kept the first compilation alive after syntax-only edits.");
+        GC.KeepAlive(driver);
+        GC.KeepAlive(latestCompilation);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static (GeneratorDriver Driver, WeakReference FirstCompilation, Compilation LatestCompilation) RunSourceEdits(int edits)
+    {
+        Compilation compilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
+        var firstCompilation = new WeakReference(compilation);
+
+        var driver = CSharpGeneratorDriver
+            .Create([new InfrastructureGenerator().AsSourceGenerator()])
+            .RunGenerators(compilation);
+
+        for (var i = 0; i < edits; i++)
+        {
+            compilation = compilation.ReplaceSyntaxTree(
+                compilation.SyntaxTrees.First(),
+                CSharpSyntaxTree.ParseText(DefaultSource + $"\npublic class Edit{i} {{ }}", CSharpParseOptions.Default));
+            driver = driver.RunGenerators(compilation);
+        }
+
+        return (driver, firstCompilation, compilation);
+    }
+
+    private static object? GetExtractedModel(GeneratorDriver driver) =>
+        driver.GetRunResult().Results[0].TrackedSteps[InfrastructureGenerator.ExtractAssemblyInfoStep][0].Outputs[0].Value;
 
     [Fact]
     public void AddReference_ShouldRegenerate()
