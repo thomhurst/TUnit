@@ -12,6 +12,7 @@ internal class ContextProvider(IServiceProvider serviceProvider, string testSess
 {
     private readonly ConcurrentDictionary<Assembly, AssemblyHookContext> _assemblyContexts = new();
     private readonly ConcurrentDictionary<Type, ClassHookContext> _classContexts = new();
+    private readonly Lock _creationLock = new();
 
     public GlobalContext GlobalContext { get; } = new()
     {
@@ -51,11 +52,30 @@ internal class ContextProvider(IServiceProvider serviceProvider, string testSess
     /// </summary>
     public AssemblyHookContext GetOrCreateAssemblyContext(Assembly assembly)
     {
-        return _assemblyContexts.GetOrAdd(assembly, static (assembly, context) =>
-            new AssemblyHookContext(context)
+        if (_assemblyContexts.TryGetValue(assembly, out var existing))
+        {
+            return existing;
+        }
+
+        // Not ConcurrentDictionary.GetOrAdd: the context constructor registers itself with its
+        // parent, so a factory that loses the GetOrAdd race would leave an orphaned, test-less
+        // context visible through TestSessionContext.Assemblies. Creation happens once per
+        // assembly, so the lock is off the hot path.
+        lock (_creationLock)
+        {
+            if (_assemblyContexts.TryGetValue(assembly, out existing))
+            {
+                return existing;
+            }
+
+            var created = new AssemblyHookContext(TestSessionContext)
             {
                 Assembly = assembly
-            }, TestSessionContext);
+            };
+
+            _assemblyContexts[assembly] = created;
+            return created;
+        }
     }
 
     /// <summary>
@@ -67,14 +87,31 @@ internal class ContextProvider(IServiceProvider serviceProvider, string testSess
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type classType)
     {
-        return _classContexts.GetOrAdd(classType, static ([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
-            type, state) =>
+        if (_classContexts.TryGetValue(classType, out var existing))
         {
-            return new ClassHookContext(state.GetOrCreateAssemblyContext(type.Assembly))
+            return existing;
+        }
+
+        // See GetOrCreateAssemblyContext: a lost GetOrAdd race would leave an orphaned class
+        // context in AssemblyHookContext.TestClasses. The assembly context is resolved before
+        // taking _creationLock on purpose, so the assembly and class paths never nest the lock.
+        var assemblyContext = GetOrCreateAssemblyContext(classType.Assembly);
+
+        lock (_creationLock)
+        {
+            if (_classContexts.TryGetValue(classType, out existing))
             {
-                ClassType = type
+                return existing;
+            }
+
+            var created = new ClassHookContext(assemblyContext)
+            {
+                ClassType = classType
             };
-        }, this);
+
+            _classContexts[classType] = created;
+            return created;
+        }
     }
 
     /// <summary>

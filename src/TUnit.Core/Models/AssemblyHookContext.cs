@@ -27,13 +27,26 @@ public class AssemblyHookContext : Context
     private readonly List<ClassHookContext> _testClasses = [];
     private TestContext[]? _cachedAllTests;
 
+    // Set when the last class was removed and the assembly was detached from the session. Guarded by _lock.
+    private bool _detached;
+
     public void AddClass(ClassHookContext classHookContext)
     {
         lock (_lock)
         {
             _testClasses.Add(classHookContext);
             InvalidateCache();
+
+            // A class reattached by a dynamic test after filtering emptied this assembly.
+            if (_detached)
+            {
+                _detached = false;
+                TestSessionContext.AddAssembly(this);
+                return;
+            }
         }
+
+        TestSessionContext.InvalidateTestCaches();
     }
 
     public IReadOnlyList<ClassHookContext> TestClasses { get { lock (_lock) return [.. _testClasses]; } }
@@ -49,20 +62,32 @@ public class AssemblyHookContext : Context
 
     internal bool FirstTestStarted { get; set; }
 
+    internal void InvalidateTestCaches()
+    {
+        lock (_lock)
+        {
+            InvalidateCache();
+        }
+
+        TestSessionContext.InvalidateTestCaches();
+    }
+
     internal void RemoveClass(ClassHookContext classContext)
     {
-        bool empty;
         lock (_lock)
         {
             _testClasses.Remove(classContext);
             InvalidateCache();
-            empty = _testClasses.Count == 0;
+
+            if (_testClasses.Count == 0)
+            {
+                _detached = true;
+                TestSessionContext.RemoveAssembly(this);
+                return;
+            }
         }
 
-        if (empty)
-        {
-            TestSessionContext.RemoveAssembly(this);
-        }
+        TestSessionContext.InvalidateTestCaches();
     }
 
     internal override void SetAsyncLocalContext()

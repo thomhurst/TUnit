@@ -13,8 +13,14 @@ namespace TUnit.TestProject.Bugs._5700;
 ///
 /// The test uses a rendezvous (TaskCompletionSource) rather than wall-clock
 /// sampling so it stays deterministic on slow CI runners: Test1 waits for
-/// any Test2 invocation to start, and each Test2 invocation waits for Test1
-/// to be live. Either side timing out → fix is broken.
+/// any Test2 invocation to start. Under the bug Test2 could only start after
+/// Test1 (and every other unconstrained test) finished, so Test1 times out.
+///
+/// Only Test1 waits. Test1 sits in the shared parallel queue, so on a busy
+/// runner it can be dispatched long after the keyed lane has started Test2.
+/// Making Test2 wait for Test1 as well (as an earlier version did) measured
+/// queue depth rather than the bug, and flaked when Test1 was dispatched more
+/// than a minute after Test2.
 ///
 /// Test2 also asserts the keyed constraint still serializes its own invocations.
 /// </summary>
@@ -23,25 +29,20 @@ public class Repro5700
 {
     private const string Test2Key = "Tests.Test2";
 
-    private static readonly TaskCompletionSource Test1Live = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private static readonly TaskCompletionSource Test2Live = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private static int _test2Active;
     private static int _test2ConcurrentViolations;
 
     // Deadline is generous because the engine-test harness runs Repro5700 inside a
     // subprocess populated with every `[EngineTest=Pass]` test in the project
-    // (hundreds). On a busy CI runner the parallel queue can be saturated by other
-    // unconstrained tests, so allow a full minute for either side to be dispatched.
-    // The bug being guarded — keyed tests deferred behind the entire parallel
-    // bucket — would manifest as Test1Live/Test2Live never being set at all, not as
-    // a 60-second scheduling delay.
+    // (hundreds). The bug being guarded — keyed tests deferred behind the entire
+    // parallel bucket — would manifest as Test2Live never being set while Test1
+    // is running, not as a 60-second scheduling delay.
     private static readonly TimeSpan RendezvousTimeout = TimeSpan.FromSeconds(60);
 
     [Test]
     public async Task Test1_RunsAlongsideKeyedTest2()
     {
-        Test1Live.TrySetResult();
-
         using var cts = new CancellationTokenSource(RendezvousTimeout);
         await Test2Live.Task.WaitAsync(cts.Token);
     }
@@ -61,9 +62,6 @@ public class Repro5700
             }
 
             Test2Live.TrySetResult();
-
-            using var cts = new CancellationTokenSource(RendezvousTimeout);
-            await Test1Live.Task.WaitAsync(cts.Token);
 
             // Hold the key briefly so the second Test2 invocation queues behind
             // us, exposing any concurrency-violation in keyed serialization.

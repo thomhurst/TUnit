@@ -420,6 +420,10 @@ internal sealed class ActivityCollector : IDisposable
         // Enumerate* struct enumerators instead of LINQ ToArray over the IEnumerable
         // properties: no boxed enumerator or intermediate array per span. Two passes over
         // the (short) linked lists — count, then fill — keep the arrays exactly sized.
+        // Another thread can still add or remove tags/events/links on the activity between
+        // the passes, so the fill pass is bounded by the count and the array trimmed to what
+        // it actually saw. An exception here would escape through Activity.Stop() into
+        // whatever code stopped the activity.
         var tags = ToReportKeyValues(activity.EnumerateTagObjects());
 
         SpanEvent[]? events = null;
@@ -435,6 +439,11 @@ internal sealed class ActivityCollector : IDisposable
             var i = 0;
             foreach (ref readonly var evt in activity.EnumerateEvents())
             {
+                if (i == events.Length)
+                {
+                    break;
+                }
+
                 events[i++] = new SpanEvent
                 {
                     Name = evt.Name,
@@ -442,6 +451,8 @@ internal sealed class ActivityCollector : IDisposable
                     Tags = ToReportKeyValues(evt.EnumerateTagObjects())
                 };
             }
+
+            events = TrimToFilled(events, i);
         }
 
         var parentSpanId = activity.ParentSpanId != default ? activity.ParentSpanId.ToString() : null;
@@ -459,12 +470,19 @@ internal sealed class ActivityCollector : IDisposable
             var i = 0;
             foreach (ref readonly var link in activity.EnumerateLinks())
             {
+                if (i == links.Length)
+                {
+                    break;
+                }
+
                 links[i++] = new SpanLink
                 {
                     TraceId = link.Context.TraceId.ToString(),
                     SpanId = link.Context.SpanId.ToString()
                 };
             }
+
+            links = TrimToFilled(links, i);
         }
 
         var statusStr = activity.Status switch
@@ -522,6 +540,11 @@ internal sealed class ActivityCollector : IDisposable
         var i = 0;
         foreach (ref readonly var tag in tagObjects)
         {
+            if (i == result.Length)
+            {
+                break;
+            }
+
             result[i++] = new ReportKeyValue
             {
                 Key = tag.Key,
@@ -529,7 +552,23 @@ internal sealed class ActivityCollector : IDisposable
             };
         }
 
-        return result;
+        return TrimToFilled(result, i);
+    }
+
+    private static T[]? TrimToFilled<T>(T[] array, int filled)
+    {
+        if (filled == array.Length)
+        {
+            return array;
+        }
+
+        if (filled == 0)
+        {
+            return null;
+        }
+
+        Array.Resize(ref array, filled);
+        return array;
     }
 
     public void Dispose()
