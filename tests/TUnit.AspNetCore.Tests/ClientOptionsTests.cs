@@ -70,6 +70,25 @@ public class ClientOptionsTests
         await Assert.That(echoed).Contains(TUnitTestIdHandler.HeaderName + ": " + TestContext.Current!.Id);
     }
 
+    [Test]
+    public async Task CreateClient_Redirect_KeepsPropagationHeadersOnRedirectedRequest()
+    {
+        using var client = Factory.CreateClient();
+
+        await AssertRedirectedRequestHasTestIdHeader(client);
+    }
+
+    internal static async Task AssertRedirectedRequestHasTestIdHeader(HttpClient client)
+    {
+        var response = await client.GetAsync("/redirect-to-echo-headers");
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        var lines = (await response.Content.ReadAsStringAsync()).Split('\n');
+
+        // Exactly one value: the header is injected on the redirected request, not duplicated.
+        await Assert.That(lines).Contains(TUnitTestIdHandler.HeaderName + ": " + TestContext.Current!.Id);
+    }
+
     internal static async Task AssertCookieRoundTrip(HttpClient client, string expected)
     {
         var set = await client.GetAsync("/cookie/set/abc");
@@ -92,11 +111,47 @@ public class WebApplicationTestClientOptionsTests : WebApplicationTest<TestWebAp
     }
 
     [Test]
-    public async Task CreateClient_WithOptions_CanDisableCookies()
+    public async Task CreateClient_FollowsRedirects_ByDefault()
     {
-        using var client = Factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = false });
+        using var client = Factory.CreateClient();
+
+        var response = await client.GetAsync("/redirect");
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await Assert.That(await response.Content.ReadAsStringAsync()).IsEqualTo("pong");
+    }
+
+    [Test]
+    public async Task CreateClient_Redirect_KeepsPropagationHeadersOnRedirectedRequest()
+    {
+        using var client = Factory.CreateClient();
+
+        await ClientOptionsTests.AssertRedirectedRequestHasTestIdHeader(client);
+    }
+
+    [Test]
+    public async Task CreateClient_WithOptions_CanDisableCookiesAndRedirects()
+    {
+        using var client = Factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            HandleCookies = false,
+            AllowAutoRedirect = false,
+        });
 
         await ClientOptionsTests.AssertCookieRoundTrip(client, expected: "<none>");
+
+        var response = await client.GetAsync("/redirect");
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Redirect);
+    }
+
+    [Test]
+    public async Task CreateClient_WithOptions_UsesBaseAddress()
+    {
+        var baseAddress = new Uri("http://tunit.test/");
+
+        using var client = Factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = baseAddress });
+
+        await Assert.That(client.BaseAddress).IsEqualTo(baseAddress);
     }
 
     [Test]
@@ -107,5 +162,36 @@ public class WebApplicationTestClientOptionsTests : WebApplicationTest<TestWebAp
         var echoed = await client.GetStringAsync("/echo-headers");
 
         await Assert.That(echoed).Contains(TUnitTestIdHandler.HeaderName + ": " + TestContext.Current!.Id);
+    }
+}
+
+/// <summary>
+/// A <c>ConfigureClient</c> override must still apply to clients created through the
+/// option-aware <c>CreateClient</c> overloads.
+/// </summary>
+public class ConfigureClientOverrideTests
+{
+    [ClassDataSource(Shared = [SharedType.PerTestSession])]
+    public ConfigureClientWebAppFactory Factory { get; set; } = null!;
+
+    [Test]
+    public async Task CreateClient_RunsConfigureClientOverride()
+    {
+        using var client = Factory.CreateClient();
+
+        var echoed = await client.GetStringAsync("/echo-headers");
+
+        await Assert.That(echoed).Contains(ConfigureClientWebAppFactory.HeaderName + ": yes");
+    }
+}
+
+public class ConfigureClientWebAppFactory : TestWebAppFactory
+{
+    public const string HeaderName = "X-Configured-By-Override";
+
+    protected override void ConfigureClient(HttpClient client)
+    {
+        base.ConfigureClient(client);
+        client.DefaultRequestHeaders.Add(HeaderName, "yes");
     }
 }

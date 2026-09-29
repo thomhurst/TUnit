@@ -246,11 +246,7 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
     /// <see cref="WebApplicationFactoryClientOptions.HandleCookies"/> and
     /// <see cref="WebApplicationFactoryClientOptions.BaseAddress"/>.
     /// </summary>
-    public new HttpClient CreateClient(WebApplicationFactoryClientOptions options)
-    {
-        var client = base.CreateDefaultClient(TUnitHttpClientFilter.CreateClientOptionsHandlers(options));
-        client.BaseAddress = options.BaseAddress;
-        return client;
-    }
+    public new HttpClient CreateClient(WebApplicationFactoryClientOptions options) =>
+        TUnitHttpClientFilter.CreateClient(base.CreateDefaultClient, options);
 
 }

@@ -30,6 +30,7 @@ app.MapGet("/cookie/get", (HttpContext context) =>
     Results.Text(context.Request.Cookies.TryGetValue("tunit-cookie", out var value) ? value : "<none>"));
 
 app.MapGet("/redirect", () => Results.Redirect("/ping"));
+app.MapGet("/redirect-to-echo-headers", () => Results.Redirect("/echo-headers"));
 
 // Echoes the request headers the test client sent, so tests can assert that TUnit's
 // propagation headers are still emitted by option-configured clients.

@@ -50,12 +50,8 @@ public sealed class TracedWebApplicationFactory<TEntryPoint> : IAsyncDisposable,
     /// tracing and test context propagation. Honors cookie handling, auto-redirect and base address
     /// settings the same way as <see cref="WebApplicationFactory{TEntryPoint}.CreateClient(WebApplicationFactoryClientOptions)"/>.
     /// </summary>
-    public HttpClient CreateClient(WebApplicationFactoryClientOptions options)
-    {
-        var client = _inner.CreateDefaultClient(TUnitHttpClientFilter.CreateClientOptionsHandlers(options));
-        client.BaseAddress = options.BaseAddress;
-        return client;
-    }
+    public HttpClient CreateClient(WebApplicationFactoryClientOptions options) =>
+        TUnitHttpClientFilter.CreateClient(_inner.CreateDefaultClient, options);
 
     /// <summary>
     /// Creates an <see cref="HttpClient"/> with the specified delegating handlers, plus
