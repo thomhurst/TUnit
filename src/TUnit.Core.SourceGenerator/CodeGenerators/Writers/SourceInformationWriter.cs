@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.Enums;
+﻿using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Utilities;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
@@ -56,46 +54,6 @@ public static class SourceInformationWriter
         MetadataGenerationHelper.WriteMethodMetadata(sourceCodeWriter, methodSymbol, namedTypeSymbol);
         sourceCodeWriter.Append($"{suffix}");
         sourceCodeWriter.AppendLine();
-    }
-
-    public static void GenerateMembers(ICodeWriter sourceCodeWriter, Compilation compilation, INamedTypeSymbol namedTypeSymbol, ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? property, ArgumentsType argumentsType)
-    {
-        if (parameters.Length == 0 && property is null)
-        {
-            sourceCodeWriter.Append("[],");
-            return;
-        }
-
-        sourceCodeWriter.Append("[");
-
-        if (property is not null)
-        {
-            GeneratePropertyInformation(sourceCodeWriter, compilation, property, namedTypeSymbol);
-        }
-
-        foreach (var parameter in parameters)
-        {
-            GenerateParameterInformation(sourceCodeWriter, compilation, parameter, argumentsType, null);
-        }
-
-        sourceCodeWriter.Append("],");
-    }
-
-    public static void GeneratePropertyInformation(ICodeWriter sourceCodeWriter,
-        Compilation compilation, IPropertySymbol property, INamedTypeSymbol namedTypeSymbol)
-    {
-        MetadataGenerationHelper.WritePropertyMetadata(sourceCodeWriter, property, namedTypeSymbol);
-        sourceCodeWriter.Append(",");
-    }
-
-    public static void GenerateParameterInformation(ICodeWriter sourceCodeWriter,
-        Compilation context,
-        IParameterSymbol parameter, ArgumentsType argumentsType,
-        IDictionary<string, string>? genericSubstitutions)
-    {
-        // For now, use the generic version since it's what the existing code was doing
-        MetadataGenerationHelper.WriteParameterMetadataGeneric(sourceCodeWriter, parameter);
-        sourceCodeWriter.Append(",");
     }
 
     /// <summary>

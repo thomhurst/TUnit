@@ -1100,6 +1100,9 @@ namespace
     public static class ParameterMetadataFactory
     {
         public static .ParameterMetadata Create( type, string name, .TypeInfo typeInfo, bool isNullable, <.ParameterInfo>? reflectionInfoFactory = null) { }
+        public static .ParameterMetadata[] ForConstructor( declaringType, bool matchByParameterCount, params .ParameterMetadata[] parameters) { }
+        public static .ParameterMetadata[] ForGenericMethod( declaringType, string methodName, params .ParameterMetadata[] parameters) { }
+        public static .ParameterMetadata[] ForMethod( declaringType, string methodName, bool isStatic, params .ParameterMetadata[] parameters) { }
     }
     [.DebuggerDisplay("{Type} {Name}")]
     public class ParameterMetadata<T> : .ParameterMetadata, <.ParameterMetadata<T>>

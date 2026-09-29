@@ -27,6 +27,7 @@ public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedM
     public ParameterInfo ReflectionInfo
     {
         get => field ??= ReflectionInfoFactory?.Invoke()
+            ?? ReflectionInfoResolver?.Get(ReflectionInfoIndex)
             ?? throw new InvalidOperationException(
                 $"ReflectionInfo for parameter '{Name}' was not set and no ReflectionInfoFactory was provided.");
         set;
@@ -37,6 +38,13 @@ public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedM
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public Func<ParameterInfo>? ReflectionInfoFactory { get; init; }
+
+    /// <summary>
+    /// Shared per-method lazy lookup attached by <see cref="ParameterMetadataFactory"/> for generated code.
+    /// </summary>
+    internal ParameterInfoResolver? ReflectionInfoResolver { get; set; }
+
+    internal int ReflectionInfoIndex { get; set; }
 
     public bool IsParams => CachedIsParams ?? ReflectionInfo.IsDefined(typeof(ParamArrayAttribute), false);
     public bool IsOptional => CachedIsOptional ?? ReflectionInfo.IsOptional;

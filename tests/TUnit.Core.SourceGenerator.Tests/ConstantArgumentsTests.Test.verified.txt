@@ -154,10 +154,10 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     new global::TUnit.Core.ArgumentsAttribute("123"),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "String1", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "dummy", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("String1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "dummy", new global::TUnit.Core.ConcreteType(typeof(string)), false)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
@@ -175,10 +175,10 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     new global::TUnit.Core.ArgumentsAttribute(123),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "Int", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "dummy", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Int", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "dummy", new global::TUnit.Core.ConcreteType(typeof(int)), false)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
@@ -196,10 +196,10 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     new global::TUnit.Core.ArgumentsAttribute(1.23d),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "Double", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(double), "dummy", new global::TUnit.Core.ConcreteType(typeof(double)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Double", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(double), "dummy", new global::TUnit.Core.ConcreteType(typeof(double)), false)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
@@ -217,10 +217,10 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     new global::TUnit.Core.ArgumentsAttribute(1.23000002f),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "Float", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "dummy", new global::TUnit.Core.ConcreteType(typeof(float)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Float", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "dummy", new global::TUnit.Core.ConcreteType(typeof(float)), false)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
@@ -238,10 +238,10 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     new global::TUnit.Core.ArgumentsAttribute(123L),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "Long", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long), "dummy", new global::TUnit.Core.ConcreteType(typeof(long)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Long", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long), "dummy", new global::TUnit.Core.ConcreteType(typeof(long)), false)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
@@ -259,10 +259,10 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     new global::TUnit.Core.ArgumentsAttribute(123U),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "UInt", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "dummy", new global::TUnit.Core.ConcreteType(typeof(uint)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("UInt", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(uint) }, null)!.GetParameters()[0])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "dummy", new global::TUnit.Core.ConcreteType(typeof(uint)), false)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
@@ -280,10 +280,10 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     new global::TUnit.Core.ArgumentsAttribute(123UL),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
-            parameters: new global::TUnit.Core.ParameterMetadata[]
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "ULong", false, new global::TUnit.Core.ParameterMetadata[]
             {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(ulong), "dummy", new global::TUnit.Core.ConcreteType(typeof(ulong)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("ULong", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(ulong) }, null)!.GetParameters()[0])
-            },
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(ulong), "dummy", new global::TUnit.Core.ConcreteType(typeof(ulong)), false)
+            }),
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,

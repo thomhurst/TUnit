@@ -89,10 +89,10 @@ internal static class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestS
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test2", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test2", __classType, typeof(void), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>), "Test2", false, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0])
-});
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", new global::TUnit.Core.ConcreteType(typeof(bool)), false)
+}));
     private static global::TUnit.TestProject.Bugs._1889.DerivedTest __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._1889.DerivedTest();
@@ -176,10 +176,10 @@ internal static class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestS
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test3", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test3", __classType, typeof(void), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>), "Test3", false, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0])
-});
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", new global::TUnit.Core.ConcreteType(typeof(bool)), false)
+}));
     private static global::TUnit.TestProject.Bugs._1889.DerivedTest __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._1889.DerivedTest();

@@ -531,10 +531,10 @@ namespace TUnit.Generated
             GenericTypeCount = 0,
             ReturnType = typeof(global::System.Threading.Tasks.Task),
             ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            Parameters = global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), "BeforeAllSetUpWithContext", true, new global::TUnit.Core.ParameterMetadata[]
             {
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.ClassHookContext), "context", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.ClassHookContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext) }, null)!.GetParameters()[0])
-            },
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.ClassHookContext), "context", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.ClassHookContext)), false)
+            }),
             Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
             {
                 Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
@@ -604,10 +604,10 @@ namespace TUnit.Generated
             GenericTypeCount = 0,
             ReturnType = typeof(global::System.Threading.Tasks.Task),
             ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            Parameters = global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), "BeforeAllSetUp", true, new global::TUnit.Core.ParameterMetadata[]
             {
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUp", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
-            },
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false)
+            }),
             Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
             {
                 Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
@@ -677,11 +677,11 @@ namespace TUnit.Generated
             GenericTypeCount = 0,
             ReturnType = typeof(global::System.Threading.Tasks.Task),
             ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            Parameters = global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), "BeforeAllSetUpWithContext", true, new global::TUnit.Core.ParameterMetadata[]
             {
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.ClassHookContext), "context", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.ClassHookContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
-            },
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.ClassHookContext), "context", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.ClassHookContext)), false),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false)
+            }),
             Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
             {
                 Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
@@ -823,10 +823,10 @@ namespace TUnit.Generated
             GenericTypeCount = 0,
             ReturnType = typeof(global::System.Threading.Tasks.Task),
             ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            Parameters = global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), "Setup", false, new global::TUnit.Core.ParameterMetadata[]
             {
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("Setup", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
-            },
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false)
+            }),
             Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
             {
                 Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
@@ -896,10 +896,10 @@ namespace TUnit.Generated
             GenericTypeCount = 0,
             ReturnType = typeof(global::System.Threading.Tasks.Task),
             ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            Parameters = global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), "SetupWithContext", false, new global::TUnit.Core.ParameterMetadata[]
             {
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.TestContext), "testContext", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0])
-            },
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.TestContext), "testContext", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)), false)
+            }),
             Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
             {
                 Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
@@ -969,11 +969,11 @@ namespace TUnit.Generated
             GenericTypeCount = 0,
             ReturnType = typeof(global::System.Threading.Tasks.Task),
             ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            Parameters = global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), "SetupWithContext", false, new global::TUnit.Core.ParameterMetadata[]
             {
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.TestContext), "testContext", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
-            },
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.TestContext), "testContext", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)), false),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false)
+            }),
             Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
             {
                 Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
