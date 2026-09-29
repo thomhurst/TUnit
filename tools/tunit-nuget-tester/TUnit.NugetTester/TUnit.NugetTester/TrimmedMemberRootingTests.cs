@@ -42,6 +42,24 @@ public class TrimmedMemberRootingTests
         await Assert.That(parameter.ReflectionInfo.Member.Name).IsEqualTo(nameof(Internal_Generic_Method_Parameters_Resolve));
     }
 
+    [Test]
+    [Arguments(4)]
+    internal async Task Shares_Name_With_Annotated_Helper(int value)
+    {
+        // A private overload with the same name has a [DynamicallyAccessedMembers] parameter. Rooting by name
+        // (any GetMethod(name, ...) intrinsic) would keep it too and report IL2111.
+        var parameter = TestContext.Current!.Metadata.TestDetails.MethodMetadata.Parameters[0];
+
+        await Assert.That(parameter.ReflectionInfo.Name).IsEqualTo(nameof(value));
+        await Assert.That(Shares_Name_With_Annotated_Helper(this, typeof(TrimmedMemberRootingTests))).IsGreaterThanOrEqualTo(_field);
+    }
+
+    private int Shares_Name_With_Annotated_Helper(object owner,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.NonPublicFields)] Type ownerType)
+    {
+        return CountInstanceFields(owner, ownerType);
+    }
+
     private static int CountInstanceFields(object owner,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.NonPublicFields)] Type ownerType)
     {

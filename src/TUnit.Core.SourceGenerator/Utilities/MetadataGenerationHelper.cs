@@ -239,14 +239,16 @@ internal static class MetadataGenerationHelper
         else if (method.DeclaredAccessibility != Accessibility.Public)
         {
             // The factory's declaring-type annotation only keeps public methods, so trimming stays limited to what
-            // ClassMetadata.Type already keeps. A non-public method is rooted by its own GetMethod(name, flags) call,
-            // an intrinsic that keeps only methods with that name, instead of annotating the type with
-            // NonPublicMethods, which would keep (and report IL2111 for) every private helper.
-            var isStatic = method.IsStatic.ToString().ToLowerInvariant();
-            var bindingFlags = method.IsStatic
-                ? "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static"
-                : "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance";
-            writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForMethodLookup(typeof({containingType}), \"{method.Name}\", {isStatic}, {method.TypeParameters.Length}, static () => typeof({containingType}).GetMethod(\"{method.Name}\", {bindingFlags}), ");
+            // ClassMetadata.Type already keeps. A non-public method is kept instead by a no-op delegate carrying
+            // [DynamicDependency] with its exact signature. Annotating the type with NonPublicMethods would keep
+            // every private helper, and a GetMethod(name, ...) intrinsic would keep every same-name overload; both
+            // report IL2111 for helpers with [DynamicallyAccessedMembers] parameters. Trimming only matters on
+            // .NET 5+, where the attribute exists.
+            writer.AppendLine($"global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof({containingType}), \"{method.Name}\", {method.IsStatic.ToString().ToLowerInvariant()}, {method.TypeParameters.Length},");
+            writer.AppendLine("#if NET5_0_OR_GREATER");
+            writer.AppendLine($"[global::System.Diagnostics.CodeAnalysis.DynamicDependency(\"{GetDynamicDependencySignature(method)}\", typeof({containingType}))]");
+            writer.AppendLine("#endif");
+            writer.Append("static () => { }, ");
         }
         else if (method.TypeParameters.Length > 0 || usesTypeParameters)
         {
@@ -256,6 +258,24 @@ internal static class MetadataGenerationHelper
         {
             writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof({containingType}), \"{method.Name}\", {method.IsStatic.ToString().ToLowerInvariant()}, ");
         }
+    }
+
+    /// <summary>
+    /// Returns the method's signature in the documentation-comment ID form that
+    /// <see cref="System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute"/> expects, e.g.
+    /// <c>Run``1(``0,System.Int32)</c>: the member's doc ID without its "M:" prefix and declaring type.
+    /// </summary>
+    private static string GetDynamicDependencySignature(IMethodSymbol method)
+    {
+        var methodId = method.OriginalDefinition.GetDocumentationCommentId();
+        var typeId = method.ContainingType.OriginalDefinition.GetDocumentationCommentId();
+
+        if (methodId is null || typeId is null || !methodId.StartsWith("M:" + typeId.Substring(2) + ".", StringComparison.Ordinal))
+        {
+            return method.Name;
+        }
+
+        return methodId.Substring(typeId.Length + 1);
     }
 
     /// <summary>

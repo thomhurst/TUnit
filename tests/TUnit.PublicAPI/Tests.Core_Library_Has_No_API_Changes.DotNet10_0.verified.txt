@@ -1144,7 +1144,7 @@ namespace
         public static .ParameterMetadata[] ForGenericMethod([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  declaringType, string methodName, params .ParameterMetadata[] parameters) { }
         public static .ParameterMetadata[] ForGenericMethod([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  declaringType, string methodName, bool isStatic, int genericParameterCount, params .ParameterMetadata[] parameters) { }
         public static .ParameterMetadata[] ForMethod([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  declaringType, string methodName, bool isStatic, params .ParameterMetadata[] parameters) { }
-        public static .ParameterMetadata[] ForMethodLookup( declaringType, string methodName, bool isStatic, int genericParameterCount, <.MethodInfo?> lookup, params .ParameterMetadata[] parameters) { }
+        public static .ParameterMetadata[] ForNonPublicMethod( declaringType, string methodName, bool isStatic, int genericParameterCount,  rootMethod, params .ParameterMetadata[] parameters) { }
     }
     [.DebuggerDisplay("{Type} {Name}")]
     public class ParameterMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]  T> : .ParameterMetadata, <.ParameterMetadata<T>>
