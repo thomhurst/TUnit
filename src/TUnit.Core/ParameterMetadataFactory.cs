@@ -55,7 +55,7 @@ public static class ParameterMetadataFactory
     /// <summary>
     /// Attaches lazy <see cref="ParameterMetadata.ReflectionInfo"/> resolution to the parameters of a
     /// generic method (or one whose parameters use type parameters). The method is looked up once, on first
-    /// access, by name and parameter count.
+    /// access, by name and parameter count; with same-arity overloads the first match reflection returns wins.
     /// </summary>
     public static ParameterMetadata[] ForGenericMethod(
         [DynamicallyAccessedMembers(DeclaringTypeMembers)] Type declaringType,
@@ -80,6 +80,11 @@ public static class ParameterMetadataFactory
             matchByParameterCount ? ParameterInfoResolver.Kind.ConstructorByParameterCount : ParameterInfoResolver.Kind.Constructor, parameters));
     }
 
+    /// <remarks>
+    /// Mutates the supplied instances in place and binds each one to its position in <paramref name="parameters"/>.
+    /// The array and its elements must belong to exactly one method or constructor and must not be reordered or
+    /// reused afterwards; generated code always passes a fresh array per member.
+    /// </remarks>
     private static ParameterMetadata[] Attach(ParameterMetadata[] parameters, ParameterInfoResolver resolver)
     {
         for (var i = 0; i < parameters.Length; i++)
@@ -130,8 +135,22 @@ internal sealed class ParameterInfoResolver
 
     public ParameterInfo? Get(int index)
     {
+        // Benign race: concurrent first accesses may each run Resolve(), but the lookup is idempotent and
+        // reference assignment is atomic, so every caller observes an equivalent ParameterInfo[].
         var resolved = _resolved ??= Resolve();
         return (uint) index < (uint) resolved.Length ? resolved[index] : null;
+    }
+
+    internal string Describe()
+    {
+        return _kind switch
+        {
+            Kind.InstanceMethod => $"instance method '{_declaringType.FullName}.{_methodName}' with {_parameters.Length} parameter(s) matched by parameter types",
+            Kind.StaticMethod => $"static method '{_declaringType.FullName}.{_methodName}' with {_parameters.Length} parameter(s) matched by parameter types",
+            Kind.MethodByParameterCount => $"method '{_declaringType.FullName}.{_methodName}' matched by parameter count ({_parameters.Length})",
+            Kind.Constructor => $"constructor of '{_declaringType.FullName}' with {_parameters.Length} parameter(s) matched by parameter types",
+            _ => $"constructor of '{_declaringType.FullName}' matched by parameter count ({_parameters.Length})",
+        };
     }
 
     private ParameterInfo[] Resolve()

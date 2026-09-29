@@ -28,10 +28,18 @@ public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedM
     {
         get => field ??= ReflectionInfoFactory?.Invoke()
             ?? ReflectionInfoResolver?.Get(ReflectionInfoIndex)
-            ?? throw new InvalidOperationException(
-                $"ReflectionInfo for parameter '{Name}' was not set and no ReflectionInfoFactory was provided.");
+            ?? throw CreateMissingReflectionInfoException();
         set;
     } = null!;
+
+    private InvalidOperationException CreateMissingReflectionInfoException()
+    {
+        return ReflectionInfoResolver is { } resolver
+            ? new InvalidOperationException(
+                $"ReflectionInfo for parameter '{Name}' (index {ReflectionInfoIndex}) could not be resolved: {resolver.Describe()} was not found.")
+            : new InvalidOperationException(
+                $"ReflectionInfo for parameter '{Name}' was not set and no ReflectionInfoFactory was provided.");
+    }
 
     /// <summary>
     /// Lazy factory for ReflectionInfo. Set by source generator to defer reflection to first access.

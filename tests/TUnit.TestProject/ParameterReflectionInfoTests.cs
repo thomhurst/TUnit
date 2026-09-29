@@ -60,8 +60,54 @@ public class ParameterReflectionInfoTests(string first, int second)
         await Assert.That(parameters[1].ReflectionInfo.Member.Name).IsEqualTo(nameof(StaticHelper));
     }
 
+    [Test]
+    public async Task Open_Generic_Constructor_Matched_By_Parameter_Count()
+    {
+        var parameters = ParameterMetadataFactory.ForConstructor(typeof(GenericHolder<>), true,
+            ParameterMetadataFactory.Create(typeof(object), "value", new ConcreteType(typeof(object)), false),
+            ParameterMetadataFactory.Create(typeof(int), "count", new ConcreteType(typeof(int)), false));
+
+        await Assert.That(parameters[0].ReflectionInfo.Name).IsEqualTo("value");
+        await Assert.That(parameters[1].ReflectionInfo.Name).IsEqualTo("count");
+        await Assert.That(parameters[1].ReflectionInfo.Member is ConstructorInfo).IsTrue();
+        await Assert.That(parameters[0].ReflectionInfo.Member.DeclaringType).IsEqualTo(typeof(GenericHolder<>));
+    }
+
+    [Test]
+    public async Task Generic_Method_Via_Factory()
+    {
+        var parameters = ParameterMetadataFactory.ForGenericMethod(typeof(ParameterReflectionInfoTests), nameof(GenericHelper),
+            ParameterMetadataFactory.Create(typeof(object), "item", new ConcreteType(typeof(object)), false));
+
+        await Assert.That(parameters[0].ReflectionInfo.Name).IsEqualTo("item");
+        await Assert.That(parameters[0].ReflectionInfo.Member.Name).IsEqualTo(nameof(GenericHelper));
+    }
+
+    [Test]
+    public async Task Unresolvable_Member_Reports_Lookup_In_Exception()
+    {
+        var parameters = ParameterMetadataFactory.ForMethod(typeof(ParameterReflectionInfoTests), "DoesNotExist", false,
+            ParameterMetadataFactory.Create(typeof(int), "value", new ConcreteType(typeof(int)), false));
+
+        var exception = Assert.Throws<InvalidOperationException>(() => _ = parameters[0].ReflectionInfo);
+
+        await Assert.That(exception.Message).Contains("DoesNotExist");
+        await Assert.That(exception.Message).Contains(nameof(ParameterReflectionInfoTests));
+    }
+
     private static void StaticHelper(int value, string text)
     {
+    }
+
+    private static void GenericHelper<T>(T item)
+    {
+    }
+
+    private sealed class GenericHolder<T>
+    {
+        public GenericHolder(T value, int count)
+        {
+        }
     }
 
     internal static async Task AssertParameter(ParameterMetadata parameter, string name, int position, Type type)
