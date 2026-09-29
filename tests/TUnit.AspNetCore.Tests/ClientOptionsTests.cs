@@ -85,7 +85,8 @@ public class ClientOptionsTests
 
         var lines = (await response.Content.ReadAsStringAsync()).Split('\n');
 
-        // Exactly one value: the header is injected on the redirected request, not duplicated.
+        // Exact line match proves a single value: /echo-headers joins repeated values with
+        // commas, so a header duplicated across redirect hops would not match this line.
         await Assert.That(lines).Contains(TUnitTestIdHandler.HeaderName + ": " + TestContext.Current!.Id);
     }
 
