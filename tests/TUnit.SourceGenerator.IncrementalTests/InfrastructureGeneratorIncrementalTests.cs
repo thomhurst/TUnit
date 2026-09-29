@@ -146,6 +146,70 @@ public class InfrastructureGeneratorIncrementalTests
         AssertRunReason(driver3, IncrementalStepRunReason.Unchanged);
     }
 
+    private const string ShadowingSource = "namespace OtherTestLibrary { public class FirstHooks { } }";
+
+    [Fact]
+    public void FreshDriver_SameReferences_SourceShadowsSelectedType_SelectsNextType()
+    {
+        var baseCompilation = CreateWithTwoTypeLibrary();
+
+        // Populate the shared memo from an unrelated driver.
+        var unshadowed = GenerateInfrastructure(CSharpGeneratorDriver.Create(new InfrastructureGenerator()).RunGenerators(baseCompilation));
+        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.FirstHooks)", unshadowed);
+
+        // Same reference array, but a source type now takes FirstHooks' name, so typeof() would bind
+        // to the source type and never initialize OtherTestLibrary.
+        var shadowedCompilation = baseCompilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(ShadowingSource));
+        var shadowed = GenerateInfrastructure(CSharpGeneratorDriver.Create(new InfrastructureGenerator()).RunGenerators(shadowedCompilation));
+        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.SecondHooks)", shadowed);
+        Xunit.Assert.DoesNotContain("typeof(global::OtherTestLibrary.FirstHooks)", shadowed);
+    }
+
+    [Fact]
+    public void FreshDriver_SameReferences_SourceSensitiveSelectionIsNotReused()
+    {
+        var baseCompilation = CreateWithTwoTypeLibrary();
+        var shadowedCompilation = baseCompilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(ShadowingSource));
+
+        // The shadowed run must not memoize its (source-dependent) choice for later compilations.
+        var shadowed = GenerateInfrastructure(CSharpGeneratorDriver.Create(new InfrastructureGenerator()).RunGenerators(shadowedCompilation));
+        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.SecondHooks)", shadowed);
+
+        var unshadowed = GenerateInfrastructure(CSharpGeneratorDriver.Create(new InfrastructureGenerator()).RunGenerators(baseCompilation));
+        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.FirstHooks)", unshadowed);
+    }
+
+    [Fact]
+    public void EditSource_ShadowingSelectedType_ShouldRegenerate()
+    {
+        var compilation1 = CreateWithTwoTypeLibrary();
+        var driver1 = TestHelper.GenerateTracked<InfrastructureGenerator>(compilation1);
+        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.FirstHooks)", GenerateInfrastructure(driver1));
+
+        var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText(ShadowingSource));
+        var driver2 = driver1.RunGenerators(compilation2);
+        AssertRunReason(driver2, IncrementalStepRunReason.Modified);
+        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.SecondHooks)", GenerateInfrastructure(driver2));
+
+        var driver3 = driver2.RunGenerators(compilation1);
+        AssertRunReason(driver3, IncrementalStepRunReason.Modified);
+        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.FirstHooks)", GenerateInfrastructure(driver3));
+    }
+
+    private static CSharpCompilation CreateWithTwoTypeLibrary()
+    {
+        var consumer = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
+        var library = CSharpCompilation.Create(
+            "OtherTestLibrary",
+            [CSharpSyntaxTree.ParseText("namespace OtherTestLibrary { public class FirstHooks { [TUnit.Core.Before(TUnit.Core.HookType.Assembly)] public static void Setup() { } } public class SecondHooks { } }")],
+            consumer.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        return consumer.AddReferences(library.ToMetadataReference());
+    }
+
+    private static string GenerateInfrastructure(GeneratorDriver driver) =>
+        driver.GetRunResult().GeneratedTrees.Single(t => t.FilePath.EndsWith("TUnitInfrastructure.g.cs")).ToString();
+
     private static CSharpCompilation CreateHookLibrary(Compilation consumer, string typeName) =>
         CSharpCompilation.Create(
             "OtherTestLibrary",

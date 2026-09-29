@@ -86,34 +86,65 @@ public class InfrastructureGenerator : IIncrementalGenerator
     /// rebuilding or (for an IDE project reference) editing a reference produces a new array, so
     /// extraction reruns. The table is keyed weakly on that array and its values hold only strings,
     /// so no Compilation or MetadataReference is kept alive by the cache.
+    /// <para>
+    /// The selection is reference-derived except for one source dependency:
+    /// <see cref="Compilation.GetTypeByMetadataName"/> prefers a source type over a referenced type with
+    /// the same metadata name, so source can shadow a candidate. The memo is therefore only stored
+    /// when no candidate was shadowed (the selection then equals a purely reference-based one), and on
+    /// reuse each selected type is checked against the current source; if any is now shadowed,
+    /// extraction reruns. The table is static and can be hit by independent drivers that share a
+    /// reference array, so this keeps every returned model identical to a fresh extraction.
+    /// </para>
     /// </summary>
     private static AssemblyInfoModel GetAssemblyInfo(Compilation compilation)
     {
         // Directive references (#r in scripts) are not part of the key; skip memoization for them.
         if (!compilation.DirectiveReferences.IsEmpty)
         {
-            return ExtractAssemblyInfo(compilation);
+            return ExtractAssemblyInfo(compilation, out _);
         }
 
+        // Deliberate layout assumption: ImmutableArray<T> is a struct wrapping a single T[] field
+        // (ImmutableCollectionsMarshal.AsArray does the same, but is not available to netstandard2.0
+        // analyzers). The incremental tests for added/replaced references guard this.
         var references = compilation.ExternalReferences;
         var key = Unsafe.As<ImmutableArray<MetadataReference>, MetadataReference[]?>(ref references);
         if (key is null)
         {
-            return ExtractAssemblyInfo(compilation);
+            return ExtractAssemblyInfo(compilation, out _);
         }
 
         var holder = AssemblyInfoCache.GetValue(key, static _ => new AssemblyInfoCacheEntry());
         var cached = holder.Value;
         if (cached is not null
             && cached.Language == compilation.Language
-            && cached.AssemblyName == compilation.AssemblyName)
+            && cached.AssemblyName == compilation.AssemblyName
+            && !IsAnyShadowedBySource(compilation, cached.SelectedMetadataNames))
         {
             return cached.Model;
         }
 
-        var model = ExtractAssemblyInfo(compilation);
-        holder.Value = new CachedAssemblyInfo(compilation.Language, compilation.AssemblyName, model);
+        var model = ExtractAssemblyInfo(compilation, out var selectedMetadataNames);
+        if (selectedMetadataNames is not null)
+        {
+            holder.Value = new CachedAssemblyInfo(compilation.Language, compilation.AssemblyName, model, selectedMetadataNames);
+        }
+
         return model;
+    }
+
+    private static bool IsAnyShadowedBySource(Compilation compilation, string[] selectedMetadataNames)
+    {
+        var sourceAssembly = compilation.Assembly;
+        foreach (var metadataName in selectedMetadataNames)
+        {
+            if (sourceAssembly.GetTypeByMetadataName(metadataName) is not null)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static readonly ConditionalWeakTable<MetadataReference[], AssemblyInfoCacheEntry> AssemblyInfoCache = new();
@@ -123,22 +154,31 @@ public class InfrastructureGenerator : IIncrementalGenerator
         public volatile CachedAssemblyInfo? Value;
     }
 
-    private sealed class CachedAssemblyInfo(string language, string? assemblyName, AssemblyInfoModel model)
+    private sealed class CachedAssemblyInfo(string language, string? assemblyName, AssemblyInfoModel model, string[] selectedMetadataNames)
     {
         public string Language { get; } = language;
 
         public string? AssemblyName { get; } = assemblyName;
 
         public AssemblyInfoModel Model { get; } = model;
+
+        public string[] SelectedMetadataNames { get; } = selectedMetadataNames;
     }
 
     /// <summary>
     /// Extracts all needed data as primitives in the transform step.
     /// This enables proper incremental caching - the model contains only strings.
     /// </summary>
-    private static AssemblyInfoModel ExtractAssemblyInfo(Compilation compilation)
+    /// <param name="compilation">The compilation to inspect.</param>
+    /// <param name="selectedMetadataNames">
+    /// Metadata names of the selected types, or <see langword="null"/> when a source type shadowed a
+    /// candidate, in which case the result depends on source and must not be memoized.
+    /// </param>
+    private static AssemblyInfoModel ExtractAssemblyInfo(Compilation compilation, out string[]? selectedMetadataNames)
     {
         var assembliesToLoad = new List<string>();
+        var metadataNames = new List<string>();
+        var shadowedBySource = false;
 
         // Find TUnit.Core assembly - only assemblies referencing this can contain tests
         var tunitCoreAssembly = FindTUnitCoreAssembly(compilation);
@@ -177,13 +217,16 @@ public class InfrastructureGenerator : IIncrementalGenerator
         {
             if (ShouldLoadAssembly(assembly, compilation))
             {
-                var publicType = GetFirstUniquePublicType(assembly, compilation);
+                var publicType = GetFirstUniquePublicType(assembly, compilation, out var metadataName, ref shadowedBySource);
                 if (publicType != null)
                 {
                     assembliesToLoad.Add(publicType);
+                    metadataNames.Add(metadataName!);
                 }
             }
         }
+
+        selectedMetadataNames = shadowedBySource ? null : [.. metadataNames];
 
         return new AssemblyInfoModel
         {
@@ -331,7 +374,11 @@ public class InfrastructureGenerator : IIncrementalGenerator
     /// Gets the first public type from an assembly that can be uniquely resolved by the compilation.
     /// This avoids CS0433 errors when multiple assemblies define types with the same fully-qualified name.
     /// </summary>
-    private static string? GetFirstUniquePublicType(IAssemblySymbol assembly, Compilation compilation)
+    private static string? GetFirstUniquePublicType(
+        IAssemblySymbol assembly,
+        Compilation compilation,
+        out string? selectedMetadataName,
+        ref bool shadowedBySource)
     {
         foreach (var type in GetPublicTypesRecursive(assembly.GlobalNamespace))
         {
@@ -348,10 +395,12 @@ public class InfrastructureGenerator : IIncrementalGenerator
             // GetTypeByMetadataName returns null when the type name is ambiguous
             if (SymbolEqualityComparer.Default.Equals(resolvedType, type))
             {
+                selectedMetadataName = metadataName;
                 return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             }
 
             // null or different type = ambiguous, try next type
+            shadowedBySource |= IsFromSource(resolvedType, compilation);
         }
 
         // Fallback: try generic types if no non-generic unique type was found
@@ -382,12 +431,22 @@ public class InfrastructureGenerator : IIncrementalGenerator
                     typeName = typeName.Substring(0, genericStart) + openGenericSuffix;
                 }
 
+                selectedMetadataName = metadataName;
                 return typeName;
             }
+
+            shadowedBySource |= IsFromSource(resolvedType, compilation);
         }
 
+        selectedMetadataName = null;
         return null; // No unique type found, skip this assembly
     }
+
+    // GetTypeByMetadataName returns the compilation's own (source) type when one exists, hiding
+    // any referenced type with the same metadata name.
+    private static bool IsFromSource(INamedTypeSymbol? resolvedType, Compilation compilation) =>
+        resolvedType is not null
+        && SymbolEqualityComparer.Default.Equals(resolvedType.ContainingAssembly, compilation.Assembly);
 
     /// <summary>
     /// Gets the full metadata name for a type (e.g., "Namespace.OuterClass+NestedClass").
