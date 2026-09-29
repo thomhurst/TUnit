@@ -430,19 +430,37 @@ public class SessionActivityLifecycleTests
     /// Manages an <see cref="ActivityListener"/> scoped to a test, ensuring
     /// cleanup even if the test fails.
     /// </summary>
+    /// <remarks>
+    /// The listener sees every activity on the TUnit sources in the process, including the
+    /// engine's own spans for tests running in parallel with this one. Only activities started
+    /// from this test's async flow are tracked, so <see cref="Dispose"/> never stops a span
+    /// the engine is still writing to on another thread.
+    /// </remarks>
     private sealed class ActivityListenerScope : IDisposable
     {
+        private static readonly AsyncLocal<ActivityListenerScope?> CurrentScope = new();
+
         private readonly ActivityListener _listener;
         private readonly ConcurrentBag<Activity> _activities = [];
+        private readonly ActivityListenerScope? _previousScope;
 
         public ActivityListenerScope()
         {
+            _previousScope = CurrentScope.Value;
+            CurrentScope.Value = this;
+
             _listener = new ActivityListener
             {
                 ShouldListenTo = static source => source.Name is TUnitActivitySource.SourceName or TUnitActivitySource.LifecycleSourceName,
                 Sample = static (ref ActivityCreationOptions<ActivityContext> _) =>
                     ActivitySamplingResult.AllDataAndRecorded,
-                ActivityStarted = activity => _activities.Add(activity),
+                ActivityStarted = activity =>
+                {
+                    if (ReferenceEquals(CurrentScope.Value, this))
+                    {
+                        _activities.Add(activity);
+                    }
+                },
             };
 
             ActivitySource.AddActivityListener(_listener);
@@ -450,6 +468,8 @@ public class SessionActivityLifecycleTests
 
         public void Dispose()
         {
+            CurrentScope.Value = _previousScope;
+
             // Stop any activities that are still running to prevent leaks
             foreach (var activity in _activities)
             {
