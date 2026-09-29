@@ -149,4 +149,57 @@ public class CompilerArgumentsPopulatedAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task Expression_Argument_Is_Flagged_For_TUnit_Assertions_Method_Returning_Void()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Assertions;
+
+                public class MyClass
+                {
+                    public void MyTest(string? value)
+                    {
+                        Assert.NotNull(value, {|#0:"expression"|});
+                    }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.CompilerArgumentsPopulated)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
+    public async Task User_Method_Returning_TUnit_Assertion_Is_Not_Flagged()
+    {
+        // Only parameters of TUnit.Assertions' own methods are checked; the wrapper's forwarding
+        // call into Assert.That is still flagged.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Runtime.CompilerServices;
+                using System.Threading.Tasks;
+                using TUnit.Assertions;
+                using TUnit.Assertions.Extensions;
+                using TUnit.Assertions.Sources;
+
+                public class MyClass
+                {
+                    public static ValueAssertion<int> MyThat(int value, [CallerArgumentExpression(nameof(value))] string? expression = null)
+                        => Assert.That(value, {|#0:expression|});
+
+                    public async Task MyTest()
+                    {
+                        await MyThat(1, "explicit").IsEqualTo(1);
+                    }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.CompilerArgumentsPopulated)
+                    .WithLocation(0)
+            );
+    }
 }

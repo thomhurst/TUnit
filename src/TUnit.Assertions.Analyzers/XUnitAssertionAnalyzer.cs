@@ -18,10 +18,33 @@ public class XUnitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 
     public override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
+        context.RegisterCompilationStartAction(compilationStart =>
+        {
+            // Every reported method lives in a type Xunit.Assert (from any referenced assembly), so skip
+            // the per-invocation work entirely when no such type exists.
+            if (!HasXunitAssertType(compilationStart.Compilation))
+            {
+                return;
+            }
+
+            compilationStart.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
+        });
     }
 
-    private void AnalyzeOperation(OperationAnalysisContext context)
+    private static bool HasXunitAssertType(Compilation compilation)
+    {
+        foreach (var member in compilation.GlobalNamespace.GetMembers("Xunit"))
+        {
+            if (member is INamespaceSymbol xunitNamespace && !xunitNamespace.GetTypeMembers("Assert").IsEmpty)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void AnalyzeOperation(OperationAnalysisContext context)
     {
         if (context.Operation is not IInvocationOperation invocationOperation)
         {
