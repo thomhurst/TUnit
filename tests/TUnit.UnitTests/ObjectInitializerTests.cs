@@ -150,20 +150,22 @@ public class ObjectInitializerTests
         using var fixture = new BlockingPrefixInitializer(completeSynchronously: true);
         using var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellableWait ? cancellationTokenSource.Token : CancellationToken.None;
-        var initializingThreadId = 0;
-        Task<int>[] waiters = [];
+        // Compare Thread objects, not ManagedThreadId: once the dedicated thread exits, the runtime
+        // can hand its ID to a thread-pool thread that then runs a correctly queued continuation.
+        Thread? initializingThread = null;
+        Task<Thread>[] waiters = [];
 
         // A dedicated thread cannot later pick up correctly queued waiter continuations.
         var initialization = Task.Factory.StartNew(() =>
         {
-            initializingThreadId = Environment.CurrentManagedThreadId;
+            initializingThread = Thread.CurrentThread;
             return ObjectInitializer.InitializeAsync(fixture).AsTask();
         }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
 
-        async Task<int> ObserveContinuationAsync()
+        async Task<Thread> ObserveContinuationAsync()
         {
             await ObjectInitializer.InitializeAsync(fixture, cancellationToken).ConfigureAwait(false);
-            return Environment.CurrentManagedThreadId;
+            return Thread.CurrentThread;
         }
 
         // Act
@@ -182,9 +184,10 @@ public class ObjectInitializerTests
 
         // Assert
         await Assert.That(continuationThreads.Length).IsEqualTo(waiterCount);
-        foreach (var threadId in continuationThreads)
+        await Assert.That(initializingThread).IsNotNull();
+        foreach (var thread in continuationThreads)
         {
-            await Assert.That(threadId).IsNotEqualTo(initializingThreadId);
+            await Assert.That(thread).IsNotSameReferenceAs(initializingThread);
         }
     }
 
