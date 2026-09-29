@@ -164,6 +164,99 @@ public class HookMetadataGeneratorIncrementalTests
         AssertRunReason(driver2, IncrementalStepRunReason.Modified);
     }
 
+    [Fact]
+    public void ClassGroups_AcrossFilesWithDisjointHookKinds_AreEmittedInCompilationOrder()
+    {
+        // The first file's class has only a Before hook besides the shared BeforeEvery hook, and the second
+        // file's class has only an After hook. No single hook kind orders the two files except BeforeEvery,
+        // so file order must come from the compilation rather than from merging per-kind sequences.
+        const string first =
+            """
+            using TUnit.Core;
+
+            public static class FirstFileHooks
+            {
+                [Before(HookType.Class)]
+                public static void BeforeClass() { }
+
+                [BeforeEvery(HookType.Assembly)]
+                public static void BeforeEveryAssembly(AssemblyHookContext context) { }
+            }
+            """;
+
+        const string second =
+            """
+            using TUnit.Core;
+
+            public static class SecondFileHooks
+            {
+                [After(HookType.Class)]
+                public static void AfterClass() { }
+
+                [BeforeEvery(HookType.Assembly)]
+                public static void BeforeEveryAssembly(AssemblyHookContext context) { }
+            }
+            """;
+
+        var compilation = Fixture.CreateLibrary(
+            CSharpSyntaxTree.ParseText(first, CSharpParseOptions.Default, path: "First.cs"),
+            CSharpSyntaxTree.ParseText(second, CSharpParseOptions.Default, path: "Second.cs"));
+
+        AssertGeneratedOrder(compilation, "FirstFileHooks", "SecondFileHooks");
+
+        // Reversing the files in the compilation reverses the emitted order.
+        var reversed = Fixture.CreateLibrary(
+            CSharpSyntaxTree.ParseText(second, CSharpParseOptions.Default, path: "Second.cs"),
+            CSharpSyntaxTree.ParseText(first, CSharpParseOptions.Default, path: "First.cs"));
+
+        AssertGeneratedOrder(reversed, "SecondFileHooks", "FirstFileHooks");
+    }
+
+    [Fact]
+    public void ClassGroups_DeclaredOnOneLine_AreEmittedInDeclarationOrder()
+    {
+        const string source =
+            """
+            using TUnit.Core;
+
+            public class ZHooks { [Before(HookType.Test)] public void Setup() { } } public class AHooks { [Before(HookType.Test)] public void Setup() { } }
+            """;
+
+        var compilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(source, CSharpParseOptions.Default));
+
+        AssertGeneratedOrder(compilation, "ZHooks", "AHooks");
+    }
+
+    [Fact]
+    public void AddUnrelatedFile_ShouldNotChangeHookFileOrder()
+    {
+        var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default, path: "Hooks.cs"));
+
+        var driver1 = TestHelper.GenerateTracked<HookMetadataGenerator>(compilation1);
+
+        var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}", CSharpParseOptions.Default, path: "Other.cs"));
+        var driver2 = driver1.RunGenerators(compilation2);
+        var runResult = driver2.GetRunResult().Results[0];
+
+        TestHelper.AssertRunReason(runResult, HookMetadataGenerator.HookFileOrder, IncrementalStepRunReason.Unchanged, 0);
+        TestHelper.AssertRunReason(runResult, HookMetadataGenerator.HookClassGroups, IncrementalStepRunReason.Cached, 0);
+    }
+
+    private static void AssertGeneratedOrder(Compilation compilation, params string[] typeNames)
+    {
+        var driver = TestHelper.GenerateTracked<HookMetadataGenerator>(compilation);
+        var generatorResult = Xunit.Assert.Single(driver.GetRunResult().Results);
+        Xunit.Assert.Null(generatorResult.Exception);
+
+        var hintNames = generatorResult.GeneratedSources.Select(static s => s.HintName).ToArray();
+        var indices = typeNames
+            .Select(typeName => Array.FindIndex(hintNames, hintName => hintName.Contains(typeName)))
+            .ToArray();
+
+        Xunit.Assert.DoesNotContain(-1, indices);
+        Xunit.Assert.Equal(indices.OrderBy(static i => i), indices);
+    }
+
     private static void AssertRunReason(GeneratorDriver driver, IncrementalStepRunReason reason)
     {
         var runResult = driver.GetRunResult().Results[0];

@@ -22,6 +22,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
     public const string ExtractAfterHooks = "ExtractAfterHooks";
     public const string ExtractBeforeEveryHooks = "ExtractBeforeEveryHooks";
     public const string ExtractAfterEveryHooks = "ExtractAfterEveryHooks";
+    public const string HookFileOrder = "HookFileOrder";
     public const string HookClassGroups = "HookClassGroups";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -65,20 +66,36 @@ public class HookMetadataGenerator : IIncrementalGenerator
             .Where(static m => m is not null)
             .WithTrackingName(ExtractAfterEveryHooks);
 
+        var allHooks = beforeHooks.Collect()
+            .Combine(afterHooks.Collect())
+            .Combine(beforeEveryHooks.Collect())
+            .Combine(afterEveryHooks.Collect())
+            .Select(static (data, _) =>
+            {
+                var (((before, after), beforeEvery), afterEvery) = data;
+                return new[] { before, after, beforeEvery, afterEvery };
+            });
+
+        // The files that declare hooks, in compilation order. Only this small list is compared between
+        // runs, so edits that add, remove or reorder unrelated files leave the grouping step cached.
+        var hookFileOrder = allHooks
+            .Select(static (hookArrays, _) => GetHookFilePaths(hookArrays))
+            .Combine(context.CompilationProvider)
+            .Select(static (data, _) => OrderByCompilation(data.Left, data.Right))
+            .WithTrackingName(HookFileOrder);
+
         // Group hooks by declaring class so each class gets one generated file instead of one per hook.
         // .Collect() is a fan-in, so grouping re-runs when any hook model changes, but it only arranges
         // already-extracted models. HookClassGroup's value equality means only the changed class's file
         // is re-emitted.
-        var hookClassGroups = beforeHooks.Collect()
-            .Combine(afterHooks.Collect())
-            .Combine(beforeEveryHooks.Collect())
-            .Combine(afterEveryHooks.Collect())
+        var hookClassGroups = allHooks
+            .Combine(hookFileOrder)
             .Combine(enabledProvider)
             .SelectMany(static (data, _) =>
             {
-                var ((((before, after), beforeEvery), afterEvery), isEnabled) = data;
+                var ((hookArrays, fileOrder), isEnabled) = data;
                 return isEnabled
-                    ? GroupHooksByClass(before, after, beforeEvery, afterEvery)
+                    ? GroupHooksByClass(hookArrays, fileOrder)
                     : [];
             })
             .WithTrackingName(HookClassGroups);
@@ -86,80 +103,104 @@ public class HookMetadataGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(hookClassGroups, GenerateHookClassFile);
     }
 
-    private static IEnumerable<HookClassGroup> GroupHooksByClass(params ImmutableArray<HookModel?>[] hookArrays)
+    private static EquatableArray<string> GetHookFilePaths(ImmutableArray<HookModel?>[] hookArrays)
     {
-        var fileRanks = RankFilesBySourceOrder(hookArrays);
+        var paths = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var hooks in hookArrays)
+        {
+            foreach (var hook in hooks)
+            {
+                if (hook is not null)
+                {
+                    paths.Add(hook.FilePath);
+                }
+            }
+        }
+
+        // Sorted so equal sets compare equal and the compilation-order step stays cached.
+        var sorted = paths.ToArray();
+        Array.Sort(sorted, StringComparer.Ordinal);
+        return new EquatableArray<string>(sorted);
+    }
+
+    /// <summary>
+    /// Orders the files that declare hooks as their syntax trees are ordered in the compilation. The compiler
+    /// emits types in that order, which is the order reflection discovery sees them in.
+    /// </summary>
+    private static EquatableArray<string> OrderByCompilation(EquatableArray<string> hookFilePaths, Compilation compilation)
+    {
+        if (hookFilePaths.Length == 0)
+        {
+            return hookFilePaths;
+        }
+
+        var remaining = new HashSet<string>(hookFilePaths, StringComparer.Ordinal);
+        var ordered = new List<string>(remaining.Count);
+        foreach (var tree in compilation.SyntaxTrees)
+        {
+            // Removing also lists a path shared by several trees (e.g. empty paths in tests) only once.
+            if (remaining.Remove(tree.FilePath))
+            {
+                ordered.Add(tree.FilePath);
+
+                if (remaining.Count == 0)
+                {
+                    break;
+                }
+            }
+        }
+
+        // Defensive: a hook whose path matches no tree still gets a deterministic rank.
+        foreach (var path in hookFilePaths)
+        {
+            if (remaining.Contains(path))
+            {
+                ordered.Add(path);
+            }
+        }
+
+        return new EquatableArray<string>(ordered.ToArray());
+    }
+
+    private static IEnumerable<HookClassGroup> GroupHooksByClass(ImmutableArray<HookModel?>[] hookArrays, EquatableArray<string> fileOrder)
+    {
+        var fileRanks = new Dictionary<string, int>(fileOrder.Length, StringComparer.Ordinal);
+        for (var i = 0; i < fileOrder.Length; i++)
+        {
+            fileRanks[fileOrder[i]] = i;
+        }
 
         // A type's fully qualified name identifies it within a compilation, so grouping by it matches
         // grouping by symbol while keeping the pipeline free of symbols.
         //
         // Registration indices come from runtime counters incremented by static field initializers, which
         // run in generated-file order. Groups are therefore emitted in the source order of each class's
-        // first hook. Hooks of one kind in different classes then register in declaration order, as they
-        // did with per-hook files and as reflection discovery does. Grouping by first appearance in the
-        // concatenated per-kind arrays would instead move a class ahead just because it has a Before hook.
+        // first hook: file in compilation order, then line, then column. Hooks of one kind in different
+        // classes then register in declaration order, as they did with per-hook files and as reflection
+        // discovery does. Grouping by first appearance in the concatenated per-kind arrays would instead
+        // move a class ahead just because it has a Before hook.
         return hookArrays
             .SelectMany(static hooks => hooks)
             .Where(static hook => hook is not null)
             .GroupBy(static hook => hook!.FullyQualifiedTypeName, StringComparer.Ordinal)
             .Select(group =>
             {
-                var first = group.OrderBy(hook => fileRanks[hook!.FilePath]).ThenBy(static hook => hook!.LineNumber).First()!;
-                return (FileRank: fileRanks[first.FilePath], first.LineNumber, Group: group);
+                var first = group
+                    .OrderBy(hook => fileRanks[hook!.FilePath])
+                    .ThenBy(static hook => hook!.LineNumber)
+                    .ThenBy(static hook => hook!.ColumnNumber)
+                    .First()!;
+                return (FileRank: fileRanks[first.FilePath], first.LineNumber, first.ColumnNumber, Group: group);
             })
             .OrderBy(static entry => entry.FileRank)
             .ThenBy(static entry => entry.LineNumber)
+            .ThenBy(static entry => entry.ColumnNumber)
             .ThenBy(static entry => entry.Group.Key, StringComparer.Ordinal)
             .Select(static entry => new HookClassGroup
             {
                 FullyQualifiedTypeName = entry.Group.Key,
                 Hooks = entry.Group.Select(static hook => hook!).ToEquatableArray()
             });
-    }
-
-    /// <summary>
-    /// Ranks source files in compilation order. Each collected array is ordered by syntax tree, so each
-    /// array's sequence of distinct files is a subsequence of the compilation's file order. Merging those
-    /// sequences recovers that order for every file that declares a hook.
-    /// </summary>
-    private static Dictionary<string, int> RankFilesBySourceOrder(ImmutableArray<HookModel?>[] hookArrays)
-    {
-        var files = new List<string>();
-        var seen = new HashSet<string>(StringComparer.Ordinal);
-
-        foreach (var hooks in hookArrays)
-        {
-            var cursor = 0;
-            string? previous = null;
-
-            foreach (var hook in hooks)
-            {
-                if (hook is null || string.Equals(hook.FilePath, previous, StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                previous = hook.FilePath;
-
-                if (seen.Add(hook.FilePath))
-                {
-                    files.Insert(cursor, hook.FilePath);
-                    cursor++;
-                }
-                else
-                {
-                    cursor = files.IndexOf(hook.FilePath) + 1;
-                }
-            }
-        }
-
-        var ranks = new Dictionary<string, int>(files.Count, StringComparer.Ordinal);
-        for (var i = 0; i < files.Count; i++)
-        {
-            ranks[files[i]] = i;
-        }
-
-        return ranks;
     }
 
     private static void GenerateHookClassFile(SourceProductionContext context, HookClassGroup group)
@@ -228,7 +269,8 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
         var location = context.TargetNode.GetLocation();
         var filePath = location.SourceTree?.FilePath ?? hookAttribute.ConstructorArguments.ElementAtOrDefault(1).Value?.ToString() ?? "";
-        var lineNumber = location.GetLineSpan().StartLinePosition.Line + 1;
+        var startPosition = location.GetLineSpan().StartLinePosition;
+        var lineNumber = startPosition.Line + 1;
 
         var order = GetHookOrder(hookAttribute);
         var hookExecutor = GetHookExecutorType(methodSymbol);
@@ -282,6 +324,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
             MethodName = methodSymbol.Name,
             FilePath = filePath,
             LineNumber = lineNumber,
+            ColumnNumber = startPosition.Character,
             HookKind = hookKind,
             HookType = hookType,
             Order = order,
