@@ -88,21 +88,83 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
     private static IEnumerable<HookClassGroup> GroupHooksByClass(params ImmutableArray<HookModel?>[] hookArrays)
     {
+        var fileRanks = RankFilesBySourceOrder(hookArrays);
+
         // A type's fully qualified name identifies it within a compilation, so grouping by it matches
         // grouping by symbol while keeping the pipeline free of symbols.
+        //
+        // Registration indices come from runtime counters incremented by static field initializers, which
+        // run in generated-file order. Groups are therefore emitted in the source order of each class's
+        // first hook. Hooks of one kind in different classes then register in declaration order, as they
+        // did with per-hook files and as reflection discovery does. Grouping by first appearance in the
+        // concatenated per-kind arrays would instead move a class ahead just because it has a Before hook.
         return hookArrays
             .SelectMany(static hooks => hooks)
             .Where(static hook => hook is not null)
             .GroupBy(static hook => hook!.FullyQualifiedTypeName, StringComparer.Ordinal)
-            .Select(static group => new HookClassGroup
+            .Select(group =>
             {
-                FullyQualifiedTypeName = group.Key,
-                Hooks = group.Select(static hook => hook!).ToEquatableArray()
+                var first = group.OrderBy(hook => fileRanks[hook!.FilePath]).ThenBy(static hook => hook!.LineNumber).First()!;
+                return (FileRank: fileRanks[first.FilePath], first.LineNumber, Group: group);
+            })
+            .OrderBy(static entry => entry.FileRank)
+            .ThenBy(static entry => entry.LineNumber)
+            .ThenBy(static entry => entry.Group.Key, StringComparer.Ordinal)
+            .Select(static entry => new HookClassGroup
+            {
+                FullyQualifiedTypeName = entry.Group.Key,
+                Hooks = entry.Group.Select(static hook => hook!).ToEquatableArray()
             });
+    }
+
+    /// <summary>
+    /// Ranks source files in compilation order. Each collected array is ordered by syntax tree, so each
+    /// array's sequence of distinct files is a subsequence of the compilation's file order. Merging those
+    /// sequences recovers that order for every file that declares a hook.
+    /// </summary>
+    private static Dictionary<string, int> RankFilesBySourceOrder(ImmutableArray<HookModel?>[] hookArrays)
+    {
+        var files = new List<string>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var hooks in hookArrays)
+        {
+            var cursor = 0;
+            string? previous = null;
+
+            foreach (var hook in hooks)
+            {
+                if (hook is null || string.Equals(hook.FilePath, previous, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                previous = hook.FilePath;
+
+                if (seen.Add(hook.FilePath))
+                {
+                    files.Insert(cursor, hook.FilePath);
+                    cursor++;
+                }
+                else
+                {
+                    cursor = files.IndexOf(hook.FilePath) + 1;
+                }
+            }
+        }
+
+        var ranks = new Dictionary<string, int>(files.Count, StringComparer.Ordinal);
+        for (var i = 0; i < files.Count; i++)
+        {
+            ranks[files[i]] = i;
+        }
+
+        return ranks;
     }
 
     private static void GenerateHookClassFile(SourceProductionContext context, HookClassGroup group)
     {
+        // Tracks the hook being generated so a failure names it.
         var hook = group.Hooks[0];
         try
         {
