@@ -256,4 +256,108 @@ public class CompilerArgumentsPopulatedAnalyzerTests
                 assertionsAlias: null
             );
     }
+
+    [Test]
+    public async Task Constructor_Arguments_Of_Assertion_Assembly_Types_Are_Flagged_When_Populated()
+    {
+        // Object creations and constructor initializers are checked as well as invocations: any constructor
+        // declared in an assembly that defines TUnit.Assertions.Assert is in scope, including an extern-aliased copy.
+        await Verifier
+            .VerifyAnalyzerWithAdditionalAliasedAssemblyAsync(
+                """
+                extern alias AssertionsCopy;
+
+                using AssertionsCopy::TUnit.Assertions;
+
+                public class DerivedCapture : ExpressionCapture
+                {
+                    public DerivedCapture(int value) : base(value, {|#0:"base-initializer"|})
+                    {
+                    }
+                }
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        _ = new ExpressionCapture(1, {|#1:"explicit"|});
+                        ExpressionCapture targetTyped = new(1, {|#2:expression: "named"|}, {|#3:member: "member"|});
+                    }
+                }
+                """,
+                ConstructorCopySource,
+                "AssertionsCopy",
+                assertionsAlias: null,
+
+                Verifier.Diagnostic(Rules.CompilerArgumentsPopulated).WithLocation(0),
+                Verifier.Diagnostic(Rules.CompilerArgumentsPopulated).WithLocation(1),
+                Verifier.Diagnostic(Rules.CompilerArgumentsPopulated).WithLocation(2),
+                Verifier.Diagnostic(Rules.CompilerArgumentsPopulated).WithLocation(3)
+            );
+    }
+
+    [Test]
+    public async Task Constructor_Arguments_Of_Assertion_Assembly_Types_Are_Not_Flagged_When_Not_Populated()
+    {
+        await Verifier
+            .VerifyAnalyzerWithAdditionalAliasedAssemblyAsync(
+                """
+                extern alias AssertionsCopy;
+
+                using AssertionsCopy::TUnit.Assertions;
+
+                public class DerivedCapture : ExpressionCapture
+                {
+                    public DerivedCapture(int value) : base(value)
+                    {
+                    }
+                }
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        _ = new ExpressionCapture(1);
+                        ExpressionCapture targetTyped = new(1);
+                    }
+                }
+                """,
+                ConstructorCopySource,
+                "AssertionsCopy",
+                assertionsAlias: null
+            );
+    }
+
+    // An assembly that defines TUnit.Assertions.Assert (so the analyzer treats it as an assertions assembly)
+    // plus a type whose constructor has compiler-populated parameters.
+    private const string ConstructorCopySource =
+        """
+        namespace System.Runtime.CompilerServices
+        {
+            [AttributeUsage(AttributeTargets.Parameter)]
+            internal sealed class CallerArgumentExpressionAttribute : Attribute
+            {
+                public CallerArgumentExpressionAttribute(string parameterName) => ParameterName = parameterName;
+
+                public string ParameterName { get; }
+            }
+        }
+
+        namespace TUnit.Assertions
+        {
+            public static class Assert
+            {
+            }
+
+            public class ExpressionCapture
+            {
+                public ExpressionCapture(
+                    int value,
+                    [System.Runtime.CompilerServices.CallerArgumentExpression("value")] string? expression = null,
+                    [System.Runtime.CompilerServices.CallerMemberName] string member = "")
+                {
+                }
+            }
+        }
+        """;
 }
