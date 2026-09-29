@@ -1,5 +1,5 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.CodeGenerators.Equality;
 using TUnit.Core.SourceGenerator.Models;
 using TUnit.Core.SourceGenerator.Models.Extracted;
 
@@ -57,11 +57,14 @@ public class InfrastructureGenerator : IIncrementalGenerator
                 return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
             });
 
-        // Extract assembly names as primitives in the transform step
-        // This enables proper incremental caching
+        // Extract assembly names as primitives in the transform step. AssemblyInfoModel equality
+        // keeps the generated source cached across keystrokes. No custom Compilation comparer here:
+        // when a comparer reports "equal", the input node keeps the OLD compilation in its table,
+        // pinning it (trees, bound state) until references change. The reference walk is memoized
+        // per driver instead, so syntax-only edits still skip it.
+        var memo = new AssemblyInfoMemo();
         var assemblyInfoProvider = context.CompilationProvider
-            .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer())
-            .Select((compilation, _) => ExtractAssemblyInfo(compilation))
+            .Select((compilation, _) => memo.GetAssemblyInfo(compilation))
             .WithTrackingName(ExtractAssemblyInfoStep)
             .Combine(enabledProvider);
 
@@ -78,12 +81,109 @@ public class InfrastructureGenerator : IIncrementalGenerator
     }
 
     /// <summary>
+    /// Single-slot memo of the reference walk, created per <see cref="Initialize"/> and so owned by one
+    /// generator driver. The walk costs several milliseconds per run on a real test project (about
+    /// 6.5 ms for TUnit.TestProject's 211 references), and in the IDE it would otherwise run on every
+    /// keystroke.
+    /// <para>
+    /// The key is every compilation input the walk reads except source:
+    /// <see cref="Compilation.ExternalReferences"/> (compared with <see cref="ImmutableArray{T}"/>
+    /// <c>==</c>, which compares the backing array by reference; syntax-only edits reuse it, while any
+    /// reference change produces a new one), the <see cref="Compilation.Options"/> instance and the
+    /// assembly name. Scripts are never memoized. The one source dependency, a source type shadowing a
+    /// selected type, is re-checked on every hit.
+    /// </para>
+    /// <para>
+    /// The slot only ever describes the latest compilation this driver saw: every miss replaces or
+    /// clears it. It holds that compilation's reference list and options (which the live compilation
+    /// holds anyway), never a <see cref="Compilation"/> or syntax tree, and it dies with the driver.
+    /// </para>
+    /// </summary>
+    internal sealed class AssemblyInfoMemo
+    {
+        // Racy by design: concurrent runs may both miss, both extract and both store. Entries are
+        // immutable and each equals a fresh extraction for its key, so the only cost is duplicate work.
+        private volatile Entry? _last;
+
+        public AssemblyInfoModel GetAssemblyInfo(Compilation compilation)
+        {
+            // Script submissions read inputs outside the key (#r directive references, the previous
+            // submission), so they always extract fresh.
+            if (compilation.ScriptCompilationInfo is not null || !compilation.DirectiveReferences.IsEmpty)
+            {
+                _last = null;
+                return ExtractAssemblyInfo(compilation, out _);
+            }
+
+            var last = _last;
+            if (last is not null
+                && last.References == compilation.ExternalReferences
+                && ReferenceEquals(last.Options, compilation.Options)
+                && last.AssemblyName == compilation.AssemblyName
+                && !IsAnyShadowedBySource(compilation, last.SelectedMetadataNames))
+            {
+                return last.Model;
+            }
+
+            var model = ExtractAssemblyInfo(compilation, out var selectedMetadataNames);
+            _last = selectedMetadataNames is null
+                ? null
+                : new Entry(compilation.ExternalReferences, compilation.Options, compilation.AssemblyName, model, selectedMetadataNames);
+            return model;
+        }
+
+        private sealed class Entry(
+            ImmutableArray<MetadataReference> references,
+            CompilationOptions options,
+            string? assemblyName,
+            AssemblyInfoModel model,
+            string[] selectedMetadataNames)
+        {
+            public ImmutableArray<MetadataReference> References { get; } = references;
+
+            public CompilationOptions Options { get; } = options;
+
+            public string? AssemblyName { get; } = assemblyName;
+
+            public AssemblyInfoModel Model { get; } = model;
+
+            public string[] SelectedMetadataNames { get; } = selectedMetadataNames;
+        }
+    }
+
+    private static bool IsAnyShadowedBySource(Compilation compilation, string[] selectedMetadataNames)
+    {
+        var sourceAssembly = compilation.Assembly;
+        foreach (var metadataName in selectedMetadataNames)
+        {
+            if (sourceAssembly.GetTypeByMetadataName(metadataName) is not null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Extracts all needed data as primitives in the transform step.
     /// This enables proper incremental caching - the model contains only strings.
+    /// <para>
+    /// The result is memoized by <see cref="AssemblyInfoMemo"/> across syntax-only edits, so any
+    /// dependency on source must be reported through <paramref name="selectedMetadataNames"/> (as the
+    /// shadowing check does) so that reuse can re-check it.
+    /// </para>
     /// </summary>
-    private static AssemblyInfoModel ExtractAssemblyInfo(Compilation compilation)
+    /// <param name="compilation">The compilation to inspect.</param>
+    /// <param name="selectedMetadataNames">
+    /// Metadata names of the selected types, or <see langword="null"/> when a source type shadowed a
+    /// candidate, in which case the result depends on source and must not be memoized.
+    /// </param>
+    private static AssemblyInfoModel ExtractAssemblyInfo(Compilation compilation, out string[]? selectedMetadataNames)
     {
         var assembliesToLoad = new List<string>();
+        var metadataNames = new List<string>();
+        var shadowedBySource = false;
 
         // Find TUnit.Core assembly - only assemblies referencing this can contain tests
         var tunitCoreAssembly = FindTUnitCoreAssembly(compilation);
@@ -122,13 +222,16 @@ public class InfrastructureGenerator : IIncrementalGenerator
         {
             if (ShouldLoadAssembly(assembly, compilation))
             {
-                var publicType = GetFirstUniquePublicType(assembly, compilation);
+                var publicType = GetFirstUniquePublicType(assembly, compilation, out var metadataName, ref shadowedBySource);
                 if (publicType != null)
                 {
                     assembliesToLoad.Add(publicType);
+                    metadataNames.Add(metadataName!);
                 }
             }
         }
+
+        selectedMetadataNames = shadowedBySource ? null : [.. metadataNames];
 
         return new AssemblyInfoModel
         {
@@ -276,7 +379,11 @@ public class InfrastructureGenerator : IIncrementalGenerator
     /// Gets the first public type from an assembly that can be uniquely resolved by the compilation.
     /// This avoids CS0433 errors when multiple assemblies define types with the same fully-qualified name.
     /// </summary>
-    private static string? GetFirstUniquePublicType(IAssemblySymbol assembly, Compilation compilation)
+    private static string? GetFirstUniquePublicType(
+        IAssemblySymbol assembly,
+        Compilation compilation,
+        out string? selectedMetadataName,
+        ref bool shadowedBySource)
     {
         foreach (var type in GetPublicTypesRecursive(assembly.GlobalNamespace))
         {
@@ -293,10 +400,12 @@ public class InfrastructureGenerator : IIncrementalGenerator
             // GetTypeByMetadataName returns null when the type name is ambiguous
             if (SymbolEqualityComparer.Default.Equals(resolvedType, type))
             {
+                selectedMetadataName = metadataName;
                 return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             }
 
             // null or different type = ambiguous, try next type
+            shadowedBySource |= IsFromSource(resolvedType, compilation);
         }
 
         // Fallback: try generic types if no non-generic unique type was found
@@ -327,12 +436,22 @@ public class InfrastructureGenerator : IIncrementalGenerator
                     typeName = typeName.Substring(0, genericStart) + openGenericSuffix;
                 }
 
+                selectedMetadataName = metadataName;
                 return typeName;
             }
+
+            shadowedBySource |= IsFromSource(resolvedType, compilation);
         }
 
+        selectedMetadataName = null;
         return null; // No unique type found, skip this assembly
     }
+
+    // GetTypeByMetadataName returns the compilation's own (source) type when one exists, hiding
+    // any referenced type with the same metadata name.
+    private static bool IsFromSource(INamedTypeSymbol? resolvedType, Compilation compilation) =>
+        resolvedType is not null
+        && SymbolEqualityComparer.Default.Equals(resolvedType.ContainingAssembly, compilation.Assembly);
 
     /// <summary>
     /// Gets the full metadata name for a type (e.g., "Namespace.OuterClass+NestedClass").
