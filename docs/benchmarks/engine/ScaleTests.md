@@ -10,14 +10,14 @@ This benchmark was automatically generated on **2026-09-29** from the latest CI 
 
 ## 📊 Results[​](#-results "Direct link to 📊 Results")
 
-| Framework       | Version | Mean        | Median      | StdDev     |
-| --------------- | ------- | ----------- | ----------- | ---------- |
-| **TUnit**       | 1.71.0  | 455.86 ms   | 416.93 ms   | 110.214 ms |
-| NUnit           | 5.0.0   | 721.99 ms   | 707.07 ms   | 78.368 ms  |
-| MSTest          | 4.4.1   | 726.62 ms   | 713.95 ms   | 94.749 ms  |
-| xUnit3          | 4.0.1   | 1,017.40 ms | 1,010.46 ms | 104.138 ms |
-| **TUnit (AOT)** | 1.71.0  | 31.10 ms    | 31.20 ms    | 4.098 ms   |
-| xUnit3\_AOT     | 4.0.1   | 41.38 ms    | 41.20 ms    | 6.093 ms   |
+| Framework       | Version | Mean      | Median    | StdDev    |
+| --------------- | ------- | --------- | --------- | --------- |
+| **TUnit**       | 1.72.0  | 401.48 ms | 398.58 ms | 29.893 ms |
+| NUnit           | 5.0.0   | 699.73 ms | 698.68 ms | 41.524 ms |
+| MSTest          | 4.4.1   | 644.21 ms | 643.49 ms | 45.761 ms |
+| xUnit3          | 4.0.1   | 803.38 ms | 802.06 ms | 41.410 ms |
+| **TUnit (AOT)** | 1.72.0  | 24.10 ms  | 23.79 ms  | 1.726 ms  |
+| xUnit3\_AOT     | 4.0.1   | 28.47 ms  | 29.36 ms  | 4.226 ms  |
 
 ## 📈 Visual Comparison[​](#-visual-comparison "Direct link to 📈 Visual Comparison")
 
@@ -33,4 +33,4 @@ Methodology
 
 View the [benchmarks overview](/docs/benchmarks/.md) for methodology details and environment information.
 
-*Last generated: 2026-09-29T16:54:28.495Z*
+*Last generated: 2026-09-29T18:13:18.339Z*
