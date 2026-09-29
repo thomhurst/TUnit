@@ -36,7 +36,10 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             .CreateSyntaxProvider(
                 predicate: static (node, _) => IsCandidateClass(node),
                 transform: static (ctx, ct) => GetStaticPropertyChain(ctx, ct))
-            .Where(static chain => chain.Length > 0);
+            // Every chain contains the class itself, so drop chains without any static data-source
+            // property: they add nothing to the result, and keeping them out of the collected array
+            // stops unrelated classes (any class with a base list) from re-running the parse step.
+            .Where(static chain => HasAnyProperty(chain));
 
         var testClasses = classChains
             .Collect()
@@ -77,6 +80,20 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         {
             if (member is PropertyDeclarationSyntax { AttributeLists.Count: > 0 } property
                 && property.Modifiers.Any(SyntaxKind.StaticKeyword))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool HasAnyProperty(EquatableArray<StaticPropertyTypeSegment> chain)
+    {
+        // Indexed loop: EquatableArray<T>.GetEnumerator() returns a boxed IEnumerator<T>.
+        for (var i = 0; i < chain.Length; i++)
+        {
+            if (chain[i].Properties.Length > 0)
             {
                 return true;
             }

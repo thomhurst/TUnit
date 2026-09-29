@@ -89,6 +89,21 @@ public class PropertyInjectionSourceGeneratorIncrementalTests
     }
 
     [Fact]
+    public void EditUnrelatedMemberShouldNotRerunConcreteGenericTypes()
+    {
+        var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
+
+        var driver1 = TestHelper.GenerateTracked<PropertyInjectionSourceGenerator>(compilation1);
+
+        // The per-node transform output must be equatable, so an unchanged result stops the
+        // flattened step from re-running rather than merely re-producing equal values.
+        var compilation2 = TestHelper.ReplacePropertyDeclaration(compilation1, "Plain", "public long Plain { get; set; }");
+        var driver2 = driver1.RunGenerators(compilation2);
+        TestHelper.AssertAllRunReasons(driver2.GetRunResult().Results[0],
+            PropertyInjectionSourceGenerator.ConcreteGenericTypesStep, IncrementalStepRunReason.Cached);
+    }
+
+    [Fact]
     public void ModifyDataSourcePropertyShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));

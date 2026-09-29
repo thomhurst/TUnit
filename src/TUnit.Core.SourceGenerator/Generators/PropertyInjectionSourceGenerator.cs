@@ -86,7 +86,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             .CreateSyntaxProvider(
                 predicate: static (node, _) => IsConcreteGenericTypeCandidate(node),
                 transform: static (ctx, _) => ExtractConcreteGenericTypes(ctx))
-            .Where(static x => x.Count > 0)
+            .Where(static x => x.Length > 0)
             .SelectMany(static (types, _) => types)
             .WithTrackingName(ConcreteGenericTypesStep);
 
@@ -340,7 +340,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     /// 1. Inheritance chains (base types)
     /// 2. IDataSourceAttribute type arguments
     /// </summary>
-    private static List<ConcreteGenericTypeModel> ExtractConcreteGenericTypes(GeneratorSyntaxContext context)
+    private static EquatableArray<ConcreteGenericTypeModel> ExtractConcreteGenericTypes(GeneratorSyntaxContext context)
     {
         var semanticModel = context.SemanticModel;
         var compilationContext = GetCompilationContext(semanticModel.Compilation);
@@ -349,7 +349,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var asyncInitializerInterface = compilationContext.AsyncInitializerInterface;
 
         if (dataSourceInterface == null || asyncInitializerInterface == null)
-            return [];
+            return EquatableArray<ConcreteGenericTypeModel>.Empty;
 
         var results = new List<ConcreteGenericTypeModel>();
         // Discovery from type declarations (inheritance chains)
@@ -447,7 +447,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             }
         }
 
-        return results;
+        return results.ToEquatableArray();
     }
 
     /// <summary>

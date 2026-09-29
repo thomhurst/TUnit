@@ -44,6 +44,29 @@ public class StaticPropertyInitializationGeneratorIncrementalTests
     }
 
     [Fact]
+    public void AddUnrelatedClassWithBaseListShouldNotRerunParse()
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(DefaultProperties, CSharpParseOptions.Default);
+        var compilation1 = Fixture.CreateLibrary(syntaxTree);
+
+        var driver1 = TestHelper.GenerateTracked<StaticPropertyInitializationGenerator>(compilation1);
+        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+
+        // A class with a base list is a syntactic candidate, but its chain has no static
+        // data-source property, so it must not reach the collected input of the parse step.
+        var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+            """
+            public class Unrelated : System.IDisposable
+            {
+                public void Dispose() { }
+            }
+            """));
+        var driver2 = driver1.RunGenerators(compilation2);
+        AssertRunParseLength(driver2, 2);
+        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached);
+    }
+
+    [Fact]
     public void AddClassWithValidPropertyShouldRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultProperties, CSharpParseOptions.Default);
