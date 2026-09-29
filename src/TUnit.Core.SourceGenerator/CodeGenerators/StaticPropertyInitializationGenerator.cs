@@ -90,9 +90,10 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 
     private static bool HasAnyProperty(EquatableArray<StaticPropertyTypeSegment> chain)
     {
-        foreach (var segment in chain)
+        // Indexed loop: EquatableArray<T>.GetEnumerator() returns a boxed IEnumerator<T>.
+        for (var i = 0; i < chain.Length; i++)
         {
-            if (segment.Properties.Length > 0)
+            if (chain[i].Properties.Length > 0)
             {
                 return true;
             }
