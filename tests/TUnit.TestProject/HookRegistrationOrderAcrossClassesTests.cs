@@ -32,6 +32,16 @@ public class HookRegistrationOrderAcrossClassesTests
 {
     private static readonly ConcurrentQueue<string> Executed = new();
 
+    // A host can run several test sessions in one process, re-running the assembly hooks each time.
+    // Session hooks run before assembly hooks, so clearing here scopes the recorded entries to one session.
+    [Before(TestSession)]
+    public static void ResetRecordedHooks()
+    {
+        while (Executed.TryDequeue(out _))
+        {
+        }
+    }
+
     internal static void Record(AssemblyHookContext context, string name)
     {
         if (context.Assembly == typeof(HookRegistrationOrderAcrossClassesTests).Assembly)
