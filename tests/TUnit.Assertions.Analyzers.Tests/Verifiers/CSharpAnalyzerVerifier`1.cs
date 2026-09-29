@@ -38,7 +38,50 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
     /// <inheritdoc cref="AnalyzerVerifier{TAnalyzer, TTest, TVerifier}.VerifyAnalyzerAsync(string, DiagnosticResult[])"/>
     public static async Task VerifyAnalyzerAsync([StringSyntax("c#-test")] string source, params DiagnosticResult[] expected)
     {
-        var test = new Test
+        var test = CreateTest(source);
+
+        test.ExpectedDiagnostics.AddRange(expected);
+        await test.RunAsync(CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Like <see cref="VerifyAnalyzerAsync(string, DiagnosticResult[])"/>, but the references whose file name
+    /// is in <paramref name="aliasedReferenceFileNames"/> are only reachable through <c>extern alias</c>
+    /// <paramref name="alias"/> (not merged into the global namespace).
+    /// </summary>
+    public static async Task VerifyAnalyzerWithAliasedReferencesAsync(
+        [StringSyntax("c#-test")] string source,
+        string alias,
+        string[] aliasedReferenceFileNames,
+        params DiagnosticResult[] expected)
+    {
+        var test = CreateTest(source);
+
+        test.SolutionTransforms.Add((solution, projectId) =>
+        {
+            var project = solution.GetProject(projectId)!;
+            var references = project.MetadataReferences
+                .Select(reference => reference is PortableExecutableReference { FilePath: { } filePath } peReference
+                    && aliasedReferenceFileNames.Contains(Path.GetFileName(filePath), StringComparer.OrdinalIgnoreCase)
+                        ? peReference.WithAliases([alias])
+                        : reference)
+                .ToList();
+
+            if (!references.Any(reference => reference.Properties.Aliases.Contains(alias)))
+            {
+                throw new InvalidOperationException($"None of the references matched {string.Join(", ", aliasedReferenceFileNames)}.");
+            }
+
+            return solution.WithProjectMetadataReferences(projectId, references);
+        });
+
+        test.ExpectedDiagnostics.AddRange(expected);
+        await test.RunAsync(CancellationToken.None);
+    }
+
+    private static Test CreateTest(string source)
+    {
+        return new Test
         {
             TestCode = source,
             ReferenceAssemblies = GetReferenceAssemblies()
@@ -57,8 +100,5 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
             },
             CompilerDiagnostics = CompilerDiagnostics.None
         };
-
-        test.ExpectedDiagnostics.AddRange(expected);
-        await test.RunAsync(CancellationToken.None);
     }
 }

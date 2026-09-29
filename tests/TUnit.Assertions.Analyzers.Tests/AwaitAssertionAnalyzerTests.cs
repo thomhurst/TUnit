@@ -169,4 +169,33 @@ public class AwaitAssertionAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task Assert_That_Is_Flagged_When_TUnit_Assertions_Is_Only_Referenced_Via_Extern_Alias()
+    {
+        await Verifier
+            .VerifyAnalyzerWithAliasedReferencesAsync(
+                """
+                extern alias TUnitAssertions;
+
+                using System.Threading.Tasks;
+                using TUnitAssertions::TUnit.Assertions;
+                using TUnitAssertions::TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    public async Task MyTest()
+                    {
+                        var one = 1;
+                        {|#0:Assert.That(one)|}.IsEqualTo(1);
+                    }
+                }
+                """,
+                "TUnitAssertions",
+                ["TUnit.Assertions.netstandard2.0.dll"],
+
+                Verifier.Diagnostic(Rules.AwaitAssertion)
+                    .WithLocation(0)
+            );
+    }
 }

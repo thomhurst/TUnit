@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Assertions.Analyzers.Extensions;
+using TUnit.Assertions.Analyzers.Helpers;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -582,9 +583,9 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
                 return;
             }
 
-            _collectionBase = compilation.GetTypeByMetadataName("TUnit.Assertions.Sources.CollectionAssertionBase`2");
-            _asyncEnumerableBase = compilation.GetTypeByMetadataName("TUnit.Assertions.Sources.AsyncEnumerableAssertionBase`1");
-            _asyncDelegate = compilation.GetTypeByMetadataName("TUnit.Assertions.Sources.AsyncDelegateAssertion");
+            _collectionBase = AssertionSymbols.ResolveType(compilation, "TUnit.Assertions.Sources.CollectionAssertionBase`2");
+            _asyncEnumerableBase = AssertionSymbols.ResolveType(compilation, "TUnit.Assertions.Sources.AsyncEnumerableAssertionBase`1");
+            _asyncDelegate = AssertionSymbols.ResolveType(compilation, "TUnit.Assertions.Sources.AsyncDelegateAssertion");
             _resolved = true;
         }
     }

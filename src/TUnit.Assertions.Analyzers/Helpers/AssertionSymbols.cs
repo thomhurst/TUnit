@@ -18,13 +18,13 @@ internal sealed class AssertionSymbols
 
     private AssertionSymbols(Compilation compilation)
     {
-        Assert = compilation.GetTypeByMetadataName("TUnit.Assertions.Assert");
-        ShouldExtensions = compilation.GetTypeByMetadataName("TUnit.Assertions.Should.ShouldExtensions");
-        IAssertionSource = compilation.GetTypeByMetadataName("TUnit.Assertions.Core.IAssertionSource");
-        IAssertionSourceOfT = compilation.GetTypeByMetadataName("TUnit.Assertions.Core.IAssertionSource`1");
-        IShouldSource = compilation.GetTypeByMetadataName("TUnit.Assertions.Should.Core.IShouldSource");
-        IShouldSourceOfT = compilation.GetTypeByMetadataName("TUnit.Assertions.Should.Core.IShouldSource`1");
-        AssertionOfT = compilation.GetTypeByMetadataName("TUnit.Assertions.Core.Assertion`1");
+        Assert = ResolveType(compilation, "TUnit.Assertions.Assert");
+        ShouldExtensions = ResolveType(compilation, "TUnit.Assertions.Should.ShouldExtensions");
+        IAssertionSource = ResolveType(compilation, "TUnit.Assertions.Core.IAssertionSource");
+        IAssertionSourceOfT = ResolveType(compilation, "TUnit.Assertions.Core.IAssertionSource`1");
+        IShouldSource = ResolveType(compilation, "TUnit.Assertions.Should.Core.IShouldSource");
+        IShouldSourceOfT = ResolveType(compilation, "TUnit.Assertions.Should.Core.IShouldSource`1");
+        AssertionOfT = ResolveType(compilation, "TUnit.Assertions.Core.Assertion`1");
     }
 
     /// <summary><c>TUnit.Assertions.Assert</c>, or null when TUnit.Assertions isn't referenced.</summary>
@@ -42,6 +42,33 @@ internal sealed class AssertionSymbols
     public INamedTypeSymbol? IShouldSourceOfT { get; }
 
     public INamedTypeSymbol? AssertionOfT { get; }
+
+    /// <summary>
+    /// Resolves a type by metadata name from the compilation or any referenced assembly.
+    /// </summary>
+    /// <remarks>
+    /// <c>Compilation.GetTypeByMetadataName</c> ignores references that are only reachable through an
+    /// <c>extern alias</c>, and returns null when the name is defined in more than one assembly. Calls
+    /// through such references still bind to these types, so fall back to probing each referenced
+    /// assembly directly rather than silently disabling the analyzers.
+    /// </remarks>
+    public static INamedTypeSymbol? ResolveType(Compilation compilation, string metadataName)
+    {
+        if (compilation.GetTypeByMetadataName(metadataName) is { } type)
+        {
+            return type;
+        }
+
+        foreach (var assembly in compilation.SourceModule.ReferencedAssemblySymbols)
+        {
+            if (assembly.GetTypeByMetadataName(metadataName) is { } referencedType)
+            {
+                return referencedType;
+            }
+        }
+
+        return null;
+    }
 
     public static AssertionSymbols For(Compilation compilation)
         => Cache.GetValue(compilation, static c => new AssertionSymbols(c));

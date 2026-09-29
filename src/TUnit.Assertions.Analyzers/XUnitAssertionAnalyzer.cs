@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 using TUnit.Assertions.Analyzers.Extensions;
+using TUnit.Assertions.Analyzers.Helpers;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -31,18 +32,9 @@ public class XUnitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
         });
     }
 
+    // Probes extern-alias-only references too (compilation.GlobalNamespace doesn't merge those in).
     private static bool HasXunitAssertType(Compilation compilation)
-    {
-        foreach (var member in compilation.GlobalNamespace.GetMembers("Xunit"))
-        {
-            if (member is INamespaceSymbol xunitNamespace && !xunitNamespace.GetTypeMembers("Assert").IsEmpty)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
+        => AssertionSymbols.ResolveType(compilation, "Xunit.Assert") is not null;
 
     private static void AnalyzeOperation(OperationAnalysisContext context)
     {
