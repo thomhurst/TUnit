@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
+using TUnit.Assertions.Analyzers.Helpers;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -17,10 +18,20 @@ public class DynamicInAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
 
     public override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterOperationAction(AnalyzeOperation, OperationKind.DynamicInvocation);
+        context.RegisterCompilationStartAction(compilationStart =>
+        {
+            var symbols = AssertionSymbols.For(compilationStart.Compilation);
+
+            if (symbols.Assert.IsEmpty)
+            {
+                return;
+            }
+
+            compilationStart.RegisterOperationAction(ctx => AnalyzeOperation(ctx, symbols), OperationKind.DynamicInvocation);
+        });
     }
 
-    private void AnalyzeOperation(OperationAnalysisContext context)
+    private static void AnalyzeOperation(OperationAnalysisContext context, AssertionSymbols symbols)
     {
         if (context.Operation is not IDynamicInvocationOperation dynamicInvocationOperation)
         {
@@ -33,8 +44,7 @@ public class DynamicInAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (targetMethod.Name != "That"
-            || !SymbolEqualityComparer.Default.Equals(targetMethod.ContainingType, context.Compilation.GetTypeByMetadataName("TUnit.Assertions.Assert")))
+        if (!symbols.IsAssertThat(targetMethod))
         {
             return;
         }

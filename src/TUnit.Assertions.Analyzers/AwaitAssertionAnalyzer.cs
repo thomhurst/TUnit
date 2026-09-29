@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
-using TUnit.Assertions.Analyzers.Extensions;
+using TUnit.Assertions.Analyzers.Helpers;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -18,10 +18,20 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 
     public override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
+        context.RegisterCompilationStartAction(compilationStart =>
+        {
+            var symbols = AssertionSymbols.For(compilationStart.Compilation);
+
+            if (symbols.Assert.IsEmpty && symbols.ShouldExtensions.IsEmpty)
+            {
+                return;
+            }
+
+            compilationStart.RegisterOperationAction(ctx => AnalyzeOperation(ctx, symbols), OperationKind.Invocation);
+        });
     }
 
-    private void AnalyzeOperation(OperationAnalysisContext context)
+    private static void AnalyzeOperation(OperationAnalysisContext context, AssertionSymbols symbols)
     {
         if (context.Operation is not IInvocationOperation invocationOperation)
         {
@@ -30,23 +40,12 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var methodSymbol = invocationOperation.TargetMethod;
 
-        // Cheap pre-filter on the simple name: this runs for every invocation in the compilation,
-        // and building the fully qualified display string for each one is expensive.
-        if (methodSymbol.RendersNameAsLastSegment()
-            && methodSymbol.Name is not ("Multiple" or "That" or "Should"))
-        {
-            return;
-        }
-
-        var fullyQualifiedNonGenericMethodName = methodSymbol.GloballyQualifiedNonGeneric();
-
-        if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.Multiple")
+        if (methodSymbol.Name == "Multiple"
+            && symbols.Assert.Contains(methodSymbol.ContainingType))
         {
             CheckMultipleInvocation(context, invocationOperation);
         }
-
-        if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.That"
-                                                 or "global::TUnit.Assertions.Should.ShouldExtensions.Should")
+        else if (symbols.IsAssertThat(methodSymbol) || symbols.IsShould(methodSymbol))
         {
             CheckAssertInvocation(context, invocationOperation);
         }

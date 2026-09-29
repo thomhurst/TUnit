@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 using TUnit.Assertions.Analyzers.Extensions;
+using TUnit.Assertions.Analyzers.Helpers;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -18,10 +19,28 @@ public class AwaitValueTaskAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
 
     public override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
+        context.RegisterCompilationStartAction(compilationStart =>
+        {
+            var symbols = AssertionSymbols.For(compilationStart.Compilation);
+            var valueTask = compilationStart.Compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask");
+            var genericValueTask = compilationStart.Compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask`1");
+
+            if (symbols.Assert.IsEmpty || valueTask is null || genericValueTask is null)
+            {
+                return;
+            }
+
+            compilationStart.RegisterOperationAction(
+                ctx => AnalyzeOperation(ctx, symbols, valueTask, genericValueTask),
+                OperationKind.Invocation);
+        });
     }
 
-    private void AnalyzeOperation(OperationAnalysisContext context)
+    private static void AnalyzeOperation(
+        OperationAnalysisContext context,
+        AssertionSymbols symbols,
+        INamedTypeSymbol valueTask,
+        INamedTypeSymbol genericValueTask)
     {
         if (context.Operation is not IInvocationOperation invocationOperation)
         {
@@ -30,7 +49,7 @@ public class AwaitValueTaskAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var methodSymbol = invocationOperation.TargetMethod;
 
-        if (!methodSymbol.IsGloballyQualifiedNonGeneric("global::TUnit.Assertions.Assert.That"))
+        if (!symbols.IsAssertThat(methodSymbol))
         {
             return;
         }
@@ -38,9 +57,6 @@ public class AwaitValueTaskAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
         var funcArgumentOperation = invocationOperation.Arguments.First();
 
         var type = funcArgumentOperation.Parameter?.Type;
-
-        var valueTask = context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask")!;
-        var genericValueTask = context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask`1")!;
 
         if (type?.IsOrInherits(valueTask) is true || type?.OriginalDefinition?.IsOrInherits(genericValueTask) is true)
         {

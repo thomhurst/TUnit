@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Assertions.Analyzers.Extensions;
+using TUnit.Assertions.Analyzers.Helpers;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -20,6 +21,11 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 {
     public override void ReportSuppressions(SuppressionAnalysisContext context)
     {
+        // Diagnostics cluster in the same methods, so the candidate null checks of each scope are collected
+        // (and semantically validated) once per call rather than once per diagnostic.
+        Dictionary<SyntaxNode, List<NullCheckCandidate>>? candidatesByScope = null;
+        NullCheckTypes? nullCheckTypes = null;
+
         foreach (var diagnostic in context.ReportedDiagnostics)
         {
             // Only process nullability warnings
@@ -34,7 +40,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
                 continue;
             }
 
-            var root = sourceTree.GetRoot();
+            var root = sourceTree.GetRoot(context.CancellationToken);
             var diagnosticSpan = diagnostic.Location.SourceSpan;
             var node = root.FindNode(diagnosticSpan);
 
@@ -43,8 +49,6 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
                 continue;
             }
 
-            var semanticModel = context.GetSemanticModel(sourceTree);
-
             // Find the variable/expression being referenced that caused the warning
             var targetExpression = GetTargetExpression(node);
             if (targetExpression is null)
@@ -52,8 +56,12 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
                 continue;
             }
 
+            var semanticModel = context.GetSemanticModel(sourceTree);
+            nullCheckTypes ??= new NullCheckTypes(semanticModel.Compilation);
+            candidatesByScope ??= new Dictionary<SyntaxNode, List<NullCheckCandidate>>();
+
             // Check if this variable/expression was previously asserted as non-null
-            if (WasAssertedNotNull(targetExpression, semanticModel, context.CancellationToken))
+            if (WasAssertedNotNull(targetExpression, semanticModel, nullCheckTypes, candidatesByScope, context.CancellationToken))
             {
                 Suppress(context, diagnostic);
             }
@@ -91,6 +99,8 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
     private bool WasAssertedNotNull(
         ExpressionSyntax targetExpression,
         SemanticModel semanticModel,
+        NullCheckTypes nullCheckTypes,
+        Dictionary<SyntaxNode, List<NullCheckCandidate>> candidatesByScope,
         CancellationToken cancellationToken)
     {
         // Find the innermost containing scope (lambda, local function, or method)
@@ -119,37 +129,54 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
             return false;
         }
 
+        if (!candidatesByScope.TryGetValue(containingMethod, out var candidates))
+        {
+            candidates = CollectCandidates(containingMethod);
+            candidatesByScope.Add(containingMethod, candidates);
+        }
+
         // Semantically this checks every invocation inside any statement of the scope that precedes the
         // usage's statement in document (pre-)order, which includes the statements that enclose it.
         // Rather than scanning the descendants of each such statement (quadratic in nesting depth),
-        // visit each invocation once and test its outermost enclosing statement instead: an invocation is
-        // inside some preceding statement exactly when its outermost statement within the scope precedes
-        // (or encloses) the usage's statement.
-        foreach (var node in containingMethod.DescendantNodes())
+        // each invocation is visited once and tested by its outermost enclosing statement instead: an
+        // invocation is inside some preceding statement exactly when its outermost statement within the
+        // scope precedes (or encloses) the usage's statement.
+        foreach (var candidate in candidates)
         {
-            if (node is not InvocationExpressionSyntax
-                {
-                    Expression: MemberAccessExpressionSyntax { Name.Identifier.Text: "IsNotNull" or "NotBeNull" }
-                } invocation)
-            {
-                continue;
-            }
-
-            if (GetOutermostStatement(invocation, containingMethod) is not { } outermostStatement
-                || outermostStatement == identifierStatement
-                || outermostStatement.SpanStart > identifierStatement.SpanStart)
+            if (candidate.OutermostStatement == identifierStatement
+                || candidate.OutermostStatement.SpanStart > identifierStatement.SpanStart)
             {
                 continue;
             }
 
             // Look for await Assert.That(x).IsNotNull() pattern
-            if (IsNotNullAssertion(invocation, targetExpression, semanticModel, cancellationToken))
+            if (candidate.GetAssertedExpression(semanticModel, nullCheckTypes, cancellationToken) is { } assertedExpression
+                && ExpressionsMatch(assertedExpression, targetExpression, semanticModel, cancellationToken))
             {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static List<NullCheckCandidate> CollectCandidates(SyntaxNode scope)
+    {
+        var candidates = new List<NullCheckCandidate>();
+
+        foreach (var node in scope.DescendantNodes())
+        {
+            if (node is InvocationExpressionSyntax
+                {
+                    Expression: MemberAccessExpressionSyntax { Name.Identifier.Text: "IsNotNull" or "NotBeNull" }
+                } invocation
+                && GetOutermostStatement(invocation, scope) is { } outermostStatement)
+            {
+                candidates.Add(new NullCheckCandidate(invocation, outermostStatement));
+            }
+        }
+
+        return candidates;
     }
 
     private static bool IsStrictDescendantOf(SyntaxNode node, SyntaxNode ancestor)
@@ -180,10 +207,14 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         return outermost;
     }
 
-    private bool IsNotNullAssertion(
+    /// <summary>
+    /// Returns the expression a recognised TUnit null check asserts on, or null when
+    /// <paramref name="invocation"/> isn't one.
+    /// </summary>
+    private static ExpressionSyntax? GetAssertedExpression(
         InvocationExpressionSyntax invocation,
-        ExpressionSyntax targetExpression,
         SemanticModel semanticModel,
+        NullCheckTypes nullCheckTypes,
         CancellationToken cancellationToken)
     {
         // Patterns recognised:
@@ -194,30 +225,28 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         //   await variable.Should().Contain("test").And.NotBeNull()
         if (invocation.Expression is not MemberAccessExpressionSyntax { Name.Identifier.Text: var calledName })
         {
-            return false;
+            return null;
         }
 
-        ExpressionSyntax? targetArgument = calledName switch
+        return calledName switch
         {
-            "IsNotNull" => GetAssertThatArgument(invocation, semanticModel, cancellationToken),
+            "IsNotNull" => GetAssertThatArgument(invocation, semanticModel, nullCheckTypes, cancellationToken),
             "NotBeNull" => GetShouldReceiver(invocation, semanticModel, cancellationToken),
             _ => null,
         };
-
-        return targetArgument is not null
-            && ExpressionsMatch(targetArgument, targetExpression, semanticModel, cancellationToken);
     }
 
     private static ExpressionSyntax? GetAssertThatArgument(
         InvocationExpressionSyntax invocation,
         SemanticModel semanticModel,
+        NullCheckTypes nullCheckTypes,
         CancellationToken cancellationToken)
     {
         var assertThatCall = FindAssertThatInChain(invocation);
         if (assertThatCall is null
             || assertThatCall.ArgumentList.Arguments.Count != 1
             || !IsSupportedAssertionChain(invocation, assertThatCall, semanticModel, cancellationToken)
-            || !IsTUnitIsNotNullMethod(invocation, semanticModel, cancellationToken)
+            || !IsTUnitIsNotNullMethod(invocation, semanticModel, nullCheckTypes, cancellationToken)
             || !IsTUnitMethod(
                 assertThatCall,
                 semanticModel,
@@ -234,6 +263,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
     private static bool IsTUnitIsNotNullMethod(
         InvocationExpressionSyntax invocation,
         SemanticModel semanticModel,
+        NullCheckTypes nullCheckTypes,
         CancellationToken cancellationToken)
     {
         if (semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is not IMethodSymbol symbol)
@@ -249,32 +279,30 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
             return false;
         }
 
-        if (method.ContainingType.GloballyQualifiedNonGeneric() == "global::TUnit.Assertions.Extensions.AssertionExtensions")
+        if (method.ContainingType.IsGloballyQualifiedNonGeneric("global::TUnit.Assertions.Extensions.AssertionExtensions"))
         {
             return true;
         }
 
-        var collectionBase = semanticModel.Compilation.GetTypeByMetadataName(
-            "TUnit.Assertions.Sources.CollectionAssertionBase`2");
+        var collectionBase = nullCheckTypes.CollectionBase;
 
         // Check the declaring assembly as well as the shared base: a custom subclass
         // can hide IsNotNull, but that does not make its method a TUnit null check.
-        if (collectionBase is null
-            || !SymbolEqualityComparer.Default.Equals(method.ContainingAssembly, collectionBase.ContainingAssembly))
+        if (!collectionBase.ContainsAssembly(method.ContainingAssembly))
         {
             return false;
         }
 
-        var asyncEnumerableBase = semanticModel.Compilation.GetTypeByMetadataName(
-            "TUnit.Assertions.Sources.AsyncEnumerableAssertionBase`1");
-        var asyncDelegate = semanticModel.Compilation.GetTypeByMetadataName(
-            "TUnit.Assertions.Sources.AsyncDelegateAssertion");
+        var asyncEnumerableBase = nullCheckTypes.AsyncEnumerableBase;
+        var asyncDelegate = nullCheckTypes.AsyncDelegate;
 
         for (var type = method.ContainingType; type is not null; type = type.BaseType)
         {
-            if (SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, collectionBase)
-                || SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, asyncEnumerableBase)
-                || SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, asyncDelegate))
+            var definition = type.OriginalDefinition;
+
+            if (collectionBase.Contains(definition)
+                || asyncEnumerableBase.Contains(definition)
+                || asyncDelegate.Contains(definition))
             {
                 return true;
             }
@@ -388,7 +416,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         var method = symbol.ReducedFrom ?? symbol;
         return method.Name == methodName
                && IsReferencedAssertionAssembly(method.ContainingAssembly, semanticModel.Compilation)
-               && method.ContainingType.GloballyQualifiedNonGeneric() == fullyQualifiedContainingTypeName;
+               && method.ContainingType.IsGloballyQualifiedNonGeneric(fullyQualifiedContainingTypeName);
     }
 
     private static bool IsReferencedAssertionAssembly(IAssemblySymbol? assembly, Compilation compilation)
@@ -399,7 +427,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
                && !SymbolEqualityComparer.Default.Equals(assembly, compilation.Assembly);
     }
 
-    private bool ExpressionsMatch(
+    private static bool ExpressionsMatch(
         ExpressionSyntax assertArgument,
         ExpressionSyntax targetExpression,
         SemanticModel semanticModel,
@@ -424,7 +452,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         return false;
     }
 
-    private bool SymbolsMatch(
+    private static bool SymbolsMatch(
         ExpressionSyntax expr1,
         ExpressionSyntax expr2,
         SemanticModel semanticModel,
@@ -482,6 +510,86 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// An <c>IsNotNull()</c>/<c>NotBeNull()</c> invocation in a scope, with its semantic validation memoized
+    /// so it runs at most once however many diagnostics in the scope it is checked against.
+    /// </summary>
+    private sealed class NullCheckCandidate(InvocationExpressionSyntax invocation, StatementSyntax outermostStatement)
+    {
+        private bool _resolved;
+        private ExpressionSyntax? _assertedExpression;
+
+        public StatementSyntax OutermostStatement { get; } = outermostStatement;
+
+        public ExpressionSyntax? GetAssertedExpression(
+            SemanticModel semanticModel,
+            NullCheckTypes nullCheckTypes,
+            CancellationToken cancellationToken)
+        {
+            if (!_resolved)
+            {
+                _assertedExpression = IsNotNullAssertionSuppressor.GetAssertedExpression(
+                    invocation, semanticModel, nullCheckTypes, cancellationToken);
+                _resolved = true;
+            }
+
+            return _assertedExpression;
+        }
+    }
+
+    /// <summary>
+    /// The TUnit.Assertions source base types whose <c>IsNotNull</c> members count as null checks,
+    /// resolved on first use and then reused for the rest of the <see cref="ReportSuppressions"/> call.
+    /// </summary>
+    private sealed class NullCheckTypes(Compilation compilation)
+    {
+        private bool _resolved;
+        private TypeSymbolSet _collectionBase;
+        private TypeSymbolSet _asyncEnumerableBase;
+        private TypeSymbolSet _asyncDelegate;
+
+        public TypeSymbolSet CollectionBase
+        {
+            get
+            {
+                EnsureResolved();
+                return _collectionBase;
+            }
+        }
+
+        public TypeSymbolSet AsyncEnumerableBase
+        {
+            get
+            {
+                EnsureResolved();
+                return _asyncEnumerableBase;
+            }
+        }
+
+        public TypeSymbolSet AsyncDelegate
+        {
+            get
+            {
+                EnsureResolved();
+                return _asyncDelegate;
+            }
+        }
+
+        private void EnsureResolved()
+        {
+            if (_resolved)
+            {
+                return;
+            }
+
+            var hasExternAliasedReferences = TypeSymbolSet.HasExternAliasedReferences(compilation);
+            _collectionBase = TypeSymbolSet.Resolve(compilation, "TUnit.Assertions.Sources.CollectionAssertionBase`2", hasExternAliasedReferences);
+            _asyncEnumerableBase = TypeSymbolSet.Resolve(compilation, "TUnit.Assertions.Sources.AsyncEnumerableAssertionBase`1", hasExternAliasedReferences);
+            _asyncDelegate = TypeSymbolSet.Resolve(compilation, "TUnit.Assertions.Sources.AsyncDelegateAssertion", hasExternAliasedReferences);
+            _resolved = true;
+        }
     }
 
     private void Suppress(SuppressionAnalysisContext context, Diagnostic diagnostic)
