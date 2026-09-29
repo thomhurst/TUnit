@@ -116,10 +116,40 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         var finalTests = filteredTests as List<AbstractExecutableTest> ?? [.. filteredTests];
 
+        if (isForExecution && finalTests.Count != allTests.Count)
+        {
+            RemoveExcludedTestsFromHookContexts(allTests, finalTests);
+        }
+
         await _testFilterService.RegisterTestsAsync(finalTests, isForExecution).ConfigureAwait(false);
 
         var finalContext = ExecutionContext.Capture();
         return new TestDiscoveryResult(finalTests, finalContext);
+    }
+
+    // Every built test was added to its ClassHookContext when its TestContext was created. Filters
+    // that can only be evaluated after building (e.g. on properties added at discovery time) leave
+    // tests in those contexts that will never run, so hooks would otherwise see them through
+    // TestClasses/AllTests/TestCount and fire work for classes that are not part of the run.
+    private static void RemoveExcludedTestsFromHookContexts(
+        List<AbstractExecutableTest> allTests,
+        List<AbstractExecutableTest> finalTests)
+    {
+        var testsToKeep = new HashSet<TestContext>(TUnit.Core.Helpers.ReferenceEqualityComparer<TestContext>.Instance);
+        foreach (var test in finalTests)
+        {
+            testsToKeep.Add(test.Context);
+        }
+
+        var visitedClasses = new HashSet<ClassHookContext>(TUnit.Core.Helpers.ReferenceEqualityComparer<ClassHookContext>.Instance);
+        foreach (var test in allTests)
+        {
+            var classContext = test.Context.ClassContext;
+            if (!testsToKeep.Contains(test.Context) && visitedClasses.Add(classContext))
+            {
+                classContext.RetainTests(testsToKeep);
+            }
+        }
     }
 
     // Project the resolved tests onto their contexts into a pre-sized list.

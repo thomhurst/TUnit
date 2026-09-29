@@ -64,6 +64,37 @@ public class ContextProviderTests
         await Assert.That(publishedContext.Metadata.TestDetails).IsSameReferenceAs(testDetails);
     }
 
+    [Test]
+    public async Task GetOrCreateClassContext_ConcurrentCallers_RegisterASingleContext()
+    {
+        // Contexts register themselves with their parent when constructed. Creating them through
+        // a racing ConcurrentDictionary.GetOrAdd factory left the losers registered as orphaned,
+        // test-less entries in AssemblyHookContext.TestClasses / TestSessionContext.Assemblies.
+        for (var attempt = 0; attempt < 50; attempt++)
+        {
+            var provider = new ContextProvider(new EmptyServiceProvider(), Guid.NewGuid().ToString(), testFilter: null);
+            // The engine creates the session context before building tests; do the same so only
+            // the class/assembly creation path races.
+            var session = provider.TestSessionContext;
+            using var start = new ManualResetEventSlim();
+
+            var workers = Enumerable.Range(0, Math.Max(4, Environment.ProcessorCount))
+                .Select(_ => Task.Factory.StartNew(() =>
+                {
+                    start.Wait();
+                    return provider.GetOrCreateClassContext(typeof(DummyTestClass));
+                }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default))
+                .ToArray();
+
+            start.Set();
+            var contexts = await Task.WhenAll(workers);
+
+            await Assert.That(contexts.All(c => ReferenceEquals(c, contexts[0]))).IsTrue();
+            await Assert.That(session.Assemblies).Count().IsEqualTo(1);
+            await Assert.That(session.TestClasses).Count().IsEqualTo(1);
+        }
+    }
+
     private sealed class DummyTestClass
     {
         public Task SomeTest() => Task.CompletedTask;

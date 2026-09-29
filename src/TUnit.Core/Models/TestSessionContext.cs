@@ -97,6 +97,14 @@ public class TestSessionContext : Context
 
     internal bool FirstTestStarted { get; set; }
 
+    internal void InvalidateTestCaches()
+    {
+        lock (_lock)
+        {
+            InvalidateCaches();
+        }
+    }
+
     private int _failureCount;
 
     /// <summary>

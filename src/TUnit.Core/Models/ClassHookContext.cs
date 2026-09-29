@@ -76,6 +76,35 @@ public class ClassHookContext : Context
         return ClassType.GetHashCode();
     }
 
+    /// <summary>
+    /// Drops every test not in <paramref name="testsToKeep"/>. Used once filtering has decided which
+    /// built tests will run, so hooks only see participating tests. Removes the class from its assembly
+    /// when no tests remain.
+    /// </summary>
+    internal void RetainTests(HashSet<TestContext> testsToKeep)
+    {
+        bool empty;
+        lock (_lock)
+        {
+            if (_tests.RemoveAll(t => !testsToKeep.Contains(t)) == 0)
+            {
+                return;
+            }
+
+            _testSet.IntersectWith(testsToKeep);
+            empty = _tests.Count is 0;
+        }
+
+        if (empty)
+        {
+            AssemblyContext.RemoveClass(this);
+        }
+        else
+        {
+            AssemblyContext.InvalidateTestCaches();
+        }
+    }
+
     internal void RemoveTest(TestContext test)
     {
         bool empty;

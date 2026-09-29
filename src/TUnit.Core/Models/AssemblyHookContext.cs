@@ -49,6 +49,16 @@ public class AssemblyHookContext : Context
 
     internal bool FirstTestStarted { get; set; }
 
+    internal void InvalidateTestCaches()
+    {
+        lock (_lock)
+        {
+            InvalidateCache();
+        }
+
+        TestSessionContext.InvalidateTestCaches();
+    }
+
     internal void RemoveClass(ClassHookContext classContext)
     {
         bool empty;
@@ -62,6 +72,10 @@ public class AssemblyHookContext : Context
         if (empty)
         {
             TestSessionContext.RemoveAssembly(this);
+        }
+        else
+        {
+            TestSessionContext.InvalidateTestCaches();
         }
     }
 
