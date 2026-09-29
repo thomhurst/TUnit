@@ -38,25 +38,12 @@ public class WebApplicationFactoryAccessAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private static bool ReferencesWebApplicationTest(Compilation compilation)
     {
-        foreach (var tunitNamespace in compilation.GlobalNamespace.GetNamespaceMembers())
-        {
-            if (tunitNamespace.Name != "TUnit")
-            {
-                continue;
-            }
-
-            foreach (var aspNetCoreNamespace in tunitNamespace.GetNamespaceMembers())
-            {
-                // Matches every arity, like IsWebApplicationTestType's name check.
-                if (aspNetCoreNamespace.Name == "AspNetCore"
-                    && !aspNetCoreNamespace.GetTypeMembers("WebApplicationTest").IsEmpty)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        // GetTypesByMetadataName searches the source assembly and every reference, including ones only
+        // reachable through an extern alias (which Compilation.GlobalNamespace omits), and unlike
+        // GetTypeByMetadataName it doesn't return null when several assemblies declare the type.
+        // Both arities are checked to match IsWebApplicationTestType's arity-agnostic name check.
+        return !compilation.GetTypesByMetadataName("TUnit.AspNetCore.WebApplicationTest").IsEmpty
+            || !compilation.GetTypesByMetadataName("TUnit.AspNetCore.WebApplicationTest`2").IsEmpty;
     }
 
     private void AnalyzePropertyReference(OperationAnalysisContext context)
