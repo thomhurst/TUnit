@@ -171,58 +171,15 @@ namespace TUnit.Mocks.Generated
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class IDynamicService_GetAsync_M0_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+    public sealed class IDynamicService_GetAsync_M0_MockCall : global::TUnit.Mocks.MockMethodCallBase<IDynamicService_GetAsync_M0_MockCall, dynamic>
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<dynamic>? _builder;
-
         internal IDynamicService_GetAsync_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-        }
+            : base(engine, memberId, memberName, matchers, default) { }
 
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<dynamic> EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<dynamic> EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-            var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<dynamic>(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public IDynamicService_GetAsync_M0_MockCall Returns(dynamic value) { EnsureSetup().Returns(value); return this; }
-        /// <inheritdoc />
-        public IDynamicService_GetAsync_M0_MockCall Returns(global::System.Func<dynamic> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public IDynamicService_GetAsync_M0_MockCall ReturnsSequentially(params dynamic[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
-        /// <inheritdoc />
-        public IDynamicService_GetAsync_M0_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public IDynamicService_GetAsync_M0_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public IDynamicService_GetAsync_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IDynamicService_GetAsync_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public IDynamicService_GetAsync_M0_MockCall Then() { EnsureSetup().Then(); return this; }
+        /// <summary>Configure a fixed return value.</summary>
+        public new IDynamicService_GetAsync_M0_MockCall Returns(dynamic value) { EnsureSetup().Returns(value); return this; }
+        /// <summary>Configure a computed return value, invoked on each call.</summary>
+        public new IDynamicService_GetAsync_M0_MockCall Returns(global::System.Func<dynamic> factory) { EnsureSetup().Returns(factory); return this; }
 
         /// <summary>Return a pre-built Task directly (e.g., from a TaskCompletionSource).</summary>
         public IDynamicService_GetAsync_M0_MockCall ReturnsAsync(global::System.Threading.Tasks.Task<dynamic> task) { EnsureSetup().ReturnsRaw(task); return this; }
@@ -249,75 +206,18 @@ namespace TUnit.Mocks.Generated
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public IDynamicService_GetAsync_M0_MockCall Returns(global::System.Func<global::System.Threading.Tasks.Task<dynamic>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
         #endif
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class IDynamicService_ComputeAsync_M1_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+    public sealed class IDynamicService_ComputeAsync_M1_MockCall : global::TUnit.Mocks.MockMethodCallBase<IDynamicService_ComputeAsync_M1_MockCall, dynamic>
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<dynamic>? _builder;
-
         internal IDynamicService_ComputeAsync_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-        }
+            : base(engine, memberId, memberName, matchers, default) { }
 
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<dynamic> EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<dynamic> EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-            var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<dynamic>(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public IDynamicService_ComputeAsync_M1_MockCall Returns(dynamic value) { EnsureSetup().Returns(value); return this; }
-        /// <inheritdoc />
-        public IDynamicService_ComputeAsync_M1_MockCall Returns(global::System.Func<dynamic> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public IDynamicService_ComputeAsync_M1_MockCall ReturnsSequentially(params dynamic[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
-        /// <inheritdoc />
-        public IDynamicService_ComputeAsync_M1_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public IDynamicService_ComputeAsync_M1_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public IDynamicService_ComputeAsync_M1_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IDynamicService_ComputeAsync_M1_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public IDynamicService_ComputeAsync_M1_MockCall Then() { EnsureSetup().Then(); return this; }
+        /// <summary>Configure a fixed return value.</summary>
+        public new IDynamicService_ComputeAsync_M1_MockCall Returns(dynamic value) { EnsureSetup().Returns(value); return this; }
+        /// <summary>Configure a computed return value, invoked on each call.</summary>
+        public new IDynamicService_ComputeAsync_M1_MockCall Returns(global::System.Func<dynamic> factory) { EnsureSetup().Returns(factory); return this; }
 
         /// <summary>Return a pre-built ValueTask directly (e.g., from a TaskCompletionSource).</summary>
         /// <remarks>The same ValueTask instance is returned on every call. Since ValueTask may only be awaited once,
@@ -346,20 +246,6 @@ namespace TUnit.Mocks.Generated
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public IDynamicService_ComputeAsync_M1_MockCall Returns(global::System.Func<global::System.Threading.Tasks.ValueTask<dynamic>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
         #endif
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
     }
 }
 

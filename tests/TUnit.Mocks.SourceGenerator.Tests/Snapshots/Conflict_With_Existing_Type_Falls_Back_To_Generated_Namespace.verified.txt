@@ -145,58 +145,10 @@ namespace TUnit.Mocks.Generated
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class MyApp_IGreeter_Greet_M0_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+    public sealed class MyApp_IGreeter_Greet_M0_MockCall : global::TUnit.Mocks.MockMethodCallBase<MyApp_IGreeter_Greet_M0_MockCall, string>
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string>? _builder;
-
         internal MyApp_IGreeter_Greet_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-        }
-
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string> EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string> EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-            var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<string>(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public MyApp_IGreeter_Greet_M0_MockCall Returns(string value) { EnsureSetup().Returns(value); return this; }
-        /// <inheritdoc />
-        public MyApp_IGreeter_Greet_M0_MockCall Returns(global::System.Func<string> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public MyApp_IGreeter_Greet_M0_MockCall ReturnsSequentially(params string[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
-        /// <inheritdoc />
-        public MyApp_IGreeter_Greet_M0_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public MyApp_IGreeter_Greet_M0_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public MyApp_IGreeter_Greet_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public MyApp_IGreeter_Greet_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public MyApp_IGreeter_Greet_M0_MockCall Then() { EnsureSetup().Then(); return this; }
+            : base(engine, memberId, memberName, matchers, default) { }
 
         /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
         public MyApp_IGreeter_Greet_M0_MockCall Returns(global::System.Func<string, string> factory)
@@ -218,20 +170,6 @@ namespace TUnit.Mocks.Generated
             EnsureSetup().Throws(args => exceptionFactory((string)args[0]!));
             return this;
         }
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
     }
 }
 

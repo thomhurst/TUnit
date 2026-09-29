@@ -237,58 +237,15 @@ namespace TUnit.Mocks.Generated
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class IEnumAndGenericService_GetColorAsync_M0_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+    public sealed class IEnumAndGenericService_GetColorAsync_M0_MockCall : global::TUnit.Mocks.MockMethodCallBase<IEnumAndGenericService_GetColorAsync_M0_MockCall, global::Color>
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<global::Color>? _builder;
-
         internal IEnumAndGenericService_GetColorAsync_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-        }
+            : base(engine, memberId, memberName, matchers, default) { }
 
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<global::Color> EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<global::Color> EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-            var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<global::Color>(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorAsync_M0_MockCall Returns(global::Color value) { EnsureSetup().Returns(value); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorAsync_M0_MockCall Returns(global::System.Func<global::Color> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorAsync_M0_MockCall ReturnsSequentially(params global::Color[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorAsync_M0_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorAsync_M0_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorAsync_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorAsync_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorAsync_M0_MockCall Then() { EnsureSetup().Then(); return this; }
+        /// <summary>Configure a fixed return value.</summary>
+        public new IEnumAndGenericService_GetColorAsync_M0_MockCall Returns(global::Color value) { EnsureSetup().Returns(value); return this; }
+        /// <summary>Configure a computed return value, invoked on each call.</summary>
+        public new IEnumAndGenericService_GetColorAsync_M0_MockCall Returns(global::System.Func<global::Color> factory) { EnsureSetup().Returns(factory); return this; }
 
         /// <summary>Return a pre-built Task directly (e.g., from a TaskCompletionSource).</summary>
         public IEnumAndGenericService_GetColorAsync_M0_MockCall ReturnsAsync(global::System.Threading.Tasks.Task<global::Color> task) { EnsureSetup().ReturnsRaw(task); return this; }
@@ -317,75 +274,18 @@ namespace TUnit.Mocks.Generated
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public IEnumAndGenericService_GetColorAsync_M0_MockCall Returns(global::System.Func<global::System.Threading.Tasks.Task<global::Color>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
         #endif
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class IEnumAndGenericService_GetColorValueAsync_M1_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+    public sealed class IEnumAndGenericService_GetColorValueAsync_M1_MockCall : global::TUnit.Mocks.MockMethodCallBase<IEnumAndGenericService_GetColorValueAsync_M1_MockCall, global::Color>
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<global::Color>? _builder;
-
         internal IEnumAndGenericService_GetColorValueAsync_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-        }
+            : base(engine, memberId, memberName, matchers, default) { }
 
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<global::Color> EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<global::Color> EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-            var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<global::Color>(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorValueAsync_M1_MockCall Returns(global::Color value) { EnsureSetup().Returns(value); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorValueAsync_M1_MockCall Returns(global::System.Func<global::Color> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorValueAsync_M1_MockCall ReturnsSequentially(params global::Color[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorValueAsync_M1_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorValueAsync_M1_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorValueAsync_M1_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorValueAsync_M1_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_GetColorValueAsync_M1_MockCall Then() { EnsureSetup().Then(); return this; }
+        /// <summary>Configure a fixed return value.</summary>
+        public new IEnumAndGenericService_GetColorValueAsync_M1_MockCall Returns(global::Color value) { EnsureSetup().Returns(value); return this; }
+        /// <summary>Configure a computed return value, invoked on each call.</summary>
+        public new IEnumAndGenericService_GetColorValueAsync_M1_MockCall Returns(global::System.Func<global::Color> factory) { EnsureSetup().Returns(factory); return this; }
 
         /// <summary>Return a pre-built ValueTask directly (e.g., from a TaskCompletionSource).</summary>
         /// <remarks>The same ValueTask instance is returned on every call. Since ValueTask may only be awaited once,
@@ -416,77 +316,18 @@ namespace TUnit.Mocks.Generated
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public IEnumAndGenericService_GetColorValueAsync_M1_MockCall Returns(global::System.Func<global::System.Threading.Tasks.ValueTask<global::Color>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
         #endif
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class IEnumAndGenericService_FindAsync_M2_MockCall<T> : global::TUnit.Mocks.Verification.ICallVerification
+    public sealed class IEnumAndGenericService_FindAsync_M2_MockCall<T> : global::TUnit.Mocks.MockMethodCallBase<IEnumAndGenericService_FindAsync_M2_MockCall<T>, T?>
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private readonly global::System.Collections.Immutable.ImmutableArray<global::System.Type> _typeArguments;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<T?>? _builder;
-
         internal IEnumAndGenericService_FindAsync_M2_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers, global::System.Collections.Immutable.ImmutableArray<global::System.Type> typeArguments)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-            _typeArguments = typeArguments;
-        }
+            : base(engine, memberId, memberName, matchers, typeArguments) { }
 
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<T?> EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<T?> EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName, _typeArguments);
-            var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<T?>(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindAsync_M2_MockCall<T> Returns(T? value) { EnsureSetup().Returns(value); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindAsync_M2_MockCall<T> Returns(global::System.Func<T?> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindAsync_M2_MockCall<T> ReturnsSequentially(params T?[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindAsync_M2_MockCall<T> Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindAsync_M2_MockCall<T> Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindAsync_M2_MockCall<T> Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindAsync_M2_MockCall<T> TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindAsync_M2_MockCall<T> Then() { EnsureSetup().Then(); return this; }
+        /// <summary>Configure a fixed return value.</summary>
+        public new IEnumAndGenericService_FindAsync_M2_MockCall<T> Returns(T? value) { EnsureSetup().Returns(value); return this; }
+        /// <summary>Configure a computed return value, invoked on each call.</summary>
+        public new IEnumAndGenericService_FindAsync_M2_MockCall<T> Returns(global::System.Func<T?> factory) { EnsureSetup().Returns(factory); return this; }
 
         /// <summary>Return a pre-built Task directly (e.g., from a TaskCompletionSource).</summary>
         public IEnumAndGenericService_FindAsync_M2_MockCall<T> ReturnsAsync(global::System.Threading.Tasks.Task<T?> task) { EnsureSetup().ReturnsRaw(task); return this; }
@@ -559,77 +400,18 @@ namespace TUnit.Mocks.Generated
             EnsureSetup().Throws(args => exceptionFactory((int)args[0]!));
             return this;
         }
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled(message);
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class IEnumAndGenericService_FindStructAsync_M3_MockCall<T> : global::TUnit.Mocks.Verification.ICallVerification where T : struct
+    public sealed class IEnumAndGenericService_FindStructAsync_M3_MockCall<T> : global::TUnit.Mocks.MockMethodCallBase<IEnumAndGenericService_FindStructAsync_M3_MockCall<T>, T?> where T : struct
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private readonly global::System.Collections.Immutable.ImmutableArray<global::System.Type> _typeArguments;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<T?>? _builder;
-
         internal IEnumAndGenericService_FindStructAsync_M3_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers, global::System.Collections.Immutable.ImmutableArray<global::System.Type> typeArguments)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-            _typeArguments = typeArguments;
-        }
+            : base(engine, memberId, memberName, matchers, typeArguments) { }
 
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<T?> EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<T?> EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName, _typeArguments);
-            var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<T?>(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindStructAsync_M3_MockCall<T> Returns(T? value) { EnsureSetup().Returns(value); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindStructAsync_M3_MockCall<T> Returns(global::System.Func<T?> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindStructAsync_M3_MockCall<T> ReturnsSequentially(params T?[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindStructAsync_M3_MockCall<T> Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindStructAsync_M3_MockCall<T> Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindStructAsync_M3_MockCall<T> Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindStructAsync_M3_MockCall<T> TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public IEnumAndGenericService_FindStructAsync_M3_MockCall<T> Then() { EnsureSetup().Then(); return this; }
+        /// <summary>Configure a fixed return value.</summary>
+        public new IEnumAndGenericService_FindStructAsync_M3_MockCall<T> Returns(T? value) { EnsureSetup().Returns(value); return this; }
+        /// <summary>Configure a computed return value, invoked on each call.</summary>
+        public new IEnumAndGenericService_FindStructAsync_M3_MockCall<T> Returns(global::System.Func<T?> factory) { EnsureSetup().Returns(factory); return this; }
 
         /// <summary>Return a pre-built Task directly (e.g., from a TaskCompletionSource).</summary>
         public IEnumAndGenericService_FindStructAsync_M3_MockCall<T> ReturnsAsync(global::System.Threading.Tasks.Task<T?> task) { EnsureSetup().ReturnsRaw(task); return this; }
@@ -701,20 +483,6 @@ namespace TUnit.Mocks.Generated
             EnsureSetup().Throws(args => exceptionFactory((int)args[0]!));
             return this;
         }
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled(message);
     }
 }
 
