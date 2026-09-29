@@ -95,6 +95,9 @@ public class ParameterReflectionInfoTests(string first, int second)
     }
 
     [Test]
+    // Trimming does not keep non-public methods for the public-method factories (by design), so this keeps the
+    // helper explicitly; the test covers the fallback lookup itself, which then works in JIT and Native AOT alike.
+    [DynamicDependency(nameof(PrivateStaticHelper))]
     public async Task Non_Public_Method_Via_Public_Factory_Falls_Back()
     {
         var parameters = ParameterMetadataFactory.ForMethod(typeof(ParameterReflectionInfoTests), nameof(PrivateStaticHelper), true,
