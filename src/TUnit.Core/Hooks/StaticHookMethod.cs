@@ -7,8 +7,15 @@ namespace TUnit.Core.Hooks;
 #endif
 public abstract record StaticHookMethod<T> : StaticHookMethod, IExecutableHook<T>
 {
+    /// <summary>
+    /// The hook body. Source-generated bodies call the hook method directly, without an async state machine,
+    /// so invoke it only through <see cref="InvokeBodyAsync"/> to keep async-method semantics.
+    /// </summary>
     public Func<T, CancellationToken, ValueTask>? Body { get; init; }
     public abstract ValueTask ExecuteAsync(T context, CancellationToken cancellationToken);
+
+    internal ValueTask InvokeBodyAsync(T context, CancellationToken cancellationToken)
+        => HookBodyInvoker.InvokeAsync(Body!, context, cancellationToken);
 }
 
 #if !DEBUG

@@ -5,7 +5,7 @@ public record AfterTestDiscoveryHookMethod : StaticHookMethod<TestDiscoveryConte
     public override ValueTask ExecuteAsync(TestDiscoveryContext context, CancellationToken cancellationToken)
     {
         return HookExecutor.ExecuteAfterTestDiscoveryHook(MethodInfo, context,
-            () => Body!.Invoke(context, cancellationToken)
+            () => InvokeBodyAsync(context, cancellationToken)
         );
     }
 }

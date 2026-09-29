@@ -16,6 +16,10 @@ public sealed class HookModel : IEquatable<HookModel>
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
 
+    // Zero-based column of the hook's declaration. Not emitted; together with LineNumber it orders
+    // class groups declared on the same line.
+    public required int ColumnNumber { get; init; }
+
     // Hook configuration (using strings to match existing generator API)
     public required string HookKind { get; init; } // "Before", "After", "BeforeEvery", "AfterEvery"
     public required string HookType { get; init; } // "Test", "Class", "Assembly", "TestSession", "TestDiscovery"
@@ -69,6 +73,7 @@ public sealed class HookModel : IEquatable<HookModel>
                && MethodName == other.MethodName
                && FilePath == other.FilePath
                && LineNumber == other.LineNumber
+               && ColumnNumber == other.ColumnNumber
                && HookKind == other.HookKind
                && HookType == other.HookType
                && Order == other.Order
