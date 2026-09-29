@@ -309,9 +309,12 @@ internal sealed class ParameterInfoResolver
         for (var i = 0; i < candidateParameters.Length; i++)
         {
             var parameterType = candidateParameters[i].ParameterType;
+
+            // Generated metadata never describes a by-ref parameter, so a ref/in/out overload of a test method is
+            // never an exact match (it can still be picked by the parameter-count fallback if nothing else fits).
             if (parameterType.IsByRef)
             {
-                parameterType = parameterType.GetElementType()!;
+                return false;
             }
 
             // Parameters that use type parameters are emitted as object, so only concrete types can be compared.

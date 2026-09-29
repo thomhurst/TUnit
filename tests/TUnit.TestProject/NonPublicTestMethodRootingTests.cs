@@ -44,6 +44,23 @@ public class NonPublicTestMethodRootingTests
         await Assert.That(Internal_Shares_Name(typeof(NonPublicTestMethodRootingTests))).IsGreaterThanOrEqualTo(0);
     }
 
+    // Declared before the test below so reflection enumerates it first: the by-ref overload must not be mistaken
+    // for the test method just because its element type matches.
+    private void Internal_Ref_Overload(ref int value)
+    {
+        value++;
+    }
+
+    [Test]
+    [Arguments(4)]
+    internal async Task Internal_Ref_Overload(int value)
+    {
+        var parameter = TestContext.Current!.Metadata.TestDetails.MethodMetadata.Parameters[0];
+
+        await Assert.That(parameter.ReflectionInfo.ParameterType).IsEqualTo(typeof(int));
+        await Assert.That(parameter.ReflectionInfo.Member.Name).IsEqualTo(nameof(Internal_Ref_Overload));
+    }
+
     private int Internal_Shares_Name(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.NonPublicFields)] Type type)
     {

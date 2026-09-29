@@ -134,6 +134,18 @@ internal static class TUnit_TestProject_NonPublicTestMethodRootingTests__TestSou
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
+                case 2:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Internal_Ref_Overload(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            }
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
                 default:
                     throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
@@ -213,6 +225,31 @@ internal static class TUnit_TestProject_NonPublicTestMethodRootingTests__TestSou
             createInstance: __createInstance,
             invokeBody: __invoke,
             methodIndex: 1,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.NonPublicTestMethodRootingTests>(
+            methodName: "Internal_Ref_Overload",
+            fullyQualifiedName: "TUnit.TestProject.NonPublicTestMethodRootingTests.Internal_Ref_Overload",
+            filePath: "",
+            lineNumber: 54,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(4),
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests), "Internal_Ref_Overload", false, 0,
+            #if NET5_0_OR_GREATER
+            [global::System.Diagnostics.CodeAnalysis.DynamicDependency("Internal_Ref_Overload(System.Int32)", typeof(global::TUnit.TestProject.NonPublicTestMethodRootingTests))]
+            #endif
+            static () => { }, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 2,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
