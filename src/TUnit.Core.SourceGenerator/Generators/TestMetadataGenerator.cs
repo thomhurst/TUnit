@@ -1100,6 +1100,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 case TestReturnPattern.ValueTask:
                     writer.AppendLine($"return {methodCall};");
                     break;
+                case TestReturnPattern.ValueTaskOfT:
+                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCall}.AsTask());");
+                    break;
                 case TestReturnPattern.Task:
                     writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCall});");
                     break;
@@ -3847,7 +3850,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private enum TestReturnPattern
     {
         Void,        // void methods
-        ValueTask,   // ValueTask or ValueTask<T>
+        ValueTask,   // ValueTask
+        ValueTaskOfT, // ValueTask<T>
         Task,        // Task or Task<T>
         Unknown      // F# Async, custom awaitables, etc.
     }
@@ -3861,9 +3865,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var returnTypeName = method.ReturnType.ToDisplayString();
 
-        if (returnTypeName.StartsWith("System.Threading.Tasks.ValueTask"))
+        if (returnTypeName == "System.Threading.Tasks.ValueTask")
         {
             return TestReturnPattern.ValueTask;
+        }
+
+        if (returnTypeName.StartsWith("System.Threading.Tasks.ValueTask<"))
+        {
+            return TestReturnPattern.ValueTaskOfT;
         }
 
         if (returnTypeName.StartsWith("System.Threading.Tasks.Task") ||
@@ -3889,6 +3898,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             case TestReturnPattern.ValueTask:
                 writer.AppendLine($"return {methodCall};");
+                break;
+
+            case TestReturnPattern.ValueTaskOfT:
+                writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCall}.AsTask());");
                 break;
 
             case TestReturnPattern.Task:
