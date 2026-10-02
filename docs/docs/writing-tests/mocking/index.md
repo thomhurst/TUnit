@@ -210,3 +210,4 @@ See [Argument Matchers](argument-matchers) for the full API.
 - [Advanced Features](advanced) — state machines, events, auto-mocking, diagnostics, and more
 - [HTTP Mocking](http) — mock `HttpClient` with `MockHttpHandler`
 - [Logging](logging) — capture and verify `ILogger` calls with `MockLogger`
+- Migrating from another library — [Moq](../../migration/mocking/moq.md), [NSubstitute](../../migration/mocking/nsubstitute.md), or [FakeItEasy](../../migration/mocking/fakeiteasy.md)

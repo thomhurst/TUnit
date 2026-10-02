@@ -227,6 +227,16 @@ const sidebars: SidebarsConfig = {
         'migration/xunit',
         'migration/nunit',
         'migration/mstest',
+        {
+          type: 'category',
+          label: 'Mocking Libraries',
+          collapsed: true,
+          items: [
+            'migration/mocking/moq',
+            'migration/mocking/nsubstitute',
+            'migration/mocking/fakeiteasy',
+          ],
+        },
       ],
     },
     {
