@@ -3,8 +3,8 @@
 #
 # That workflow runs on pull_request_target so it can review pull requests from
 # forks, which means the diff it analyses is untrusted while the job holds real
-# `pull-requests: write`. This script is the only write path exposed to the
-# model: the pull request number comes from the environment rather than an
+# `pull-requests: write`. The trusted CI publisher invokes this write path after
+# analysis: the pull request number comes from the environment rather than an
 # argument, so an injected instruction cannot retarget another PR, and the body
 # is passed directly rather than read from a path, so no file on the runner can
 # be turned into a public comment.
