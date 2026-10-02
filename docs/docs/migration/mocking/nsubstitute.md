@@ -445,7 +445,7 @@ decimal tax = calculator.Object.Tax(100m); // base implementation: 20
 
 This is different from `Substitute.For<SomeClass>()`, which does not call the base implementation of virtual members. If you depend on that, configure each member you call. Pass constructor arguments as typed parameters: `MyService.Mock("connection", 42)`.
 
-TUnit.Mocks can also configure `protected` virtual and abstract members with the same syntax as public members. To wrap an existing object and override only some of its members, use `Mock.Wrap(instance)`.
+TUnit.Mocks can also configure `protected` virtual and abstract members with the same syntax as public members. To wrap an existing instance of a non-sealed class and override only some of its virtual members, use `Mock.Wrap(instance)`. `Mock.Wrap` does not support interfaces.
 
 ## Other Features
 

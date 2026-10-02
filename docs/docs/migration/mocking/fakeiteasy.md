@@ -27,7 +27,7 @@ TUnit.Mocks works with any test framework. You can migrate mocks before, after, 
 | `A.Fake<IService>(o => o.Strict())` | `IService.Mock(MockBehavior.Strict)` |
 | `A.Fake<MyClass>(o => o.WithArgumentsForConstructor(...))` | `MyClass.Mock(arg1, arg2)` |
 | `A.Fake<IService>(o => o.Implements<IOther>())` | `Mock.Of<IService, IOther>()` |
-| `A.Fake<IService>(o => o.Wrapping(real))` | `Mock.Wrap(real)` |
+| `A.Fake<MyClass>(o => o.Wrapping(real))` | `Mock.Wrap(real)` (non-sealed classes only; no equivalent for interfaces) |
 | The fake passed to the code under test | `mock` (converts implicitly) or `mock.Object` |
 | `A.CallTo(() => fake.Method(1)).Returns(value)` | `mock.Method(1).Returns(value)` |
 | `.ReturnsLazily((int id) => ...)` | `.Returns((int id) => ...)` |

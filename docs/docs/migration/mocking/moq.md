@@ -387,6 +387,8 @@ Moq's `mock.Verify()` checks only setups marked `.Verifiable()`. TUnit.Mocks has
 var repository = new Mock<IUserRepository>();
 repository.Setup(x => x.GetById(1)).Returns(new User(1, "Alice")).Verifiable();
 
+repository.Object.GetById(1); // the code under test
+
 repository.Verify();
 repository.VerifyNoOtherCalls();
 ```
@@ -395,6 +397,8 @@ repository.VerifyNoOtherCalls();
 // TUnit.Mocks
 var repository = IUserRepository.Mock();
 repository.GetById(1).Returns(new User(1, "Alice"));
+
+repository.Object.GetById(1); // the code under test
 
 repository.GetById(1).WasCalled();
 repository.VerifyNoOtherCalls();
@@ -469,7 +473,7 @@ Moq configures `protected` members with `mock.Protected().Setup<T>("Name", ...)`
 | `mock.Invocations.Clear()` | `mock.Reset()` (also clears setups and state) |
 | `Mock.Get(instance)` | `Mock.Get(instance)` |
 
-To wrap an existing object and override only some of its members, use `Mock.Wrap(instance)`. See [Advanced Features](../../writing-tests/mocking/advanced.md) for state machines, diagnostics, and `MockRepository`.
+To wrap an existing instance of a non-sealed class and override only some of its virtual members, use `Mock.Wrap(instance)`. `Mock.Wrap` does not support interfaces. See [Advanced Features](../../writing-tests/mocking/advanced.md) for state machines, diagnostics, and `MockRepository`.
 
 ## Running Both Libraries Side by Side
 
