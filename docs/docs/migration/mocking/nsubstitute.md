@@ -32,7 +32,7 @@ TUnit.Mocks works with any test framework. You can migrate mocks before, after, 
 | `sub.Method(1).Returns(a, b, c)` | `mock.Method(1).ReturnsSequentially(a, b, c)` |
 | `sub.Method(1).Returns(call => ...)` | `mock.Method(1).Returns((int id) => ...)` |
 | `sub.MethodAsync(1).Returns(value)` | `mock.MethodAsync(1).Returns(value)` |
-| `sub.Method(1).ReturnsForAnyArgs(value)` | `mock.Method(Any()).Returns(value)` (`Any()` for each parameter, or `AnyArgs()` for methods with two or more) |
+| `sub.Method(1).ReturnsForAnyArgs(value)` | `mock.Method(Any()).Returns(value)` (`Any()` for each parameter; see [Ignoring Arguments](#ignoring-arguments)) |
 | `sub.Method(1).Throws(ex)` / `.ThrowsAsync(ex)` | `mock.Method(1).Throws(ex)` |
 | `sub.When(x => x.Void()).Do(call => ...)` | `mock.Void().Callback(() => ...)` |
 | `Arg.Any<T>()` | `Any()` or `Any<T>()` |
@@ -42,7 +42,7 @@ TUnit.Mocks works with any test framework. You can migrate mocks before, after, 
 | `sub.Received().Method(1)` | `mock.Method(1).WasCalled()` |
 | `sub.Received(3).Method(1)` | `mock.Method(1).WasCalled(Times.Exactly(3))` |
 | `sub.DidNotReceive().Method(1)` | `mock.Method(1).WasNeverCalled()` |
-| `sub.ReceivedWithAnyArgs().Method(default)` | `mock.Method(Any()).WasCalled()` (`Any()` for each parameter, or `AnyArgs()` for methods with two or more) |
+| `sub.ReceivedWithAnyArgs().Method(default)` | `mock.Method(Any()).WasCalled()` (`Any()` for each parameter; see [Ignoring Arguments](#ignoring-arguments)) |
 | `Received.InOrder(() => { ... })` | `Mock.VerifyInOrder(() => { ... })` |
 | `sub.ReceivedCalls()` | `mock.Invocations` |
 | `sub.ClearReceivedCalls()` | `mock.Reset()` (also clears setups) |
@@ -189,7 +189,7 @@ To return a task you create yourself, such as one from a `TaskCompletionSource`,
 
 ### Ignoring Arguments
 
-`ReturnsForAnyArgs` has no direct equivalent. Pass `Any()` for each parameter, or pass `AnyArgs()` once. `AnyArgs()` exists only for methods with two or more matchable parameters and a unique name.
+`ReturnsForAnyArgs` and `ReceivedWithAnyArgs` have no direct equivalent. Pass `Any()` for each parameter. Some methods also get an `AnyArgs()` shortcut that replaces all of them. It is not generated for overloaded or generic methods, for methods with fewer than two matchable parameters, or for methods with `out`, `ref`, or ref-struct parameters. See [when the shortcut is generated](../../writing-tests/mocking/argument-matchers.md#anyargs--match-every-parameter-with-one-token).
 
 ```csharp
 // NSubstitute

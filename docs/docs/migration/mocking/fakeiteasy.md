@@ -40,7 +40,7 @@ TUnit.Mocks works with any test framework. You can migrate mocks before, after, 
 | `.AssignsOutAndRefParameters(value)` | `.SetsOut{ParameterName}(value)` |
 | `A<T>.Ignored` / `A<T>._` | `Any()` or `Any<T>()` |
 | `A<T>.That.Matches(x => ...)` | `x => ...` or `Is<T>(x => ...)` |
-| `.WithAnyArguments()` | `Any()` for each parameter, or `AnyArgs()` |
+| `.WithAnyArguments()` | `Any()` for each parameter (see [Argument Constraints](#argument-constraints)) |
 | `.MustHaveHappened()` | `.WasCalled()` |
 | `.MustHaveHappenedOnceExactly()` | `.WasCalled(Times.Once)` |
 | `.MustNotHaveHappened()` | `.WasNeverCalled()` |
@@ -245,7 +245,7 @@ TUnit.Mocks imports its matchers globally. A raw value is an exact match, and a 
 | `A<List<int>>.That.IsEmpty()` | `IsEmpty<List<int>>()` |
 | `A<List<int>>.That.IsSameSequenceAs(expected)` | `SequenceEquals<List<int>, int>(expected)` |
 | `A<string>.That.StartsWith("a")` | `s => s.StartsWith("a")` |
-| `.WithAnyArguments()` | `Any()` for each parameter, or `AnyArgs()` |
+| `.WithAnyArguments()` | `Any()` for each parameter, or `AnyArgs()` where generated |
 | `.WhenArgumentsMatch(args => ...)` | A lambda matcher on each parameter |
 
 ```csharp
@@ -260,7 +260,7 @@ var repository = IUserRepository.Mock();
 repository.GetById(id => id > 100).Returns(new User(101, "Admin"));
 ```
 
-`AnyArgs()` exists only for methods with two or more matchable parameters and a unique name.
+To replace `.WithAnyArguments()`: pass `Any()` for each parameter. Some methods also get an `AnyArgs()` shortcut that replaces all of them. It is not generated for overloaded or generic methods, for methods with fewer than two matchable parameters, or for methods with `out`, `ref`, or ref-struct parameters. See [when the shortcut is generated](../../writing-tests/mocking/argument-matchers.md#anyargs--match-every-parameter-with-one-token).
 
 ### Capturing Arguments
 
