@@ -277,3 +277,4 @@ See [Argument Matchers](/docs/writing-tests/mocking/argument-matchers.md) for th
 * [Advanced Features](/docs/writing-tests/mocking/advanced.md) — state machines, events, auto-mocking, diagnostics, and more
 * [HTTP Mocking](/docs/writing-tests/mocking/http.md) — mock `HttpClient` with `MockHttpHandler`
 * [Logging](/docs/writing-tests/mocking/logging.md) — capture and verify `ILogger` calls with `MockLogger`
+* Migrating from another library — [Moq](/docs/migration/mocking/moq.md), [NSubstitute](/docs/migration/mocking/nsubstitute.md), or [FakeItEasy](/docs/migration/mocking/fakeiteasy.md)
