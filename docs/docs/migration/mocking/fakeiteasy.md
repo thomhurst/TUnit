@@ -371,7 +371,7 @@ repository.ConnectionName.Set("replica").WasCalled(Times.Once);
 
 `FakeItEasy.Times` and `TUnit.Mocks.Times` are different types. In a migrated file, `Times` refers to the TUnit.Mocks type.
 
-In a TUnit test, you can also await the check as an assertion:
+In a TUnit test, you can also await the check as an assertion. This needs the separate `TUnit.Mocks.Assertions` package (`dotnet add package TUnit.Mocks.Assertions`) and `using TUnit.Mocks.Assertions;`:
 
 ```csharp
 // TUnit.Mocks

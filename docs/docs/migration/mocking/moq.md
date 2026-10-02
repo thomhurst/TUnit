@@ -43,7 +43,8 @@ TUnit.Mocks works with any test framework. You can migrate mocks before, after, 
 | `mock.Verify(x => x.Method(1), Times.Once())` | `mock.Method(1).WasCalled(Times.Once)` |
 | `mock.Verify(x => x.Method(1), Times.Never())` | `mock.Method(1).WasNeverCalled()` |
 | `mock.VerifySet(x => x.Prop = value)` | `mock.Prop.Set(value).WasCalled()` |
-| `mock.VerifyAll()` | `mock.VerifyAll()` |
+| `mock.Verify()` (`.Verifiable()` setups) | `.WasCalled()` on each of those calls |
+| `mock.VerifyAll()` | `mock.VerifyAll()` (does not mark calls as verified for `VerifyNoOtherCalls()`) |
 | `mock.VerifyNoOtherCalls()` | `mock.VerifyNoOtherCalls()` |
 | `mock.Raise(x => x.Event += null, args)` | `mock.Raise{EventName}(args)` |
 | `mock.As<IOther>()` | `Mock.Of<IService, IOther>()` |
@@ -369,7 +370,7 @@ repository.ConnectionName.WasCalled(Times.AtLeastOnce);
 
 Both libraries accept a failure message: `.WasCalled(Times.Once, "Save should run once")`.
 
-In a TUnit test, you can also await the check as an assertion:
+In a TUnit test, you can also await the check as an assertion. This needs the separate `TUnit.Mocks.Assertions` package (`dotnet add package TUnit.Mocks.Assertions`) and `using TUnit.Mocks.Assertions;`:
 
 ```csharp
 // TUnit.Mocks
@@ -379,7 +380,7 @@ await Assert.That(repository.GetById(1)).WasCalled(Times.Once);
 
 ### Verifiable Setups and VerifyAll
 
-Moq's `mock.VerifyAll()` checks every setup. `mock.Verify()` checks only setups marked `.Verifiable()`. TUnit.Mocks has `VerifyAll()` and no `Verifiable()`. To check a single setup, verify that call with `WasCalled()`.
+Moq's `mock.Verify()` checks only setups marked `.Verifiable()`. TUnit.Mocks has no `Verifiable()`, so verify each of those calls with `WasCalled()`. This also marks the call as verified for `VerifyNoOtherCalls()`. Do not replace `Verify()` with `VerifyAll()`: `VerifyAll()` also fails for unused setups that were not verifiable, and it does not mark calls as verified.
 
 ```csharp
 // Moq
@@ -395,7 +396,7 @@ repository.VerifyNoOtherCalls();
 var repository = IUserRepository.Mock();
 repository.GetById(1).Returns(new User(1, "Alice"));
 
-repository.VerifyAll();
+repository.GetById(1).WasCalled();
 repository.VerifyNoOtherCalls();
 ```
 

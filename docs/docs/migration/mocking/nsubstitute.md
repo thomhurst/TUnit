@@ -31,8 +31,8 @@ TUnit.Mocks works with any test framework. You can migrate mocks before, after, 
 | `sub.Method(1).Returns(value)` | `mock.Method(1).Returns(value)` |
 | `sub.Method(1).Returns(a, b, c)` | `mock.Method(1).ReturnsSequentially(a, b, c)` |
 | `sub.Method(1).Returns(call => ...)` | `mock.Method(1).Returns((int id) => ...)` |
-| `sub.MethodAsync(1).Returns(Task.FromResult(value))` | `mock.MethodAsync(1).Returns(value)` |
-| `sub.Method(1).ReturnsForAnyArgs(value)` | `mock.Method(Any()).Returns(value)` or `mock.Method(AnyArgs()).Returns(value)` |
+| `sub.MethodAsync(1).Returns(value)` | `mock.MethodAsync(1).Returns(value)` |
+| `sub.Method(1).ReturnsForAnyArgs(value)` | `mock.Method(Any()).Returns(value)` (`Any()` for each parameter, or `AnyArgs()` for methods with two or more) |
 | `sub.Method(1).Throws(ex)` / `.ThrowsAsync(ex)` | `mock.Method(1).Throws(ex)` |
 | `sub.When(x => x.Void()).Do(call => ...)` | `mock.Void().Callback(() => ...)` |
 | `Arg.Any<T>()` | `Any()` or `Any<T>()` |
@@ -42,7 +42,7 @@ TUnit.Mocks works with any test framework. You can migrate mocks before, after, 
 | `sub.Received().Method(1)` | `mock.Method(1).WasCalled()` |
 | `sub.Received(3).Method(1)` | `mock.Method(1).WasCalled(Times.Exactly(3))` |
 | `sub.DidNotReceive().Method(1)` | `mock.Method(1).WasNeverCalled()` |
-| `sub.ReceivedWithAnyArgs().Method(default)` | `mock.Method(AnyArgs()).WasCalled()` |
+| `sub.ReceivedWithAnyArgs().Method(default)` | `mock.Method(Any()).WasCalled()` (`Any()` for each parameter, or `AnyArgs()` for methods with two or more) |
 | `Received.InOrder(() => { ... })` | `Mock.VerifyInOrder(() => { ... })` |
 | `sub.ReceivedCalls()` | `mock.Invocations` |
 | `sub.ClearReceivedCalls()` | `mock.Reset()` (also clears setups) |
@@ -171,12 +171,12 @@ repository.GetById(1)
 
 ### Async Methods
 
-NSubstitute needs a `Task` for async members. TUnit.Mocks wraps the value in `Task<T>` or `ValueTask<T>` for you.
+Both libraries accept the unwrapped value for `Task<T>` and `ValueTask<T>` members. TUnit.Mocks wraps it in the task for you, so async setups usually need no change.
 
 ```csharp
 // NSubstitute
 var repository = Substitute.For<IUserRepository>();
-repository.GetByIdAsync(1).Returns(Task.FromResult<User?>(new User(1, "Alice")));
+repository.GetByIdAsync(1).Returns(new User(1, "Alice"));
 ```
 
 ```csharp
@@ -371,7 +371,7 @@ repository.ConnectionName.Set("replica").WasCalled();
 
 `WasCalled()` without arguments means at least once, like `Received()`. The `Times` class also has `Once`, `Never`, `AtLeastOnce`, `AtLeast(n)`, `AtMost(n)`, and `Between(min, max)`.
 
-In a TUnit test, you can also await the check as an assertion:
+In a TUnit test, you can also await the check as an assertion. This needs the separate `TUnit.Mocks.Assertions` package (`dotnet add package TUnit.Mocks.Assertions`) and `using TUnit.Mocks.Assertions;`:
 
 ```csharp
 // TUnit.Mocks
