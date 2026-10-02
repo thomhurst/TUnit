@@ -1,6 +1,6 @@
 ---
 name: tunit
-description: Write or troubleshoot tests using TUnit, TUnit.Assertions, or TUnit.Mocks, or migrate tests to TUnit. Routes to task-specific official documentation. Use only for tasks involving these packages or migration to TUnit.
+description: Write or troubleshoot tests using TUnit, TUnit.Assertions, or TUnit.Mocks, or migrate tests or mocks to TUnit or TUnit.Mocks. Routes to task-specific official documentation. Use only for tasks involving these packages or migration to them.
 license: MIT
 ---
 
@@ -32,6 +32,7 @@ Choose the link that matches the task; these are alternatives, not a reading che
 | Run tests or select tests | [Running tests](https://tunit.dev/docs/getting-started/running-your-tests.md) or [filters](https://tunit.dev/docs/execution/test-filters.md) |
 | Migrate an existing suite | [xUnit](https://tunit.dev/docs/migration/xunit.md), [NUnit](https://tunit.dev/docs/migration/nunit.md), or [MSTest](https://tunit.dev/docs/migration/mstest.md), matching the source framework |
 | Mocking | [TUnit.Mocks](https://tunit.dev/docs/writing-tests/mocking.md) |
+| Migrate mocks to TUnit.Mocks | [Moq](https://tunit.dev/docs/migration/mocking/moq.md), [NSubstitute](https://tunit.dev/docs/migration/mocking/nsubstitute.md), or [FakeItEasy](https://tunit.dev/docs/migration/mocking/fakeiteasy.md), matching the source library |
 | Aspire integration testing | [Aspire](https://tunit.dev/docs/examples/aspire.md) |
 | ASP.NET Core integration testing | [ASP.NET Core](https://tunit.dev/docs/examples/aspnet.md) |
 | Playwright browser testing | [Playwright](https://tunit.dev/docs/examples/playwright.md) |

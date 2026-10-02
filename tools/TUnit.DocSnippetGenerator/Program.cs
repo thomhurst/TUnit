@@ -436,6 +436,7 @@ static string GenerateSource(
         else
         {
             builder.AppendLine($"namespace {generatedNamespace};");
+            AppendMockingLibraryUsings(builder, snippet);
         }
 
         builder.AppendLine($"#line {snippet.Line} \"{snippet.SourcePath}\"")
@@ -504,6 +505,7 @@ static string GenerateSource(
     }
 
     builder.AppendLine($"namespace {generatedNamespace};");
+    AppendMockingLibraryUsings(builder, snippet);
 
     if (containsExtensionMethod)
     {
@@ -688,6 +690,36 @@ static void AppendFrameworkAliases(StringBuilder builder, Snippet snippet)
             .AppendLine("using TestCategoryAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.TestCategoryAttribute;")
             .AppendLine("using TestPropertyAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute;");
         builder.AppendLine("using IgnoreAttribute = global::Microsoft.VisualStudio.TestTools.UnitTesting.IgnoreAttribute;");
+    }
+}
+
+// Mocking-library migration pages compare Moq, NSubstitute, and FakeItEasy with TUnit.Mocks.
+// Their type names (Mock<T>, Times, MockBehavior, Arg) clash with TUnit.Mocks' global usings,
+// so a fence marked with the library's name imports it inside the namespace, where lookup
+// finds it before the global usings.
+static void AppendMockingLibraryUsings(StringBuilder builder, Snippet snippet)
+{
+    if (!snippet.SourcePath.Contains("/migration/mocking/", StringComparison.OrdinalIgnoreCase))
+    {
+        return;
+    }
+
+    var marker = Regex.Match(snippet.Source, @"(?m)^\s*//\s*(Moq|NSubstitute|FakeItEasy)\s*$");
+    if (!marker.Success)
+    {
+        return;
+    }
+
+    var namespaces = marker.Groups[1].Value switch
+    {
+        "Moq" => new[] { "Moq" },
+        "NSubstitute" => new[] { "NSubstitute", "NSubstitute.ExceptionExtensions", "NSubstitute.ReceivedExtensions" },
+        _ => new[] { "FakeItEasy" }
+    };
+
+    foreach (var ns in namespaces)
+    {
+        builder.AppendLine($"using {ns};");
     }
 }
 

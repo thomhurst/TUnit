@@ -38,6 +38,7 @@
     <PackageReference Include="BenchmarkDotNet" />
     <PackageReference Include="bunit" />
     <PackageReference Include="CliWrap" />
+    <PackageReference Include="FakeItEasy" />
     <PackageReference Include="FsCheck" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
@@ -45,6 +46,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Playwright" />
+    <PackageReference Include="Moq" />
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="NUnit" />
