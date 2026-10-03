@@ -239,6 +239,15 @@ public class ReportDataMergerTests
     }
 
     [Test]
+    public async Task WallClock_Duration_Ignores_Default_Timestamp()
+    {
+        var suite = TestReportData.BuildWithSingleTest("A.Tests", start: "0001-01-01T00:00:00Z", durationMs: 100, totalDurationMs: 4000);
+
+        var wall = ReportDataMerger.ComputeWallClockDurationMs([suite]);
+        await Assert.That(wall).IsEqualTo(4000d);
+    }
+
+    [Test]
     public async Task SuiteLabels_Disambiguate_Progressively()
     {
         var plain = ReportDataMerger.BuildSuiteLabels([

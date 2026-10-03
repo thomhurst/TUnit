@@ -882,6 +882,7 @@ internal static class HtmlReportGenerator
             CultureInfo.InvariantCulture,
             DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
             out var dt)
+            && dt != DateTimeOffset.MinValue
             ? dt.ToUnixTimeMilliseconds()
             : null;
     }
