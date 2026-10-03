@@ -10,7 +10,7 @@ namespace TUnit.AspNetCore;
 public abstract class WebApplicationTest
 {
     // Shared across all generic instantiations of WebApplicationTest<TFactory, TEntryPoint>.
-    // WebApplicationFactory.Server is synchronous; Task.Run prevents blocking async threads,
+    // WebApplicationFactory.Services is synchronous; Task.Run prevents blocking async threads,
     // and this semaphore caps concurrent DI container builds to avoid thread pool starvation.
     // Capped at 8: startup is reflection/I/O-bound, not CPU-bound, so ProcessorCount alone
     // would allow too many concurrent builds on high-core-count machines.
@@ -127,12 +127,13 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
                 (_, config) => ConfigureTestConfiguration(config),
                 ConfigureWebHostBuilder));
 
-        // Semaphore guards only the Server property access (the synchronous host build),
+        // Services initializes both TestServer and Kestrel; Server only supports TestServer.
+        // Semaphore guards only the Services property access (the synchronous host build),
         // not the factory creation above which is fast synchronous configuration.
         await ServerInitSemaphore.WaitAsync(testContext.Execution.CancellationToken);
         try
         {
-            await Task.Run(() => _ = _factory.Server, testContext.Execution.CancellationToken);
+            await Task.Run(() => _ = _factory.Services, testContext.Execution.CancellationToken);
         }
         finally
         {
