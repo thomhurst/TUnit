@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="TUnit">
-  <rect x="2" y="2" width="60" height="60" rx="12" fill="#d5f4e5"/>
-  <path fill="#214b3c" d="M13 15h38v9H36.75v26h-9.5V24H13z"/>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#512bd4"/>
+  <path fill="#ffffff" d="M13 14h38v9.5H36.75V50h-9.5V23.5H13z"/>
+  <circle cx="48" cy="46" r="7" fill="#22b866"/>
+  <path d="m44.6 46.1 2.3 2.3 4.3-4.6" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
