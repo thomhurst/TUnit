@@ -8,7 +8,7 @@
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "build TUnit.TestProject",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/tests/TUnit.TestProject/bin/Debug/net10.0/TUnit.TestProject.dll",
             // TUnit.TestProject contains intentionally failing tests: always run a targeted filter.

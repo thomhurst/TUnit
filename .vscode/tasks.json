@@ -14,6 +14,21 @@
             "problemMatcher": "$msCompile"
         },
         {
+            // TUnit.Dev.slnx does not include TUnit.TestProject, so the debug launch builds it directly.
+            "label": "build TUnit.TestProject",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/tests/TUnit.TestProject",
+                "--framework",
+                "net10.0",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "watch",
             "command": "dotnet",
             "type": "process",
