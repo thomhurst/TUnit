@@ -108,13 +108,38 @@ If want to provide sample code for complicated or useful different test suite se
 
 ## Building TUnit Locally
 
+TUnit builds and tests on Windows, Linux and macOS.
+
+### Prerequisites
+
+- **.NET SDK** matching [`global.json`](../global.json).
+- **.NET 8, 9 and 10 runtimes.** The test projects target all three, and a target framework whose
+  runtime is missing fails with "You must install or update .NET". Either run a single framework
+  (`--framework net10.0`, see below) or install the others, including the ASP.NET Core runtime, with
+  [dotnet-install](https://learn.microsoft.com/dotnet/core/tools/dotnet-install-script)
+  (`--channel 8.0 --runtime dotnet`, `--channel 8.0 --runtime aspnetcore`, and so on). Homebrew's
+  `dotnet` formula ships one runtime only.
+- **PowerShell 7** (`pwsh`) for the scripts in `scripts/`. On Linux and macOS they run directly, e.g.
+  `./scripts/run-reflection-tests.ps1`, or as `pwsh scripts/run-reflection-tests.ps1`.
+- **Docker** for the ASP.NET Core and Aspire tests.
+- **A Native AOT toolchain** for AOT publishing: the Visual Studio "Desktop development with C++"
+  workload on Windows, the Xcode Command Line Tools on macOS, and `clang` plus the zlib development
+  package on Linux. If .NET itself was installed with Homebrew, its AOT runtime links against
+  Homebrew's OpenSSL and Brotli:
+  `export LIBRARY_PATH=/opt/homebrew/opt/openssl@3/lib:/opt/homebrew/opt/brotli/lib`.
+
+Any of Visual Studio, Rider, or VS Code with C# Dev Kit works; the repository's VS Code settings and
+the dev container open `TUnit.Dev.slnx`.
+
+### Solutions
+
 TUnit ships several solution files. Pick the right one for your task — the
 full `TUnit.slnx` is large enough that a cold build can take 20+ minutes,
 which is rarely what contributors actually need:
 
 | Solution         | Projects | When to use                                                                                                    |
 | ---------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `TUnit.Dev.slnx` | 44       | **Recommended for contributors.** Drops the per-Roslyn-version generator variants and example projects. Open this in Visual Studio / Rider for day-to-day work. |
+| `TUnit.Dev.slnx` | 44       | **Recommended for contributors.** Drops the per-Roslyn-version generator variants and example projects. Open this in your IDE for day-to-day work. |
 | `TUnit.CI.slnx`  | 73       | What CI builds. Use only when you're verifying CI-specific changes.                                            |
 | `TUnit.slnx`     | 96       | Full shipping graph including all per-Roslyn-version analyzer/generator variants. Slow; rarely needed locally. |
 
@@ -132,7 +157,7 @@ $env:MSBUILDUSESERVER = '1' # PowerShell
 
 Source-generated files are not written to disk by default (saves significant
 disk I/O on every build). To dump them under each test project's
-`SourceGeneratedViewer\` folder, build with:
+`SourceGeneratedViewer/` folder, build with:
 
 ```bash
 dotnet build -p:EmitCompilerGeneratedFiles=true
@@ -153,10 +178,14 @@ TUnit supports both source-generated and reflection-based test discovery. **All 
 
 If your changes affect the source generator output or public APIs:
 
-1. Run the relevant tests: `dotnet test tests/TUnit.Core.SourceGenerator.Tests` or `dotnet test tests/TUnit.PublicAPI`
+1. Run the relevant tests: `dotnet test --project tests/TUnit.Core.SourceGenerator.Tests --framework net10.0` or `dotnet test --project tests/TUnit.PublicAPI --framework net10.0` (repeat for each framework you have installed)
 2. Review any `.received.txt` files generated
 3. If the changes are intentional, rename them to `.verified.txt`
 4. Commit the `.verified.txt` files with your changes
+
+The `.Net4_7` snapshots come from a .NET Framework leg that only builds on Windows. On Linux and macOS,
+push your change and take the `*.received.*` files from the `ReceivedSnapshots-windows-latest` artifact
+of the failed CI run.
 
 #### Performance Considerations
 
