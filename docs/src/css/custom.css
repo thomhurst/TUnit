@@ -8,7 +8,7 @@
 :root {
   --tunit-ink: #142019;
   --tunit-body: #36423b;
-  --tunit-muted: #67736c;
+  --tunit-muted: #5f6b64;
   --tunit-paper: #f6f7f4;
   --tunit-surface: #edf0eb;
   --tunit-border: #dce1da;
@@ -44,7 +44,7 @@
   --ifm-color-emphasis-300: #dce1da;
   --ifm-color-emphasis-400: #b7bfb9;
   --ifm-color-emphasis-500: #8e9891;
-  --ifm-color-emphasis-600: #67736c;
+  --ifm-color-emphasis-600: #5f6b64;
   --ifm-color-emphasis-700: #36423b;
   --ifm-color-emphasis-800: #24302a;
   --ifm-color-emphasis-900: #142019;
@@ -53,7 +53,7 @@
   --syntax-function: #7b4a8f;
   --syntax-class: #2c6e72;
   --syntax-number: #1d7348;
-  --syntax-comment: #7b867f;
+  --syntax-comment: #5c6760;
 }
 
 html[data-theme='dark'] {
