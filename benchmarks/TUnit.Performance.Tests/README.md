@@ -41,8 +41,10 @@ dotnet run -c Release
 # Build for AOT (native AOT cannot cross-compile, so target the current machine)
 dotnet publish -c Release --use-current-runtime --self-contained -p:PublishAot=true -o publish
 
-# Run the published executable (TUnit.Performance.Tests.exe on Windows)
+# Run the published executable
 ./publish/TUnit.Performance.Tests
+# On Windows:
+./publish/TUnit.Performance.Tests.exe
 ```
 
 ### Run Specific Benchmarks
