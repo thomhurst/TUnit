@@ -7,19 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/TUnit.slnx",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary;ForceNoAlign"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "publish",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/TUnit.slnx",
+                "${workspaceFolder}/TUnit.Dev.slnx",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -33,7 +21,9 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/TUnit.slnx"
+                "${workspaceFolder}/tests/TUnit.UnitTests",
+                "--framework",
+                "net10.0"
             ],
             "problemMatcher": "$msCompile"
         }

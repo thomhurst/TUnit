@@ -2,7 +2,10 @@
 
   <PropertyGroup>
     <!-- Multi-target to verify generator output across consumer TFMs (snapshot tests). -->
-    <TargetFrameworks>net472;net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <!-- .NET Framework only runs on Windows: elsewhere `dotnet test` would hand this leg to Mono.
+         The .Net4_7 snapshots are verified by the Windows CI leg. -->
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net472;$(TargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
 
   <Import Project="..\..\eng\TestProject.props" />

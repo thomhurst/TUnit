@@ -8,9 +8,9 @@
         "ms-dotnettools.csdevkit"
       ],
       "settings": {
-        "dotnet.defaultSolution": "TUnit.sln"
+        "dotnet.defaultSolution": "TUnit.Dev.slnx"
       }
     }
   },
-  "postCreateCommand": "dotnet restore && dotnet build"
+  "postCreateCommand": "bash .devcontainer/install-runtimes.sh && dotnet build TUnit.Dev.slnx"
 }

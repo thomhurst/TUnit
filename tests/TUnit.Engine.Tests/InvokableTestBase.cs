@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using CliWrap;
 using CliWrap.Buffered;
@@ -63,7 +64,7 @@ public abstract class InvokableTestBase(TestMode testMode)
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_",
-                    "--hangdump", "--hangdump-filename", $"hangdump.{Environment.OSVersion.Platform}.tests-{guid}.dmp", "--hangdump-timeout", "5m",
+                    "--hangdump", "--hangdump-filename", $"hangdump.{RuntimeInformation.RuntimeIdentifier}.tests-{guid}.dmp", "--hangdump-timeout", "5m",
 
                     ..runOptions.AdditionalArguments
                 ]

@@ -9,7 +9,18 @@
 #   - CLEAR root-level workflow output covered by the repository's .gitignore.
 #   - Long-path safe: git's own delete now works because core.longpaths=true is set
 #     system-wide; the `\\?\` extended-length Remove-Item is kept as a fallback for
-#     environments where that config is missing.
+#     environments where that config is missing (Windows only; see Remove-DirectoryTree).
+
+function Remove-DirectoryTree {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Path)
+
+    # On Windows, \\?\ disables Win32 path normalization (and with it MAX_PATH), so forward
+    # slashes (git's output format) are NOT translated — convert to backslashes or the delete
+    # no-ops. The prefix means nothing on Linux/macOS, where it makes the path unresolvable.
+    $target = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { '\\?\' + ($Path -replace '/', '\') } else { $Path }
+    Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction SilentlyContinue
+}
 
 function New-OrdinalStringMap {
     [CmdletBinding()]
@@ -140,8 +151,12 @@ function Remove-MergedWorktree {
         Write-Host "Preserving main or harness-managed worktree: $Worktree"
         return
     }
-    $topLevel = git -C $Worktree rev-parse --show-toplevel 2>$null
-    if ($LASTEXITCODE -ne 0 -or [IO.Path]::GetFullPath($topLevel) -ne $worktreePath) {
+    # Ask git whether the path is the work tree's root rather than comparing paths: git reports
+    # symlink-resolved paths (/private/var/... for macOS's /var/...), Resolve-Path does not.
+    $null = git -C $Worktree rev-parse --show-toplevel 2>$null
+    $topLevelOk = $LASTEXITCODE -eq 0
+    $prefix = git -C $Worktree rev-parse --show-prefix 2>$null
+    if (-not $topLevelOk -or $LASTEXITCODE -ne 0 -or $prefix) {
         Write-Host "Preserving worktree $Label : $Worktree (could not verify repository path)"
         return
     }
@@ -201,9 +216,7 @@ function Remove-MergedWorktree {
             Write-Host "WARNING: worktree $Label requires manual removal -- detach the node_modules junction at $($junction.FullName) first, then re-run cleanup: $Worktree"
             return
         }
-        # \\?\ disables Win32 path normalization, so forward slashes (git's output
-        # format) are NOT translated — convert to backslashes or the delete no-ops.
-        Remove-Item -LiteralPath ('\\?\' + ($Worktree -replace '/', '\')) -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-DirectoryTree -Path $Worktree
     }
 
     git -C $Repo worktree prune

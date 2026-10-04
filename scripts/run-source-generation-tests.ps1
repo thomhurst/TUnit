@@ -25,7 +25,7 @@ try {
     dotnet run `
         -f $Framework `
         --configuration $Configuration `
-        --treenode-filter $Filter `
+        --treenode-filter "$Filter" `
         --no-build 2>&1 | Out-String | Write-Host
     
     $success = $LASTEXITCODE -eq 0

@@ -156,6 +156,14 @@ try {
             "Repository-generated path was not treated as disposable: $generatedPath"
     }
 
+    # The fallback delete must work with git's forward-slash paths on every OS: the Windows
+    # long-path prefix it adds there makes a Linux/macOS path unresolvable.
+    $fallbackTarget = Join-Path $testRoot 'fallback-delete'
+    New-Item -ItemType Directory -Path (Join-Path $fallbackTarget 'nested/deeper') -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $fallbackTarget 'nested/deeper/file.txt') -Value 'x'
+    Remove-DirectoryTree -Path ($fallbackTarget -replace '\\', '/')
+    Assert-True (-not (Test-Path -LiteralPath $fallbackTarget)) 'Fallback delete did not remove the directory.'
+
     Write-Host 'OK worktree cleanup safety tests passed.'
 }
 finally {

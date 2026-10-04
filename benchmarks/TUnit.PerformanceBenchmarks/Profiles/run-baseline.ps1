@@ -2,7 +2,7 @@
 # Usage: .\run-baseline.ps1
 
 param(
-    [string]$OutputDir = ".\Results"
+    [string]$OutputDir = "Results"
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,7 +11,18 @@ $projectDir = Split-Path -Parent $scriptDir
 
 $scales = @(100, 500, 1000, 5000, 10000)
 $timestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
-$resultsFile = "$OutputDir\baseline-$timestamp.md"
+$resultsFile = Join-Path $OutputDir "baseline-$timestamp.md"
+
+# Get-CimInstance is Windows-only; ask each platform in its own way.
+function Get-CpuName {
+    try {
+        if ($IsMacOS) { return (sysctl -n machdep.cpu.brand_string) }
+        if ($IsLinux) { return ((Get-Content /proc/cpuinfo | Select-String -Pattern "^model name\s*:\s*(.+)$" | Select-Object -First 1).Matches.Groups[1].Value) }
+        return (Get-CimInstance Win32_Processor).Name
+    } catch {
+        return "unknown"
+    }
+}
 
 Push-Location $projectDir
 try {
@@ -25,7 +36,7 @@ Generated: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 
 ## Environment
 - OS: $([System.Environment]::OSVersion.VersionString)
-- CPU: $((Get-CimInstance Win32_Processor).Name)
+- CPU: $(Get-CpuName)
 - .NET: $(dotnet --version)
 - TUnit: $(git describe --tags --always 2>$null || 'unknown')
 
@@ -41,7 +52,7 @@ Generated: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
         Write-Host "========================================`n" -ForegroundColor Cyan
 
         # Regenerate tests for the specified scale
-        & pwsh -ExecutionPolicy Bypass -File "$projectDir\generate-tests.ps1" -Scale $scale
+        & pwsh -ExecutionPolicy Bypass -File (Join-Path $projectDir "generate-tests.ps1") -Scale $scale
 
         # Build the project
         Write-Host "Building project..." -ForegroundColor Yellow
