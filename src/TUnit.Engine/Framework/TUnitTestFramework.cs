@@ -80,10 +80,21 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         }
         catch (Exception e) when (IsCancellationException(e))
         {
+            var serviceProvider = GetOrCreateServiceProvider(context);
+
+            if (!context.CancellationToken.IsCancellationRequested && serviceProvider.CancellationToken.TerminationSignalReceived)
+            {
+                // MTP only treats the exception as a cancellation when its own token fired, which
+                // SIGTERM does not do; re-throwing would crash the host. Fail the session instead.
+                await serviceProvider.Logger.LogErrorAsync("The test run was cancelled by SIGTERM.");
+                serviceProvider.SessionFailed = true;
+                return;
+            }
+
             var message = context.CancellationToken.IsCancellationRequested
                 ? "The test run was cancelled."
                 : "Test execution stopped due to fail-fast.";
-            await GetOrCreateServiceProvider(context).Logger.LogErrorAsync(message);
+            await serviceProvider.Logger.LogErrorAsync(message);
 
             // Re-throw is safe here — MTP handles OperationCanceledException specially.
             throw;

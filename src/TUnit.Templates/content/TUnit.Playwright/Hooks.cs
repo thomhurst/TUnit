@@ -12,6 +12,11 @@ public class Hooks
             Environment.SetEnvironmentVariable("PWDEBUG", "1");
         }
 
-        Microsoft.Playwright.Program.Main(["install"]);
+        var exitCode = Microsoft.Playwright.Program.Main(["install"]);
+        if (exitCode != 0)
+        {
+            // On Linux, browsers also need system libraries: run `playwright install --with-deps` once.
+            throw new InvalidOperationException($"Playwright browser installation failed with exit code {exitCode}.");
+        }
     }
 }

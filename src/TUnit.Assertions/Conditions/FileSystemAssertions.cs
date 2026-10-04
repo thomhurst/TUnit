@@ -91,6 +91,9 @@ public class DirectoryHasNoSubdirectoriesAssertion : Assertion<DirectoryInfo>
 }
 
 // FileInfo assertions - unique ones that don't conflict with FileInfoAssertionExtensions
+/// <remarks>
+/// The System attribute only exists on Windows; on Linux and macOS this assertion always passes.
+/// </remarks>
 [AssertionExtension("IsNotSystem")]
 public class FileIsNotSystemAssertion : Assertion<FileInfo>
 {
@@ -132,6 +135,10 @@ public class FileIsNotSystemAssertion : Assertion<FileInfo>
     protected override string GetExpectation() => "to not be a system file";
 }
 
+/// <remarks>
+/// On Linux and macOS a file counts as executable when any execute permission bit is set. On Windows,
+/// and on .NET Framework, it is judged by extension (.exe, .bat, .cmd, .com, .sh, .ps1).
+/// </remarks>
 [AssertionExtension("IsNotExecutable")]
 public class FileIsNotExecutableAssertion : Assertion<FileInfo>
 {
@@ -162,16 +169,31 @@ public class FileIsNotExecutableAssertion : Assertion<FileInfo>
             return Task.FromResult(AssertionResult.Failed($"file '{value.FullName}' does not exist"));
         }
 
-        var executableExtensions = new[] { ".exe", ".bat", ".cmd", ".com", ".sh", ".ps1" };
-        var isExecutable = executableExtensions.Contains(value.Extension.ToLowerInvariant());
+#if NET
+        // On Unix, executability is the file mode, not the name: a 0755 "myapp" is executable and
+        // a 0644 "notes.sh" is not.
+        if (!OperatingSystem.IsWindows() && !OperatingSystem.IsBrowser())
+        {
+            const UnixFileMode anyExecute = UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute;
 
-        if (isExecutable)
+            if ((value.UnixFileMode & anyExecute) != 0)
+            {
+                return Task.FromResult(AssertionResult.Failed($"file '{value.FullName}' is executable (mode: {value.UnixFileMode})"));
+            }
+
+            return AssertionResult._passedTask;
+        }
+#endif
+
+        if (ExecutableExtensions.Contains(value.Extension, StringComparer.OrdinalIgnoreCase))
         {
             return Task.FromResult(AssertionResult.Failed($"file '{value.FullName}' is executable (extension: {value.Extension})"));
         }
 
         return AssertionResult._passedTask;
     }
+
+    private static readonly string[] ExecutableExtensions = [".exe", ".bat", ".cmd", ".com", ".sh", ".ps1"];
 
     protected override string GetExpectation() => "to not be executable";
 }

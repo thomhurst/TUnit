@@ -1,3 +1,6 @@
+#if NET
+using System.Runtime.InteropServices;
+#endif
 using System.Runtime.Versioning;
 using TUnit.Core.Settings;
 
@@ -22,6 +25,21 @@ public class EngineCancellationToken : IDisposable
     private volatile bool _forcefulExitStarted;
     private CancellationTokenRegistration _platformRegistration;
     private bool _cancelKeyPressSubscribed;
+#if NET
+    private PosixSignalRegistration? _sigtermRegistration;
+    private volatile bool _terminationSignalReceived;
+#endif
+
+    /// <summary>
+    /// Whether the run was cancelled by SIGTERM. Microsoft.Testing.Platform does not observe that
+    /// signal, so unlike Ctrl+C its own run token is not cancelled alongside ours.
+    /// </summary>
+    internal bool TerminationSignalReceived =>
+#if NET
+        _terminationSignalReceived;
+#else
+        false;
+#endif
 
     public EngineCancellationToken()
     {
@@ -29,7 +47,7 @@ public class EngineCancellationToken : IDisposable
     }
 
     /// <summary>
-    /// Hooks up process-wide cancellation signals (Ctrl+C / ProcessExit) the first time it's
+    /// Hooks up process-wide cancellation signals (Ctrl+C / SIGTERM / ProcessExit) the first time it's
     /// called for this instance. Idempotent — subsequent calls are no-ops so that concurrent
     /// MTP server-mode RPCs against one session don't clobber each other's cancellation chain.
     /// Per-call cancellation flows through the explicit <c>CancellationToken</c> threaded into
@@ -67,7 +85,49 @@ public class EngineCancellationToken : IDisposable
 #if NET5_0_OR_GREATER
         }
 #endif
+
+#if NET
+        _sigtermRegistration = TryRegisterSigterm();
+#endif
     }
+
+#if NET
+    /// <summary>
+    /// SIGTERM is how Unix asks a process to stop (<c>docker stop</c>, Kubernetes, CI cancellation,
+    /// <c>timeout</c>). Left to the runtime it only raises <see cref="AppDomain.ProcessExit"/>, which
+    /// gives After hooks <see cref="TimeoutSettings.ProcessExitHookDelay"/> before the process
+    /// dies. Handling it like Ctrl+C instead cancels the run and allows the full
+    /// <see cref="TimeoutSettings.ForcefulExitTimeout"/> for cleanup. Windows is left alone:
+    /// there the signal maps to console close/shutdown events, which the runtime already handles.
+    /// </summary>
+    private PosixSignalRegistration? TryRegisterSigterm()
+    {
+        // Android, iOS and tvOS do not deliver POSIX signals to managed code.
+        if (OperatingSystem.IsWindows() || OperatingSystem.IsBrowser() || OperatingSystem.IsWasi()
+            || OperatingSystem.IsAndroid() || OperatingSystem.IsIOS() || OperatingSystem.IsTvOS())
+        {
+            return null;
+        }
+
+        try
+        {
+            return PosixSignalRegistration.Create(PosixSignal.SIGTERM, OnSigterm);
+        }
+        catch (PlatformNotSupportedException)
+        {
+            return null;
+        }
+    }
+
+    private void OnSigterm(PosixSignalContext context)
+    {
+        // Prevent the default behaviour (immediate termination); the forceful-exit timer still
+        // guarantees the process ends.
+        context.Cancel = true;
+        _terminationSignalReceived = true;
+        Cancel();
+    }
+#endif
 
     /// <summary>
     /// Subscribes to <see cref="Console.CancelKeyPress"/>. Platforms without console signals
@@ -144,7 +204,8 @@ public class EngineCancellationToken : IDisposable
 
     private void OnProcessExit(object? sender, EventArgs e)
     {
-        // Process is exiting (SIGTERM, kill, etc.) - trigger cancellation to execute After hooks
+        // Process is exiting (Environment.Exit, end of Main, or a signal not handled above) - trigger
+        // cancellation to execute After hooks.
         // Note: ProcessExit runs on a background thread with limited time (~3 seconds on Windows)
         // The After hooks registered via CancellationToken.Register() will execute when we cancel
         if (!CancellationTokenSource.IsCancellationRequested)
@@ -165,6 +226,10 @@ public class EngineCancellationToken : IDisposable
     public void Dispose()
     {
         _platformRegistration.Dispose();
+#if NET
+        _sigtermRegistration?.Dispose();
+        _sigtermRegistration = null;
+#endif
 
         // Console.CancelKeyPress is not supported on browser platforms
 #if NET5_0_OR_GREATER

@@ -26,8 +26,10 @@ file static partial class FileInfoAssertionExtensions
     public static bool IsEmpty(this FileInfo value) => value?.Length == 0;
     [GenerateAssertion(ExpectationMessage = "to not be empty", InlineMethodBody = true)]
     public static bool IsNotEmpty(this FileInfo value) => value != null && value.Length > 0;
+    /// <remarks>The System attribute only exists on Windows; on Linux and macOS this never holds.</remarks>
     [GenerateAssertion(ExpectationMessage = "to be a system file", InlineMethodBody = true)]
     public static bool IsSystemFile(this FileInfo value) => value?.Attributes.HasFlag(FileAttributes.System) == true;
+    /// <remarks>The Archive attribute is only maintained on Windows; on Linux and macOS this never holds.</remarks>
     [GenerateAssertion(ExpectationMessage = "to be archived", InlineMethodBody = true)]
     public static bool IsArchived(this FileInfo value) => value?.Attributes.HasFlag(FileAttributes.Archive) == true;
 }
