@@ -57,6 +57,8 @@ Settings are accessed exclusively through `context.Settings` in the discovery ho
 | `ForcefulExitTimeout` | `TimeSpan` | 30 seconds | Grace period before the process is forcefully terminated after a cancellation. |
 | `ProcessExitHookDelay` | `TimeSpan` | 500 ms | Delay before process-exit hooks run, allowing pending I/O to flush. |
 
+On Linux and macOS, SIGTERM (sent by `docker stop`, Kubernetes, and CI cancellation) cancels the run the same way as Ctrl+C: After hooks run within `ForcefulExitTimeout`, and the run ends as a failed test session with exit code 10.
+
 ### `context.Settings.Parallelism`
 
 | Property | Type | Default | Description |
