@@ -151,6 +151,11 @@ function Remove-MergedWorktree {
         Write-Host "Preserving main or harness-managed worktree: $Worktree"
         return
     }
+    # A link to a worktree is not that worktree: git would follow it and remove the target.
+    if ((Get-Item -LiteralPath $Worktree -Force).LinkType) {
+        Write-Host "Preserving worktree $Label : $Worktree (path is a link)"
+        return
+    }
     # Ask git whether the path is the work tree's root rather than comparing paths: git reports
     # symlink-resolved paths (/private/var/... for macOS's /var/...), Resolve-Path does not.
     $null = git -C $Worktree rev-parse --show-toplevel 2>$null

@@ -44,6 +44,17 @@ try {
     New-Item -ItemType Directory -Path (Split-Path $generatedFile -Parent) | Out-Null
     Set-Content -LiteralPath $generatedFile -Value 'generated'
 
+    # A link to the worktree must not be followed: removing through it would delete the target.
+    $linkToWorktree = Join-Path $testRoot 'link-to-artifacts'
+    $linkCreated = $true
+    try { New-Item -ItemType SymbolicLink -Path $linkToWorktree -Target $artifactWorktree | Out-Null }
+    catch { $linkCreated = $false; Write-Host "Skipping link check: cannot create symbolic links here ($($_.Exception.Message))" }
+    if ($linkCreated) {
+        Remove-MergedWorktree -Repo $repo -Worktree $linkToWorktree -Label 'link fixture'
+        Assert-True (Test-Path -LiteralPath $artifactWorktree) 'Removing through a link deleted the linked worktree.'
+        Remove-Item -LiteralPath $linkToWorktree -Force
+    }
+
     Remove-MergedWorktree -Repo $repo -Worktree $artifactWorktree -Label 'artifact fixture'
     Assert-True (-not (Test-Path -LiteralPath $artifactWorktree)) 'Artifact-only worktree was not removed.'
 
