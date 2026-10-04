@@ -26,9 +26,10 @@
   --tunit-warning-surface: #f7efd6;
   --tunit-danger: #9a3322;
   --tunit-danger-surface: #f8e6e1;
-  --tunit-chart-primary: #2e9a63;
+  /* Bar labels sit on these colours, so each keeps at least 4.5:1 contrast with --tunit-chart-label. */
+  --tunit-chart-primary: #1d7348;
   --tunit-chart-secondary: #142019;
-  --tunit-chart-comparison: #a7b0a9;
+  --tunit-chart-comparison: #5f6b64;
   --tunit-chart-label: #f6f7f4;
 
   --ifm-color-primary: #1d7348;
@@ -78,7 +79,7 @@ html[data-theme='dark'] {
   --tunit-danger-surface: #34201b;
   --tunit-chart-primary: #4fb47c;
   --tunit-chart-secondary: #e5ece7;
-  --tunit-chart-comparison: #4c5850;
+  --tunit-chart-comparison: #8f9c94;
   --tunit-chart-label: #121815;
 
   --ifm-color-primary: #7fcf9f;

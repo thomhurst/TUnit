@@ -1,7 +1,7 @@
 import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import {Highlight, themes} from 'prism-react-renderer';
-import {useCallback, useEffect, useRef, useState, type CSSProperties, type JSX, type MouseEvent} from 'react';
+import {useCallback, useEffect, useRef, useState, type CSSProperties, type JSX, type PointerEvent} from 'react';
 
 import styles from './index.module.css';
 
@@ -11,6 +11,9 @@ const cellSize = 8;
 const cellPitch = 10;
 const workerCount = 12;
 const animationMs = 3200;
+/* Durations below these thresholds get the lightest and middle shades of green. */
+const quickTestMs = 4;
+const steadyTestMs = 12;
 
 const classNames = [
   'OrderTests', 'CartTests', 'InvoiceTests', 'LoginTests', 'SearchTests', 'QueueTests', 'PaymentTests',
@@ -25,6 +28,7 @@ const methodNames = [
 ];
 
 type RunPlan = {
+  width: number;
   cols: number;
   rows: number;
   offsetX: number;
@@ -34,6 +38,7 @@ type RunPlan = {
   testClass: Uint16Array;
   method: Uint16Array;
   makespanMs: number;
+  sortedEnd: Float32Array;
 };
 
 function random(seed: number): () => number {
@@ -93,61 +98,97 @@ function planRun(width: number, rows: number): RunPlan {
     start[i] /= makespanMs;
     end[i] /= makespanMs;
   }
-  return {cols, rows, offsetX, start, end, durationMs, testClass, method, makespanMs};
+  const sortedEnd = end.slice().sort();
+  return {width, cols, rows, offsetX, start, end, durationMs, testClass, method, makespanMs, sortedEnd};
 }
 
 function testName(run: RunPlan, index: number): string {
   return `${classNames[run.testClass[index] % classNames.length]}.${methodNames[run.method[index]]}`;
 }
 
-type Hover = {x: number; y: number; name: string; status: string};
+type Hover = {x: number; y: number; flip: boolean; name: string; status: string};
+type Palette = {pending: string; running: string; quick: string; steady: string; slow: string};
+
+/* Number of tests that finished by time t; sortedEnd is ascending. */
+function countPassed(run: RunPlan, t: number): number {
+  let low = 0;
+  let high = run.sortedEnd.length;
+  while (low < high) {
+    const mid = (low + high) >>> 1;
+    if (run.sortedEnd[mid] <= t) low = mid + 1;
+    else high = mid;
+  }
+  return low;
+}
 
 function TestWall(): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const passedRef = useRef<HTMLElement>(null);
+  const timeRef = useRef<HTMLSpanElement>(null);
+  const fillRef = useRef<HTMLDivElement>(null);
   const planRef = useRef<RunPlan | null>(null);
+  const paletteRef = useRef<Palette | null>(null);
   const progressRef = useRef(1);
   const frame = useRef(0);
-  const [progress, setProgress] = useState(1);
-  const [total, setTotal] = useState(0);
+  const replayed = useRef(false);
+  const [done, setDone] = useState(true);
+  const [announcement, setAnnouncement] = useState('');
   const [hover, setHover] = useState<Hover | null>(null);
 
+  const readPalette = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const css = getComputedStyle(canvas);
+    const colour = (name: string) => css.getPropertyValue(name).trim();
+    paletteRef.current = {
+      pending: colour('--tunit-cell'),
+      running: colour('--tunit-muted'),
+      quick: colour('--tunit-pass-light'),
+      steady: colour('--tunit-pass-mid'),
+      slow: colour('--tunit-pass-fill'),
+    };
+  }, []);
+
+  // The canvas and the readout are updated directly each frame so React stays out of the animation loop.
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     const run = planRef.current;
-    if (!canvas || !run) return;
+    const palette = paletteRef.current;
+    if (!canvas || !run || !palette) return;
     const context = canvas.getContext('2d');
     if (!context) return;
-    const css = getComputedStyle(canvas);
-    const colour = (name: string) => css.getPropertyValue(name).trim();
-    const pending = colour('--tunit-cell');
-    const running = colour('--tunit-muted');
-    // Passed tests are shaded by duration, so slow tests stand out as darker squares.
-    const quick = colour('--tunit-pass-light');
-    const steady = colour('--tunit-pass-mid');
-    const slow = colour('--tunit-pass-fill');
     const t = progressRef.current;
     const ratio = window.devicePixelRatio || 1;
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    for (const [colour, matches] of [
-      [pending, (i: number) => t < run.start[i]],
-      [running, (i: number) => t >= run.start[i] && t < run.end[i]],
-      [quick, (i: number) => t >= run.end[i] && run.durationMs[i] < 4],
-      [steady, (i: number) => t >= run.end[i] && run.durationMs[i] >= 4 && run.durationMs[i] < 12],
-      [slow, (i: number) => t >= run.end[i] && run.durationMs[i] >= 12],
-    ] as const) {
-      context.fillStyle = colour;
-      for (let i = 0; i < run.start.length; i++) {
-        if (!matches(i)) continue;
+    context.clearRect(0, 0, run.width, canvas.height);
+
+    // Passed tests are shaded by duration, so slow tests stand out as darker squares.
+    const buckets: number[][] = [[], [], [], [], []];
+    for (let i = 0; i < run.start.length; i++) {
+      const bucket = t < run.start[i] ? 0
+        : t < run.end[i] ? 1
+        : run.durationMs[i] < quickTestMs ? 2
+        : run.durationMs[i] < steadyTestMs ? 3 : 4;
+      buckets[bucket].push(i);
+    }
+    const colours = [palette.pending, palette.running, palette.quick, palette.steady, palette.slow];
+    buckets.forEach((cells, bucket) => {
+      context.fillStyle = colours[bucket];
+      for (const i of cells) {
         context.fillRect(run.offsetX + (i % run.cols) * cellPitch, Math.floor(i / run.cols) * cellPitch, cellSize, cellSize);
       }
-    }
+    });
+
+    const passed = countPassed(run, t);
+    if (passedRef.current) passedRef.current.textContent = passed.toLocaleString('en-US');
+    if (timeRef.current) timeRef.current.textContent = `${(run.makespanMs * t / 1000).toFixed(2)}s`;
+    if (fillRef.current) fillRef.current.style.transform = `scaleX(${passed / run.start.length})`;
   }, []);
 
   const layout = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const width = canvas.parentElement?.clientWidth ?? 0;
+    const width = canvas.getBoundingClientRect().width;
     const rows = width < 640 ? 16 : 14;
     const run = planRun(width, rows);
     planRef.current = run;
@@ -156,60 +197,82 @@ function TestWall(): JSX.Element {
     canvas.width = Math.round(width * ratio);
     canvas.height = Math.round(height * ratio);
     canvas.style.height = `${height}px`;
-    setTotal(run.start.length);
     draw();
   }, [draw]);
 
   const play = useCallback(() => {
     cancelAnimationFrame(frame.current);
+    setHover(null);
     const finish = () => {
       progressRef.current = 1;
-      setProgress(1);
       draw();
+      setDone(true);
+      if (replayed.current && planRef.current) {
+        setAnnouncement(`Run finished: ${planRef.current.start.length.toLocaleString('en-US')} tests passed, 0 failed.`);
+      }
     };
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       finish();
       return;
     }
+    setDone(false);
+    setAnnouncement('');
     const begin = performance.now();
     const step = (now: number) => {
-      const t = Math.min((now - begin) / animationMs, 1);
-      progressRef.current = t;
-      setProgress(t);
-      draw();
-      if (t < 1) frame.current = requestAnimationFrame(step);
+      progressRef.current = Math.min((now - begin) / animationMs, 1);
+      if (progressRef.current < 1) {
+        draw();
+        frame.current = requestAnimationFrame(step);
+      } else {
+        finish();
+      }
     };
     progressRef.current = 0;
+    draw();
     frame.current = requestAnimationFrame(step);
   }, [draw]);
 
+  const replay = () => {
+    replayed.current = true;
+    play();
+  };
+
   useEffect(() => {
+    readPalette();
     layout();
     play();
-    let width = canvasRef.current?.parentElement?.clientWidth;
-    const resize = new ResizeObserver(entries => {
-      const next = entries[0].contentRect.width;
+    let width = canvasRef.current?.getBoundingClientRect().width;
+    const resize = new ResizeObserver(() => {
+      const next = canvasRef.current?.getBoundingClientRect().width;
       if (next === width) return;
       width = next;
+      // A new width means a new plan, so a run in progress starts again on the new wall.
+      const running = progressRef.current < 1;
       layout();
+      if (running) play();
     });
-    if (canvasRef.current?.parentElement) resize.observe(canvasRef.current.parentElement);
-    const theme = new MutationObserver(draw);
+    if (canvasRef.current) resize.observe(canvasRef.current);
+    const theme = new MutationObserver(() => {
+      readPalette();
+      draw();
+    });
     theme.observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
     return () => {
       cancelAnimationFrame(frame.current);
       resize.disconnect();
       theme.disconnect();
     };
-  }, [layout, play, draw]);
+  }, [readPalette, layout, play, draw]);
 
-  const inspect = (event: MouseEvent<HTMLCanvasElement>) => {
+  const inspect = (event: PointerEvent<HTMLCanvasElement>) => {
     const run = planRef.current;
     if (!run) return;
     const bounds = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - bounds.left;
     const y = event.clientY - bounds.top;
-    const col = Math.floor((x - run.offsetX) / cellPitch);
+    // Map from the displayed size back to the plan's coordinates in case the two differ.
+    const scale = bounds.width > 0 ? run.width / bounds.width : 1;
+    const col = Math.floor((x * scale - run.offsetX) / cellPitch);
     const row = Math.floor(y / cellPitch);
     if (col < 0 || col >= run.cols || row < 0 || row >= run.rows) {
       setHover(null);
@@ -220,43 +283,36 @@ function TestWall(): JSX.Element {
     const status = t >= run.end[index]
       ? `Passed in ${Math.max(1, Math.round(run.durationMs[index]))} ms`
       : t >= run.start[index] ? 'Running' : 'Waiting for a worker';
-    setHover({x, y, name: testName(run, index), status});
+    setHover({x, y, flip: x > bounds.width / 2, name: testName(run, index), status});
   };
-
-  let passed = 0;
-  const run = planRef.current;
-  if (run) for (let i = 0; i < run.end.length; i++) if (progress >= run.end[i]) passed++;
-  const done = progress >= 1;
-  const seconds = ((run?.makespanMs ?? 0) * progress / 1000).toFixed(2);
-  const barText = (
-    <>
-      <span><strong>{passed.toLocaleString('en-US')}</strong> passed</span>
-      <span>0 failed</span>
-      <span className={styles.barTime}>{seconds}s</span>
-    </>
-  );
 
   return (
     <figure className={styles.wall}>
       <div className={styles.wallCanvas}>
-        <canvas ref={canvasRef} onMouseMove={inspect} onMouseLeave={() => setHover(null)} aria-hidden="true" />
+        <canvas ref={canvasRef} onPointerMove={inspect} onPointerLeave={() => setHover(null)} aria-hidden="true" />
         {hover && (
-          <div className={styles.tooltip} style={{left: hover.x, top: hover.y} as CSSProperties} aria-hidden="true">
+          <div className={hover.flip ? `${styles.tooltip} ${styles.tooltipFlip}` : styles.tooltip}
+            style={{left: hover.x, top: hover.y} as CSSProperties} aria-hidden="true">
             <span>{hover.name}</span>
             <span>{hover.status}</span>
           </div>
         )}
       </div>
-      <div className={styles.stats} aria-hidden="true">{barText}</div>
-      <div className={styles.bar} aria-hidden="true">
-        <div className={styles.barFill} style={{transform: `scaleX(${total ? passed / total : 1})`}} />
+      <div className={styles.stats} aria-hidden="true">
+        <span><strong ref={passedRef}>0</strong> passed</span>
+        <span>0 failed</span>
+        <span ref={timeRef} className={styles.barTime}>0.00s</span>
       </div>
+      <div className={styles.bar} aria-hidden="true">
+        <div ref={fillRef} className={styles.barFill} />
+      </div>
+      <p className={styles.visuallyHidden} role="status">{announcement}</p>
       <figcaption className={styles.wallCaption}>
         <span>
           Each square is one test, run by one of {workerCount} workers. Darker squares took longer.
-          Hover one to see its name.
+          Point at one to see its name.
         </span>
-        <button type="button" onClick={play} disabled={!done}>Run again</button>
+        <button type="button" onClick={replay} disabled={!done}>Run again</button>
       </figcaption>
     </figure>
   );
@@ -405,7 +461,7 @@ public async Task Greeting_contains_name()
 }`} />
           <figcaption>
             <span className={styles.diagnosticId}>TUnitAssertions0002</span>
-            Assert statements must be awaited. All TUnit assertions return Task.
+            Assert statements must be awaited - all TUnit assertions return Task
           </figcaption>
         </figure>
       </>

@@ -29,9 +29,12 @@
 /* The wall of tests */
 .wall { margin: 0; padding: 1.5rem 1.5rem 1.25rem; border: 1px solid var(--tunit-border); border-radius: 10px; background: var(--tunit-surface); }
 .wallCanvas { position: relative; }
-.wallCanvas canvas { display: block; width: 100%; cursor: crosshair; }
+.wallCanvas canvas { display: block; width: 100%; cursor: crosshair; touch-action: pan-y; }
 .tooltip { position: absolute; z-index: 2; display: grid; gap: 0.1rem; padding: 0.45rem 0.65rem; margin: 0.8rem 0 0 0.8rem; border-radius: 6px; background: var(--tunit-ink); color: var(--tunit-paper); font-family: var(--tunit-mono); font-size: 0.68rem; font-stretch: 87.5%; white-space: nowrap; pointer-events: none; }
 .tooltip span:last-child { opacity: 0.7; }
+/* Past the middle of the wall, the tooltip opens to the left so it stays on screen. */
+.tooltipFlip { margin: 0.8rem 0 0 -0.8rem; transform: translateX(-100%); }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .stats { display: flex; align-items: baseline; gap: 1.5rem; margin-top: 1.25rem; color: var(--tunit-muted); font-family: var(--tunit-mono); font-size: 0.75rem; font-stretch: 87.5%; }
 .stats strong { color: var(--tunit-ink); font-weight: 600; }
 .barTime { margin-left: auto; }
