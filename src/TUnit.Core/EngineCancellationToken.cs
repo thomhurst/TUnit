@@ -124,6 +124,11 @@ public class EngineCancellationToken : IDisposable
         // Prevent the default behaviour (immediate termination); the forceful-exit timer still
         // guarantees the process ends.
         context.Cancel = true;
+        OnTerminationSignal();
+    }
+
+    internal void OnTerminationSignal()
+    {
         _terminationSignalReceived = true;
         Cancel();
     }
@@ -171,35 +176,35 @@ public class EngineCancellationToken : IDisposable
 
     private void Cancel(bool armForcefulExit = true)
     {
+        // The forceful-exit timer is only for signal-driven cancellation (Ctrl+C / SIGTERM), where we
+        // suppressed the runtime's default termination and must guarantee the process still dies.
+        // Platform-driven cancellation manages its own shutdown, so it opts out.
+        // Arm it BEFORE cancelling: Cancel() runs registered callbacks (After hooks) synchronously,
+        // and one that blocks must not postpone the deadline that is meant to bound it.
+        if (armForcefulExit && !_forcefulExitStarted)
+        {
+            _forcefulExitStarted = true;
+            ArmForcefulExit();
+        }
+
         // Cancel the test execution
         if (!CancellationTokenSource.IsCancellationRequested)
         {
             CancellationTokenSource.Cancel();
         }
+    }
 
-        // The forceful-exit timer is only for signal-driven cancellation (Ctrl+C), where we
-        // suppressed the runtime's default termination and must guarantee the process still dies.
-        // Platform-driven cancellation manages its own shutdown, so it opts out.
-        if (!armForcefulExit)
+    // Virtual so tests can observe arming without terminating the test process.
+    internal virtual void ArmForcefulExit()
+    {
+        _ = Task.Delay(TUnitSettings.Default.Timeouts.ForcefulExitTimeout, CancellationToken.None).ContinueWith(t =>
         {
-            return;
-        }
-
-        // Only start the forceful exit timer once
-        if (!_forcefulExitStarted)
-        {
-            _forcefulExitStarted = true;
-
-            // Start a new forceful exit timer
-            _ = Task.Delay(TUnitSettings.Default.Timeouts.ForcefulExitTimeout, CancellationToken.None).ContinueWith(t =>
+            if (!t.IsCanceled)
             {
-                if (!t.IsCanceled)
-                {
-                    Console.WriteLine("Forcefully terminating the process due to cancellation request.");
-                    Environment.Exit(1);
-                }
-            }, TaskScheduler.Default);
-        }
+                Console.WriteLine("Forcefully terminating the process due to cancellation request.");
+                Environment.Exit(1);
+            }
+        }, TaskScheduler.Default);
     }
 
     private void OnProcessExit(object? sender, EventArgs e)

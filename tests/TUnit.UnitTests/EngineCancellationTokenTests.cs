@@ -56,6 +56,44 @@ public class EngineCancellationTokenTests
         await Assert.That(() => token.Initialise()).Throws<InvalidOperationException>();
     }
 
+#if NET
+    [Test]
+    public async Task TerminationSignal_Arms_Forceful_Exit_Before_Cancellation_Callbacks_Run()
+    {
+        // Cancellation callbacks (After hooks) run synchronously inside Cancel(); a blocking one
+        // must not delay the deadline that bounds shutdown.
+        using var token = new RecordingForcefulExitToken();
+        bool? armedWhenCallbackRan = null;
+        token.Token.Register(() => armedWhenCallbackRan = token.ForcefulExitArmed);
+
+        token.OnTerminationSignal();
+
+        await Assert.That(armedWhenCallbackRan).IsEqualTo(true);
+        await Assert.That(token.TerminationSignalReceived).IsTrue();
+        await Assert.That(token.Token.IsCancellationRequested).IsTrue();
+    }
+#endif
+
+    [Test]
+    public async Task PlatformCancellation_Does_Not_Arm_Forceful_Exit()
+    {
+        using var platform = new CancellationTokenSource();
+        using var token = new RecordingForcefulExitToken();
+        token.Initialise(platform.Token);
+
+        platform.Cancel();
+
+        await Assert.That(token.Token.IsCancellationRequested).IsTrue();
+        await Assert.That(token.ForcefulExitArmed).IsFalse();
+    }
+
+    private sealed class RecordingForcefulExitToken : RecordingCancelKeyPressToken
+    {
+        public bool ForcefulExitArmed { get; private set; }
+
+        internal override void ArmForcefulExit() => ForcefulExitArmed = true;
+    }
+
     private class RecordingCancelKeyPressToken : EngineCancellationToken
     {
         public int SubscribeCalls { get; private set; }
