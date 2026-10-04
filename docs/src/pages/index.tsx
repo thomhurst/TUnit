@@ -7,8 +7,8 @@ import styles from './index.module.css';
 
 /* ---------- The test wall: every square is one test in a simulated parallel run. ---------- */
 
-const cellSize = 10;
-const cellPitch = 13;
+const cellSize = 8;
+const cellPitch = 10;
 const workerCount = 12;
 const animationMs = 3200;
 
@@ -118,9 +118,13 @@ function TestWall(): JSX.Element {
     const context = canvas.getContext('2d');
     if (!context) return;
     const css = getComputedStyle(canvas);
-    const pending = css.getPropertyValue('--tunit-cell').trim();
-    const running = css.getPropertyValue('--tunit-ink').trim();
-    const passed = css.getPropertyValue('--tunit-pass-fill').trim();
+    const colour = (name: string) => css.getPropertyValue(name).trim();
+    const pending = colour('--tunit-cell');
+    const running = colour('--tunit-muted');
+    // Passed tests are shaded by duration, so slow tests stand out as darker squares.
+    const quick = colour('--tunit-pass-light');
+    const steady = colour('--tunit-pass-mid');
+    const slow = colour('--tunit-pass-fill');
     const t = progressRef.current;
     const ratio = window.devicePixelRatio || 1;
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -128,7 +132,9 @@ function TestWall(): JSX.Element {
     for (const [colour, matches] of [
       [pending, (i: number) => t < run.start[i]],
       [running, (i: number) => t >= run.start[i] && t < run.end[i]],
-      [passed, (i: number) => t >= run.end[i]],
+      [quick, (i: number) => t >= run.end[i] && run.durationMs[i] < 4],
+      [steady, (i: number) => t >= run.end[i] && run.durationMs[i] >= 4 && run.durationMs[i] < 12],
+      [slow, (i: number) => t >= run.end[i] && run.durationMs[i] >= 12],
     ] as const) {
       context.fillStyle = colour;
       for (let i = 0; i < run.start.length; i++) {
@@ -142,7 +148,7 @@ function TestWall(): JSX.Element {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const width = canvas.parentElement?.clientWidth ?? 0;
-    const rows = width < 640 ? 22 : 18;
+    const rows = width < 640 ? 16 : 14;
     const run = planRun(width, rows);
     planRef.current = run;
     const height = rows * cellPitch - (cellPitch - cellSize);
@@ -241,16 +247,14 @@ function TestWall(): JSX.Element {
           </div>
         )}
       </div>
-      <div className={styles.bar} aria-hidden="true" style={{'--fill': total ? passed / total : 1} as CSSProperties}>
-        {/* The text is drawn twice so it stays readable on both the track and the green fill. */}
-        <div className={styles.barRow}>{barText}</div>
-        <div className={`${styles.barRow} ${styles.barFill}`}>{barText}</div>
+      <div className={styles.stats} aria-hidden="true">{barText}</div>
+      <div className={styles.bar} aria-hidden="true">
+        <div className={styles.barFill} style={{transform: `scaleX(${total ? passed / total : 1})`}} />
       </div>
       <figcaption className={styles.wallCaption}>
         <span>
-          Each square is one test, run by one of {workerCount} workers. {total > 0 && done
-            ? `All ${total.toLocaleString('en-US')} passed.`
-            : 'Hover a square to see its name.'}
+          Each square is one test, run by one of {workerCount} workers. Darker squares took longer.
+          Hover one to see its name.
         </span>
         <button type="button" onClick={play} disabled={!done}>Run again</button>
       </figcaption>
@@ -262,7 +266,7 @@ function Hero(): JSX.Element {
   return (
     <header className={styles.hero}>
       <div className={`${styles.container} ${styles.heroTop}`}>
-        <h1 className={styles.heroTitle}>Keep it<br />green.</h1>
+        <h1 className={styles.heroTitle}>Keep it green.</h1>
         <div className={styles.heroAside}>
           <p>
             TUnit is a testing framework for modern .NET. Tests are discovered while you build
@@ -274,7 +278,7 @@ function Hero(): JSX.Element {
           </div>
         </div>
       </div>
-      <TestWall />
+      <div className={styles.container}><TestWall /></div>
     </header>
   );
 }
@@ -436,6 +440,7 @@ function Claims(): JSX.Element {
     <section className={styles.claims} aria-labelledby="claims-title">
       <div className={styles.container}>
         <h2 id="claims-title" className={styles.sectionTitle}>Our claims, written as tests.</h2>
+        <p className={styles.sectionLead}>Open any result to see the code behind it.</p>
         <div className={styles.claimList}>
           {claims.map((claim, index) => (
             <details key={claim.name} className={styles.claim} open={index === 0}>

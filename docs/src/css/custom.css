@@ -1,115 +1,118 @@
 @import url('./benchmark-charts.css');
-@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,200..800;1,200..800&family=Martian+Mono:wdth,wght@75..112.5,100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap');
 
 /*
  * TUnit's identity is the red/green bar every unit-testing tool has shown since JUnit.
- * Bar green is the brand; fail red appears only where something failed.
- * Ink is a deep bottle green rather than black, on chalk-grey paper.
+ * Greens are muted emerald and sage so long reading stays calm; red appears only for failures.
  */
 :root {
-  --tunit-ink: #0b2418;
-  --tunit-body: #2c3b33;
-  --tunit-muted: #56635b;
-  --tunit-paper: #eef0ec;
-  --tunit-surface: #e2e6e0;
-  --tunit-border: #c9cfc7;
-  --tunit-accent: #0a7a3c;
-  --tunit-accent-surface: #d3efdc;
-  --tunit-code: #e6e9e3;
-  --tunit-on-primary: #0b2418;
-  --tunit-pass: #0a7a3c;
-  --tunit-pass-fill: #19c25d;
-  --tunit-fail: #d63a26;
-  --tunit-cell: #d2d8d0;
+  --tunit-ink: #142019;
+  --tunit-body: #36423b;
+  --tunit-muted: #67736c;
+  --tunit-paper: #f6f7f4;
+  --tunit-surface: #edf0eb;
+  --tunit-border: #dce1da;
+  --tunit-accent: #1d7348;
+  --tunit-accent-surface: #e1efe5;
+  --tunit-code: #eef1ec;
+  --tunit-on-primary: #f6f7f4;
+  --tunit-pass: #1d7348;
+  --tunit-pass-fill: #2e9a63;
+  --tunit-pass-light: #a6d5b8;
+  --tunit-pass-mid: #62b98a;
+  --tunit-fail: #c0442f;
+  --tunit-cell: #e2e6df;
   --tunit-warning: #6b4a00;
-  --tunit-warning-surface: #f6ebc8;
-  --tunit-danger: #a3271a;
-  --tunit-danger-surface: #f8dfda;
-  --tunit-chart-primary: #19c25d;
-  --tunit-chart-secondary: #0b2418;
-  --tunit-chart-comparison: #9aa69e;
-  --tunit-chart-label: #0b2418;
+  --tunit-warning-surface: #f7efd6;
+  --tunit-danger: #9a3322;
+  --tunit-danger-surface: #f8e6e1;
+  --tunit-chart-primary: #2e9a63;
+  --tunit-chart-secondary: #142019;
+  --tunit-chart-comparison: #a7b0a9;
+  --tunit-chart-label: #f6f7f4;
 
-  --ifm-color-primary: #0a7a3c;
-  --ifm-color-primary-dark: #096e36;
-  --ifm-color-primary-darker: #096833;
-  --ifm-color-primary-darkest: #07552a;
-  --ifm-color-primary-light: #0b8642;
-  --ifm-color-primary-lighter: #0c8c45;
-  --ifm-color-primary-lightest: #0e9f4e;
-  --ifm-color-emphasis-100: #e6e9e3;
-  --ifm-color-emphasis-200: #d9ddd6;
-  --ifm-color-emphasis-300: #c9cfc7;
-  --ifm-color-emphasis-400: #a5aea7;
-  --ifm-color-emphasis-500: #7f8b83;
-  --ifm-color-emphasis-600: #56635b;
-  --ifm-color-emphasis-700: #2c3b33;
-  --ifm-color-emphasis-800: #1a2e23;
-  --ifm-color-emphasis-900: #0b2418;
-  --syntax-keyword: #1f5fbf;
-  --syntax-string: #a3461b;
-  --syntax-function: #7a3e9d;
-  --syntax-class: #0f6e78;
-  --syntax-number: #0a7a3c;
-  --syntax-comment: #6b776f;
+  --ifm-color-primary: #1d7348;
+  --ifm-color-primary-dark: #1a6841;
+  --ifm-color-primary-darker: #19623d;
+  --ifm-color-primary-darkest: #145132;
+  --ifm-color-primary-light: #207e4f;
+  --ifm-color-primary-lighter: #218453;
+  --ifm-color-primary-lightest: #26965e;
+  --ifm-color-emphasis-100: #eef1ec;
+  --ifm-color-emphasis-200: #e4e8e2;
+  --ifm-color-emphasis-300: #dce1da;
+  --ifm-color-emphasis-400: #b7bfb9;
+  --ifm-color-emphasis-500: #8e9891;
+  --ifm-color-emphasis-600: #67736c;
+  --ifm-color-emphasis-700: #36423b;
+  --ifm-color-emphasis-800: #24302a;
+  --ifm-color-emphasis-900: #142019;
+  --syntax-keyword: #3a5ea8;
+  --syntax-string: #9a5528;
+  --syntax-function: #7b4a8f;
+  --syntax-class: #2c6e72;
+  --syntax-number: #1d7348;
+  --syntax-comment: #7b867f;
 }
 
 html[data-theme='dark'] {
-  --tunit-ink: #e8f2ea;
-  --tunit-body: #c3d1c7;
-  --tunit-muted: #93a69a;
-  --tunit-paper: #0c1f15;
-  --tunit-surface: #13291d;
-  --tunit-border: #24402f;
-  --tunit-accent: #4fe08a;
-  --tunit-accent-surface: #173a26;
-  --tunit-code: #102619;
-  --tunit-on-primary: #0c1f15;
-  --tunit-pass: #4fe08a;
-  --tunit-pass-fill: #2ed66e;
-  --tunit-fail: #ff6b57;
-  --tunit-cell: #1d3628;
-  --tunit-warning: #f3d58e;
-  --tunit-warning-surface: #33301c;
-  --tunit-danger: #ffb4a8;
-  --tunit-danger-surface: #3d1f1a;
-  --tunit-chart-primary: #2ed66e;
-  --tunit-chart-secondary: #e8f2ea;
-  --tunit-chart-comparison: #4d6657;
-  --tunit-chart-label: #0c1f15;
+  --tunit-ink: #e5ece7;
+  --tunit-body: #c2ccc5;
+  --tunit-muted: #919d95;
+  --tunit-paper: #121815;
+  --tunit-surface: #18201b;
+  --tunit-border: #263029;
+  --tunit-accent: #7fcf9f;
+  --tunit-accent-surface: #1b2c22;
+  --tunit-code: #161e19;
+  --tunit-on-primary: #121815;
+  --tunit-pass: #7fcf9f;
+  --tunit-pass-fill: #4fb47c;
+  --tunit-pass-light: #2b5a40;
+  --tunit-pass-mid: #3b8a5f;
+  --tunit-fail: #f08a76;
+  --tunit-cell: #1f2923;
+  --tunit-warning: #ead39a;
+  --tunit-warning-surface: #2a2719;
+  --tunit-danger: #f4b2a5;
+  --tunit-danger-surface: #34201b;
+  --tunit-chart-primary: #4fb47c;
+  --tunit-chart-secondary: #e5ece7;
+  --tunit-chart-comparison: #4c5850;
+  --tunit-chart-label: #121815;
 
-  --ifm-color-primary: #4fe08a;
-  --ifm-color-primary-dark: #35dc78;
-  --ifm-color-primary-darker: #28d86f;
-  --ifm-color-primary-darkest: #1eb85a;
-  --ifm-color-primary-light: #69e49c;
-  --ifm-color-primary-lighter: #76e7a5;
-  --ifm-color-primary-lightest: #9eeec0;
-  --ifm-color-emphasis-100: #13291d;
-  --ifm-color-emphasis-200: #1b3426;
-  --ifm-color-emphasis-300: #24402f;
-  --ifm-color-emphasis-400: #3a5a47;
-  --ifm-color-emphasis-500: #5f7a69;
-  --ifm-color-emphasis-600: #93a69a;
-  --ifm-color-emphasis-700: #c3d1c7;
-  --ifm-color-emphasis-800: #d8e4db;
-  --ifm-color-emphasis-900: #e8f2ea;
-  --syntax-keyword: #8fb8ff;
-  --syntax-string: #f3b58a;
-  --syntax-function: #e3b3f5;
-  --syntax-class: #7fd8de;
-  --syntax-number: #7be3a8;
-  --syntax-comment: #8a9e91;
+  --ifm-color-primary: #7fcf9f;
+  --ifm-color-primary-dark: #69c68e;
+  --ifm-color-primary-darker: #5ec285;
+  --ifm-color-primary-darkest: #42ab6c;
+  --ifm-color-primary-light: #95d8b0;
+  --ifm-color-primary-lighter: #a0dcb8;
+  --ifm-color-primary-lightest: #c1e8d0;
+  --ifm-color-emphasis-100: #18201b;
+  --ifm-color-emphasis-200: #1e2721;
+  --ifm-color-emphasis-300: #263029;
+  --ifm-color-emphasis-400: #3a463e;
+  --ifm-color-emphasis-500: #5c6a61;
+  --ifm-color-emphasis-600: #919d95;
+  --ifm-color-emphasis-700: #c2ccc5;
+  --ifm-color-emphasis-800: #d6ded8;
+  --ifm-color-emphasis-900: #e5ece7;
+  --syntax-keyword: #9db8ec;
+  --syntax-string: #e2b48c;
+  --syntax-function: #d3b0e3;
+  --syntax-class: #8fcfd2;
+  --syntax-number: #8fd6aa;
+  --syntax-comment: #7e8b83;
 }
 
 /* Define aliases in both themes so inherited values resolve against that theme. */
 :root, html[data-theme='dark'] {
-  --tunit-display: 'Martian Mono', 'Cascadia Code', Consolas, monospace;
-  --ifm-font-family-base: 'Atkinson Hyperlegible Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --tunit-mono: 'Martian Mono', 'Cascadia Code', Consolas, monospace;
+  --ifm-font-family-base: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --ifm-font-family-monospace: 'Martian Mono', 'Cascadia Code', Consolas, monospace;
   --ifm-line-height-base: 1.7;
-  --ifm-heading-font-family: var(--tunit-display);
-  --ifm-heading-font-weight: 700;
+  --ifm-heading-font-family: var(--ifm-font-family-base);
+  --ifm-heading-font-weight: 650;
   --ifm-font-color-base: var(--tunit-body);
   --ifm-heading-color: var(--tunit-ink);
   --ifm-background-color: var(--tunit-paper);
@@ -130,7 +133,7 @@ html[data-theme='dark'] {
   --ifm-color-content-secondary: var(--tunit-muted);
   --ifm-card-background-color: var(--tunit-code);
   --ifm-code-background: var(--tunit-code);
-  --ifm-code-font-size: 82%;
+  --ifm-code-font-size: 80%;
   --ifm-table-border-color: var(--tunit-border);
   --ifm-table-head-background: var(--tunit-surface);
   --ifm-table-stripe-background: transparent;
@@ -162,8 +165,8 @@ a { text-underline-offset: 3px; }
   box-shadow: none;
 }
 .navbar__brand { gap: 0.6rem; }
-.navbar__title { color: var(--tunit-ink); font-family: var(--tunit-display); font-size: 1.1rem; font-weight: 800; font-stretch: 112.5%; letter-spacing: -0.04em; }
-.navbar__link { font-size: 0.95rem; font-weight: 600; }
+.navbar__title { color: var(--tunit-ink); font-size: 1.2rem; font-weight: 750; letter-spacing: -0.03em; }
+.navbar__link { font-size: 0.95rem; font-weight: 550; }
 .navbar__link--active { color: var(--tunit-accent); }
 .navbar__logo { height: 1.7rem; }
 .navbar__toggle, .navbar-sidebar__close { color: var(--tunit-ink); }
@@ -179,7 +182,7 @@ a { text-underline-offset: 3px; }
     left: 0;
     right: 0;
     bottom: -1px;
-    height: 3px;
+    height: 2px;
     background: var(--tunit-pass-fill);
     transform-origin: left;
     animation: tunit-reading-bar linear both;
@@ -196,17 +199,14 @@ a { text-underline-offset: 3px; }
   --ifm-footer-link-hover-color: var(--tunit-accent);
   border-top: 1px solid var(--tunit-border);
 }
-/* Monospaced spaces are as wide as letters; pull words together in display type. */
-h1, h2, h3, h4, .navbar__title, .pagination-nav__label { word-spacing: -0.3em; }
-.theme-doc-markdown h3 { word-spacing: normal; }
-.footer__title { font-family: var(--tunit-display); font-size: 0.8rem; }
+.footer__title { font-size: 0.9rem; }
 
 /* The same palette also applies to the Algolia dialog, not just its trigger. */
 html[data-theme] {
   --docsearch-primary-color: var(--tunit-accent);
   --docsearch-text-color: var(--tunit-ink);
   --docsearch-muted-color: var(--tunit-muted);
-  --docsearch-container-background: rgb(11 36 24 / 60%);
+  --docsearch-container-background: rgb(20 32 25 / 55%);
   --docsearch-modal-background: var(--tunit-paper);
   --docsearch-searchbox-background: var(--tunit-code);
   --docsearch-searchbox-focus-background: var(--tunit-paper);
@@ -222,7 +222,7 @@ html[data-theme] {
   --docsearch-footer-shadow: 0 -1px 0 var(--tunit-border);
   --docsearch-logo-color: var(--tunit-muted);
 }
-.DocSearch-Button { background: var(--tunit-surface); border: 1px solid transparent; color: var(--tunit-muted); border-radius: 4px; }
+.DocSearch-Button { background: var(--tunit-surface); border: 1px solid var(--tunit-border); color: var(--tunit-muted); border-radius: 6px; }
 .DocSearch-Button:hover { background: var(--tunit-code); color: var(--tunit-ink); box-shadow: inset 0 0 0 1px var(--tunit-accent); }
 .DocSearch-Button-Key { background: var(--tunit-paper); border: 1px solid var(--tunit-border); color: var(--tunit-muted); box-shadow: none; }
 .DocSearch-Hit[aria-selected='true'] a { background: var(--tunit-accent-surface); }
@@ -235,7 +235,7 @@ html[data-theme] {
 .menu__link:hover { color: var(--tunit-ink); }
 .menu__list-item-collapsible { border-radius: 3px; }
 .menu__list-item-collapsible:hover { background: var(--tunit-surface); }
-:is(.theme-doc-sidebar-item-category-level-1 > .menu__list-item-collapsible, .theme-doc-sidebar-item-link-level-1) > .menu__link { color: var(--tunit-ink); font-weight: 700; }
+:is(.theme-doc-sidebar-item-category-level-1 > .menu__list-item-collapsible, .theme-doc-sidebar-item-link-level-1) > .menu__link { color: var(--tunit-ink); font-weight: 600; }
 
 /* Nested sidebar levels read like a test explorer tree. The open page is marked with a passed test cell. */
 .theme-doc-sidebar-menu .menu__list .menu__list {
@@ -246,38 +246,38 @@ html[data-theme] {
 .theme-doc-sidebar-menu .menu__link--active:not(.menu__link--sublist) {
   position: relative;
   color: var(--tunit-ink);
-  font-weight: 700;
+  font-weight: 600;
   background: var(--tunit-surface);
 }
 .theme-doc-sidebar-menu .menu__list .menu__list .menu__link--active:not(.menu__link--sublist)::before {
   content: '';
   position: absolute;
-  left: calc(-0.35rem - 5px);
-  top: calc(50% - 4.5px);
-  width: 9px;
-  height: 9px;
+  left: calc(-0.35rem - 4px);
+  top: calc(50% - 3.5px);
+  width: 7px;
+  height: 7px;
   border-radius: 1px;
   background: var(--tunit-pass-fill);
 }
 
 .table-of-contents { font-size: 0.85rem; }
-.table-of-contents__link--active { color: var(--tunit-ink); font-weight: 700; }
+.table-of-contents__link--active { color: var(--tunit-accent); font-weight: 600; }
 .table-of-contents__link:hover { color: var(--tunit-accent); }
-.theme-doc-markdown { --ifm-h1-font-size: 2.3rem; --ifm-h2-font-size: 1.45rem; --ifm-h3-font-size: 1.15rem; }
-.theme-doc-markdown h1 { font-weight: 800; font-stretch: 112.5%; letter-spacing: -0.045em; line-height: 1.1; }
-.theme-doc-markdown h2 { font-weight: 700; letter-spacing: -0.03em; margin-top: 3rem; }
-.theme-doc-markdown h3 { font-family: var(--ifm-font-family-base); font-weight: 700; letter-spacing: -0.01em; margin-top: 2rem; }
+.theme-doc-markdown { --ifm-h1-font-size: 2.4rem; --ifm-h2-font-size: 1.55rem; --ifm-h3-font-size: 1.2rem; }
+.theme-doc-markdown h1 { font-weight: 700; letter-spacing: -0.035em; line-height: 1.1; }
+.theme-doc-markdown h2 { font-weight: 650; letter-spacing: -0.025em; margin-top: 3rem; }
+.theme-doc-markdown h3 { font-weight: 650; letter-spacing: -0.015em; margin-top: 2rem; }
 .theme-doc-markdown :is(h2, h3) { scroll-margin-top: calc(var(--ifm-navbar-height) + 1rem); }
 .theme-doc-markdown > p, .theme-doc-markdown > ul, .theme-doc-markdown > ol { max-width: 72ch; }
-.theme-doc-markdown { font-size: 1.05rem; }
+.theme-doc-markdown { font-size: 1.04rem; }
 .breadcrumbs__link { font-size: 0.82rem; }
 .pagination-nav__link { background: transparent; border-color: var(--tunit-border); border-radius: 4px; }
 .pagination-nav__link:hover { border-color: var(--tunit-pass-fill); background: var(--tunit-surface); }
-.pagination-nav__label { color: var(--tunit-ink); font-family: var(--tunit-display); font-size: 0.95rem; }
+.pagination-nav__label { color: var(--tunit-ink); font-weight: 600; }
 .pagination-nav__sublabel { color: var(--tunit-muted); }
 
 :not(pre) > code { color: var(--tunit-ink); background: var(--tunit-code); border: 0; padding: 0.12em 0.4em; border-radius: 3px; }
-.theme-code-block { --prism-background-color: var(--tunit-code); background: var(--tunit-code); border: 1px solid var(--tunit-border); border-radius: 4px; box-shadow: none; }
+.theme-code-block { --prism-background-color: var(--tunit-code); background: var(--tunit-code); border: 1px solid var(--tunit-border); border-radius: 6px; box-shadow: none; }
 .theme-code-block pre { background: var(--tunit-code) !important; color: var(--tunit-ink) !important; font-size: 0.8rem; line-height: 1.75; }
 .theme-code-block pre code { background: transparent; color: inherit; border: 0; padding-block: 0; }
 /* Titled code blocks look like an editor tab, since the title is almost always a file name. */
@@ -289,7 +289,7 @@ html[data-theme] {
   border: 1px solid var(--tunit-border);
   border-bottom: 0;
   border-radius: 3px 3px 0 0;
-  box-shadow: inset 0 3px 0 var(--tunit-pass-fill);
+  box-shadow: inset 0 2px 0 var(--tunit-pass-fill);
   color: var(--tunit-ink);
   font-family: var(--ifm-font-family-monospace);
   font-size: 0.72rem;
@@ -303,6 +303,7 @@ html[data-theme] {
 .theme-code-block .token:is(.number, .boolean, .constant) { color: var(--syntax-number) !important; }
 .theme-code-block .token:is(.comment, .prolog, .doctype, .cdata) { color: var(--syntax-comment) !important; }
 .theme-code-block .token:is(.plain, .punctuation, .operator, .variable, .parameter) { color: var(--tunit-ink) !important; }
+.theme-code-block .token { font-style: normal !important; }
 
 blockquote { background: transparent; border-left: 3px solid var(--tunit-border); color: var(--tunit-body); padding: 0.25rem 1rem; }
 blockquote > :last-child { margin-bottom: 0; }
@@ -314,7 +315,7 @@ blockquote > :last-child { margin-bottom: 0; }
 /* Admonitions follow the test-result colours: green for success and tips, red for danger. */
 .theme-admonition:is(.alert--info, .alert--secondary, .alert--from-xunit, .alert--from-nunit, .alert--from-mstest) {
   --ifm-alert-background-color: var(--tunit-surface);
-  --ifm-alert-border-color: var(--tunit-ink);
+  --ifm-alert-border-color: var(--tunit-muted);
   --ifm-alert-foreground-color: var(--tunit-ink);
 }
 .theme-admonition:is(.alert--success, .alert--performance) {
@@ -332,7 +333,7 @@ blockquote > :last-child { margin-bottom: 0; }
   --ifm-alert-border-color: var(--tunit-fail);
   --ifm-alert-foreground-color: var(--tunit-danger);
 }
-.theme-admonition { color: var(--ifm-alert-foreground-color); box-shadow: none; border-width: 0 0 0 4px; border-radius: 0 4px 4px 0; }
+.theme-admonition { color: var(--ifm-alert-foreground-color); box-shadow: none; border-width: 0 0 0 3px; border-radius: 0 6px 6px 0; }
 .theme-admonition :is(p, h5) { color: inherit; }
 .theme-admonition a { color: inherit; text-decoration: underline; }
 .theme-admonition :not(pre) > code { background: var(--tunit-paper); color: var(--tunit-ink); }
@@ -351,7 +352,6 @@ blockquote > :last-child { margin-bottom: 0; }
 
 @media (max-width: 640px) {
   .theme-doc-markdown { --ifm-h1-font-size: 1.75rem; --ifm-h2-font-size: 1.25rem; font-size: 1rem; }
-  .theme-doc-markdown h1 { font-stretch: 100%; }
   .DocSearch-Button { padding-inline: 0.5rem; }
 }
 
