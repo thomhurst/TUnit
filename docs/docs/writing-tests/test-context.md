@@ -100,7 +100,7 @@ See the [Test Parameters](../execution/parameters.md) guide for full details.
 
 Custom properties can be added to a test using the `[Property]` attribute. Properties are key-value pairs of strings that serve multiple purposes:
 
-- **Test filtering**: Filter tests at the command line with `dotnet run --treenode-filter /*/*/*/*[PropertyName=PropertyValue]`
+- **Test filtering**: Filter tests at the command line with `dotnet run --treenode-filter "/*/*/*/*[PropertyName=PropertyValue]"`
 - **Runtime logic**: Access properties in setup/cleanup hooks via `TestContext` to conditionally execute logic
 - **Inheritance**: Apply `[Property]` on a base class and all sub-class tests inherit it
 

@@ -38,24 +38,24 @@ dotnet run -c Release
 ### Native AOT Comparison
 
 ```bash
-# Build for AOT
-dotnet publish -c Release -r win-x64 --self-contained -p:PublishAot=true
+# Build for AOT (native AOT cannot cross-compile, so target the current machine)
+dotnet publish -c Release --use-current-runtime --self-contained -p:PublishAot=true -o publish
 
-# Run the published executable
-./bin/Release/net8.0/win-x64/publish/TUnit.Performance.Tests.exe
+# Run the published executable (TUnit.Performance.Tests.exe on Windows)
+./publish/TUnit.Performance.Tests
 ```
 
 ### Run Specific Benchmarks
 
 ```bash
 # Run only discovery benchmarks
-dotnet run -c Release -- --filter *Discovery*
+dotnet run -c Release -- --filter '*Discovery*'
 
 # Run only execution benchmarks
-dotnet run -c Release -- --filter *Execution*
+dotnet run -c Release -- --filter '*Execution*'
 
 # Run only data source benchmarks
-dotnet run -c Release -- --filter *DataSource*
+dotnet run -c Release -- --filter '*DataSource*'
 ```
 
 ## Expected Results
