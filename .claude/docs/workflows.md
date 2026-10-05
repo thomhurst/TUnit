@@ -11,11 +11,15 @@ dotnet build TUnit.Dev.slnx --no-restore -graphBuild:True
 
 Use `TUnit.slnx` for the full solution, including Roslyn version variants. Run `dotnet test` from the relevant test project directory. Core generator snapshots live in `tests/TUnit.Core.SourceGenerator.Tests`; public API snapshots live in `tests/TUnit.PublicAPI`.
 
+Test projects target net8.0, net9.0 and net10.0; only installed runtimes can run, so pass `--framework net10.0` (or another installed one) when the machine lacks the others. The PublicAPI and generator snapshot projects add a net472 leg on Windows only; off Windows, `.Net4_7` snapshot updates come from the `ReceivedSnapshots-windows-latest` CI artifact.
+
+Scripts in `scripts/` need PowerShell 7. On Linux and macOS, quote any argument containing `*` when calling a native command from PowerShell: unquoted arguments are glob-expanded, so a treenode filter becomes a list of file paths.
+
 For the intentionally failing test application, always select the class or method under test:
 
 ```sh
 cd tests/TUnit.TestProject
-dotnet test --treenode-filter "/*/*/ClassName/*"
+dotnet test --framework net10.0 --treenode-filter "/*/*/ClassName/*"
 ```
 
 A single-method filter has the form `/Assembly/Namespace/ClassName/TestMethodName`. Run one filter per command; do not join paths with `|`.

@@ -11,27 +11,8 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "Running SingleFile tests..." -ForegroundColor Yellow
 
-# Get runtime identifier for platform-specific builds
-function Get-RuntimeIdentifier {
-    # For PowerShell 5.x compatibility on Windows
-    if ($PSVersionTable.PSVersion.Major -lt 6) {
-        # Windows PowerShell 5.x
-        return "win-x64"
-    }
-    # PowerShell Core 6+
-    if ($IsWindows) {
-        return "win-x64"
-    } elseif ($IsLinux) {
-        return "linux-x64"
-    } elseif ($IsMacOS) {
-        return "osx-arm64"
-    } else {
-        # Default to Windows if platform detection fails
-        return "win-x64"
-    }
-}
-
-$rid = Get-RuntimeIdentifier
+# Publish for the SDK's own runtime identifier: a hard-coded one targeted the wrong architecture
+# on Intel Macs and on Arm64 Linux/Windows.
 $isWindowsPlatform = ($PSVersionTable.PSVersion.Major -lt 6) -or ((Get-Variable -Name 'IsWindows' -ErrorAction SilentlyContinue) -and $IsWindows)
 $executableName = if ($isWindowsPlatform) { "TUnit.TestProject.exe" } else { "TUnit.TestProject" }
 
@@ -49,7 +30,7 @@ try {
     dotnet publish `
         -f $Framework `
         -c $Configuration `
-        -r $rid `
+        --use-current-runtime `
         -p:SingleFile=true `
         -o "TESTPROJECT_SINGLEFILE" 2>&1 | Out-String | Write-Host
 
@@ -62,7 +43,9 @@ try {
     $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
     $singleFileExecutable = Join-Path "TESTPROJECT_SINGLEFILE" $executableName
-    & $singleFileExecutable --treenode-filter $Filter 2>&1 | Out-String | Write-Host
+    # Quoted: on Linux/macOS PowerShell glob-expands unquoted native arguments, turning the
+    # filter into a list of matching file paths.
+    & $singleFileExecutable --treenode-filter "$Filter" 2>&1 | Out-String | Write-Host
 
     $success = $LASTEXITCODE -eq 0
     $stopwatch.Stop()

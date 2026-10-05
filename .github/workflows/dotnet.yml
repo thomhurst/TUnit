@@ -181,6 +181,19 @@ jobs:
           name: TestingPlatformDiagnosticLogs${{matrix.os}}
           path: '**/log_*.diag'
 
+      # Snapshot mismatches leave *.received.txt next to the *.verified.txt they failed against.
+      # The .Net4_7 snapshots can only be produced on Windows, so contributors on Linux/macOS
+      # take them from this artifact.
+      - name: Upload Received Snapshots
+        uses: actions/upload-artifact@v7.0.1
+        if: failure()
+        with:
+          name: ReceivedSnapshots-${{matrix.os}}
+          path: |
+            **/*.received.*
+            **/*.received/**
+          if-no-files-found: ignore
+
       - name: Upload Hang Dumps
         uses: actions/upload-artifact@v7.0.1
         if: always()

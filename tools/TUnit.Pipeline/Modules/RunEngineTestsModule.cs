@@ -1,4 +1,5 @@
-﻿using ModularPipelines.Attributes;
+﻿using System.Runtime.InteropServices;
+using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
@@ -37,7 +38,7 @@ public class RunEngineTestsModule : Module<CommandResult>
             Configuration = "Release",
             Framework = "net10.0",
             Arguments = [
-                "--hangdump", "--hangdump-filename", $"hangdump.{Environment.OSVersion.Platform}.engine-tests.dmp", "--hangdump-timeout", "30m",
+                "--hangdump", "--hangdump-filename", $"hangdump.{RuntimeInformation.RuntimeIdentifier}.engine-tests.dmp", "--hangdump-timeout", "30m",
                 "--timeout", "35m",
             ],
         }, new CommandExecutionOptions

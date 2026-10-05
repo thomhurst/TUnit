@@ -8,10 +8,11 @@
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "build TUnit.TestProject",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/tests/TUnit.TestProject/bin/Debug/net8.0/TUnit.TestProject.dll",
-            "args": [],
+            "program": "${workspaceFolder}/tests/TUnit.TestProject/bin/Debug/net10.0/TUnit.TestProject.dll",
+            // TUnit.TestProject contains intentionally failing tests: always run a targeted filter.
+            "args": ["--treenode-filter", "${input:treenodeFilter}"],
             "cwd": "${workspaceFolder}/tests/TUnit.TestProject",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
@@ -21,6 +22,14 @@
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "treenodeFilter",
+            "type": "promptString",
+            "description": "Tree-node filter, e.g. /*/*/ClassName/*",
+            "default": "/*/*/ClassName/*"
         }
     ]
 }
