@@ -43,7 +43,8 @@
     <RootNamespace>$(_BaseProjectName)</RootNamespace>
     <IsPackable>false</IsPackable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-    <!-- These compile their base project's sources, which the base project already analyzes. -->
+    <!-- Opts out of the repo-internal analyzers wired in Directory.Build.targets: these compile their
+         base project's sources, which the base project already analyzes. -->
     <TUnitSkipInternalAnalyzers>true</TUnitSkipInternalAnalyzers>
   </PropertyGroup>
 

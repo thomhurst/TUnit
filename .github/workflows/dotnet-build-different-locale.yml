@@ -23,20 +23,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup .NET 8
+      # Build only: the SDK pinned by global.json builds every target framework.
+      - name: Setup .NET
         uses: actions/setup-dotnet@v6.0.0
         with:
-          dotnet-version: 10.0.401
-
-      - name: Setup .NET 9
-        uses: actions/setup-dotnet@v6.0.0
-        with:
-          dotnet-version: 10.0.401
-
-      - name: Setup .NET 10
-        uses: actions/setup-dotnet@v6.0.0
-        with:
-          dotnet-version: 10.0.x
+          global-json-file: global.json
 
       - name: Generate and set locale for subsequent steps
         run: |

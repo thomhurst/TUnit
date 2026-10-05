@@ -28,7 +28,7 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
 {
     public const string DiagnosticId = "TUNITINT001";
 
-    private const string TypedConstantValueDisplay = "TypedConstant.Value (may hold a number)";
+    private const string TypedConstantValueDisplay = "TypedConstant.Value (may hold a number; use ToInvariantString())";
 
     private static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,
@@ -37,7 +37,7 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         category: "Globalization",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "Build-time code must behave identically under every culture. Format and parse numbers and dates with CultureInfo.InvariantCulture.");
+        description: "Build-time code must behave identically under every culture. Format and parse numbers and dates with CultureInfo.InvariantCulture; for a boxed value such as TypedConstant.Value use the null-preserving ToInvariantString() extension. See .claude/docs/project-structure.md.");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
