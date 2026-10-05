@@ -38,7 +38,7 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         category: "Globalization",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "Build-time code must behave identically under every culture. Format and parse numbers and dates with CultureInfo.InvariantCulture; for a boxed value such as TypedConstant.Value use the null-preserving ToInvariantString() extension. See .claude/docs/project-structure.md.");
+        description: "Build-time code must behave identically under every culture. Format and parse numbers and dates with CultureInfo.InvariantCulture; for a boxed value such as TypedConstant.Value use the null-preserving ToInvariantString() extension. The rule is not exhaustive: a number already typed object or an unconstrained generic before it is formatted is not seen (TypedConstant.Value excepted). See .claude/docs/project-structure.md.");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
