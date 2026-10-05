@@ -223,8 +223,9 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         var type = UnderlyingType(source);
 
         // A non-negative integer constant ("_" + 1, $"{0}") formats the same in every culture: only the
-        // negative sign varies for integers. Negative and floating-point constants are still reported.
-        if (IsNonNegativeIntegerConstant(source))
+        // negative sign varies for integers. That holds only without a culture-dependent format such as
+        // "N2" (group and decimal separators). Negative and floating-point constants are still reported.
+        if (IsNonNegativeIntegerConstant(source) && IsCultureNeutralIntegerFormat(format))
         {
             return;
         }
@@ -289,6 +290,23 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
     private static bool IsNonNegativeIntegerConstant(IOperation operation)
         => operation.ConstantValue is { HasValue: true, Value: sbyte or short or int or long } constant
            && System.Convert.ToInt64(constant.Value, System.Globalization.CultureInfo.InvariantCulture) >= 0;
+
+    /// <summary>No format, or a standard integer format whose output has no separators: D, G or X.</summary>
+    private static bool IsCultureNeutralIntegerFormat(IOperation? format)
+    {
+        if (format is null)
+        {
+            return true;
+        }
+
+        if (format.ConstantValue is not { HasValue: true, Value: string text })
+        {
+            return false;
+        }
+
+        return text.Length == 0
+            || "DdGgXx".IndexOf(text[0]) >= 0 && text.Skip(1).All(char.IsDigit);
+    }
 
     private static bool IsHexFormat(IOperation? format)
         => format?.ConstantValue is { HasValue: true, Value: string { Length: > 0 } text } && (text[0] == 'x' || text[0] == 'X');
