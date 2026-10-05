@@ -15,6 +15,10 @@
                       ReferenceOutputAssembly="false"
                       SetTargetFramework="TargetFramework=netstandard2.0"
                       PrivateAssets="all" />
+    <ProjectReference Include="..\..\src\TUnit.Assertions.Should\TUnit.Assertions.Should.csproj"
+                      ReferenceOutputAssembly="false"
+                      SetTargetFramework="TargetFramework=netstandard2.0"
+                      PrivateAssets="all" />
   </ItemGroup>
 
   <!-- Copy the netstandard2.0 builds of TUnit.Core / TUnit.Assertions / TUnit.Assertions.Should
