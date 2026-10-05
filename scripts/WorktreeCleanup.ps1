@@ -153,16 +153,18 @@ function Remove-MergedWorktree {
     }
     # A link to a worktree is not that worktree: git would follow it and remove the target.
     # Only the path itself is checked; a symlinked ancestor (macOS's /var) is fine and expected.
-    if ((Get-Item -LiteralPath $Worktree -Force).LinkType) {
+    if ((Get-Item -LiteralPath $Worktree -Force -ErrorAction SilentlyContinue).LinkType) {
         Write-Host "Preserving worktree $Label : $Worktree (path is a link)"
         return
     }
     # Ask git whether the path is the work tree's root rather than comparing paths: git reports
     # symlink-resolved paths (/private/var/... for macOS's /var/...), Resolve-Path does not.
     $null = git -C $Worktree rev-parse --show-toplevel 2>$null
-    $topLevelOk = $LASTEXITCODE -eq 0
+    $isInsideWorkTree = $LASTEXITCODE -eq 0
     $prefix = git -C $Worktree rev-parse --show-prefix 2>$null
-    if (-not $topLevelOk -or $LASTEXITCODE -ne 0 -or $prefix) {
+    $prefixKnown = $LASTEXITCODE -eq 0
+    $isWorkTreeRoot = $isInsideWorkTree -and $prefixKnown -and -not $prefix
+    if (-not $isWorkTreeRoot) {
         Write-Host "Preserving worktree $Label : $Worktree (could not verify repository path)"
         return
     }
