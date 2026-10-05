@@ -46,5 +46,7 @@ jobs:
 
       # The whole CI solution, not just one project: every source generator runs during this build,
       # inside a compiler that uses the locale above, and must still emit valid C#.
+      # A version is passed as the main pipeline does: under GitHub Actions Directory.Build.props
+      # leaves Version unset, and TUnit.Assertions.Should's "$(Version)-beta" would then be invalid.
       - name: Build
-        run: dotnet build TUnit.CI.slnx -c Release
+        run: dotnet build TUnit.CI.slnx -c Release -p:Version=1.0.0

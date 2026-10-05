@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <!-- RunInternalAnalyzersTestsModule requests a hang dump, like the other analyzer test modules. -->
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
   </ItemGroup>
 
   <Import Project="..\..\eng\TestProject.targets" />
