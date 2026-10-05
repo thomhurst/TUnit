@@ -12,8 +12,12 @@ namespace TUnit.Analyzers.Internal;
 /// fr-FR a double formats with a decimal comma — both produce generated C# that does not compile,
 /// and parsing with the wrong separator silently changes values.
 /// CA1305 only sees explicit calls such as <c>ToString()</c> and <c>string.Format</c>; it misses
-/// interpolated strings, <c>+</c> concatenation and <c>StringBuilder.Append(int)</c>, which is
-/// where generated code is built. This rule covers all of them.
+/// interpolated strings, <c>+</c> / <c>+=</c> concatenation and <c>StringBuilder.Append(int)</c>,
+/// which is where generated code is built. This rule covers all of them.
+/// <para>
+/// Limit: only statically typed values are checked. A number reaching a conversion as
+/// <c>object</c> or an unconstrained generic (e.g. <c>$"{(object) i}"</c>) is not seen.
+/// </para>
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
@@ -43,6 +47,7 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
             start.RegisterOperationAction(c => AnalyzeInterpolation(c, types), OperationKind.Interpolation);
             start.RegisterOperationAction(c => AnalyzeHandlerAppend(c, types), OperationKind.InterpolatedStringAppendFormatted);
             start.RegisterOperationAction(c => AnalyzeConcatenation(c, types), OperationKind.Binary);
+            start.RegisterOperationAction(c => AnalyzeCompoundConcatenation(c, types), OperationKind.CompoundAssignment);
             start.RegisterOperationAction(c => AnalyzeInvocation(c, types), OperationKind.Invocation);
         });
     }
@@ -106,14 +111,28 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        foreach (var operand in new[] { binary.LeftOperand, binary.RightOperand })
-        {
-            var operandType = UnderlyingType(operand);
+        ReportOperandIfCultureSensitive(context, types, binary.LeftOperand);
+        ReportOperandIfCultureSensitive(context, types, binary.RightOperand);
+    }
 
-            if (types.IsCultureSensitive(operandType))
-            {
-                Report(context, operand, "String concatenation", operandType!);
-            }
+    // s += i
+    private static void AnalyzeCompoundConcatenation(OperationAnalysisContext context, KnownTypes types)
+    {
+        var assignment = (ICompoundAssignmentOperation) context.Operation;
+
+        if (assignment.OperatorKind == BinaryOperatorKind.Add && assignment.Target.Type?.SpecialType == SpecialType.System_String)
+        {
+            ReportOperandIfCultureSensitive(context, types, assignment.Value);
+        }
+    }
+
+    private static void ReportOperandIfCultureSensitive(OperationAnalysisContext context, KnownTypes types, IOperation operand)
+    {
+        var operandType = UnderlyingType(operand);
+
+        if (types.IsCultureSensitive(operandType))
+        {
+            Report(context, operand, "String concatenation", operandType!);
         }
     }
 
@@ -148,12 +167,20 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        // string.Format("{0}", value)
-        if (method.Name == "Format" && method.ContainingType.SpecialType == SpecialType.System_String)
+        // string.Format("{0}", value), string.Concat(prefix, value), string.Join(", ", values)
+        if (method.ContainingType.SpecialType == SpecialType.System_String && method.Name is "Format" or "Concat" or "Join")
         {
-            foreach (var argument in invocation.Arguments.Skip(1))
+            // Join<T>(separator, IEnumerable<T>) formats every element with the current culture.
+            if (method is { Name: "Join", IsGenericMethod: true } && types.IsCultureSensitive(method.TypeArguments[0]))
             {
-                ReportArgumentIfCultureSensitive(context, types, argument, "string.Format");
+                Report(context, invocation, "string.Join", method.TypeArguments[0]);
+                return;
+            }
+
+            // The format string / separator is text, never a formatted value.
+            foreach (var argument in method.Name == "Concat" ? invocation.Arguments : invocation.Arguments.Skip(1))
+            {
+                ReportArgumentIfCultureSensitive(context, types, argument, $"string.{method.Name}");
             }
 
             return;
@@ -193,11 +220,28 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
 
     private static void ReportArgumentIfCultureSensitive(OperationAnalysisContext context, KnownTypes types, IArgumentOperation argument, string conversion)
     {
-        var argumentType = UnderlyingType(argument.Value);
-
-        if (types.IsCultureSensitive(argumentType))
+        // string.Format("{0} {1}", a, b) passes a compiler-built params array: check its elements.
+        if (argument.ArgumentKind == ArgumentKind.ParamArray
+            && argument.Value is IArrayCreationOperation { Initializer: { } initializer })
         {
-            Report(context, argument.Value, conversion, argumentType!);
+            foreach (var element in initializer.ElementValues)
+            {
+                ReportValueIfCultureSensitive(context, types, element, conversion);
+            }
+
+            return;
+        }
+
+        ReportValueIfCultureSensitive(context, types, argument.Value, conversion);
+    }
+
+    private static void ReportValueIfCultureSensitive(OperationAnalysisContext context, KnownTypes types, IOperation value, string conversion)
+    {
+        var valueType = UnderlyingType(value);
+
+        if (types.IsCultureSensitive(valueType))
+        {
+            Report(context, value, conversion, valueType!);
         }
     }
 

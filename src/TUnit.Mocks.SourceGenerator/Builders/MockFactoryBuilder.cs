@@ -114,7 +114,7 @@ internal static class MockFactoryBuilder
             var map = GetSecondaryMap(model, i);
             var arrayExpr = map.Length == 0
                 ? "global::System.Array.Empty<int>()"
-                : $"new int[] {{ {string.Join(", ", map)} }}";
+                : $"new int[] {{ {string.Join(", ", map.Select(id => id.ToString(CultureInfo.InvariantCulture)))} }}";
             writer.AppendLine($"private static readonly int[] _secondaryMap{i.ToString(CultureInfo.InvariantCulture)} = {arrayExpr};");
         }
         writer.AppendLine();

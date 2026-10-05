@@ -13,6 +13,9 @@ public class CultureSensitiveFormattingAnalyzerTests
     [Arguments("_ = $\"{n}\";", "Interpolation")]
     [Arguments("_ = $\"{dt}\";", "Interpolation")]
     [Arguments("_ = \"a\" + i;", "String concatenation")]
+    [Arguments("s += i;", "String concatenation")]
+    [Arguments("_ = string.Concat(s, i);", "string.Concat")]
+    [Arguments("_ = string.Join(\",\", new[] { i });", "string.Join")]
     [Arguments("sb.Append($\"{i}\");", "Interpolation")]
     [Arguments("sb.Append(i);", "StringBuilder.Append")]
     [Arguments("sb.Append(d);", "StringBuilder.Append")]
@@ -23,6 +26,8 @@ public class CultureSensitiveFormattingAnalyzerTests
     [Arguments("_ = int.Parse(s);", "Int32.Parse")]
     [Arguments("_ = double.TryParse(s, out _);", "Double.TryParse")]
     [Arguments("_ = string.Format(\"{0}\", i);", "string.Format")]
+    [Arguments("_ = string.Format(\"{0} {1} {2}\", s, u, d);", "string.Format")]
+    [Arguments("writer.Write(\"{0} {1}\", s, i);", "TextWriter.Write")]
     [Arguments("_ = Convert.ToString(i);", "Convert.ToString")]
     [Arguments("_ = Convert.ToDouble(s);", "Convert.ToDouble")]
     public async Task Reports_Culture_Sensitive_Conversion(string statement, string expectedConversion)
@@ -49,6 +54,10 @@ public class CultureSensitiveFormattingAnalyzerTests
     [Arguments("sb.Append(',', i);")]
     [Arguments("sb.Insert(i, \"x\");")]
     [Arguments("sb.Append(u).Append(c).Append(s);")]
+    [Arguments("s += u;")]
+    [Arguments("_ = string.Format(\"{0} {1}\", s, u);")]
+    [Arguments("_ = string.Join(\",\", new[] { u });")]
+    [Arguments("_ = string.Concat(s, c);")]
     public async Task Ignores_Invariant_Or_Culture_Independent_Conversion(string statement)
     {
         var diagnostics = await Analyze(statement);
