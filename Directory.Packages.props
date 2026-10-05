@@ -24,28 +24,35 @@
     <PackageVersion Include="FSharp.Core" Version="10.1.401" />
     <PackageVersion Include="Humanizer" Version="3.0.10" />
     <PackageVersion Include="MessagePack" Version="3.1.11" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.31" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.20" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" Condition="'$(TargetFramework)' != 'net8.0' And '$(TargetFramework)' != 'net9.0'" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
     <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="18.9.6" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="18.10.1" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.7.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.2" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Version="1.1.2" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" Version="1.1.2" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.4" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Version="1.1.4" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" Version="1.1.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" Version="1.1.2" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" Version="1.1.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.7.0" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.7.23" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <!-- Per-TFM versions: the 10.x packages do not support net8.0/net9.0 consumers. -->
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.1" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.20" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.12" Condition="'$(TargetFramework)' != 'net8.0' And '$(TargetFramework)' != 'net9.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.20" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" Condition="'$(TargetFramework)' != 'net8.0' And '$(TargetFramework)' != 'net9.0'" />
     <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="2.1.2" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.63.0" />
@@ -89,7 +96,7 @@
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.8.0" />
-    <PackageVersion Include="Polyfill" Version="11.4.1" />
+    <PackageVersion Include="Polyfill" Version="11.4.3" />
     <PackageVersion Include="PublicApiGenerator" Version="11.5.4" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
@@ -114,15 +121,15 @@
     <PackageVersion Include="Testcontainers.Redis" Version="4.15.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
     <PackageVersion Include="TUnit.Assertions.FSharp" Version="1.72.16" />
-    <PackageVersion Include="Verify" Version="33.2.0" />
-    <PackageVersion Include="Verify.NUnit" Version="33.2.0" />
+    <PackageVersion Include="Verify" Version="33.3.0" />
+    <PackageVersion Include="Verify.NUnit" Version="33.3.0" />
     <PackageVersion Include="TUnit" Version="1.72.16" />
     <PackageVersion Include="TUnit.AspNetCore" Version="1.72.16" />
     <PackageVersion Include="TUnit.Core" Version="1.72.16" />
     <PackageVersion Include="TUnit.Engine" Version="1.72.16" />
     <PackageVersion Include="TUnit.Assertions" Version="1.72.16" />
-    <PackageVersion Include="Verify.TUnit" Version="33.2.0" />
-    <PackageVersion Include="Vogen" Version="8.0.6" />
+    <PackageVersion Include="Verify.TUnit" Version="33.3.0" />
+    <PackageVersion Include="Vogen" Version="8.0.7" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
