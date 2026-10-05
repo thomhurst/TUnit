@@ -179,7 +179,7 @@ public static class TypeExtensions
         // 1. Start with '<' (like <MethodName>d__0 for async state machines)
         // 2. Contain '<>' (like <>c for compiler-generated classes)
         // This won't match normal generic types like List<T> because those don't have '<' in the type name itself
-        return typeName.StartsWith("<") || typeName.Contains("<>");
+        return typeName.StartsWith("<", StringComparison.Ordinal) || typeName.Contains("<>");
     }
 
     public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>

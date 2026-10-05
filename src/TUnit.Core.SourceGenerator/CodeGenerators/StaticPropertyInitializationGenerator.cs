@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
@@ -350,7 +351,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
     private static string GetStableHash(PropertyWithDataSourceModel propertyData)
     {
         var typeName = propertyData.Property.ContainingType.GloballyQualified;
-        return FileNameHelper.GetStableHashCode($"{typeName}.{propertyData.Property.Name}").ToString("x8");
+        return FileNameHelper.GetStableHashCode($"{typeName}.{propertyData.Property.Name}").ToString("x8", CultureInfo.InvariantCulture);
     }
 
     private static string GetInitializerMethodName(PropertyWithDataSourceModel propertyData)

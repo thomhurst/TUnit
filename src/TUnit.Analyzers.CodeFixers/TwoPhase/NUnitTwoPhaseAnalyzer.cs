@@ -110,7 +110,7 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
             {
                 var containingNamespace = methodSymbol.ContainingType?.ContainingNamespace?.ToDisplayString();
                 // Only return false if we positively know it's NOT NUnit
-                if (containingNamespace != null && !containingNamespace.StartsWith("NUnit.Framework"))
+                if (containingNamespace != null && !containingNamespace.StartsWith("NUnit.Framework", StringComparison.Ordinal))
                 {
                     return false;
                 }
@@ -1010,11 +1010,11 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
         if (constraint is InvocationExpressionSyntax invocation)
         {
             var invocationText = invocation.ToString();
-            if (invocationText.StartsWith("Is.TypeOf(typeof("))
+            if (invocationText.StartsWith("Is.TypeOf(typeof(", StringComparison.Ordinal))
             {
                 // Extract type from Is.TypeOf(typeof(ArgumentException))
                 var start = "Is.TypeOf(typeof(".Length;
-                var end = invocationText.LastIndexOf("))");
+                var end = invocationText.LastIndexOf("))", StringComparison.Ordinal);
                 if (end > start)
                 {
                     return invocationText.Substring(start, end - start);
@@ -1431,7 +1431,7 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
     protected override bool IsFrameworkNamespace(string? ns)
     {
-        return ns != null && ns.StartsWith("NUnit.Framework");
+        return ns != null && ns.StartsWith("NUnit.Framework", StringComparison.Ordinal);
     }
 
     protected override bool ShouldRemoveAttribute(AttributeSyntax node)

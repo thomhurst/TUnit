@@ -252,7 +252,7 @@ public class MSTestAssertionRewriter : AssertionRewriter
     protected override bool IsFrameworkAssertionNamespace(string namespaceName)
     {
         return namespaceName == "Microsoft.VisualStudio.TestTools.UnitTesting" ||
-               namespaceName.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting.");
+               namespaceName.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting.", StringComparison.Ordinal);
     }
 
     protected override bool IsKnownAssertionTypeBySyntax(string targetType, string methodName)

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
@@ -731,7 +732,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         // Stable (per-build deterministic) hash of the full type name. SafeClassName collapses every
         // separator to '_', so two types whose FQNs differ only in '.' vs '_' share a SafeClassName;
         // the hash keeps both the source-class name and the merged-.cctor field unique.
-        var stableHash = FileNameHelper.GetStableHashCode(model.ClassFullyQualifiedName).ToString("x8");
+        var stableHash = FileNameHelper.GetStableHashCode(model.ClassFullyQualifiedName).ToString("x8", CultureInfo.InvariantCulture);
         var sourceClassName = $"PropertyInjectionSource_{stableHash}";
         var fileName = $"{model.SafeClassName}_PropertyInjection.g.cs";
 
@@ -907,7 +908,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static void GenerateInitializerPropertySource(SourceProductionContext context, AsyncInitializerModel model)
     {
         var fileName = $"{model.SafeTypeName}_InitializerProperties.g.cs";
-        var stableHash = FileNameHelper.GetStableHashCode(model.TypeFullyQualified).ToString("x8");
+        var stableHash = FileNameHelper.GetStableHashCode(model.TypeFullyQualified).ToString("x8", CultureInfo.InvariantCulture);
 
         var sb = new StringBuilder();
         WriteGeneratedFileHeader(sb);
@@ -947,7 +948,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static void GenerateGenericPropertyInjectionSource(SourceProductionContext context, ConcreteGenericTypeModel model)
     {
         // See GeneratePropertyInjectionSource: deterministic hash disambiguates SafeTypeName collisions.
-        var stableHash = FileNameHelper.GetStableHashCode(model.ConcreteTypeFullyQualified).ToString("x8");
+        var stableHash = FileNameHelper.GetStableHashCode(model.ConcreteTypeFullyQualified).ToString("x8", CultureInfo.InvariantCulture);
         var sourceClassName = $"PropertyInjectionSource_Generic_{stableHash}";
         var fileName = $"{model.SafeTypeName}_Generic_PropertyInjection.g.cs";
 
@@ -1036,7 +1037,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static void GenerateGenericInitializerPropertySource(SourceProductionContext context, ConcreteGenericTypeModel model)
     {
         var fileName = $"{model.SafeTypeName}_Generic_InitializerProperties.g.cs";
-        var stableHash = FileNameHelper.GetStableHashCode(model.ConcreteTypeFullyQualified).ToString("x8");
+        var stableHash = FileNameHelper.GetStableHashCode(model.ConcreteTypeFullyQualified).ToString("x8", CultureInfo.InvariantCulture);
 
         var sb = new StringBuilder();
         WriteGeneratedFileHeader(sb);
@@ -1231,7 +1232,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         var displayString = typeSymbol.GloballyQualified();
 
-        if (displayString.EndsWith("?"))
+        if (displayString.EndsWith("?", StringComparison.Ordinal))
         {
             displayString = displayString.TrimEnd('?');
         }

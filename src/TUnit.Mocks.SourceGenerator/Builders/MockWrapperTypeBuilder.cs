@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Linq;
 using TUnit.Mocks.SourceGenerator.Models;
 using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
@@ -204,7 +205,7 @@ internal static class MockWrapperTypeBuilder
     /// with, so setups and verifications see one call either way.
     /// </summary>
     private static string EngineDispatch(MockMemberModel prop, string? memberName = null, string? args = null)
-        => $"global::TUnit.Mocks.MockRegistry.GetEngine(this).HandleCall({prop.SetterMemberId}, "
+        => $"global::TUnit.Mocks.MockRegistry.GetEngine(this).HandleCall({prop.SetterMemberId.ToString(CultureInfo.InvariantCulture)}, "
             + $"\"{memberName ?? "set_" + prop.Name}\", {args ?? "new object?[] { value }"})";
 
     // Cast the underlying Object to a specific interface so an explicit forward dispatches to

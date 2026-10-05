@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Linq;
 using TUnit.Mocks.SourceGenerator.Models;
 using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
@@ -383,7 +384,7 @@ internal static class MockImplBuilder
                 {
                     writer.AppendLine($"{getterPrefix}get");
                     writer.OpenBrace();
-                    writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
+                    writer.AppendLine($"_engine.HandleCall({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
                     writer.AppendLine("return default;");
                     writer.CloseBrace();
                 }
@@ -391,7 +392,7 @@ internal static class MockImplBuilder
                 {
                     writer.AppendLine($"{getterPrefix}get");
                     writer.OpenBrace();
-                    writer.AppendLine($"if (_engine.TryHandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>()))");
+                    writer.AppendLine($"if (_engine.TryHandleCall({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>()))");
                     writer.AppendLine("{");
                     writer.IncreaseIndent();
                     writer.AppendLine("return default;");
@@ -403,17 +404,17 @@ internal static class MockImplBuilder
             }
             else if (prop.IsAbstractMember && prop.IsReturnTypeStaticAbstractInterface)
             {
-                writer.AppendLine($"{getterPrefix}get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
+                writer.AppendLine($"{getterPrefix}get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
             }
             else if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
+                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
             }
             else if (prop.IsReturnTypeStaticAbstractInterface)
             {
                 writer.AppendLine($"{getterPrefix}get");
                 writer.OpenBrace();
-                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
                 writer.AppendLine($"return ({prop.ReturnType})__rawResult!;");
@@ -426,7 +427,7 @@ internal static class MockImplBuilder
             {
                 writer.AppendLine($"{getterPrefix}get");
                 writer.OpenBrace();
-                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}, out var __result{FormatAutoMockFactoryArgument(autoMockFactory)}))");
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}, out var __result{FormatAutoMockFactoryArgument(autoMockFactory)}))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
                 writer.AppendLine("return __result;");
@@ -449,13 +450,13 @@ internal static class MockImplBuilder
             // pass-through fallback the `set` path has (#6829).
             if (prop.IsAbstractMember || prop.IsInitOnly)
             {
-                writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
+                writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId.ToString(CultureInfo.InvariantCulture)}, \"set_{prop.Name}\", {setterArgs});");
             }
             else
             {
                 writer.AppendLine($"{setterPrefix}set");
                 writer.OpenBrace();
-                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs}))");
+                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId.ToString(CultureInfo.InvariantCulture)}, \"set_{prop.Name}\", {setterArgs}))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
                 writer.AppendLine($"_wrappedInstance.{EscapeIdentifier(prop.Name)} = value;");
@@ -949,12 +950,12 @@ internal static class MockImplBuilder
             if (prop.HasGetter)
             {
                 writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
-                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
+                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
             }
             if (prop.HasSetter)
             {
                 writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
-                writer.AppendLine($"{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+                writer.AppendLine($"{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId.ToString(CultureInfo.InvariantCulture)}, \"set_{prop.Name}\", new object?[] {{ value }});");
             }
             writer.CloseBrace();
             return;
@@ -971,17 +972,17 @@ internal static class MockImplBuilder
                 // ref struct property — can't use HandleCallWithReturn<T>, use void dispatch + return default
                 writer.AppendLine("get");
                 writer.OpenBrace();
-                writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
+                writer.AppendLine($"_engine.HandleCall({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
                 writer.AppendLine("return default;");
                 writer.CloseBrace();
             }
             else if (prop.IsReturnTypeStaticAbstractInterface)
             {
-                writer.AppendLine($"get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
+                writer.AppendLine($"get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
             }
             else
             {
-                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
+                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
             }
         }
 
@@ -991,11 +992,11 @@ internal static class MockImplBuilder
             if (prop.IsRefStructReturn)
             {
                 // ref struct property — can't box value, use empty args
-                writer.AppendLine($"{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", global::System.Array.Empty<object?>());");
+                writer.AppendLine($"{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId.ToString(CultureInfo.InvariantCulture)}, \"set_{prop.Name}\", global::System.Array.Empty<object?>());");
             }
             else
             {
-                writer.AppendLine($"{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+                writer.AppendLine($"{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId.ToString(CultureInfo.InvariantCulture)}, \"set_{prop.Name}\", new object?[] {{ value }});");
             }
         }
 
@@ -1020,7 +1021,7 @@ internal static class MockImplBuilder
                 {
                     writer.AppendLine($"{getterPrefix}get");
                     writer.OpenBrace();
-                    writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
+                    writer.AppendLine($"_engine.HandleCall({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
                     writer.AppendLine("return default;");
                     writer.CloseBrace();
                 }
@@ -1028,7 +1029,7 @@ internal static class MockImplBuilder
                 {
                     writer.AppendLine($"{getterPrefix}get");
                     writer.OpenBrace();
-                    writer.AppendLine($"if (_engine.TryHandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>()))");
+                    writer.AppendLine($"if (_engine.TryHandleCall({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>()))");
                     writer.AppendLine("{");
                     writer.IncreaseIndent();
                     writer.AppendLine("return default;");
@@ -1040,18 +1041,18 @@ internal static class MockImplBuilder
             }
             else if (prop.IsAbstractMember && prop.IsReturnTypeStaticAbstractInterface)
             {
-                writer.AppendLine($"{getterPrefix}get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
+                writer.AppendLine($"{getterPrefix}get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
             }
             else if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
+                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
             }
             else if (prop.IsReturnTypeStaticAbstractInterface)
             {
                 // Virtual property getter: try engine, fall back to base (CS8920-safe)
                 writer.AppendLine($"{getterPrefix}get");
                 writer.OpenBrace();
-                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
                 writer.AppendLine($"return ({prop.ReturnType})__rawResult!;");
@@ -1065,7 +1066,7 @@ internal static class MockImplBuilder
                 // Virtual property getter: try engine, fall back to base
                 writer.AppendLine($"{getterPrefix}get");
                 writer.OpenBrace();
-                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}, out var __result{FormatAutoMockFactoryArgument(autoMockFactory)}))");
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}, out var __result{FormatAutoMockFactoryArgument(autoMockFactory)}))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
                 writer.AppendLine("return __result;");
@@ -1085,7 +1086,7 @@ internal static class MockImplBuilder
 
             if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
+                writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId.ToString(CultureInfo.InvariantCulture)}, \"set_{prop.Name}\", {setterArgs});");
             }
             else
             {
@@ -1093,7 +1094,7 @@ internal static class MockImplBuilder
                 // allowed from an init accessor, so init-only needs no special case here)
                 writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)}");
                 writer.OpenBrace();
-                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs}))");
+                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId.ToString(CultureInfo.InvariantCulture)}, \"set_{prop.Name}\", {setterArgs}))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
                 writer.AppendLine($"base.{EscapeIdentifier(prop.Name)} = value;");
@@ -1122,14 +1123,14 @@ internal static class MockImplBuilder
         {
             var argsArray = GetIndexerGetterArgsArray(prop);
             writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
-            writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
+            writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
         }
 
         if (prop.HasSetter)
         {
             var setterArgs = GetIndexerSetterArgsArray(prop);
             writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
-            writer.AppendLine($"{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
+            writer.AppendLine($"{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId.ToString(CultureInfo.InvariantCulture)}, \"set_Item\", {setterArgs});");
         }
 
         writer.CloseBrace();
@@ -1157,13 +1158,13 @@ internal static class MockImplBuilder
             writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
             if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
+                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
             }
             else
             {
                 writer.AppendLine($"{getterPrefix}get");
                 writer.OpenBrace();
-                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault}, out var __result))");
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault}, out var __result))");
                 writer.OpenBrace();
                 writer.AppendLine("return __result;");
                 writer.CloseBrace();
@@ -1180,13 +1181,13 @@ internal static class MockImplBuilder
             // (CS8852), so an init-only wrap indexer dispatches without the fallback (#6829).
             if (prop.IsAbstractMember || (prop.IsInitOnly && fallbackTarget != "base"))
             {
-                writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
+                writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)} => _engine.HandleCall({prop.SetterMemberId.ToString(CultureInfo.InvariantCulture)}, \"set_Item\", {setterArgs});");
             }
             else
             {
                 writer.AppendLine($"{setterPrefix}{SetterKeyword(prop)}");
                 writer.OpenBrace();
-                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs}))");
+                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId.ToString(CultureInfo.InvariantCulture)}, \"set_Item\", {setterArgs}))");
                 writer.OpenBrace();
                 writer.AppendLine($"{fallbackTarget}[{argPassList}] = value;");
                 writer.CloseBrace();
@@ -1325,7 +1326,7 @@ internal static class MockImplBuilder
                                 // The `!` suppresses CS8600/CS8604 when a delegate parameter type
                                 // is non-nullable (the cast from object? would otherwise warn). The
                                 // single-parameter dispatch path uses the same `args!` pattern.
-                                castArgs.Add($"({evt.RaiseParameterList[i].FullyQualifiedType})__argArray[{i}]!");
+                                castArgs.Add($"({evt.RaiseParameterList[i].FullyQualifiedType})__argArray[{i.ToString(CultureInfo.InvariantCulture)}]!");
                             }
                             writer.AppendLine($"Raise_{evt.Name}({string.Join(", ", castArgs)});");
                             writer.DecreaseIndent();
@@ -1458,11 +1459,11 @@ internal static class MockImplBuilder
     {
         if (method is { IsGenericMethod: true })
         {
-            return $"_engine.HandleCall({memberId}, \"{memberName}\", {argsArray}, {TypeArgumentsArrayLiteral(method)})";
+            return $"_engine.HandleCall({memberId.ToString(CultureInfo.InvariantCulture)}, \"{memberName}\", {argsArray}, {TypeArgumentsArrayLiteral(method)})";
         }
         return isTyped
-            ? $"_engine.HandleCall<{typeArgs}>({memberId}, \"{memberName}\", {argsList})"
-            : $"_engine.HandleCall({memberId}, \"{memberName}\", {argsArray})";
+            ? $"_engine.HandleCall<{typeArgs}>({memberId.ToString(CultureInfo.InvariantCulture)}, \"{memberName}\", {argsList})"
+            : $"_engine.HandleCall({memberId.ToString(CultureInfo.InvariantCulture)}, \"{memberName}\", {argsArray})";
     }
 
     /// <summary>Emits a HandleCallWithReturn invocation, choosing typed or fallback path.</summary>
@@ -1473,11 +1474,11 @@ internal static class MockImplBuilder
         {
             // Generic methods dispatch through the object?[] overload that carries the method's type
             // arguments; an auto-mock factory (for an auto-mockable return type) is preserved before it.
-            return $"_engine.HandleCallWithReturn<{returnTypeArg}>({memberId}, \"{memberName}\", {argsArray}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)}, {TypeArgumentsArrayLiteral(method)})";
+            return $"_engine.HandleCallWithReturn<{returnTypeArg}>({memberId.ToString(CultureInfo.InvariantCulture)}, \"{memberName}\", {argsArray}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)}, {TypeArgumentsArrayLiteral(method)})";
         }
         return isTyped
-            ? $"_engine.HandleCallWithReturn<{returnTypeArg}, {typeArgs}>({memberId}, \"{memberName}\", {argsList}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)})"
-            : $"_engine.HandleCallWithReturn<{returnTypeArg}>({memberId}, \"{memberName}\", {argsArray}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)})";
+            ? $"_engine.HandleCallWithReturn<{returnTypeArg}, {typeArgs}>({memberId.ToString(CultureInfo.InvariantCulture)}, \"{memberName}\", {argsList}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)})"
+            : $"_engine.HandleCallWithReturn<{returnTypeArg}>({memberId.ToString(CultureInfo.InvariantCulture)}, \"{memberName}\", {argsArray}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)})";
     }
 
     /// <summary>
@@ -1498,14 +1499,14 @@ internal static class MockImplBuilder
     /// <summary>Emits a TryHandleCall condition, choosing typed or fallback path.</summary>
     private static string EmitTryHandleCall(bool isTyped, string? typeArgs, string? argsList, string? argsArray, int memberId, string memberName)
         => isTyped
-            ? $"_engine.TryHandleCall<{typeArgs}>({memberId}, \"{memberName}\", {argsList})"
-            : $"_engine.TryHandleCall({memberId}, \"{memberName}\", {argsArray})";
+            ? $"_engine.TryHandleCall<{typeArgs}>({memberId.ToString(CultureInfo.InvariantCulture)}, \"{memberName}\", {argsList})"
+            : $"_engine.TryHandleCall({memberId.ToString(CultureInfo.InvariantCulture)}, \"{memberName}\", {argsArray})";
 
     /// <summary>Emits a TryHandleCallWithReturn condition, choosing typed or fallback path.</summary>
     private static string EmitTryHandleCallWithReturn(bool isTyped, string? typeArgs, string? argsList, string? argsArray, string returnTypeArg, int memberId, string memberName, string defaultValue, string outVar, string? autoMockFactory = null)
         => isTyped
-            ? $"_engine.TryHandleCallWithReturn<{returnTypeArg}, {typeArgs}>({memberId}, \"{memberName}\", {argsList}, {defaultValue}, out var {outVar}{FormatAutoMockFactoryArgument(autoMockFactory)})"
-            : $"_engine.TryHandleCallWithReturn<{returnTypeArg}>({memberId}, \"{memberName}\", {argsArray}, {defaultValue}, out var {outVar}{FormatAutoMockFactoryArgument(autoMockFactory)})";
+            ? $"_engine.TryHandleCallWithReturn<{returnTypeArg}, {typeArgs}>({memberId.ToString(CultureInfo.InvariantCulture)}, \"{memberName}\", {argsList}, {defaultValue}, out var {outVar}{FormatAutoMockFactoryArgument(autoMockFactory)})"
+            : $"_engine.TryHandleCallWithReturn<{returnTypeArg}>({memberId.ToString(CultureInfo.InvariantCulture)}, \"{memberName}\", {argsArray}, {defaultValue}, out var {outVar}{FormatAutoMockFactoryArgument(autoMockFactory)})";
 
     private static string FormatAutoMockFactoryArgument(string? autoMockFactory)
         => autoMockFactory is null ? "" : $", {autoMockFactory}";
@@ -1607,15 +1608,15 @@ internal static class MockImplBuilder
                 safeName ??= GetCompositeShortSafeName(model);
                 nsPrefix ??= GetGlobalMockNamespacePrefix(model);
                 var delegateFqn = nsPrefix + GetOutRefSetterDelegateName(safeName, method, p);
-                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i}) && __v{i} is {delegateFqn} __d{i}) __d{i}({p.Direction.RefKeyword()} {name});");
+                writer.AppendLine($"if (__outRef.TryGetValue({i.ToString(CultureInfo.InvariantCulture)}, out var __v{i.ToString(CultureInfo.InvariantCulture)}) && __v{i.ToString(CultureInfo.InvariantCulture)} is {delegateFqn} __d{i.ToString(CultureInfo.InvariantCulture)}) __d{i.ToString(CultureInfo.InvariantCulture)}({p.Direction.RefKeyword()} {name});");
             }
             else if (p.SpanElementType is not null)
             {
-                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
+                writer.AppendLine($"if (__outRef.TryGetValue({i.ToString(CultureInfo.InvariantCulture)}, out var __v{i.ToString(CultureInfo.InvariantCulture)})) {name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i.ToString(CultureInfo.InvariantCulture)}!);");
             }
             else
             {
-                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {name} = ({p.FullyQualifiedType})__v{i}!;");
+                writer.AppendLine($"if (__outRef.TryGetValue({i.ToString(CultureInfo.InvariantCulture)}, out var __v{i.ToString(CultureInfo.InvariantCulture)})) {name} = ({p.FullyQualifiedType})__v{i.ToString(CultureInfo.InvariantCulture)}!;");
             }
         }
     }
@@ -1710,7 +1711,7 @@ internal static class MockImplBuilder
         var name = StripGlobalPrefix(model.FullyQualifiedName);
         var hasNamespace = !IsGlobalNamespace(model.Namespace);
 
-        if (hasNamespace && name.StartsWith(model.Namespace + "."))
+        if (hasNamespace && name.StartsWith(model.Namespace + ".", StringComparison.Ordinal))
             name = name.Substring(model.Namespace.Length + 1);
 
         // Strip same-namespace qualifications from generic type arguments so that
@@ -1728,7 +1729,7 @@ internal static class MockImplBuilder
 
     /// <summary>Variant that reuses a precomputed safe name to avoid recomputing it per param.</summary>
     public static string GetOutRefSetterDelegateName(string safeName, MockMemberModel method, MockParameterModel param)
-        => $"{safeName}_{method.Name}_M{method.MemberId}_{MockMembersBuilder.ToPascalCase(param.Name)}_{param.Direction.PascalLabel()}Setter";
+        => $"{safeName}_{method.Name}_M{method.MemberId.ToString(CultureInfo.InvariantCulture)}_{MockMembersBuilder.ToPascalCase(param.Name)}_{param.Direction.PascalLabel()}Setter";
 
     /// <summary>Fully qualified (<c>global::</c>-rooted) reference to the delegate.</summary>
     public static string GetOutRefSetterDelegateFqn(MockTypeModel model, MockMemberModel method, MockParameterModel param)
@@ -1773,7 +1774,7 @@ internal static class MockImplBuilder
     }
 
     private static string StripGlobalPrefix(string name)
-        => name.StartsWith("global::") ? name.Substring("global::".Length) : name;
+        => name.StartsWith("global::", StringComparison.Ordinal) ? name.Substring("global::".Length) : name;
 
     private static string SanitizeIdentifier(string name)
         => IdentifierEscaping.SanitizeIdentifier(name);

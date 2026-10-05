@@ -952,7 +952,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // Add null-forgiving operator for reference types if not already present
         // This is safe because we've already checked for null above
         var isNullable = data.TargetType.IsNullable;
-        if (isNullable && !string.IsNullOrEmpty(inlinedBody) && !inlinedBody.StartsWith("value!"))
+        if (isNullable && !string.IsNullOrEmpty(inlinedBody) && !inlinedBody.StartsWith("value!", StringComparison.Ordinal))
         {
             // Replace null-conditional operators with null-forgiving + regular operators
             // value?.Member becomes value!.Member (safe because we already null-checked)
@@ -1315,8 +1315,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
         // Fallback: check for common ref struct types by name
         var typeName = namedType.ToDisplayString();
-        if (typeName.StartsWith("System.Span<") ||
-            typeName.StartsWith("System.ReadOnlySpan<") ||
+        if (typeName.StartsWith("System.Span<", StringComparison.Ordinal) ||
+            typeName.StartsWith("System.ReadOnlySpan<", StringComparison.Ordinal) ||
             typeName == "System.Runtime.CompilerServices.DefaultInterpolatedStringHandler")
         {
             return true;

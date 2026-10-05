@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -408,7 +409,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 
         if (effectivePriority > 0)
         {
-            sourceBuilder.AppendLine($"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({effectivePriority})]");
+            sourceBuilder.AppendLine($"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({effectivePriority.ToString(CultureInfo.InvariantCulture)})]");
         }
 
         // Method declaration

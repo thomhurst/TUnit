@@ -47,7 +47,7 @@ internal static class CovarianceHelper
     /// </summary>
     public static string GetConstraintTypeName(string typeName, ITypeSymbol type)
     {
-        if (type.NullableAnnotation == NullableAnnotation.Annotated && typeName.EndsWith("?"))
+        if (type.NullableAnnotation == NullableAnnotation.Annotated && typeName.EndsWith("?", StringComparison.Ordinal))
         {
             return typeName.Substring(0, typeName.Length - 1);
         }
@@ -60,7 +60,7 @@ internal static class CovarianceHelper
     /// </summary>
     public static string GetCovariantContextExpr(string targetTypeName)
     {
-        var nullableCastType = targetTypeName.EndsWith("?") ? targetTypeName : $"{targetTypeName}?";
+        var nullableCastType = targetTypeName.EndsWith("?", StringComparison.Ordinal) ? targetTypeName : $"{targetTypeName}?";
         return $"source.Context.Map<{targetTypeName}>(static x => ({nullableCastType})x)";
     }
 

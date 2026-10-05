@@ -1,3 +1,4 @@
+using System.Globalization;
 using TUnit.Mocks.SourceGenerator.Models;
 
 namespace TUnit.Mocks.SourceGenerator.Builders;
@@ -51,7 +52,7 @@ internal static class MockDelegateFactoryBuilder
                     if (invokeMethod.IsVoid && !invokeMethod.IsAsync)
                     {
                         // void delegate (Action<...>)
-                        writer.AppendLine($"engine.HandleCall({invokeMethod.MemberId}, \"Invoke\", {argsArray});");
+                        writer.AppendLine($"engine.HandleCall({invokeMethod.MemberId.ToString(CultureInfo.InvariantCulture)}, \"Invoke\", {argsArray});");
                         EmitOutRefReadback(writer, invokeMethod, model);
                     }
                     else if (invokeMethod.IsAsync)
@@ -65,7 +66,7 @@ internal static class MockDelegateFactoryBuilder
                     else
                     {
                         // returning delegate (Func<..., TReturn>)
-                        writer.AppendLine($"var __result = engine.HandleCallWithReturn<{invokeMethod.ReturnType}>({invokeMethod.MemberId}, \"Invoke\", {argsArray}, {invokeMethod.SmartDefault});");
+                        writer.AppendLine($"var __result = engine.HandleCallWithReturn<{invokeMethod.ReturnType}>({invokeMethod.MemberId.ToString(CultureInfo.InvariantCulture)}, \"Invoke\", {argsArray}, {invokeMethod.SmartDefault});");
                         EmitOutRefReadback(writer, invokeMethod, model);
                         writer.AppendLine("return __result;");
                     }
@@ -90,7 +91,7 @@ internal static class MockDelegateFactoryBuilder
         {
             using (writer.Block("try"))
             {
-                writer.AppendLine($"engine.HandleCall({method.MemberId}, \"Invoke\", {argsArray});");
+                writer.AppendLine($"engine.HandleCall({method.MemberId.ToString(CultureInfo.InvariantCulture)}, \"Invoke\", {argsArray});");
                 EmitOutRefReadback(writer, method, model);
                 MockImplBuilder.EmitRawReturnCheck(writer, method);
                 writer.AppendLine(method.IsValueTask
@@ -109,7 +110,7 @@ internal static class MockDelegateFactoryBuilder
         var unwrapped = method.UnwrappedReturnType;
         using (writer.Block("try"))
         {
-            writer.AppendLine($"var __result = engine.HandleCallWithReturn<{unwrapped}>({method.MemberId}, \"Invoke\", {argsArray}, {method.UnwrappedSmartDefault});");
+            writer.AppendLine($"var __result = engine.HandleCallWithReturn<{unwrapped}>({method.MemberId.ToString(CultureInfo.InvariantCulture)}, \"Invoke\", {argsArray}, {method.UnwrappedSmartDefault});");
             EmitOutRefReadback(writer, method, model);
             MockImplBuilder.EmitRawReturnCheck(writer, method);
             writer.AppendLine(method.IsValueTask
@@ -131,7 +132,7 @@ internal static class MockDelegateFactoryBuilder
     // Lambda parameter names need not match the delegate's, so use positional names the generator
     // owns. A declared name such as `engine`, `del` or `__result` would otherwise shadow a captured
     // local or collide with a local declared in the lambda body (CS0136).
-    private static string GetLambdaParameterName(int index) => $"arg{index}";
+    private static string GetLambdaParameterName(int index) => $"arg{index.ToString(CultureInfo.InvariantCulture)}";
 
     private static string BuildLambdaParameterList(MockMemberModel method)
     {

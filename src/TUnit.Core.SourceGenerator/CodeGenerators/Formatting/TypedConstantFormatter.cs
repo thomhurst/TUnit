@@ -128,7 +128,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
 
                 // Fallback to cast for non-member values
                 var formattedValue = FormatPrimitive(value);
-                return formattedValue != null && formattedValue.StartsWith("-")
+                return formattedValue != null && formattedValue.StartsWith("-", StringComparison.Ordinal)
                     ? $"({targetType.GloballyQualified()})({formattedValue})"
                     : $"({targetType.GloballyQualified()}){formattedValue}";
             }
@@ -139,27 +139,27 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 switch (targetType.SpecialType)
                 {
                     case SpecialType.System_Byte:
-                        return $"(byte){(int)charValue}";
+                        return $"(byte){((int)charValue).ToString(CultureInfo.InvariantCulture)}";
                     case SpecialType.System_SByte:
-                        return $"(sbyte){(int)charValue}";
+                        return $"(sbyte){((int)charValue).ToString(CultureInfo.InvariantCulture)}";
                     case SpecialType.System_Int16:
-                        return $"(short){(int)charValue}";
+                        return $"(short){((int)charValue).ToString(CultureInfo.InvariantCulture)}";
                     case SpecialType.System_UInt16:
-                        return $"(ushort){(int)charValue}";
+                        return $"(ushort){((int)charValue).ToString(CultureInfo.InvariantCulture)}";
                     case SpecialType.System_Int32:
-                        return $"{(int)charValue}";
+                        return $"{((int)charValue).ToString(CultureInfo.InvariantCulture)}";
                     case SpecialType.System_UInt32:
                         return $"{(uint)charValue}u";
                     case SpecialType.System_Int64:
-                        return $"{(long)charValue}L";
+                        return $"{((long)charValue).ToString(CultureInfo.InvariantCulture)}L";
                     case SpecialType.System_UInt64:
                         return $"{(ulong)charValue}UL";
                     case SpecialType.System_Single:
-                        return $"{(float)charValue}f";
+                        return $"{((float)charValue).ToString(CultureInfo.InvariantCulture)}f";
                     case SpecialType.System_Double:
-                        return $"{(double)charValue}d";
+                        return $"{((double)charValue).ToString(CultureInfo.InvariantCulture)}d";
                     case SpecialType.System_Decimal:
-                        return $"{(decimal)charValue}m";
+                        return $"{((decimal)charValue).ToString(CultureInfo.InvariantCulture)}m";
                 }
             }
 
@@ -217,7 +217,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                     if (value is int or long or short or byte or uint or ulong or ushort or sbyte)
                     {
                         // For integer types, convert to decimal
-                        var decimalValue = Convert.ToDecimal(value);
+                        var decimalValue = Convert.ToDecimal(value, CultureInfo.InvariantCulture);
                         return $"{decimalValue.ToString("G29", CultureInfo.InvariantCulture)}m";
                     }
 
@@ -277,7 +277,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
 
         // Fallback to cast syntax
         var formattedValue = FormatPrimitive(constant.Value);
-        var result = formattedValue != null && formattedValue.StartsWith("-")
+        var result = formattedValue != null && formattedValue.StartsWith("-", StringComparison.Ordinal)
             ? $"({enumType.GloballyQualified()})({formattedValue})"
             : $"({enumType.GloballyQualified()}){formattedValue}";
             
@@ -390,8 +390,8 @@ public class TypedConstantFormatter : ITypedConstantFormatter
 
         try
         {
-            var enumLong = Convert.ToInt64(enumValue);
-            var providedLong = Convert.ToInt64(providedValue);
+            var enumLong = Convert.ToInt64(enumValue, CultureInfo.InvariantCulture);
+            var providedLong = Convert.ToInt64(providedValue, CultureInfo.InvariantCulture);
             return enumLong == providedLong;
         }
         catch

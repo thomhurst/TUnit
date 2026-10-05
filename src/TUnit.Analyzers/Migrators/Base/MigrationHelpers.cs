@@ -195,7 +195,7 @@ public static class MigrationHelpers
             {
                 var nameString = u.Name?.ToString() ?? "";
                 return !namespacesToRemove.Any(ns =>
-                    nameString == ns || nameString.StartsWith(ns + "."));
+                    nameString == ns || nameString.StartsWith(ns + ".", StringComparison.Ordinal));
             })
             .ToList();
 
@@ -254,7 +254,7 @@ public static class MigrationHelpers
                 {
                     var nameString = u.Name?.ToString() ?? "";
                     return !namespacesToRemove.Any(nsToRemove =>
-                        nameString == nsToRemove || nameString.StartsWith(nsToRemove + "."));
+                        nameString == nsToRemove || nameString.StartsWith(nsToRemove + ".", StringComparison.Ordinal));
                 })
                 .ToList();
 
@@ -285,7 +285,7 @@ public static class MigrationHelpers
                 {
                     var nameString = u.Name?.ToString() ?? "";
                     return !namespacesToRemove.Any(nsToRemove =>
-                        nameString == nsToRemove || nameString.StartsWith(nsToRemove + "."));
+                        nameString == nsToRemove || nameString.StartsWith(nsToRemove + ".", StringComparison.Ordinal));
                 })
                 .ToList();
 

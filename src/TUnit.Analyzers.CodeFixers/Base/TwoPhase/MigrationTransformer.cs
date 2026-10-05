@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -160,7 +161,7 @@ public class MigrationTransformer
                 // Build the try body as a statement
                 var tryBlockBody = conversion.TryBlockBody.Trim();
                 // Ensure it ends with semicolon if not already
-                if (!tryBlockBody.EndsWith(";") && !tryBlockBody.EndsWith("}"))
+                if (!tryBlockBody.EndsWith(";", StringComparison.Ordinal) && !tryBlockBody.EndsWith("}", StringComparison.Ordinal))
                 {
                     tryBlockBody += ";";
                 }
@@ -1268,7 +1269,7 @@ public class MigrationTransformer
     {
         var failureSummary = _plan.Failures
             .GroupBy(f => f.Phase)
-            .Select(g => $"// TODO: TUnit migration - {g.Key}: {g.Count()} item(s) could not be converted")
+            .Select(g => $"// TODO: TUnit migration - {g.Key}: {g.Count().ToString(CultureInfo.InvariantCulture)} item(s) could not be converted")
             .ToList();
 
         if (failureSummary.Count == 0)

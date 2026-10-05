@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Linq;
 using TUnit.Mocks.SourceGenerator.Models;
 using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
@@ -122,11 +123,11 @@ internal static class MockBridgeBuilder
             writer.AppendLine("if (__engine is null) return default!;");
             if (prop.IsReturnTypeStaticAbstractInterface)
             {
-                writer.AppendLine($"return ({prop.ReturnType})__engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
+                writer.AppendLine($"return ({prop.ReturnType})__engine.HandleCallWithReturn<object?>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
             }
             else
             {
-                writer.AppendLine($"return __engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
+                writer.AppendLine($"return __engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
             }
             writer.CloseBrace();
         }
@@ -138,7 +139,7 @@ internal static class MockBridgeBuilder
             writer.OpenBrace();
             writer.AppendLine($"var __engine = {staticEngineTypeName}.Engine;");
             writer.AppendLine("if (__engine is null) return;");
-            writer.AppendLine($"__engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+            writer.AppendLine($"__engine.HandleCall({prop.SetterMemberId.ToString(CultureInfo.InvariantCulture)}, \"set_{prop.Name}\", new object?[] {{ value }});");
             writer.CloseBrace();
         }
 
@@ -173,7 +174,7 @@ internal static class MockBridgeBuilder
         if (method.IsVoid && !method.IsAsync)
         {
             writer.AppendLine("if (__engine is null) return;");
-            writer.AppendLine($"__engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
+            writer.AppendLine($"__engine.HandleCall({method.MemberId.ToString(CultureInfo.InvariantCulture)}, \"{method.Name}\", {argsArray});");
             MockImplBuilder.EmitOutRefReadback(writer, method, model);
         }
         else if (method.IsVoid && method.IsAsync)
@@ -189,7 +190,7 @@ internal static class MockBridgeBuilder
 
             using (writer.Block("try"))
             {
-                writer.AppendLine($"__engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
+                writer.AppendLine($"__engine.HandleCall({method.MemberId.ToString(CultureInfo.InvariantCulture)}, \"{method.Name}\", {argsArray});");
                 MockImplBuilder.EmitOutRefReadback(writer, method, model);
                 if (method.IsValueTask)
                 {
@@ -227,7 +228,7 @@ internal static class MockBridgeBuilder
 
             using (writer.Block("try"))
             {
-                writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null)!;");
+                writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__engine.HandleCallWithReturn<object?>({method.MemberId.ToString(CultureInfo.InvariantCulture)}, \"{method.Name}\", {argsArray}, null)!;");
                 MockImplBuilder.EmitOutRefReadback(writer, method, model);
                 if (method.IsValueTask)
                 {
@@ -263,7 +264,7 @@ internal static class MockBridgeBuilder
 
             using (writer.Block("try"))
             {
-                writer.AppendLine($"var __result = __engine.HandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault});");
+                writer.AppendLine($"var __result = __engine.HandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId.ToString(CultureInfo.InvariantCulture)}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault});");
                 MockImplBuilder.EmitOutRefReadback(writer, method, model);
                 if (method.IsValueTask)
                 {
@@ -291,14 +292,14 @@ internal static class MockBridgeBuilder
             // Return type has static abstract members — can't use as generic type argument (CS8920).
             // Use object? and cast instead.
             writer.AppendLine("if (__engine is null) return default!;");
-            writer.AppendLine($"var __result = __engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null);");
+            writer.AppendLine($"var __result = __engine.HandleCallWithReturn<object?>({method.MemberId.ToString(CultureInfo.InvariantCulture)}, \"{method.Name}\", {argsArray}, null);");
             MockImplBuilder.EmitOutRefReadback(writer, method, model);
             writer.AppendLine($"return ({method.ReturnType})__result!;");
         }
         else
         {
             writer.AppendLine("if (__engine is null) return default!;");
-            writer.AppendLine($"var __result = __engine.HandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault});");
+            writer.AppendLine($"var __result = __engine.HandleCallWithReturn<{method.ReturnType}>({method.MemberId.ToString(CultureInfo.InvariantCulture)}, \"{method.Name}\", {argsArray}, {method.SmartDefault});");
             MockImplBuilder.EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return __result;");
         }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -598,7 +599,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
     private static string GetSimpleTypeName(string fullyQualifiedTypeName)
     {
         // Remove global:: prefix
-        var typeName = fullyQualifiedTypeName.StartsWith("global::")
+        var typeName = fullyQualifiedTypeName.StartsWith("global::", StringComparison.Ordinal)
             ? fullyQualifiedTypeName.Substring(8)
             : fullyQualifiedTypeName;
 
@@ -895,7 +896,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine(",");
 
         writer.AppendLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(hook.HookExecutorTypeName)},");
-        writer.AppendLine($"Order = {hook.Order},");
+        writer.AppendLine($"Order = {hook.Order.ToString(CultureInfo.InvariantCulture)},");
         writer.AppendLine("RegistrationIndex = __registrationIndex,");
         writer.AppendLine($"Body = {bodyName}" + (isInstance ? "" : ","));
 
@@ -905,7 +906,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
             // see the matching comment in TestMetadataGenerator. Hand-escaping a path into a
             // verbatim literal doubles every separator on Windows, breaking source-link resolution.
             writer.AppendLine($"FilePath = {SymbolDisplay.FormatLiteral(hook.FilePath, quote: true)},");
-            writer.AppendLine($"LineNumber = {hook.LineNumber}");
+            writer.AppendLine($"LineNumber = {hook.LineNumber.ToString(CultureInfo.InvariantCulture)}");
         }
 
         writer.Unindent();

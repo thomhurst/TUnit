@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -27,7 +28,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"Type = typeof({safeTypeDisplay}),");
         writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(methodSymbol.ContainingType)},");
         writer.AppendLine($"Name = \"{methodSymbol.Name}\",");
-        writer.AppendLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
+        writer.AppendLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length.ToString(CultureInfo.InvariantCulture)},");
         writer.AppendLine($"ReturnType = typeof({safeReturnTypeDisplay}),");
         writer.AppendLine($"ReturnTypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(methodSymbol.ReturnType)},");
         writer.Append($"Parameters = ");
@@ -60,7 +61,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"Type = typeof({safeTypeDisplay}),");
         writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(methodSymbol.ContainingType)},");
         writer.AppendLine($"Name = \"{methodSymbol.Name}\",");
-        writer.AppendLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
+        writer.AppendLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length.ToString(CultureInfo.InvariantCulture)},");
         writer.AppendLine($"ReturnType = typeof({safeReturnTypeDisplay}),");
         writer.AppendLine($"ReturnTypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(methodSymbol.ReturnType)},");
         writer.AppendLine($"Parameters = {GenerateParameterMetadataArrayForMethod(methodSymbol, writer.IndentLevel)},");
@@ -245,11 +246,11 @@ internal static class MetadataGenerationHelper
             // report IL2111 for helpers with [DynamicallyAccessedMembers] parameters. The attribute is emitted for every
             // target: a .NET Standard test library can end up in a trimmed app, and DynamicDependencyPolyfillGenerator
             // declares the attribute where the framework lacks it.
-            writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof({containingType}), \"{method.Name}\", {method.IsStatic.ToString().ToLowerInvariant()}, {method.TypeParameters.Length}, [global::System.Diagnostics.CodeAnalysis.DynamicDependency(\"{GetDynamicDependencySignature(method)}\", typeof({containingType}))] static () => {{ }}, ");
+            writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForNonPublicMethod(typeof({containingType}), \"{method.Name}\", {method.IsStatic.ToString().ToLowerInvariant()}, {method.TypeParameters.Length.ToString(CultureInfo.InvariantCulture)}, [global::System.Diagnostics.CodeAnalysis.DynamicDependency(\"{GetDynamicDependencySignature(method)}\", typeof({containingType}))] static () => {{ }}, ");
         }
         else if (method.TypeParameters.Length > 0 || usesTypeParameters)
         {
-            writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof({containingType}), \"{method.Name}\", {method.IsStatic.ToString().ToLowerInvariant()}, {method.TypeParameters.Length}, ");
+            writer.Append($"global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof({containingType}), \"{method.Name}\", {method.IsStatic.ToString().ToLowerInvariant()}, {method.TypeParameters.Length.ToString(CultureInfo.InvariantCulture)}, ");
         }
         else
         {
@@ -299,7 +300,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"ReflectionInfo = {reflectionInfo},");
         writer.AppendLine($"Type = typeof({safePropertyTypeName}),");
         writer.AppendLine($"Name = \"{property.Name}\",");
-        writer.AppendLine($"IsStatic = {property.IsStatic.ToString().ToLower()},");
+        writer.AppendLine($"IsStatic = {property.IsStatic.ToString().ToLowerInvariant()},");
         writer.AppendLine($"IsNullable = {property.Type.IsNullable().ToString().ToLowerInvariant()},");
         writer.AppendLine($"Getter = {GetPropertyAccessor(containingType, property)},");
         writer.AppendLine("ClassMetadata = null!,");

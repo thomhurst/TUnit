@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
@@ -547,7 +548,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                 continue;
             }
 
-            var converterClassName = $"AotConverter_{converterIndex++}";
+            var converterClassName = $"AotConverter_{(converterIndex++).ToString(CultureInfo.InvariantCulture)}";
             var sourceTypeName = conversion.SourceType.GloballyQualified;
             var targetTypeName = conversion.TargetType.GloballyQualified;
 

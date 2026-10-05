@@ -10,7 +10,7 @@ public static class AttributeExtensions
 {
     public static AttributeData? Get(this ImmutableArray<AttributeData> attributeDatas, string fullyQualifiedName)
     {
-        if (!fullyQualifiedName.StartsWith("global::"))
+        if (!fullyQualifiedName.StartsWith("global::", StringComparison.Ordinal))
         {
             fullyQualifiedName = $"global::{fullyQualifiedName}";
         }

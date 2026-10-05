@@ -726,7 +726,7 @@ internal static class MockTypeDiscovery
             var invocationSymbol = context.SemanticModel.GetSymbolInfo(invocation, ct);
             if (invocationSymbol.Symbol is IMethodSymbol resolved
                 && resolved.ContainingType?.Name is { } containingName
-                && containingName.EndsWith("_MockStaticExtension"))
+                && containingName.EndsWith("_MockStaticExtension", StringComparison.Ordinal))
                 return ImmutableArray<MockTypeModel>.Empty;
         }
 

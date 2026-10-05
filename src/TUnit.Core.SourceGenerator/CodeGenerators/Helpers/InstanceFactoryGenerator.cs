@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
@@ -311,7 +312,7 @@ public static class InstanceFactoryGenerator
                 }
 
                 var parameterType = parameterTypes[i];
-                var argAccess = $"args[{i}]";
+                var argAccess = $"args[{i.ToString(CultureInfo.InvariantCulture)}]";
 
                 // Use CastHelper which now has AOT converter registry support
                 writer.Append($"global::TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");

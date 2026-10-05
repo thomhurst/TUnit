@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using TUnit.Mocks.SourceGenerator.Builders;
@@ -211,7 +212,7 @@ internal static class SecondarySurfaceFactory
 
     private static string GetMethodNameParamsKey(MockMemberModel m)
     {
-        var sb = new System.Text.StringBuilder(m.Name).Append('`').Append(m.TypeParameters.Length).Append('(');
+        var sb = new System.Text.StringBuilder(m.Name).Append('`').Append(m.TypeParameters.Length.ToString(CultureInfo.InvariantCulture)).Append('(');
         for (int i = 0; i < m.Parameters.Length; i++)
         {
             if (i > 0) sb.Append(',');

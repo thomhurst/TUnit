@@ -314,7 +314,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
     private static bool IsValidStaticTearDownMethod(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, out HookLevel? hookLevel)
     {
         return methodSymbol.IsHookMethod(context.Compilation, out var type, out hookLevel, out _)
-               && type.Name.StartsWith("After")
+               && type.Name.StartsWith("After", StringComparison.Ordinal)
                && hookLevel is HookLevel.TestSession or HookLevel.Assembly or HookLevel.Class;
     }
 
@@ -334,7 +334,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         if (methodSymbol.IsHookMethod(context.Compilation, out var type, out var level, out _)
-            && type.Name.StartsWith("After") && level == HookLevel.Test)
+            && type.Name.StartsWith("After", StringComparison.Ordinal) && level == HookLevel.Test)
         {
             return true;
         }
