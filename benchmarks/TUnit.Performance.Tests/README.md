@@ -37,6 +37,8 @@ dotnet run -c Release
 
 ### Native AOT Comparison
 
+Native AOT needs a platform toolchain: the Visual Studio "Desktop development with C++" workload on Windows, the Xcode Command Line Tools on macOS, and `clang` plus the zlib development package on Linux. See the [.NET Native AOT prerequisites](https://learn.microsoft.com/dotnet/core/deploying/native-aot/#prerequisites).
+
 ```bash
 # Build for AOT (native AOT cannot cross-compile across operating systems, so target the current machine)
 dotnet publish -c Release --use-current-runtime --self-contained -p:PublishAot=true -o publish

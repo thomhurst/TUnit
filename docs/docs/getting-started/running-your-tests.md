@@ -57,16 +57,21 @@ On Windows this will be a `.exe` and on Linux/macOS there will be no extension.
 
 This can be invoked directly and passed any flags.
 
-The publish folder sits under the runtime identifier you published for, such as `win-x64`, `linux-x64` or `osx-arm64`.
+The publish folder sits under the runtime identifier (`<rid>`) you published for, such as `win-x64`, `linux-x64` or `osx-arm64`.
 
 ```sh
-cd path/to/YourTestProject/bin/Release/net8.0/linux-x64/publish
+cd path/to/YourTestProject/bin/Release/net8.0/<rid>/publish
 ./YourTestProject
 # or with flags
 ./YourTestProject --report-trx --coverage
 ```
 
-On Windows, run `.\YourTestProject.exe` instead.
+On Windows, from the `win-x64` publish folder:
+
+```powershell
+cd path/to/YourTestProject/bin/Release/net8.0/win-x64/publish
+.\YourTestProject.exe --report-trx --coverage
+```
 
 ## IDE Support
 
