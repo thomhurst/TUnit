@@ -176,13 +176,22 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         // StringBuilder.Append(int), TextWriter.Write(double), and their Insert/AppendLine/WriteLine kin.
         // Only the formatted arguments count: Append(char, repeatCount) and Insert(index, ...) take
         // integers that are never turned into text. The formatted parameters are matched by their BCL
-        // names ("value", and "arg0".."argN" for the composite-format overloads); these names have been
+        // names ("value", "values" for AppendJoin's params array, and "arg0".."argN" for the
+        // composite-format overloads), because the excluded integers (repeatCount, startIndex, count,
+        // charCount, index) have the same types as formatted values. These names have been
         // stable since .NET Framework, and the StringBuilder/TextWriter tests fail if they ever change.
         if (IsTextSink(method, types))
         {
+            // AppendJoin<T>(separator, IEnumerable<T>) formats every element, like string.Join<T>.
+            if (method is { Name: "AppendJoin", IsGenericMethod: true } && types.IsCultureSensitive(method.TypeArguments[0]))
+            {
+                Report(context, invocation, "StringBuilder.AppendJoin", method.TypeArguments[0].ToDisplayString());
+                return;
+            }
+
             foreach (var argument in invocation.Arguments)
             {
-                if (argument.Parameter is { Name: var name } && (name == "value" || name.StartsWith("arg", StringComparison.Ordinal)))
+                if (argument.Parameter is { Name: var name } && (name is "value" or "values" || name.StartsWith("arg", StringComparison.Ordinal)))
                 {
                     ReportArgumentIfCultureSensitive(context, types, argument, $"{method.ContainingType.Name}.{method.Name}");
                 }
@@ -278,7 +287,7 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
 
     private static bool IsTextSink(IMethodSymbol method, KnownTypes types)
     {
-        if (method.Name is not ("Append" or "AppendLine" or "Insert" or "Write" or "WriteLine"))
+        if (method.Name is not ("Append" or "AppendLine" or "AppendJoin" or "Insert" or "Write" or "WriteLine"))
         {
             return false;
         }

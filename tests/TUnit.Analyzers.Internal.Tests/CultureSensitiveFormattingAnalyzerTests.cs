@@ -25,6 +25,8 @@ public class CultureSensitiveFormattingAnalyzerTests
     [Arguments("sb.Append(d);", "StringBuilder.Append")]
     [Arguments("sb.AppendLine($\"{i}\");", "Interpolation")]
     [Arguments("writer.Write(i);", "TextWriter.Write")]
+    [Arguments("sb.AppendJoin(\",\", new[] { d });", "StringBuilder.AppendJoin")]
+    [Arguments("sb.AppendJoin(\",\", s, i);", "StringBuilder.AppendJoin")]
     [Arguments("_ = i.ToString();", "ToString()")]
     [Arguments("_ = d.ToString(\"N2\");", "ToString()")]
     [Arguments("_ = d.ToString((IFormatProvider?) null);", "ToString()")]
@@ -76,6 +78,9 @@ public class CultureSensitiveFormattingAnalyzerTests
     [Arguments("_ = string.Format(\"{0} {1}\", s, u);")]
     [Arguments("_ = string.Join(\",\", new[] { u });")]
     [Arguments("_ = string.Concat(s, c);")]
+    [Arguments("sb.AppendJoin(\",\", new[] { u });")]
+    [Arguments("sb.AppendJoin(\",\", s, u);")]
+    [Arguments("sb.Append(s, i, i);")]
     public async Task Ignores_Invariant_Or_Culture_Independent_Conversion(string statement)
     {
         var diagnostics = await Analyze(statement);
