@@ -126,7 +126,12 @@ public class EngineCancellationToken : IDisposable
         // Suppress the default behaviour (immediate termination) only when a live session took the
         // signal: the forceful-exit timer it armed still guarantees the process ends. A signal that
         // lands after disposal keeps the runtime's default, so the process still stops.
-        context.Cancel = OnTerminationSignal();
+        // Only ever set it: every registered handler shares this context, and assigning false here
+        // would undo another, live session's suppression.
+        if (OnTerminationSignal())
+        {
+            context.Cancel = true;
+        }
     }
 
     /// <returns>Whether a live session handled the signal (and armed the forceful-exit timer).</returns>
