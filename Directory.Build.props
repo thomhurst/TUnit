@@ -50,8 +50,9 @@
     <RootNamespace>$(_BaseProjectName)</RootNamespace>
     <IsPackable>false</IsPackable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-    <!-- Opts out of the repo-internal analyzers wired in Directory.Build.targets: these compile their
-         base project's sources, which the base project already analyzes. -->
+    <!-- Opts out of the repo-internal analyzers wired in Directory.Build.targets: these compile the
+         sources of $(_BaseProjectName) (e.g. TUnit.Analyzers for TUnit.Analyzers.Roslyn44), and that
+         base project is analyzed. -->
     <TUnitSkipInternalAnalyzers>true</TUnitSkipInternalAnalyzers>
   </PropertyGroup>
 
