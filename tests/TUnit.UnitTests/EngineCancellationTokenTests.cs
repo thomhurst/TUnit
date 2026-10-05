@@ -66,8 +66,9 @@ public class EngineCancellationTokenTests
         bool? armedWhenCallbackRan = null;
         token.Token.Register(() => armedWhenCallbackRan = token.ForcefulExitArmed);
 
-        token.OnTerminationSignal();
+        var handled = token.OnTerminationSignal();
 
+        await Assert.That(handled).IsTrue();
         await Assert.That(armedWhenCallbackRan).IsEqualTo(true);
         await Assert.That(token.TerminationSignalReceived).IsTrue();
         await Assert.That(token.Token.IsCancellationRequested).IsTrue();
@@ -77,10 +78,13 @@ public class EngineCancellationTokenTests
     public async Task TerminationSignal_After_Dispose_Neither_Throws_Nor_Arms_Forceful_Exit()
     {
         // The runtime may dispatch a signal it captured before Dispose unregistered the handler.
+        // Unhandled, so OnSigterm leaves the runtime's default termination in place.
         var token = new RecordingForcefulExitToken();
         token.Dispose();
 
-        await Assert.That(() => token.OnTerminationSignal()).ThrowsNothing();
+        var handled = token.OnTerminationSignal();
+
+        await Assert.That(handled).IsFalse();
         await Assert.That(token.ForcefulExitArmed).IsFalse();
     }
 #endif

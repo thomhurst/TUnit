@@ -123,19 +123,36 @@ public class EngineCancellationToken : IDisposable
 
     private void OnSigterm(PosixSignalContext context)
     {
-        // Prevent the default behaviour (immediate termination); the forceful-exit timer still
-        // guarantees the process ends.
-        context.Cancel = true;
-        OnTerminationSignal();
+        // Suppress the default behaviour (immediate termination) only when a live session took the
+        // signal: the forceful-exit timer it armed still guarantees the process ends. A signal that
+        // lands after disposal keeps the runtime's default, so the process still stops.
+        context.Cancel = OnTerminationSignal();
     }
 
-    internal void OnTerminationSignal()
+    /// <returns>Whether a live session handled the signal (and armed the forceful-exit timer).</returns>
+    internal bool OnTerminationSignal()
     {
-        _terminationSignalReceived = true;
+        // Check-and-arm under the gate Dispose takes: either the session is already disposed and the
+        // signal is not handled, or the timer is armed before Dispose can complete.
+        lock (_forcefulExitGate)
+        {
+            if (_disposed)
+            {
+                return false;
+            }
+
+            _terminationSignalReceived = true;
+
+            if (!_forcefulExitStarted)
+            {
+                _forcefulExitStarted = true;
+                ArmForcefulExit();
+            }
+        }
 
         try
         {
-            Cancel();
+            Cancel(armForcefulExit: false);
         }
         catch (ObjectDisposedException)
         {
@@ -143,6 +160,8 @@ public class EngineCancellationToken : IDisposable
             // snapshotted, so the signal can land after the session's token was disposed.
             // An exception escaping the signal handler would crash the process.
         }
+
+        return true;
     }
 #endif
 
