@@ -24,4 +24,9 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Common" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- One null-preserving invariant formatter for attribute arguments, shared with the core generator. -->
+    <Compile Include="..\TUnit.Core.SourceGenerator\Extensions\ObjectExtensions.cs" Link="Shared\ObjectExtensions.cs" />
+  </ItemGroup>
+
 </Project>

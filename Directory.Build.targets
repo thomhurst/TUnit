@@ -11,7 +11,9 @@
        Directory.Build.props). -->
   <PropertyGroup>
     <_TUnitBuildTimeProject Condition="'$(TUnitSkipInternalAnalyzers)' != 'true'
-                                       and ('$(EnforceExtendedAnalyzerRules)' == 'true' or '$(MSBuildProjectName)' == 'TUnit.Mocks.InternalsAccess.Tasks')">true</_TUnitBuildTimeProject>
+                                       and ('$(EnforceExtendedAnalyzerRules)' == 'true'
+                                            or '$(IsRoslynComponent)' == 'true'
+                                            or '$(MSBuildProjectName)' == 'TUnit.Mocks.InternalsAccess.Tasks')">true</_TUnitBuildTimeProject>
     <!-- netstandard2.0 projects do not get the .NET analyzers by default; the globalization rules
          in eng/BuildTimeGlobalization.globalconfig need them. -->
     <EnableNETAnalyzers Condition="'$(_TUnitBuildTimeProject)' == 'true'">true</EnableNETAnalyzers>

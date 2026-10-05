@@ -1,4 +1,4 @@
-using TUnit.SourceGen.Shared;
+using TUnit.Core.SourceGenerator.Extensions;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Collections.Immutable;

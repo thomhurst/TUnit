@@ -1,4 +1,4 @@
-using TUnit.SourceGen.Shared;
+using TUnit.Core.SourceGenerator.Extensions;
 using System.Collections.Immutable;
 using System.Text;
 using System.Text.RegularExpressions;
