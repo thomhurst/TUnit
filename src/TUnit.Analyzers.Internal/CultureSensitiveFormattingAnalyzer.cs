@@ -175,7 +175,9 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
 
         // StringBuilder.Append(int), TextWriter.Write(double), and their Insert/AppendLine/WriteLine kin.
         // Only the formatted arguments count: Append(char, repeatCount) and Insert(index, ...) take
-        // integers that are never turned into text.
+        // integers that are never turned into text. The formatted parameters are matched by their BCL
+        // names ("value", and "arg0".."argN" for the composite-format overloads); these names have been
+        // stable since .NET Framework, and the StringBuilder/TextWriter tests fail if they ever change.
         if (IsTextSink(method, types))
         {
             foreach (var argument in invocation.Arguments)
