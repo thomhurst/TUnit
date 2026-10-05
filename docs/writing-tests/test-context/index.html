@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.a95f87d4.css">
-<script src="/assets/js/runtime~main.ee401eaa.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.2c4a029f.js" defer="defer"></script>
 <script src="/assets/js/main.ecf969af.js" defer="defer"></script>
 </head>
 <body>
@@ -45,7 +45,7 @@ that should live alongside test reports.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="custom-properties">Custom Properties<a href="#custom-properties" class="hash-link" aria-label="Direct link to Custom Properties" title="Direct link to Custom Properties" translate="no">​</a></h2>
 <p>Custom properties can be added to a test using the <code>[Property]</code> attribute. Properties are key-value pairs of strings that serve multiple purposes:</p>
 <ul>
-<li class=""><strong>Test filtering</strong>: Filter tests at the command line with <code>dotnet run --treenode-filter /*/*/*/*[PropertyName=PropertyValue]</code></li>
+<li class=""><strong>Test filtering</strong>: Filter tests at the command line with <code>dotnet run --treenode-filter &quot;/*/*/*/*[PropertyName=PropertyValue]&quot;</code></li>
 <li class=""><strong>Runtime logic</strong>: Access properties in setup/cleanup hooks via <code>TestContext</code> to conditionally execute logic</li>
 <li class=""><strong>Inheritance</strong>: Apply <code>[Property]</code> on a base class and all sub-class tests inherit it</li>
 </ul>

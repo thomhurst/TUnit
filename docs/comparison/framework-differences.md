@@ -67,7 +67,7 @@ TUnit creates a new instance for every test, with no way to opt out. If you need
 
 Consider a multi-tenanted test suite where tests repeat with different tenants injected via `[TestFixtureSource]`. A natural next step is filtering by tenant. In NUnit, you might try using `IApplyToTest` to set a property based on the constructor argument, but it doesn't work — tests are enumerated at startup before the fixture source provides its values.
 
-Because TUnit discovers tests via source generation, constructor arguments are available upfront. You can set properties with `ITestDiscoveryEvent` and filter with `--treenode-filter /*/*/*/*[Tenant=MyTenant]`.
+Because TUnit discovers tests via source generation, constructor arguments are available upfront. You can set properties with `ITestDiscoveryEvent` and filter with `--treenode-filter "/*/*/*/*[Tenant=MyTenant]"`.
 
 ### Attribute scope[​](#attribute-scope "Direct link to Attribute scope")
 

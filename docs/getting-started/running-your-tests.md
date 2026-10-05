@@ -11,7 +11,7 @@ Coverage and TRX reporting are built in. See [Extensions](/docs/extending/built-
 For a simple execution of a project, `dotnet run` is the preferred method, allowing easier passing in of command line flags.
 
 ```
-cd 'C:/Your/Test/Directory'
+cd path/to/YourTestProject
 
 dotnet run -c Release
 
@@ -25,7 +25,7 @@ dotnet run -c Release --report-trx --coverage
 `dotnet test` requires any command line flags to be specified as application arguments, meaning after a `--` - Otherwise you'll get an error about unknown switches.
 
 ```
-cd 'C:/Your/Test/Directory'
+cd path/to/YourTestProject
 
 dotnet test -c Release
 
@@ -39,7 +39,7 @@ dotnet test -c Release -- --report-trx --coverage
 If your test project has already been built, you can use `dotnet exec` or just `dotnet` with the `.dll` path
 
 ```
-cd 'C:/Your/Test/Directory/bin/Release/net8.0'
+cd path/to/YourTestProject/bin/Release/net8.0
 
 dotnet exec YourTestProject.dll
 
@@ -51,7 +51,7 @@ dotnet exec YourTestProject.dll --report-trx --coverage
 or
 
 ```
-cd 'C:/Your/Test/Directory/bin/Release/net8.0'
+cd path/to/YourTestProject/bin/Release/net8.0
 
 dotnet YourTestProject.dll
 
@@ -66,14 +66,24 @@ When you publish your test project, you'll be given an executable. On Windows th
 
 This can be invoked directly and passed any flags.
 
-```
-cd 'C:/Your/Test/Directory/bin/Release/net8.0/win-x64/publish'
+The publish folder sits under the runtime identifier you published for, such as `win-x64`, `linux-x64` or `osx-arm64`. Replace `linux-x64` below with yours.
 
-./YourTestProject.exe
+```
+cd path/to/YourTestProject/bin/Release/net8.0/linux-x64/publish
+
+./YourTestProject
 
 # or with flags
 
-./YourTestProject.exe --report-trx --coverage
+./YourTestProject --report-trx --coverage
+```
+
+On Windows, from the `win-x64` publish folder:
+
+```
+cd path/to/YourTestProject/bin/Release/net8.0/win-x64/publish
+
+.\YourTestProject.exe --report-trx --coverage
 ```
 
 ## IDE Support[​](#ide-support "Direct link to IDE Support")

@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.a95f87d4.css">
-<script src="/assets/js/runtime~main.ee401eaa.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.2c4a029f.js" defer="defer"></script>
 <script src="/assets/js/main.ecf969af.js" defer="defer"></script>
 </head>
 <body>
@@ -43,7 +43,7 @@
 <p>TUnit creates a new instance for every test, with no way to opt out. If you need shared state, use <code>static</code> fields — that makes the sharing explicit and visible to anyone reading the code.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dynamic-data-and-filtering">Dynamic data and filtering<a href="#dynamic-data-and-filtering" class="hash-link" aria-label="Direct link to Dynamic data and filtering" title="Direct link to Dynamic data and filtering" translate="no">​</a></h3>
 <p>Consider a multi-tenanted test suite where tests repeat with different tenants injected via <code>[TestFixtureSource]</code>. A natural next step is filtering by tenant. In NUnit, you might try using <code>IApplyToTest</code> to set a property based on the constructor argument, but it doesn&#x27;t work — tests are enumerated at startup before the fixture source provides its values.</p>
-<p>Because TUnit discovers tests via source generation, constructor arguments are available upfront. You can set properties with <code>ITestDiscoveryEvent</code> and filter with <code>--treenode-filter /*/*/*/*[Tenant=MyTenant]</code>.</p>
+<p>Because TUnit discovers tests via source generation, constructor arguments are available upfront. You can set properties with <code>ITestDiscoveryEvent</code> and filter with <code>--treenode-filter &quot;/*/*/*/*[Tenant=MyTenant]&quot;</code>.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="attribute-scope">Attribute scope<a href="#attribute-scope" class="hash-link" aria-label="Direct link to Attribute scope" title="Direct link to Attribute scope" translate="no">​</a></h3>
 <p>NUnit&#x27;s <code>[Repeat]</code> and <code>[Retry]</code> only work on test methods. Want to retry every test in a class? Or set a default for the whole assembly? You can&#x27;t.</p>
 <p>In TUnit, most attributes work at test, class, and assembly level. Test takes highest priority, then class, then assembly — so you can set defaults broadly and override them where needed.</p>
