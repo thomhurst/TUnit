@@ -19,7 +19,7 @@ To use TUnit with a file-based C# application, you can follow these steps:
         #:package TUnit@1.6.0
         ```
 
-    -   You can also use msbuild props files to include TUnit. By creating a `Directory.build.props` file in the same directory as the csharp file.
+    -   You can also use msbuild props files to include TUnit. By creating a `Directory.Build.props` file in the same directory as the csharp file.
 
         ```xml
         <Project>
@@ -72,7 +72,7 @@ dotnet project convert Program.cs
 
 Single file csharp applications can also be used with msbuild props files. You can create a `*.props` file and the dotnet sdk will automatically include it when running the file-based application.
 
-1. Create a file named `Directory.build.props` with the following content:
+1. Create a file named `Directory.Build.props` with the following content:
 
     ```xml
     <Project>
@@ -112,4 +112,4 @@ Single file csharp applications can also be used with msbuild props files. You c
     dotnet run file.cs
     ```
 
-This will automatically include the `Directory.build.props` file as long as it is in the same directory as the csharp file, and you will be able to run your tests with TUnit.
+This will automatically include the `Directory.Build.props` file as long as it is in the same directory as the csharp file, and you will be able to run your tests with TUnit.

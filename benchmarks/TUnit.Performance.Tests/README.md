@@ -37,25 +37,29 @@ dotnet run -c Release
 
 ### Native AOT Comparison
 
+Native AOT needs a platform toolchain: the Visual Studio "Desktop development with C++" workload on Windows, the Xcode Command Line Tools on macOS, and `clang` plus the zlib development package on Linux. See the [.NET Native AOT prerequisites](https://learn.microsoft.com/dotnet/core/deploying/native-aot/#prerequisites).
+
 ```bash
-# Build for AOT
-dotnet publish -c Release -r win-x64 --self-contained -p:PublishAot=true
+# Build for AOT (native AOT cannot cross-compile across operating systems, so target the current machine)
+dotnet publish -c Release --use-current-runtime --self-contained -p:PublishAot=true -o publish
 
 # Run the published executable
-./bin/Release/net8.0/win-x64/publish/TUnit.Performance.Tests.exe
+./publish/TUnit.Performance.Tests
+# On Windows:
+./publish/TUnit.Performance.Tests.exe
 ```
 
 ### Run Specific Benchmarks
 
 ```bash
 # Run only discovery benchmarks
-dotnet run -c Release -- --filter *Discovery*
+dotnet run -c Release -- --filter '*Discovery*'
 
 # Run only execution benchmarks
-dotnet run -c Release -- --filter *Execution*
+dotnet run -c Release -- --filter '*Execution*'
 
 # Run only data source benchmarks
-dotnet run -c Release -- --filter *DataSource*
+dotnet run -c Release -- --filter '*DataSource*'
 ```
 
 ## Expected Results

@@ -12,8 +12,8 @@ Coverage and TRX reporting are built in. See [Extensions](../extending/built-in-
 
 For a simple execution of a project, `dotnet run` is the preferred method, allowing easier passing in of command line flags.
 
-```powershell
-cd 'C:/Your/Test/Directory'
+```sh
+cd path/to/YourTestProject
 dotnet run -c Release
 # or with flags
 dotnet run -c Release --report-trx --coverage
@@ -23,8 +23,8 @@ dotnet run -c Release --report-trx --coverage
 
 `dotnet test` requires any command line flags to be specified as application arguments, meaning after a `--` - Otherwise you'll get an error about unknown switches.
 
-```powershell
-cd 'C:/Your/Test/Directory'
+```sh
+cd path/to/YourTestProject
 dotnet test -c Release
 # or with flags
 dotnet test -c Release -- --report-trx --coverage
@@ -34,8 +34,8 @@ dotnet test -c Release -- --report-trx --coverage
 
 If your test project has already been built, you can use `dotnet exec` or just `dotnet` with the `.dll` path
 
-```powershell
-cd 'C:/Your/Test/Directory/bin/Release/net8.0'
+```sh
+cd path/to/YourTestProject/bin/Release/net8.0
 dotnet exec YourTestProject.dll
 # or with flags
 dotnet exec YourTestProject.dll --report-trx --coverage
@@ -43,8 +43,8 @@ dotnet exec YourTestProject.dll --report-trx --coverage
 
 or
 
-```powershell
-cd 'C:/Your/Test/Directory/bin/Release/net8.0'
+```sh
+cd path/to/YourTestProject/bin/Release/net8.0
 dotnet YourTestProject.dll
 # or with flags
 dotnet YourTestProject.dll --report-trx --coverage
@@ -57,11 +57,20 @@ On Windows this will be a `.exe` and on Linux/macOS there will be no extension.
 
 This can be invoked directly and passed any flags.
 
-```powershell
-cd 'C:/Your/Test/Directory/bin/Release/net8.0/win-x64/publish'
-./YourTestProject.exe
+The publish folder sits under the runtime identifier you published for, such as `win-x64`, `linux-x64` or `osx-arm64`. Replace `linux-x64` below with yours.
+
+```sh
+cd path/to/YourTestProject/bin/Release/net8.0/linux-x64/publish
+./YourTestProject
 # or with flags
-./YourTestProject.exe --report-trx --coverage
+./YourTestProject --report-trx --coverage
+```
+
+On Windows, from the `win-x64` publish folder:
+
+```powershell
+cd path/to/YourTestProject/bin/Release/net8.0/win-x64/publish
+.\YourTestProject.exe --report-trx --coverage
 ```
 
 ## IDE Support
