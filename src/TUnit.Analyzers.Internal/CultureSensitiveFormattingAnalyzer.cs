@@ -141,7 +141,8 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         if (method.ContainingType.SpecialType == SpecialType.System_String && method.Name is "Format" or "Concat" or "Join")
         {
             // Join<T>(separator, IEnumerable<T>) formats every element with the current culture.
-            if (method is { Name: "Join", IsGenericMethod: true } && types.IsCultureSensitive(method.TypeArguments[0]))
+            if (method is { Name: "Join", IsGenericMethod: true } && types.IsCultureSensitive(method.TypeArguments[0])
+                && !IsArrayOfNonNegativeIntegerConstants(invocation))
             {
                 Report(context, invocation, "string.Join", method.TypeArguments[0].ToDisplayString());
                 return;
@@ -183,7 +184,8 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         if (IsTextSink(method, types))
         {
             // AppendJoin<T>(separator, IEnumerable<T>) formats every element, like string.Join<T>.
-            if (method is { Name: "AppendJoin", IsGenericMethod: true } && types.IsCultureSensitive(method.TypeArguments[0]))
+            if (method is { Name: "AppendJoin", IsGenericMethod: true } && types.IsCultureSensitive(method.TypeArguments[0])
+                && !IsArrayOfNonNegativeIntegerConstants(invocation))
             {
                 Report(context, invocation, "StringBuilder.AppendJoin", method.TypeArguments[0].ToDisplayString());
                 return;
@@ -304,6 +306,15 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
+    /// <summary>
+    /// Join(", ", new[] { 1, 2 }): every element is a non-negative integer constant, which formats the
+    /// same in every culture (see <see cref="IsNonNegativeIntegerConstant"/>).
+    /// </summary>
+    private static bool IsArrayOfNonNegativeIntegerConstants(IInvocationOperation invocation)
+        => invocation.Arguments.LastOrDefault()?.Value is { } values
+           && Unwrap(values) is IArrayCreationOperation { Initializer: { } initializer }
+           && initializer.ElementValues.All(IsNonNegativeIntegerConstant);
+
     private static bool IsNonNegativeIntegerConstant(IOperation operation)
         => operation.ConstantValue is { HasValue: true, Value: sbyte or short or int or long } constant
            && System.Convert.ToInt64(constant.Value, System.Globalization.CultureInfo.InvariantCulture) >= 0;
@@ -383,6 +394,7 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
 
     private sealed class KnownTypes
     {
+        private readonly ImmutableHashSet<ITypeSymbol> _otherIntegral;
         private readonly ImmutableHashSet<ITypeSymbol> _otherCultureSensitive;
 
         public KnownTypes(Compilation compilation)
@@ -395,22 +407,13 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
             Convert = compilation.GetTypeByMetadataName("System.Convert");
             TypedConstantValue = compilation.GetTypeByMetadataName("Microsoft.CodeAnalysis.TypedConstant")?
                 .GetMembers("Value").OfType<IPropertySymbol>().FirstOrDefault();
-            BigInteger = compilation.GetTypeByMetadataName("System.Numerics.BigInteger");
             CultureInfo = compilation.GetTypeByMetadataName("System.Globalization.CultureInfo");
 
-            _otherCultureSensitive = new[]
-                {
-                    "System.DateTimeOffset",
-                    "System.DateOnly",
-                    "System.TimeOnly",
-                    "System.Int128",
-                    "System.Numerics.BigInteger",
-                    "System.Half",
-                }
-                .Select(compilation.GetTypeByMetadataName)
-                .Where(t => t is not null)
-                .Cast<ITypeSymbol>()
-                .ToImmutableHashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+            // Culture-sensitive types without a SpecialType, resolved by metadata name (null when the
+            // target framework lacks them). The integral ones also accept hex formats.
+            _otherIntegral = Resolve(compilation, "System.Int128", "System.Numerics.BigInteger");
+            _otherCultureSensitive = _otherIntegral.Union(
+                Resolve(compilation, "System.DateTimeOffset", "System.DateOnly", "System.TimeOnly", "System.Half"));
         }
 
         public INamedTypeSymbol? FormatProvider { get; }
@@ -420,7 +423,6 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         public INamedTypeSymbol? TextWriter { get; }
         public INamedTypeSymbol? Convert { get; }
         private IPropertySymbol? TypedConstantValue { get; }
-        private INamedTypeSymbol? BigInteger { get; }
         private INamedTypeSymbol? CultureInfo { get; }
 
         public bool IsCurrentCulture(IOperation operation)
@@ -451,7 +453,13 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         /// <summary>Signed integer types, the only culture-sensitive types that support hex formats.</summary>
         public bool IsIntegral(ITypeSymbol type) => type.SpecialType is SpecialType.System_SByte
             or SpecialType.System_Int16 or SpecialType.System_Int32 or SpecialType.System_Int64 or SpecialType.System_IntPtr
-            || SymbolEqualityComparer.Default.Equals(type, BigInteger)
-            || type.Name == "Int128" && type.ContainingNamespace?.ToDisplayString() == "System";
+            || _otherIntegral.Contains(type);
+
+        private static ImmutableHashSet<ITypeSymbol> Resolve(Compilation compilation, params string[] metadataNames)
+            => metadataNames
+                .Select(compilation.GetTypeByMetadataName)
+                .Where(t => t is not null)
+                .Cast<ITypeSymbol>()
+                .ToImmutableHashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
     }
 }

@@ -20,6 +20,8 @@ public class CultureSensitiveFormattingAnalyzerTests
     [Arguments("s += i;", "String concatenation")]
     [Arguments("_ = string.Concat(s, i);", "string.Concat")]
     [Arguments("_ = string.Join(\",\", new[] { i });", "string.Join")]
+    [Arguments("_ = string.Join(\",\", new[] { 1, -1 });", "string.Join")]
+    [Arguments("sb.AppendJoin(\",\", new[] { 1.5 });", "StringBuilder.AppendJoin")]
     [Arguments("sb.Append($\"{i}\");", "Interpolation")]
     [Arguments("sb.Append(i);", "StringBuilder.Append")]
     [Arguments("sb.Append(d);", "StringBuilder.Append")]
@@ -81,7 +83,23 @@ public class CultureSensitiveFormattingAnalyzerTests
     [Arguments("sb.AppendJoin(\",\", new[] { u });")]
     [Arguments("sb.AppendJoin(\",\", s, u);")]
     [Arguments("sb.Append(s, i, i);")]
+    [Arguments("sb.AppendJoin(\",\", new[] { 7 });")]
+    [Arguments("_ = string.Join(\",\", new[] { 0, 42 });")]
     public async Task Ignores_Invariant_Or_Culture_Independent_Conversion(string statement)
+    {
+        var diagnostics = await Analyze(statement);
+
+        await Assert.That(diagnostics).IsEmpty();
+    }
+
+    // Documented limit: a number that is already typed object or an unconstrained generic before it
+    // is formatted is not seen (TypedConstant.Value is the exception). Pinned so a change is deliberate.
+    [Test]
+    [Arguments("_ = $\"{o}\";")]
+    [Arguments("_ = o.ToString();")]
+    [Arguments("sb.Append(o);")]
+    [Arguments("_ = $\"{t}\";")]
+    public async Task Does_Not_See_Values_Already_Typed_Object_Or_Generic(string statement)
     {
         var diagnostics = await Analyze(statement);
 
@@ -101,7 +119,7 @@ public class CultureSensitiveFormattingAnalyzerTests
 
             class C
             {
-                void M(int i, double d, int? n, DateTime dt, uint u, bool b, char c, Kind e, string s, StringBuilder sb, TextWriter writer, TypedConstant tc)
+                void M<T>(T t, object o, int i, double d, int? n, DateTime dt, uint u, bool b, char c, Kind e, string s, StringBuilder sb, TextWriter writer, TypedConstant tc)
                 {
                     {{statement}}
                 }
