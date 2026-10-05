@@ -60,12 +60,26 @@ public class SigtermTests
             File.Exists(afterMarker).ShouldBeTrue($"The After hook did not complete:{Environment.NewLine}{output}");
             output.ToString().ShouldContain("The test run was cancelled by SIGTERM.");
 
-            // 128 + signal: 143 = killed by SIGTERM itself, 134 = aborted on an unhandled exception.
-            result.ExitCode.ShouldNotBe(143);
-            result.ExitCode.ShouldNotBe(134);
+            // A failed session; not 143 (killed by SIGTERM itself) or 134 (aborted on an unhandled exception).
+            result.ExitCode.ShouldBe(10);
         }
         finally
         {
+            // If the test bailed out before the child finished, stop it before deleting the
+            // directory its After hook writes to.
+            if (!commandTask.Task.IsCompleted)
+            {
+                forcefulCancellation.Cancel();
+                try
+                {
+                    await commandTask;
+                }
+                catch (OperationCanceledException)
+                {
+                    // Expected: the child was killed.
+                }
+            }
+
             if (Directory.Exists(markerDirectory))
             {
                 Directory.Delete(markerDirectory, recursive: true);

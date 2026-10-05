@@ -130,7 +130,17 @@ public class EngineCancellationToken : IDisposable
     internal void OnTerminationSignal()
     {
         _terminationSignalReceived = true;
-        Cancel();
+
+        try
+        {
+            Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Disposing the registration does not stop a dispatch the runtime had already
+            // snapshotted, so the signal can land after the session's token was disposed.
+            // An exception escaping the signal handler would crash the process.
+        }
     }
 #endif
 

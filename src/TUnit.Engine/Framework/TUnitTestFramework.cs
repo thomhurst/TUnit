@@ -77,6 +77,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             serviceProvider.CancellationToken.Initialise(context.CancellationToken);
 
             await _requestHandler.HandleRequestAsync((TestExecutionRequest) context.Request, serviceProvider, context, GetFilter(context));
+
+            // Cancellation does not always surface as an exception (a run can wind down cleanly),
+            // but a run stopped by SIGTERM must never report success.
+            if (serviceProvider.CancellationToken.TerminationSignalReceived)
+            {
+                await serviceProvider.Logger.LogErrorAsync(SigtermMessage);
+                serviceProvider.SessionFailed = true;
+            }
         }
         catch (Exception e) when (IsCancellationException(e))
         {
@@ -86,7 +94,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             {
                 // MTP only treats the exception as a cancellation when its own token fired, which
                 // SIGTERM does not do; re-throwing would crash the host. Fail the session instead.
-                await serviceProvider.Logger.LogErrorAsync("The test run was cancelled by SIGTERM.");
+                await serviceProvider.Logger.LogErrorAsync(SigtermMessage);
                 serviceProvider.SessionFailed = true;
                 return;
             }
@@ -144,6 +152,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 _frameworkServiceProvider,
                 _capabilities));
     }
+
+    private const string SigtermMessage = "The test run was cancelled by SIGTERM.";
 
     private static bool IsCancellationException(Exception e)
     {

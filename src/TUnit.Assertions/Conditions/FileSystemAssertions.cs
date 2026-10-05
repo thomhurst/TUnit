@@ -142,6 +142,8 @@ public class FileIsNotSystemAssertion : Assertion<FileInfo>
 [AssertionExtension("IsNotExecutable")]
 public class FileIsNotExecutableAssertion : Assertion<FileInfo>
 {
+    private static readonly string[] ExecutableExtensions = [".exe", ".bat", ".cmd", ".com", ".sh", ".ps1"];
+
     public FileIsNotExecutableAssertion(
         AssertionContext<FileInfo> context)
         : base(context)
@@ -192,8 +194,6 @@ public class FileIsNotExecutableAssertion : Assertion<FileInfo>
 
         return AssertionResult._passedTask;
     }
-
-    private static readonly string[] ExecutableExtensions = [".exe", ".bat", ".cmd", ".com", ".sh", ".ps1"];
 
     protected override string GetExpectation() => "to not be executable";
 }

@@ -1,4 +1,5 @@
 using TUnit.Assertions.Extensions;
+using TUnit.Core.Enums;
 using TUnit.Engine.Helpers;
 
 namespace TUnit.UnitTests;
@@ -31,6 +32,26 @@ public class FileLockDetectionTests
         {
             File.Delete(path);
         }
+    }
+
+    [Test]
+    [RunOn(OS.Windows)]
+    public async Task Windows_Sharing_And_Lock_Violations_Are_Detected()
+    {
+        await Assert.That(FileLockDetection.IsFileLocked(new IOException("x", unchecked((int) 0x80070020)))).IsTrue();
+        await Assert.That(FileLockDetection.IsFileLocked(new IOException("x", unchecked((int) 0x80070021)))).IsTrue();
+        await Assert.That(FileLockDetection.IsFileLocked(new IOException("x", unchecked((int) 0x80070005)))).IsFalse();
+    }
+
+    [Test]
+    [ExcludeOn(OS.Windows)]
+    public async Task Unix_EWouldBlock_For_This_Platform_Is_Detected()
+    {
+        // EWOULDBLOCK is 35 on macOS (and FreeBSD), 11 on Linux; the other value means something else here.
+        var (ewouldblock, other) = OperatingSystem.IsMacOS() ? (35, 11) : (11, 35);
+
+        await Assert.That(FileLockDetection.IsFileLocked(new IOException("x", ewouldblock))).IsTrue();
+        await Assert.That(FileLockDetection.IsFileLocked(new IOException("x", other))).IsFalse();
     }
 
     [Test]
