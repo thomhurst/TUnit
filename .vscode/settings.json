@@ -1,0 +1,4 @@
+{
+    // The repository root holds three solutions; C# Dev Kit needs to be told which to load.
+    "dotnet.defaultSolution": "TUnit.Dev.slnx"
+}

@@ -53,8 +53,9 @@ public sealed class RunOnAttribute(OS OperatingSystem) : SkipAttribute($"Test is
         {
             return Task.FromResult(false);
         }
-#if NET
-        // Only validate Linux and macOS on .NET 5+ where these OS flags are available
+
+        // RuntimeInformation.IsOSPlatform is available on netstandard2.0 too, so .NET Framework
+        // test projects running under Mono on Linux or macOS must reach these checks.
         if (OperatingSystem.HasFlag(OS.Linux) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             return Task.FromResult(false);
@@ -65,6 +66,7 @@ public sealed class RunOnAttribute(OS OperatingSystem) : SkipAttribute($"Test is
             return Task.FromResult(false);
         }
 
+#if NET
         // Check for Browser platform (WebAssembly)
         if (OperatingSystem.HasFlag(OS.Browser) && System.OperatingSystem.IsBrowser())
         {
