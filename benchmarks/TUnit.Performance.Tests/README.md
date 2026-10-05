@@ -38,7 +38,7 @@ dotnet run -c Release
 ### Native AOT Comparison
 
 ```bash
-# Build for AOT (native AOT cannot cross-compile, so target the current machine)
+# Build for AOT (native AOT cannot cross-compile across operating systems, so target the current machine)
 dotnet publish -c Release --use-current-runtime --self-contained -p:PublishAot=true -o publish
 
 # Run the published executable
