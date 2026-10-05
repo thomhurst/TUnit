@@ -13,12 +13,11 @@ internal static class FileLockDetection
     private const int ErrorLockViolation = 0x21;
 
     // Unix: .NET takes an advisory flock for FileShare and reports contention with the raw errno
-    // as the HResult. EWOULDBLOCK (== EAGAIN) is 11 on Linux and 35 on the BSD family (macOS, FreeBSD).
+    // as the HResult. EWOULDBLOCK (== EAGAIN) is 11 on Linux and 35 on the BSDs (macOS, FreeBSD,
+    // NetBSD, OpenBSD). Both are accepted everywhere rather than probing the OS: the other value is
+    // EDEADLK on each family, and treating that as contention only costs a bounded retry.
     private const int EWouldBlockLinux = 11;
     private const int EWouldBlockBsd = 35;
-
-    // OSPlatform.FreeBSD is not part of netstandard2.0.
-    private static readonly OSPlatform FreeBSD = OSPlatform.Create("FREEBSD");
 
     internal static bool IsFileLocked(IOException exception)
     {
@@ -31,7 +30,7 @@ internal static class FileLockDetection
                 return true;
             }
         }
-        else if (exception.HResult == (IsBsd() ? EWouldBlockBsd : EWouldBlockLinux))
+        else if (exception.HResult is EWouldBlockLinux or EWouldBlockBsd)
         {
             return true;
         }
@@ -40,7 +39,4 @@ internal static class FileLockDetection
         // English on .NET (Core); a localized .NET Framework message simply won't match.
         return exception.Message.Contains("being used by another process");
     }
-
-    private static bool IsBsd() =>
-        RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(FreeBSD);
 }

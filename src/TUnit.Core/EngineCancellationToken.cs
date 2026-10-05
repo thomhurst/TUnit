@@ -155,6 +155,8 @@ public class EngineCancellationToken : IDisposable
             }
         }
 
+        // Runs cancellation callbacks (After hooks) synchronously on the signal-dispatch thread. A
+        // slow hook blocks that thread, which is acceptable: the timer armed above bounds it.
         try
         {
             Cancel(armForcefulExit: false);

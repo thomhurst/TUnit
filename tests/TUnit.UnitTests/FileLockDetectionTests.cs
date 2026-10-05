@@ -45,13 +45,13 @@ public class FileLockDetectionTests
 
     [Test]
     [ExcludeOn(OS.Windows)]
-    public async Task Unix_EWouldBlock_For_This_Platform_Is_Detected()
+    public async Task Unix_EWouldBlock_Is_Detected_For_Linux_And_Bsd_Numbering()
     {
-        // EWOULDBLOCK is 35 on macOS and FreeBSD, 11 on Linux; the other value means something else here.
-        var (ewouldblock, other) = OperatingSystem.IsMacOS() || OperatingSystem.IsFreeBSD() ? (35, 11) : (11, 35);
-
-        await Assert.That(FileLockDetection.IsFileLocked(new IOException("x", ewouldblock))).IsTrue();
-        await Assert.That(FileLockDetection.IsFileLocked(new IOException("x", other))).IsFalse();
+        // EWOULDBLOCK is 11 on Linux and 35 on the BSDs; both are accepted on any Unix.
+        await Assert.That(FileLockDetection.IsFileLocked(new IOException("x", 11))).IsTrue();
+        await Assert.That(FileLockDetection.IsFileLocked(new IOException("x", 35))).IsTrue();
+        // EACCES is a permission error, not contention.
+        await Assert.That(FileLockDetection.IsFileLocked(new IOException("x", 13))).IsFalse();
     }
 
     [Test]
