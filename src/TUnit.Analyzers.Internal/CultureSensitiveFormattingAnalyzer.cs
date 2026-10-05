@@ -19,8 +19,9 @@ namespace TUnit.Analyzers.Internal;
 /// user attribute arguments such as <c>[Arguments(-1.5)]</c>, typed only as <c>object</c>.
 /// </para>
 /// <para>
-/// Limit: other values typed <c>object</c> or an unconstrained generic (e.g.
-/// <c>$"{(object) i}"</c>) are not seen.
+/// Limit: a value that reaches the conversion already typed <c>object</c> or an unconstrained
+/// generic (e.g. a field of type <c>object</c>) is not seen; an explicit box such as
+/// <c>$"{(object) i}"</c> is.
 /// </para>
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
@@ -232,7 +233,7 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
 
         // Hexadecimal formatting is culture-independent, but only integers support it:
         // "x.00" on a double is a custom format that still uses the culture's separator.
-        if (types.IsCultureSensitive(type) && !(KnownTypes.IsIntegral(type!) && IsHexFormat(format)))
+        if (types.IsCultureSensitive(type) && !(types.IsIntegral(type!) && IsHexFormat(format)))
         {
             Report(context, reportAt ?? value, conversion, type!.ToDisplayString());
         }
@@ -262,11 +263,16 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
     private static bool PassesFormatProvider(IInvocationOperation invocation, KnownTypes types)
         => invocation.Arguments.Any(a => IsProvidedFormatProvider(a, types));
 
-    /// <summary>An <see cref="IFormatProvider"/> argument that is neither omitted nor <c>null</c>.</summary>
+    /// <summary>
+    /// An <see cref="IFormatProvider"/> argument that is neither omitted, <c>null</c>, nor the current
+    /// culture: <c>ToString(CultureInfo.CurrentCulture)</c> is as culture-dependent as <c>ToString()</c>.
+    /// </summary>
     private static bool IsProvidedFormatProvider(IArgumentOperation argument, KnownTypes types)
         => types.IsFormatProvider(argument.Parameter?.Type)
            && argument.ArgumentKind != ArgumentKind.DefaultValue
-           && Unwrap(argument.Value).ConstantValue is not { HasValue: true, Value: null };
+           && Unwrap(argument.Value) is var provider
+           && provider.ConstantValue is not { HasValue: true, Value: null }
+           && !types.IsCurrentCulture(provider);
 
     private static bool IsTextSink(IMethodSymbol method, KnownTypes types)
     {
@@ -324,6 +330,10 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
                 case IConversionOperation { IsImplicit: true } conversion:
                     operation = conversion.Operand;
                     continue;
+                // An explicit box ($"{(object) i}") still formats the underlying number.
+                case IConversionOperation { Type: { SpecialType: SpecialType.System_Object } or { TypeKind: TypeKind.Interface }, Operand.Type.IsValueType: true } boxing:
+                    operation = boxing.Operand;
+                    continue;
                 case IConditionalAccessInstanceOperation instance:
                     var access = instance.Parent;
                     while (access is not null and not IConditionalAccessOperation)
@@ -374,10 +384,15 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
             Convert = compilation.GetTypeByMetadataName("System.Convert");
             TypedConstantValue = compilation.GetTypeByMetadataName("Microsoft.CodeAnalysis.TypedConstant")?
                 .GetMembers("Value").OfType<IPropertySymbol>().FirstOrDefault();
+            BigInteger = compilation.GetTypeByMetadataName("System.Numerics.BigInteger");
+            CultureInfo = compilation.GetTypeByMetadataName("System.Globalization.CultureInfo");
 
             _otherCultureSensitive = new[]
                 {
                     "System.DateTimeOffset",
+                    "System.DateOnly",
+                    "System.TimeOnly",
+                    "System.Int128",
                     "System.Numerics.BigInteger",
                     "System.Half",
                 }
@@ -394,6 +409,12 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         public INamedTypeSymbol? TextWriter { get; }
         public INamedTypeSymbol? Convert { get; }
         private IPropertySymbol? TypedConstantValue { get; }
+        private INamedTypeSymbol? BigInteger { get; }
+        private INamedTypeSymbol? CultureInfo { get; }
+
+        public bool IsCurrentCulture(IOperation operation)
+            => operation is IPropertyReferenceOperation { Property: { Name: "CurrentCulture" or "CurrentUICulture" } property }
+               && SymbolEqualityComparer.Default.Equals(property.ContainingType, CultureInfo);
 
         public bool IsFormatProvider(ITypeSymbol? type)
             => type is not null && SymbolEqualityComparer.Default.Equals(type, FormatProvider);
@@ -405,8 +426,8 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
 
         /// <summary>
         /// Signed integers (the negative sign varies), floating point and decimal (the decimal
-        /// separator varies) and dates. Unsigned integers, bool, char and enums format the same
-        /// in every culture.
+        /// separator varies) and dates and times. Unsigned integers, bool, char and enums format the
+        /// same in every culture; so does TimeSpan, whose default ToString() uses the invariant "c" format.
         /// </summary>
         public bool IsCultureSensitive(ITypeSymbol? type) => type is not null && (type.SpecialType switch
         {
@@ -417,8 +438,9 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         });
 
         /// <summary>Signed integer types, the only culture-sensitive types that support hex formats.</summary>
-        public static bool IsIntegral(ITypeSymbol type) => type.SpecialType is SpecialType.System_SByte
+        public bool IsIntegral(ITypeSymbol type) => type.SpecialType is SpecialType.System_SByte
             or SpecialType.System_Int16 or SpecialType.System_Int32 or SpecialType.System_Int64 or SpecialType.System_IntPtr
-            || type.Name == "BigInteger" && type.ContainingNamespace?.ToDisplayString() == "System.Numerics";
+            || SymbolEqualityComparer.Default.Equals(type, BigInteger)
+            || type.Name == "Int128" && type.ContainingNamespace?.ToDisplayString() == "System";
     }
 }
