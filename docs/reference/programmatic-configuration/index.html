@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.a95f87d4.css">
-<script src="/assets/js/runtime~main.2c4a029f.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.ed2cf1e5.js" defer="defer"></script>
 <script src="/assets/js/main.ecf969af.js" defer="defer"></script>
 </head>
 <body>
@@ -35,6 +35,7 @@
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="settings-reference">Settings Reference<a href="#settings-reference" class="hash-link" aria-label="Direct link to Settings Reference" title="Direct link to Settings Reference" translate="no">​</a></h2>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="contextsettingstimeouts"><code>context.Settings.Timeouts</code><a href="#contextsettingstimeouts" class="hash-link" aria-label="Direct link to contextsettingstimeouts" title="Direct link to contextsettingstimeouts" translate="no">​</a></h3>
 <table><thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>DefaultTestTimeout</code></td><td><code>TimeSpan</code></td><td>30 minutes</td><td>Maximum duration for a single test before it is cancelled.</td></tr><tr><td><code>DefaultHookTimeout</code></td><td><code>TimeSpan</code></td><td>5 minutes</td><td>Maximum duration for a single hook (<code>[Before]</code>/<code>[After]</code>) before it is cancelled.</td></tr><tr><td><code>ForcefulExitTimeout</code></td><td><code>TimeSpan</code></td><td>30 seconds</td><td>Grace period before the process is forcefully terminated after a cancellation.</td></tr><tr><td><code>ProcessExitHookDelay</code></td><td><code>TimeSpan</code></td><td>500 ms</td><td>Delay before process-exit hooks run, allowing pending I/O to flush.</td></tr></tbody></table>
+<p>On Linux and macOS with .NET 8 or later, SIGTERM (sent by <code>docker stop</code>, Kubernetes, and CI cancellation) cancels the run the same way as Ctrl+C: After hooks run within <code>ForcefulExitTimeout</code>, and the run ends as a failed test session with exit code 10. .NET Framework test projects running on Mono keep the runtime&#x27;s default handling, so After hooks there only get <code>ProcessExitHookDelay</code>.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="contextsettingsparallelism"><code>context.Settings.Parallelism</code><a href="#contextsettingsparallelism" class="hash-link" aria-label="Direct link to contextsettingsparallelism" title="Direct link to contextsettingsparallelism" translate="no">​</a></h3>
 <table><thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>MaximumParallelTests</code></td><td><code>int?</code></td><td><code>null</code> (4 x CPU cores)</td><td>Maximum number of tests that can execute concurrently. Set to <code>null</code> to use the default heuristic.</td></tr></tbody></table>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="contextsettingsdisplay"><code>context.Settings.Display</code><a href="#contextsettingsdisplay" class="hash-link" aria-label="Direct link to contextsettingsdisplay" title="Direct link to contextsettingsdisplay" translate="no">​</a></h3>
