@@ -79,7 +79,7 @@ if (-not $OutputDir) {
 }
 New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 
-$ExeSuffix = if ($IsWindows) { ".exe" } else { "" }
+$ExeSuffix = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { ".exe" } else { "" }
 $ExePath = Join-Path $ProjectDir "bin" $Configuration $Framework "$ProjectName$ExeSuffix"
 
 Write-Host ""

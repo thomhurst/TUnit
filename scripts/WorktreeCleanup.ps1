@@ -152,6 +152,7 @@ function Remove-MergedWorktree {
         return
     }
     # A link to a worktree is not that worktree: git would follow it and remove the target.
+    # Only the path itself is checked; a symlinked ancestor (macOS's /var) is fine and expected.
     if ((Get-Item -LiteralPath $Worktree -Force).LinkType) {
         Write-Host "Preserving worktree $Label : $Worktree (path is a link)"
         return

@@ -9,6 +9,9 @@ internal static class RuntimeIdentifiers
     /// Native AOT cannot cross-compile to another OS, so AOT publishes always target the host.
     /// Built from the OS and process architecture rather than <see cref="RuntimeInformation.RuntimeIdentifier"/>,
     /// which reports a distro-specific RID (e.g. <c>ubuntu.24.04-x64</c>) on source-built SDKs.
+    /// glibc is assumed: on Alpine/musl this still yields <c>linux-x64</c>, not <c>linux-musl-x64</c>.
+    /// Only for publishing; labels such as hang-dump names use <see cref="RuntimeInformation.RuntimeIdentifier"/>,
+    /// which never throws.
     /// </summary>
     public static string Current { get; } = $"{CurrentOperatingSystem}-{CurrentArchitecture}";
 

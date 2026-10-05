@@ -37,7 +37,7 @@ public class RunEngineTestsModule : Module<CommandResult>
             Configuration = "Release",
             Framework = "net10.0",
             Arguments = [
-                "--hangdump", "--hangdump-filename", $"hangdump.{RuntimeIdentifiers.Current}.engine-tests.dmp", "--hangdump-timeout", "30m",
+                "--hangdump", "--hangdump-filename", $"hangdump.{System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier}.engine-tests.dmp", "--hangdump-timeout", "30m",
                 "--timeout", "35m",
             ],
         }, new CommandExecutionOptions
