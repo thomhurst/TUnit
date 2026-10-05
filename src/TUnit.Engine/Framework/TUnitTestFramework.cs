@@ -129,7 +129,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
         if (_serviceProvidersPerSession.TryRemove(context.SessionUid.Value, out var serviceProvider))
         {
-            if (serviceProvider.SessionFailed)
+            // TerminationSignalReceived too: SIGTERM can arrive after the request finished but before
+            // the host closes the session, and a terminated run must never report success.
+            if (serviceProvider.SessionFailed || serviceProvider.CancellationToken.TerminationSignalReceived)
             {
                 isSuccess = false;
             }

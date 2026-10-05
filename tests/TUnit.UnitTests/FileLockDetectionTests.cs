@@ -47,8 +47,8 @@ public class FileLockDetectionTests
     [ExcludeOn(OS.Windows)]
     public async Task Unix_EWouldBlock_For_This_Platform_Is_Detected()
     {
-        // EWOULDBLOCK is 35 on macOS (and FreeBSD), 11 on Linux; the other value means something else here.
-        var (ewouldblock, other) = OperatingSystem.IsMacOS() ? (35, 11) : (11, 35);
+        // EWOULDBLOCK is 35 on macOS and FreeBSD, 11 on Linux; the other value means something else here.
+        var (ewouldblock, other) = OperatingSystem.IsMacOS() || OperatingSystem.IsFreeBSD() ? (35, 11) : (11, 35);
 
         await Assert.That(FileLockDetection.IsFileLocked(new IOException("x", ewouldblock))).IsTrue();
         await Assert.That(FileLockDetection.IsFileLocked(new IOException("x", other))).IsFalse();

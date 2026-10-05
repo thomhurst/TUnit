@@ -23,6 +23,8 @@ public class EngineCancellationToken : IDisposable
 
     private int _initialised;
     private volatile bool _forcefulExitStarted;
+    private readonly object _forcefulExitGate = new();
+    private bool _disposed;
     private CancellationTokenRegistration _platformRegistration;
     private bool _cancelKeyPressSubscribed;
 #if NET
@@ -191,10 +193,18 @@ public class EngineCancellationToken : IDisposable
         // Platform-driven cancellation manages its own shutdown, so it opts out.
         // Arm it BEFORE cancelling: Cancel() runs registered callbacks (After hooks) synchronously,
         // and one that blocks must not postpone the deadline that is meant to bound it.
-        if (armForcefulExit && !_forcefulExitStarted)
+        if (armForcefulExit)
         {
-            _forcefulExitStarted = true;
-            ArmForcefulExit();
+            // Under the gate shared with Dispose: a signal the runtime dispatches after the session
+            // was disposed must not arm a timer that would later kill a host still in use.
+            lock (_forcefulExitGate)
+            {
+                if (!_disposed && !_forcefulExitStarted)
+                {
+                    _forcefulExitStarted = true;
+                    ArmForcefulExit();
+                }
+            }
         }
 
         // Cancel the test execution
@@ -240,6 +250,11 @@ public class EngineCancellationToken : IDisposable
     /// </summary>
     public void Dispose()
     {
+        lock (_forcefulExitGate)
+        {
+            _disposed = true;
+        }
+
         _platformRegistration.Dispose();
 #if NET
         _sigtermRegistration?.Dispose();

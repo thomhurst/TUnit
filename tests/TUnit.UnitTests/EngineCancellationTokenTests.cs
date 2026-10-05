@@ -72,6 +72,17 @@ public class EngineCancellationTokenTests
         await Assert.That(token.TerminationSignalReceived).IsTrue();
         await Assert.That(token.Token.IsCancellationRequested).IsTrue();
     }
+
+    [Test]
+    public async Task TerminationSignal_After_Dispose_Neither_Throws_Nor_Arms_Forceful_Exit()
+    {
+        // The runtime may dispatch a signal it captured before Dispose unregistered the handler.
+        var token = new RecordingForcefulExitToken();
+        token.Dispose();
+
+        await Assert.That(() => token.OnTerminationSignal()).ThrowsNothing();
+        await Assert.That(token.ForcefulExitArmed).IsFalse();
+    }
 #endif
 
     [Test]

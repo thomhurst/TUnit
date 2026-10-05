@@ -36,7 +36,8 @@ internal static class FileLockDetection
             return true;
         }
 
-        // Fallback heuristic for hosts that map the error differently.
+        // Best-effort fallback for hosts that map the error differently. The runtime's message is
+        // English on .NET (Core); a localized .NET Framework message simply won't match.
         return exception.Message.Contains("being used by another process");
     }
 
