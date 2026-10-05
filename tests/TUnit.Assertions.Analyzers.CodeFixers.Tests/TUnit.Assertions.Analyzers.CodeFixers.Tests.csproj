@@ -4,6 +4,16 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\TUnit.Assertions.Analyzers.CodeFixers\TUnit.Assertions.Analyzers.CodeFixers.csproj" />
         <ProjectReference Include="..\..\src\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
+        <!-- Build-order only: the netstandard2.0 DLLs copied below must exist before this project copies
+             them. Without these, a parallel solution build can race (MSB3030). -->
+        <ProjectReference Include="..\..\src\TUnit.Core\TUnit.Core.csproj"
+                          ReferenceOutputAssembly="false"
+                          SetTargetFramework="TargetFramework=netstandard2.0"
+                          PrivateAssets="all" />
+        <ProjectReference Include="..\..\src\TUnit.Assertions\TUnit.Assertions.csproj"
+                          ReferenceOutputAssembly="false"
+                          SetTargetFramework="TargetFramework=netstandard2.0"
+                          PrivateAssets="all" />
     </ItemGroup>
 
     <!-- Copy netstandard2.0 builds of TUnit.Core / TUnit.Assertions into the test bin so the
