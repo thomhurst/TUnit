@@ -15,14 +15,20 @@ namespace TUnit.Analyzers.Internal;
 /// interpolated strings, <c>+</c> / <c>+=</c> concatenation and <c>StringBuilder.Append(int)</c>,
 /// which is where generated code is built. This rule covers all of them.
 /// <para>
-/// Limit: only statically typed values are checked. A number reaching a conversion as
-/// <c>object</c> or an unconstrained generic (e.g. <c>$"{(object) i}"</c>) is not seen.
+/// Roslyn's <c>TypedConstant.Value</c> is treated as a possible number: it is how generators read
+/// user attribute arguments such as <c>[Arguments(-1.5)]</c>, typed only as <c>object</c>.
+/// </para>
+/// <para>
+/// Limit: other values typed <c>object</c> or an unconstrained generic (e.g.
+/// <c>$"{(object) i}"</c>) are not seen.
 /// </para>
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
 {
     public const string DiagnosticId = "TUNITINT001";
+
+    private const string TypedConstantValueDisplay = "TypedConstant.Value (may hold a number)";
 
     private static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,
@@ -55,20 +61,12 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeInterpolation(OperationAnalysisContext context, KnownTypes types)
     {
         var interpolation = (IInterpolationOperation) context.Operation;
-        var valueType = UnderlyingType(interpolation.Expression);
 
-        if (!types.IsCultureSensitive(valueType) || IsHexFormat(interpolation.FormatString))
+        if (interpolation.Parent is IInterpolatedStringOperation interpolatedString
+            && !FormatsWithExplicitCulture(interpolatedString, types))
         {
-            return;
+            ReportIfCultureSensitive(context, types, interpolation.Expression, "Interpolation", interpolation.FormatString);
         }
-
-        if (interpolation.Parent is not IInterpolatedStringOperation interpolatedString
-            || FormatsWithExplicitCulture(interpolatedString, types))
-        {
-            return;
-        }
-
-        Report(context, interpolation.Expression, "Interpolation", valueType!);
     }
 
     /// <summary>
@@ -79,40 +77,25 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
     {
         var append = (IInterpolatedStringAppendOperation) context.Operation;
 
-        if (append.AppendCall is not IInvocationOperation { Arguments.Length: > 0 } call)
+        if (append.AppendCall is not IInvocationOperation { Arguments.Length: > 0 } call
+            || append.Parent is IInterpolatedStringOperation interpolatedString && FormatsWithExplicitCulture(interpolatedString, types))
         {
             return;
         }
 
-        var value = call.Arguments[0].Value;
-        var valueType = UnderlyingType(value);
         var format = call.Arguments.FirstOrDefault(a => a.Parameter?.Name == "format")?.Value;
-
-        if (!types.IsCultureSensitive(valueType) || IsHexFormat(format))
-        {
-            return;
-        }
-
-        if (append.Parent is IInterpolatedStringOperation interpolatedString
-            && FormatsWithExplicitCulture(interpolatedString, types))
-        {
-            return;
-        }
-
-        Report(context, value, "Interpolation", valueType!);
+        ReportIfCultureSensitive(context, types, call.Arguments[0].Value, "Interpolation", format);
     }
 
     private static void AnalyzeConcatenation(OperationAnalysisContext context, KnownTypes types)
     {
         var binary = (IBinaryOperation) context.Operation;
 
-        if (binary.OperatorKind != BinaryOperatorKind.Add || binary.Type?.SpecialType != SpecialType.System_String)
+        if (binary.OperatorKind == BinaryOperatorKind.Add && binary.Type?.SpecialType == SpecialType.System_String)
         {
-            return;
+            ReportIfCultureSensitive(context, types, binary.LeftOperand, "String concatenation");
+            ReportIfCultureSensitive(context, types, binary.RightOperand, "String concatenation");
         }
-
-        ReportOperandIfCultureSensitive(context, types, binary.LeftOperand);
-        ReportOperandIfCultureSensitive(context, types, binary.RightOperand);
     }
 
     // s += i
@@ -122,17 +105,7 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
 
         if (assignment.OperatorKind == BinaryOperatorKind.Add && assignment.Target.Type?.SpecialType == SpecialType.System_String)
         {
-            ReportOperandIfCultureSensitive(context, types, assignment.Value);
-        }
-    }
-
-    private static void ReportOperandIfCultureSensitive(OperationAnalysisContext context, KnownTypes types, IOperation operand)
-    {
-        var operandType = UnderlyingType(operand);
-
-        if (types.IsCultureSensitive(operandType))
-        {
-            Report(context, operand, "String concatenation", operandType!);
+            ReportIfCultureSensitive(context, types, assignment.Value, "String concatenation");
         }
     }
 
@@ -141,29 +114,25 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         var invocation = (IInvocationOperation) context.Operation;
         var method = invocation.TargetMethod;
 
-        if (HasFormatProviderParameter(method, types))
+        // An IFormatProvider parameter only helps when a provider is actually passed:
+        // ToString(null) or an omitted optional provider still means the current culture.
+        if (PassesFormatProvider(invocation, types))
         {
             return;
         }
 
-        // value.ToString() / value.ToString("N2")
+        // value.ToString() / value.ToString("N2") / constant.Value?.ToString()
         if (method.Name == nameof(ToString) && invocation.Instance is { } instance)
         {
-            var instanceType = UnderlyingType(instance);
-
-            if (types.IsCultureSensitive(instanceType)
-                && !IsHexFormat(invocation.Arguments.FirstOrDefault()?.Value.ConstantValue is { HasValue: true, Value: string format } ? format : null))
-            {
-                Report(context, invocation, "ToString()", instanceType!);
-            }
-
+            var format = invocation.Arguments.FirstOrDefault(a => a.Value.Type?.SpecialType == SpecialType.System_String)?.Value;
+            ReportIfCultureSensitive(context, types, instance, "ToString()", format, reportAt: invocation);
             return;
         }
 
         // int.Parse(text), double.TryParse(text, out var d)
         if (method.Name is "Parse" or "TryParse" && method.IsStatic && types.IsCultureSensitive(method.ContainingType))
         {
-            Report(context, invocation, $"{method.ContainingType.Name}.{method.Name}", method.ContainingType);
+            Report(context, invocation, $"{method.ContainingType.Name}.{method.Name}", method.ContainingType.ToDisplayString());
             return;
         }
 
@@ -173,7 +142,7 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
             // Join<T>(separator, IEnumerable<T>) formats every element with the current culture.
             if (method is { Name: "Join", IsGenericMethod: true } && types.IsCultureSensitive(method.TypeArguments[0]))
             {
-                Report(context, invocation, "string.Join", method.TypeArguments[0]);
+                Report(context, invocation, "string.Join", method.TypeArguments[0].ToDisplayString());
                 return;
             }
 
@@ -197,7 +166,7 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
             else if (types.IsCultureSensitive(method.ReturnType)
                      && UnderlyingType(converted.Value) is { SpecialType: SpecialType.System_String or SpecialType.System_Object })
             {
-                Report(context, invocation, $"Convert.{method.Name}", method.ReturnType);
+                Report(context, invocation, $"Convert.{method.Name}", method.ReturnType.ToDisplayString());
             }
 
             return;
@@ -226,22 +195,45 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         {
             foreach (var element in initializer.ElementValues)
             {
-                ReportValueIfCultureSensitive(context, types, element, conversion);
+                ReportIfCultureSensitive(context, types, element, conversion);
             }
 
             return;
         }
 
-        ReportValueIfCultureSensitive(context, types, argument.Value, conversion);
+        ReportIfCultureSensitive(context, types, argument.Value, conversion);
     }
 
-    private static void ReportValueIfCultureSensitive(OperationAnalysisContext context, KnownTypes types, IOperation value, string conversion)
+    private static void ReportIfCultureSensitive(
+        OperationAnalysisContext context,
+        KnownTypes types,
+        IOperation value,
+        string conversion,
+        IOperation? format = null,
+        IOperation? reportAt = null)
     {
-        var valueType = UnderlyingType(value);
+        var source = Unwrap(value);
 
-        if (types.IsCultureSensitive(valueType))
+        if (types.IsTypedConstantValue(source))
         {
-            Report(context, value, conversion, valueType!);
+            Report(context, reportAt ?? value, conversion, TypedConstantValueDisplay);
+            return;
+        }
+
+        var type = UnderlyingType(source);
+
+        // A non-negative integer constant ("_" + 1, $"{0}") formats the same in every culture: only the
+        // negative sign varies for integers. Negative and floating-point constants are still reported.
+        if (IsNonNegativeIntegerConstant(source))
+        {
+            return;
+        }
+
+        // Hexadecimal formatting is culture-independent, but only integers support it:
+        // "x.00" on a double is a custom format that still uses the culture's separator.
+        if (types.IsCultureSensitive(type) && !(KnownTypes.IsIntegral(type!) && IsHexFormat(format)))
+        {
+            Report(context, reportAt ?? value, conversion, type!.ToDisplayString());
         }
     }
 
@@ -262,17 +254,18 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
             return true;
         }
 
-        if (parent is IInterpolatedStringHandlerCreationOperation { HandlerCreation: IObjectCreationOperation creation })
-        {
-            return creation.Arguments.Any(a =>
-                types.IsFormatProvider(a.Parameter?.Type) && a.Value.ConstantValue is not { HasValue: true, Value: null });
-        }
-
-        return false;
+        return parent is IInterpolatedStringHandlerCreationOperation { HandlerCreation: IObjectCreationOperation creation }
+            && creation.Arguments.Any(a => IsProvidedFormatProvider(a, types));
     }
 
-    private static bool HasFormatProviderParameter(IMethodSymbol method, KnownTypes types)
-        => method.Parameters.Any(p => types.IsFormatProvider(p.Type));
+    private static bool PassesFormatProvider(IInvocationOperation invocation, KnownTypes types)
+        => invocation.Arguments.Any(a => IsProvidedFormatProvider(a, types));
+
+    /// <summary>An <see cref="IFormatProvider"/> argument that is neither omitted nor <c>null</c>.</summary>
+    private static bool IsProvidedFormatProvider(IArgumentOperation argument, KnownTypes types)
+        => types.IsFormatProvider(argument.Parameter?.Type)
+           && argument.ArgumentKind != ArgumentKind.DefaultValue
+           && Unwrap(argument.Value).ConstantValue is not { HasValue: true, Value: null };
 
     private static bool IsTextSink(IMethodSymbol method, KnownTypes types)
     {
@@ -293,21 +286,50 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
-    private static bool IsHexFormat(IOperation? format)
-        => IsHexFormat(format?.ConstantValue is { HasValue: true, Value: string text } ? text : null);
+    private static bool IsNonNegativeIntegerConstant(IOperation operation)
+        => operation.ConstantValue is { HasValue: true, Value: sbyte or short or int or long } constant
+           && System.Convert.ToInt64(constant.Value, System.Globalization.CultureInfo.InvariantCulture) >= 0;
 
-    private static bool IsHexFormat(string? format)
-        => format is { Length: > 0 } && (format[0] == 'x' || format[0] == 'X');
+    private static bool IsHexFormat(IOperation? format)
+        => format?.ConstantValue is { HasValue: true, Value: string { Length: > 0 } text } && (text[0] == 'x' || text[0] == 'X');
+
+    /// <summary>
+    /// Strips implicit conversions (boxing, widening) and maps the receiver inside a
+    /// conditional access (<c>x.Value?.ToString()</c>) back to the expression it stands for.
+    /// </summary>
+    private static IOperation Unwrap(IOperation operation)
+    {
+        while (true)
+        {
+            switch (operation)
+            {
+                case IConversionOperation { IsImplicit: true } conversion:
+                    operation = conversion.Operand;
+                    continue;
+                case IConditionalAccessInstanceOperation instance:
+                    var access = instance.Parent;
+                    while (access is not null and not IConditionalAccessOperation)
+                    {
+                        access = access.Parent;
+                    }
+
+                    if (access is IConditionalAccessOperation conditional)
+                    {
+                        operation = conditional.Operation;
+                        continue;
+                    }
+
+                    return operation;
+                default:
+                    return operation;
+            }
+        }
+    }
 
     /// <summary>The operand's type before any implicit boxing or widening, unwrapping Nullable&lt;T&gt;.</summary>
     private static ITypeSymbol? UnderlyingType(IOperation operation)
     {
-        while (operation is IConversionOperation { IsImplicit: true } conversion)
-        {
-            operation = conversion.Operand;
-        }
-
-        var type = operation.Type;
+        var type = Unwrap(operation).Type;
 
         if (type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable)
         {
@@ -317,8 +339,8 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         return type;
     }
 
-    private static void Report(OperationAnalysisContext context, IOperation operation, string conversion, ITypeSymbol type)
-        => context.ReportDiagnostic(Diagnostic.Create(Rule, operation.Syntax.GetLocation(), conversion, type.ToDisplayString()));
+    private static void Report(OperationAnalysisContext context, IOperation operation, string conversion, string typeDisplay)
+        => context.ReportDiagnostic(Diagnostic.Create(Rule, operation.Syntax.GetLocation(), conversion, typeDisplay));
 
     private sealed class KnownTypes
     {
@@ -332,6 +354,8 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
             StringBuilder = compilation.GetTypeByMetadataName("System.Text.StringBuilder");
             TextWriter = compilation.GetTypeByMetadataName("System.IO.TextWriter");
             Convert = compilation.GetTypeByMetadataName("System.Convert");
+            TypedConstantValue = compilation.GetTypeByMetadataName("Microsoft.CodeAnalysis.TypedConstant")?
+                .GetMembers("Value").OfType<IPropertySymbol>().FirstOrDefault();
 
             _otherCultureSensitive = new[]
                 {
@@ -351,9 +375,15 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
         public INamedTypeSymbol? StringBuilder { get; }
         public INamedTypeSymbol? TextWriter { get; }
         public INamedTypeSymbol? Convert { get; }
+        private IPropertySymbol? TypedConstantValue { get; }
 
         public bool IsFormatProvider(ITypeSymbol? type)
             => type is not null && SymbolEqualityComparer.Default.Equals(type, FormatProvider);
+
+        public bool IsTypedConstantValue(IOperation operation)
+            => TypedConstantValue is not null
+               && operation is IPropertyReferenceOperation reference
+               && SymbolEqualityComparer.Default.Equals(reference.Property, TypedConstantValue);
 
         /// <summary>
         /// Signed integers (the negative sign varies), floating point and decimal (the decimal
@@ -367,5 +397,10 @@ public sealed class CultureSensitiveFormattingAnalyzer : DiagnosticAnalyzer
                 or SpecialType.System_Decimal or SpecialType.System_DateTime => true,
             _ => _otherCultureSensitive.Contains(type),
         });
+
+        /// <summary>Signed integer types, the only culture-sensitive types that support hex formats.</summary>
+        public static bool IsIntegral(ITypeSymbol type) => type.SpecialType is SpecialType.System_SByte
+            or SpecialType.System_Int16 or SpecialType.System_Int32 or SpecialType.System_Int64 or SpecialType.System_IntPtr
+            || type.Name == "BigInteger" && type.ContainingNamespace?.ToDisplayString() == "System.Numerics";
     }
 }

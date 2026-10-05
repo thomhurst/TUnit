@@ -486,11 +486,11 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             ])
         {
             targetType = type;
-            methodName = attr.ConstructorArguments[1].Value?.ToString();
+            methodName = attr.ConstructorArguments[1].Value.ToInvariantString();
         }
         else
         {
-            methodName = attr.ConstructorArguments[0].Value?.ToString();
+            methodName = attr.ConstructorArguments[0].Value.ToInvariantString();
             targetType = containingType;
         }
 

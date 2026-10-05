@@ -1151,11 +1151,11 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             TypedConstantKind.Primitive when constant.Value is string str => $"\"{EscapeString(str)}\"",
             TypedConstantKind.Primitive when constant.Value is bool b => b ? "true" : "false",
             TypedConstantKind.Primitive when constant.Value is char c => $"'{EscapeChar(c)}'",
-            TypedConstantKind.Primitive => constant.Value?.ToString() ?? "null",
+            TypedConstantKind.Primitive => constant.Value.ToInvariantString() ?? "null",
             TypedConstantKind.Enum => FormatEnumConstant(constant),
             TypedConstantKind.Type => FormatTypeConstant(constant),
             TypedConstantKind.Array => FormatArrayConstant(constant),
-            _ => constant.Value?.ToString() ?? "null"
+            _ => constant.Value.ToInvariantString() ?? "null"
         };
     }
 
@@ -1200,9 +1200,9 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         if (constant is { Type: not null, Value: not null })
         {
             var enumTypeName = constant.Type.ToDisplayString();
-            return $"({enumTypeName}){constant.Value}";
+            return $"({enumTypeName}){constant.Value.ToInvariantString()}";
         }
-        return constant.Value?.ToString() ?? "null";
+        return constant.Value.ToInvariantString() ?? "null";
     }
 
     private static string FormatTypeConstant(TypedConstant constant)
@@ -1212,7 +1212,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             var displayString = GetNonNullableTypeString(typeSymbol);
             return $"typeof({displayString})";
         }
-        return $"typeof({constant.Value})";
+        return $"typeof({constant.Value.ToInvariantString()})";
     }
 
     private static string GetNonNullableTypeString(ITypeSymbol typeSymbol)

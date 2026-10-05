@@ -1,3 +1,4 @@
+using TUnit.Core.SourceGenerator.Extensions;
 using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -66,7 +67,7 @@ public class DynamicTestsGenerator : IIncrementalGenerator
         var testAttribute = methodSymbol.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "DynamicTestBuilderAttribute");
 
-        var filePath = testAttribute?.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? string.Empty;
+        var filePath = testAttribute?.ConstructorArguments.ElementAtOrDefault(0).Value.ToInvariantString() ?? string.Empty;
         var lineNumber = testAttribute?.ConstructorArguments.ElementAtOrDefault(1).Value as int? ?? 0;
 
         // Extract ALL data as primitives - no symbols escape this method

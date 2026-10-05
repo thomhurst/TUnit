@@ -1831,12 +1831,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // MethodDataSource(Type, string) overload
             targetType = (ITypeSymbol?)attr.ConstructorArguments[0].Value;
-            methodName = attr.ConstructorArguments[1].Value?.ToString();
+            methodName = attr.ConstructorArguments[1].Value.ToInvariantString();
         }
         else if (attr.ConstructorArguments.Length >= 1)
         {
             // MethodDataSource(string) overload
-            methodName = attr.ConstructorArguments[0].Value?.ToString();
+            methodName = attr.ConstructorArguments[0].Value.ToInvariantString();
 
             // Check for MethodDataSource<T> generic variant - extract T from type arguments
             if (attr.AttributeClass is { IsGenericType: true })
@@ -2119,7 +2119,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             case TypedConstantKind.Primitive:
                 if (constant.Type?.SpecialType == SpecialType.System_String)
                 {
-                    var stringValue = constant.Value?.ToString() ?? "";
+                    var stringValue = constant.Value.ToInvariantString() ?? "";
                     var escapedValue = stringValue
                         .Replace("\\", "\\\\")
                         .Replace("\"", "\\\"")
@@ -2130,7 +2130,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
                 else if (constant.Type?.SpecialType == SpecialType.System_Char)
                 {
-                    var charValue = constant.Value?.ToString() ?? "";
+                    var charValue = constant.Value.ToInvariantString() ?? "";
                     var escapedChar = charValue
                         .Replace("\\", "\\\\")
                         .Replace("'", "\\'")
@@ -2152,7 +2152,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                     else
                     {
-                        writer.Append(constant.Value?.ToString() ?? "null");
+                        writer.Append(constant.Value.ToInvariantString() ?? "null");
                     }
                 }
                 break;
@@ -3986,7 +3986,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var arg = constructorArgs[0];
             if (arg.Type?.Name == "String")
             {
-                var testName = arg.Value?.ToString() ?? "";
+                var testName = arg.Value.ToInvariantString() ?? "";
 
                 if (genericTypeArgument != null)
                 {
@@ -4023,7 +4023,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (firstArg.Type?.Name == "String" && secondArg.Type is IArrayTypeSymbol)
             {
-                var testName = firstArg.Value?.ToString() ?? "";
+                var testName = firstArg.Value.ToInvariantString() ?? "";
 
                 if (genericTypeArgument != null)
                 {
@@ -4064,7 +4064,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 // DependsOnAttribute(Type testClass, string testName)
                 var classType = firstArg.Value as ITypeSymbol;
-                var testName = secondArg.Value?.ToString() ?? "";
+                var testName = secondArg.Value.ToInvariantString() ?? "";
 
                 if (classType != null)
                 {
@@ -4080,7 +4080,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // DependsOnAttribute(Type testClass, string testName, Type[] parameterTypes)
             var classType = constructorArgs[0].Value as ITypeSymbol;
-            var testName = constructorArgs[1].Value?.ToString() ?? "";
+            var testName = constructorArgs[1].Value.ToInvariantString() ?? "";
 
             if (classType != null)
             {
@@ -4274,7 +4274,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         MethodDeclarationSyntax methodSyntax,
         AttributeData testAttribute)
     {
-        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value.ToInvariantString();
         var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 0;
 
         var methodLocation = methodSyntax.GetLocation();
@@ -4295,7 +4295,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         AttributeData testAttribute,
         ClassDeclarationSyntax classSyntax)
     {
-        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value.ToInvariantString();
         var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 0;
 
         var methodLocation = method.Locations.FirstOrDefault();
@@ -5043,8 +5043,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     foreach (var methodArgAttr in nonGenericMethodArguments)
                     {
                         // Generate a concrete test metadata for this combination
-                        writer.AppendLine($"// Class arguments: {string.Join(", ", classArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
-                        writer.AppendLine($"// Method arguments: {string.Join(", ", methodArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
+                        writer.AppendLine($"// Class arguments: {string.Join(", ", classArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value.ToInvariantString() ?? "null")))}");
+                        writer.AppendLine($"// Method arguments: {string.Join(", ", methodArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value.ToInvariantString() ?? "null")))}");
                         GenerateConcreteTestMetadataForNonGeneric(writer, testMethod, className, classArgAttr, methodArgAttr);
                         writer.AppendLine();
                     }
@@ -5055,7 +5055,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Only class arguments, no method arguments
                 foreach (var classArgAttr in nonGenericClassArguments)
                 {
-                    writer.AppendLine($"// Class arguments: {string.Join(", ", classArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
+                    writer.AppendLine($"// Class arguments: {string.Join(", ", classArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value.ToInvariantString() ?? "null")))}");
                     GenerateConcreteTestMetadataForNonGeneric(writer, testMethod, className, classArgAttr, null);
                     writer.AppendLine();
                 }
@@ -5065,7 +5065,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Only method arguments, no class arguments
                 foreach (var methodArgAttr in nonGenericMethodArguments)
                 {
-                    writer.AppendLine($"// Method arguments: {string.Join(", ", methodArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
+                    writer.AppendLine($"// Method arguments: {string.Join(", ", methodArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value.ToInvariantString() ?? "null")))}");
                     GenerateConcreteTestMetadataForNonGeneric(writer, testMethod, className, null, methodArgAttr);
                     writer.AppendLine();
                 }

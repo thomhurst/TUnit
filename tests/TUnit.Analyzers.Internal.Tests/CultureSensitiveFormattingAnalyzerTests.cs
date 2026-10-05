@@ -13,6 +13,8 @@ public class CultureSensitiveFormattingAnalyzerTests
     [Arguments("_ = $\"{n}\";", "Interpolation")]
     [Arguments("_ = $\"{dt}\";", "Interpolation")]
     [Arguments("_ = \"a\" + i;", "String concatenation")]
+    [Arguments("_ = \"a\" + -1;", "String concatenation")]
+    [Arguments("_ = $\"{1.5}\";", "Interpolation")]
     [Arguments("s += i;", "String concatenation")]
     [Arguments("_ = string.Concat(s, i);", "string.Concat")]
     [Arguments("_ = string.Join(\",\", new[] { i });", "string.Join")]
@@ -23,6 +25,11 @@ public class CultureSensitiveFormattingAnalyzerTests
     [Arguments("writer.Write(i);", "TextWriter.Write")]
     [Arguments("_ = i.ToString();", "ToString()")]
     [Arguments("_ = d.ToString(\"N2\");", "ToString()")]
+    [Arguments("_ = d.ToString((IFormatProvider?) null);", "ToString()")]
+    [Arguments("_ = d.ToString(\"x.00\");", "ToString()")]
+    [Arguments("_ = tc.Value?.ToString();", "ToString()")]
+    [Arguments("_ = $\"{tc.Value}\";", "Interpolation")]
+    [Arguments("sb.Append(tc.Value);", "StringBuilder.Append")]
     [Arguments("_ = int.Parse(s);", "Int32.Parse")]
     [Arguments("_ = double.TryParse(s, out _);", "Double.TryParse")]
     [Arguments("_ = string.Format(\"{0}\", i);", "string.Format")]
@@ -48,6 +55,11 @@ public class CultureSensitiveFormattingAnalyzerTests
     [Arguments("_ = Convert.ToString(i, CultureInfo.InvariantCulture);")]
     [Arguments("_ = $\"{u} {b} {c} {e} {s}\";")]
     [Arguments("_ = $\"{i:X8}\";")]
+    [Arguments("_ = i.ToString(\"x8\");")]
+    [Arguments("_ = \"a\" + 1;")]
+    [Arguments("_ = $\"{0} {42L}\";")]
+    [Arguments("sb.Append(7);")]
+    [Arguments("_ = Convert.ToString(tc.Value, CultureInfo.InvariantCulture);")]
     [Arguments("sb.Append(CultureInfo.InvariantCulture, $\"{i} {d}\");")]
     [Arguments("sb.Append($\"{u} {i:x}\");")]
     [Arguments("_ = \"a\" + u + c + b;")]
@@ -72,12 +84,13 @@ public class CultureSensitiveFormattingAnalyzerTests
             using System.Globalization;
             using System.IO;
             using System.Text;
+            using Microsoft.CodeAnalysis;
 
             enum Kind { A }
 
             class C
             {
-                void M(int i, double d, int? n, DateTime dt, uint u, bool b, char c, Kind e, string s, StringBuilder sb, TextWriter writer)
+                void M(int i, double d, int? n, DateTime dt, uint u, bool b, char c, Kind e, string s, StringBuilder sb, TextWriter writer, TypedConstant tc)
                 {
                     {{statement}}
                 }
@@ -92,7 +105,7 @@ public class CultureSensitiveFormattingAnalyzerTests
             "Analyzed",
             [CSharpSyntaxTree.ParseText(source)],
             references,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
 
         var compileErrors = compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToArray();
         if (compileErrors.Length > 0)

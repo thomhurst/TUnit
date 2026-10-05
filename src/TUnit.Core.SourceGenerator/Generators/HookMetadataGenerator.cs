@@ -269,7 +269,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         }
 
         var location = context.TargetNode.GetLocation();
-        var filePath = location.SourceTree?.FilePath ?? hookAttribute.ConstructorArguments.ElementAtOrDefault(1).Value?.ToString() ?? "";
+        var filePath = location.SourceTree?.FilePath ?? hookAttribute.ConstructorArguments.ElementAtOrDefault(1).Value.ToInvariantString() ?? "";
         var startPosition = location.GetLineSpan().StartLinePosition;
         var lineNumber = startPosition.Line + 1;
 

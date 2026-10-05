@@ -55,7 +55,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 return "default";
 
             default:
-                return constant.Value?.ToString() ?? "null";
+                return constant.Value.ToInvariantString() ?? "null";
         }
     }
 
@@ -69,13 +69,13 @@ public class TypedConstantFormatter : ITypedConstantFormatter
         switch (constant.Kind)
         {
             case TypedConstantKind.Primitive:
-                return EscapeForTestId(constant.Value?.ToString() ?? "null");
+                return EscapeForTestId(constant.Value.ToInvariantString() ?? "null");
 
             case TypedConstantKind.Enum:
                 // For test IDs, use the numeric value or member name
                 var enumType = constant.Type as INamedTypeSymbol;
                 var memberName = GetEnumMemberName(enumType, constant.Value);
-                return memberName ?? constant.Value?.ToString() ?? "null";
+                return memberName ?? constant.Value.ToInvariantString() ?? "null";
 
             case TypedConstantKind.Type:
                 var type = (ITypeSymbol)constant.Value!;
@@ -86,7 +86,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 return $"[{string.Join(", ", elements)}]";
 
             default:
-                return EscapeForTestId(constant.Value?.ToString() ?? "null");
+                return EscapeForTestId(constant.Value.ToInvariantString() ?? "null");
         }
     }
 

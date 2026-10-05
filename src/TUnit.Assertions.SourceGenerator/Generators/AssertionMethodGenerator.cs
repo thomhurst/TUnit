@@ -1,3 +1,4 @@
+using TUnit.SourceGen.Shared;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -65,13 +66,13 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
             if (attributeData.ConstructorArguments.Length == 2)
             {
-                methodName = attributeData.ConstructorArguments[1].Value?.ToString();
+                methodName = attributeData.ConstructorArguments[1].Value.ToInvariantString();
                 containingType = targetType;
             }
             else if (attributeData.ConstructorArguments.Length >= 3)
             {
                 containingType = attributeData.ConstructorArguments[1].Value as INamedTypeSymbol;
-                methodName = attributeData.ConstructorArguments[2].Value?.ToString();
+                methodName = attributeData.ConstructorArguments[2].Value.ToInvariantString();
             }
 
             if (targetType != null && containingType != null && !string.IsNullOrEmpty(methodName))
@@ -90,7 +91,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 {
                     customName = attributeData.NamedArguments
                         .FirstOrDefault(na => na.Key == "CustomName")
-                        .Value.Value?.ToString();
+                        .Value.Value.ToInvariantString();
                 }
 
                 var negateLogic = false;
@@ -122,7 +123,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 {
                     expectationMessage = attributeData.NamedArguments
                         .FirstOrDefault(na => na.Key == "ExpectationMessage")
-                        .Value.Value?.ToString();
+                        .Value.Value.ToInvariantString();
                 }
 
                 var createAssertionAttributeData = new CreateAssertionAttributeData(
@@ -184,14 +185,14 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             if (attributeData.ConstructorArguments.Length == 1)
             {
                 // CreateAssertionAttribute<T>(string methodName)
-                methodName = attributeData.ConstructorArguments[0].Value?.ToString();
+                methodName = attributeData.ConstructorArguments[0].Value.ToInvariantString();
                 containingType = targetType;
             }
             else if (attributeData.ConstructorArguments.Length == 2)
             {
                 // CreateAssertionAttribute<T>(Type containingType, string methodName)
                 containingType = attributeData.ConstructorArguments[0].Value as INamedTypeSymbol;
-                methodName = attributeData.ConstructorArguments[1].Value?.ToString();
+                methodName = attributeData.ConstructorArguments[1].Value.ToInvariantString();
             }
 
             if (targetType != null && containingType != null && !string.IsNullOrEmpty(methodName))
@@ -216,7 +217,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     switch (namedArgument.Key)
                     {
                         case "CustomName":
-                            customName = namedArgument.Value.Value?.ToString();
+                            customName = namedArgument.Value.Value.ToInvariantString();
                             break;
                         case "NegateLogic":
                             negateLogic = namedArgument.Value.Value is true;
@@ -228,7 +229,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                             treatAsInstance = namedArgument.Value.Value is true;
                             break;
                         case "ExpectationMessage":
-                            expectationMessage = namedArgument.Value.Value?.ToString();
+                            expectationMessage = namedArgument.Value.Value.ToInvariantString();
                             break;
                     }
                 }

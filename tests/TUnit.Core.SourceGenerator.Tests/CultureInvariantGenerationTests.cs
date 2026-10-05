@@ -16,6 +16,7 @@ internal class CultureInvariantGenerationTests
     private const string Source =
         """
         global using global::System;
+        global using global::System.Collections.Generic;
         global using global::System.Threading.Tasks;
         global using global::TUnit.Core;
         global using static global::TUnit.Core.HookType;
@@ -37,6 +38,24 @@ internal class CultureInvariantGenerationTests
             [Test]
             [Arguments(-1.55)]
             public void DecimalFromDouble(decimal value) { }
+        }
+
+        // Property data-source attribute arguments are re-emitted by the property injection generator.
+        public sealed class OffsetSourceAttribute(double value, int offset) : DataSourceGeneratorAttribute<double>
+        {
+            protected override IEnumerable<Func<double>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+            {
+                yield return () => value + offset;
+            }
+        }
+
+        public class PropertyDataSource
+        {
+            [OffsetSource(-2.5, -3)]
+            public required double Value { get; init; }
+
+            [Test]
+            public void UsesProperty() { }
         }
         """;
 
@@ -73,7 +92,11 @@ internal class CultureInvariantGenerationTests
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
             GeneratorDriver driver = CSharpGeneratorDriver.Create(
-                [new TestMetadataGenerator().AsSourceGenerator(), new HookMetadataGenerator().AsSourceGenerator()],
+                [
+                    new TestMetadataGenerator().AsSourceGenerator(),
+                    new HookMetadataGenerator().AsSourceGenerator(),
+                    new PropertyInjectionSourceGenerator().AsSourceGenerator(),
+                ],
                 parseOptions: parseOptions);
             driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out _);
 
