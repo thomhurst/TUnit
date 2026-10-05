@@ -12,8 +12,10 @@ jobs:
   modularpipeline:
     strategy:
       matrix:
-        locale: [fr-FR, pl-PL, de-DE]
-      fail-fast: true
+        # sv-SE: negative numbers use U+2212 MINUS SIGN (also fi-FI, nb-NO, et-EE, lt-LT).
+        # de-DE / fr-FR / pl-PL: decimal comma. tr-TR: dotless i in casing. ar-SA: Arabic number formatting.
+        locale: [fr-FR, pl-PL, de-DE, sv-SE, tr-TR, ar-SA]
+      fail-fast: false
     runs-on: ubuntu-latest
 
     steps:
@@ -51,6 +53,7 @@ jobs:
           echo "LANG=${LOCALE}.UTF-8" >> $GITHUB_ENV
           echo "LC_ALL=${LOCALE}.UTF-8" >> $GITHUB_ENV
 
+      # The whole CI solution, not just one project: every source generator runs during this build,
+      # inside a compiler that uses the locale above, and must still emit valid C#.
       - name: Build
-        run: dotnet build -c Release
-        working-directory: tests/TUnit.TestProject
+        run: dotnet build TUnit.CI.slnx -c Release
