@@ -11,5 +11,8 @@ Product projects live in `src/`, tests in `tests/`, and benchmarks in `benchmark
 | `TUnit.Analyzers` / `TUnit.Analyzers.CodeFixers` | Test diagnostics and fixes; other libraries have their own analyzer projects |
 | `TUnit.Mocks` / `TUnit.Mocks.SourceGenerator` | Mock runtime and generated implementations; sibling projects provide integrations |
 | `TUnit.Templates` | Packaged `dotnet new` templates |
+| `TUnit.Analyzers.Internal` | Repo-internal analyzer (never shipped): `TUNITINT001` rejects culture-sensitive number/date formatting and parsing in build-time projects |
 
 Source-generated and reflection metadata feed the same execution path. Roslyn compatibility projects (`*.Roslyn414`, `*.Roslyn44`, `*.Roslyn47`) link shared sources from their base project; account for those variants when changing generators or analyzers.
+
+Generators, analyzers, code fixers and build tasks run inside consumers' compilers, so their behaviour must not depend on the build machine's culture (sv-SE renders negative numbers with U+2212, de-DE uses decimal commas, tr-TR lowercases `I` to `ı`). `Directory.Build.targets` applies `TUNITINT001` and `eng/BuildTimeGlobalization.globalconfig` (CA1304/CA1305/CA1309/CA1310/CA1311 as errors) to those projects; format and parse with `CultureInfo.InvariantCulture` and compare strings with `StringComparison.Ordinal`.

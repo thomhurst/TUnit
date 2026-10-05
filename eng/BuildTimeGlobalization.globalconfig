@@ -1,0 +1,15 @@
+is_global = true
+
+# Applied to TUnit's build-time projects (generators, analyzers, code fixers, build tasks) by
+# Directory.Build.targets. Their code runs inside every consumer's compiler, so it must behave
+# identically under every culture. TUNITINT001 (src/TUnit.Analyzers.Internal) covers the
+# formatting these rules cannot see: interpolation, concatenation and StringBuilder appends.
+
+# Culture-sensitive ToLower()/ToUpper(): "I".ToLower() is "ı" under tr-TR.
+dotnet_diagnostic.CA1304.severity = error
+dotnet_diagnostic.CA1311.severity = error
+# ToString()/Parse()/string.Format without an IFormatProvider.
+dotnet_diagnostic.CA1305.severity = error
+# Culture-sensitive string comparison (StartsWith/EndsWith/IndexOf/Compare without StringComparison).
+dotnet_diagnostic.CA1309.severity = error
+dotnet_diagnostic.CA1310.severity = error

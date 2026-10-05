@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\eng\TestProject.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.Analyzers.Internal\TUnit.Analyzers.Internal.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+  </ItemGroup>
+
+  <Import Project="..\..\eng\TestProject.targets" />
+
+</Project>
