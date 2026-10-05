@@ -53,10 +53,9 @@ public sealed class ExcludeOnAttribute(OS OperatingSystem) : SkipAttribute($"Thi
         // Check if the current platform matches any of the excluded operating systems
         var shouldSkip =
             OperatingSystem.HasFlag(OS.Windows) && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-#if NET
-            // Only validate Linux and macOS on .NET 5+ where these OS flags are available
             || (OperatingSystem.HasFlag(OS.Linux) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             || (OperatingSystem.HasFlag(OS.MacOs) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+#if NET
             || (OperatingSystem.HasFlag(OS.Browser) && System.OperatingSystem.IsBrowser())
 #endif
             ;

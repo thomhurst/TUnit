@@ -107,7 +107,7 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
             // has no way to single one out. Same-identity duplicates collapse onto one copy.
             var (identityGroups, unreadableMatches) = GroupMatchesByIdentity(matches);
 
-            if (matches.Select(m => m.ItemSpec).Distinct(StringComparer.OrdinalIgnoreCase).Count() > 1)
+            if (matches.Select(m => m.ItemSpec).Distinct(PathComparer).Count() > 1)
             {
                 var unreadableNote = unreadableMatches.Count > 0
                     ? " References whose assembly identity cannot be read are left in place: " +
@@ -498,6 +498,9 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
         // The net472 MSBuild host only runs on Windows.
         StringComparison.OrdinalIgnoreCase;
 #endif
+
+    private static StringComparer PathComparer =>
+        PathComparison == StringComparison.OrdinalIgnoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
 
     private static bool IsReferenceAssembly(string path)
     {

@@ -1,6 +1,7 @@
 #if NET8_0_OR_GREATER
 using System.Buffers;
 #endif
+using System.Runtime.InteropServices;
 
 namespace TUnit.Engine.Helpers;
 
@@ -92,7 +93,7 @@ internal static class PathValidator
         {
             var currentDir = Path.GetFullPath(Directory.GetCurrentDirectory());
 
-            if (!fullPath.StartsWith(currentDir, StringComparison.OrdinalIgnoreCase))
+            if (!IsWithinDirectory(fullPath, currentDir))
             {
                 throw new ArgumentException(
                     $"Relative path resolves outside the current working directory and is not allowed: '{validatedPath}'",
@@ -101,6 +102,30 @@ internal static class PathValidator
         }
 
         return fullPath;
+    }
+
+    /// <summary>
+    /// Whether <paramref name="fullPath"/> is <paramref name="directory"/> itself or lies beneath it.
+    /// Requires a separator at the boundary, so <c>/foo/barbaz</c> is not inside <c>/foo/bar</c>, and
+    /// folds case only on Windows: on a case-sensitive filesystem <c>/foo/Bar</c> is a different directory.
+    /// </summary>
+    internal static bool IsWithinDirectory(string fullPath, string directory)
+    {
+        var comparison = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
+
+        // A root ("/" or "C:\") trims to "" or "C:", after which the boundary check still holds.
+        var root = directory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        if (!fullPath.StartsWith(root, comparison))
+        {
+            return false;
+        }
+
+        return fullPath.Length == root.Length
+            || fullPath[root.Length] == Path.DirectorySeparatorChar
+            || fullPath[root.Length] == Path.AltDirectorySeparatorChar;
     }
 
     private static bool ContainsPathTraversal(string path)

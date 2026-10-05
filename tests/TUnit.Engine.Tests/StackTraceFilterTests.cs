@@ -233,4 +233,21 @@ public class StackTraceFilterTests
         lines[0].ShouldContain("MyApp.Tests.MyTest");
         lines[1].ShouldContain("--detailed-stacktrace");
     }
+
+    [Test]
+    [Arguments("\r\n")]
+    [Arguments("\n")]
+    public void Trace_With_Either_Line_Ending_Is_Filtered(string lineEnding)
+    {
+        // A trace captured on another OS keeps that OS's line endings.
+        var stackTrace = string.Join(lineEnding,
+            "   at MyApp.Tests.MyTest() in /src/Tests.cs:line 15",
+            "   at TUnit.Core.RunHelpers.RunAsync()");
+
+        var result = TUnitFailedException.FilterStackTrace(stackTrace);
+
+        result.ShouldContain("MyApp.Tests.MyTest");
+        result.ShouldNotContain("TUnit.Core.RunHelpers");
+        result.ShouldNotContain("\r" + Environment.NewLine);
+    }
 }

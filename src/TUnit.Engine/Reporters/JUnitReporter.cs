@@ -150,7 +150,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
                 Console.WriteLine($"JUnit XML report written to: {path}");
                 return;
             }
-            catch (IOException ex) when (attempt < maxAttempts && IsFileLocked(ex))
+            catch (IOException ex) when (attempt < maxAttempts && FileLockDetection.IsFileLocked(ex))
             {
                 var baseDelay = EngineDefaults.BaseRetryDelayMs * Math.Pow(2, attempt - 1);
                 var jitter = Random.Shared.Next(0, EngineDefaults.MaxRetryJitterMs);
@@ -162,16 +162,5 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         }
 
         Console.WriteLine($"Failed to write JUnit XML report to: {path} after {maxAttempts} attempts");
-    }
-
-    private static bool IsFileLocked(IOException exception)
-    {
-        // Check if the exception is due to the file being locked/in use
-        // HResult 0x80070020 is ERROR_SHARING_VIOLATION on Windows
-        // HResult 0x80070021 is ERROR_LOCK_VIOLATION on Windows
-        var errorCode = exception.HResult & 0xFFFF;
-        return errorCode == 0x20 || errorCode == 0x21 ||
-               exception.Message.Contains("being used by another process") ||
-               exception.Message.Contains("access denied", StringComparison.OrdinalIgnoreCase);
     }
 }

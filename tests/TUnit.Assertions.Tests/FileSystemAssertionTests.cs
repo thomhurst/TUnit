@@ -111,6 +111,33 @@ public class FileSystemAssertionTests
         await Assert.That(file).IsNotExecutable();
     }
 
+#if NET
+    [Test]
+    [ExcludeOn(OS.Windows)]
+    [System.Runtime.Versioning.UnsupportedOSPlatform("windows")]
+    public async Task Test_FileInfo_IsNotExecutable_Fails_For_Executable_Mode_Without_Extension()
+    {
+        var file = new FileInfo(Path.Combine(_testDirectory, "myapp"));
+        File.WriteAllText(file.FullName, "#!/bin/sh");
+        File.SetUnixFileMode(file.FullName, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+
+        await Assert.That(async () => await Assert.That(file).IsNotExecutable())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    [ExcludeOn(OS.Windows)]
+    [System.Runtime.Versioning.UnsupportedOSPlatform("windows")]
+    public async Task Test_FileInfo_IsNotExecutable_Passes_For_Script_Without_Execute_Bit()
+    {
+        var file = new FileInfo(Path.Combine(_testDirectory, "notes.sh"));
+        File.WriteAllText(file.FullName, "echo hi");
+        File.SetUnixFileMode(file.FullName, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+
+        await Assert.That(file).IsNotExecutable();
+    }
+#endif
+
     [Test]
     public async Task Test_FileInfo_HasExtension()
     {
