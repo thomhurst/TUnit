@@ -2,6 +2,23 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
+  <!-- Per-TFM versions: the 10.x packages do not support net8.0/net9.0 consumers.
+       Any project (single- or multi-targeted) that builds for net8.0/net9.0 resolves the matching 8.x/9.x version. -->
+  <PropertyGroup>
+    <MvcTestingVersion>10.0.12</MvcTestingVersion>
+    <LoggingVersion>10.0.12</LoggingVersion>
+    <LoggingAbstractionsVersion>10.0.12</LoggingAbstractionsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <MvcTestingVersion>8.0.31</MvcTestingVersion>
+    <LoggingVersion>8.0.1</LoggingVersion>
+    <LoggingAbstractionsVersion>8.0.3</LoggingAbstractionsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <MvcTestingVersion>9.0.20</MvcTestingVersion>
+    <LoggingVersion>9.0.20</LoggingVersion>
+    <LoggingAbstractionsVersion>9.0.20</LoggingAbstractionsVersion>
+  </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Grpc.Core.Api" Version="2.84.0" />
     <PackageVersion Include="MassTransit" Version="9.2.3" />
@@ -24,7 +41,7 @@
     <PackageVersion Include="FSharp.Core" Version="10.1.401" />
     <PackageVersion Include="Humanizer" Version="3.0.10" />
     <PackageVersion Include="MessagePack" Version="3.1.11" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(MvcTestingVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
     <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.10" />
@@ -32,20 +49,20 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.7.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.2" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Version="1.1.2" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" Version="1.1.2" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.4" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Version="1.1.4" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" Version="1.1.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" Version="1.1.2" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" Version="1.1.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.7.0" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.7.23" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(LoggingVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(LoggingAbstractionsVersion)" />
     <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="2.1.2" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.63.0" />
@@ -122,7 +139,7 @@
     <PackageVersion Include="TUnit.Engine" Version="1.72.16" />
     <PackageVersion Include="TUnit.Assertions" Version="1.72.16" />
     <PackageVersion Include="Verify.TUnit" Version="33.3.0" />
-    <PackageVersion Include="Vogen" Version="8.0.6" />
+    <PackageVersion Include="Vogen" Version="8.0.7" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
