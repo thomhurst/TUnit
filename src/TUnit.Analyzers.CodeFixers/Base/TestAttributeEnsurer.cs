@@ -15,7 +15,8 @@ public class TestAttributeEnsurer : CSharpSyntaxRewriter
         "Arguments",
         "MethodDataSource",
         "ClassDataSource",
-        "MatrixDataSource"
+        "MatrixDataSource",
+        "PairwiseDataSource"
     ];
 
     public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)

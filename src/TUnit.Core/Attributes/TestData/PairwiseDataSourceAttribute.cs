@@ -83,6 +83,7 @@ public sealed class PairwiseDataSourceAttribute : UntypedDataSourceGeneratorAttr
         Func<int[], bool>? isAllowed = null;
         if (exclusions.Length > 0)
         {
+            // Shared across predicate invocations; generation is single-threaded, so this is safe.
             var buffer = new object?[valueSets.Length];
             isAllowed = indices =>
             {

@@ -12,7 +12,8 @@ namespace TUnit.Analyzers.CodeFixers;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MatrixDataSourceCodeFixProvider)), Shared]
 public class MatrixDataSourceCodeFixProvider : CodeFixProvider
 {
-    private const string Title = "Add [MatrixDataSource]";
+    private const string MatrixTitle = "Add [MatrixDataSource]";
+    private const string PairwiseTitle = "Add [PairwiseDataSource]";
 
     public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(DiagnosticIds.MatrixDataSourceAttributeRequired);
@@ -39,19 +40,30 @@ public class MatrixDataSourceCodeFixProvider : CodeFixProvider
 
             context.RegisterCodeFix(
                 CodeAction.Create(
-                    title: Title,
-                    createChangedDocument: c => AddMatrixDataSourceAsync(context.Document, target, c),
-                    equivalenceKey: Title),
+                    title: MatrixTitle,
+                    createChangedDocument: c => AddDataSourceAsync(context.Document, target, "MatrixDataSource", c),
+                    equivalenceKey: MatrixTitle),
+                diagnostic);
+
+            context.RegisterCodeFix(
+                CodeAction.Create(
+                    title: PairwiseTitle,
+                    createChangedDocument: c => AddDataSourceAsync(context.Document, target, "PairwiseDataSource", c),
+                    equivalenceKey: PairwiseTitle),
                 diagnostic);
         }
     }
 
-    private static async Task<Document> AddMatrixDataSourceAsync(Document document, SyntaxNode target, CancellationToken cancellationToken)
+    private static async Task<Document> AddDataSourceAsync(
+        Document document,
+        SyntaxNode target,
+        string attributeName,
+        CancellationToken cancellationToken)
     {
         var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
         var attributeList = SyntaxFactory.AttributeList(
             SyntaxFactory.SingletonSeparatedList(
-                SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("MatrixDataSource"))));
+                SyntaxFactory.Attribute(SyntaxFactory.IdentifierName(attributeName))));
 
         SyntaxNode updated = target switch
         {

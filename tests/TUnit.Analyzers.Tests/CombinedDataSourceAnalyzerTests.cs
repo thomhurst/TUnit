@@ -104,6 +104,32 @@ public class CombinedDataSourceAnalyzerTests
     }
 
     [Test]
+    public async Task Method_With_CombinedDataSource_And_PairwiseDataSource_Has_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [CombinedDataSources]
+                    [PairwiseDataSource]
+                    [Test]
+                    public void {|#0:MyTest|}(
+                        [Arguments(1, 2, 3)] int value,
+                        [Arguments("a", "b")] string text
+                        )
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.CombinedDataSourceConflictWithMatrix)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
     public async Task Class_With_CombinedDataSource_And_ParameterDataSources_No_Error()
     {
         await Verifier

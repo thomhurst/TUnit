@@ -37,7 +37,44 @@ public class MatrixDataSourceCodeFixProviderTests
                 {
                 }
             }
+            """,
+            test => test.CodeActionEquivalenceKey = "Add [MatrixDataSource]"
+        );
+    }
+
+    [Test]
+    public async Task Adds_PairwiseDataSource_On_Method()
+    {
+        await Verifier.VerifyCodeFixAsync(
             """
+            using TUnit.Core;
+
+            public class MyClass
+            {
+                [Test]
+                public void {|#0:MyTest|}(
+                    [Matrix(1, 2, 3)] int value,
+                    [Matrix(true, false)] bool flag)
+                {
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.MatrixDataSourceAttributeRequired).WithLocation(0),
+            """
+            using TUnit.Core;
+
+            public class MyClass
+            {
+                [Test]
+                [PairwiseDataSource]
+                public void MyTest(
+                    [Matrix(1, 2, 3)] int value,
+                    [Matrix(true, false)] bool flag)
+                {
+                }
+            }
+            """,
+            test => test.CodeActionEquivalenceKey = "Add [PairwiseDataSource]"
         );
     }
 
@@ -80,7 +117,8 @@ public class MatrixDataSourceCodeFixProviderTests
                 {
                 }
             }
-            """
+            """,
+            test => test.CodeActionEquivalenceKey = "Add [MatrixDataSource]"
         );
     }
 }

@@ -481,10 +481,10 @@
         <value>Parameter missing data source attribute</value>
     </data>
     <data name="TUnit0072Description" xml:space="preserve">
-        <value>Using [CombinedDataSources] together with [MatrixDataSource] is not recommended as they serve different purposes and may cause confusion.</value>
+        <value>Using [CombinedDataSources] together with [MatrixDataSource] or [PairwiseDataSource] is not recommended as they serve different purposes and may cause confusion.</value>
     </data>
     <data name="TUnit0072MessageFormat" xml:space="preserve">
-        <value>[CombinedDataSources] should not be used with [MatrixDataSource]. Use one or the other.</value>
+        <value>[CombinedDataSources] should not be used with [MatrixDataSource] or [PairwiseDataSource]. Use one or the other.</value>
     </data>
     <data name="TUnit0072Title" xml:space="preserve">
         <value>Conflicting data source attributes</value>
