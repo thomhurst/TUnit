@@ -38,6 +38,7 @@ internal sealed class TUnitSymbols
         BaseTestAttribute = compilation.GetTypeByMetadataName("TUnit.Core.BaseTestAttribute");
         MatrixAttribute = compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.Matrix.WithoutGlobalPrefix);
         MatrixDataSourceAttribute = compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.MatrixDataSourceAttribute.WithoutGlobalPrefix);
+        PairwiseDataSourceAttribute = compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.PairwiseDataSourceAttribute.WithoutGlobalPrefix);
         CombinedDataSourceAttribute = compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.CombinedDataSourceAttribute.WithoutGlobalPrefix);
         DataSourceAttributeInterface = compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithoutGlobalPrefix);
     }
@@ -59,6 +60,8 @@ internal sealed class TUnitSymbols
     public INamedTypeSymbol? MatrixAttribute { get; }
 
     public INamedTypeSymbol? MatrixDataSourceAttribute { get; }
+
+    public INamedTypeSymbol? PairwiseDataSourceAttribute { get; }
 
     public INamedTypeSymbol? CombinedDataSourceAttribute { get; }
 

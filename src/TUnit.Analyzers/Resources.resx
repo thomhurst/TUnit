@@ -346,13 +346,13 @@
         <value>Test methods must not be static</value>
     </data>
     <data name="TUnit0049Description" xml:space="preserve">
-        <value>[MatrixDataSourceAttribute] is required if using [Matrix] values on your parameters.</value>
+        <value>[MatrixDataSource] or [PairwiseDataSource] is required if using [Matrix] values on your parameters.</value>
     </data>
     <data name="TUnit0049MessageFormat" xml:space="preserve">
-        <value>[MatrixDataSourceAttribute] is required if using [Matrix] values on your parameters.</value>
+        <value>[MatrixDataSource] or [PairwiseDataSource] is required if using [Matrix] values on your parameters.</value>
     </data>
     <data name="TUnit0049Title" xml:space="preserve">
-        <value>[MatrixDataSourceAttribute] is required</value>
+        <value>[MatrixDataSource] or [PairwiseDataSource] is required</value>
     </data>
     <data name="TUnit0050Description" xml:space="preserve">
         <value>Too many arguments provided.</value>

@@ -107,4 +107,79 @@ public class MatrixDataSourceAnalyzerTests
                     .WithLocation(0)
             );
     }
+
+    [Test]
+    public async Task Method_Pairwise_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [PairwiseDataSource]
+                    [Test]
+                    public void MyTest(
+                        [Matrix(1, 2, 3)] int value,
+                        [Matrix(true, false)] bool value2,
+                        [Matrix("a", "b")] string value3
+                        )
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Method_Pairwise_With_Seed_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [PairwiseDataSource(Seed = 42)]
+                    [MatrixExclusion(1, true)]
+                    [Test]
+                    public void MyTest(
+                        [Matrix(1, 2, 3)] int value,
+                        [Matrix(true, false)] bool value2
+                        )
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Class_Pairwise_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                [PairwiseDataSource]
+                public class MyClass
+                {
+                    public MyClass(
+                        [Matrix(1, 2, 3)] int value,
+                        [Matrix(true, false)] bool value2
+                        )
+                    {
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """
+            );
+    }
 }

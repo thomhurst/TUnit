@@ -1326,7 +1326,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [MatrixDataSourceAttribute] is required if using [Matrix] values on your parameters..
+        ///   Looks up a localized string similar to [MatrixDataSource] or [PairwiseDataSource] is required if using [Matrix] values on your parameters..
         /// </summary>
         internal static string TUnit0049Description {
             get {
@@ -1335,7 +1335,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [MatrixDataSourceAttribute] is required if using [Matrix] values on your parameters..
+        ///   Looks up a localized string similar to [MatrixDataSource] or [PairwiseDataSource] is required if using [Matrix] values on your parameters..
         /// </summary>
         internal static string TUnit0049MessageFormat {
             get {
@@ -1344,7 +1344,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [MatrixDataSourceAttribute] is required.
+        ///   Looks up a localized string similar to [MatrixDataSource] or [PairwiseDataSource] is required.
         /// </summary>
         internal static string TUnit0049Title {
             get {

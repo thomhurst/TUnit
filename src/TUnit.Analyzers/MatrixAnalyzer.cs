@@ -66,7 +66,7 @@ public class MatrixAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (!attributes.Any(x => x.IsMatrixDataSourceAttribute(context.Compilation)))
+        if (!attributes.Any(x => x.IsMatrixValuesDataSourceAttribute(context.Compilation)))
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.MatrixDataSourceAttributeRequired,

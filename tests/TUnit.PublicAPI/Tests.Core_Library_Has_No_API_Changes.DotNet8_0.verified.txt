@@ -1087,6 +1087,14 @@ namespace
         public .<string> NotInParallelConstraintKeys { get; init; }
         public int Order { get; set; }
     }
+    [(.Class | .Method)]
+    public sealed class PairwiseDataSourceAttribute : .UntypedDataSourceGeneratorAttribute, .IAccessesInstanceData
+    {
+        public const int DefaultSeed = 15485863;
+        public PairwiseDataSourceAttribute() { }
+        public int Seed { get; set; }
+        protected override .<<object?[]?>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata) { }
+    }
     public class ParallelGroupAttribute : .TUnitAttribute, ., .
     {
         public ParallelGroupAttribute(string group) { }
