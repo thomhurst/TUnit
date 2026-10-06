@@ -1,3 +1,6 @@
+#if NET
+using System.Runtime.InteropServices;
+#endif
 using System.Runtime.Versioning;
 using TUnit.Core.Settings;
 
@@ -20,8 +23,25 @@ public class EngineCancellationToken : IDisposable
 
     private int _initialised;
     private volatile bool _forcefulExitStarted;
+    private readonly object _forcefulExitGate = new();
+    private bool _disposed;
     private CancellationTokenRegistration _platformRegistration;
     private bool _cancelKeyPressSubscribed;
+#if NET
+    private PosixSignalRegistration? _sigtermRegistration;
+    private volatile bool _terminationSignalReceived;
+#endif
+
+    /// <summary>
+    /// Whether the run was cancelled by SIGTERM. Microsoft.Testing.Platform does not observe that
+    /// signal, so unlike Ctrl+C its own run token is not cancelled alongside ours.
+    /// </summary>
+    internal bool TerminationSignalReceived =>
+#if NET
+        _terminationSignalReceived;
+#else
+        false;
+#endif
 
     public EngineCancellationToken()
     {
@@ -29,7 +49,7 @@ public class EngineCancellationToken : IDisposable
     }
 
     /// <summary>
-    /// Hooks up process-wide cancellation signals (Ctrl+C / ProcessExit) the first time it's
+    /// Hooks up process-wide cancellation signals (Ctrl+C / SIGTERM / ProcessExit) the first time it's
     /// called for this instance. Idempotent — subsequent calls are no-ops so that concurrent
     /// MTP server-mode RPCs against one session don't clobber each other's cancellation chain.
     /// Per-call cancellation flows through the explicit <c>CancellationToken</c> threaded into
@@ -67,7 +87,90 @@ public class EngineCancellationToken : IDisposable
 #if NET5_0_OR_GREATER
         }
 #endif
+
+#if NET
+        _sigtermRegistration = TryRegisterSigterm();
+#endif
     }
+
+#if NET
+    /// <summary>
+    /// SIGTERM is how Unix asks a process to stop (<c>docker stop</c>, Kubernetes, CI cancellation,
+    /// <c>timeout</c>). Left to the runtime it only raises <see cref="AppDomain.ProcessExit"/>, which
+    /// gives After hooks <see cref="TimeoutSettings.ProcessExitHookDelay"/> before the process
+    /// dies. Handling it like Ctrl+C instead cancels the run and allows the full
+    /// <see cref="TimeoutSettings.ForcefulExitTimeout"/> for cleanup. Windows is left alone:
+    /// there the signal maps to console close/shutdown events, which the runtime already handles.
+    /// </summary>
+    private PosixSignalRegistration? TryRegisterSigterm()
+    {
+        // Android, iOS and tvOS do not deliver POSIX signals to managed code.
+        if (OperatingSystem.IsWindows() || OperatingSystem.IsBrowser() || OperatingSystem.IsWasi()
+            || OperatingSystem.IsAndroid() || OperatingSystem.IsIOS() || OperatingSystem.IsTvOS())
+        {
+            return null;
+        }
+
+        try
+        {
+            return PosixSignalRegistration.Create(PosixSignal.SIGTERM, OnSigterm);
+        }
+        catch (PlatformNotSupportedException)
+        {
+            return null;
+        }
+    }
+
+    private void OnSigterm(PosixSignalContext context)
+    {
+        // Suppress the default behaviour (immediate termination) only when a live session took the
+        // signal: the forceful-exit timer it armed still guarantees the process ends. A signal that
+        // lands after disposal keeps the runtime's default, so the process still stops.
+        // Only ever set it: every registered handler shares this context, and assigning false here
+        // would undo another, live session's suppression.
+        if (OnTerminationSignal())
+        {
+            context.Cancel = true;
+        }
+    }
+
+    /// <returns>Whether a live session handled the signal (and armed the forceful-exit timer).</returns>
+    internal bool OnTerminationSignal()
+    {
+        // Check-and-arm under the gate Dispose takes: either the session is already disposed and the
+        // signal is not handled, or the timer is armed before Dispose can complete.
+        lock (_forcefulExitGate)
+        {
+            if (_disposed)
+            {
+                return false;
+            }
+
+            _terminationSignalReceived = true;
+
+            if (!_forcefulExitStarted)
+            {
+                _forcefulExitStarted = true;
+                ArmForcefulExit();
+            }
+        }
+
+        // Runs cancellation callbacks (After hooks) synchronously on the signal-dispatch thread. A
+        // slow hook blocks that thread, which is acceptable: the timer armed above bounds it.
+        try
+        {
+            Cancel(armForcefulExit: false);
+        }
+        catch (ObjectDisposedException)
+        {
+            // Disposing the registration does not stop a dispatch the runtime had already
+            // snapshotted, so the signal can land after the session's token was disposed.
+            // An exception escaping the signal handler would crash the process.
+        }
+
+        return true;
+    }
+#endif
 
     /// <summary>
     /// Subscribes to <see cref="Console.CancelKeyPress"/>. Platforms without console signals
@@ -111,40 +214,49 @@ public class EngineCancellationToken : IDisposable
 
     private void Cancel(bool armForcefulExit = true)
     {
+        // The forceful-exit timer is only for signal-driven cancellation (Ctrl+C / SIGTERM), where we
+        // suppressed the runtime's default termination and must guarantee the process still dies.
+        // Platform-driven cancellation manages its own shutdown, so it opts out.
+        // Arm it BEFORE cancelling: Cancel() runs registered callbacks (After hooks) synchronously,
+        // and one that blocks must not postpone the deadline that is meant to bound it.
+        if (armForcefulExit)
+        {
+            // Under the gate shared with Dispose: a signal the runtime dispatches after the session
+            // was disposed must not arm a timer that would later kill a host still in use.
+            lock (_forcefulExitGate)
+            {
+                if (!_disposed && !_forcefulExitStarted)
+                {
+                    _forcefulExitStarted = true;
+                    ArmForcefulExit();
+                }
+            }
+        }
+
         // Cancel the test execution
         if (!CancellationTokenSource.IsCancellationRequested)
         {
             CancellationTokenSource.Cancel();
         }
+    }
 
-        // The forceful-exit timer is only for signal-driven cancellation (Ctrl+C), where we
-        // suppressed the runtime's default termination and must guarantee the process still dies.
-        // Platform-driven cancellation manages its own shutdown, so it opts out.
-        if (!armForcefulExit)
+    // Virtual so tests can observe arming without terminating the test process.
+    internal virtual void ArmForcefulExit()
+    {
+        _ = Task.Delay(TUnitSettings.Default.Timeouts.ForcefulExitTimeout, CancellationToken.None).ContinueWith(t =>
         {
-            return;
-        }
-
-        // Only start the forceful exit timer once
-        if (!_forcefulExitStarted)
-        {
-            _forcefulExitStarted = true;
-
-            // Start a new forceful exit timer
-            _ = Task.Delay(TUnitSettings.Default.Timeouts.ForcefulExitTimeout, CancellationToken.None).ContinueWith(t =>
+            if (!t.IsCanceled)
             {
-                if (!t.IsCanceled)
-                {
-                    Console.WriteLine("Forcefully terminating the process due to cancellation request.");
-                    Environment.Exit(1);
-                }
-            }, TaskScheduler.Default);
-        }
+                Console.WriteLine("Forcefully terminating the process due to cancellation request.");
+                Environment.Exit(1);
+            }
+        }, TaskScheduler.Default);
     }
 
     private void OnProcessExit(object? sender, EventArgs e)
     {
-        // Process is exiting (SIGTERM, kill, etc.) - trigger cancellation to execute After hooks
+        // Process is exiting (Environment.Exit, end of Main, or a signal not handled above) - trigger
+        // cancellation to execute After hooks.
         // Note: ProcessExit runs on a background thread with limited time (~3 seconds on Windows)
         // The After hooks registered via CancellationToken.Register() will execute when we cancel
         if (!CancellationTokenSource.IsCancellationRequested)
@@ -164,7 +276,16 @@ public class EngineCancellationToken : IDisposable
     /// </summary>
     public void Dispose()
     {
+        lock (_forcefulExitGate)
+        {
+            _disposed = true;
+        }
+
         _platformRegistration.Dispose();
+#if NET
+        _sigtermRegistration?.Dispose();
+        _sigtermRegistration = null;
+#endif
 
         // Console.CancelKeyPress is not supported on browser platforms
 #if NET5_0_OR_GREATER

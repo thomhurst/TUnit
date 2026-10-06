@@ -35,7 +35,12 @@
 ###############################################################################
 *.bat text eol=crlf
 *.cmd text eol=crlf
-*.ps1 text eol=crlf
+
+###############################################################################
+# PowerShell - always LF: pwsh reads LF on every OS (Windows PowerShell too), and
+# a CRLF checkout breaks the #!/usr/bin/env pwsh shebang on Linux and macOS.
+###############################################################################
+*.ps1 text eol=lf
 
 ###############################################################################
 # Verify snapshots - LF for consistent cross-platform diffs

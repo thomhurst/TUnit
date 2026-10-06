@@ -1,4 +1,5 @@
 using TUnit.Assertions.Extensions;
+using TUnit.Core.Enums;
 using TUnit.Engine.Helpers;
 
 namespace TUnit.UnitTests;
@@ -70,5 +71,54 @@ public class PathValidatorTests
         var result = PathValidator.SanitizeFileName(name);
 
         await Assert.That(result).IsEqualTo(prefix);
+    }
+
+    [Test]
+    public async Task IsWithinDirectory_Child_IsInside()
+    {
+        var root = Path.GetFullPath(Path.GetTempPath());
+        var child = Path.Combine(root, "reports", "out.html");
+
+        await Assert.That(PathValidator.IsWithinDirectory(child, root)).IsTrue();
+    }
+
+    [Test]
+    public async Task IsWithinDirectory_DirectoryItself_IsInside()
+    {
+        var root = Path.GetFullPath(Path.GetTempPath());
+
+        await Assert.That(PathValidator.IsWithinDirectory(root, root)).IsTrue();
+    }
+
+    [Test]
+    public async Task IsWithinDirectory_SiblingSharingPrefix_IsOutside()
+    {
+        var parent = Path.GetFullPath(Path.GetTempPath());
+        var directory = Path.Combine(parent, "bar");
+        var sibling = Path.Combine(parent, "barbaz", "file.txt");
+
+        await Assert.That(PathValidator.IsWithinDirectory(sibling, directory)).IsFalse();
+    }
+
+    [Test]
+    [ExcludeOn(OS.Windows)]
+    public async Task IsWithinDirectory_DifferentlyCasedSibling_IsOutside_On_CaseSensitive_Platforms()
+    {
+        await Assert.That(PathValidator.IsWithinDirectory("/work/Project/file.txt", "/work/project")).IsFalse();
+    }
+
+    [Test]
+    [RunOn(OS.Windows)]
+    public async Task IsWithinDirectory_FoldsCase_On_Windows()
+    {
+        await Assert.That(PathValidator.IsWithinDirectory(@"C:\Work\Project\file.txt", @"c:\work\project")).IsTrue();
+    }
+
+    [Test]
+    public async Task IsWithinDirectory_FileSystemRoot_ContainsEverything()
+    {
+        var root = Path.GetPathRoot(Path.GetFullPath(Path.GetTempPath()))!;
+
+        await Assert.That(PathValidator.IsWithinDirectory(Path.GetFullPath(Path.GetTempPath()), root)).IsTrue();
     }
 }

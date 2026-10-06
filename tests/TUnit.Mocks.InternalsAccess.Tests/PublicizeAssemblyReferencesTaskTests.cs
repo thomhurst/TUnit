@@ -200,6 +200,32 @@ public class PublicizeAssemblyReferencesTaskTests
     }
 
     [Test]
+    public async Task Paths_Differing_Only_In_Case_Are_Distinct_References_On_A_Case_Sensitive_FileSystem()
+    {
+        var root = NewScratchDirectory();
+        var lowerDirectory = Path.Combine(root, "deps");
+        var upperDirectory = Path.Combine(root, "DEPS");
+        Directory.CreateDirectory(lowerDirectory);
+
+        // Windows, and macOS's default APFS volume, fold case: there both paths name one file.
+        Skip.When(Directory.Exists(upperDirectory), "Requires a case-sensitive file system.");
+
+        Directory.CreateDirectory(upperDirectory);
+        var lower = Path.Combine(lowerDirectory, TargetLibName + ".dll");
+        var upper = Path.Combine(upperDirectory, TargetLibName + ".dll");
+        File.Copy(TargetLibPath, lower);
+        File.Copy(TargetLibPath, upper);
+
+        var engine = new StubBuildEngine();
+        var task = CreateTask(NewScratchDirectory(), TargetLibName);
+        task.BuildEngine = engine;
+        task.ReferencePaths = [new TaskItem(lower), new TaskItem(upper)];
+
+        await Assert.That(task.Execute()).IsTrue();
+        await Assert.That(engine.Warnings.Select(w => w.Code)).Contains("TUMIA004");
+    }
+
+    [Test]
     public async Task Duplicate_Requests_Produce_Single_Publicized_Reference()
     {
         var dir = NewScratchDirectory();

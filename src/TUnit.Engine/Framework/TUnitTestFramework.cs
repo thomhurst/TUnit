@@ -77,13 +77,32 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             serviceProvider.CancellationToken.Initialise(context.CancellationToken);
 
             await _requestHandler.HandleRequestAsync((TestExecutionRequest) context.Request, serviceProvider, context, GetFilter(context));
+
+            // Cancellation does not always surface as an exception (a run can wind down cleanly),
+            // but a run stopped by SIGTERM must never report success.
+            if (serviceProvider.CancellationToken.TerminationSignalReceived)
+            {
+                await serviceProvider.Logger.LogErrorAsync(SigtermMessage);
+                serviceProvider.SessionFailed = true;
+            }
         }
         catch (Exception e) when (IsCancellationException(e))
         {
+            var serviceProvider = GetOrCreateServiceProvider(context);
+
+            if (!context.CancellationToken.IsCancellationRequested && serviceProvider.CancellationToken.TerminationSignalReceived)
+            {
+                // MTP only treats the exception as a cancellation when its own token fired, which
+                // SIGTERM does not do; re-throwing would crash the host. Fail the session instead.
+                await serviceProvider.Logger.LogErrorAsync(SigtermMessage);
+                serviceProvider.SessionFailed = true;
+                return;
+            }
+
             var message = context.CancellationToken.IsCancellationRequested
                 ? "The test run was cancelled."
                 : "Test execution stopped due to fail-fast.";
-            await GetOrCreateServiceProvider(context).Logger.LogErrorAsync(message);
+            await serviceProvider.Logger.LogErrorAsync(message);
 
             // Re-throw is safe here — MTP handles OperationCanceledException specially.
             throw;
@@ -110,7 +129,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
         if (_serviceProvidersPerSession.TryRemove(context.SessionUid.Value, out var serviceProvider))
         {
-            if (serviceProvider.SessionFailed)
+            // TerminationSignalReceived too: SIGTERM can arrive after the request finished but before
+            // the host closes the session, and a terminated run must never report success.
+            if (serviceProvider.SessionFailed || serviceProvider.CancellationToken.TerminationSignalReceived)
             {
                 isSuccess = false;
             }
@@ -133,6 +154,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 _frameworkServiceProvider,
                 _capabilities));
     }
+
+    private const string SigtermMessage = "The test run was cancelled by SIGTERM.";
 
     private static bool IsCancellationException(Exception e)
     {

@@ -24,6 +24,7 @@ file static partial class DirectoryInfoAssertionExtensions
     public static bool IsHidden(this DirectoryInfo value) => value?.Attributes.HasFlag(FileAttributes.Hidden) == true;
     [GenerateAssertion(ExpectationMessage = "to not be hidden", InlineMethodBody = true)]
     public static bool IsNotHidden(this DirectoryInfo value) => value?.Attributes.HasFlag(FileAttributes.Hidden) == false;
+    /// <remarks>The System attribute only exists on Windows; on Linux and macOS this never holds.</remarks>
     [GenerateAssertion(ExpectationMessage = "to be a system directory", InlineMethodBody = true)]
     public static bool IsSystemDirectory(this DirectoryInfo value) => value?.Attributes.HasFlag(FileAttributes.System) == true;
 }

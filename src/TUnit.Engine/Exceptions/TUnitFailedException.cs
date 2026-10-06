@@ -77,9 +77,12 @@ public abstract class TUnitFailedException : TUnitException
         ReadOnlySpan<char> pendingSeparator = default;
         var hasPendingSeparator = false;
 
-        foreach (var range in span.Split(Environment.NewLine))
+        // Split on '\n' and trim '\r' rather than splitting on Environment.NewLine: a trace captured
+        // on another OS (CRLF read on Unix, LF read on Windows) would otherwise be one long line and
+        // nothing would be filtered.
+        foreach (var range in span.Split('\n'))
         {
-            var slice = span[range];
+            var slice = span[range].TrimEnd('\r');
             var trimmed = slice.Trim();
 
             if (IsTUnitInternalFrame(trimmed))

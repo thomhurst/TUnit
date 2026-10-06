@@ -1119,7 +1119,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 Console.WriteLine($"HTML test report written to: {path}");
                 return true;
             }
-            catch (IOException ex) when (attempt < maxAttempts && IsFileLocked(ex))
+            catch (IOException ex) when (attempt < maxAttempts && FileLockDetection.IsFileLocked(ex))
             {
                 var baseDelay = EngineDefaults.BaseRetryDelayMs * Math.Pow(2, attempt - 1);
                 var jitter = Random.Shared.Next(0, EngineDefaults.MaxRetryJitterMs);
@@ -1132,19 +1132,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         Console.WriteLine($"Failed to write HTML test report to: {path} after {maxAttempts} attempts");
         return false;
-    }
-
-    private static bool IsFileLocked(IOException exception)
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            var errorCode = exception.HResult & 0xFFFF;
-            return errorCode is 0x20 or 0x21; // ERROR_SHARING_VIOLATION / ERROR_LOCK_VIOLATION
-        }
-
-        // On POSIX, concurrent writers are less common; fallback to message heuristic
-        return exception.Message.Contains("being used by another process") ||
-               exception.Message.Contains("access denied", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <returns>The uploaded artifact's URL, when the in-process upload succeeded.</returns>

@@ -44,6 +44,17 @@ try {
     New-Item -ItemType Directory -Path (Split-Path $generatedFile -Parent) | Out-Null
     Set-Content -LiteralPath $generatedFile -Value 'generated'
 
+    # A link to the worktree must not be followed: removing through it would delete the target.
+    $linkToWorktree = Join-Path $testRoot 'link-to-artifacts'
+    $linkCreated = $true
+    try { New-Item -ItemType SymbolicLink -Path $linkToWorktree -Target $artifactWorktree | Out-Null }
+    catch { $linkCreated = $false; Write-Host "Skipping link check: cannot create symbolic links here ($($_.Exception.Message))" }
+    if ($linkCreated) {
+        Remove-MergedWorktree -Repo $repo -Worktree $linkToWorktree -Label 'link fixture'
+        Assert-True (Test-Path -LiteralPath $artifactWorktree) 'Removing through a link deleted the linked worktree.'
+        Remove-Item -LiteralPath $linkToWorktree -Force
+    }
+
     Remove-MergedWorktree -Repo $repo -Worktree $artifactWorktree -Label 'artifact fixture'
     Assert-True (-not (Test-Path -LiteralPath $artifactWorktree)) 'Artifact-only worktree was not removed.'
 
@@ -155,6 +166,14 @@ try {
         Assert-True (Test-DisposableWorktreePath -Path $generatedPath) `
             "Repository-generated path was not treated as disposable: $generatedPath"
     }
+
+    # The fallback delete must work with git's forward-slash paths on every OS: the Windows
+    # long-path prefix it adds there makes a Linux/macOS path unresolvable.
+    $fallbackTarget = Join-Path $testRoot 'fallback-delete'
+    New-Item -ItemType Directory -Path (Join-Path $fallbackTarget 'nested/deeper') -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $fallbackTarget 'nested/deeper/file.txt') -Value 'x'
+    Remove-DirectoryTree -Path ($fallbackTarget -replace '\\', '/')
+    Assert-True (-not (Test-Path -LiteralPath $fallbackTarget)) 'Fallback delete did not remove the directory.'
 
     Write-Host 'OK worktree cleanup safety tests passed.'
 }

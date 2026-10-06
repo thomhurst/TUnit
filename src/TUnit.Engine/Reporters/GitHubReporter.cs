@@ -532,14 +532,22 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         {
             try
             {
+                // FileShare.None rather than File.AppendAllText: on Unix the latter takes only a shared
+                // lock, so parallel test processes could append at the same offset and overwrite each
+                // other. An exclusive lock makes contenders fail and go through the retry below.
+                var bytes = Encoding.UTF8.GetBytes(contents);
+                using (var stream = new FileStream(_outputSummaryFilePath, FileMode.Append, FileAccess.Write, FileShare.None))
+                {
 #if NET
-                await File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
+                    await stream.WriteAsync(bytes);
 #else
-                File.AppendAllText(_outputSummaryFilePath, contents, Encoding.UTF8);
+                    await stream.WriteAsync(bytes, 0, bytes.Length);
 #endif
+                }
+
                 return;
             }
-            catch (IOException ex) when (attempt < maxAttempts && IsFileLocked(ex))
+            catch (IOException ex) when (attempt < maxAttempts && FileLockDetection.IsFileLocked(ex))
             {
                 var baseDelay = EngineDefaults.BaseRetryDelayMs * Math.Pow(2, attempt - 1);
                 var jitter = random.Next(0, EngineDefaults.MaxRetryJitterMs);
@@ -549,17 +557,6 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
                 await Task.Delay(delay);
             }
         }
-    }
-
-    private static bool IsFileLocked(IOException exception)
-    {
-        // Check if the exception is due to the file being locked/in use
-        // HResult 0x80070020 is ERROR_SHARING_VIOLATION on Windows
-        // HResult 0x80070021 is ERROR_LOCK_VIOLATION on Windows
-        var errorCode = exception.HResult & 0xFFFF;
-        return errorCode == 0x20 || errorCode == 0x21 || 
-               exception.Message.Contains("being used by another process") ||
-               exception.Message.Contains("access denied", StringComparison.OrdinalIgnoreCase);
     }
 
     private string GetDetails(IProperty? stateProperty, PropertyBag properties)
@@ -665,7 +662,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         // TUnit stores source line numbers 1-based (via [CallerLineNumber] / Roslyn span + 1),
         // and they flow into LineSpan.Start.Line unchanged — so it is already 1-based here.
         var line = fileLocation.LineSpan.Start.Line;
-        var fileName = Path.GetFileName(fileLocation.FilePath);
+        // Normalise first: an assembly built on Windows and run on Linux carries a backslash-separated
+        // path, which Path.GetFileName does not split there.
+        var fileName = Path.GetFileName(fileLocation.FilePath.Replace('\\', '/'));
         return $"[{fileName}:{line}]({serverUrl}/{repo}/blob/{sha}/{filePath}#L{line})";
     }
 

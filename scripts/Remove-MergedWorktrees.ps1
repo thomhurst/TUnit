@@ -243,7 +243,7 @@ try {
             if ($gitdir -notlike "$mainNorm/.git/worktrees/*") { continue }
             if (Test-Path -LiteralPath $gitdir) { continue }
             if ($WhatIf) { Write-Host "sweep: WOULD remove orphaned dir $($dir.FullName) (dangling gitdir: $gitdir)"; continue }
-            Remove-Item -LiteralPath ('\\?\' + ($dir.FullName -replace '/', '\')) -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-DirectoryTree -Path $dir.FullName
             if (Test-Path -LiteralPath $dir.FullName) {
                 Write-Host "sweep: WARNING could not fully remove orphaned dir $($dir.FullName)"
             }

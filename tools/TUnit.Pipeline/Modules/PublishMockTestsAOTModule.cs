@@ -40,7 +40,7 @@ public class PublishMockTestsAOTModule : Module<IReadOnlyList<CommandResult>>
                 return await context.DotNet().Publish(new DotNetPublishOptions
                 {
                     ProjectSolution = testProject.Path,
-                    Runtime = GetRuntimeIdentifier(),
+                    Runtime = RuntimeIdentifiers.Current,
                     Configuration = "Release",
                     Output = Path.Combine(rootDir, $"MOCKTESTS_AOT_{framework}"),
                     Properties =
@@ -64,25 +64,5 @@ public class PublishMockTestsAOTModule : Module<IReadOnlyList<CommandResult>>
         }
 
         return results;
-    }
-
-    private static string GetRuntimeIdentifier()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            return "linux-x64";
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return "win-x64";
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            return "osx-arm64";
-        }
-
-        throw new ArgumentException("Unknown platform");
     }
 }

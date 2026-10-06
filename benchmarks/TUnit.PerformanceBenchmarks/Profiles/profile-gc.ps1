@@ -3,7 +3,7 @@
 
 param(
     [int]$Scale = 1000,
-    [string]$OutputDir = ".\Results"
+    [string]$OutputDir = "Results"
 )
 
 $ErrorActionPreference = "Stop"
@@ -17,7 +17,7 @@ try {
 
     # Regenerate tests for the specified scale
     Write-Host "Generating tests for scale: $Scale" -ForegroundColor Cyan
-    & pwsh -ExecutionPolicy Bypass -File "$projectDir\generate-tests.ps1" -Scale $Scale
+    & pwsh -ExecutionPolicy Bypass -File (Join-Path $projectDir "generate-tests.ps1") -Scale $Scale
 
     # Build the project
     Write-Host "Building project..." -ForegroundColor Cyan
@@ -25,7 +25,9 @@ try {
 
     # Generate timestamp for output files
     $timestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
-    $traceFile = "$OutputDir\gc-trace-$Scale-$timestamp.nettrace"
+    # Join-Path, not "\": dotnet-trace is a native command, so PowerShell does not translate the
+    # separator for it on Linux/macOS.
+    $traceFile = Join-Path $OutputDir "gc-trace-$Scale-$timestamp.nettrace"
 
     Write-Host "Starting GC/allocation profile capture..." -ForegroundColor Cyan
     Write-Host "Trace will be saved to: $traceFile" -ForegroundColor Yellow

@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <!-- Multi-target to verify generator output across consumer TFMs (snapshot tests). -->
-    <TargetFrameworks>net472;net8.0;net9.0;net10.0</TargetFrameworks>
+    <!-- net472 is added on Windows only; see WindowsNetFrameworkTestTarget in Directory.Build.props. -->
+    <TargetFrameworks>$(WindowsNetFrameworkTestTarget)net8.0;net9.0;net10.0</TargetFrameworks>
   </PropertyGroup>
 
   <Import Project="..\..\eng\TestProject.props" />

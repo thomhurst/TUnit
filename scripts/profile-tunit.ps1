@@ -79,7 +79,8 @@ if (-not $OutputDir) {
 }
 New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 
-$ExePath = Join-Path $ProjectDir "bin" $Configuration $Framework "$ProjectName.exe"
+$ExeSuffix = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { ".exe" } else { "" }
+$ExePath = Join-Path $ProjectDir "bin" $Configuration $Framework "$ProjectName$ExeSuffix"
 
 Write-Host ""
 Write-Host "===================================================================" -ForegroundColor Cyan
@@ -125,8 +126,9 @@ if (-not (Test-Path $ExePath)) {
 
 $TestArgs = @()
 if ($Filter) {
-    $TestArgs += "--treenode-filter"
-    $TestArgs += $Filter
+    # One "--option=value" element: splatted arguments are glob-expanded on Linux/macOS, and a
+    # separate filter element such as /*/*/MyClass/* would become a list of file paths.
+    $TestArgs += "--treenode-filter=$Filter"
 }
 if ($ExtraArgs) {
     $TestArgs += $ExtraArgs
@@ -191,9 +193,10 @@ if (-not $testProc.HasExited) {
 
     # Start counters collection in background
     $counterJob = Start-Job -ScriptBlock {
-        param($pid, $file, $interval, $providers)
+        # Not $pid: that is PowerShell's read-only automatic variable, so binding to it fails.
+        param($processId, $file, $interval, $providers)
         & dotnet-counters collect `
-            --process-id $pid `
+            --process-id $processId `
             --output $file `
             --format csv `
             --refresh-interval $interval `

@@ -392,6 +392,77 @@ public class GitHubReporterTests
         }
     }
 
+    [Test]
+    public async Task AfterRunAsync_SourceLink_Text_Is_The_File_Name_For_A_Windows_Built_Path()
+    {
+        // An assembly built on Windows and run on Linux/macOS carries a backslash-separated source
+        // path, which Path.GetFileName does not split there.
+        var (reporter, outputFile) = await SetupReporter();
+        Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", "thomhurst/TUnit");
+        Environment.SetEnvironmentVariable("GITHUB_SHA", "abc123");
+        Environment.SetEnvironmentVariable("GITHUB_SERVER_URL", "https://github.com");
+
+        try
+        {
+            var message = new TestNodeUpdateMessage(
+                sessionUid: new SessionUid("test-session"),
+                testNode: new TestNode
+                {
+                    Uid = new TestNodeUid("loc-win"),
+                    DisplayName = "FailingTest",
+                    Properties = new PropertyBag(
+                        new FailedTestNodeStateProperty(new Exception("boom"), "boom"),
+                        new TestMethodIdentifierProperty(
+                            @namespace: "TestNamespace",
+                            assemblyFullName: "TestAssembly",
+                            typeName: "SampleTests",
+                            methodName: "FailingTest",
+                            parameterTypeFullNames: [],
+                            returnTypeFullName: "System.Void",
+                            methodArity: 0),
+                        new TestFileLocationProperty(
+                            @"D:\a\TUnit\src\SampleTests.cs",
+                            new LinePositionSpan(new LinePosition(12, 0), new LinePosition(20, 0))))
+                });
+
+            await FeedTestMessages(reporter, message);
+            await reporter.AfterRunAsync(1, CancellationToken.None);
+
+            var output = await File.ReadAllTextAsync(outputFile);
+            output.ShouldContain("[SampleTests.cs:12](");
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", null);
+            Environment.SetEnvironmentVariable("GITHUB_SHA", null);
+            Environment.SetEnvironmentVariable("GITHUB_SERVER_URL", null);
+        }
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Waits_For_Another_Writer_Holding_The_Summary_File()
+    {
+        // Parallel test processes append to one GITHUB_STEP_SUMMARY. The reporter must take the
+        // file exclusively and retry, rather than append alongside another writer: on Unix a
+        // shared-lock append from two processes can land at the same offset and overwrite.
+        var (reporter, outputFile) = await SetupReporter();
+        await FeedTestMessages(reporter, CreateFailedTestMessage("w1", "FailingTest", "SampleTests", new Exception("boom")));
+
+        Task afterRun;
+        using (new FileStream(outputFile, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+        {
+            afterRun = reporter.AfterRunAsync(1, CancellationToken.None);
+            await Task.Delay(100);
+
+            afterRun.IsCompleted.ShouldBeFalse("the reporter wrote while another writer held the file");
+        }
+
+        await afterRun;
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("FailingTest");
+    }
+
     private string CreateTempFile()
     {
         var path = Path.GetTempFileName();
