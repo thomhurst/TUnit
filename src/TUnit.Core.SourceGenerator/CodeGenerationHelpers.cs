@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -44,8 +45,8 @@ internal static class CodeGenerationHelpers
     private static bool IsCompilerGeneratedAttribute(AttributeData attr)
     {
         var fullName = attr.AttributeClass!.GloballyQualified();
-        return fullName.StartsWith("System.Runtime.CompilerServices.") ||
-               fullName.StartsWith("System.Diagnostics.CodeAnalysis.");
+        return fullName.StartsWith("System.Runtime.CompilerServices.", StringComparison.Ordinal) ||
+               fullName.StartsWith("System.Diagnostics.CodeAnalysis.", StringComparison.Ordinal);
     }
 
     public static bool ContainsTypeParameter(ITypeSymbol type)
@@ -142,7 +143,7 @@ internal static class CodeGenerationHelpers
             // This is a generic parameter (e.g., T, TKey)
             var position = GetGenericParameterPosition(typeParameter);
             var isMethodParameter = typeParameter.DeclaringMethod != null;
-            return $@"new global::TUnit.Core.GenericParameter({position}, {(isMethodParameter ? "true" : "false")}, ""{typeParameter.Name}"")";
+            return $@"new global::TUnit.Core.GenericParameter({position.ToString(CultureInfo.InvariantCulture)}, {(isMethodParameter ? "true" : "false")}, ""{typeParameter.Name}"")";
         }
 
         if (typeSymbol is INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } namedType)

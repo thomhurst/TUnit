@@ -1,3 +1,4 @@
+using TUnit.Core.SourceGenerator.Extensions;
 using System.Collections.Immutable;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -235,8 +236,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             // Handle UnconditionalSuppressMessage - goes to CheckAsync
             if (attributeClass.Name == "UnconditionalSuppressMessageAttribute" && attr.ConstructorArguments.Length >= 2)
             {
-                var category = attr.ConstructorArguments[0].Value?.ToString();
-                var checkId = attr.ConstructorArguments[1].Value?.ToString();
+                var category = attr.ConstructorArguments[0].Value.ToInvariantString();
+                var checkId = attr.ConstructorArguments[1].Value.ToInvariantString();
 
                 var justification = "";
                 foreach (var namedArg in attr.NamedArguments)
@@ -256,7 +257,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             // Handle RequiresUnreferencedCode - goes to extension method AND add suppression to CheckAsync
             else if (attributeClass.Name == "RequiresUnreferencedCodeAttribute" && attr.ConstructorArguments.Length >= 1)
             {
-                var message = attr.ConstructorArguments[0].Value?.ToString();
+                var message = attr.ConstructorArguments[0].Value.ToInvariantString();
 
                 var urlPart = "";
                 foreach (var namedArg in attr.NamedArguments)
@@ -279,7 +280,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             // Handle RequiresDynamicCode - goes to extension method AND add suppression to CheckAsync
             else if (attributeClass.Name == "RequiresDynamicCodeAttribute" && attr.ConstructorArguments.Length >= 1)
             {
-                var message = attr.ConstructorArguments[0].Value?.ToString();
+                var message = attr.ConstructorArguments[0].Value.ToInvariantString();
 
                 var urlPart = "";
                 foreach (var namedArg in attr.NamedArguments)
@@ -952,7 +953,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // Add null-forgiving operator for reference types if not already present
         // This is safe because we've already checked for null above
         var isNullable = data.TargetType.IsNullable;
-        if (isNullable && !string.IsNullOrEmpty(inlinedBody) && !inlinedBody.StartsWith("value!"))
+        if (isNullable && !string.IsNullOrEmpty(inlinedBody) && !inlinedBody.StartsWith("value!", StringComparison.Ordinal))
         {
             // Replace null-conditional operators with null-forgiving + regular operators
             // value?.Member becomes value!.Member (safe because we already null-checked)
@@ -1315,8 +1316,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
         // Fallback: check for common ref struct types by name
         var typeName = namedType.ToDisplayString();
-        if (typeName.StartsWith("System.Span<") ||
-            typeName.StartsWith("System.ReadOnlySpan<") ||
+        if (typeName.StartsWith("System.Span<", StringComparison.Ordinal) ||
+            typeName.StartsWith("System.ReadOnlySpan<", StringComparison.Ordinal) ||
             typeName == "System.Runtime.CompilerServices.DefaultInterpolatedStringHandler")
         {
             return true;

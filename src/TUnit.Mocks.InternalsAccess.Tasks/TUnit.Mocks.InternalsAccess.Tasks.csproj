@@ -11,6 +11,8 @@
          assembly-dependency resolution can find them. -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <EnableDynamicLoading>true</EnableDynamicLoading>
+    <!-- Runs inside MSBuild, so it gets the repo-internal culture analyzers (Directory.Build.targets). -->
+    <TUnitBuildTimeProject>true</TUnitBuildTimeProject>
   </PropertyGroup>
 
   <ItemGroup>

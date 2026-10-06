@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Immutable;
 using System.Composition;
 using Microsoft.CodeAnalysis;
@@ -218,12 +219,17 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         };
     }
 
+    // C# literal text is culture-invariant ("0.5"); parsing it with the build machine's culture
+    // fails under e.g. sv-SE or de-DE and would silently drop the .Within(tolerance) clause.
+    private static bool IsDecimalLiteral(LiteralExpressionSyntax literal)
+        => decimal.TryParse(literal.Token.ValueText, NumberStyles.Number, CultureInfo.InvariantCulture, out _);
+
     private static async Task<ExpressionSyntax> IsNotEqualTo(CodeFixContext context,
         SeparatedSyntaxList<ArgumentSyntax> argumentListArguments,
         ArgumentSyntax? actual, ArgumentSyntax? expected)
     {
         if (argumentListArguments.Count >= 3 && argumentListArguments[2].Expression is LiteralExpressionSyntax literalExpressionSyntax
-                                             && decimal.TryParse(literalExpressionSyntax.Token.ValueText, out _))
+                                             && IsDecimalLiteral(literalExpressionSyntax))
         {
             return SyntaxFactory.ParseExpression(
                 $"Assert.That({actual}).IsNotEqualTo({expected}).Within({literalExpressionSyntax})");
@@ -251,7 +257,7 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         ArgumentSyntax? actual, ArgumentSyntax? expected)
     {
         if (argumentListArguments.Count >= 3 && argumentListArguments[2].Expression is LiteralExpressionSyntax literalExpressionSyntax
-            && decimal.TryParse(literalExpressionSyntax.Token.ValueText, out _))
+            && IsDecimalLiteral(literalExpressionSyntax))
         {
             return SyntaxFactory.ParseExpression(
                 $"Assert.That({actual}).IsEqualTo({expected}).Within({literalExpressionSyntax})");

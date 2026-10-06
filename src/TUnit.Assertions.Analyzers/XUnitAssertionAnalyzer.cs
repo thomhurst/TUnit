@@ -54,7 +54,7 @@ public class XUnitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var fullyQualifiedNonGenericMethodName = methodSymbol.GloballyQualifiedNonGeneric();
 
-        if (fullyQualifiedNonGenericMethodName.StartsWith("global::Xunit.Assert."))
+        if (fullyQualifiedNonGenericMethodName.StartsWith("global::Xunit.Assert.", StringComparison.Ordinal))
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.XUnitAssertion, context.Operation.Syntax.GetLocation())

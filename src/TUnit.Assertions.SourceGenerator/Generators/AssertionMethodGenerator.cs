@@ -1,3 +1,5 @@
+using TUnit.Core.SourceGenerator.Extensions;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -64,13 +66,13 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
             if (attributeData.ConstructorArguments.Length == 2)
             {
-                methodName = attributeData.ConstructorArguments[1].Value?.ToString();
+                methodName = attributeData.ConstructorArguments[1].Value.ToInvariantString();
                 containingType = targetType;
             }
             else if (attributeData.ConstructorArguments.Length >= 3)
             {
                 containingType = attributeData.ConstructorArguments[1].Value as INamedTypeSymbol;
-                methodName = attributeData.ConstructorArguments[2].Value?.ToString();
+                methodName = attributeData.ConstructorArguments[2].Value.ToInvariantString();
             }
 
             if (targetType != null && containingType != null && !string.IsNullOrEmpty(methodName))
@@ -89,7 +91,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 {
                     customName = attributeData.NamedArguments
                         .FirstOrDefault(na => na.Key == "CustomName")
-                        .Value.Value?.ToString();
+                        .Value.Value.ToInvariantString();
                 }
 
                 var negateLogic = false;
@@ -121,7 +123,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 {
                     expectationMessage = attributeData.NamedArguments
                         .FirstOrDefault(na => na.Key == "ExpectationMessage")
-                        .Value.Value?.ToString();
+                        .Value.Value.ToInvariantString();
                 }
 
                 var createAssertionAttributeData = new CreateAssertionAttributeData(
@@ -183,14 +185,14 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             if (attributeData.ConstructorArguments.Length == 1)
             {
                 // CreateAssertionAttribute<T>(string methodName)
-                methodName = attributeData.ConstructorArguments[0].Value?.ToString();
+                methodName = attributeData.ConstructorArguments[0].Value.ToInvariantString();
                 containingType = targetType;
             }
             else if (attributeData.ConstructorArguments.Length == 2)
             {
                 // CreateAssertionAttribute<T>(Type containingType, string methodName)
                 containingType = attributeData.ConstructorArguments[0].Value as INamedTypeSymbol;
-                methodName = attributeData.ConstructorArguments[1].Value?.ToString();
+                methodName = attributeData.ConstructorArguments[1].Value.ToInvariantString();
             }
 
             if (targetType != null && containingType != null && !string.IsNullOrEmpty(methodName))
@@ -215,7 +217,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     switch (namedArgument.Key)
                     {
                         case "CustomName":
-                            customName = namedArgument.Value.Value?.ToString();
+                            customName = namedArgument.Value.Value.ToInvariantString();
                             break;
                         case "NegateLogic":
                             negateLogic = namedArgument.Value.Value is true;
@@ -227,7 +229,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                             treatAsInstance = namedArgument.Value.Value is true;
                             break;
                         case "ExpectationMessage":
-                            expectationMessage = namedArgument.Value.Value?.ToString();
+                            expectationMessage = namedArgument.Value.Value.ToInvariantString();
                             break;
                     }
                 }
@@ -659,7 +661,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             // Generate type parameter names: T, T1, T2, etc.
             var typeParamCount = attributeData.TargetType.TypeParameters.Length;
             var typeParamNames = typeParamCount == 1 ? new[] { "T" } :
-                                 Enumerable.Range(1, typeParamCount).Select(i => $"T{i}").ToArray();
+                                 Enumerable.Range(1, typeParamCount).Select(i => $"T{i.ToString(CultureInfo.InvariantCulture)}").ToArray();
             var typeParamsList = string.Join(", ", typeParamNames);
 
             // Generate assertion class with generic parameters
@@ -878,7 +880,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 if (staticMethod.MethodKind == MethodKind.PropertyGet)
                 {
                     // Property getter - access as property, not method
-                    var propertyName = methodName.StartsWith("get_") ? methodName.Substring(4) : methodName;
+                    var propertyName = methodName.StartsWith("get_", StringComparison.Ordinal) ? methodName.Substring(4) : methodName;
                     sourceBuilder.AppendLine($"        var result = actualValue.{propertyName};");
                 }
                 else
@@ -1018,12 +1020,12 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 parameterSuffix = $"With{firstParamType}";
                 if (method.Parameters.Length > 1)
                 {
-                    parameterSuffix += $"And{method.Parameters.Length - 1}More";
+                    parameterSuffix += $"And{(method.Parameters.Length - 1).ToString(CultureInfo.InvariantCulture)}More";
                 }
             }
             else if (method.Parameters.Length > 1)
             {
-                parameterSuffix = $"With{method.Parameters.Length}Parameters";
+                parameterSuffix = $"With{method.Parameters.Length.ToString(CultureInfo.InvariantCulture)}Parameters";
             }
         }
 
@@ -1183,7 +1185,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             // For unbound generic types like Memory<T>, generate generic extension method
             var typeParamCount = attributeData.TargetType.TypeParameters.Length;
             var typeParamNames = typeParamCount == 1 ? new[] { "T" } :
-                                 Enumerable.Range(1, typeParamCount).Select(i => $"T{i}").ToArray();
+                                 Enumerable.Range(1, typeParamCount).Select(i => $"T{i.ToString(CultureInfo.InvariantCulture)}").ToArray();
             var typeParamsList = string.Join(", ", typeParamNames);
 
             var unboundTypeName = attributeData.TargetType.Name;

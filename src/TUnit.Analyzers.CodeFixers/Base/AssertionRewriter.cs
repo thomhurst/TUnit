@@ -147,8 +147,8 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
 
             // Check if the type is ValueTask, ValueTask<T>, Task, or Task<T>
             var typeName = typeInfo.Type.ToDisplayString();
-            var isTaskType = typeName.StartsWith("System.Threading.Tasks.ValueTask") ||
-                             typeName.StartsWith("System.Threading.Tasks.Task") ||
+            var isTaskType = typeName.StartsWith("System.Threading.Tasks.ValueTask", StringComparison.Ordinal) ||
+                             typeName.StartsWith("System.Threading.Tasks.Task", StringComparison.Ordinal) ||
                              typeName == "System.Threading.Tasks.ValueTask" ||
                              typeName == "System.Threading.Tasks.Task";
 
@@ -436,8 +436,8 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
             if (typeInfo.Type is INamedTypeSymbol namedType)
             {
                 if (namedType.AllInterfaces.Any(i =>
-                    i.Name.StartsWith("IComparer") ||
-                    i.Name.StartsWith("IEqualityComparer")))
+                    i.Name.StartsWith("IComparer", StringComparison.Ordinal) ||
+                    i.Name.StartsWith("IEqualityComparer", StringComparison.Ordinal)))
                 {
                     return true;
                 }
@@ -469,7 +469,7 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
 
         // Check for variable names or expressions containing "comparer" (case-insensitive)
         // This catches variable names like 'comparer', 'myComparer', 'stringComparer', etc.
-        if (lowerExpressionText.EndsWith("comparer") ||
+        if (lowerExpressionText.EndsWith("comparer", StringComparison.Ordinal) ||
             lowerExpressionText.Contains("comparer.") ||
             lowerExpressionText.Contains("comparer<") ||
             lowerExpressionText.Contains("equalitycomparer"))

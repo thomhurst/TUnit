@@ -36,6 +36,7 @@
   <!-- Roslyn analyzers and code fixers -->
   <Folder Name="/Analyzers/">
     <Project Path="src/TUnit.Analyzers/TUnit.Analyzers.csproj" />
+    <Project Path="src/TUnit.Analyzers.Internal/TUnit.Analyzers.Internal.csproj" />
     <Project Path="src/TUnit.Analyzers.CodeFixers/TUnit.Analyzers.CodeFixers.csproj" />
     <Project Path="src/TUnit.Analyzers.Roslyn414/TUnit.Analyzers.Roslyn414.csproj" />
     <Project Path="src/TUnit.Analyzers.Roslyn44/TUnit.Analyzers.Roslyn44.csproj" />
@@ -66,6 +67,7 @@
 
   <!-- Test projects -->
   <Folder Name="/Tests/">
+    <Project Path="tests/TUnit.Analyzers.Internal.Tests/TUnit.Analyzers.Internal.Tests.csproj" />
     <Project Path="tests/TUnit.Analyzers.Tests/TUnit.Analyzers.Tests.csproj" />
     <Project Path="tests/TUnit.AspNetCore.Analyzers.Tests/TUnit.AspNetCore.Analyzers.Tests.csproj" />
     <Project Path="tests/TUnit.Assertions.Analyzers.CodeFixers.Tests/TUnit.Assertions.Analyzers.CodeFixers.Tests.csproj" />

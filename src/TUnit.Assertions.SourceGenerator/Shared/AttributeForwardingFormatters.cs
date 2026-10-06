@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
@@ -52,6 +53,6 @@ internal static class AttributeForwardingFormatters
     public static string FormatEditorBrowsable(AttributeData attr, string globalQualifier = "")
     {
         var state = attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is int s ? s : 0;
-        return $"[{globalQualifier}System.ComponentModel.EditorBrowsable(({globalQualifier}System.ComponentModel.EditorBrowsableState){state})]";
+        return $"[{globalQualifier}System.ComponentModel.EditorBrowsable(({globalQualifier}System.ComponentModel.EditorBrowsableState){state.ToString(CultureInfo.InvariantCulture)})]";
     }
 }

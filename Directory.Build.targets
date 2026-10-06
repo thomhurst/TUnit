@@ -3,4 +3,45 @@
     <DefineConstants Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(RoslynVersion)', '4.7'))">$(DefineConstants);ROSLYN4_7_OR_GREATER</DefineConstants>
     <DefineConstants Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(RoslynVersion)', '4.14'))">$(DefineConstants);ROSLYN4_14_OR_GREATER</DefineConstants>
   </PropertyGroup>
+
+  <!-- Repo-internal analyzers (src/TUnit.Analyzers.Internal) for code that runs inside the compiler
+       or MSBuild — generators, analyzers, code fixers and build tasks — where behaviour must not
+       depend on the build machine's culture. Roslyn components are enrolled automatically; other
+       build-time projects (MSBuild tasks) set TUnitBuildTimeProject=true. Projects opt out with
+       TUnitSkipInternalAnalyzers (the .RoslynNN variants, which compile their base project's
+       sources, set it in Directory.Build.props). -->
+  <PropertyGroup>
+    <_TUnitBuildTimeProject Condition="'$(TUnitSkipInternalAnalyzers)' != 'true'
+                                       and ('$(EnforceExtendedAnalyzerRules)' == 'true'
+                                            or '$(IsRoslynComponent)' == 'true'
+                                            or '$(TUnitBuildTimeProject)' == 'true')">true</_TUnitBuildTimeProject>
+    <!-- netstandard2.0 projects do not get the .NET analyzers by default; the globalization rules
+         in eng/BuildTimeGlobalization.globalconfig need them. -->
+    <EnableNETAnalyzers Condition="'$(_TUnitBuildTimeProject)' == 'true'">true</EnableNETAnalyzers>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(_TUnitBuildTimeProject)' == 'true'">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)src/TUnit.Analyzers.Internal/TUnit.Analyzers.Internal.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"
+                      SetTargetFramework="TargetFramework=netstandard2.0"
+                      PrivateAssets="all" />
+    <EditorConfigFiles Include="$(MSBuildThisFileDirectory)eng/BuildTimeGlobalization.globalconfig" />
+  </ItemGroup>
+
+  <!-- Fails the build when a project under src/ references the compiler or MSBuild packages but is
+       neither enrolled above nor opted out, so a new build-time project cannot skip the check. -->
+  <Target Name="_TUnitEnsureBuildTimeProjectsAreAnalyzed"
+          BeforeTargets="CoreCompile"
+          Condition="'$(_TUnitBuildTimeProject)' != 'true'
+                     and '$(TUnitSkipInternalAnalyzers)' != 'true'
+                     and $([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)').StartsWith('$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', 'src'))'))">
+    <ItemGroup>
+      <_TUnitBuildTimePackageReference Include="@(PackageReference)"
+                                       Condition="$([System.String]::Copy('%(Identity)').StartsWith('Microsoft.CodeAnalysis'))
+                                                  or $([System.String]::Copy('%(Identity)').StartsWith('Microsoft.Build'))" />
+    </ItemGroup>
+    <Error Condition="'@(_TUnitBuildTimePackageReference)' != ''"
+           Text="$(MSBuildProjectName) references @(_TUnitBuildTimePackageReference) but is not checked by the repo-internal culture analyzers. Set TUnitBuildTimeProject=true if its code runs inside the compiler or MSBuild, or TUnitSkipInternalAnalyzers=true if it does not (see Directory.Build.targets)." />
+  </Target>
 </Project>

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -282,7 +283,7 @@ internal static class MockMembersBuilder
     /// secondary (pair) surfaces.
     /// </summary>
     private static string FormatMemberId(MockTypeModel model, int memberId)
-        => model.IsSecondaryMemberSurface ? $"__Id(__engine, {memberId})" : memberId.ToString();
+        => model.IsSecondaryMemberSurface ? $"__Id(__engine, {memberId.ToString(CultureInfo.InvariantCulture)})" : memberId.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     /// Emits namespace-scoped delegate types so non-span ref struct out/ref values can travel
@@ -356,7 +357,7 @@ internal static class MockMembersBuilder
     // "@event_someMethod_M0_MockCall". This is valid C#: the '@' prefix applies to the entire
     // compound identifier, and the resulting token after '@' is not itself a keyword.
     private static string GetWrapperName(string safeName, MockMemberModel method)
-        => $"{safeName}_{method.Name}_M{method.MemberId}_MockCall";
+        => $"{safeName}_{method.Name}_M{method.MemberId.ToString(CultureInfo.InvariantCulture)}_MockCall";
 
     private static string GetWrapperTypeName(string safeName, MockMemberModel method, MockTypeModel model)
         => GetWrapperName(safeName, method) + GetCombinedTypeParameterList(model, method);
@@ -658,7 +659,7 @@ internal static class MockMembersBuilder
         // parameters — a same-name inner declaration would shadow (CS0693) and break the
         // conversion helper's result-type reference. See issues #6495 and #6515.
         var genericTaskKind = taskType.Substring(0, taskType.IndexOf('<'));
-        var isValueTaskKind = genericTaskKind.EndsWith("ValueTask");
+        var isValueTaskKind = genericTaskKind.EndsWith("ValueTask", StringComparison.Ordinal);
         var genericFuncType = $"global::System.Func<{typeList}, {genericTaskKind}<{aliasTypeParam}>>";
         writer.AppendLine();
         writer.AppendLine("/// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>");
@@ -781,25 +782,25 @@ internal static class MockMembersBuilder
             writer.AppendLine($"/// <summary>Sets the '{param.Name}' {dirLabel} parameter to the specified value when this setup matches.</summary>");
             if (param.SpanElementType is not null)
             {
-                writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i}, {param.Name}.ToArray()); return this; }}");
+                writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i.ToString(CultureInfo.InvariantCulture)}, {param.Name}.ToArray()); return this; }}");
             }
             else if (param.IsRefStruct)
             {
                 safeName ??= MockImplBuilder.GetCompositeShortSafeName(model);
                 nsPrefix ??= MockImplBuilder.GetGlobalMockNamespacePrefix(model);
                 var delegateFqn = nsPrefix + MockImplBuilder.GetOutRefSetterDelegateName(safeName, method, param);
-                writer.AppendLine($"public {wrapperName} {methodName}({delegateFqn} setter) {{ EnsureSetup().SetsOutParameter({i}, setter); return this; }}");
+                writer.AppendLine($"public {wrapperName} {methodName}({delegateFqn} setter) {{ EnsureSetup().SetsOutParameter({i.ToString(CultureInfo.InvariantCulture)}, setter); return this; }}");
             }
             else
             {
-                writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i}, {param.Name}); return this; }}");
+                writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i.ToString(CultureInfo.InvariantCulture)}, {param.Name}); return this; }}");
             }
         }
     }
 
     internal static string ToPascalCase(string name)
     {
-        if (name.StartsWith("@")) name = name[1..];
+        if (name.StartsWith("@", StringComparison.Ordinal)) name = name[1..];
         return string.IsNullOrEmpty(name) ? name : char.ToUpperInvariant(name[0]) + name[1..];
     }
 
@@ -818,8 +819,8 @@ internal static class MockMembersBuilder
     {
         // For nullable types, skip the null-forgiving operator since the value can legitimately be null.
         // For non-nullable types, ! suppresses the object? -> T conversion warning.
-        var bang = p.FullyQualifiedType.EndsWith("?") ? "" : "!";
-        return $"({p.FullyQualifiedType})args[{index}]{bang}";
+        var bang = p.FullyQualifiedType.EndsWith("?", StringComparison.Ordinal) ? "" : "!";
+        return $"({p.FullyQualifiedType})args[{index.ToString(CultureInfo.InvariantCulture)}]{bang}";
     }
 
     private static void GenerateMemberMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
@@ -940,7 +941,7 @@ internal static class MockMembersBuilder
                 .Where(p => p.Direction != ParameterDirection.Out)
                 .Select(p => $"{p.Direction}:{p.FullyQualifiedType}"));
             var typeArity = m.TypeParameters.Length;
-            var key = $"{m.Name}`{typeArity}({matchable})";
+            var key = $"{m.Name}`{typeArity.ToString(CultureInfo.InvariantCulture)}({matchable})";
             if (!byKey.TryGetValue(key, out var list))
             {
                 list = new List<MockMemberModel>();
@@ -1277,7 +1278,7 @@ internal static class MockMembersBuilder
             foreach (var idx in funcIndices.OrderBy(i => i))
             {
                 var p = method.Parameters[idx];
-                var rawName = p.Name.StartsWith("@") ? p.Name[1..] : p.Name;
+                var rawName = p.Name.StartsWith("@", StringComparison.Ordinal) ? p.Name[1..] : p.Name;
                 writer.AppendLine($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> __fa_{rawName} = {p.Name};");
             }
 
@@ -1289,7 +1290,7 @@ internal static class MockMembersBuilder
                 if (p.Direction == ParameterDirection.Out) continue;
                 if (!includeRefStructArgs && p.IsRefStruct) continue;
 
-                var rawName = p.Name.StartsWith("@") ? p.Name[1..] : p.Name;
+                var rawName = p.Name.StartsWith("@", StringComparison.Ordinal) ? p.Name[1..] : p.Name;
                 matcherExprs.Add(funcIndices.Contains(i) ? $"__fa_{rawName}.Matcher" : $"{p.Name}.Matcher");
             }
 
@@ -1905,7 +1906,7 @@ internal static class MockMembersBuilder
         // accept it). Only a struct-constrained T? (genuine Nullable<T>) or a
         // concrete annotated type may skip the guard at generation time.
         var nullableAnnotationIsDefaultable = defaultableTypeParameters.Contains(declaredType.TrimEnd('?'));
-        var isNonNullable = !declaredType.EndsWith("?") || nullableAnnotationIsDefaultable;
+        var isNonNullable = !declaredType.EndsWith("?", StringComparison.Ordinal) || nullableAnnotationIsDefaultable;
         if (isTuple && isNonNullable)
         {
             // A value-tuple type is statically a non-nullable value type, so null always
@@ -1989,10 +1990,10 @@ internal static class MockMembersBuilder
             // (whose element-name/annotation rules differ) out of the generated code.
             for (var i = 0; i < tupleElements.Length; i++)
             {
-                pendingTupleItems.Add(($"{helperSuffix}_{i}", tupleElements[i]));
+                pendingTupleItems.Add(($"{helperSuffix}_{i.ToString(CultureInfo.InvariantCulture)}", tupleElements[i]));
             }
-            var converted = string.Join(", ", tupleElements.Select((_, i) => $"__TUnitMocksConvertAsyncTupleItem{helperSuffix}_{i}(tuple[{i}])"));
-            writer.AppendLine($"case global::System.Runtime.CompilerServices.ITuple tuple when tuple.GetType().IsValueType && tuple.Length == {tupleElements.Length}: return ({converted});");
+            var converted = string.Join(", ", tupleElements.Select((_, i) => $"__TUnitMocksConvertAsyncTupleItem{helperSuffix}_{i.ToString(CultureInfo.InvariantCulture)}(tuple[{i.ToString(CultureInfo.InvariantCulture)}])"));
+            writer.AppendLine($"case global::System.Runtime.CompilerServices.ITuple tuple when tuple.GetType().IsValueType && tuple.Length == {tupleElements.Length.ToString(CultureInfo.InvariantCulture)}: return ({converted});");
         }
 
         var declaredSpelling = isTuple ? $"'{patternType}'" : $"'\" + typeof({patternType}) + \"'";
@@ -2111,12 +2112,12 @@ internal static class MockMembersBuilder
     /// </summary>
     private static string StripTupleElementNames(string type)
     {
-        if (type.EndsWith("?"))
+        if (type.EndsWith("?", StringComparison.Ordinal))
         {
             return StripTupleElementNames(type.Substring(0, type.Length - 1)) + "?";
         }
 
-        if (type.EndsWith("[]"))
+        if (type.EndsWith("[]", StringComparison.Ordinal))
         {
             return StripTupleElementNames(type.Substring(0, type.Length - 2)) + "[]";
         }
@@ -2127,7 +2128,7 @@ internal static class MockMembersBuilder
         }
 
         var open = type.IndexOf('<');
-        if (open >= 0 && type.EndsWith(">"))
+        if (open >= 0 && type.EndsWith(">", StringComparison.Ordinal))
         {
             var args = SplitTopLevelTypeArguments(type.Substring(open + 1, type.Length - open - 2));
             return type.Substring(0, open) + "<" + string.Join(", ", args.Select(StripTupleElementNames)) + ">";
@@ -2142,7 +2143,7 @@ internal static class MockMembersBuilder
     /// so trim it before testing — misclassifying it as bare would emit the ungated alias next
     /// to the synchronous factory and make <c>Returns(() =&gt; null)</c> ambiguous (CS0121).
     /// </summary>
-    private static bool IsGenericTaskType(string taskType) => taskType.TrimEnd('?').EndsWith(">");
+    private static bool IsGenericTaskType(string taskType) => taskType.TrimEnd('?').EndsWith(">", StringComparison.Ordinal);
 
     /// <summary>
     /// The type parameter name for the generic async-factory Returns alias, uniquified against
@@ -2290,8 +2291,8 @@ internal static class MockMembersBuilder
 
     private static string NormalizeNumericTypeName(string type)
     {
-        var name = type.StartsWith("global::") ? type.Substring("global::".Length) : type;
-        return name.StartsWith("System.") ? name.Substring("System.".Length) : name;
+        var name = type.StartsWith("global::", StringComparison.Ordinal) ? type.Substring("global::".Length) : type;
+        return name.StartsWith("System.", StringComparison.Ordinal) ? name.Substring("System.".Length) : name;
     }
 
     /// <summary>

@@ -12,8 +12,10 @@ jobs:
   modularpipeline:
     strategy:
       matrix:
-        locale: [fr-FR, pl-PL, de-DE]
-      fail-fast: true
+        # sv-SE: negative numbers use U+2212 MINUS SIGN (also fi-FI, nb-NO, et-EE, lt-LT).
+        # de-DE / fr-FR / pl-PL: decimal comma. tr-TR: dotless i in casing. ar-SA: Arabic number formatting.
+        locale: [fr-FR, pl-PL, de-DE, sv-SE, tr-TR, ar-SA]
+      fail-fast: false
     runs-on: ubuntu-latest
 
     steps:
@@ -21,20 +23,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup .NET 8
+      # Build only: the SDK pinned by global.json builds every target framework.
+      - name: Setup .NET
         uses: actions/setup-dotnet@v6.0.0
         with:
-          dotnet-version: 10.0.401
-
-      - name: Setup .NET 9
-        uses: actions/setup-dotnet@v6.0.0
-        with:
-          dotnet-version: 10.0.401
-
-      - name: Setup .NET 10
-        uses: actions/setup-dotnet@v6.0.0
-        with:
-          dotnet-version: 10.0.x
+          global-json-file: global.json
 
       - name: Generate and set locale for subsequent steps
         run: |
@@ -51,6 +44,9 @@ jobs:
           echo "LANG=${LOCALE}.UTF-8" >> $GITHUB_ENV
           echo "LC_ALL=${LOCALE}.UTF-8" >> $GITHUB_ENV
 
+      # The whole CI solution, not just one project: every source generator runs during this build,
+      # inside a compiler that uses the locale above, and must still emit valid C#.
+      # A version is passed as the main pipeline does: under GitHub Actions Directory.Build.props
+      # leaves Version unset, and TUnit.Assertions.Should's "$(Version)-beta" would then be invalid.
       - name: Build
-        run: dotnet build -c Release
-        working-directory: tests/TUnit.TestProject
+        run: dotnet build TUnit.CI.slnx -c Release -p:Version=1.0.0

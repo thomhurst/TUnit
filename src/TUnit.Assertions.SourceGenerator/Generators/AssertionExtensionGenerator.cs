@@ -1,3 +1,5 @@
+using TUnit.Core.SourceGenerator.Extensions;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -55,7 +57,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         string? methodName = null;
         if (attributeData.ConstructorArguments.Length > 0)
         {
-            methodName = attributeData.ConstructorArguments[0].Value?.ToString();
+            methodName = attributeData.ConstructorArguments[0].Value.ToInvariantString();
         }
 
         if (string.IsNullOrEmpty(methodName))
@@ -70,7 +72,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         {
             if (namedArg.Key == "NegatedMethodName")
             {
-                negatedMethodName = namedArg.Value.Value?.ToString();
+                negatedMethodName = namedArg.Value.Value.ToInvariantString();
             }
             else if (namedArg.Key == "OverloadResolutionPriority" && namedArg.Value.Value is int priority)
             {
@@ -102,7 +104,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         string? RequiresUnreferencedCodeMessage = null;
         if (RequiresUnreferencedCodeAttr != null && RequiresUnreferencedCodeAttr.ConstructorArguments.Length > 0)
         {
-            RequiresUnreferencedCodeMessage = RequiresUnreferencedCodeAttr.ConstructorArguments[0].Value?.ToString();
+            RequiresUnreferencedCodeMessage = RequiresUnreferencedCodeAttr.ConstructorArguments[0].Value.ToInvariantString();
         }
 
         // Everything below is flattened to strings so the pipeline model compares by value and
@@ -241,7 +243,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         if (constructorRequiresUnreferencedCodeAttr != null && constructorRequiresUnreferencedCodeAttr.ConstructorArguments.Length > 0)
         {
             // Constructor-level attribute takes precedence
-            return constructorRequiresUnreferencedCodeAttr.ConstructorArguments[0].Value?.ToString();
+            return constructorRequiresUnreferencedCodeAttr.ConstructorArguments[0].Value.ToInvariantString();
         }
 
         if (!string.IsNullOrEmpty(classLevelMessage))
@@ -408,7 +410,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 
         if (effectivePriority > 0)
         {
-            sourceBuilder.AppendLine($"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({effectivePriority})]");
+            sourceBuilder.AppendLine($"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({effectivePriority.ToString(CultureInfo.InvariantCulture)})]");
         }
 
         // Method declaration

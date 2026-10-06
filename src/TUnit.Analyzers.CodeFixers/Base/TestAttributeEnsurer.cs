@@ -78,7 +78,7 @@ public class TestAttributeEnsurer : CSharpSyntaxRewriter
         var name = attribute.Name.ToString();
 
         // Remove "Attribute" suffix if present
-        if (name.EndsWith("Attribute"))
+        if (name.EndsWith("Attribute", StringComparison.Ordinal))
         {
             name = name[..^9];
         }

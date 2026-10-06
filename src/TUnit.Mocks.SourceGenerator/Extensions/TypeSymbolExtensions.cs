@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +36,7 @@ internal static class TypeSymbolExtensions
     public static string GetFullyQualifiedNameWithoutGlobal(this ITypeSymbol type)
     {
         var fqn = type.GetFullyQualifiedName();
-        return fqn.StartsWith("global::") ? fqn.Substring("global::".Length) : fqn;
+        return fqn.StartsWith("global::", StringComparison.Ordinal) ? fqn.Substring("global::".Length) : fqn;
     }
 
     public static string GetOpenGenericTypeOfExpression(this INamedTypeSymbol type)
@@ -103,7 +104,7 @@ internal static class TypeSymbolExtensions
         if (!string.IsNullOrEmpty(namespaceName) && namespaceName != "<global namespace>")
         {
             var prefix = namespaceName + ".";
-            if (name.StartsWith(prefix))
+            if (name.StartsWith(prefix, StringComparison.Ordinal))
             {
                 name = name.Substring(prefix.Length);
             }
@@ -216,7 +217,7 @@ internal static class TypeSymbolExtensions
         if (member is IMethodSymbol method)
         {
             var paramTypes = string.Join(',', method.Parameters.Select(p => p.Type.GetFullyQualifiedName() + (p.RefKind != RefKind.None ? "&" : "")));
-            var typeParams = method.TypeParameters.Length > 0 ? $"`{method.TypeParameters.Length}" : "";
+            var typeParams = method.TypeParameters.Length > 0 ? $"`{method.TypeParameters.Length.ToString(CultureInfo.InvariantCulture)}" : "";
             return $"M:{method.Name}{typeParams}({paramTypes})";
         }
         if (member is IPropertySymbol prop)
@@ -306,7 +307,7 @@ internal static class TypeSymbolExtensions
     }
 
     private static string StripGlobalPrefix(string name)
-        => name.StartsWith("global::") ? name.Substring("global::".Length) : name;
+        => name.StartsWith("global::", StringComparison.Ordinal) ? name.Substring("global::".Length) : name;
 
     private static string SanitizeIdentifier(string name)
         => IdentifierEscaping.SanitizeIdentifier(name);

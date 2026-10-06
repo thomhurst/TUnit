@@ -1,32 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\eng\Polyfill.targets" />
-
+  <!-- Repo-internal analyzers, applied to TUnit's own build-time projects (see Directory.Build.targets).
+       Never packed or shipped. -->
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IsRoslynComponent>true</IsRoslynComponent>
-    <RootNamespace>TUnit.Assertions.SourceGenerator</RootNamespace>
-    <PackageId>TUnit.Assertions.SourceGenerator</PackageId>
-    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <IsPackable>false</IsPackable>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+    <!-- Analyzing itself would need the analyzer to exist before it is built. -->
+    <TUnitSkipInternalAnalyzers>true</TUnitSkipInternalAnalyzers>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-  </ItemGroup>
-  <ItemGroup>
-    <!-- One null-preserving invariant formatter for attribute arguments, shared with the core generator. -->
-    <Compile Include="..\TUnit.Core.SourceGenerator\Extensions\ObjectExtensions.cs" Link="Shared\ObjectExtensions.cs" />
   </ItemGroup>
 
 </Project>

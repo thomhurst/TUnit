@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -110,7 +111,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
                         {
                             var containingType = methodSymbol.ContainingType?.ToDisplayString();
                             // Only return false if we positively know it's NOT xUnit
-                            if (containingType != null && !containingType.StartsWith("Xunit.Assert"))
+                            if (containingType != null && !containingType.StartsWith("Xunit.Assert", StringComparison.Ordinal))
                             {
                                 return false;
                             }
@@ -620,12 +621,12 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         for (var i = 1; i < args.Count; i++)
         {
             var inspectorText = args[i].Expression.ToFullString().Replace("\r", "").Replace("\n", " ").Trim();
-            inspectors.Add($"[{i - 1}]: {inspectorText}");
+            inspectors.Add($"[{(i - 1).ToString(CultureInfo.InvariantCulture)}]: {inspectorText}");
         }
 
         var inspectorSummary = string.Join("; ", inspectors);
         var todoComment = $"// TODO: TUnit migration - Assert.Collection element inspectors were dropped and need manual conversion: {inspectorSummary}";
-        return (AssertionConversionKind.Collection, $"await Assert.That({collection}).Count().IsEqualTo({inspectorCount})", true, todoComment);
+        return (AssertionConversionKind.Collection, $"await Assert.That({collection}).Count().IsEqualTo({inspectorCount.ToString(CultureInfo.InvariantCulture)})", true, todoComment);
     }
 
     private string? TryConvertActionToPredicate(ExpressionSyntax actionExpression)
@@ -818,7 +819,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
     protected override bool IsFrameworkNamespace(string? ns)
     {
-        return ns != null && ns.StartsWith("Xunit");
+        return ns != null && ns.StartsWith("Xunit", StringComparison.Ordinal);
     }
 
     protected override bool ShouldRemoveAttribute(AttributeSyntax node)
@@ -1049,7 +1050,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         foreach (var baseType in collectionDefinition.BaseList.Types)
         {
             var typeName = baseType.Type.ToString();
-            if (typeName.StartsWith("ICollectionFixture<"))
+            if (typeName.StartsWith("ICollectionFixture<", StringComparison.Ordinal))
             {
                 // Extract the type argument
                 if (baseType.Type is GenericNameSyntax genericName)
@@ -1151,7 +1152,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
                     }
 
                     // Check for IClassFixture<T>
-                    if (typeName.StartsWith("IClassFixture<") || IsIClassFixtureType(originalBaseType))
+                    if (typeName.StartsWith("IClassFixture<", StringComparison.Ordinal) || IsIClassFixtureType(originalBaseType))
                     {
                         var fixtureType = ExtractGenericTypeArgument(originalBaseType);
                         if (fixtureType != null)
@@ -1438,7 +1439,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
     {
         var typeInfo = SemanticModel.GetTypeInfo(baseType.Type);
         var displayString = typeInfo.Type?.ToDisplayString() ?? "";
-        return displayString.StartsWith("Xunit.IClassFixture<");
+        return displayString.StartsWith("Xunit.IClassFixture<", StringComparison.Ordinal);
     }
 
     private string? ExtractGenericTypeArgument(BaseTypeSyntax baseType)
@@ -1465,7 +1466,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         // Check for generic interface patterns like IClassFixture<T>
         foreach (var xunitType in XUnitBaseTypes)
         {
-            if (typeName.StartsWith(xunitType + "<") || typeName == xunitType)
+            if (typeName.StartsWith(xunitType + "<", StringComparison.Ordinal) || typeName == xunitType)
             {
                 return true;
             }
@@ -1476,7 +1477,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         if (typeInfo.Type != null)
         {
             var ns = typeInfo.Type.ContainingNamespace?.ToDisplayString();
-            if (ns?.StartsWith("Xunit") == true)
+            if (ns?.StartsWith("Xunit", StringComparison.Ordinal) == true)
             {
                 return true;
             }
@@ -1727,7 +1728,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
             {
                 var containingType = methodSymbol.ContainingType?.ToDisplayString();
-                return containingType?.StartsWith("Xunit.Record") == true;
+                return containingType?.StartsWith("Xunit.Record", StringComparison.Ordinal) == true;
             }
         }
         return false;

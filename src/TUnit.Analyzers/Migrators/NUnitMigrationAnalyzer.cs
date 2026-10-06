@@ -15,7 +15,7 @@ public class NUnitMigrationAnalyzer : BaseMigrationAnalyzer
     {
         return usingName == "NUnit" || 
                usingName == "NUnit.Framework" || 
-               usingName.StartsWith("NUnit.Framework.");
+               usingName.StartsWith("NUnit.Framework.", StringComparison.Ordinal);
     }
     
     protected override bool IsFrameworkNamespace(string? namespaceName)
@@ -26,7 +26,7 @@ public class NUnitMigrationAnalyzer : BaseMigrationAnalyzer
         }
 
         return namespaceName == "NUnit.Framework" ||
-               namespaceName.StartsWith("NUnit.Framework.");
+               namespaceName.StartsWith("NUnit.Framework.", StringComparison.Ordinal);
     }
 
     protected override bool IsFrameworkTypeName(string typeName)
