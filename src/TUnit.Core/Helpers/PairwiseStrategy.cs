@@ -461,7 +461,9 @@ internal static class PairwiseStrategy
                 TestCaseInfo? testCase = CreateRandomTestCase(tuple);
                 if (testCase is null)
                 {
-                    continue;
+                    // FindAllowedTestCase already searched every completion of this tuple.
+                    // Further random attempts cannot succeed, so stop immediately.
+                    return null;
                 }
 
                 int coverage = MaximizeCoverage(testCase, tuple);
