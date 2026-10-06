@@ -695,11 +695,39 @@ internal static class PairwiseStrategy
         /// Removes a tuple that cannot be covered by any allowed test case.
         /// </summary>
         /// <param name="tuple">The tuple to remove.</param>
+        /// <remarks>
+        /// <see cref="CreateAllTuples"/> stores both orientations of every pair, e.g. (A,B) and (B,A).
+        /// When one orientation is impossible under the caller's constraints, the other is too; dropping
+        /// only the instance we just failed would leave the mirror in its own bucket and force another
+        /// exhaustive <see cref="FindAllowedTestCase"/> search for the same dead end.
+        /// </remarks>
         private void RemoveTuple(FeatureTuple tuple)
         {
             for (int i = 0; i < tuple.Length; i++)
             {
                 _uncoveredTuples![tuple[i].Dimension][tuple[i].Feature].Remove(tuple);
+            }
+
+            if (tuple.Length != 2)
+            {
+                return;
+            }
+
+            FeatureInfo first = tuple[0];
+            FeatureInfo second = tuple[1];
+            List<FeatureTuple> mirrorBucket = _uncoveredTuples![second.Dimension][second.Feature];
+            for (int i = mirrorBucket.Count - 1; i >= 0; i--)
+            {
+                FeatureTuple candidate = mirrorBucket[i];
+                if (candidate.Length == 2
+                    && candidate[0].Dimension == second.Dimension
+                    && candidate[0].Feature == second.Feature
+                    && candidate[1].Dimension == first.Dimension
+                    && candidate[1].Feature == first.Feature)
+                {
+                    mirrorBucket.RemoveAt(i);
+                    break;
+                }
             }
         }
     }

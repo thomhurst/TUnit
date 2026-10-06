@@ -167,6 +167,7 @@ Changing the parameter values (or their order) can change which test cases are g
 
 - Like `[MatrixDataSource]`, `[PairwiseDataSource]` only supports test method parameters. It can't be used for class constructor parameters.
 - Pairwise coverage only guarantees that every *pair* of values is tested. It does not try to cover combinations of three or more values.
+- When many values are combined with heavy `[MatrixExclusion]` sets, discovery may still probe a large search space for unreachable pairs. Prefer fewer values or fewer exclusions when generation is slow.
 
 ## Algorithm
 

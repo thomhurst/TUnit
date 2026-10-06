@@ -96,6 +96,40 @@ public class PairwiseDataSourceTests
     }
 
     [Test]
+    public async Task Unreachable_Pair_With_Many_Parameters_Still_Covers_Reachable_Pairs()
+    {
+        // Five parameters of size 4 => 1024 Cartesian rows. Excluding every row that pairs
+        // p0=0 with p1=0 makes that pair impossible; generation must drop both mirrored
+        // tuple orientations without timing out, and still cover every reachable pair.
+        IReadOnlyList<object?>[] valueSets =
+        [
+            [0, 1, 2, 3],
+            [0, 1, 2, 3],
+            [0, 1, 2, 3],
+            [0, 1, 2, 3],
+            [0, 1, 2, 3],
+        ];
+
+        var exclusions = new List<object?[]>();
+        for (var c = 0; c < 4; c++)
+        for (var d = 0; d < 4; d++)
+        for (var e = 0; e < 4; e++)
+        {
+            exclusions.Add([0, 0, c, d, e]);
+        }
+
+        var rows = PairwiseDataSourceAttribute.GetTestCases(valueSets, [.. exclusions], PairwiseDataSourceAttribute.DefaultSeed);
+
+        await Assert.That(rows.Count).IsGreaterThan(0);
+        foreach (var row in rows)
+        {
+            await Assert.That(MatrixParameterValues.IsExcluded([.. exclusions], row)).IsFalse();
+        }
+
+        await Assert.That(GetUncoveredPairs(valueSets, rows, [.. exclusions])).IsEmpty();
+    }
+
+    [Test]
     public async Task Enum_Exclusions_Match_Underlying_Values()
     {
         IReadOnlyList<object?>[] valueSets =
