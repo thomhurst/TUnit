@@ -1,3 +1,4 @@
+using TUnit.Core.SourceGenerator.Extensions;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Core.SourceGenerator.Models.Extracted;
@@ -95,7 +96,7 @@ public sealed class TypedConstantModel : IEquatable<TypedConstantModel>
             TypedConstantKind.Primitive => FormatPrimitiveValue(constant.Value),
             TypedConstantKind.Enum => FormatEnumValue(constant),
             TypedConstantKind.Type => (constant.Value as ITypeSymbol)?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            _ => constant.Value?.ToString()
+            _ => constant.Value.ToInvariantString()
         };
     }
 

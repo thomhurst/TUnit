@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Extensions;
 
@@ -18,7 +19,7 @@ public static class TupleArgumentHelper
         for (var i = 0; i < parameters.Count; i++)
         {
             var parameter = parameters[i];
-            var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{parameter.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
+            var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{parameter.Type.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])";
             allArguments.Add(castExpression);
         }
 
@@ -67,7 +68,7 @@ public static class TupleArgumentHelper
                 for (var i = 0; i < parameters.Count; i++)
                 {
                     var param = parameters[i];
-                    var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
+                    var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])";
                     argumentExpressions.Add(castExpression);
                 }
             }
@@ -76,7 +77,7 @@ public static class TupleArgumentHelper
                 for (var i = 0; i < parameters.Count && i < argCount; i++)
                 {
                     var param = parameters[i];
-                    var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
+                    var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])";
                     argumentExpressions.Add(castExpression);
                 }
             }
@@ -93,7 +94,7 @@ public static class TupleArgumentHelper
                 for (var i = 0; i < regularParamCount; i++)
                 {
                     var param = parameters[i];
-                    var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
+                    var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])";
                     argumentExpressions.Add(castExpression);
                 }
             }
@@ -102,7 +103,7 @@ public static class TupleArgumentHelper
                 for (var i = 0; i < regularParamCount && i < argCount; i++)
                 {
                     var param = parameters[i];
-                    var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
+                    var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])";
                     argumentExpressions.Add(castExpression);
                 }
             }
@@ -120,11 +121,11 @@ public static class TupleArgumentHelper
                     // redundant "- 0" offset for cleaner generated code.
                     var rangeCount = regularParamCount == 0
                         ? argCountExpression
-                        : $"{argCountExpression} - {regularParamCount}";
+                        : $"{argCountExpression} - {regularParamCount.ToString(CultureInfo.InvariantCulture)}";
                     // Use fully-qualified static Enumerable.Select/ToArray calls rather than the
                     // extension-method chain — generated files don't import System.Linq unless the
                     // project has ImplicitUsings enabled, so the extension form fails to compile (CS1061).
-                    var arrayInit = $"({argumentsArrayName}.Length > {regularParamCount} ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range({regularParamCount}, {rangeCount}), i => global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[i]))) : global::System.Array.Empty<{elementType.GloballyQualified()}>())";
+                    var arrayInit = $"({argumentsArrayName}.Length > {regularParamCount.ToString(CultureInfo.InvariantCulture)} ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range({regularParamCount.ToString(CultureInfo.InvariantCulture)}, {rangeCount}), i => global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[i]))) : global::System.Array.Empty<{elementType.GloballyQualified()}>())";
                     argumentExpressions.Add(arrayInit);
                 }
                 else
@@ -149,7 +150,7 @@ public static class TupleArgumentHelper
                         // Anything else goes through CastHelper.ToTrailingArray, which also converts an
                         // array of a different runtime type element-wise (e.g. an object[] supplied by a
                         // MatrixAttribute subclass for a MyEnum[] parameter — issue #6678).
-                        var singleArg = $"{argumentsArrayName}[{regularParamCount}]";
+                        var singleArg = $"{argumentsArrayName}[{regularParamCount.ToString(CultureInfo.InvariantCulture)}]";
                         var checkAndCast = $"({singleArg} is null ? null : {singleArg} is {paramsParam.Type.GloballyQualified()} arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<{elementType.GloballyQualified()}>({singleArg}))";
                         argumentExpressions.Add(checkAndCast);
                     }
@@ -159,7 +160,7 @@ public static class TupleArgumentHelper
                         var arrayElements = new List<string>();
                         for (var i = regularParamCount; i < argCount; i++)
                         {
-                            arrayElements.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[{i}])");
+                            arrayElements.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])");
                         }
                         argumentExpressions.Add($"new {elementType.GloballyQualified()}[] {{ {string.Join(", ", arrayElements)} }}");
                     }
@@ -168,7 +169,7 @@ public static class TupleArgumentHelper
             else
             {
                 // Fallback if we can't determine element type
-                var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{paramsParam.Type.GloballyQualified()}>({argumentsArrayName}[{regularParamCount}])";
+                var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{paramsParam.Type.GloballyQualified()}>({argumentsArrayName}[{regularParamCount.ToString(CultureInfo.InvariantCulture)}])";
                 argumentExpressions.Add(castExpression);
             }
         }

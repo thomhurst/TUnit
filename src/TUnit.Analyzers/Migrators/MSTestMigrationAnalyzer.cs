@@ -14,7 +14,7 @@ public class MSTestMigrationAnalyzer : BaseMigrationAnalyzer
     protected override bool IsFrameworkUsing(string usingName)
     {
         return usingName == "Microsoft.VisualStudio.TestTools.UnitTesting" || 
-               usingName.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting.");
+               usingName.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting.", StringComparison.Ordinal);
     }
     
     protected override bool IsFrameworkNamespace(string? namespaceName)
@@ -25,7 +25,7 @@ public class MSTestMigrationAnalyzer : BaseMigrationAnalyzer
         }
 
         return namespaceName == "Microsoft.VisualStudio.TestTools.UnitTesting" ||
-               namespaceName.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting.");
+               namespaceName.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting.", StringComparison.Ordinal);
     }
 
     protected override bool IsFrameworkTypeName(string typeName)

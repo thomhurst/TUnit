@@ -31,7 +31,7 @@ public class ForbidRedefiningAttributeUsageAnalyzer : ConcurrentDiagnosticAnalyz
             return;
         }
 
-        if (namedTypeSymbol.ContainingNamespace?.ToDisplayString().StartsWith("TUnit.Core") == true)
+        if (namedTypeSymbol.ContainingNamespace?.ToDisplayString().StartsWith("TUnit.Core", StringComparison.Ordinal) == true)
         {
             return;
         }

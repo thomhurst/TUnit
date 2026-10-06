@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Globalization;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -164,9 +165,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     if (currentType.IsGenericType)
                     {
                         var genericTypeName = currentType.OriginalDefinition?.Name ?? typeName;
-                        if (genericTypeName.StartsWith("DataSourceGeneratorAttribute") ||
-                            genericTypeName.StartsWith("AsyncDataSourceGeneratorAttribute") ||
-                            genericTypeName.StartsWith("ClassDataSourceAttribute"))
+                        if (genericTypeName.StartsWith("DataSourceGeneratorAttribute", StringComparison.Ordinal) ||
+                            genericTypeName.StartsWith("AsyncDataSourceGeneratorAttribute", StringComparison.Ordinal) ||
+                            genericTypeName.StartsWith("ClassDataSourceAttribute", StringComparison.Ordinal))
                         {
                             return true;
                         }
@@ -520,7 +521,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 
                 // Check if return type is Func<T> where T matches the property type
                 if (returnType is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } funcType &&
-                    funcType.ToDisplayString().StartsWith("System.Func<"))
+                    funcType.ToDisplayString().StartsWith("System.Func<", StringComparison.Ordinal))
                 {
                     var funcReturnType = funcType.TypeArguments[0];
                     if (funcReturnType.ToDisplayString() == propertyType.ToDisplayString() ||
@@ -541,7 +542,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 // If the return type is Func<T>, report T instead since that's what will be injected
                 var reportedType = returnType;
                 if (returnType is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } funcTypeForError &&
-                    funcTypeForError.ToDisplayString().StartsWith("System.Func<"))
+                    funcTypeForError.ToDisplayString().StartsWith("System.Func<", StringComparison.Ordinal))
                 {
                     reportedType = funcTypeForError.TypeArguments[0];
                 }
@@ -792,7 +793,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             unwrappedLayer = false;
 
             if (type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } genericType
-                && genericType.ToDisplayString().StartsWith("System.Func<"))
+                && genericType.ToDisplayString().StartsWith("System.Func<", StringComparison.Ordinal))
             {
                 isFunc = true;
                 type = genericType.TypeArguments[0];
@@ -871,9 +872,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 if (type.IsGenericType)
                 {
                     var genericTypeName = type.OriginalDefinition?.Name ?? typeName;
-                    return genericTypeName.StartsWith("DataSourceGeneratorAttribute") ||
-                           genericTypeName.StartsWith("AsyncDataSourceGeneratorAttribute") ||
-                           genericTypeName.StartsWith("ClassDataSourceAttribute");
+                    return genericTypeName.StartsWith("DataSourceGeneratorAttribute", StringComparison.Ordinal) ||
+                           genericTypeName.StartsWith("AsyncDataSourceGeneratorAttribute", StringComparison.Ordinal) ||
+                           genericTypeName.StartsWith("ClassDataSourceAttribute", StringComparison.Ordinal);
                 }
                 return typeName == "ArgumentsAttribute";
             });
@@ -972,7 +973,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         if (methodParameterType?.SpecialType == SpecialType.System_Decimal &&
             argument.Type?.SpecialType == SpecialType.System_Double &&
-            decimal.TryParse(argument.Value?.ToString(), out _))
+            decimal.TryParse(Convert.ToString(argument.Value, CultureInfo.InvariantCulture), NumberStyles.Number, CultureInfo.InvariantCulture, out _))
         {
             // Decimals can't technically be used in attributes, but we can still write it as a double
             // e.g. [Arguments(1.55)]

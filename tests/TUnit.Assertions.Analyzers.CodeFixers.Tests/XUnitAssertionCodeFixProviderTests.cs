@@ -152,6 +152,51 @@ public class XUnitAssertionCodeFixProviderTests
     }
 
     [Test]
+    [Arguments("sv-SE")]
+    [Arguments("de-DE")]
+    public async Task Xunit_Within_Tolerance_Is_Kept_Under_Decimal_Comma_Culture(string cultureName)
+    {
+        // The tolerance literal's text is always "0.01"; parsing it with a decimal-comma culture
+        // used to fail and silently drop .Within(...), producing a weaker assertion.
+        var previous = System.Globalization.CultureInfo.CurrentCulture;
+        System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo(cultureName);
+
+        try
+        {
+            await Verifier
+                .VerifyCodeFixAsync(
+                    """
+                    using System.Threading.Tasks;
+
+                    public class MyClass
+                    {
+                        public void MyTest()
+                        {
+                            {|#0:Xunit.Assert.Equal(1.0, 1.0, 0.01)|};
+                        }
+                    }
+                    """,
+                    Verifier.Diagnostic(Rules.XUnitAssertion).WithLocation(0),
+                    """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        Assert.That(1.0).IsEqualTo(1.0).Within(0.01);
+                    }
+                }
+                """
+                );
+        }
+        finally
+        {
+            System.Globalization.CultureInfo.CurrentCulture = previous;
+        }
+    }
+
+    [Test]
     public async Task Xunit_All_Converts_To_AssertMultiple_WithForeach()
     {
         await Verifier

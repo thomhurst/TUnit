@@ -160,7 +160,7 @@ public abstract class MigrationAnalyzer
                     {
                         // Create a new conversion with .Wait() instead of await
                         var newReplacementCode = conversion.ReplacementCode;
-                        if (newReplacementCode.StartsWith("await "))
+                        if (newReplacementCode.StartsWith("await ", StringComparison.Ordinal))
                         {
                             newReplacementCode = newReplacementCode.Substring(6) + ".Wait()";
                         }
@@ -682,16 +682,16 @@ public abstract class MigrationAnalyzer
 
         // Already Task or Task<T> → no change needed
         if (returnTypeText == "Task" ||
-            returnTypeText.StartsWith("Task<") ||
-            returnTypeText.StartsWith("System.Threading.Tasks.Task"))
+            returnTypeText.StartsWith("Task<", StringComparison.Ordinal) ||
+            returnTypeText.StartsWith("System.Threading.Tasks.Task", StringComparison.Ordinal))
         {
             return (false, false, null);
         }
 
         // Already ValueTask or ValueTask<T> → no change needed (async already works with ValueTask)
         if (returnTypeText == "ValueTask" ||
-            returnTypeText.StartsWith("ValueTask<") ||
-            returnTypeText.StartsWith("System.Threading.Tasks.ValueTask"))
+            returnTypeText.StartsWith("ValueTask<", StringComparison.Ordinal) ||
+            returnTypeText.StartsWith("System.Threading.Tasks.ValueTask", StringComparison.Ordinal))
         {
             return (false, false, null);
         }

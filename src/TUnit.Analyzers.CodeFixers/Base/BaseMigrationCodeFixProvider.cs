@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Immutable;
 using System.Composition;
 using Microsoft.CodeAnalysis;
@@ -297,7 +298,7 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
         // Group failures by step and create summary comments
         var failureSummary = context.Failures
             .GroupBy(f => f.Step)
-            .Select(g => $"// TODO: TUnit migration - {g.Key}: {g.Count()} item(s) could not be converted automatically")
+            .Select(g => $"// TODO: TUnit migration - {g.Key}: {g.Count().ToString(CultureInfo.InvariantCulture)} item(s) could not be converted automatically")
             .ToList();
 
         if (failureSummary.Count == 0)
@@ -338,7 +339,7 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
     {
         var failureSummary = plan.Failures
             .GroupBy(f => f.Phase)
-            .Select(g => $"// TODO: TUnit migration - {g.Key}: {g.Count()} item(s) could not be converted automatically")
+            .Select(g => $"// TODO: TUnit migration - {g.Key}: {g.Count().ToString(CultureInfo.InvariantCulture)} item(s) could not be converted automatically")
             .ToList();
 
         if (failureSummary.Count == 0)

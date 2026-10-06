@@ -123,7 +123,7 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
             {
                 var containingNamespace = methodSymbol.ContainingType?.ContainingNamespace?.ToDisplayString();
                 // Only return false if we positively know it's NOT MSTest
-                if (containingNamespace != null && !containingNamespace.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting"))
+                if (containingNamespace != null && !containingNamespace.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting", StringComparison.Ordinal))
                 {
                     return false;
                 }
@@ -788,7 +788,7 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
 
     protected override bool IsFrameworkNamespace(string? ns)
     {
-        return ns != null && ns.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting");
+        return ns != null && ns.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting", StringComparison.Ordinal);
     }
 
     protected override bool ShouldRemoveAttribute(AttributeSyntax node)

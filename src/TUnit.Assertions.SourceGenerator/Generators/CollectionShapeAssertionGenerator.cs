@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -98,7 +99,7 @@ public sealed class CollectionShapeAssertionGenerator : IIncrementalGenerator
             }
 
             var typeParamNames = source.TypeParameters.Select(t => (object)t.Name).ToArray();
-            var shapeType = string.Format(row.ShapeFormat, typeParamNames);
+            var shapeType = string.Format(CultureInfo.InvariantCulture, row.ShapeFormat, typeParamNames);
             var receiver = $"{wrapperOpen}<{shapeType}>";
             var sourceClosed = source.ToDisplayString(Fq);
 
@@ -106,7 +107,7 @@ public sealed class CollectionShapeAssertionGenerator : IIncrementalGenerator
             {
                 SeedKind.Ctor => $"new {sourceClosed}(source.Context)",
                 SeedKind.FromContext => $"{sourceClosed}.FromContext(source.Context)",
-                SeedKind.UpcastCtor => $"new {sourceClosed}(source.Context.MapPreservingPreWork<{string.Format(row.UpcastTargetFormat!, typeParamNames)}>(x => x))",
+                SeedKind.UpcastCtor => $"new {sourceClosed}(source.Context.MapPreservingPreWork<{string.Format(CultureInfo.InvariantCulture, row.UpcastTargetFormat!, typeParamNames)}>(x => x))",
                 _ => $"new {sourceClosed}(source.Context)",
             };
 
@@ -206,7 +207,7 @@ public sealed class CollectionShapeAssertionGenerator : IIncrementalGenerator
         var orp = method.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "OverloadResolutionPriorityAttribute");
         var orpLine = orp is { ConstructorArguments.Length: > 0 } && orp.ConstructorArguments[0].Value is int p && p != 0
-            ? $"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({p})]\n"
+            ? $"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({p.ToString(CultureInfo.InvariantCulture)})]\n"
             : "";
 
         var typeArgs = methodGenerics.Count > 0 ? $"<{string.Join(", ", methodGenerics)}>" : "";

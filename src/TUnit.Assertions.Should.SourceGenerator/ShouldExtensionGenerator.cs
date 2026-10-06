@@ -1,3 +1,4 @@
+using System.Globalization;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -758,7 +759,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     private static string GetMethodSignatureKey(IMethodSymbol method)
     {
         var sb = new StringBuilder(method.Name);
-        sb.Append('`').Append(method.Arity);
+        sb.Append('`').Append(method.Arity.ToString(CultureInfo.InvariantCulture));
         foreach (var parameter in method.Parameters)
         {
             sb.Append('|')
@@ -868,7 +869,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     {
         var sb = new StringBuilder(method.Name)
             .Append('|')
-            .Append(method.TypeParameters.Length);
+            .Append(method.TypeParameters.Length.ToString(CultureInfo.InvariantCulture));
 
         foreach (var parameter in method.Parameters)
         {
@@ -1353,7 +1354,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         var suffix = 0;
         while (!emittedHints.Add(hint))
         {
-            hint = $"{hintName}_{++suffix}.Generated.g.cs";
+            hint = $"{hintName}_{(++suffix).ToString(CultureInfo.InvariantCulture)}.Generated.g.cs";
         }
         ctx.AddSource(hint, sb.ToString());
     }
@@ -1457,7 +1458,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         var suffix = 0;
         while (!emittedHints.Add(hint))
         {
-            hint = $"{className}_{++suffix}.g.cs";
+            hint = $"{className}_{(++suffix).ToString(CultureInfo.InvariantCulture)}.g.cs";
         }
         ctx.AddSource(hint, sb.ToString());
     }
@@ -1586,7 +1587,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             .Append('|')
             .Append(method.ReturnTypeFullName)
             .Append('|')
-            .Append(method.MethodGenericParams.Length);
+            .Append(method.MethodGenericParams.Length.ToString(CultureInfo.InvariantCulture));
 
         foreach (var typeArg in method.ReturnTypeGenericArgs)
         {
@@ -1654,7 +1655,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         var sb = new StringBuilder(methodNameOverride ?? method.Name).Append('|');
         AppendTypeSignatureKey(sb, method.Parameters[0].Type, typeParameterOrdinals);
-        sb.Append('|').Append(method.TypeParameters.Length);
+        sb.Append('|').Append(method.TypeParameters.Length.ToString(CultureInfo.InvariantCulture));
 
         foreach (var parameter in method.Parameters.Skip(1))
         {
@@ -1675,11 +1676,11 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             case ITypeParameterSymbol typeParameter:
                 if (typeParameterOrdinals.TryGetValue(typeParameter, out var ordinal))
                 {
-                    sb.Append('!').Append(ordinal);
+                    sb.Append('!').Append(ordinal.ToString(CultureInfo.InvariantCulture));
                 }
                 else
                 {
-                    sb.Append('!').Append(typeParameter.Ordinal);
+                    sb.Append('!').Append(typeParameter.Ordinal.ToString(CultureInfo.InvariantCulture));
                 }
                 return;
 
@@ -1936,7 +1937,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         var suffix = 0;
         while (!emittedHints.Add(hint))
         {
-            hint = $"ShouldExtensions.Generated_{++suffix}.g.cs";
+            hint = $"ShouldExtensions.Generated_{(++suffix).ToString(CultureInfo.InvariantCulture)}.g.cs";
         }
 
         ctx.AddSource(hint, sb.ToString());
@@ -1958,7 +1959,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         sb.AppendLine();
         if (entry.Priority != 0)
         {
-            sb.AppendLine($"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({entry.Priority})]");
+            sb.AppendLine($"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({entry.Priority.ToString(CultureInfo.InvariantCulture)})]");
         }
         if (!string.IsNullOrEmpty(entry.RequiresUnreferencedCodeMessage))
         {
@@ -2163,7 +2164,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
                 var ctorArg = attr.ConstructorArguments[0];
                 if (ctorArg.Type is INamedTypeSymbol enumType && ctorArg.Value is int intValue)
                 {
-                    damAttr = $"[global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(({enumType.ToDisplayString(format)}){intValue})]";
+                    damAttr = $"[global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(({enumType.ToDisplayString(format)}){intValue.ToString(CultureInfo.InvariantCulture)})]";
                 }
                 break;
             }

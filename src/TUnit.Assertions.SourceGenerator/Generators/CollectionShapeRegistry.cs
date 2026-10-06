@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Generic;
 using System.Text;
 
@@ -68,7 +69,7 @@ internal static class CollectionShapeRegistry
             var nameArgs = arity == 2 ? new object[] { "TKey", "TValue" } : new object[] { "TInner" };
             var names = string.Join(", ", nameArgs);
             result[i] = new ItemShape(
-                Shape: string.Format(row.ShapeFormat, nameArgs),
+                Shape: string.Format(CultureInfo.InvariantCulture, row.ShapeFormat, nameArgs),
                 SourceClosed: $"{sourceFq}<{names}>",
                 Names: names,
                 DictConstraint: arity == 2 ? "\n        where TKey : notnull" : "",

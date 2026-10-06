@@ -752,7 +752,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
     protected override bool IsFrameworkAssertionNamespace(string namespaceName)
     {
         // Include NUnit.Framework.Legacy - ClassicAssert should be converted to TUnit assertions
-        return namespaceName == "NUnit.Framework" || namespaceName.StartsWith("NUnit.Framework.");
+        return namespaceName == "NUnit.Framework" || namespaceName.StartsWith("NUnit.Framework.", StringComparison.Ordinal);
     }
 
     protected override bool IsKnownAssertionTypeBySyntax(string targetType, string methodName)
