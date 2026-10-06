@@ -2,7 +2,8 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-  <!-- Per-TFM versions: the 10.x packages do not support net8.0/net9.0 consumers. -->
+  <!-- Per-TFM versions: the 10.x packages do not support net8.0/net9.0 consumers.
+       Any project (single- or multi-targeted) that builds for net8.0/net9.0 resolves the matching 8.x/9.x version. -->
   <PropertyGroup>
     <MvcTestingVersion>10.0.12</MvcTestingVersion>
     <LoggingVersion>10.0.12</LoggingVersion>
