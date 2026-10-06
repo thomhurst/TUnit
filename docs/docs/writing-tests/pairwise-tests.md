@@ -5,7 +5,7 @@ Pairwise testing (also known as *all-pairs* testing) is a well-known way to keep
 
 Most bugs are triggered by a single value or by the interaction of two parameters, so pairwise testing catches a large share of them with far fewer test cases.
 
-To use it, swap `[MatrixDataSource]` for `[PairwiseDataSource]`. The parameters are declared exactly as for matrix tests. Like `[MatrixDataSource]`, it can be applied to a test method (for its parameters) or to a test class (for its constructor parameters):
+To use it, swap `[MatrixDataSource]` for `[PairwiseDataSource]`. The parameters are declared exactly as for matrix tests:
 
 ```csharp
 using TUnit.Assertions;
@@ -165,6 +165,7 @@ Changing the parameter values (or their order) can change which test cases are g
 
 ## Limitations
 
+- Like `[MatrixDataSource]`, `[PairwiseDataSource]` only supports test method parameters. It can't be used for class constructor parameters.
 - Pairwise coverage only guarantees that every *pair* of values is tested. It does not try to cover combinations of three or more values.
 
 ## Algorithm
