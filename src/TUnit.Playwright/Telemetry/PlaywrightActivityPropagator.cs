@@ -7,8 +7,7 @@ namespace TUnit.Playwright.Telemetry;
 
 /// <summary>
 /// Injects W3C <c>traceparent</c>/<c>baggage</c> headers from <see cref="Activity.Current"/>
-/// into a Playwright <see cref="Microsoft.Playwright.BrowserNewContextOptions.ExtraHTTPHeaders"/>
-/// dictionary. Pre-existing keys in the target are preserved.
+/// into a header dictionary for Playwright requests. Pre-existing keys in the target are preserved.
 /// </summary>
 internal static class PlaywrightActivityPropagator
 {
