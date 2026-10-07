@@ -105,9 +105,9 @@ public class CombinedDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
                 }
             }
 
-            // Rule 3: Warn if mixing CombinedDataSources with MatrixDataSource
-            var hasMatrixDataSource = attributes.Any(x => x.IsMatrixDataSourceAttribute(context.Compilation));
-            if (hasMatrixDataSource)
+            // Rule 3: Warn if mixing CombinedDataSources with MatrixDataSource or PairwiseDataSource
+            var hasMatrixValuesDataSource = attributes.Any(x => x.IsMatrixValuesDataSourceAttribute(context.Compilation));
+            if (hasMatrixValuesDataSource)
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.CombinedDataSourceConflictWithMatrix,

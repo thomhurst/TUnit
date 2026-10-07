@@ -1,7 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using TUnit.Core.Enums;
-using TUnit.Core.Extensions;
-using TUnit.Core.Helpers;
+﻿using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -16,6 +13,10 @@ namespace TUnit.Core;
 /// </para>
 /// <para>
 /// Use <see cref="MatrixExclusionAttribute"/> on the test method to exclude specific combinations.
+/// </para>
+/// <para>
+/// When the full Cartesian product is too large, consider <see cref="PairwiseDataSourceAttribute"/>,
+/// which uses the same parameter attributes but only guarantees that every pair of values is covered.
 /// </para>
 /// </remarks>
 /// <example>
@@ -40,50 +41,13 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
 {
     protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        var parameterInformation = dataGeneratorMetadata
-            .MembersToGenerate
-            .OfType<ParameterMetadata>()
-            .ToArray();
-
-        if (parameterInformation.Length != dataGeneratorMetadata.MembersToGenerate.Length
-            || parameterInformation.Length is 0)
-        {
-            throw new Exception("[MatrixDataSource] only supports parameterised tests");
-        }
-
-        if (dataGeneratorMetadata.TestInformation == null)
-        {
-            throw new InvalidOperationException("MatrixDataSource requires test information but none is available. This may occur during static property initialization.");
-        }
-
-        var testInformation = dataGeneratorMetadata.TestInformation;
-
-        var classType = testInformation.Class.Type;
-
-
-        var exclusions = GetExclusions(dataGeneratorMetadata.Type == DataGeneratorType.TestParameters
-            ? dataGeneratorMetadata.TestInformation.GetCustomAttributes()
-            : classType.GetCustomAttributesSafe());
-
-        var valueSets = new IReadOnlyList<object?>[parameterInformation.Length];
-        for (var i = 0; i < parameterInformation.Length; i++)
-        {
-            valueSets[i] = GetAllArguments(dataGeneratorMetadata, parameterInformation[i]);
-        }
+        var parameterInformation = MatrixParameterValues.GetParameters(dataGeneratorMetadata, "MatrixDataSource");
+        var exclusions = MatrixParameterValues.GetExclusions(dataGeneratorMetadata);
+        var valueSets = MatrixParameterValues.GetValueSets(dataGeneratorMetadata, parameterInformation);
 
         foreach (var rowArray in CartesianProductHelper.GetCartesianProduct(valueSets))
         {
-            var excluded = false;
-            foreach (var exclusion in exclusions)
-            {
-                if (IsExcluded(exclusion, rowArray))
-                {
-                    excluded = true;
-                    break;
-                }
-            }
-
-            if (excluded)
+            if (MatrixParameterValues.IsExcluded(exclusions, rowArray))
             {
                 continue;
             }
@@ -91,160 +55,4 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
             yield return () => rowArray;
         }
     }
-
-    private bool IsExcluded(object?[] exclusion, object?[] rowArray)
-    {
-        if (exclusion.Length != rowArray.Length)
-        {
-            return false;
-        }
-
-        for (var i = 0; i < exclusion.Length; i++)
-        {
-            var exclusionValue = exclusion[i];
-            var rowValue = rowArray[i];
-
-            // Handle enum to underlying type conversion for both values
-            if (exclusionValue != null && exclusionValue.GetType().IsEnum)
-            {
-                exclusionValue = Convert.ChangeType(exclusionValue, Enum.GetUnderlyingType(exclusionValue.GetType()));
-            }
-
-            if (rowValue != null && rowValue.GetType().IsEnum)
-            {
-                rowValue = Convert.ChangeType(rowValue, Enum.GetUnderlyingType(rowValue.GetType()));
-            }
-
-            if (!Equals(exclusionValue, rowValue))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static object?[][] GetExclusions(IEnumerable<Attribute> attributes)
-    {
-        List<object?[]>? exclusions = null;
-
-        foreach (var attribute in attributes)
-        {
-            if (attribute is MatrixExclusionAttribute exclusionAttribute)
-            {
-                (exclusions ??= []).Add(exclusionAttribute.Objects);
-            }
-        }
-
-        return exclusions is null ? [] : [.. exclusions];
-    }
-
-    private IReadOnlyList<object?> GetAllArguments(DataGeneratorMetadata dataGeneratorMetadata,
-        ParameterMetadata sourceGeneratedParameterInformation)
-    {
-        // Get MatrixAttribute on this parameter
-        // Prefer cached attributes from source generator for AOT compatibility
-        MatrixAttribute? matrixAttribute;
-
-        if (sourceGeneratedParameterInformation.CachedDataSourceAttributes != null)
-        {
-            // Source-generated mode: use cached attributes (no reflection!)
-            matrixAttribute = sourceGeneratedParameterInformation.CachedDataSourceAttributes
-                .OfType<MatrixAttribute>()
-                .FirstOrDefault();
-        }
-        else
-        {
-            // Reflection mode: fall back to runtime attribute discovery
-            if (sourceGeneratedParameterInformation.ReflectionInfo == null)
-            {
-                throw new InvalidOperationException($"Parameter reflection information is not available for parameter '{sourceGeneratedParameterInformation.Name}'. This typically occurs when using instance method data sources which are not supported at compile time.");
-            }
-
-            matrixAttribute = sourceGeneratedParameterInformation.ReflectionInfo.GetCustomAttributesSafe()
-                .OfType<MatrixAttribute>()
-                .FirstOrDefault();
-        }
-
-        // Check if this is an instance data attribute and we don't have an instance
-        if (matrixAttribute is IAccessesInstanceData && dataGeneratorMetadata.TestClassInstance == null)
-        {
-            var className = dataGeneratorMetadata.TestInformation?.Class.Type.Name ?? "Unknown";
-            if (dataGeneratorMetadata.TestInformation?.Class.Type.IsGenericTypeDefinition ?? false)
-            {
-                throw new InvalidOperationException(
-                    $"Cannot use MatrixInstanceMethod attribute in generic class '{className}' when the generic type parameters " +
-                    $"must be inferred from the matrix values. This creates a circular dependency: " +
-                    $"the instance is needed to get the matrix values, but the generic types (which come from the matrix values) " +
-                    $"are needed to create the instance. Consider using static methods for matrix data sources in generic classes, " +
-                    $"or provide the generic type arguments explicitly using [Arguments] or other data source attributes.");
-            }
-
-            throw new InvalidOperationException(
-                $"Instance is required for MatrixInstanceMethod but no instance is available. " +
-                $"This typically happens when the test class requires data that hasn't been expanded yet.");
-        }
-
-        var objects = matrixAttribute?.GetObjects(dataGeneratorMetadata);
-
-        if (matrixAttribute is not null && objects is { Length: > 0 })
-        {
-            return matrixAttribute.Excluding is not null
-                       ? objects.Except(matrixAttribute.Excluding).ToArray()
-                       : objects;
-        }
-
-        var type = sourceGeneratedParameterInformation.Type;
-
-        // Use the IsNullable property for AOT-safe nullable detection
-        Type? underlyingType = null;
-        var isNullable = sourceGeneratedParameterInformation.IsNullable;
-
-        if (isNullable)
-        {
-            // Try to get underlying type, but if it fails in AOT, we'll handle it
-            underlyingType = Nullable.GetUnderlyingType(type);
-
-            // If Nullable.GetUnderlyingType failed but we know it's nullable from metadata,
-            // check if it's a generic type with one type argument
-            if (underlyingType == null && type.IsGenericType && type.GetGenericArguments().Length == 1)
-            {
-                underlyingType = type.GetGenericArguments()[0];
-            }
-        }
-
-        var resolvedType = underlyingType ?? type;
-
-        if (resolvedType == typeof(bool))
-        {
-            if (matrixAttribute?.Excluding is not null)
-            {
-                throw new InvalidOperationException("Do not exclude values from a boolean.");
-            }
-
-            return isNullable ? [true, false, null] : [true, false];
-        }
-
-        if (resolvedType.IsEnum)
-        {
-            var enumValues = Enum.GetValuesAsUnderlyingType(resolvedType)
-                                 .Cast<object?>();
-
-            if (isNullable)
-            {
-                enumValues = enumValues.Append(null);
-                if (matrixAttribute?.Excluding?.Any(x => x is null) ?? false)
-                {
-                    throw new InvalidOperationException("Do not exclude null from a nullable enum - instead use the enum directly");
-                }
-            }
-
-            return enumValues
-               .Except(matrixAttribute?.Excluding?.Select(e => Convert.ChangeType(e, Enum.GetUnderlyingType(resolvedType))) ?? [])
-                .ToArray();
-        }
-
-        throw new ArgumentNullException($"No MatrixAttribute found for parameter '{sourceGeneratedParameterInformation.Name}' and the parameter type '{resolvedType.Name}' cannot be auto-generated. Only bool and enum types support auto-generation.");
-    }
-
 }

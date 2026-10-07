@@ -11,6 +11,7 @@ TUnit offers several ways to provide data to your tests. Use this guide to pick 
 | Shared object with lifecycle | `[ClassDataSource<T>]` | [Class Data Source](class-data-source.md) |
 | Reusable data rows | `[TestDataRow<T>]` | [Test Data Row](test-data-row.md) |
 | All parameter combinations | `[MatrixDataSource]` | [Matrix Tests](matrix-tests.md) |
+| Every pair of parameter values (fewer cases) | `[PairwiseDataSource]` | [Pairwise Tests](pairwise-tests.md) |
 | Multiple sources on one method | Combined attributes | [Combined Data Sources](combined-data-source.md) |
 | Hierarchical injection | Nested properties | [Nested Data Sources](nested-data-sources.md) |
 | Custom generic attributes | `[GenerateGenericTest(typeof(...))]` | [Generic Attributes](generic-attributes.md) |
@@ -78,4 +79,5 @@ public async Task Multiply(
 - **`[MethodDataSource]`** is best for computed or complex data.
 - **`[ClassDataSource<T>]`** manages object lifecycles (initialization, disposal, sharing across tests).
 - **`[MatrixDataSource]`** generates the Cartesian product of all `[Matrix]` parameter values.
+- **`[PairwiseDataSource]`** uses the same `[Matrix]` parameters but only covers every pair of values, which is far fewer test cases when there are many parameters.
 - Attributes can be combined on a single method — see [Combined Data Sources](combined-data-source.md).
