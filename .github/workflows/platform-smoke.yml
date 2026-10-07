@@ -151,7 +151,7 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/artifacts/platform-smoke/WASI"
           wasmtime run -S http --dir . dotnet.wasm TUnit.PlatformSmoke \
             2>&1 | tee "$GITHUB_WORKSPACE/artifacts/platform-smoke/WASI/run.log"
-      - uses: actions/upload-artifact@v7.0.1
+      - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: platform-smoke-${{ matrix.platform }}

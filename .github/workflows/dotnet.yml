@@ -175,7 +175,7 @@ jobs:
         run: ./scripts/Verify-DocSnippets.ps1 -PackagesPath . -Version $env:PackageVersion
 
       - name: Upload Diagnostic Logs
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: TestingPlatformDiagnosticLogs${{matrix.os}}
@@ -185,7 +185,7 @@ jobs:
       # The .Net4_7 snapshots can only be produced on Windows, so contributors on Linux/macOS
       # take them from this artifact.
       - name: Upload Received Snapshots
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         if: failure()
         with:
           name: ReceivedSnapshots-${{matrix.os}}
@@ -195,14 +195,14 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload Hang Dumps
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: HangDump${{matrix.os}}
           path: '**/hangdump*'
 
       - name: NuGet Packages Artifacts
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: 'NuGetPackages-${{matrix.os}}'
