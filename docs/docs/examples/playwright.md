@@ -217,6 +217,11 @@ public class DashboardTests : PageTest
 
 Requests to other origins, such as web fonts or third-party APIs, never receive the headers. `traceparent` is not a CORS-safelisted header, so sending it to a third-party origin causes a CORS preflight that most servers reject, and it also leaks the test's trace id.
 
-The headers are added by a context route. Playwright disables its HTTP cache for contexts with routes. Routes you add later run before TUnit's route: call `route.FallbackAsync()` instead of `route.ContinueAsync()` in them to keep the headers.
+The headers are added by a context route, which has these limits:
+
+- Playwright disables its HTTP cache for contexts with routes. Set `PropagateTraceContext` to `false` to keep the cache.
+- Routes you add later run before TUnit's route. Call `route.FallbackAsync()` instead of `route.ContinueAsync()` in them to keep the headers.
+- Context routes do not see WebSocket traffic or requests handled by a service worker, so those requests get no headers. To route requests that a service worker would handle, set `ServiceWorkers = ServiceWorkerPolicy.Block` in the context options.
+- When a request to an origin under test is redirected, Playwright keeps the headers on the redirected request, even if it goes to another origin.
 
 For full Playwright API details, see the [Playwright for .NET documentation](https://playwright.dev/dotnet/).

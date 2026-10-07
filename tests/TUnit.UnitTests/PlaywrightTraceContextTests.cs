@@ -157,6 +157,36 @@ public class PlaywrightTraceContextTests
         await Assert.That(FallbackHeaders(route)["traceparent"]).Contains(activity.TraceId.ToHexString());
     }
 
+    [Test]
+    public async Task ContextIsClosedWhenRouteRegistrationFails()
+    {
+        using var activity = new Activity("trace-context-test").SetIdFormat(ActivityIdFormat.W3C).Start();
+        var (browser, context) = CreateBrowser();
+        context.WhenForAnyArgs(c => c.RouteAsync(default(Regex)!, default(Func<IRoute, Task>)!))
+            .Do(_ => throw new PlaywrightException("route failed"));
+        var test = new OriginsBrowserTest(["https://app.test"]) { Browser = browser };
+
+        await Assert.That(() => test.NewContext(new BrowserNewContextOptions())).Throws<PlaywrightException>();
+        await context.Received(1).CloseAsync();
+    }
+
+    [Test]
+    public async Task ContextFixtureClosesContextWhenRouteRegistrationFails()
+    {
+        using var activity = new Activity("trace-context-test").SetIdFormat(ActivityIdFormat.W3C).Start();
+        var (browser, context) = CreateBrowser();
+        context.WhenForAnyArgs(c => c.RouteAsync(default(Regex)!, default(Func<IRoute, Task>)!))
+            .Do(_ => throw new PlaywrightException("route failed"));
+        var fixture = new OriginsContextFixture
+        {
+            BrowserFixture = new BrowserFixture { Browser = browser, PlaywrightFixture = null! }
+        };
+
+        await Assert.That(fixture.InitializeAsync).Throws<PlaywrightException>();
+        await context.Received(1).CloseAsync();
+        await Assert.That(fixture.Context).IsNull();
+    }
+
     private static (IBrowser Browser, IBrowserContext Context) CreateBrowser()
     {
         var browser = Substitute.For<IBrowser>();

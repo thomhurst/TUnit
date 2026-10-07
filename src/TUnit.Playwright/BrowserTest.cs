@@ -37,8 +37,12 @@ public class BrowserTest : PlaywrightTest
     /// </summary>
     /// <remarks>
     /// Headers are added by a context route, which disables Playwright's HTTP cache for
-    /// that context. Routes you register later run first; call <c>route.FallbackAsync()</c>
-    /// rather than <c>route.ContinueAsync()</c> in them to keep the headers.
+    /// that context; set <see cref="PropagateTraceContext"/> to <c>false</c> to keep the cache.
+    /// Routes you register later run first; call <c>route.FallbackAsync()</c> rather than
+    /// <c>route.ContinueAsync()</c> in them to keep the headers. Context routes do not see
+    /// WebSocket traffic or requests handled by a service worker, so those requests get no
+    /// headers. Playwright keeps the headers when a routed request is redirected, including
+    /// redirects to another origin.
     /// </remarks>
     public virtual IReadOnlyList<string>? TraceContextOrigins => null;
 

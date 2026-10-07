@@ -46,8 +46,12 @@ public class ContextFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptI
     /// </summary>
     /// <remarks>
     /// Headers are added by a context route, which disables Playwright's HTTP cache for
-    /// that context. Routes you register later run first; call <c>route.FallbackAsync()</c>
-    /// rather than <c>route.ContinueAsync()</c> in them to keep the headers.
+    /// that context; set <see cref="PropagateTraceContext"/> to <c>false</c> to keep the cache.
+    /// Routes you register later run first; call <c>route.FallbackAsync()</c> rather than
+    /// <c>route.ContinueAsync()</c> in them to keep the headers. Context routes do not see
+    /// WebSocket traffic or requests handled by a service worker, so those requests get no
+    /// headers. Playwright keeps the headers when a routed request is redirected, including
+    /// redirects to another origin.
     /// </remarks>
     protected virtual IReadOnlyList<string>? TraceContextOrigins => null;
 
@@ -60,7 +64,19 @@ public class ContextFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptI
         _context = await BrowserFixture.Browser.NewContextAsync(options).ConfigureAwait(false);
         if (traceContext is not null)
         {
-            await traceContext.RegisterAsync(_context).ConfigureAwait(false);
+            try
+            {
+                await traceContext.RegisterAsync(_context).ConfigureAwait(false);
+            }
+            catch
+            {
+                if (Interlocked.Exchange(ref _context, null) is { } context)
+                {
+                    await context.CloseAsync().ConfigureAwait(false);
+                }
+
+                throw;
+            }
         }
 
         // Option-only recording can span shared fixture lifetimes and has no single test owner.
