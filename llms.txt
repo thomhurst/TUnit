@@ -128,6 +128,7 @@
 - [Verification](/docs/writing-tests/mocking/verification.md): Verification uses the same methods as setup — the chain method (.WasCalled(), .WasNeverCalled()) makes it a verification instead of a setup.
 - [Nested Data Sources with Initialization](/docs/writing-tests/nested-data-sources.md): When writing integration tests, you often need complex test fixtures that depend on other initialized resources. TUnit's nested data source initialization feature makes this elegant and automatic.
 - [Test Ordering & Dependencies](/docs/writing-tests/ordering.md): Ordering with [Order]
+- [Pairwise Tests](/docs/writing-tests/pairwise-tests.md): Matrix tests run every combination of parameter values, so the number of test cases grows exponentially with the number of parameters.
 - [Property Injection](/docs/writing-tests/property-injection.md): TUnit's AOT-compatible property injection system makes it easy to initialize properties on your test class with compile-time safety and excellent performance.
 - [Skipping Tests](/docs/writing-tests/skip.md): If you want to simply skip a test, just place a [Skip(reason)] attribute on your test with an explanation of why you're skipping it.
 - [Test Context](/docs/writing-tests/test-context.md): All tests have a TestContext object available to them.

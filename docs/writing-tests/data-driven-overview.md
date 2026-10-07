@@ -4,17 +4,18 @@ TUnit offers several ways to provide data to your tests. Use this guide to pick 
 
 ## Decision Table[​](#decision-table "Direct link to Decision Table")
 
-| Scenario                            | Approach                             | Page                                                                 |
-| ----------------------------------- | ------------------------------------ | -------------------------------------------------------------------- |
-| Fixed inline values                 | `[Arguments(...)]`                   | [Arguments](/docs/writing-tests/arguments.md)                        |
-| Data from a method                  | `[MethodDataSource]`                 | [Method Data Sources](/docs/writing-tests/method-data-source.md)     |
-| Shared object with lifecycle        | `[ClassDataSource<T>]`               | [Class Data Source](/docs/writing-tests/class-data-source.md)        |
-| Reusable data rows                  | `[TestDataRow<T>]`                   | [Test Data Row](/docs/writing-tests/test-data-row.md)                |
-| All parameter combinations          | `[MatrixDataSource]`                 | [Matrix Tests](/docs/writing-tests/matrix-tests.md)                  |
-| Multiple sources on one method      | Combined attributes                  | [Combined Data Sources](/docs/writing-tests/combined-data-source.md) |
-| Hierarchical injection              | Nested properties                    | [Nested Data Sources](/docs/writing-tests/nested-data-sources.md)    |
-| Custom generic attributes           | `[GenerateGenericTest(typeof(...))]` | [Generic Attributes](/docs/writing-tests/generic-attributes.md)      |
-| Huge data set (reduce IDE overhead) | `DeferEnumeration = true`            | [Defer Enumeration](/docs/writing-tests/defer-enumeration.md)        |
+| Scenario                                     | Approach                             | Page                                                                 |
+| -------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------- |
+| Fixed inline values                          | `[Arguments(...)]`                   | [Arguments](/docs/writing-tests/arguments.md)                        |
+| Data from a method                           | `[MethodDataSource]`                 | [Method Data Sources](/docs/writing-tests/method-data-source.md)     |
+| Shared object with lifecycle                 | `[ClassDataSource<T>]`               | [Class Data Source](/docs/writing-tests/class-data-source.md)        |
+| Reusable data rows                           | `[TestDataRow<T>]`                   | [Test Data Row](/docs/writing-tests/test-data-row.md)                |
+| All parameter combinations                   | `[MatrixDataSource]`                 | [Matrix Tests](/docs/writing-tests/matrix-tests.md)                  |
+| Every pair of parameter values (fewer cases) | `[PairwiseDataSource]`               | [Pairwise Tests](/docs/writing-tests/pairwise-tests.md)              |
+| Multiple sources on one method               | Combined attributes                  | [Combined Data Sources](/docs/writing-tests/combined-data-source.md) |
+| Hierarchical injection                       | Nested properties                    | [Nested Data Sources](/docs/writing-tests/nested-data-sources.md)    |
+| Custom generic attributes                    | `[GenerateGenericTest(typeof(...))]` | [Generic Attributes](/docs/writing-tests/generic-attributes.md)      |
+| Huge data set (reduce IDE overhead)          | `DeferEnumeration = true`            | [Defer Enumeration](/docs/writing-tests/defer-enumeration.md)        |
 
 ## Quick Examples[​](#quick-examples "Direct link to Quick Examples")
 
@@ -108,4 +109,5 @@ public async Task Multiply(
 * **`[MethodDataSource]`** is best for computed or complex data.
 * **`[ClassDataSource<T>]`** manages object lifecycles (initialization, disposal, sharing across tests).
 * **`[MatrixDataSource]`** generates the Cartesian product of all `[Matrix]` parameter values.
+* **`[PairwiseDataSource]`** uses the same `[Matrix]` parameters but only covers every pair of values, which is far fewer test cases when there are many parameters.
 * Attributes can be combined on a single method — see [Combined Data Sources](/docs/writing-tests/combined-data-source.md).

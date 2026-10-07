@@ -4,7 +4,7 @@ The Matrix data source is a way to specify different arguments per parameter, an
 
 warning
 
-As your number of arguments and/or parameters increase, the number of test cases will grow exponentially.<br /><!-- -->For example, 3 parameters with 10 values each will generate 1,000 test cases (10 × 10 × 10).<br /><!-- -->Use with caution to avoid very large test suites.
+As your number of arguments and/or parameters increase, the number of test cases will grow exponentially.<br /><!-- -->For example, 3 parameters with 10 values each will generate 1,000 test cases (10 × 10 × 10).<br /><!-- -->Use with caution to avoid very large test suites. If you don't need every combination, [Pairwise Tests](/docs/writing-tests/pairwise-tests.md) use the same `[Matrix]` parameter attributes but only generate enough test cases to cover every pair of values.
 
 For our arguments, we'll add a `[Matrix]` attribute. Instead of this being added to the test method, it's added to the parameters themselves.
 
