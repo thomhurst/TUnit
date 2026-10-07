@@ -45,12 +45,17 @@ public class MatrixDataSourceCodeFixProvider : CodeFixProvider
                     equivalenceKey: MatrixTitle),
                 diagnostic);
 
-            context.RegisterCodeFix(
-                CodeAction.Create(
-                    title: PairwiseTitle,
-                    createChangedDocument: c => AddDataSourceAsync(context.Document, target, "PairwiseDataSource", c),
-                    equivalenceKey: PairwiseTitle),
-                diagnostic);
+            // [PairwiseDataSource] implements IAccessesInstanceData, which TestBuilder rejects for
+            // class (constructor) data sources, so only offer it for test methods.
+            if (target is MethodDeclarationSyntax)
+            {
+                context.RegisterCodeFix(
+                    CodeAction.Create(
+                        title: PairwiseTitle,
+                        createChangedDocument: c => AddDataSourceAsync(context.Document, target, "PairwiseDataSource", c),
+                        equivalenceKey: PairwiseTitle),
+                    diagnostic);
+            }
         }
     }
 

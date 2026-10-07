@@ -104,7 +104,7 @@ This generates 17 test cases instead of 270.
 
 ## Exclusions
 
-`[MatrixExclusion(...)]` works with `[PairwiseDataSource]` as well. Exclusions are applied *while* the test cases are generated, not by filtering afterwards, so every pair of values that can still appear in an allowed test case remains covered.
+`[MatrixExclusion(...)]` works with `[PairwiseDataSource]` as well. Exclusions are applied *while* the test cases are generated, not by filtering afterwards, so every pair of values that can still appear in an allowed test case remains covered. Pairs that no allowed test case can contain (because your exclusions rule out every row with that pair) are skipped silently, so over-excluding produces fewer test cases rather than an error.
 
 ```csharp
 using TUnit.Assertions;

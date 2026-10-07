@@ -121,4 +121,34 @@ public class MatrixDataSourceCodeFixProviderTests
             test => test.CodeActionEquivalenceKey = "Add [MatrixDataSource]"
         );
     }
+
+    [Test]
+    public async Task Does_Not_Offer_PairwiseDataSource_On_Class()
+    {
+        const string source = """
+            using TUnit.Core;
+
+            public class {|#0:MyClass|}
+            {
+                public MyClass(
+                    [Matrix(1, 2)] int value,
+                    [Matrix(true, false)] bool flag)
+                {
+                }
+
+                [Test]
+                public void MyTest()
+                {
+                }
+            }
+            """;
+
+        // Fixed code identical to the source asserts that no matching code action is offered.
+        await Verifier.VerifyCodeFixAsync(
+            source,
+            Verifier.Diagnostic(Rules.MatrixDataSourceAttributeRequired).WithLocation(0),
+            source,
+            test => test.CodeActionEquivalenceKey = "Add [PairwiseDataSource]"
+        );
+    }
 }
