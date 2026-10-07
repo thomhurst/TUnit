@@ -305,4 +305,45 @@ public class LoginPageTests : PageTest
 * `width` - viewport width used for the recording, in pixels. Defaults to `1280`.
 * `height` - viewport height used for the recording, in pixels. Defaults to `1400`.
 
+## Trace Context Propagation[​](#trace-context-propagation "Direct link to Trace Context Propagation")
+
+TUnit can add W3C `traceparent` and `baggage` headers from the current test to the requests your page sends to the application under test. This lets the application's telemetry be correlated with the test that triggered it.
+
+Headers are sent only to the origins under test. By default this is the origin of `BaseURL` in the context options. If no base URL is set, no headers are sent. List the origins explicitly with `TraceContextOrigins`:
+
+```
+public class DashboardTests : PageTest
+
+{
+
+    public override IReadOnlyList<string>? TraceContextOrigins => ["https://localhost:7217"];
+
+
+
+    [Test]
+
+    public async Task Dashboard_Loads()
+
+    {
+
+        await Page.GotoAsync("https://localhost:7217/dashboard");
+
+        await Assert.That(await Page.TitleAsync()).IsEqualTo("Dashboard");
+
+    }
+
+}
+```
+
+`ContextFixture` has the same property as a `protected virtual` member. Override `PropagateTraceContext` to return `false` to disable propagation.
+
+Requests to other origins, such as web fonts or third-party APIs, never receive the headers. `traceparent` is not a CORS-safelisted header, so sending it to a third-party origin causes a CORS preflight that most servers reject, and it also leaks the test's trace id.
+
+The headers are added by a context route, which has these limits:
+
+* Playwright disables its HTTP cache for contexts with routes. Set `PropagateTraceContext` to `false` to keep the cache.
+* Routes you add later run before TUnit's route. Call `route.FallbackAsync()` instead of `route.ContinueAsync()` in them to keep the headers.
+* Context routes do not see WebSocket traffic or requests handled by a service worker, so those requests get no headers. To route requests that a service worker would handle, set `ServiceWorkers = ServiceWorkerPolicy.Block` in the context options.
+* When a request to an origin under test is redirected, Playwright keeps the headers on the redirected request, even if it goes to another origin.
+
 For full Playwright API details, see the [Playwright for .NET documentation](https://playwright.dev/dotnet/).
