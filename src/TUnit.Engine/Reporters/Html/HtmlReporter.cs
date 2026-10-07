@@ -729,7 +729,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             var timingProperty = testNode.Properties.AsEnumerable()
                 .OfType<TimingProperty>()
                 .FirstOrDefault();
-            if (timingProperty?.GlobalTiming is { } globalTiming)
+            // Tests that never started (e.g. skipped before execution) carry a default
+            // TimingInfo whose StartTime is 0001-01-01; including it would stretch the
+            // run duration back two millennia.
+            if (timingProperty?.GlobalTiming is { } globalTiming && globalTiming.StartTime != default)
             {
                 var startMs = globalTiming.StartTime.ToUnixTimeMilliseconds();
                 var endMs = (globalTiming.StartTime + globalTiming.Duration).ToUnixTimeMilliseconds();
@@ -938,7 +941,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         var (status, exception, skipReason) = ExtractStatus(stateProperty);
 
         var durationMs = timingProperty?.GlobalTiming.Duration.TotalMilliseconds ?? 0;
-        var startTime = timingProperty?.GlobalTiming.StartTime;
+        var startTime = timingProperty?.GlobalTiming.StartTime is { } started && started != default ? started : (DateTimeOffset?)null;
         var endTime = startTime.HasValue ? startTime.Value + timingProperty!.GlobalTiming.Duration : (DateTimeOffset?)null;
 
         return new ReportTestResult

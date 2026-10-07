@@ -575,6 +575,48 @@ public class HtmlReporterTests
     }
 
     [Test]
+    public async Task BuildReportData_Ignores_Default_Start_Timestamps()
+    {
+        // #6942: tests that never started (e.g. skipped before execution) carry a default
+        // TimingInfo whose StartTime is 0001-01-01. Neither the run duration nor the per-test
+        // StartTime may be derived from it, or the report shows ~17,757,303 hours.
+        var reporter = new HtmlReporter(new MockExtension());
+
+        var start = DateTimeOffset.UtcNow;
+        var ranNode = CreateTimedNode("ran-1", "RanTest", PassedTestNodeStateProperty.CachedInstance,
+            new TimingInfo(start, start.AddMilliseconds(250), TimeSpan.FromMilliseconds(250)));
+        var skippedNode = CreateTimedNode("skipped-1", "SkippedTest", new SkippedTestNodeStateProperty("skipped"),
+            new TimingInfo());
+
+        await reporter.ConsumeAsync(reporter, new TestNodeUpdateMessage(new SessionUid("s"), ranNode), CancellationToken.None);
+        await reporter.ConsumeAsync(reporter, new TestNodeUpdateMessage(new SessionUid("s"), skippedNode), CancellationToken.None);
+
+        var data = reporter.BuildReportData();
+
+        data.TotalDurationMs.ShouldBe(250d, tolerance: 1d);
+        var skipped = data.Groups.SelectMany(g => g.Tests).Single(t => t.Id == "skipped-1");
+        skipped.StartTime.ShouldBeNull();
+        skipped.EndTime.ShouldBeNull();
+    }
+
+    private static TestNode CreateTimedNode(string uid, string methodName, IProperty state, TimingInfo timing) => new()
+    {
+        Uid = new TestNodeUid(uid),
+        DisplayName = methodName,
+        Properties = new PropertyBag(
+            state,
+            new TestMethodIdentifierProperty(
+                @namespace: "Sample",
+                assemblyFullName: "TestAssembly",
+                typeName: "TimedTests",
+                methodName: methodName,
+                parameterTypeFullNames: [],
+                returnTypeFullName: "System.Void",
+                methodArity: 0),
+            new TimingProperty(timing))
+    };
+
+    [Test]
     public void FilterEngineNotices_StripsTUnitPrefixedLines()
     {
         // Engine-emitted advisories ("[TUnit] External span cap reached…") are written

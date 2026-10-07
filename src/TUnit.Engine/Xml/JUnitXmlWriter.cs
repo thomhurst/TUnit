@@ -379,8 +379,9 @@ internal static class JUnitXmlWriter
             {
                 summary.TotalTime += durationValue;
 
-                // Track the earliest start time from actual test execution
-                if (timing.GlobalTiming.StartTime is { } startTime)
+                // Track the earliest start time from actual test execution; tests that never
+                // started carry a default (0001-01-01) start and must not drag it back
+                if (timing.GlobalTiming.StartTime is { } startTime && startTime != default)
                 {
                     if (earliestStartTime is null || startTime < earliestStartTime)
                     {
