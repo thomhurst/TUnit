@@ -4,7 +4,7 @@
 
 Last Updated
 
-This benchmark was automatically generated on **2026-10-07** from the latest CI run.
+This benchmark was automatically generated on **2026-10-08** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.401
 
@@ -14,12 +14,12 @@ Verifying mock method calls:
 
 | Library         | Mean          | Error        | StdDev       | Allocated |
 | --------------- | ------------- | ------------ | ------------ | --------- |
-| **TUnit.Mocks** | 427.66 ns     | 2.931 ns     | 2.598 ns     | 3024 B    |
-| Imposter        | 388.42 ns     | 7.538 ns     | 6.294 ns     | 4664 B    |
-| Mockolate       | 252.62 ns     | 3.752 ns     | 3.133 ns     | 2128 B    |
-| Moq             | 106,695.92 ns | 2,018.865 ns | 2,073.226 ns | 24340 B   |
-| NSubstitute     | 3,439.95 ns   | 67.806 ns    | 99.390 ns    | 10064 B   |
-| FakeItEasy      | 3,569.49 ns   | 37.126 ns    | 28.985 ns    | 10722 B   |
+| **TUnit.Mocks** | 768.30 ns     | 6.508 ns     | 6.088 ns     | 3024 B    |
+| Imposter        | 736.12 ns     | 13.541 ns    | 20.268 ns    | 4664 B    |
+| Mockolate       | 467.01 ns     | 4.227 ns     | 3.954 ns     | 2128 B    |
+| Moq             | 155,329.27 ns | 1,104.075 ns | 1,032.752 ns | 24338 B   |
+| NSubstitute     | 6,097.89 ns   | 15.238 ns    | 14.254 ns    | 10064 B   |
+| FakeItEasy      | 5,204.82 ns   | 19.489 ns    | 18.230 ns    | 10717 B   |
 
 <!-- -->
 
@@ -29,12 +29,12 @@ Verifying mock method calls:
 
 | Library         | Mean         | Error      | StdDev     | Allocated |
 | --------------- | ------------ | ---------- | ---------- | --------- |
-| **TUnit.Mocks** | 32.02 ns     | 0.399 ns   | 0.373 ns   | 320 B     |
-| Imposter        | 169.50 ns    | 3.085 ns   | 4.894 ns   | 2384 B    |
-| Mockolate       | 131.16 ns    | 2.378 ns   | 1.986 ns   | 1144 B    |
-| Moq             | 26,809.43 ns | 472.652 ns | 580.459 ns | 6925 B    |
-| NSubstitute     | 1,942.28 ns  | 37.612 ns  | 44.775 ns  | 7088 B    |
-| FakeItEasy      | 1,829.27 ns  | 11.595 ns  | 9.683 ns   | 5210 B    |
+| **TUnit.Mocks** | 62.15 ns     | 1.040 ns   | 0.973 ns   | 320 B     |
+| Imposter        | 370.76 ns    | 7.454 ns   | 10.925 ns  | 2384 B    |
+| Mockolate       | 258.68 ns    | 2.493 ns   | 2.332 ns   | 1144 B    |
+| Moq             | 38,021.40 ns | 368.205 ns | 344.419 ns | 6922 B    |
+| NSubstitute     | 3,135.65 ns  | 7.329 ns   | 6.120 ns   | 7088 B    |
+| FakeItEasy      | 2,511.28 ns  | 16.980 ns  | 15.052 ns  | 5209 B    |
 
 <!-- -->
 
@@ -42,14 +42,14 @@ Verifying mock method calls:
 
 ### Multiple[​](#multiple "Direct link to Multiple")
 
-| Library         | Mean          | Error        | StdDev       | Allocated |
-| --------------- | ------------- | ------------ | ------------ | --------- |
-| **TUnit.Mocks** | 754.96 ns     | 12.757 ns    | 11.309 ns    | 4512 B    |
-| Imposter        | 845.72 ns     | 16.799 ns    | 28.978 ns    | 11144 B   |
-| Mockolate       | 581.50 ns     | 6.184 ns     | 4.828 ns     | 5240 B    |
-| Moq             | 143,879.25 ns | 2,740.438 ns | 2,429.327 ns | 34698 B   |
-| NSubstitute     | 6,179.63 ns   | 78.650 ns    | 73.569 ns    | 16889 B   |
-| FakeItEasy      | 6,329.99 ns   | 58.820 ns    | 55.021 ns    | 19232 B   |
+| Library         | Mean          | Error        | StdDev     | Allocated |
+| --------------- | ------------- | ------------ | ---------- | --------- |
+| **TUnit.Mocks** | 1,281.85 ns   | 4.487 ns     | 4.197 ns   | 4512 B    |
+| Imposter        | 1,875.15 ns   | 29.236 ns    | 25.917 ns  | 11144 B   |
+| Mockolate       | 1,141.21 ns   | 5.660 ns     | 5.294 ns   | 5240 B    |
+| Moq             | 189,625.48 ns | 1,038.300 ns | 920.426 ns | 34584 B   |
+| NSubstitute     | 10,352.21 ns  | 44.790 ns    | 39.705 ns  | 16761 B   |
+| FakeItEasy      | 9,325.13 ns   | 76.169 ns    | 67.522 ns  | 19398 B   |
 
 <!-- -->
 
@@ -63,4 +63,4 @@ Methodology
 
 View the [mock benchmarks overview](/docs/benchmarks/mocks/.md) for methodology details and environment information.
 
-*Last generated: 2026-10-07T02:41:59.908Z*
+*Last generated: 2026-10-08T02:41:51.713Z*
