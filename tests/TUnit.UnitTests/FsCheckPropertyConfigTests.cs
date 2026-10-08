@@ -98,6 +98,10 @@ public class FsCheckPropertyConfigTests
     [Arguments("-12345,67891")]
     [Arguments("abc,67891")]
     [Arguments("12345;67891")]
+    [Arguments("(12345,67891")]
+    [Arguments("12345,67891)")]
+    [Arguments("((12345,67891))")]
+    [Arguments("(12345,67891))")]
     public async Task Replay_RejectsValuesFsCheckCannotReplay(string replay)
     {
         var executor = new FsCheckPropertyTestExecutor(new FsCheckPropertyAttribute { Replay = replay });

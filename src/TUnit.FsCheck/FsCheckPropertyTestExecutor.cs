@@ -130,7 +130,7 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
 
     /// <summary>
     /// Parses the values FsCheck reports on failure: "seed,gamma" (whole run) or "seed,gamma,size"
-    /// (failing step only), optionally in the parentheses FsCheck prints them in.
+    /// (failing step only), optionally in the one pair of parentheses FsCheck prints them in.
     /// </summary>
     /// <remarks>
     /// A seed alone is rejected rather than paired with a default gamma: FsCheck never reports a seed
@@ -138,7 +138,15 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
     /// </remarks>
     private static (ulong Seed, ulong Gamma, int? Size) ParseReplay(string replay)
     {
-        var parts = replay.Trim().Trim('(', ')').Split(',');
+        var value = replay.Trim();
+
+        // Strip only one enclosing pair. Any other parenthesis stays and fails the number parsing below.
+        if (value.Length >= 2 && value[0] == '(' && value[value.Length - 1] == ')')
+        {
+            value = value.Substring(1, value.Length - 2);
+        }
+
+        var parts = value.Split(',');
 
         if (parts.Length is 2 or 3
             && ulong.TryParse(parts[0].Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var seed)
