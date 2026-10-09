@@ -78,7 +78,7 @@
     <PackageVersion Include="Microsoft.Testing.Platform" Version="2.5.1" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.5.1" />
     <PackageVersion Include="Imposter" Version="0.2.5"/>
-    <PackageVersion Include="Mockolate" Version="3.5.2" />
+    <PackageVersion Include="Mockolate" Version="3.6.0" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="Moq" Version="4.21.0" />
     <PackageVersion Include="System.Threading.Channels" Version="9.0.0" />
