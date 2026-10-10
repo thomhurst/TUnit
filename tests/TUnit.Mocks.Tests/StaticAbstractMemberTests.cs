@@ -54,6 +54,21 @@ public interface IAmazonService : IServiceConfig
         ClientConfig clientConfig);
 }
 
+public class StaticAbstractClientFactory
+{
+    public virtual IAmazonService? Client => throw new InvalidOperationException("base should not run");
+
+    public virtual IAmazonService? Create() => throw new InvalidOperationException("base should not run");
+}
+
+/// <summary>Claims it can provide any type, returning an object that is not an <see cref="IAmazonService"/>.</summary>
+public class CatchAllDefaultValueProvider : IDefaultValueProvider
+{
+    public bool CanProvide(Type type) => true;
+
+    public object? GetDefaultValue(Type type) => new object();
+}
+
 /// <summary>
 /// Integration tests for static abstract interface member mock support.
 /// Uses the generated bridge interface (_Mockable) because C# CS8920 prevents
@@ -267,5 +282,28 @@ public class StaticAbstractMemberTests
     private static IAmazonService? CallCreateDefaultServiceClient<T>(AWSCredentials creds, ClientConfig config)
         where T : IAmazonService
         => T.CreateDefaultServiceClient(creds, config);
+
+    [Test]
+    public async Task PassThrough_False_With_Catch_All_Provider_Does_Not_Throw_InvalidCast_For_Property()
+    {
+        var mock = StaticAbstractClientFactory.Mock();
+        Mock.SetPassThrough(mock, false);
+        Mock.SetDefaultValueProvider(mock, new CatchAllDefaultValueProvider());
+
+        // The generated cast uses an `is` pattern, so the provider's unrelated object yields null.
+        var isNull = mock.Object.Client is null;
+        await Assert.That(isNull).IsTrue();
+    }
+
+    [Test]
+    public async Task PassThrough_False_With_Catch_All_Provider_Does_Not_Throw_InvalidCast_For_Method()
+    {
+        var mock = StaticAbstractClientFactory.Mock();
+        Mock.SetPassThrough(mock, false);
+        Mock.SetDefaultValueProvider(mock, new CatchAllDefaultValueProvider());
+
+        var isNull = mock.Object.Create() is null;
+        await Assert.That(isNull).IsTrue();
+    }
 }
 #endif

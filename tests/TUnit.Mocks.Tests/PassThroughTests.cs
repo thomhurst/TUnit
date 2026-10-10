@@ -29,6 +29,8 @@ public class PassThroughValue
     public override bool Equals(object? obj) => ReferenceEquals(this, obj);
     public override int GetHashCode() => 7;
     public override string ToString() => "money";
+    public virtual bool Equals(string? other) => other == "base";
+    public virtual object Describe() => "base";
 }
 
 public class PassThroughTests
@@ -252,6 +254,28 @@ public class PassThroughTests
     }
 
     [Test]
+    public async Task PassThrough_False_Equals_Overloads_Are_Not_Treated_As_Object_Equals()
+    {
+        var loose = PassThroughValue.Mock();
+        Mock.SetPassThrough(loose, false);
+        await Assert.That(loose.Object.Equals("base")).IsFalse();
+
+        var strict = PassThroughValue.Mock(MockBehavior.Strict);
+        Mock.SetPassThrough(strict, false);
+        await Assert.That(() => strict.Object.Equals("base")).Throws<MockStrictBehaviorException>();
+    }
+
+    [Test]
+    public async Task PassThrough_False_Uses_DefaultValueProvider_For_Members_Returning_Object()
+    {
+        var mock = PassThroughValue.Mock();
+        Mock.SetPassThrough(mock, false);
+        Mock.SetDefaultValueProvider(mock, new ObjectProvider("provided"));
+
+        await Assert.That(mock.Object.Describe()).IsEqualTo("provided");
+    }
+
+    [Test]
     public async Task PassThrough_False_Auto_Tracks_Setter_Value_When_A_Setter_Setup_Matches()
     {
         var mock = PassThroughSubject.Mock();
@@ -290,6 +314,13 @@ public class PassThroughTests
         await Assert.That(mock.Object.Two(1, 2)).IsEqualTo(99);
         await Assert.That(() => mock.Object.Zero()).Throws<MockStrictBehaviorException>();
         await Assert.That(() => mock.Object.Three(1, 2, 3)).Throws<MockStrictBehaviorException>();
+    }
+
+    private sealed class ObjectProvider(object value) : IDefaultValueProvider
+    {
+        public bool CanProvide(Type type) => type == typeof(object);
+
+        public object? GetDefaultValue(Type type) => value;
     }
 
     private sealed class FixedIntProvider(int value) : IDefaultValueProvider

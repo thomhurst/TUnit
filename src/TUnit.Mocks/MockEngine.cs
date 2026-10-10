@@ -406,7 +406,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// property value, the custom <see cref="DefaultValueProvider"/>, or a loose auto-mock.
     /// Returns false when none applies, leaving the caller to apply strict-mode and default handling.
     /// </summary>
-    private bool TryResolveUnmatchedReturn<TReturn>(string memberName, Func<MockBehavior, IMock>? autoMockFactory, out TReturn result, bool allowCustomDefault = true)
+    private bool TryResolveUnmatchedReturn<TReturn>(string memberName, Func<MockBehavior, IMock>? autoMockFactory, out TReturn result)
     {
         // Auto-track property getters: return stored value if available
         if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
@@ -422,7 +422,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         // Suppressed: DefaultValueProvider is opt-in (null by default). Users who set it accept the AOT tradeoff.
         // The source generator emits inline defaults for Task<T>/ValueTask<T>/collections without needing this path.
 #pragma warning disable IL3050, IL2026
-        if (allowCustomDefault && DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
         {
             var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
             if (customDefault is TReturn typedCustom) { result = typedCustom; return true; }
@@ -446,10 +446,11 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// implementation when <see cref="PassThrough"/> is false: argument matching, dictionaries and diagnostics
     /// depend on them behaving normally.
     /// </summary>
-    private static bool IsObjectMethod(string memberName, int argumentCount) => argumentCount switch
+    private static bool IsObjectMethod(string memberName, int argumentCount, bool argumentIsObject = false) => argumentCount switch
     {
         0 => memberName is "GetHashCode" or "ToString",
-        1 => memberName == "Equals",
+        // Only Equals(object): an Equals(string) or Equals(T) overload is an ordinary member.
+        1 => argumentIsObject && memberName == "Equals",
         _ => false,
     };
 
@@ -480,7 +481,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// </summary>
     private TReturn ResolveWithoutBase<TReturn>(string memberName, object?[] args, Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue)
     {
-        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn resolved, allowCustomDefault: typeof(TReturn) != typeof(object)))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn resolved))
         {
             return resolved;
         }
@@ -492,7 +493,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     private TReturn ResolveWithoutBase<TReturn, TStore>(string memberName, in TStore store, Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue)
         where TStore : struct, IArgumentStore
     {
-        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn resolved, allowCustomDefault: typeof(TReturn) != typeof(object)))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn resolved))
         {
             return resolved;
         }

@@ -184,7 +184,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!PassThrough && !IsObjectMethod(memberName, 1))
+        if (!PassThrough && !IsObjectMethod(memberName, 1, typeof(T1) == typeof(object)))
         {
             result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
