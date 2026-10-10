@@ -118,6 +118,8 @@ public sealed class AnyArg
 /// <summary>
 /// Sentinel type returned by <see cref="Arg.IsOfType{TDerived}"/> that implicitly converts to
 /// <see cref="Arg{T}"/> for any T, so the parameter type is inferred from context.
+/// Use it directly as an argument; it only converts where an <see cref="Arg{T}"/> is expected, so
+/// <c>var a = IsOfType&lt;X&gt;();</c> cannot be passed on without a typed conversion (declare <c>Arg&lt;T&gt; a = ...</c> instead).
 /// </summary>
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 public sealed class OfTypeArg
@@ -130,6 +132,8 @@ public sealed class OfTypeArg
 /// <summary>
 /// Sentinel type returned by <see cref="Arg.IsSameAs(object)"/> that implicitly converts to
 /// <see cref="Arg{T}"/> for any reference type T, so the parameter type is inferred from context.
+/// Use it directly as an argument; it only converts where an <see cref="Arg{T}"/> is expected, so
+/// <c>var a = IsSameAs(x);</c> cannot be passed on without a typed conversion (declare <c>Arg&lt;T&gt; a = ...</c> instead).
 /// </summary>
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 public sealed class SameAsArg

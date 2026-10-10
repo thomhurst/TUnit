@@ -179,7 +179,7 @@ Matching is case-sensitive (`StringComparison.Ordinal`) unless you pass a compar
 
 ## Type and Reference Matchers
 
-`IsOfType<TDerived>()` matches an argument that is an instance of `TDerived` or a subtype. The parameter type is inferred, so it lets you constrain a base-typed parameter. `IsSameAs(instance)` matches only that exact instance, ignoring any `Equals` override.
+`IsOfType<TDerived>()` matches an argument that is an instance of `TDerived` or a subtype. The parameter type is inferred, so it lets you constrain a base-typed parameter. `IsSameAs(instance)` matches only that exact instance, ignoring any `Equals` override. Both infer the parameter type from where they are used, so pass them straight into the call; to keep one in a variable, declare it with its type (`Arg<AuditEvent> sameLogout = IsSameAs(logout);`) rather than `var`.
 
 <!-- doc-test-declaration: split-before=// Usage -->
 ```csharp
