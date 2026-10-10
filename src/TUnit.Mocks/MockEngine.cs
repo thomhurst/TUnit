@@ -831,7 +831,8 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// <summary>
     /// Clears recorded call history and each setup's invoke count (so <c>VerifyAll</c> and diagnostics
     /// only count calls made after the clear). Setups, state, auto-tracked property values and
-    /// event subscriptions are kept.
+    /// event subscriptions are kept. Sequenced setups (e.g. <c>ReturnsSequentially</c>) keep their position:
+    /// only the invoke count used by <c>VerifyAll</c> and diagnostics is reset.
     /// </summary>
     /// <remarks>
     /// Recording is lock-free, so a call racing with this method may be recorded into the discarded

@@ -19,6 +19,7 @@ internal sealed class RuntimeStubMock(RuntimeStub instance) : IMock
 
     public void ClearCalls()
     {
+        // Stubs record no calls, so there is no history to clear.
     }
 
     public void Reset() => ((RuntimeStub)ObjectInstance).ResetState();

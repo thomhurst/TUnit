@@ -18,8 +18,39 @@ public interface IClearParent
     IClearChildRepo Repo { get; }
 }
 
+public interface IClearNode
+{
+    IClearNode Next { get; }
+    int Count(int value);
+}
+
 public class ClearCallsTests
 {
+    [Test]
+    public async Task ClearCalls_Keeps_Sequenced_Setup_Position()
+    {
+        var mock = ICalculator.Mock();
+        mock.Add(1, 2).ReturnsSequentially(10, 20, 30);
+        ICalculator calc = mock.Object;
+
+        await Assert.That(calc.Add(1, 2)).IsEqualTo(10);
+        Mock.ClearCalls(mock);
+
+        await Assert.That(calc.Add(1, 2)).IsEqualTo(20);
+    }
+
+    [Test]
+    public async Task ClearCalls_Terminates_For_Self_Referencing_Auto_Mocks()
+    {
+        var node = IClearNode.Mock();
+        var deep = node.Object.Next.Next.Next;
+        deep.Count(1);
+
+        Mock.ClearCalls(node);
+
+        await Assert.That(Mock.Invocations(Mock.Get(deep)).Count).IsEqualTo(0);
+    }
+
     [Test]
     public async Task ClearCalls_Cascades_To_Cached_Auto_Mocks()
     {
