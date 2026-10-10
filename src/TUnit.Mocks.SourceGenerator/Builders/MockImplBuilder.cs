@@ -302,7 +302,7 @@ internal static class MockImplBuilder
                 writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
-                writer.AppendLine($"var __result = __rawResult is {StripNullable(method.UnwrappedReturnType)} __typedResult ? __typedResult : default!;");
+                writer.AppendLine($"var __result = __rawResult is null ? default! : ({method.UnwrappedReturnType})__rawResult;");
             }
             else
             {
@@ -346,7 +346,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            writer.AppendLine($"var __result = __rawResult is {StripNullable(method.ReturnType)} __typedResult ? __typedResult : default!;");
+            writer.AppendLine($"var __result = __rawResult is null ? default! : ({method.ReturnType})__rawResult;");
             EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
@@ -417,7 +417,7 @@ internal static class MockImplBuilder
                 writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
-                writer.AppendLine($"return __rawResult is {StripNullable(prop.ReturnType)} __typedResult ? __typedResult : default!;");
+                writer.AppendLine($"return __rawResult is null ? default! : ({prop.ReturnType})__rawResult;");
                 writer.DecreaseIndent();
                 writer.AppendLine("}");
                 writer.AppendLine($"return _wrappedInstance.{EscapeIdentifier(prop.Name)};");
@@ -723,7 +723,7 @@ internal static class MockImplBuilder
                 writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
-                writer.AppendLine($"var __result = __rawResult is {StripNullable(method.UnwrappedReturnType)} __typedResult ? __typedResult : default!;");
+                writer.AppendLine($"var __result = __rawResult is null ? default! : ({method.UnwrappedReturnType})__rawResult;");
             }
             else
             {
@@ -769,7 +769,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            writer.AppendLine($"var __result = __rawResult is {StripNullable(method.ReturnType)} __typedResult ? __typedResult : default!;");
+            writer.AppendLine($"var __result = __rawResult is null ? default! : ({method.ReturnType})__rawResult;");
             EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
@@ -1055,7 +1055,7 @@ internal static class MockImplBuilder
                 writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
-                writer.AppendLine($"return __rawResult is {StripNullable(prop.ReturnType)} __typedResult ? __typedResult : default!;");
+                writer.AppendLine($"return __rawResult is null ? default! : ({prop.ReturnType})__rawResult;");
                 writer.DecreaseIndent();
                 writer.AppendLine("}");
                 writer.AppendLine($"return base.{EscapeIdentifier(prop.Name)};");
@@ -1507,10 +1507,6 @@ internal static class MockImplBuilder
         => isTyped
             ? $"_engine.TryHandleCallWithReturn<{returnTypeArg}, {typeArgs}>({memberId.ToString(CultureInfo.InvariantCulture)}, \"{memberName}\", {argsList}, {defaultValue}, out var {outVar}{FormatAutoMockFactoryArgument(autoMockFactory)})"
             : $"_engine.TryHandleCallWithReturn<{returnTypeArg}>({memberId.ToString(CultureInfo.InvariantCulture)}, \"{memberName}\", {argsArray}, {defaultValue}, out var {outVar}{FormatAutoMockFactoryArgument(autoMockFactory)})";
-
-    /// <summary>A type pattern cannot be a nullable reference type, so drop the trailing '?' for <c>is</c> casts.</summary>
-    private static string StripNullable(string typeName)
-        => typeName.EndsWith("?", StringComparison.Ordinal) ? typeName.Substring(0, typeName.Length - 1) : typeName;
 
     private static string FormatAutoMockFactoryArgument(string? autoMockFactory)
         => autoMockFactory is null ? "" : $", {autoMockFactory}";

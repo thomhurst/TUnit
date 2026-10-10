@@ -284,26 +284,28 @@ public class StaticAbstractMemberTests
         => T.CreateDefaultServiceClient(creds, config);
 
     [Test]
-    public async Task PassThrough_False_With_Catch_All_Provider_Does_Not_Throw_InvalidCast_For_Property()
+    public async Task PassThrough_False_Unconfigured_Static_Abstract_Returns_Return_Null()
     {
         var mock = StaticAbstractClientFactory.Mock();
         Mock.SetPassThrough(mock, false);
-        Mock.SetDefaultValueProvider(mock, new CatchAllDefaultValueProvider());
 
-        // The generated cast uses an `is` pattern, so the provider's unrelated object yields null.
-        var isNull = mock.Object.Client is null;
-        await Assert.That(isNull).IsTrue();
+        var clientIsNull = mock.Object.Client is null;
+        var createdIsNull = mock.Object.Create() is null;
+
+        await Assert.That(clientIsNull).IsTrue();
+        await Assert.That(createdIsNull).IsTrue();
     }
 
     [Test]
-    public async Task PassThrough_False_With_Catch_All_Provider_Does_Not_Throw_InvalidCast_For_Method()
+    public async Task PassThrough_False_Catch_All_Provider_Mismatch_Is_Not_Silently_Swallowed()
     {
         var mock = StaticAbstractClientFactory.Mock();
         Mock.SetPassThrough(mock, false);
         Mock.SetDefaultValueProvider(mock, new CatchAllDefaultValueProvider());
 
-        var isNull = mock.Object.Create() is null;
-        await Assert.That(isNull).IsTrue();
+        // Same as interface members: a non-null value of the wrong type fails loudly instead of becoming default.
+        await Assert.That(() => { _ = mock.Object.Client; }).Throws<InvalidCastException>();
+        await Assert.That(() => { _ = mock.Object.Create(); }).Throws<InvalidCastException>();
     }
 }
 #endif
