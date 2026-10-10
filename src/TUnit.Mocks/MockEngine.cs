@@ -101,7 +101,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
     public MockBehavior Behavior { get; }
 
-    private volatile bool _callBase = true;
+    private volatile bool _passThrough = true;
 
     /// <summary>
     /// When true (the default), an unconfigured virtual member of a class or wrap mock runs the
@@ -109,10 +109,10 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// the default value and strict mode throws.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool CallBase
+    public bool PassThrough
     {
-        get => _callBase;
-        set => _callBase = value;
+        get => _passThrough;
+        set => _passThrough = value;
     }
 
     public MockEngine(MockBehavior behavior)
@@ -442,7 +442,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     }
 
     /// <summary>
-    /// For a void/setter call that skips the base implementation (<see cref="CallBase"/> = false):
+    /// For a void/setter call that skips the base implementation (<see cref="PassThrough"/> = false):
     /// throws in strict mode, since the call was not set up.
     /// </summary>
     private void ThrowIfStrictWithoutBase(string memberName, object?[] args)
@@ -462,7 +462,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     }
 
     /// <summary>
-    /// For a call with a return value that skips the base implementation (<see cref="CallBase"/> = false):
+    /// For a call with a return value that skips the base implementation (<see cref="PassThrough"/> = false):
     /// resolves tracked/default/auto-mock values, or throws in strict mode. A custom
     /// <see cref="DefaultValueProvider"/> never overrides strict mode, so an unexpected call still fails.
     /// </summary>
@@ -544,7 +544,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             throw new MockStrictBehaviorException(callDesc);
         }
 
-        if (!setupFound && !CallBase)
+        if (!setupFound && !PassThrough)
         {
             ThrowIfStrictWithoutBase(memberName, args);
 
@@ -618,7 +618,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             throw new MockStrictBehaviorException(callDesc);
         }
 
-        if (!CallBase)
+        if (!PassThrough)
         {
             result = ResolveWithoutBase(memberName, args, autoMockFactory, defaultValue);
             return true;
@@ -823,7 +823,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// Recording is lock-free, so a call racing with this method may be recorded into the discarded
     /// history and lost. That is intentional: a call concurrent with a clear has no defined ordering.
     /// </remarks>
-    public void ClearInvocations()
+    public void ClearCalls()
     {
         lock (Lock)
         {

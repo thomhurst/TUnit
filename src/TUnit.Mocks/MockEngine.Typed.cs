@@ -156,7 +156,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!setupFound && !CallBase)
+        if (!setupFound && !PassThrough)
         {
             ThrowIfStrictWithoutBase(memberName, store);
             // Single-argument setter only; multi-argument setters (indexers) are not auto-tracked.
@@ -201,7 +201,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!CallBase)
+        if (!PassThrough)
         {
             result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
@@ -324,7 +324,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!setupFound && !CallBase)
+        if (!setupFound && !PassThrough)
         {
             ThrowIfStrictWithoutBase(memberName, store);
             return true;
@@ -367,7 +367,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!CallBase)
+        if (!PassThrough)
         {
             result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
@@ -490,7 +490,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!setupFound && !CallBase)
+        if (!setupFound && !PassThrough)
         {
             ThrowIfStrictWithoutBase(memberName, store);
             return true;
@@ -533,7 +533,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!CallBase)
+        if (!PassThrough)
         {
             result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
@@ -656,7 +656,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!setupFound && !CallBase)
+        if (!setupFound && !PassThrough)
         {
             ThrowIfStrictWithoutBase(memberName, store);
             return true;
@@ -699,7 +699,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!CallBase)
+        if (!PassThrough)
         {
             result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
@@ -822,7 +822,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!setupFound && !CallBase)
+        if (!setupFound && !PassThrough)
         {
             ThrowIfStrictWithoutBase(memberName, store);
             return true;
@@ -865,7 +865,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!CallBase)
+        if (!PassThrough)
         {
             result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
@@ -988,7 +988,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!setupFound && !CallBase)
+        if (!setupFound && !PassThrough)
         {
             ThrowIfStrictWithoutBase(memberName, store);
             return true;
@@ -1031,7 +1031,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!CallBase)
+        if (!PassThrough)
         {
             result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
@@ -1154,7 +1154,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!setupFound && !CallBase)
+        if (!setupFound && !PassThrough)
         {
             ThrowIfStrictWithoutBase(memberName, store);
             return true;
@@ -1197,7 +1197,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!CallBase)
+        if (!PassThrough)
         {
             result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
@@ -1320,7 +1320,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!setupFound && !CallBase)
+        if (!setupFound && !PassThrough)
         {
             ThrowIfStrictWithoutBase(memberName, store);
             return true;
@@ -1363,7 +1363,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!CallBase)
+        if (!PassThrough)
         {
             result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;

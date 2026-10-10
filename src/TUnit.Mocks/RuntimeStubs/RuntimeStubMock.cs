@@ -17,7 +17,7 @@ internal sealed class RuntimeStubMock(RuntimeStub instance) : IMock
     {
     }
 
-    public void ClearInvocations()
+    public void ClearCalls()
     {
     }
 

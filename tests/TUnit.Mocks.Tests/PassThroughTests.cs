@@ -3,12 +3,12 @@ using TUnit.Mocks.Exceptions;
 
 namespace TUnit.Mocks.Tests;
 
-public interface ICallBaseDependency
+public interface IPassThroughDependency
 {
     int GetValue();
 }
 
-public class CallBaseSubject
+public class PassThroughSubject
 {
     public virtual string Name { get; set; } = "base-name";
     public virtual string this[int index] { get => "base-" + index; set { } }
@@ -19,28 +19,28 @@ public class CallBaseSubject
     public virtual int Eight(int a, int b, int c, int d, int e, int f, int g, int h) => a + b + c + d + e + f + g + h;
     public virtual string Greet(string name) => $"Hello, {name}";
     public virtual Task<int> GetAsync() => Task.FromResult(7);
-    public virtual ICallBaseDependency GetDependency() => throw new InvalidOperationException("base should not run");
+    public virtual IPassThroughDependency GetDependency() => throw new InvalidOperationException("base should not run");
     public virtual void Run() => BaseRunCount++;
     public int BaseRunCount { get; private set; }
 }
 
-public class CallBaseTests
+public class PassThroughTests
 {
     [Test]
-    public async Task CallBase_Defaults_To_True_And_Runs_Base()
+    public async Task PassThrough_Defaults_To_True_And_Runs_Base()
     {
-        var mock = CallBaseSubject.Mock();
+        var mock = PassThroughSubject.Mock();
 
-        await Assert.That(Mock.GetCallBase(mock)).IsTrue();
+        await Assert.That(Mock.GetPassThrough(mock)).IsTrue();
         await Assert.That(mock.Object.Two(2, 3)).IsEqualTo(5);
         await Assert.That(mock.Object.Name).IsEqualTo("base-name");
     }
 
     [Test]
-    public async Task CallBase_False_Returns_Defaults_For_Unconfigured_Members()
+    public async Task PassThrough_False_Returns_Defaults_For_Unconfigured_Members()
     {
-        var mock = CallBaseSubject.Mock();
-        Mock.SetCallBase(mock, false);
+        var mock = PassThroughSubject.Mock();
+        Mock.SetPassThrough(mock, false);
         var subject = mock.Object;
 
         await Assert.That(subject.Zero()).IsEqualTo(0);
@@ -54,10 +54,10 @@ public class CallBaseTests
     }
 
     [Test]
-    public async Task CallBase_False_Does_Not_Run_Base_Void_Method()
+    public async Task PassThrough_False_Does_Not_Run_Base_Void_Method()
     {
-        var mock = CallBaseSubject.Mock();
-        Mock.SetCallBase(mock, false);
+        var mock = PassThroughSubject.Mock();
+        Mock.SetPassThrough(mock, false);
 
         mock.Object.Run();
 
@@ -66,9 +66,9 @@ public class CallBaseTests
     }
 
     [Test]
-    public async Task CallBase_True_Runs_Base_Void_Method()
+    public async Task PassThrough_True_Runs_Base_Void_Method()
     {
-        var mock = CallBaseSubject.Mock();
+        var mock = PassThroughSubject.Mock();
 
         mock.Object.Run();
 
@@ -76,10 +76,10 @@ public class CallBaseTests
     }
 
     [Test]
-    public async Task CallBase_False_Configured_Setups_Still_Win()
+    public async Task PassThrough_False_Configured_Setups_Still_Win()
     {
-        var mock = CallBaseSubject.Mock();
-        Mock.SetCallBase(mock, false);
+        var mock = PassThroughSubject.Mock();
+        Mock.SetPassThrough(mock, false);
         mock.Two(1, 2).Returns(99);
         mock.One(Any()).Returns(5);
 
@@ -89,10 +89,10 @@ public class CallBaseTests
     }
 
     [Test]
-    public async Task CallBase_False_Calls_Are_Still_Recorded_And_Verifiable()
+    public async Task PassThrough_False_Calls_Are_Still_Recorded_And_Verifiable()
     {
-        var mock = CallBaseSubject.Mock();
-        Mock.SetCallBase(mock, false);
+        var mock = PassThroughSubject.Mock();
+        Mock.SetPassThrough(mock, false);
 
         mock.Object.Greet("Alice");
 
@@ -101,44 +101,44 @@ public class CallBaseTests
     }
 
     [Test]
-    public async Task CallBase_Can_Be_Toggled_Back_To_True()
+    public async Task PassThrough_Can_Be_Toggled_Back_To_True()
     {
-        var mock = CallBaseSubject.Mock();
-        Mock.SetCallBase(mock, false);
+        var mock = PassThroughSubject.Mock();
+        Mock.SetPassThrough(mock, false);
         await Assert.That(mock.Object.Two(2, 3)).IsEqualTo(0);
 
-        Mock.SetCallBase(mock, true);
+        Mock.SetPassThrough(mock, true);
 
         await Assert.That(mock.Object.Two(2, 3)).IsEqualTo(5);
     }
 
     [Test]
-    public async Task CallBase_False_Strict_Throws_For_Unconfigured_Virtual_Members()
+    public async Task PassThrough_False_Strict_Throws_For_Unconfigured_Virtual_Members()
     {
-        var mock = CallBaseSubject.Mock(MockBehavior.Strict);
-        Mock.SetCallBase(mock, false);
+        var mock = PassThroughSubject.Mock(MockBehavior.Strict);
+        Mock.SetPassThrough(mock, false);
 
         Assert.Throws<MockStrictBehaviorException>(() => mock.Object.Two(1, 2));
         Assert.Throws<MockStrictBehaviorException>(() => mock.Object.Zero());
         Assert.Throws<MockStrictBehaviorException>(() => mock.Object.Run());
-        await Assert.That(Mock.GetCallBase(mock)).IsFalse();
+        await Assert.That(Mock.GetPassThrough(mock)).IsFalse();
     }
 
     [Test]
-    public async Task CallBase_False_Strict_Allows_Configured_Members()
+    public async Task PassThrough_False_Strict_Allows_Configured_Members()
     {
-        var mock = CallBaseSubject.Mock(MockBehavior.Strict);
-        Mock.SetCallBase(mock, false);
+        var mock = PassThroughSubject.Mock(MockBehavior.Strict);
+        Mock.SetPassThrough(mock, false);
         mock.Two(1, 2).Returns(3);
 
         await Assert.That(mock.Object.Two(1, 2)).IsEqualTo(3);
     }
 
     [Test]
-    public async Task CallBase_False_Loose_AutoMocks_Interface_Returns()
+    public async Task PassThrough_False_Loose_AutoMocks_Interface_Returns()
     {
-        var mock = CallBaseSubject.Mock();
-        Mock.SetCallBase(mock, false);
+        var mock = PassThroughSubject.Mock();
+        Mock.SetPassThrough(mock, false);
 
         var dependency = mock.Object.GetDependency();
 
@@ -148,10 +148,10 @@ public class CallBaseTests
     }
 
     [Test]
-    public async Task CallBase_False_With_AutoTracked_Properties_Stores_Values()
+    public async Task PassThrough_False_With_AutoTracked_Properties_Stores_Values()
     {
-        var mock = CallBaseSubject.Mock();
-        Mock.SetCallBase(mock, false);
+        var mock = PassThroughSubject.Mock();
+        Mock.SetPassThrough(mock, false);
         Mock.SetupAllProperties(mock);
 
         mock.Object.Name = "Alice";
@@ -160,43 +160,43 @@ public class CallBaseTests
     }
 
     [Test]
-    public async Task CallBase_False_Uses_Custom_DefaultValueProvider()
+    public async Task PassThrough_False_Uses_Custom_DefaultValueProvider()
     {
-        var mock = CallBaseSubject.Mock();
-        Mock.SetCallBase(mock, false);
+        var mock = PassThroughSubject.Mock();
+        Mock.SetPassThrough(mock, false);
         Mock.SetDefaultValueProvider(mock, new FixedIntProvider(-1));
 
         await Assert.That(mock.Object.Two(1, 2)).IsEqualTo(-1);
     }
 
     [Test]
-    public async Task CallBase_Static_Helpers_Round_Trip()
+    public async Task PassThrough_Static_Helpers_Round_Trip()
     {
-        var mock = CallBaseSubject.Mock();
+        var mock = PassThroughSubject.Mock();
 
-        Mock.SetCallBase(mock, false);
+        Mock.SetPassThrough(mock, false);
 
-        await Assert.That(Mock.GetCallBase(mock)).IsFalse();
+        await Assert.That(Mock.GetPassThrough(mock)).IsFalse();
         await Assert.That(mock.Object.Two(2, 3)).IsEqualTo(0);
     }
 
     [Test]
-    public async Task CallBase_False_Wrap_Mock_Does_Not_Delegate_To_Instance()
+    public async Task PassThrough_False_Wrap_Mock_Does_Not_Delegate_To_Instance()
     {
-        var real = new CallBaseSubject();
+        var real = new PassThroughSubject();
         var mock = Mock.Wrap(real);
         await Assert.That(mock.Object.Two(2, 3)).IsEqualTo(5);
 
-        Mock.SetCallBase(mock, false);
+        Mock.SetPassThrough(mock, false);
 
         await Assert.That(mock.Object.Two(2, 3)).IsEqualTo(0);
     }
 
     [Test]
-    public async Task CallBase_False_Does_Not_Auto_Track_Indexer_Setters()
+    public async Task PassThrough_False_Does_Not_Auto_Track_Indexer_Setters()
     {
-        var mock = CallBaseSubject.Mock();
-        Mock.SetCallBase(mock, false);
+        var mock = PassThroughSubject.Mock();
+        Mock.SetPassThrough(mock, false);
         Mock.SetupAllProperties(mock);
         var subject = mock.Object;
 
@@ -206,10 +206,10 @@ public class CallBaseTests
     }
 
     [Test]
-    public async Task CallBase_False_Strict_DefaultValueProvider_Does_Not_Hide_Unexpected_Calls()
+    public async Task PassThrough_False_Strict_DefaultValueProvider_Does_Not_Hide_Unexpected_Calls()
     {
-        var mock = CallBaseSubject.Mock(MockBehavior.Strict);
-        Mock.SetCallBase(mock, false);
+        var mock = PassThroughSubject.Mock(MockBehavior.Strict);
+        Mock.SetPassThrough(mock, false);
         Mock.SetDefaultValueProvider(mock, new FixedIntProvider(42));
 
         await Assert.That(() => mock.Object.Zero()).Throws<MockStrictBehaviorException>();

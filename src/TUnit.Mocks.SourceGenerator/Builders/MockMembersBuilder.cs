@@ -1401,7 +1401,7 @@ internal static class MockMembersBuilder
     // matching Mock static helper).
     private static readonly (string Name, string ReturnType, string Parameters, string ForwardArgs)[] MethodPolyfills =
     {
-        ("ClearInvocations", "void", "", ""),
+        ("ClearCalls", "void", "", ""),
         ("Reset", "void", "", ""),
         ("VerifyAll", "void", "", ""),
         ("VerifyNoOtherCalls", "void", "", ""),
@@ -1422,12 +1422,12 @@ internal static class MockMembersBuilder
         var emitInvocations = !userNames.Contains("Invocations");
         var emitBehavior = !userNames.Contains("Behavior");
         var emitDefaultValueProvider = !userNames.Contains("DefaultValueProvider");
-        var emitCallBase = !userNames.Contains("CallBase");
+        var emitPassThrough = !userNames.Contains("PassThrough");
 
         // Skip entirely when every polyfill name collides with a user member — keeps the
         // separator blank line (below) and the surrounding #if/#endif from being emitted.
         if (emitMethods.Length == 0 && !emitInState
-            && !emitInvocations && !emitBehavior && !emitDefaultValueProvider && !emitCallBase)
+            && !emitInvocations && !emitBehavior && !emitDefaultValueProvider && !emitPassThrough)
         {
             return;
         }
@@ -1468,7 +1468,7 @@ internal static class MockMembersBuilder
         // Roslyn 4.14) reject the attribute on non-indexer extension properties with CS9262
         // (#6370), and it ranks nothing anyway — the skip-emission above already guarantees no
         // same-name member ever coexists in this containing type.
-        if (emitInvocations || emitBehavior || emitDefaultValueProvider || emitCallBase)
+        if (emitInvocations || emitBehavior || emitDefaultValueProvider || emitPassThrough)
         {
             if (!first) writer.AppendLine();
             using (writer.Block($"extension{typeParams}(global::TUnit.Mocks.Mock<{mockableType}> mock){constraints}"))
@@ -1495,13 +1495,13 @@ internal static class MockMembersBuilder
                     }
                     firstProp = false;
                 }
-                if (emitCallBase)
+                if (emitPassThrough)
                 {
                     if (!firstProp) writer.AppendLine();
-                    using (writer.Block("public bool CallBase"))
+                    using (writer.Block("public bool PassThrough"))
                     {
-                        writer.AppendLine("get => global::TUnit.Mocks.Mock.GetCallBase(mock);");
-                        writer.AppendLine("set => global::TUnit.Mocks.Mock.SetCallBase(mock, value);");
+                        writer.AppendLine("get => global::TUnit.Mocks.Mock.GetPassThrough(mock);");
+                        writer.AppendLine("set => global::TUnit.Mocks.Mock.SetPassThrough(mock, value);");
                     }
                 }
             }

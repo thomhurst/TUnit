@@ -8,10 +8,10 @@ public interface IClearNamed
     string Name { get; set; }
 }
 
-public class ClearInvocationsTests
+public class ClearCallsTests
 {
     [Test]
-    public async Task ClearInvocations_Clears_History_But_Keeps_Setups()
+    public async Task ClearCalls_Clears_History_But_Keeps_Setups()
     {
         var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(42);
@@ -21,20 +21,20 @@ public class ClearInvocationsTests
         calc.Add(1, 2);
         await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(2);
 
-        Mock.ClearInvocations(mock);
+        Mock.ClearCalls(mock);
 
         await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(0);
         await Assert.That(calc.Add(1, 2)).IsEqualTo(42);
     }
 
     [Test]
-    public async Task ClearInvocations_Resets_Verification_Counts()
+    public async Task ClearCalls_Resets_Verification_Counts()
     {
         var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         calc.Add(1, 2);
-        Mock.ClearInvocations(mock);
+        Mock.ClearCalls(mock);
         calc.Add(1, 2);
 
         mock.Add(1, 2).WasCalled(Times.Once);
@@ -42,26 +42,26 @@ public class ClearInvocationsTests
     }
 
     [Test]
-    public async Task ClearInvocations_Then_Never_Called_Passes()
+    public async Task ClearCalls_Then_Never_Called_Passes()
     {
         var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         calc.Add(1, 2);
-        Mock.ClearInvocations(mock);
+        Mock.ClearCalls(mock);
 
         mock.Add(Any(), Any()).WasNeverCalled();
         await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(0);
     }
 
     [Test]
-    public async Task ClearInvocations_Allows_VerifyNoOtherCalls_After_Fresh_Act()
+    public async Task ClearCalls_Allows_VerifyNoOtherCalls_After_Fresh_Act()
     {
         var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         calc.Add(9, 9);
-        Mock.ClearInvocations(mock);
+        Mock.ClearCalls(mock);
         calc.Add(1, 2);
 
         mock.Add(1, 2).WasCalled(Times.Once);
@@ -70,60 +70,60 @@ public class ClearInvocationsTests
     }
 
     [Test]
-    public async Task ClearInvocations_Keeps_Setup_Invoked_State_For_VerifyAll()
+    public async Task ClearCalls_Keeps_Setup_Invoked_State_For_VerifyAll()
     {
         var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(3);
         ICalculator calc = mock.Object;
 
         calc.Add(1, 2);
-        Mock.ClearInvocations(mock);
+        Mock.ClearCalls(mock);
 
         Mock.VerifyAll(mock);
         await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(0);
     }
 
     [Test]
-    public async Task ClearInvocations_Keeps_Auto_Tracked_Properties()
+    public async Task ClearCalls_Keeps_Auto_Tracked_Properties()
     {
         var mock = IClearNamed.Mock();
         Mock.SetupAllProperties(mock);
         mock.Object.Name = "Alice";
 
-        Mock.ClearInvocations(mock);
+        Mock.ClearCalls(mock);
 
         await Assert.That(mock.Object.Name).IsEqualTo("Alice");
     }
 
     [Test]
-    public async Task ClearInvocations_Static_Helper_Works()
+    public async Task ClearCalls_Static_Helper_Works()
     {
         var mock = ICalculator.Mock();
         mock.Object.Add(1, 2);
 
-        Mock.ClearInvocations(mock);
+        Mock.ClearCalls(mock);
 
         await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(0);
     }
 
     [Test]
-    public async Task ClearInvocations_On_Fresh_Mock_Is_Noop()
+    public async Task ClearCalls_On_Fresh_Mock_Is_Noop()
     {
         var mock = ICalculator.Mock();
 
-        Mock.ClearInvocations(mock);
+        Mock.ClearCalls(mock);
 
         await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(0);
     }
 
     [Test]
-    public async Task ClearInvocations_Does_Not_Break_Ordered_Verification()
+    public async Task ClearCalls_Does_Not_Break_Ordered_Verification()
     {
         var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         calc.Add(0, 0);
-        Mock.ClearInvocations(mock);
+        Mock.ClearCalls(mock);
         calc.Add(1, 1);
         calc.Add(2, 2);
 
@@ -136,7 +136,7 @@ public class ClearInvocationsTests
     }
 
     [Test]
-    public async Task MockRepository_ClearInvocations_Clears_All_Tracked_Mocks()
+    public async Task MockRepository_ClearCalls_Clears_All_Tracked_Mocks()
     {
         var repo = new MockRepository();
         var calcMock = repo.Of<ICalculator>();
@@ -146,7 +146,7 @@ public class ClearInvocationsTests
         calcMock.Object.Add(1, 2);
         _ = entityMock.Object.Name;
 
-        repo.ClearInvocations();
+        repo.ClearCalls();
 
         await Assert.That(Mock.Invocations(calcMock).Count).IsEqualTo(0);
         await Assert.That(Mock.Invocations(entityMock).Count).IsEqualTo(0);
@@ -154,7 +154,7 @@ public class ClearInvocationsTests
     }
 
     [Test]
-    public async Task ClearInvocations_Is_Thread_Safe_With_Concurrent_Calls()
+    public async Task ClearCalls_Is_Thread_Safe_With_Concurrent_Calls()
     {
         var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
@@ -172,12 +172,12 @@ public class ClearInvocationsTests
         {
             for (var i = 0; i < 50; i++)
             {
-                Mock.ClearInvocations(mock);
+                Mock.ClearCalls(mock);
             }
         });
 
         await Task.WhenAll(callers.Append(clearer));
-        Mock.ClearInvocations(mock);
+        Mock.ClearCalls(mock);
 
         await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(0);
     }
@@ -187,17 +187,17 @@ public class ClearInvocationsTests
 public class MockControlPolyfillTests
 {
     [Test]
-    public async Task Instance_Style_ClearInvocations_And_CallBase_Are_Available()
+    public async Task Instance_Style_ClearCalls_And_PassThrough_Are_Available()
     {
-        var mock = CallBaseSubject.Mock();
-        mock.CallBase = false;
+        var mock = PassThroughSubject.Mock();
+        mock.PassThrough = false;
         mock.Object.Two(1, 2);
 
         await Assert.That(mock.Invocations.Count).IsEqualTo(1);
-        mock.ClearInvocations();
+        mock.ClearCalls();
 
         await Assert.That(mock.Invocations.Count).IsEqualTo(0);
-        await Assert.That(mock.CallBase).IsFalse();
+        await Assert.That(mock.PassThrough).IsFalse();
     }
 }
 #endif

@@ -114,13 +114,13 @@ public class MockRepository
     }
 
     /// <summary>
-    /// Calls <see cref="IMock.ClearInvocations"/> on every tracked mock, clearing call history but keeping setups.
+    /// Calls <see cref="IMock.ClearCalls"/> on every tracked mock, clearing call history but keeping setups.
     /// </summary>
-    public void ClearInvocations()
+    public void ClearCalls()
     {
         foreach (var mock in GetSnapshot())
         {
-            mock.ClearInvocations();
+            mock.ClearCalls();
         }
     }
 

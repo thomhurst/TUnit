@@ -16,7 +16,7 @@ public interface IMock
     void VerifyNoOtherCalls();
 
     /// <summary>Clears recorded call history only, keeping setups and state.</summary>
-    void ClearInvocations();
+    void ClearCalls();
 
     /// <summary>Clears all setups and call history.</summary>
     void Reset();

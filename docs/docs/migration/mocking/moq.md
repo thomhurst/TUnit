@@ -50,7 +50,7 @@ TUnit.Mocks works with any test framework. You can migrate mocks before, after, 
 | `mock.As<IOther>()` | `Mock.Of<IService, IOther>()` |
 | `Mock.Get(instance)` | `Mock.Get(instance)` |
 | `mock.Invocations` | `mock.Invocations` |
-| `mock.Invocations.Clear()` | `mock.ClearInvocations()` |
+| `mock.Invocations.Clear()` | `mock.ClearCalls()` |
 | `mock.Reset()` | `mock.Reset()` |
 | `new MockRepository(MockBehavior.Strict)` | `new MockRepository(MockBehavior.Strict)` |
 
@@ -458,7 +458,7 @@ calculator.Discount(Any()).Returns(5m);
 decimal tax = calculator.Object.Tax(100m); // base implementation: 20
 ```
 
-If a test depends on Moq's default `CallBase = false`, set `calculator.CallBase = false`. Unconfigured virtual members then return default values (or throw in strict mode) instead of running the base implementation.
+If a test depends on Moq's default `CallBase = false`, set `calculator.PassThrough = false`. Unconfigured virtual members then return default values (or throw in strict mode) instead of running the base implementation.
 
 Moq configures `protected` members with `mock.Protected().Setup<T>("Name", ...)` and string names. TUnit.Mocks generates typed members for `protected` virtual and abstract members, so you configure and verify them like public members.
 
@@ -471,7 +471,7 @@ Moq configures `protected` members with `mock.Protected().Setup<T>("Name", ...)`
 | `mock.As<IDisposable>()` | `Mock.Of<IUserRepository, IDisposable>()` (up to four types) |
 | `Mock.Of<IService>(x => x.Prop == value)` | `IService.Mock()` and then `mock.Prop.Returns(value)` |
 | `new Mock<Func<int, string>>()` | `Mock.OfDelegate<Func<int, string>>()` |
-| `mock.Invocations.Clear()` | `mock.ClearInvocations()` (keeps setups and state) |
+| `mock.Invocations.Clear()` | `mock.ClearCalls()` (keeps setups and state) |
 | `Mock.Get(instance)` | `Mock.Get(instance)` |
 
 To wrap an existing instance of a non-sealed class and override only some of its virtual members, use `Mock.Wrap(instance)`. `Mock.Wrap` does not support interfaces. See [Advanced Features](../../writing-tests/mocking/advanced.md) for state machines, diagnostics, and `MockRepository`.
