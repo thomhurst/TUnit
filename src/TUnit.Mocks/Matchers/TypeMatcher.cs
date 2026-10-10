@@ -26,7 +26,7 @@ internal sealed class TypeMatcher<T> : IArgumentMatcher<T>
             throw new ArgumentException(
                 $"Arg.IsOfType<{type.Name}>() cannot be used for an argument of type {parameterType.Name}: " +
                 $"{type.Name} is unrelated to {parameterType.Name}, so it could never match. " +
-                $"Use a type that derives from, or is assignable to, {parameterType.Name}.");
+                $"Use a type that can overlap with {parameterType.Name}.");
         }
 
         _type = type;

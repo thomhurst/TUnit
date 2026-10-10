@@ -334,7 +334,7 @@ _ = mock.Invocations.Count; // 0 (history cleared)
 
 The `SetupAllProperties()` flag is preserved across resets.
 
-## Clearing Invocations
+## Clearing Recorded Calls
 
 `Reset()` removes everything. To forget only the recorded calls and keep your setups, use `ClearCalls()`. This suits a test that acts twice and verifies only the second act:
 
@@ -349,7 +349,7 @@ svc.GetUser(1);                            // setup kept: still returns Alice
 mock.GetUser(1).WasCalled(Times.Once);     // counts only the call after the clear
 ```
 
-Setups, state, auto-tracked property values and event subscriptions are kept. `VerifyAll()` still sees which setups were invoked. `MockRepository.ClearCalls()` clears every tracked mock.
+Setups, state, auto-tracked property values and event subscriptions are kept. `VerifyAll()` still sees which setups were invoked. `MockRepository.ClearCalls()` clears every tracked mock. The instance-style `mock.ClearCalls()` is available on net9 and later; on net8 and older target frameworks use `Mock.ClearCalls(mock)`.
 
 ## Call Base on Class Mocks
 
