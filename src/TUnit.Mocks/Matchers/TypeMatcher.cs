@@ -22,8 +22,11 @@ internal sealed class TypeMatcher<T> : IArgumentMatcher<T>
 
         if (!related)
         {
+            // No paramName: the argument is not something the caller passed to a method they called.
             throw new ArgumentException(
-                $"Arg.IsOfType<{type.Name}>() can never match a parameter of type {parameterType.Name}.", nameof(type));
+                $"Arg.IsOfType<{type.Name}>() cannot be used for an argument of type {parameterType.Name}: " +
+                $"{type.Name} is unrelated to {parameterType.Name}, so it could never match. " +
+                $"Use a type that derives from, or is assignable to, {parameterType.Name}.");
         }
 
         _type = type;

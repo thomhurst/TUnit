@@ -219,8 +219,27 @@ public class PassThroughTests
     [Test]
     public async Task IsOfType_Throws_For_Unrelated_Type_At_Setup()
     {
-
         await Assert.That(() => { Arg<int> _ = Arg.IsOfType<string>(); }).Throws<ArgumentException>();
+    }
+
+    [Test]
+    public async Task IsOfType_Error_Names_Both_Types()
+    {
+        var ex = Assert.Throws<ArgumentException>(() => { Arg<int> _ = Arg.IsOfType<string>(); });
+
+        await Assert.That(ex.Message).Contains("String").And.Contains("Int32");
+    }
+
+    [Test]
+    public async Task PassThrough_False_Strict_Wrap_Mock_Throws_For_Unconfigured_Calls()
+    {
+        var mock = Mock.Wrap(MockBehavior.Strict, new PassThroughSubject());
+        Mock.SetPassThrough(mock, false);
+        mock.Two(1, 2).Returns(99);
+
+        await Assert.That(mock.Object.Two(1, 2)).IsEqualTo(99);
+        await Assert.That(() => mock.Object.Zero()).Throws<MockStrictBehaviorException>();
+        await Assert.That(() => mock.Object.Three(1, 2, 3)).Throws<MockStrictBehaviorException>();
     }
 
     private sealed class FixedIntProvider(int value) : IDefaultValueProvider

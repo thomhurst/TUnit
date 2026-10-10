@@ -19,6 +19,16 @@ public interface IMatcherHandler
 public class StringAndTypeMatcherTests
 {
     [Test]
+    public async Task Contains_With_String_Argument_Resolves_To_The_String_Overload()
+    {
+        // string is also IEnumerable<char>; this must bind to Contains(string), not Contains<TCollection, TElement>.
+        Arg<string> matcher = Contains("x");
+
+        await Assert.That(matcher.Matcher.Matches("abxd")).IsTrue();
+        await Assert.That(matcher.Matcher.Matches("abcd")).IsFalse();
+    }
+
+    [Test]
     public async Task StartsWith_Matches_Prefix_Only()
     {
         var mock = IMatcherHandler.Mock();
