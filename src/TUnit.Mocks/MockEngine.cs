@@ -402,12 +402,6 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     }
 
     /// <summary>
-    /// Handles a void method call for a partial/wrap mock virtual method.
-    /// Records the call, executes matching setup behavior if found.
-    /// Returns true if a setup was found (caller should NOT call base), false otherwise (caller should call base).
-    /// In Strict mode, throws if no setup matches (no fallthrough to base).
-    /// </summary>
-    /// <summary>
     /// Resolves the value for an unmatched call that is not served by a setup: an auto-tracked
     /// property value, the custom <see cref="DefaultValueProvider"/>, or a loose auto-mock.
     /// Returns false when none applies, leaving the caller to apply strict-mode and default handling.
@@ -504,6 +498,12 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         }
     }
 
+    /// <summary>
+    /// Handles a void method call for a partial/wrap mock virtual method.
+    /// Records the call, executes matching setup behavior if found.
+    /// Returns true if a setup was found (caller should NOT call base), false otherwise (caller should call base).
+    /// In Strict mode, throws if no setup matches (no fallthrough to base).
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCall(int memberId, string memberName, object?[] args)
     {
@@ -819,6 +819,10 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// Clears recorded call history only. Setups, state, auto-tracked property values and
     /// event subscriptions are kept.
     /// </summary>
+    /// <remarks>
+    /// Recording is lock-free, so a call racing with this method may be recorded into the discarded
+    /// history and lost. That is intentional: a call concurrent with a clear has no defined ordering.
+    /// </remarks>
     public void ClearInvocations()
     {
         lock (Lock)
