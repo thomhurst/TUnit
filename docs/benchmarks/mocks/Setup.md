@@ -4,7 +4,7 @@
 
 Last Updated
 
-This benchmark was automatically generated on **2026-10-09** from the latest CI run.
+This benchmark was automatically generated on **2026-10-10** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.401
 
@@ -14,12 +14,12 @@ Mock behavior configuration (returns, matchers):
 
 | Library         | Mean         | Error       | StdDev      | Allocated |
 | --------------- | ------------ | ----------- | ----------- | --------- |
-| **TUnit.Mocks** | 645.5 ns     | 10.53 ns    | 9.85 ns     | 2.37 KB   |
-| Imposter        | 960.7 ns     | 17.17 ns    | 16.06 ns    | 6.09 KB   |
-| Mockolate       | 370.3 ns     | 2.81 ns     | 2.63 ns     | 1.41 KB   |
-| Moq             | 318,608.7 ns | 2,900.12 ns | 2,712.77 ns | 28.67 KB  |
-| NSubstitute     | 6,183.3 ns   | 21.15 ns    | 18.75 ns    | 9.06 KB   |
-| FakeItEasy      | 7,574.7 ns   | 20.35 ns    | 19.04 ns    | 10.46 KB  |
+| **TUnit.Mocks** | 554.8 ns     | 7.61 ns     | 7.12 ns     | 2.37 KB   |
+| Imposter        | 806.6 ns     | 10.60 ns    | 8.85 ns     | 6.09 KB   |
+| Mockolate       | 322.1 ns     | 2.52 ns     | 2.24 ns     | 1.41 KB   |
+| Moq             | 435,489.9 ns | 1,342.70 ns | 1,190.26 ns | 28.64 KB  |
+| NSubstitute     | 6,469.0 ns   | 27.78 ns    | 25.99 ns    | 9.01 KB   |
+| FakeItEasy      | 8,700.2 ns   | 56.77 ns    | 50.33 ns    | 10.45 KB  |
 
 <!-- -->
 
@@ -27,14 +27,14 @@ Mock behavior configuration (returns, matchers):
 
 ### Multiple[​](#multiple "Direct link to Multiple")
 
-| Library         | Mean        | Error     | StdDev    | Allocated |
-| --------------- | ----------- | --------- | --------- | --------- |
-| **TUnit.Mocks** | 985.4 ns    | 7.05 ns   | 6.25 ns   | 3.18 KB   |
-| Imposter        | 1,740.2 ns  | 34.85 ns  | 51.08 ns  | 10.55 KB  |
-| Mockolate       | 634.8 ns    | 5.56 ns   | 4.93 ns   | 2.35 KB   |
-| Moq             | 84,946.5 ns | 479.55 ns | 425.11 ns | 16.34 KB  |
-| NSubstitute     | 12,389.8 ns | 38.64 ns  | 34.25 ns  | 20.31 KB  |
-| FakeItEasy      | 7,662.1 ns  | 56.51 ns  | 47.19 ns  | 11.83 KB  |
+| Library         | Mean         | Error     | StdDev    | Allocated |
+| --------------- | ------------ | --------- | --------- | --------- |
+| **TUnit.Mocks** | 800.4 ns     | 11.83 ns  | 10.49 ns  | 3.18 KB   |
+| Imposter        | 1,428.8 ns   | 24.73 ns  | 23.13 ns  | 10.55 KB  |
+| Mockolate       | 558.5 ns     | 6.64 ns   | 6.21 ns   | 2.35 KB   |
+| Moq             | 116,393.9 ns | 700.43 ns | 655.18 ns | 16.35 KB  |
+| NSubstitute     | 13,223.4 ns  | 139.50 ns | 130.49 ns | 20.31 KB  |
+| FakeItEasy      | 7,989.4 ns   | 111.02 ns | 92.70 ns  | 11.71 KB  |
 
 <!-- -->
 
@@ -48,4 +48,4 @@ Methodology
 
 View the [mock benchmarks overview](/docs/benchmarks/mocks/.md) for methodology details and environment information.
 
-*Last generated: 2026-10-09T02:42:26.464Z*
+*Last generated: 2026-10-10T02:40:36.038Z*
