@@ -60,8 +60,16 @@ public static class Arg
     /// </summary>
     public static OfTypeArg IsOfType<TDerived>() => new(typeof(TDerived));
 
-    /// <summary>Matches only the same object instance as <paramref name="reference"/> (reference equality).</summary>
-    public static Arg<T> IsSameAs<T>(T reference) where T : class => new(new ReferenceEqualsMatcher<T>(reference));
+    /// <summary>
+    /// Matches only the same object instance as <paramref name="reference"/> (reference equality).
+    /// The parameter type is inferred from context, so a base-typed parameter accepts a derived reference.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">When <paramref name="reference"/> is null.</exception>
+    /// <exception cref="ArgumentException">
+    /// When the parameter type is a value type or <paramref name="reference"/> is not assignable to it
+    /// (thrown when the matcher is set up).
+    /// </exception>
+    public static SameAsArg IsSameAs(object reference) => new(reference ?? throw new ArgumentNullException(nameof(reference)));
 
     /// <summary>Matches using a user-defined custom matcher.</summary>
     public static Arg<T> Matches<T>(IArgumentMatcher<T> matcher) => new(matcher);
@@ -117,4 +125,16 @@ public sealed class OfTypeArg
     internal Type Type { get; }
 
     internal OfTypeArg(Type type) => Type = type;
+}
+
+/// <summary>
+/// Sentinel type returned by <see cref="Arg.IsSameAs(object)"/> that implicitly converts to
+/// <see cref="Arg{T}"/> for any reference type T, so the parameter type is inferred from context.
+/// </summary>
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class SameAsArg
+{
+    internal object Reference { get; }
+
+    internal SameAsArg(object reference) => Reference = reference;
 }

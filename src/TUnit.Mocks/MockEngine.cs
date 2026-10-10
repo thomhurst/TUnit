@@ -442,6 +442,18 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     }
 
     /// <summary>
+    /// True for <c>Equals(object)</c>, <c>GetHashCode()</c> and <c>ToString()</c>. These keep running the base
+    /// implementation when <see cref="PassThrough"/> is false: argument matching, dictionaries and diagnostics
+    /// depend on them behaving normally.
+    /// </summary>
+    private static bool IsObjectMethod(string memberName, int argumentCount) => argumentCount switch
+    {
+        0 => memberName is "GetHashCode" or "ToString",
+        1 => memberName == "Equals",
+        _ => false,
+    };
+
+    /// <summary>
     /// For a void/setter call that skips the base implementation (<see cref="PassThrough"/> = false):
     /// throws in strict mode, since the call was not set up.
     /// </summary>
@@ -463,12 +475,12 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
     /// <summary>
     /// For a call with a return value that skips the base implementation (<see cref="PassThrough"/> = false):
-    /// resolves tracked/default/auto-mock values, or throws in strict mode. A custom
-    /// <see cref="DefaultValueProvider"/> never overrides strict mode, so an unexpected call still fails.
+    /// resolves tracked/default/auto-mock values, or throws in strict mode. Like an interface member, a custom
+    /// <see cref="DefaultValueProvider"/> is consulted before the strict-mode throw.
     /// </summary>
     private TReturn ResolveWithoutBase<TReturn>(string memberName, object?[] args, Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue)
     {
-        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn resolved, allowCustomDefault: Behavior != MockBehavior.Strict))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn resolved, allowCustomDefault: typeof(TReturn) != typeof(object)))
         {
             return resolved;
         }
@@ -480,7 +492,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     private TReturn ResolveWithoutBase<TReturn, TStore>(string memberName, in TStore store, Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue)
         where TStore : struct, IArgumentStore
     {
-        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn resolved, allowCustomDefault: Behavior != MockBehavior.Strict))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn resolved, allowCustomDefault: typeof(TReturn) != typeof(object)))
         {
             return resolved;
         }
@@ -509,6 +521,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     {
         RawReturnContext.Clear();
         var callRecord = RecordCall(memberId, memberName, args);
+
+        // Only a single-argument setter is a plain property; indexers (index + value) are not tracked.
+        if (!PassThrough && args.Length == 1 && AutoTrackProperties) StoreAutoTrackedSetter(memberName, args[0]);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
@@ -547,9 +562,6 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         if (!setupFound && !PassThrough)
         {
             ThrowIfStrictWithoutBase(memberName, args);
-
-            // Only a single-argument setter is a plain property; indexers (index + value) are not tracked.
-            if (args.Length == 1) StoreAutoTrackedSetter(memberName, args[0]);
             return true;
         }
 
@@ -618,7 +630,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             throw new MockStrictBehaviorException(callDesc);
         }
 
-        if (!PassThrough)
+        if (!PassThrough && !IsObjectMethod(memberName, args.Length))
         {
             result = ResolveWithoutBase(memberName, args, autoMockFactory, defaultValue);
             return true;
@@ -816,7 +828,8 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     }
 
     /// <summary>
-    /// Clears recorded call history only. Setups, state, auto-tracked property values and
+    /// Clears recorded call history and each setup's invoke count (so <c>VerifyAll</c> and diagnostics
+    /// only count calls made after the clear). Setups, state, auto-tracked property values and
     /// event subscriptions are kept.
     /// </summary>
     /// <remarks>
@@ -829,10 +842,24 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         {
             _callArrays = null;
         }
+
+        foreach (var setup in GetSetups())
+        {
+            setup.ResetInvokeCount();
+        }
+
+        // Cached auto-mocks (e.g. an interface returned by a member) keep their own history.
+        if (Volatile.Read(ref _autoMockCache) is { } autoMocks)
+        {
+            foreach (var autoMock in autoMocks.Values)
+            {
+                autoMock?.ClearCalls();
+            }
+        }
     }
 
     /// <summary>
-    /// Clears all setups and call history.
+    /// Clears all setups and call history, and restores <see cref="PassThrough"/> to its default of <c>true</c>.
     /// </summary>
     public void Reset()
     {
@@ -851,6 +878,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         Volatile.Write(ref _onSubscribeCallbacks, null);
         Volatile.Write(ref _onUnsubscribeCallbacks, null);
         Volatile.Write(ref _autoMockCache, null);
+        _passThrough = true;
     }
 
     /// <summary>

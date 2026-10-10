@@ -197,7 +197,7 @@ var sink = IAuditSink.Mock();
 var logout = new LogoutEvent();
 
 sink.Record(IsOfType<LoginEvent>()).Returns("login");
-sink.Record(IsSameAs<AuditEvent>(logout)).Returns("that logout");
+sink.Record(IsSameAs(logout)).Returns("that logout");
 
 _ = sink.Object.Record(new LoginEvent());  // "login"
 _ = sink.Object.Record(logout);            // "that logout"

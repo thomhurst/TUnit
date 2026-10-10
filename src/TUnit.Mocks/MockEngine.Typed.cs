@@ -101,27 +101,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
-        {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
-        }
-#pragma warning restore IL3050, IL2026
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -138,6 +120,9 @@ public sealed partial class MockEngine<T> where T : class
         RawReturnContext.Clear();
         var store = new ArgumentStore<T1>(arg1);
         var callRecord = RecordCall(memberId, memberName, store);
+
+        // Single-argument setter only; multi-argument setters (indexers) are not auto-tracked.
+        if (!PassThrough && AutoTrackProperties) StoreAutoTrackedSetter(memberName, arg1);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, arg1);
 
@@ -159,8 +144,6 @@ public sealed partial class MockEngine<T> where T : class
         if (!setupFound && !PassThrough)
         {
             ThrowIfStrictWithoutBase(memberName, store);
-            // Single-argument setter only; multi-argument setters (indexers) are not auto-tracked.
-            StoreAutoTrackedSetter(memberName, arg1);
             return true;
         }
         return setupFound;
@@ -201,7 +184,7 @@ public sealed partial class MockEngine<T> where T : class
         {
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
-        if (!PassThrough)
+        if (!PassThrough && !IsObjectMethod(memberName, 1))
         {
             result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
@@ -269,27 +252,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
-        {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
-        }
-#pragma warning restore IL3050, IL2026
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -435,27 +400,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
-        {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
-        }
-#pragma warning restore IL3050, IL2026
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -601,27 +548,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
-        {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
-        }
-#pragma warning restore IL3050, IL2026
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -767,27 +696,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
-        {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
-        }
-#pragma warning restore IL3050, IL2026
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -933,27 +844,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
-        {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
-        }
-#pragma warning restore IL3050, IL2026
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -1099,27 +992,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
-        {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
-        }
-#pragma warning restore IL3050, IL2026
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -1265,27 +1140,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
-        {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
-        }
-#pragma warning restore IL3050, IL2026
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)

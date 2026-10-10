@@ -8,8 +8,32 @@ public interface IClearNamed
     string Name { get; set; }
 }
 
+public interface IClearChildRepo
+{
+    void Save(int value);
+}
+
+public interface IClearParent
+{
+    IClearChildRepo Repo { get; }
+}
+
 public class ClearCallsTests
 {
+    [Test]
+    public async Task ClearCalls_Cascades_To_Cached_Auto_Mocks()
+    {
+        var parent = IClearParent.Mock();
+        var child = parent.Object.Repo;
+        child.Save(1);
+        var childMock = Mock.Get(child);
+
+        Mock.ClearCalls(parent);
+
+        await Assert.That(Mock.Invocations(childMock).Count).IsEqualTo(0);
+        childMock.Save(Any()).WasNeverCalled();
+    }
+
     [Test]
     public async Task ClearCalls_Clears_History_But_Keeps_Setups()
     {
@@ -70,17 +94,22 @@ public class ClearCallsTests
     }
 
     [Test]
-    public async Task ClearCalls_Keeps_Setup_Invoked_State_For_VerifyAll()
+    public async Task ClearCalls_Resets_Setup_Invoke_Counts_For_VerifyAll()
     {
         var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(3);
         ICalculator calc = mock.Object;
 
         calc.Add(1, 2);
+        Mock.VerifyAll(mock);
+
         Mock.ClearCalls(mock);
 
+        await Assert.That(() => Mock.VerifyAll(mock)).Throws<MockVerificationException>();
+
+        // The setup itself is kept and counts again once it is hit after the clear.
+        await Assert.That(calc.Add(1, 2)).IsEqualTo(3);
         Mock.VerifyAll(mock);
-        await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(0);
     }
 
     [Test]

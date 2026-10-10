@@ -24,6 +24,13 @@ public class PassThroughSubject
     public int BaseRunCount { get; private set; }
 }
 
+public class PassThroughValue
+{
+    public override bool Equals(object? obj) => ReferenceEquals(this, obj);
+    public override int GetHashCode() => 7;
+    public override string ToString() => "money";
+}
+
 public class PassThroughTests
 {
     [Test]
@@ -206,14 +213,57 @@ public class PassThroughTests
     }
 
     [Test]
-    public async Task PassThrough_False_Strict_DefaultValueProvider_Does_Not_Hide_Unexpected_Calls()
+    public async Task PassThrough_False_Strict_DefaultValueProvider_Behaves_Like_An_Interface_Member()
     {
         var mock = PassThroughSubject.Mock(MockBehavior.Strict);
         Mock.SetPassThrough(mock, false);
         Mock.SetDefaultValueProvider(mock, new FixedIntProvider(42));
 
-        await Assert.That(() => mock.Object.Zero()).Throws<MockStrictBehaviorException>();
-        await Assert.That(() => mock.Object.Two(1, 2)).Throws<MockStrictBehaviorException>();
+        // The provider is explicit opt-in and, as for interface members, is consulted before the strict throw.
+        await Assert.That(mock.Object.Zero()).IsEqualTo(42);
+        await Assert.That(() => mock.Object.Greet("x")).Throws<MockStrictBehaviorException>();
+    }
+
+    [Test]
+    public async Task Reset_Restores_PassThrough_To_True()
+    {
+        var mock = PassThroughSubject.Mock();
+        Mock.SetPassThrough(mock, false);
+
+        Mock.Reset(mock);
+
+        await Assert.That(Mock.GetPassThrough(mock)).IsTrue();
+        await Assert.That(mock.Object.Two(2, 3)).IsEqualTo(5);
+    }
+
+    [Test]
+    public async Task PassThrough_False_Keeps_Object_Method_Overrides()
+    {
+        foreach (var behavior in new[] { MockBehavior.Loose, MockBehavior.Strict })
+        {
+            var mock = PassThroughValue.Mock(behavior);
+            Mock.SetPassThrough(mock, false);
+            var value = mock.Object;
+
+            await Assert.That(value.Equals(value)).IsTrue();
+            await Assert.That(value.GetHashCode()).IsEqualTo(7);
+            await Assert.That(value.ToString()).IsEqualTo("money");
+        }
+    }
+
+    [Test]
+    public async Task PassThrough_False_Auto_Tracks_Setter_Value_When_A_Setter_Setup_Matches()
+    {
+        var mock = PassThroughSubject.Mock();
+        Mock.SetPassThrough(mock, false);
+        Mock.SetupAllProperties(mock);
+        var setterRan = false;
+        mock.Name.Set(Any()).Callback(() => setterRan = true);
+
+        mock.Object.Name = "x";
+
+        await Assert.That(setterRan).IsTrue();
+        await Assert.That(mock.Object.Name).IsEqualTo("x");
     }
 
     [Test]

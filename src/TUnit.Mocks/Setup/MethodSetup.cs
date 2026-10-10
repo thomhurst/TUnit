@@ -141,6 +141,9 @@ public sealed class MethodSetup
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void IncrementInvokeCount() => Interlocked.Increment(ref _invokeCount);
 
+    /// <summary>Resets the invoke count to zero, so the setup counts as unused again.</summary>
+    public void ResetInvokeCount() => Interlocked.Exchange(ref _invokeCount, 0);
+
     public void AddBehavior(IBehavior behavior)
     {
         // Setup mutation is not a hot path; one lock keeps sequential steps and composed

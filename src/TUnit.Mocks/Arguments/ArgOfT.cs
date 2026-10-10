@@ -47,4 +47,7 @@ public readonly struct Arg<T>
 
     /// <summary>Converts <see cref="Arg.IsOfType{TDerived}"/> into a type matcher for this parameter type.</summary>
     public static implicit operator Arg<T>(OfTypeArg ofType) => new(new TypeMatcher<T>(ofType.Type));
+
+    /// <summary>Converts <see cref="Arg.IsSameAs(object)"/> into a reference-equality matcher for this parameter type.</summary>
+    public static implicit operator Arg<T>(SameAsArg sameAs) => new(new ReferenceEqualsMatcher<T>(sameAs.Reference));
 }

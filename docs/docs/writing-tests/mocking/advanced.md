@@ -349,11 +349,11 @@ svc.GetUser(1);                            // setup kept: still returns Alice
 mock.GetUser(1).WasCalled(Times.Once);     // counts only the call after the clear
 ```
 
-Setups, state, auto-tracked property values and event subscriptions are kept. `VerifyAll()` still sees which setups were invoked. `MockRepository.ClearCalls()` clears every tracked mock. The instance-style `mock.ClearCalls()` is available on net9 and later; on net8 and older target frameworks use `Mock.ClearCalls(mock)`.
+Setups, state, auto-tracked property values and event subscriptions are kept. Each setup's invoke count is reset, so `VerifyAll()` and diagnostics only count calls made after the clear. The call history of cached auto-mocks is cleared too. `MockRepository.ClearCalls()` clears every tracked mock. The instance-style `mock.ClearCalls()` is available on net9 and later; on net8 and older target frameworks use `Mock.ClearCalls(mock)`.
 
 ## Call Base on Class Mocks
 
-By default a class mock runs the base implementation of any virtual member you have not configured. Set `PassThrough` to `false` to make unconfigured members behave like interface members instead: loose mocks return smart defaults (and auto-mocks for interface return types), and strict mocks throw `MockStrictBehaviorException`.
+By default a class mock runs the base implementation of any virtual member you have not configured. Set `PassThrough` to `false` to make unconfigured members behave like interface members instead: loose mocks return smart defaults (and auto-mocks for interface return types), and strict mocks throw `MockStrictBehaviorException` (a configured `DefaultValueProvider` is still consulted first, as for interface members). `Equals(object)`, `GetHashCode()` and `ToString()` keep running the base implementation so equality and dictionary lookups keep working. `Reset()` restores `PassThrough` to `true`.
 
 <!-- doc-test-declaration: split-before=// Usage -->
 ```csharp

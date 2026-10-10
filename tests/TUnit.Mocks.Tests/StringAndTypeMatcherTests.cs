@@ -167,7 +167,7 @@ public class StringAndTypeMatcherTests
     {
         var instance = new EqualsAlwaysTrue();
         var mock = IMatcherHandler.Mock();
-        mock.Lookup(IsSameAs<object>(instance)).Returns("same");
+        mock.Lookup(IsSameAs(instance)).Returns("same");
         var handler = mock.Object;
 
         await Assert.That(handler.Lookup(instance)).IsEqualTo("same");
@@ -176,9 +176,26 @@ public class StringAndTypeMatcherTests
     }
 
     [Test]
+    public async Task IsSameAs_Infers_Base_Parameter_Type_From_Derived_Reference()
+    {
+        var mock = IMatcherHandler.Mock();
+        var derived = new MatcherDerivedEvent();
+        mock.Handle(IsSameAs(derived)).Returns("same");
+
+        await Assert.That(mock.Object.Handle(derived)).IsEqualTo("same");
+        await Assert.That(mock.Object.Handle(new MatcherDerivedEvent())).IsEqualTo("");
+    }
+
+    [Test]
+    public async Task IsSameAs_Throws_For_Value_Type_Parameter()
+    {
+        await Assert.That(() => { Arg<int> _ = IsSameAs("x"); }).Throws<ArgumentException>();
+    }
+
+    [Test]
     public async Task IsSameAs_Null_Reference_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => IsSameAs<object>(null!));
+        Assert.Throws<ArgumentNullException>(() => IsSameAs(null!));
         await Task.CompletedTask;
     }
 
