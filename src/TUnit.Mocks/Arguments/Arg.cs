@@ -55,7 +55,8 @@ public static class Arg
     /// <summary>
     /// Matches an argument that is an instance of <typeparamref name="TDerived"/> (or a type derived from it).
     /// The type is inferred from the parameter position, so a base-typed parameter can be constrained to a
-    /// subtype. Null never matches.
+    /// subtype. Null never matches. <typeparamref name="TDerived"/> must be assignable to the parameter type;
+    /// this is not checked at compile time, so an unrelated type compiles but never matches.
     /// </summary>
     public static OfTypeArg IsOfType<TDerived>() => new(typeof(TDerived));
 

@@ -339,7 +339,6 @@ public sealed partial class MockEngine<T> where T : class
             {
                 throw new MockStrictBehaviorException(FormatCall(memberName, store));
             }
-            StoreAutoTrackedSetter(memberName, arg1);
             return true;
         }
         return setupFound;
@@ -516,7 +515,6 @@ public sealed partial class MockEngine<T> where T : class
             {
                 throw new MockStrictBehaviorException(FormatCall(memberName, store));
             }
-            StoreAutoTrackedSetter(memberName, arg1);
             return true;
         }
         return setupFound;
@@ -693,7 +691,6 @@ public sealed partial class MockEngine<T> where T : class
             {
                 throw new MockStrictBehaviorException(FormatCall(memberName, store));
             }
-            StoreAutoTrackedSetter(memberName, arg1);
             return true;
         }
         return setupFound;
@@ -870,7 +867,6 @@ public sealed partial class MockEngine<T> where T : class
             {
                 throw new MockStrictBehaviorException(FormatCall(memberName, store));
             }
-            StoreAutoTrackedSetter(memberName, arg1);
             return true;
         }
         return setupFound;
@@ -1047,7 +1043,6 @@ public sealed partial class MockEngine<T> where T : class
             {
                 throw new MockStrictBehaviorException(FormatCall(memberName, store));
             }
-            StoreAutoTrackedSetter(memberName, arg1);
             return true;
         }
         return setupFound;
@@ -1224,7 +1219,6 @@ public sealed partial class MockEngine<T> where T : class
             {
                 throw new MockStrictBehaviorException(FormatCall(memberName, store));
             }
-            StoreAutoTrackedSetter(memberName, arg1);
             return true;
         }
         return setupFound;
@@ -1401,7 +1395,6 @@ public sealed partial class MockEngine<T> where T : class
             {
                 throw new MockStrictBehaviorException(FormatCall(memberName, store));
             }
-            StoreAutoTrackedSetter(memberName, arg1);
             return true;
         }
         return setupFound;

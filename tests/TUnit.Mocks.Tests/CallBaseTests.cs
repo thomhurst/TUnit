@@ -11,6 +11,7 @@ public interface ICallBaseDependency
 public class CallBaseSubject
 {
     public virtual string Name { get; set; } = "base-name";
+    public virtual string this[int index] { get => "base-" + index; set { } }
     public virtual int Zero() => 100;
     public virtual int One(int a) => a + 1;
     public virtual int Two(int a, int b) => a + b;
@@ -189,6 +190,19 @@ public class CallBaseTests
         Mock.SetCallBase(mock, false);
 
         await Assert.That(mock.Object.Two(2, 3)).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task CallBase_False_Does_Not_Auto_Track_Indexer_Setters()
+    {
+        var mock = CallBaseSubject.Mock();
+        Mock.SetCallBase(mock, false);
+        Mock.SetupAllProperties(mock);
+        var subject = mock.Object;
+
+        subject[5] = "value";
+
+        await Assert.That(subject[5]).IsEqualTo("");
     }
 
     private sealed class FixedIntProvider(int value) : IDefaultValueProvider

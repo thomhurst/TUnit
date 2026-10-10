@@ -503,7 +503,8 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
                 throw new MockStrictBehaviorException(FormatCall(memberName, args));
             }
 
-            StoreAutoTrackedSetter(memberName, args.Length > 0 ? args[0] : null);
+            // Only a single-argument setter is a plain property; indexers (index + value) are not tracked.
+            if (args.Length == 1) StoreAutoTrackedSetter(memberName, args[0]);
             return true;
         }
 
