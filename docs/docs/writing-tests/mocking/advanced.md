@@ -320,7 +320,7 @@ The provider is consulted **before** auto-mocking and built-in smart defaults.
 
 ## Reset
 
-Clear all setups, call history, state, and auto-tracked property values. For class mocks it also restores `PassThrough` to its default of `true`:
+Clear all setups, call history, state, and auto-tracked property values.. Configuration such as `Behavior`, `DefaultValueProvider` and `PassThrough` is kept:
 
 ```csharp
 mock.GetUser(Any()).Returns(new User("Alice"));
@@ -353,7 +353,7 @@ Setups, state, auto-tracked property values and event subscriptions are kept. Ea
 
 ## Call Base on Class Mocks
 
-By default a class mock runs the base implementation of any virtual member you have not configured. Set `PassThrough` to `false` to make unconfigured members behave like interface members instead: loose mocks return smart defaults (and auto-mocks for interface return types), and strict mocks throw `MockStrictBehaviorException` (a configured `DefaultValueProvider` is still consulted first, as for interface members). `Equals(object)`, `GetHashCode()` and `ToString()` keep running the base implementation so equality and dictionary lookups keep working. `Reset()` restores `PassThrough` to `true`.
+By default a class mock runs the base implementation of any virtual member you have not configured. Set `PassThrough` to `false` to make unconfigured members behave like interface members instead: loose mocks return smart defaults (and auto-mocks for interface return types), and strict mocks throw `MockStrictBehaviorException` (a configured `DefaultValueProvider` is still consulted first, as for interface members). `Equals(object)`, `GetHashCode()` and `ToString()` keep running the base implementation so equality and dictionary lookups keep working. `Reset()` keeps `PassThrough`, like the other configuration (`Behavior`, `DefaultValueProvider`).
 
 <!-- doc-test-declaration: split-before=// Usage -->
 ```csharp

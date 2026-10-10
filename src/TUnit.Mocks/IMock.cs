@@ -15,12 +15,6 @@ public interface IMock
     /// <summary>Fails if any recorded call was not matched by a prior verification.</summary>
     void VerifyNoOtherCalls();
 
-    /// <summary>
-    /// Clears recorded call history and each setup's invoke count, so <c>VerifyAll</c> only counts calls made afterwards.
-    /// Setups and state are kept, including the position of sequenced setups (e.g. <c>ReturnsSequentially</c>).
-    /// </summary>
-    void ClearCalls();
-
     /// <summary>Clears all setups and call history.</summary>
     void Reset();
 }

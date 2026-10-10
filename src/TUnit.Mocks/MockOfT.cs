@@ -15,7 +15,7 @@ namespace TUnit.Mocks;
 /// happen to coincide with the mocked interface's members. Access them via <see cref="Mock"/>
 /// static helpers — e.g. <c>Mock.Reset(mock)</c>, <c>Mock.VerifyAll(mock)</c>.
 /// </remarks>
-public class Mock<T> : IMock, IMockControl<T>, IMockEngineAccess<T> where T : class
+public class Mock<T> : IMock, IMockCallHistory, IMockPassThrough, IMockControl<T>, IMockEngineAccess<T> where T : class
 {
     private readonly MockEngine<T> _engine;
 
@@ -52,7 +52,7 @@ public class Mock<T> : IMock, IMockControl<T>, IMockEngineAccess<T> where T : cl
         set => _engine.DefaultValueProvider = value;
     }
 
-    bool IMockControl<T>.PassThrough
+    bool IMockPassThrough.PassThrough
     {
         get => _engine.PassThrough;
         set => _engine.PassThrough = value;
@@ -62,7 +62,7 @@ public class Mock<T> : IMock, IMockControl<T>, IMockEngineAccess<T> where T : cl
 
     void IMock.Reset() => _engine.Reset();
 
-    void IMock.ClearCalls() => _engine.ClearCalls();
+    void IMockCallHistory.ClearCalls() => _engine.ClearCalls();
 
     void IMock.VerifyAll()
     {

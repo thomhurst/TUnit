@@ -227,15 +227,15 @@ public class PassThroughTests
     }
 
     [Test]
-    public async Task Reset_Restores_PassThrough_To_True()
+    public async Task Reset_Keeps_PassThrough_Like_Other_Configuration()
     {
         var mock = PassThroughSubject.Mock();
         Mock.SetPassThrough(mock, false);
 
         Mock.Reset(mock);
 
-        await Assert.That(Mock.GetPassThrough(mock)).IsTrue();
-        await Assert.That(mock.Object.Two(2, 3)).IsEqualTo(5);
+        await Assert.That(Mock.GetPassThrough(mock)).IsFalse();
+        await Assert.That(mock.Object.Two(2, 3)).IsEqualTo(0);
     }
 
     [Test]
@@ -294,6 +294,33 @@ public class PassThroughTests
     public async Task IsOfType_Throws_For_Unrelated_Type_At_Setup()
     {
         await Assert.That(() => { Arg<int> _ = Arg.IsOfType<string>(); }).Throws<ArgumentException>();
+    }
+
+    [Test]
+    public async Task IsOfType_Boundary_Cases_Are_Accepted()
+    {
+        Arg<object> valueTypeToObject = Arg.IsOfType<int>();     // value type boxed into object
+        Arg<int?> underlyingToNullable = Arg.IsOfType<int>();    // int is assignable to int?
+        Arg<string> sealedImplementingInterface = Arg.IsOfType<string>(); // identical type
+        Arg<IComparable> sealedToInterface = Arg.IsOfType<string>();      // sealed class implements the interface
+        Arg<MatcherBaseEvent> openClassToInterface = Arg.IsOfType<IDisposable>(); // a subclass could implement it
+        Arg<IDisposable> interfaceToInterface = Arg.IsOfType<IComparable>();      // a type could implement both
+
+        await Assert.That(valueTypeToObject.Matcher.Matches(5)).IsTrue();
+        await Assert.That(underlyingToNullable.Matcher.Matches(5)).IsTrue();
+        await Assert.That(sealedToInterface.Matcher.Matches("x")).IsTrue();
+        await Assert.That(sealedImplementingInterface.Matcher.Matches("x")).IsTrue();
+        await Assert.That(openClassToInterface.Matcher.Matches(new MatcherBaseEvent())).IsFalse();
+        await Assert.That(interfaceToInterface.Matcher.Matches(new object())).IsFalse();
+    }
+
+    [Test]
+    public async Task IsOfType_Boundary_Cases_Are_Rejected()
+    {
+        await Assert.That(() => { Arg<long> _ = Arg.IsOfType<int>(); }).Throws<ArgumentException>();            // unrelated value types
+        await Assert.That(() => { Arg<IDisposable> _ = Arg.IsOfType<string>(); }).Throws<ArgumentException>();  // sealed class lacking the interface
+        await Assert.That(() => { Arg<string> _ = Arg.IsOfType<IDisposable>(); }).Throws<ArgumentException>();  // interface the sealed class lacks
+        await Assert.That(() => { Arg<MatcherBaseEvent> _ = Arg.IsOfType<string>(); }).Throws<ArgumentException>(); // unrelated classes
     }
 
     [Test]

@@ -34,12 +34,6 @@ internal interface IMockControl<T> : IMock where T : class
     IDefaultValueProvider? DefaultValueProvider { get; set; }
 
     /// <summary>
-    /// Whether unconfigured virtual members of a class or wrap mock run the base implementation (default true).
-    /// When false they return default values (loose) or throw (strict), like interface members.
-    /// </summary>
-    bool PassThrough { get; set; }
-
-    /// <summary>
     /// Enables auto-tracking for all properties. Setters store, getters return.
     /// Explicit setups take precedence.
     /// </summary>

@@ -855,13 +855,13 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         {
             foreach (var autoMock in autoMocks.Values)
             {
-                autoMock?.ClearCalls();
+                (autoMock as IMockCallHistory)?.ClearCalls();
             }
         }
     }
 
     /// <summary>
-    /// Clears all setups and call history, and restores <see cref="PassThrough"/> to its default of <c>true</c>.
+    /// Clears all setups and call history. Configuration (<see cref="PassThrough"/>, <see cref="Behavior"/>, <see cref="DefaultValueProvider"/>) is kept.
     /// </summary>
     public void Reset()
     {
@@ -880,7 +880,6 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         Volatile.Write(ref _onSubscribeCallbacks, null);
         Volatile.Write(ref _onUnsubscribeCallbacks, null);
         Volatile.Write(ref _autoMockCache, null);
-        _passThrough = true;
     }
 
     /// <summary>

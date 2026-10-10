@@ -3,7 +3,8 @@ namespace TUnit.Mocks.RuntimeStubs;
 /// <summary>
 /// <see cref="IMock"/> wrapper for a runtime-emitted stub so it can flow through the engine's
 /// auto-mock cache. Runtime stubs have no engine: they record no calls and hold no setups, so
-/// verification is a no-op and reset only clears remembered property values.
+/// verification is a no-op and reset only clears remembered property values. They do not implement
+/// <see cref="IMockCallHistory"/>, since there is no call history to clear.
 /// </summary>
 internal sealed class RuntimeStubMock(RuntimeStub instance) : IMock
 {
@@ -15,11 +16,6 @@ internal sealed class RuntimeStubMock(RuntimeStub instance) : IMock
 
     public void VerifyNoOtherCalls()
     {
-    }
-
-    public void ClearCalls()
-    {
-        // Stubs record no calls, so there is no history to clear.
     }
 
     public void Reset() => ((RuntimeStub)ObjectInstance).ResetState();
