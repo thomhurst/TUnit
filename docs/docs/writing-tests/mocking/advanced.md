@@ -334,6 +334,46 @@ _ = mock.Invocations.Count; // 0 (history cleared)
 
 The `SetupAllProperties()` flag is preserved across resets.
 
+## Clearing Invocations
+
+`Reset()` removes everything. To forget only the recorded calls and keep your setups, use `ClearInvocations()`. This suits a test that acts twice and verifies only the second act:
+
+```csharp
+mock.GetUser(Any()).Returns(new User("Alice"));
+svc.GetUser(1);
+
+mock.ClearInvocations();
+
+_ = mock.Invocations.Count;                // 0 (history cleared)
+svc.GetUser(1);                            // setup kept: still returns Alice
+mock.GetUser(1).WasCalled(Times.Once);     // counts only the call after the clear
+```
+
+Setups, state, auto-tracked property values and event subscriptions are kept. `VerifyAll()` still sees which setups were invoked. `MockRepository.ClearInvocations()` clears every tracked mock.
+
+## Call Base on Class Mocks
+
+By default a class mock runs the base implementation of any virtual member you have not configured. Set `CallBase` to `false` to make unconfigured members behave like interface members instead: loose mocks return smart defaults (and auto-mocks for interface return types), and strict mocks throw `MockStrictBehaviorException`.
+
+<!-- doc-test-declaration: split-before=// Usage -->
+```csharp
+public class ShippingCalculator
+{
+    public virtual decimal Tax(decimal amount) => amount * 0.2m;
+    public virtual decimal Discount(decimal amount) => amount * 0.1m;
+}
+
+// Usage
+var calculator = ShippingCalculator.Mock();
+calculator.CallBase = false;
+calculator.Discount(Any()).Returns(5m);
+
+_ = calculator.Object.Discount(100m); // 5 (configured)
+_ = calculator.Object.Tax(100m);      // 0 (base implementation is not called)
+```
+
+Calls are still recorded and can be verified. `CallBase` can be changed at any time. It has no effect on interface or abstract members because they have no base implementation. On a `Mock.Wrap(...)` mock, `false` stops unconfigured calls from reaching the wrapped instance. On net8 and older target frameworks, use `Mock.SetCallBase(mock, false)` and `Mock.GetCallBase(mock)`.
+
 ## Internals Access (experimental)
 
 Some SDKs route behavior through types that are `internal` to their own assembly — the classic

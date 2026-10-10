@@ -52,9 +52,17 @@ public class Mock<T> : IMock, IMockControl<T>, IMockEngineAccess<T> where T : cl
         set => _engine.DefaultValueProvider = value;
     }
 
+    bool IMockControl<T>.CallBase
+    {
+        get => _engine.CallBase;
+        set => _engine.CallBase = value;
+    }
+
     void IMockControl<T>.SetupAllProperties() => _engine.AutoTrackProperties = true;
 
     void IMock.Reset() => _engine.Reset();
+
+    void IMock.ClearInvocations() => _engine.ClearInvocations();
 
     void IMock.VerifyAll()
     {

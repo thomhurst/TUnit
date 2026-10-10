@@ -101,6 +101,20 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
     public MockBehavior Behavior { get; }
 
+    private volatile bool _callBase = true;
+
+    /// <summary>
+    /// When true (the default), an unconfigured virtual member of a class or wrap mock runs the
+    /// base implementation. When false it behaves like an interface member: loose mode returns
+    /// the default value and strict mode throws.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool CallBase
+    {
+        get => _callBase;
+        set => _callBase = value;
+    }
+
     public MockEngine(MockBehavior behavior)
     {
         Behavior = behavior;
@@ -373,32 +387,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         // No setup matched — mark as unmatched for diagnostics
         callRecord.IsUnmatched = true;
 
-        // Auto-track property getters: return stored value if available
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn typed) return typed;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        // Custom default value provider: consulted before auto-mock and built-in defaults.
-        // Suppressed: DefaultValueProvider is opt-in (null by default). Users who set it accept the AOT tradeoff.
-        // The source generator emits inline defaults for Task<T>/ValueTask<T>/collections without needing this path.
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
-        {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
-        }
-#pragma warning restore IL3050, IL2026
-
-        // Auto-mock: for interface return types in Loose mode, create a functional mock
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -416,6 +407,55 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// Returns true if a setup was found (caller should NOT call base), false otherwise (caller should call base).
     /// In Strict mode, throws if no setup matches (no fallthrough to base).
     /// </summary>
+    /// <summary>
+    /// Resolves the value for an unmatched call that is not served by a setup: an auto-tracked
+    /// property value, the custom <see cref="DefaultValueProvider"/>, or a loose auto-mock.
+    /// Returns false when none applies, leaving the caller to apply strict-mode and default handling.
+    /// </summary>
+    private bool TryResolveUnmatchedReturn<TReturn>(string memberName, Func<MockBehavior, IMock>? autoMockFactory, out TReturn result)
+    {
+        // Auto-track property getters: return stored value if available
+        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        {
+            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
+            {
+                if (trackedValue is TReturn typed) { result = typed; return true; }
+                if (trackedValue is null) { result = default!; return true; }
+            }
+        }
+
+        // Custom default value provider: consulted before auto-mock and built-in defaults.
+        // Suppressed: DefaultValueProvider is opt-in (null by default). Users who set it accept the AOT tradeoff.
+        // The source generator emits inline defaults for Task<T>/ValueTask<T>/collections without needing this path.
+#pragma warning disable IL3050, IL2026
+        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        {
+            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
+            if (customDefault is TReturn typedCustom) { result = typedCustom; return true; }
+            if (customDefault is null) { result = default!; return true; }
+        }
+#pragma warning restore IL3050, IL2026
+
+        // Auto-mock: for interface return types in Loose mode, create a functional mock
+        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
+        {
+            result = autoMockResult;
+            return true;
+        }
+
+        result = default!;
+        return false;
+    }
+
+    /// <summary>Stores an auto-tracked property setter value for an unmatched call that skips the base implementation.</summary>
+    private void StoreAutoTrackedSetter(string memberName, object? value)
+    {
+        if (AutoTrackProperties && memberName.StartsWith("set_", StringComparison.Ordinal))
+        {
+            AutoTrackValues[memberName[4..]] = value;
+        }
+    }
+
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCall(int memberId, string memberName, object?[] args)
     {
@@ -454,6 +494,17 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         {
             var callDesc = FormatCall(memberName, args);
             throw new MockStrictBehaviorException(callDesc);
+        }
+
+        if (!setupFound && !CallBase)
+        {
+            if (Behavior == MockBehavior.Strict)
+            {
+                throw new MockStrictBehaviorException(FormatCall(memberName, args));
+            }
+
+            StoreAutoTrackedSetter(memberName, args.Length > 0 ? args[0] : null);
+            return true;
         }
 
         return setupFound;
@@ -519,6 +570,21 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         {
             var callDesc = FormatCall(memberName, args);
             throw new MockStrictBehaviorException(callDesc);
+        }
+
+        if (!CallBase)
+        {
+            if (!TryResolveUnmatchedReturn(memberName, autoMockFactory, out result))
+            {
+                if (Behavior == MockBehavior.Strict)
+                {
+                    throw new MockStrictBehaviorException(FormatCall(memberName, args));
+                }
+
+                result = defaultValue;
+            }
+
+            return true;
         }
 
         result = defaultValue;
@@ -710,6 +776,18 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
         mock = null;
         return false;
+    }
+
+    /// <summary>
+    /// Clears recorded call history only. Setups, state, auto-tracked property values and
+    /// event subscriptions are kept.
+    /// </summary>
+    public void ClearInvocations()
+    {
+        lock (Lock)
+        {
+            _callArrays = null;
+        }
     }
 
     /// <summary>

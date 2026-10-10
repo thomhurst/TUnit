@@ -26,7 +26,12 @@ TUnit.Mocks automatically imports the `Arg` class via `global using static`, so 
 | `IsNotNull<T>()` | Any non-null value |
 | `Matches(pattern)` | String matching a regex pattern |
 | `Matches(regex)` | String matching a compiled `Regex` |
+| `StartsWith(prefix)` | String starting with a prefix (optional `StringComparison`) |
+| `EndsWith(suffix)` | String ending with a suffix (optional `StringComparison`) |
+| `Contains(substring)` | String containing a substring (optional `StringComparison`) |
 | `Contains<TCol, TElem>(item)` | Collection containing an element |
+| `IsOfType<TDerived>()` | Instance of `TDerived` (or a subtype), for a base-typed parameter |
+| `IsSameAs(reference)` | The exact same instance (reference equality) |
 | `HasCount<T>(n)` | Collection with exactly n elements |
 | `IsEmpty<T>()` | Empty collection |
 | `SequenceEquals<TCol, TElem>(expected)` | Collection matching element-by-element |
@@ -161,6 +166,45 @@ svc.Search("admin_1");   // no match
 var pattern = new Regex(@"^user_\d+$", RegexOptions.Compiled);
 mock.Search(Matches(pattern)).Returns(new[] { "found" });
 ```
+
+### StartsWith, EndsWith and Contains
+
+```csharp
+mock.Greet(StartsWith("Dr. ")).Returns("Hello, doctor");
+mock.Greet(EndsWith("Jr.")).Returns("Hello, junior");
+mock.Greet(Contains("smith", StringComparison.OrdinalIgnoreCase)).Returns("Hello, Smith");
+```
+
+Matching is case-sensitive (`StringComparison.Ordinal`) unless you pass a comparison. `null` never matches. `Contains("text")` with a string is a different overload from the collection form `Contains<TCollection, TElement>(item)`.
+
+## Type and Reference Matchers
+
+`IsOfType<TDerived>()` matches an argument that is an instance of `TDerived` or a subtype. The parameter type is inferred, so it lets you constrain a base-typed parameter. `IsSameAs(instance)` matches only that exact instance, ignoring any `Equals` override.
+
+<!-- doc-test-declaration: split-before=// Usage -->
+```csharp
+public class AuditEvent { }
+public class LoginEvent : AuditEvent { }
+public class LogoutEvent : AuditEvent { }
+
+public interface IAuditSink
+{
+    string Record(AuditEvent evt);
+}
+
+// Usage
+var sink = IAuditSink.Mock();
+var logout = new LogoutEvent();
+
+sink.Record(IsOfType<LoginEvent>()).Returns("login");
+sink.Record(IsSameAs<AuditEvent>(logout)).Returns("that logout");
+
+_ = sink.Object.Record(new LoginEvent());  // "login"
+_ = sink.Object.Record(logout);            // "that logout"
+_ = sink.Object.Record(new LogoutEvent()); // "" (no match)
+```
+
+`null` never matches `IsOfType`.
 
 ## Collection Matchers
 

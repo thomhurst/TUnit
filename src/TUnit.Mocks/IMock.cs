@@ -15,6 +15,9 @@ public interface IMock
     /// <summary>Fails if any recorded call was not matched by a prior verification.</summary>
     void VerifyNoOtherCalls();
 
+    /// <summary>Clears recorded call history only, keeping setups and state.</summary>
+    void ClearInvocations();
+
     /// <summary>Clears all setups and call history.</summary>
     void Reset();
 }
