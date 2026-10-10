@@ -158,10 +158,8 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!setupFound && !CallBase)
         {
-            if (Behavior == MockBehavior.Strict)
-            {
-                throw new MockStrictBehaviorException(FormatCall(memberName, store));
-            }
+            ThrowIfStrictWithoutBase(memberName, store);
+            // Single-argument setter only; multi-argument setters (indexers) are not auto-tracked.
             StoreAutoTrackedSetter(memberName, arg1);
             return true;
         }
@@ -205,14 +203,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!CallBase)
         {
-            if (!TryResolveUnmatchedReturn(memberName, autoMockFactory, out result))
-            {
-                if (Behavior == MockBehavior.Strict)
-                {
-                    throw new MockStrictBehaviorException(FormatCall(memberName, store));
-                }
-                result = defaultValue;
-            }
+            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
         }
         result = defaultValue;
@@ -335,10 +326,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!setupFound && !CallBase)
         {
-            if (Behavior == MockBehavior.Strict)
-            {
-                throw new MockStrictBehaviorException(FormatCall(memberName, store));
-            }
+            ThrowIfStrictWithoutBase(memberName, store);
             return true;
         }
         return setupFound;
@@ -381,14 +369,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!CallBase)
         {
-            if (!TryResolveUnmatchedReturn(memberName, autoMockFactory, out result))
-            {
-                if (Behavior == MockBehavior.Strict)
-                {
-                    throw new MockStrictBehaviorException(FormatCall(memberName, store));
-                }
-                result = defaultValue;
-            }
+            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
         }
         result = defaultValue;
@@ -511,10 +492,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!setupFound && !CallBase)
         {
-            if (Behavior == MockBehavior.Strict)
-            {
-                throw new MockStrictBehaviorException(FormatCall(memberName, store));
-            }
+            ThrowIfStrictWithoutBase(memberName, store);
             return true;
         }
         return setupFound;
@@ -557,14 +535,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!CallBase)
         {
-            if (!TryResolveUnmatchedReturn(memberName, autoMockFactory, out result))
-            {
-                if (Behavior == MockBehavior.Strict)
-                {
-                    throw new MockStrictBehaviorException(FormatCall(memberName, store));
-                }
-                result = defaultValue;
-            }
+            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
         }
         result = defaultValue;
@@ -687,10 +658,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!setupFound && !CallBase)
         {
-            if (Behavior == MockBehavior.Strict)
-            {
-                throw new MockStrictBehaviorException(FormatCall(memberName, store));
-            }
+            ThrowIfStrictWithoutBase(memberName, store);
             return true;
         }
         return setupFound;
@@ -733,14 +701,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!CallBase)
         {
-            if (!TryResolveUnmatchedReturn(memberName, autoMockFactory, out result))
-            {
-                if (Behavior == MockBehavior.Strict)
-                {
-                    throw new MockStrictBehaviorException(FormatCall(memberName, store));
-                }
-                result = defaultValue;
-            }
+            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
         }
         result = defaultValue;
@@ -863,10 +824,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!setupFound && !CallBase)
         {
-            if (Behavior == MockBehavior.Strict)
-            {
-                throw new MockStrictBehaviorException(FormatCall(memberName, store));
-            }
+            ThrowIfStrictWithoutBase(memberName, store);
             return true;
         }
         return setupFound;
@@ -909,14 +867,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!CallBase)
         {
-            if (!TryResolveUnmatchedReturn(memberName, autoMockFactory, out result))
-            {
-                if (Behavior == MockBehavior.Strict)
-                {
-                    throw new MockStrictBehaviorException(FormatCall(memberName, store));
-                }
-                result = defaultValue;
-            }
+            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
         }
         result = defaultValue;
@@ -1039,10 +990,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!setupFound && !CallBase)
         {
-            if (Behavior == MockBehavior.Strict)
-            {
-                throw new MockStrictBehaviorException(FormatCall(memberName, store));
-            }
+            ThrowIfStrictWithoutBase(memberName, store);
             return true;
         }
         return setupFound;
@@ -1085,14 +1033,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!CallBase)
         {
-            if (!TryResolveUnmatchedReturn(memberName, autoMockFactory, out result))
-            {
-                if (Behavior == MockBehavior.Strict)
-                {
-                    throw new MockStrictBehaviorException(FormatCall(memberName, store));
-                }
-                result = defaultValue;
-            }
+            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
         }
         result = defaultValue;
@@ -1215,10 +1156,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!setupFound && !CallBase)
         {
-            if (Behavior == MockBehavior.Strict)
-            {
-                throw new MockStrictBehaviorException(FormatCall(memberName, store));
-            }
+            ThrowIfStrictWithoutBase(memberName, store);
             return true;
         }
         return setupFound;
@@ -1261,14 +1199,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!CallBase)
         {
-            if (!TryResolveUnmatchedReturn(memberName, autoMockFactory, out result))
-            {
-                if (Behavior == MockBehavior.Strict)
-                {
-                    throw new MockStrictBehaviorException(FormatCall(memberName, store));
-                }
-                result = defaultValue;
-            }
+            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
         }
         result = defaultValue;
@@ -1391,10 +1322,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!setupFound && !CallBase)
         {
-            if (Behavior == MockBehavior.Strict)
-            {
-                throw new MockStrictBehaviorException(FormatCall(memberName, store));
-            }
+            ThrowIfStrictWithoutBase(memberName, store);
             return true;
         }
         return setupFound;
@@ -1437,14 +1365,7 @@ public sealed partial class MockEngine<T> where T : class
         }
         if (!CallBase)
         {
-            if (!TryResolveUnmatchedReturn(memberName, autoMockFactory, out result))
-            {
-                if (Behavior == MockBehavior.Strict)
-                {
-                    throw new MockStrictBehaviorException(FormatCall(memberName, store));
-                }
-                result = defaultValue;
-            }
+            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
         }
         result = defaultValue;

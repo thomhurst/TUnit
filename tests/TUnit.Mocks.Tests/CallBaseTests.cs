@@ -205,6 +205,24 @@ public class CallBaseTests
         await Assert.That(subject[5]).IsEqualTo("");
     }
 
+    [Test]
+    public async Task CallBase_False_Strict_DefaultValueProvider_Does_Not_Hide_Unexpected_Calls()
+    {
+        var mock = CallBaseSubject.Mock(MockBehavior.Strict);
+        Mock.SetCallBase(mock, false);
+        Mock.SetDefaultValueProvider(mock, new FixedIntProvider(42));
+
+        await Assert.That(() => mock.Object.Zero()).Throws<MockStrictBehaviorException>();
+        await Assert.That(() => mock.Object.Two(1, 2)).Throws<MockStrictBehaviorException>();
+    }
+
+    [Test]
+    public async Task IsOfType_Throws_For_Unrelated_Type_At_Setup()
+    {
+
+        await Assert.That(() => { Arg<int> _ = Arg.IsOfType<string>(); }).Throws<ArgumentException>();
+    }
+
     private sealed class FixedIntProvider(int value) : IDefaultValueProvider
     {
         public bool CanProvide(Type type) => type == typeof(int);

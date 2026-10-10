@@ -412,7 +412,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// property value, the custom <see cref="DefaultValueProvider"/>, or a loose auto-mock.
     /// Returns false when none applies, leaving the caller to apply strict-mode and default handling.
     /// </summary>
-    private bool TryResolveUnmatchedReturn<TReturn>(string memberName, Func<MockBehavior, IMock>? autoMockFactory, out TReturn result)
+    private bool TryResolveUnmatchedReturn<TReturn>(string memberName, Func<MockBehavior, IMock>? autoMockFactory, out TReturn result, bool allowCustomDefault = true)
     {
         // Auto-track property getters: return stored value if available
         if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
@@ -428,7 +428,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         // Suppressed: DefaultValueProvider is opt-in (null by default). Users who set it accept the AOT tradeoff.
         // The source generator emits inline defaults for Task<T>/ValueTask<T>/collections without needing this path.
 #pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        if (allowCustomDefault && DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
         {
             var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
             if (customDefault is TReturn typedCustom) { result = typedCustom; return true; }
@@ -445,6 +445,54 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
         result = default!;
         return false;
+    }
+
+    /// <summary>
+    /// For a void/setter call that skips the base implementation (<see cref="CallBase"/> = false):
+    /// throws in strict mode, since the call was not set up.
+    /// </summary>
+    private void ThrowIfStrictWithoutBase(string memberName, object?[] args)
+    {
+        if (Behavior == MockBehavior.Strict)
+        {
+            throw new MockStrictBehaviorException(FormatCall(memberName, args));
+        }
+    }
+
+    private void ThrowIfStrictWithoutBase<TStore>(string memberName, in TStore store) where TStore : struct, IArgumentStore
+    {
+        if (Behavior == MockBehavior.Strict)
+        {
+            throw new MockStrictBehaviorException(FormatCall(memberName, store));
+        }
+    }
+
+    /// <summary>
+    /// For a call with a return value that skips the base implementation (<see cref="CallBase"/> = false):
+    /// resolves tracked/default/auto-mock values, or throws in strict mode. A custom
+    /// <see cref="DefaultValueProvider"/> never overrides strict mode, so an unexpected call still fails.
+    /// </summary>
+    private TReturn ResolveWithoutBase<TReturn>(string memberName, object?[] args, Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue)
+    {
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn resolved, allowCustomDefault: Behavior != MockBehavior.Strict))
+        {
+            return resolved;
+        }
+
+        ThrowIfStrictWithoutBase(memberName, args);
+        return defaultValue;
+    }
+
+    private TReturn ResolveWithoutBase<TReturn, TStore>(string memberName, in TStore store, Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue)
+        where TStore : struct, IArgumentStore
+    {
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn resolved, allowCustomDefault: Behavior != MockBehavior.Strict))
+        {
+            return resolved;
+        }
+
+        ThrowIfStrictWithoutBase(memberName, store);
+        return defaultValue;
     }
 
     /// <summary>Stores an auto-tracked property setter value for an unmatched call that skips the base implementation.</summary>
@@ -498,10 +546,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
         if (!setupFound && !CallBase)
         {
-            if (Behavior == MockBehavior.Strict)
-            {
-                throw new MockStrictBehaviorException(FormatCall(memberName, args));
-            }
+            ThrowIfStrictWithoutBase(memberName, args);
 
             // Only a single-argument setter is a plain property; indexers (index + value) are not tracked.
             if (args.Length == 1) StoreAutoTrackedSetter(memberName, args[0]);
@@ -575,16 +620,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
         if (!CallBase)
         {
-            if (!TryResolveUnmatchedReturn(memberName, autoMockFactory, out result))
-            {
-                if (Behavior == MockBehavior.Strict)
-                {
-                    throw new MockStrictBehaviorException(FormatCall(memberName, args));
-                }
-
-                result = defaultValue;
-            }
-
+            result = ResolveWithoutBase(memberName, args, autoMockFactory, defaultValue);
             return true;
         }
 
