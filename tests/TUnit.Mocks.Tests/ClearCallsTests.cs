@@ -258,6 +258,47 @@ public class ClearCallsTests
 
         await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(0);
     }
+
+    [Test]
+    public async Task ClearCalls_Never_Exposes_A_Half_Reset_History()
+    {
+        var mock = ICalculator.Mock();
+        ICalculator calc = mock.Object;
+
+        var callers = Enumerable.Range(0, 4)
+            .Select(_ => Task.Run(() =>
+            {
+                for (var i = 0; i < 1000; i++)
+                {
+                    calc.Add(i, i);
+                }
+            }))
+            .ToArray();
+        var clearer = Task.Run(() =>
+        {
+            for (var i = 0; i < 100; i++)
+            {
+                Mock.ClearCalls(mock);
+            }
+        });
+
+        await Task.WhenAll(callers.Append(clearer));
+
+        // Records and counts live in one snapshot object, so once the calls settle they must agree,
+        // whichever history survived the race.
+        var recorded = Mock.Invocations(mock).Count;
+        mock.Add(Any(), Any()).WasCalled(Times.Exactly(recorded));
+
+        // And a clear followed by fresh calls is exact.
+        Mock.ClearCalls(mock);
+        for (var i = 0; i < 10; i++)
+        {
+            calc.Add(i, i);
+        }
+
+        await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(10);
+        mock.Add(Any(), Any()).WasCalled(Times.Exactly(10));
+    }
 }
 
 #if NET9_0_OR_GREATER
