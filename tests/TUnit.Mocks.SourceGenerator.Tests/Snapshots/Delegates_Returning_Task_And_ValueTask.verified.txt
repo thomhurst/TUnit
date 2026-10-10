@@ -57,6 +57,10 @@ namespace TUnit.Mocks.Generated
 
         #if NET9_0_OR_GREATER
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void ClearCalls(this global::TUnit.Mocks.Mock<global::System.Func<global::System.Threading.Tasks.ValueTask>> mock)
+            => global::TUnit.Mocks.Mock.ClearCalls(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public static void Reset(this global::TUnit.Mocks.Mock<global::System.Func<global::System.Threading.Tasks.ValueTask>> mock)
             => global::TUnit.Mocks.Mock.Reset(mock);
 
@@ -94,6 +98,12 @@ namespace TUnit.Mocks.Generated
             {
                 get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
                 set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            }
+
+            public bool PassThrough
+            {
+                get => global::TUnit.Mocks.Mock.GetPassThrough(mock);
+                set => global::TUnit.Mocks.Mock.SetPassThrough(mock, value);
             }
         }
         #endif
@@ -185,6 +195,10 @@ namespace TUnit.Mocks.Generated
 
         #if NET9_0_OR_GREATER
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void ClearCalls(this global::TUnit.Mocks.Mock<global::System.Func<int, global::System.Threading.Tasks.Task>> mock)
+            => global::TUnit.Mocks.Mock.ClearCalls(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public static void Reset(this global::TUnit.Mocks.Mock<global::System.Func<int, global::System.Threading.Tasks.Task>> mock)
             => global::TUnit.Mocks.Mock.Reset(mock);
 
@@ -222,6 +236,12 @@ namespace TUnit.Mocks.Generated
             {
                 get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
                 set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            }
+
+            public bool PassThrough
+            {
+                get => global::TUnit.Mocks.Mock.GetPassThrough(mock);
+                set => global::TUnit.Mocks.Mock.SetPassThrough(mock, value);
             }
         }
         #endif
@@ -325,6 +345,10 @@ namespace TUnit.Mocks.Generated
 
         #if NET9_0_OR_GREATER
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void ClearCalls(this global::TUnit.Mocks.Mock<global::System.Func<int, global::System.Threading.Tasks.Task<int>>> mock)
+            => global::TUnit.Mocks.Mock.ClearCalls(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public static void Reset(this global::TUnit.Mocks.Mock<global::System.Func<int, global::System.Threading.Tasks.Task<int>>> mock)
             => global::TUnit.Mocks.Mock.Reset(mock);
 
@@ -362,6 +386,12 @@ namespace TUnit.Mocks.Generated
             {
                 get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
                 set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            }
+
+            public bool PassThrough
+            {
+                get => global::TUnit.Mocks.Mock.GetPassThrough(mock);
+                set => global::TUnit.Mocks.Mock.SetPassThrough(mock, value);
             }
         }
         #endif
@@ -525,6 +555,10 @@ namespace TUnit.Mocks.Generated
 
         #if NET9_0_OR_GREATER
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void ClearCalls(this global::TUnit.Mocks.Mock<global::System.Func<string, global::System.Threading.Tasks.ValueTask<string>>> mock)
+            => global::TUnit.Mocks.Mock.ClearCalls(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public static void Reset(this global::TUnit.Mocks.Mock<global::System.Func<string, global::System.Threading.Tasks.ValueTask<string>>> mock)
             => global::TUnit.Mocks.Mock.Reset(mock);
 
@@ -562,6 +596,12 @@ namespace TUnit.Mocks.Generated
             {
                 get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
                 set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            }
+
+            public bool PassThrough
+            {
+                get => global::TUnit.Mocks.Mock.GetPassThrough(mock);
+                set => global::TUnit.Mocks.Mock.SetPassThrough(mock, value);
             }
         }
         #endif

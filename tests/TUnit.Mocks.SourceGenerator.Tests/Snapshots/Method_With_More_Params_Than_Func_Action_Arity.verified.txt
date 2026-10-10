@@ -109,6 +109,10 @@ namespace TUnit.Mocks.Generated
 
         #if NET9_0_OR_GREATER
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void ClearCalls(this global::TUnit.Mocks.Mock<global::ILongMethodSignatures> mock)
+            => global::TUnit.Mocks.Mock.ClearCalls(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public static void Reset(this global::TUnit.Mocks.Mock<global::ILongMethodSignatures> mock)
             => global::TUnit.Mocks.Mock.Reset(mock);
 
@@ -146,6 +150,12 @@ namespace TUnit.Mocks.Generated
             {
                 get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
                 set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            }
+
+            public bool PassThrough
+            {
+                get => global::TUnit.Mocks.Mock.GetPassThrough(mock);
+                set => global::TUnit.Mocks.Mock.SetPassThrough(mock, value);
             }
         }
         #endif

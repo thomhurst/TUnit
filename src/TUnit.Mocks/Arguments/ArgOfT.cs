@@ -44,4 +44,10 @@ public readonly struct Arg<T>
     public static implicit operator Arg<T>(Func<T, bool> predicate) => new(new PredicateMatcher<T>(predicate!));
 
     public static implicit operator Arg<T>(AnyArg _) => new(AnyMatcher<T>.Instance);
+
+    /// <summary>Converts <see cref="Arg.IsOfType{TDerived}"/> into a type matcher for this parameter type.</summary>
+    public static implicit operator Arg<T>(OfTypeArg ofType) => new(new TypeMatcher<T>(ofType.Type));
+
+    /// <summary>Converts <see cref="Arg.IsSameAs(object)"/> into a reference-equality matcher for this parameter type.</summary>
+    public static implicit operator Arg<T>(SameAsArg sameAs) => new(new ReferenceEqualsMatcher<T>(sameAs.Reference));
 }

@@ -40,6 +40,37 @@ public static class Arg
     /// <summary>Matches a string against a compiled <see cref="Regex"/>.</summary>
     public static Arg<string> Matches(Regex regex) => new(new RegexMatcher(regex));
 
+    /// <summary>Matches a string that starts with <paramref name="prefix"/>. Null never matches.</summary>
+    public static Arg<string> StartsWith(string prefix, StringComparison comparison = StringComparison.Ordinal)
+        => new(new StringMatcher(StringMatcher.Mode.StartsWith, prefix, comparison));
+
+    /// <summary>Matches a string that ends with <paramref name="suffix"/>. Null never matches.</summary>
+    public static Arg<string> EndsWith(string suffix, StringComparison comparison = StringComparison.Ordinal)
+        => new(new StringMatcher(StringMatcher.Mode.EndsWith, suffix, comparison));
+
+    /// <summary>Matches a string that contains <paramref name="substring"/>. Null never matches.</summary>
+    public static Arg<string> Contains(string substring, StringComparison comparison = StringComparison.Ordinal)
+        => new(new StringMatcher(StringMatcher.Mode.Contains, substring, comparison));
+
+    /// <summary>
+    /// Matches an argument that is an instance of <typeparamref name="TDerived"/> (or a type derived from it).
+    /// The type is inferred from the parameter position, so a base-typed parameter can be constrained to a
+    /// subtype. Null never matches. If <typeparamref name="TDerived"/> can never overlap the parameter type
+    /// (not checked at compile time), an <see cref="ArgumentException"/> is thrown when the matcher is set up.
+    /// </summary>
+    public static OfTypeArg IsOfType<TDerived>() => new(typeof(TDerived));
+
+    /// <summary>
+    /// Matches only the same object instance as <paramref name="reference"/> (reference equality).
+    /// The parameter type is inferred from context, so a base-typed parameter accepts a derived reference.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">When <paramref name="reference"/> is null.</exception>
+    /// <exception cref="ArgumentException">
+    /// When the parameter type is a value type or <paramref name="reference"/> is not assignable to it
+    /// (thrown when the matcher is set up).
+    /// </exception>
+    public static SameAsArg IsSameAs(object reference) => new(reference ?? throw new ArgumentNullException(nameof(reference)));
+
     /// <summary>Matches using a user-defined custom matcher.</summary>
     public static Arg<T> Matches<T>(IArgumentMatcher<T> matcher) => new(matcher);
 
@@ -82,4 +113,32 @@ public sealed class AnyArg
 {
     internal static readonly AnyArg Instance = new();
     private AnyArg() { }
+}
+
+/// <summary>
+/// Sentinel type returned by <see cref="Arg.IsOfType{TDerived}"/> that implicitly converts to
+/// <see cref="Arg{T}"/> for any T, so the parameter type is inferred from context.
+/// Use it directly as an argument; it only converts where an <see cref="Arg{T}"/> is expected, so
+/// <c>var a = IsOfType&lt;X&gt;();</c> cannot be passed on without a typed conversion (declare <c>Arg&lt;T&gt; a = ...</c> instead).
+/// </summary>
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class OfTypeArg
+{
+    internal Type Type { get; }
+
+    internal OfTypeArg(Type type) => Type = type;
+}
+
+/// <summary>
+/// Sentinel type returned by <see cref="Arg.IsSameAs(object)"/> that implicitly converts to
+/// <see cref="Arg{T}"/> for any reference type T, so the parameter type is inferred from context.
+/// Use it directly as an argument; it only converts where an <see cref="Arg{T}"/> is expected, so
+/// <c>var a = IsSameAs(x);</c> cannot be passed on without a typed conversion (declare <c>Arg&lt;T&gt; a = ...</c> instead).
+/// </summary>
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class SameAsArg
+{
+    internal object Reference { get; }
+
+    internal SameAsArg(object reference) => Reference = reference;
 }

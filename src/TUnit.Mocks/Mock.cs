@@ -226,9 +226,27 @@ public static class Mock
     public static void SetDefaultValueProvider<T>(Mock<T> mock, IDefaultValueProvider? provider) where T : class
         => ((IMockControl<T>)mock).DefaultValueProvider = provider;
 
+    /// <summary>Gets whether unconfigured virtual members run the base implementation.</summary>
+    public static bool GetPassThrough<T>(Mock<T> mock) where T : class
+        => ((IMockPassThrough)mock).PassThrough;
+
+    /// <summary>
+    /// Sets whether unconfigured virtual members of a class or wrap mock run the base implementation.
+    /// Defaults to true. Has no effect on members without a base implementation (interface and abstract members).
+    /// </summary>
+    public static void SetPassThrough<T>(Mock<T> mock, bool passThrough) where T : class
+        => ((IMockPassThrough)mock).PassThrough = passThrough;
+
     /// <summary>Enables auto-tracking for all properties on <paramref name="mock"/>.</summary>
     public static void SetupAllProperties<T>(Mock<T> mock) where T : class
         => ((IMockControl<T>)mock).SetupAllProperties();
+
+    /// <summary>
+    /// Clears the recorded call history on <paramref name="mock"/> while keeping its setups, state,
+    /// auto-tracked property values and event subscriptions.
+    /// </summary>
+    public static void ClearCalls<T>(Mock<T> mock) where T : class
+        => ((IMockCallHistory)mock).ClearCalls();
 
     /// <summary>Clears all setups and call history on <paramref name="mock"/>.</summary>
     public static void Reset<T>(Mock<T> mock) where T : class

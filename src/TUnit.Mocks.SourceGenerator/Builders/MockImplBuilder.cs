@@ -302,7 +302,7 @@ internal static class MockImplBuilder
                 writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
-                writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
+                writer.AppendLine($"var __result = __rawResult is null ? default! : ({method.UnwrappedReturnType})__rawResult;");
             }
             else
             {
@@ -346,7 +346,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            writer.AppendLine($"var __result = ({method.ReturnType})__rawResult!;");
+            writer.AppendLine($"var __result = __rawResult is null ? default! : ({method.ReturnType})__rawResult;");
             EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
@@ -417,7 +417,7 @@ internal static class MockImplBuilder
                 writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
-                writer.AppendLine($"return ({prop.ReturnType})__rawResult!;");
+                writer.AppendLine($"return __rawResult is null ? default! : ({prop.ReturnType})__rawResult;");
                 writer.DecreaseIndent();
                 writer.AppendLine("}");
                 writer.AppendLine($"return _wrappedInstance.{EscapeIdentifier(prop.Name)};");
@@ -723,7 +723,7 @@ internal static class MockImplBuilder
                 writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
-                writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
+                writer.AppendLine($"var __result = __rawResult is null ? default! : ({method.UnwrappedReturnType})__rawResult;");
             }
             else
             {
@@ -769,7 +769,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            writer.AppendLine($"var __result = ({method.ReturnType})__rawResult!;");
+            writer.AppendLine($"var __result = __rawResult is null ? default! : ({method.ReturnType})__rawResult;");
             EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
@@ -1055,7 +1055,7 @@ internal static class MockImplBuilder
                 writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
-                writer.AppendLine($"return ({prop.ReturnType})__rawResult!;");
+                writer.AppendLine($"return __rawResult is null ? default! : ({prop.ReturnType})__rawResult;");
                 writer.DecreaseIndent();
                 writer.AppendLine("}");
                 writer.AppendLine($"return base.{EscapeIdentifier(prop.Name)};");
