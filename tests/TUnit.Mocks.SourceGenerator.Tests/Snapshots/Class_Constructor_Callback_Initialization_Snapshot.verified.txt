@@ -113,6 +113,10 @@ namespace TUnit.Mocks.Generated
 
         #if NET9_0_OR_GREATER
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void ClearInvocations(this global::TUnit.Mocks.Mock<global::ConstructorClient> mock)
+            => global::TUnit.Mocks.Mock.ClearInvocations(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public static void Reset(this global::TUnit.Mocks.Mock<global::ConstructorClient> mock)
             => global::TUnit.Mocks.Mock.Reset(mock);
 
@@ -150,6 +154,12 @@ namespace TUnit.Mocks.Generated
             {
                 get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
                 set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            }
+
+            public bool CallBase
+            {
+                get => global::TUnit.Mocks.Mock.GetCallBase(mock);
+                set => global::TUnit.Mocks.Mock.SetCallBase(mock, value);
             }
         }
         #endif
@@ -229,6 +239,10 @@ namespace TUnit.Mocks.Generated
 
         #if NET9_0_OR_GREATER
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void ClearInvocations(this global::TUnit.Mocks.Mock<global::WrappedConstructorClient> mock)
+            => global::TUnit.Mocks.Mock.ClearInvocations(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public static void Reset(this global::TUnit.Mocks.Mock<global::WrappedConstructorClient> mock)
             => global::TUnit.Mocks.Mock.Reset(mock);
 
@@ -266,6 +280,12 @@ namespace TUnit.Mocks.Generated
             {
                 get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
                 set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            }
+
+            public bool CallBase
+            {
+                get => global::TUnit.Mocks.Mock.GetCallBase(mock);
+                set => global::TUnit.Mocks.Mock.SetCallBase(mock, value);
             }
         }
         #endif

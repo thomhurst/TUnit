@@ -47,7 +47,7 @@ TUnit.Mocks works with any test framework. You can migrate mocks before, after, 
 | `A.CallToSet(() => fake.Prop).To(value)` | `mock.Prop.Set(value)` |
 | `fake.Event += Raise.With(args)` | `mock.Raise{EventName}(args)` |
 | `Fake.GetCalls(fake)` | `mock.Invocations` |
-| `Fake.ClearRecordedCalls(fake)` | `mock.Reset()` (also clears setups) |
+| `Fake.ClearRecordedCalls(fake)` | `mock.ClearInvocations()` (keeps setups) |
 
 <!-- doc-test-shared -->
 
@@ -440,7 +440,7 @@ calculator.Discount(Any()).Returns(5m);
 decimal tax = calculator.Object.Tax(100m); // base implementation: 20
 ```
 
-If a test depends on FakeItEasy's default behavior, configure each virtual member that the test calls. TUnit.Mocks can also configure `protected` virtual and abstract members with the same syntax as public members.
+If a test depends on FakeItEasy's default behavior, set `mock.CallBase = false`; unconfigured virtual members then return default values instead of running the base implementation. TUnit.Mocks can also configure `protected` virtual and abstract members with the same syntax as public members.
 
 ## Other Features
 
@@ -451,7 +451,7 @@ If a test depends on FakeItEasy's default behavior, configure each virtual membe
 | `A.Fake<Func<int, string>>()` | `Mock.OfDelegate<Func<int, string>>()` |
 | `A.CallTo(fake).Where(call => ...)` | No equivalent; configure each member |
 | `Fake.GetCalls(fake)` | `mock.Invocations` (a list of `CallRecord`) |
-| `Fake.ClearRecordedCalls(fake)` | `mock.Reset()`; it also clears setups and state |
+| `Fake.ClearRecordedCalls(fake)` | `mock.ClearInvocations()`; it keeps setups and state |
 
 See [Advanced Features](../../writing-tests/mocking/advanced.md) for state machines, diagnostics, custom default values, and `MockRepository`.
 

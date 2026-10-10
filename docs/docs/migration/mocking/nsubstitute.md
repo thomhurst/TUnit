@@ -45,7 +45,7 @@ TUnit.Mocks works with any test framework. You can migrate mocks before, after, 
 | `sub.ReceivedWithAnyArgs().Method(default)` | `mock.Method(Any()).WasCalled()` (`Any()` for each parameter; see [Ignoring Arguments](#ignoring-arguments)) |
 | `Received.InOrder(() => { ... })` | `Mock.VerifyInOrder(() => { ... })` |
 | `sub.ReceivedCalls()` | `mock.Invocations` |
-| `sub.ClearReceivedCalls()` | `mock.Reset()` (also clears setups) |
+| `sub.ClearReceivedCalls()` | `mock.ClearInvocations()` (keeps setups) |
 | `sub.Event += Raise.EventWith(args)` | `mock.Raise{EventName}(args)` |
 | Auto-properties on substitutes | `mock.SetupAllProperties()` |
 
@@ -443,7 +443,7 @@ calculator.Discount(Any()).Returns(5m);
 decimal tax = calculator.Object.Tax(100m); // base implementation: 20
 ```
 
-This is different from `Substitute.For<SomeClass>()`, which does not call the base implementation of virtual members. If you depend on that, configure each member you call. Pass constructor arguments as typed parameters: `MyService.Mock("connection", 42)`.
+This is different from `Substitute.For<SomeClass>()`, which does not call the base implementation of virtual members. If you depend on that, set `mock.CallBase = false`; unconfigured virtual members then return default values instead of running the base implementation. Pass constructor arguments as typed parameters: `MyService.Mock("connection", 42)`.
 
 TUnit.Mocks can also configure `protected` virtual and abstract members with the same syntax as public members. To wrap an existing instance of a non-sealed class and override only some of its virtual members, use `Mock.Wrap(instance)`. `Mock.Wrap` does not support interfaces.
 
@@ -453,7 +453,7 @@ TUnit.Mocks can also configure `protected` virtual and abstract members with the
 |---|---|
 | Recursive mocks (interface members return substitutes) | Loose mocks return auto-mocks; use `Mock.Get(instance)` to configure one |
 | `sub.ReceivedCalls()` | `mock.Invocations` (a list of `CallRecord`) |
-| `sub.ClearReceivedCalls()` | `mock.Reset()`; it also clears setups and state |
+| `sub.ClearReceivedCalls()` | `mock.ClearInvocations()`; it keeps setups and state |
 | `Substitute.For<IA, IB>()` | `Mock.Of<IA, IB>()` (up to four types) |
 | `.Configure()` before setting up a partial | Not needed; setup never calls the real member |
 
