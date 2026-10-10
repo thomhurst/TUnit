@@ -40,6 +40,23 @@ public class ClearCallsTests
     }
 
     [Test]
+    public async Task ClearCalls_Sequenced_Setup_Counts_Only_Calls_After_The_Clear_For_VerifyAll()
+    {
+        var mock = ICalculator.Mock();
+        mock.Add(1, 2).ReturnsSequentially(10, 20);
+        ICalculator calc = mock.Object;
+
+        calc.Add(1, 2);
+        Mock.ClearCalls(mock);
+
+        // The sequence position is kept, but the setup counts as unused until it is hit again.
+        await Assert.That(() => Mock.VerifyAll(mock)).Throws<MockVerificationException>();
+
+        await Assert.That(calc.Add(1, 2)).IsEqualTo(20);
+        Mock.VerifyAll(mock);
+    }
+
+    [Test]
     public async Task ClearCalls_Terminates_For_Self_Referencing_Auto_Mocks()
     {
         var node = IClearNode.Mock();
