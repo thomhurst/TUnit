@@ -46,7 +46,11 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
     private readonly ManualResetEventSlim _stopSignal = new(false);
     private readonly Lock _lock = new();
     private readonly ILogger _logger;
+    // First raise target: the parallel test limit plus headroom.
     private readonly int _maxWorkerThreads;
+    // Escalation stops here. Keyed [NotInParallel] tests and dynamic tests can run alongside the
+    // limited phase, so more tests than the parallel limit can block at once.
+    private readonly int _ceilingWorkerThreads;
     // The minimum just before the raise, so a value user code set after Start is the one restored.
     private int _minWorkerThreadsBeforeRaise;
     private int _raisedMinWorkerThreads;
@@ -54,9 +58,10 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
     // Timestamp of the queued probe work item, or 0 once a pool thread has run it.
     private long _probeQueuedAt;
 
-    private ThreadPoolStarvationMonitor(int maxWorkerThreads, ILogger logger)
+    private ThreadPoolStarvationMonitor(int maxWorkerThreads, int ceilingWorkerThreads, ILogger logger)
     {
         _maxWorkerThreads = maxWorkerThreads;
+        _ceilingWorkerThreads = ceilingWorkerThreads;
         _logger = logger;
     }
 #endif
@@ -96,7 +101,10 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
             return null;
         }
 
-        var monitor = new ThreadPoolStarvationMonitor(maxWorkerThreads, logger);
+        var monitor = new ThreadPoolStarvationMonitor(
+            maxWorkerThreads,
+            Math.Max(maxWorkerThreads, Environment.ProcessorCount * MaxWorkerThreadsPerProcessor),
+            logger);
 
         // A dedicated thread: the monitor must keep sampling while every pool thread is blocked.
         var thread = new Thread(monitor.Run)
@@ -171,10 +179,10 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
                 Volatile.Write(ref _probeQueuedAt, timestamp);
                 ThreadPool.UnsafeQueueUserWorkItem(static monitor => Volatile.Write(ref monitor._probeQueuedAt, 0), this, preferLocal: false);
             }
-            else if (IsStarved(Stopwatch.GetElapsedTime(probeQueuedAt, timestamp), cpuUtilization))
+            else if (IsStarved(Stopwatch.GetElapsedTime(probeQueuedAt, timestamp), cpuUtilization)
+                && !TryRaise())
             {
-                // One raise to the cap is all the monitor does, so it stops sampling afterwards.
-                Raise();
+                // At the ceiling, or user code took over the minimum: nothing left to do.
                 return;
             }
 
@@ -183,31 +191,70 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
         }
     }
 
-    internal void Raise()
+    /// <summary>
+    /// Raises the minimum, or escalates an earlier raise that was not enough.
+    /// Returns <c>false</c> when the monitor has nothing left to do.
+    /// </summary>
+    internal bool TryRaise()
     {
         lock (_lock)
         {
             if (_stopped)
             {
-                return;
+                return false;
             }
 
-            // Raise straight to the cap in one step. When threads are blocked in Task.Wait or .Result,
-            // the runtime's cooperative-blocking logic takes over the raise and adds threads only
-            // under narrow conditions. Repeated small raises then left the pool stuck below its new
-            // minimum for seconds, but a single raise reliably adds the threads.
             ThreadPool.GetMinThreads(out var currentMinWorkerThreads, out var currentMinIoThreads);
 
-            if (_raisedMinWorkerThreads == 0
-                && currentMinWorkerThreads < _maxWorkerThreads
-                && ThreadPool.SetMinThreads(_maxWorkerThreads, currentMinIoThreads))
+            int target;
+            if (_raisedMinWorkerThreads == 0)
             {
+                // Raise straight to the target in one step. When threads are blocked in Task.Wait or
+                // .Result, the runtime's cooperative-blocking logic takes over the raise and adds
+                // threads only under narrow conditions. Repeated small raises then left the pool stuck
+                // below its new minimum for seconds, but a single raise reliably adds the threads.
                 _minWorkerThreadsBeforeRaise = currentMinWorkerThreads;
-                _raisedMinWorkerThreads = _maxWorkerThreads;
-                _logger.LogDebug($"Thread pool starvation detected; raised minimum worker threads from {currentMinWorkerThreads} to {_maxWorkerThreads}");
+                target = _maxWorkerThreads;
             }
+            else
+            {
+                if (currentMinWorkerThreads != _raisedMinWorkerThreads)
+                {
+                    // User code changed the minimum after the raise; leave it alone.
+                    return false;
+                }
+
+                if (ThreadPool.ThreadCount < _raisedMinWorkerThreads)
+                {
+                    // The pool is still adding threads for the last raise. Raising again now would
+                    // stack raises, which is what stalled the pool.
+                    return true;
+                }
+
+                target = ComputeEscalatedMinimum(_raisedMinWorkerThreads, _ceilingWorkerThreads);
+            }
+
+            if (target <= currentMinWorkerThreads)
+            {
+                return false;
+            }
+
+            if (!ThreadPool.SetMinThreads(target, currentMinIoThreads))
+            {
+                return false;
+            }
+
+            _logger.LogDebug($"Thread pool starvation detected; raised minimum worker threads from {currentMinWorkerThreads} to {target}");
+            _raisedMinWorkerThreads = target;
+            return target < _ceilingWorkerThreads;
         }
     }
+
+    /// <summary>
+    /// Doubles a raise that did not end the starvation, up to the ceiling.
+    /// </summary>
+    internal static int ComputeEscalatedMinimum(int raisedMinWorkerThreads, int ceilingWorkerThreads)
+        => (int)Math.Min((long)raisedMinWorkerThreads * 2, ceilingWorkerThreads);
 
     /// <summary>
     /// Queued work that waits about a whole sample interval for a thread while most CPUs are idle

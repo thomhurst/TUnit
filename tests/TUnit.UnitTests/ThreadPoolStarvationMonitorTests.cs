@@ -39,7 +39,7 @@ public class ThreadPoolStarvationMonitorTests
     {
         var monitor = StartMonitor();
 
-        monitor.Raise();
+        monitor.TryRaise();
         await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(Cap);
 
         monitor.Dispose();
@@ -60,7 +60,7 @@ public class ThreadPoolStarvationMonitorTests
         var monitor = StartMonitor();
         ThreadPool.SetMinThreads(_minWorkerThreads + 5, _minIoThreads);
 
-        monitor.Raise();
+        monitor.TryRaise();
         monitor.Dispose();
 
         await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(_minWorkerThreads + 5);
@@ -70,7 +70,7 @@ public class ThreadPoolStarvationMonitorTests
     public async Task Dispose_Keeps_Minimum_User_Changed_After_Raise()
     {
         var monitor = StartMonitor();
-        monitor.Raise();
+        monitor.TryRaise();
         ThreadPool.SetMinThreads(_minWorkerThreads + 7, _minIoThreads);
 
         monitor.Dispose();
@@ -102,6 +102,66 @@ public class ThreadPoolStarvationMonitorTests
     }
 
     [Test]
+    public async Task Escalates_Only_After_Pool_Reaches_Raised_Minimum()
+    {
+        var monitor = StartMonitor();
+        try
+        {
+            await Assert.That(monitor.TryRaise()).IsTrue();
+            await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(Cap);
+
+            // The idle pool has far fewer threads than the raised minimum, so a second
+            // starved sample waits for it to catch up instead of stacking another raise.
+            await Assert.That(monitor.TryRaise()).IsTrue();
+            await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(Cap);
+        }
+        finally
+        {
+            monitor.Dispose();
+        }
+    }
+
+    [Test]
+    public async Task Stops_Escalating_When_User_Changes_Minimum()
+    {
+        var monitor = StartMonitor();
+        try
+        {
+            monitor.TryRaise();
+            ThreadPool.SetMinThreads(_minWorkerThreads + 3, _minIoThreads);
+
+            await Assert.That(monitor.TryRaise()).IsFalse();
+            await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(_minWorkerThreads + 3);
+        }
+        finally
+        {
+            monitor.Dispose();
+        }
+    }
+
+    [Test]
+    [Arguments(100, 1280, 200)]
+    [Arguments(1000, 1280, 1280)]
+    [Arguments(1280, 1280, 1280)]
+    public async Task Escalation_Doubles_Up_To_Ceiling(int raised, int ceiling, int expected)
+    {
+        await Assert.That(ThreadPoolStarvationMonitor.ComputeEscalatedMinimum(raised, ceiling)).IsEqualTo(expected);
+    }
+
+    [Test]
+    [Arguments("1", true)]
+    [Arguments("TRUE", true)]
+    [Arguments("yes", true)]
+    [Arguments("0", false)]
+    [Arguments("false", false)]
+    [Arguments("", false)]
+    [Arguments(null, false)]
+    public async Task Environment_Flag_Accepts_Only_Truthy_Values(string? value, bool expected)
+    {
+        await Assert.That(EnvironmentFlags.IsTruthy(value)).IsEqualTo(expected);
+    }
+
+    [Test]
     [Arguments(80, 20, 100)]
     [Arguments(10000, 20, 1280)]
     [Arguments(10000, 2, 128)]
@@ -125,24 +185,24 @@ public class ThreadPoolStarvationMonitorTests
     }
 
     [Test]
-    [Arguments(10, 0, false)]
-    [Arguments(10, 9, false)]
-    [Arguments(10, 10, true)]
-    [Arguments(10, 500, true)]
-    public async Task Detects_Saturated_Thread_Pool(int threadCount, long pendingWorkItems, bool expected)
+    [Arguments(10, 10, 0, false)]
+    [Arguments(10, 9, 500, false)]
+    [Arguments(10, 10, 1, true)]
+    [Arguments(10, 10, 500, true)]
+    public async Task Detects_Saturated_Thread_Pool(int threadCount, int busyWorkerThreads, long pendingWorkItems, bool expected)
     {
-        await Assert.That(TimeoutDiagnostics.IsThreadPoolSaturated(threadCount, pendingWorkItems)).IsEqualTo(expected);
+        await Assert.That(TimeoutDiagnostics.IsThreadPoolSaturated(threadCount, busyWorkerThreads, pendingWorkItems)).IsEqualTo(expected);
     }
 
     [Test]
     public async Task Timeout_Diagnostics_Include_Thread_Pool_Snapshot_And_Saturation_Hint()
     {
         var sb = new StringBuilder();
-        TimeoutDiagnostics.AppendThreadPoolDiagnostics(sb, threadCount: 4, pendingWorkItems: 50);
+        TimeoutDiagnostics.AppendThreadPoolDiagnostics(sb, threadCount: 4, busyWorkerThreads: 4, pendingWorkItems: 1);
         var message = sb.ToString();
 
         await Assert.That(message).Contains("--- Thread Pool ---");
-        await Assert.That(message).Contains("Threads: 4, pending work items: 50");
+        await Assert.That(message).Contains("Threads: 4, busy: 4, pending work items: 1");
         await Assert.That(message).Contains("thread pool appears saturated");
     }
 
@@ -150,7 +210,7 @@ public class ThreadPoolStarvationMonitorTests
     public async Task Timeout_Diagnostics_Omit_Saturation_Hint_When_Pool_Is_Idle()
     {
         var sb = new StringBuilder();
-        TimeoutDiagnostics.AppendThreadPoolDiagnostics(sb, threadCount: 4, pendingWorkItems: 0);
+        TimeoutDiagnostics.AppendThreadPoolDiagnostics(sb, threadCount: 4, busyWorkerThreads: 1, pendingWorkItems: 0);
 
         await Assert.That(sb.ToString()).DoesNotContain("saturated");
     }

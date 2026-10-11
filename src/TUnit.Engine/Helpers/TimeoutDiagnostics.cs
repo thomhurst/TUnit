@@ -42,7 +42,9 @@ internal static class TimeoutDiagnostics
 
         AppendTaskStatus(sb, executionTask, executionException);
 #if NET
-        AppendThreadPoolDiagnostics(sb, ThreadPool.ThreadCount, ThreadPool.PendingWorkItemCount);
+        ThreadPool.GetMaxThreads(out var maxWorkerThreads, out _);
+        ThreadPool.GetAvailableThreads(out var availableWorkerThreads, out _);
+        AppendThreadPoolDiagnostics(sb, ThreadPool.ThreadCount, maxWorkerThreads - availableWorkerThreads, ThreadPool.PendingWorkItemCount);
 #endif
         AppendStackTraceDiagnostics(sb);
 
@@ -97,7 +99,7 @@ internal static class TimeoutDiagnostics
     /// Appends a thread pool snapshot. A backlog of queued work means continuations and timer
     /// callbacks were waiting for a thread, so the timeout may be caused by other tests blocking.
     /// </summary>
-    internal static void AppendThreadPoolDiagnostics(StringBuilder sb, int threadCount, long pendingWorkItems)
+    internal static void AppendThreadPoolDiagnostics(StringBuilder sb, int threadCount, int busyWorkerThreads, long pendingWorkItems)
     {
         ThreadPool.GetMinThreads(out var minWorkerThreads, out _);
         ThreadPool.GetMaxThreads(out var maxWorkerThreads, out _);
@@ -108,6 +110,8 @@ internal static class TimeoutDiagnostics
         sb.AppendLine();
         sb.Append("Threads: ");
         sb.Append(threadCount);
+        sb.Append(", busy: ");
+        sb.Append(busyWorkerThreads);
         sb.Append(", pending work items: ");
         sb.Append(pendingWorkItems);
         sb.Append(", min worker threads: ");
@@ -115,7 +119,7 @@ internal static class TimeoutDiagnostics
         sb.Append(", max worker threads: ");
         sb.Append(maxWorkerThreads);
 
-        if (IsThreadPoolSaturated(threadCount, pendingWorkItems))
+        if (IsThreadPoolSaturated(threadCount, busyWorkerThreads, pendingWorkItems))
         {
             sb.AppendLine();
             sb.Append("The thread pool appears saturated. This timeout may be caused by blocking calls ");
@@ -125,8 +129,12 @@ internal static class TimeoutDiagnostics
         }
     }
 
-    internal static bool IsThreadPoolSaturated(int threadCount, long pendingWorkItems)
-        => pendingWorkItems > 0 && pendingWorkItems >= threadCount;
+    /// <summary>
+    /// Work is waiting and every pool thread is busy. Even one queued timer callback counts: it
+    /// cannot run until a thread frees up.
+    /// </summary>
+    internal static bool IsThreadPoolSaturated(int threadCount, int busyWorkerThreads, long pendingWorkItems)
+        => pendingWorkItems > 0 && busyWorkerThreads >= threadCount;
 #endif
 
     private static void AppendStackTraceDiagnostics(StringBuilder sb)

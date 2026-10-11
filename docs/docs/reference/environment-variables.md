@@ -134,7 +134,7 @@ export TUNIT_MAX_PARALLEL_TESTS=0    # Unlimited parallelism
 
 ### TUNIT_DISABLE_THREADPOOL_TUNING
 
-By default, TUnit watches the thread pool while tests run. If queued work waits for a thread while most CPUs are idle (a sign that tests are blocking), TUnit raises the pool's minimum worker thread count once, to the maximum number of parallel tests plus one per processor, capped at 64 per processor. This stops blocking tests from delaying timers and timeouts in other tests while the pool slowly adds threads. TUnit never lowers a minimum that you configured yourself. Set this variable to `1`, `true` or `yes` to turn the behavior off.
+By default, TUnit watches the thread pool while tests run. If queued work waits for a thread while most CPUs are idle (a sign that tests are blocking), TUnit raises the pool's minimum worker thread count to the maximum number of parallel tests plus one per processor, and doubles it while starvation continues, up to 64 per processor. This stops blocking tests from delaying timers and timeouts in other tests while the pool slowly adds threads. TUnit never lowers a minimum that you configured yourself. Set this variable to `1`, `true` or `yes` to turn the behavior off.
 
 ```bash
 export TUNIT_DISABLE_THREADPOOL_TUNING=1
