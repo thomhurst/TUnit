@@ -175,6 +175,15 @@ public class StringAndTypeMatcherTests
     }
 
     [Test]
+    public async Task IsOfType_Accepts_Interface_Reachable_Through_Array_Covariance()
+    {
+        Arg<object[]> matcher = IsOfType<IList<string>>();
+
+        await Assert.That(matcher.Matcher.Matches(new[] { "a" })).IsTrue();
+        await Assert.That(matcher.Matcher.Matches(new object[] { "a" })).IsFalse();
+    }
+
+    [Test]
     public async Task IsOfType_Works_For_Object_Parameters()
     {
         var mock = IMatcherHandler.Mock();

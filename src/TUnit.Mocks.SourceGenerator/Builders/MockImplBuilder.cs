@@ -1123,7 +1123,7 @@ internal static class MockImplBuilder
         {
             var argsArray = GetIndexerGetterArgsArray(prop);
             writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
-            writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
+            writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault}{FormatAutoMockFactoryArgument(GetAutoMockFactoryLambda(prop))});");
         }
 
         if (prop.HasSetter)
@@ -1156,15 +1156,18 @@ internal static class MockImplBuilder
         {
             var argsArray = GetIndexerGetterArgsArray(prop);
             writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
+            // Pass the generated auto-mock factory, so a generic return type need not be built by
+            // reflection under Native AOT (as for methods and properties).
+            var autoMockFactory = FormatAutoMockFactoryArgument(GetAutoMockFactoryLambda(prop));
             if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
+                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault}{autoMockFactory});");
             }
             else
             {
                 writer.AppendLine($"{getterPrefix}get");
                 writer.OpenBrace();
-                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault}, out var __result))");
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault}, out var __result{autoMockFactory}))");
                 writer.OpenBrace();
                 writer.AppendLine("return __result;");
                 writer.CloseBrace();

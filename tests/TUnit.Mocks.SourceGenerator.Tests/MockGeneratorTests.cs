@@ -2703,6 +2703,49 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Indexers_Returning_Interfaces_Pass_The_Auto_Mock_Factory()
+    {
+        // Indexer getters pass the generated auto-mock factory like methods and properties, so an
+        // auto-mocked generic return type need not be built by reflection under Native AOT.
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IChild<T>
+            {
+                T Value { get; }
+            }
+
+            public interface IIndexedLookup<T>
+            {
+                IChild<T> this[int index] { get; }
+            }
+
+            public abstract class IndexedBase<T>
+            {
+                public abstract IChild<T> this[string key] { get; }
+                public virtual IChild<T> this[int index] => throw new System.NotImplementedException();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var lookup = IIndexedLookup<int>.Mock();
+                    var partial = IndexedBase<int>.Mock();
+                }
+            }
+            """;
+
+        var output = GetGeneratedOutput(source);
+
+        AssertContains(output, "\"get_Item\", new object?[] { key }, default!, static __behavior =>");
+        AssertContains(output, "out var __result, static __behavior =>");
+        AssertNoGeneratedError(source, "CS1503");
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Abstract_Class_With_Abstract_Indexer()
     {
         // Regression #6516: an abstract indexer took the virtual-member path and emitted a

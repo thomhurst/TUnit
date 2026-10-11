@@ -22,8 +22,8 @@ internal sealed class TypeMatcher<T> : IArgumentMatcher<T>
         // Reject types that can never overlap the parameter type, so a mistake fails at setup time
         // instead of silently never matching. An interface may still be implemented by a non-sealed class.
         var related = underlyingParameterType.IsAssignableFrom(underlyingType) || underlyingType.IsAssignableFrom(underlyingParameterType)
-            || (underlyingType.IsInterface && !underlyingParameterType.IsSealed)
-            || (underlyingParameterType.IsInterface && !underlyingType.IsSealed);
+            || (underlyingType.IsInterface && CanHoldSubtypes(underlyingParameterType))
+            || (underlyingParameterType.IsInterface && CanHoldSubtypes(underlyingType));
 
         if (!related)
         {
@@ -38,6 +38,11 @@ internal sealed class TypeMatcher<T> : IArgumentMatcher<T>
 
         _type = type;
     }
+
+    // A reference-element array type is sealed, but array covariance lets it hold e.g. a string[]
+    // for object[], which implements interfaces (IList<string>) that object[] itself does not.
+    private static bool CanHoldSubtypes(Type type)
+        => !type.IsSealed || (type.IsArray && !type.GetElementType()!.IsValueType);
 
     public bool Matches(T? value) => value is not null && _type.IsInstanceOfType(value);
 
