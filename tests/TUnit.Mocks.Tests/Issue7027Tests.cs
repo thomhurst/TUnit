@@ -169,7 +169,7 @@ public class Issue7027Tests
         catch (NotSupportedException exception)
         {
             await Assert.That(exception.Message).Contains("Native AOT");
-            await Assert.That(exception.Message).Contains("GenerateMock");
+            await Assert.That(exception.Message).Contains(".Mock()");
         }
     }
 
@@ -192,6 +192,17 @@ public class Issue7027Tests
     {
         // The NotSupportedException tells users to paste this name into Mock.Of<...>() or typeof(...).
         await Assert.That(MockRegistry.FormatTypeName(type)).IsEqualTo(expected);
+    }
+
+    [Test]
+    public async Task Native_Aot_Fallback_Message_Recommends_The_Static_Extension()
+    {
+        var message = MockRegistry.GetNativeAotFallbackMessage(typeof(IStore7027<Outer7027<int>.Nested>));
+
+        await Assert.That(message).Contains("TUnit.Mocks.Tests.Issue7027Tests.IStore7027<TUnit.Mocks.Tests.Issue7027Tests.Outer7027<System.Int32>.Nested>.Mock()");
+        await Assert.That(message).Contains("[assembly: GenerateMock(typeof(TUnit.Mocks.Tests.Issue7027Tests.IStore7027<TUnit.Mocks.Tests.Issue7027Tests.Outer7027<System.Int32>.Nested>))]");
+        await Assert.That(message.IndexOf(".Mock()", StringComparison.Ordinal))
+            .IsLessThan(message.IndexOf("GenerateMock", StringComparison.Ordinal));
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

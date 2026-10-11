@@ -170,10 +170,7 @@ public static class MockRegistry
         // MemberAccessException-derived missing-artifact exception, depending on the version.
         catch (Exception ex) when (!IsDynamicCodeSupported && ex is (NotSupportedException or MemberAccessException or TypeLoadException))
         {
-            throw new NotSupportedException(
-                $"Cannot create a mock of '{closedType}' under Native AOT: the closed generic mock type was not pre-compiled. " +
-                $"Name the closed type at a call site (Mock.Of<{FormatTypeName(closedType)}>()) or add [assembly: GenerateMock(typeof({FormatTypeName(closedType)}))] so the source generator registers it ahead of time.",
-                ex);
+            throw new NotSupportedException(GetNativeAotFallbackMessage(closedType), ex);
         }
     }
 
@@ -209,6 +206,17 @@ public static class MockRegistry
     // netstandard2.0 consumers never run on Native AOT.
     private static bool IsDynamicCodeSupported => true;
 #endif
+
+    // T.Mock() calls the generated closed factory directly, so it works for every type argument,
+    // including private nested and file-local types that [GenerateMock] and the generator's
+    // closed registrations cannot name from a top-level class.
+    internal static string GetNativeAotFallbackMessage(Type closedType)
+    {
+        var typeName = FormatTypeName(closedType);
+        return $"Cannot create a mock of '{typeName}' under Native AOT: the closed generic mock type was not pre-compiled. " +
+            $"Create the mock with the closed type written out, preferably {typeName}.Mock(), which calls the generated factory directly. " +
+            $"If every type argument is accessible from the assembly, [assembly: GenerateMock(typeof({typeName}))] also registers it ahead of time.";
+    }
 
     /// <summary>
     /// Formats a type as C# source (<c>Ns.Outer&lt;int&gt;.IInner&lt;string&gt;</c>) so the
