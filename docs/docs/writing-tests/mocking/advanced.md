@@ -42,7 +42,7 @@ public interface IMessageConnection
 }
 
 // Usage
-var mock = Mock.Of<IMessageConnection>();
+var mock = IMessageConnection.Mock();
 mock.SendMessage(Any())
     .RaisesOnMessage("echo");
 
@@ -70,7 +70,7 @@ public interface IPayloadSource
 }
 
 // Usage
-var mock = Mock.Of<IPayloadSource>();
+var mock = IPayloadSource.Mock();
 var received = 0;
 mock.Object.Changed += (_, payload) => received = payload.Value;
 
@@ -273,7 +273,7 @@ repo.Reset();                // clear all mocks
 Get a diagnostic report of setup coverage and call matching:
 
 ```csharp
-var mock = Mock.Of<IUniversalService>();
+var mock = IUniversalService.Mock();
 var svc = mock.Object;
 
 mock.GetUser(Any()).Returns(new User("Alice"));
@@ -320,9 +320,9 @@ The provider is consulted **before** auto-mocking and built-in smart defaults.
 
 ## Native AOT and Generic Interfaces
 
-Mocks of generic interfaces are generated once, as open types. When a closed type such as `IRepository<int>` is written at a `Mock.Of<T>()` call site, in `MockRepository.Of<T>()`, or in `[assembly: GenerateMock(typeof(IRepository<int>))]`, the generator registers a factory for that closed type. These mocks need no runtime reflection, so they work under Native AOT with any type argument, including value types.
+Create generic interface mocks with the extension method, such as `IRepository<int>.Mock()`. It calls the generated factory for that closed type directly, so it needs no runtime reflection and works under Native AOT with any type argument, including value types. Closed types named in `Mock.Of<T>()`, `MockRepository.Of<T>()`, or `[assembly: GenerateMock(typeof(IRepository<int>))]` are also registered ahead of time.
 
-If the closed type is only known at runtime, for example `Mock.Of<IRepository<T>>()` inside generic helper code, TUnit.Mocks builds the type with `MakeGenericType`. Native AOT may not have compiled that instantiation, especially for value-type arguments. In that case mock creation throws a `NotSupportedException` that names the type. To fix it, write the closed type at a call site, or add `[assembly: GenerateMock(typeof(IRepository<int>))]`.
+If the closed type is only known at runtime, for example `Mock.Of<IRepository<T>>()` inside generic helper code, TUnit.Mocks builds the type with `MakeGenericType`. Native AOT may not have compiled that instantiation, especially for value-type arguments. In that case mock creation throws a `NotSupportedException` that names the type. To fix it, create the mock with the closed type, such as `IRepository<int>.Mock()`, or add `[assembly: GenerateMock(typeof(IRepository<int>))]`.
 
 The built-in `DefaultValueProvider` uses reflection to build defaults for `Task<T>`, `ValueTask<T>`, and collection types, so it is not AOT-safe. A custom `IDefaultValueProvider` that does not use reflection works under Native AOT.
 

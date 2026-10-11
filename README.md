@@ -192,7 +192,7 @@ public static async Task TearDownDatabase(ClassHookContext context) { ... }
 `TUnit.Mocks` is a source-generated, Native AOT-compatible mocking library — no runtime proxies, no `Castle.Core`. It works with any test framework:
 
 ```csharp
-var gateway = IPaymentGateway.Mock();   // or Mock.Of<IPaymentGateway>()
+var gateway = IPaymentGateway.Mock();
 
 gateway.ChargeAsync(Any<decimal>()).Returns(new ChargeResult(Success: true));
 

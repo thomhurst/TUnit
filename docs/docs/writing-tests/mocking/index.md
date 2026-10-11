@@ -64,10 +64,10 @@ public class GreeterTests
 }
 ```
 
-The `Mock.Of<T>()` factory is also available as an alternative syntax:
+Prefer `T.Mock()` for creating mocks. On language versions older than C# 14, use the equivalent `Mock.Of<T>()` factory:
 
 ```csharp
-var mock = Mock.Of<IGreeter>(); // equivalent to IGreeter.Mock()
+var mock = Mock.Of<IGreeter>(); // only needed before C# 14; prefer IGreeter.Mock()
 ```
 
 ## Key Concepts

@@ -101,7 +101,7 @@ IUserRepository sut = repository;        // implicit conversion
 IUserRepository same = repository.Object; // explicit instance
 ```
 
-`T.Mock()` requires C# 14. You can also use the factory form `Mock.Of<IUserRepository>()`. Moq's `Mock.Of<T>()` returns the mocked object, but TUnit.Mocks' `Mock.Of<T>()` returns the `Mock<T>` wrapper.
+Use `T.Mock()` to create mocks. It requires C# 14; on older language versions, use the factory form `Mock.Of<IUserRepository>()`. Moq's `Mock.Of<T>()` returns the mocked object, but TUnit.Mocks' `Mock.Of<T>()` returns the `Mock<T>` wrapper.
 
 Both libraries are loose by default. `MockBehavior.Strict` makes unconfigured calls throw. TUnit.Mocks throws `MockStrictBehaviorException`.
 

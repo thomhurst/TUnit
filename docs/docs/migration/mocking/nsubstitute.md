@@ -97,7 +97,7 @@ IUserRepository sut = repository;        // implicit conversion
 IUserRepository same = repository.Object; // explicit instance
 ```
 
-`T.Mock()` requires C# 14. You can also use the factory form `Mock.Of<IUserRepository>()`.
+Use `T.Mock()` to create mocks. It requires C# 14; on older language versions, use the factory form `Mock.Of<IUserRepository>()`.
 
 NSubstitute has no strict mode. TUnit.Mocks is loose by default, like NSubstitute. Pass `MockBehavior.Strict` to make unconfigured calls throw `MockStrictBehaviorException`:
 
