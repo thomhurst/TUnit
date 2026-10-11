@@ -93,17 +93,21 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
 
         ThreadPool.GetMinThreads(out var originalMinWorkerThreads, out _);
 
-        var maxWorkerThreads = ComputeMaxWorkerThreads(maxParallelism, Environment.ProcessorCount);
+        // SetMinThreads rejects a minimum above the configured maximum, so a host that lowered the
+        // maximum would otherwise make every raise fail.
+        ThreadPool.GetMaxThreads(out var poolMaxWorkerThreads, out _);
+        var ceilingWorkerThreads = Math.Min(Environment.ProcessorCount * MaxWorkerThreadsPerProcessor, poolMaxWorkerThreads);
+        var maxWorkerThreads = Math.Min(ComputeMaxWorkerThreads(maxParallelism, Environment.ProcessorCount), poolMaxWorkerThreads);
 
         if (originalMinWorkerThreads >= maxWorkerThreads)
         {
-            // The user already configured enough threads.
+            // The user already configured enough threads, or the pool maximum leaves no room.
             return null;
         }
 
         var monitor = new ThreadPoolStarvationMonitor(
             maxWorkerThreads,
-            Math.Max(maxWorkerThreads, Environment.ProcessorCount * MaxWorkerThreadsPerProcessor),
+            Math.Max(maxWorkerThreads, ceilingWorkerThreads),
             logger);
 
         // A dedicated thread: the monitor must keep sampling while every pool thread is blocked.

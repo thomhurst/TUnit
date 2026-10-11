@@ -79,6 +79,28 @@ public class ThreadPoolStarvationMonitorTests
     }
 
     [Test]
+    public async Task Raise_Is_Clamped_To_Pool_Maximum()
+    {
+        ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxIoThreads);
+        var lowerMaximum = _minWorkerThreads + 10;
+        try
+        {
+            await Assert.That(lowerMaximum).IsLessThan(Cap);
+            ThreadPool.SetMaxThreads(lowerMaximum, maxIoThreads);
+
+            var monitor = StartMonitor();
+            monitor.TryRaise();
+
+            await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(lowerMaximum);
+            monitor.Dispose();
+        }
+        finally
+        {
+            ThreadPool.SetMaxThreads(maxWorkerThreads, maxIoThreads);
+        }
+    }
+
+    [Test]
     public async Task Does_Not_Start_When_Minimum_Already_At_Cap()
     {
         ThreadPool.SetMinThreads(Cap, _minIoThreads);
