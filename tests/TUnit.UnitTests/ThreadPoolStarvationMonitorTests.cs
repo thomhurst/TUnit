@@ -102,6 +102,8 @@ public class ThreadPoolStarvationMonitorTests
     [Test]
     [Arguments(60, 0.1, true)]
     [Arguments(50, 0.49, true)]
+    [Arguments(45, 0.1, true)]
+    [Arguments(30, 0.1, false)]
     [Arguments(10, 0.1, false)]
     [Arguments(60, 0.9, false)]
     public async Task Starved_Only_When_Probe_Waits_And_Cpus_Are_Idle(int probeWaitMs, double cpuUtilization, bool expected)

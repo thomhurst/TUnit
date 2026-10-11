@@ -31,6 +31,10 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
 #if NET
     private static readonly TimeSpan SampleInterval = TimeSpan.FromMilliseconds(50);
 
+    // A probe queued on the previous sample has waited about one interval. The threshold sits
+    // below the interval so that timer jitter in the wait cannot push detection back a sample.
+    private static readonly TimeSpan StarvedProbeWait = TimeSpan.FromMilliseconds(40);
+
     // Below this share of total CPU capacity, queued work is waiting on blocked threads rather
     // than on busy ones, so adding threads helps instead of oversubscribing the cores.
     internal const double StarvedCpuUtilization = 0.5;
@@ -130,13 +134,24 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
     [SupportedOSPlatform("freebsd")]
     private void Sample()
     {
+#if NET9_0_OR_GREATER
+        Func<TimeSpan> getProcessCpuTime = static () => Environment.CpuUsage.TotalTime;
+#else
+        // One Process instance for the monitor's lifetime instead of one allocation per sample.
+        using var process = Process.GetCurrentProcess();
+        Func<TimeSpan> getProcessCpuTime = () =>
+        {
+            process.Refresh();
+            return process.TotalProcessorTime;
+        };
+#endif
         var processorCount = Environment.ProcessorCount;
-        var previousCpuTime = GetProcessCpuTime();
+        var previousCpuTime = getProcessCpuTime();
         var previousTimestamp = Stopwatch.GetTimestamp();
 
         while (!_stopSignal.Wait(SampleInterval))
         {
-            var cpuTime = GetProcessCpuTime();
+            var cpuTime = getProcessCpuTime();
             var timestamp = Stopwatch.GetTimestamp();
 
             var elapsedMs = Stopwatch.GetElapsedTime(previousTimestamp, timestamp).TotalMilliseconds;
@@ -190,26 +205,12 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
         }
     }
 
-    [SupportedOSPlatform("windows")]
-    [SupportedOSPlatform("linux")]
-    [SupportedOSPlatform("macos")]
-    [SupportedOSPlatform("freebsd")]
-    private static TimeSpan GetProcessCpuTime()
-    {
-#if NET9_0_OR_GREATER
-        return Environment.CpuUsage.TotalTime;
-#else
-        using var process = Process.GetCurrentProcess();
-        return process.TotalProcessorTime;
-#endif
-    }
-
     /// <summary>
-    /// Queued work that waits a whole sample interval for a thread while most CPUs are idle means
-    /// pool threads are blocked rather than busy.
+    /// Queued work that waits about a whole sample interval for a thread while most CPUs are idle
+    /// means pool threads are blocked rather than busy.
     /// </summary>
     internal static bool IsStarved(TimeSpan probeWait, double cpuUtilization)
-        => probeWait >= SampleInterval && cpuUtilization < StarvedCpuUtilization;
+        => probeWait >= StarvedProbeWait && cpuUtilization < StarvedCpuUtilization;
 
     private static bool IsTruthyEnv(string? value)
         => value is not null
