@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.a95f87d4.css">
-<script src="/assets/js/runtime~main.b453cd84.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.33e8e209.js" defer="defer"></script>
 <script src="/assets/js/main.82436889.js" defer="defer"></script>
 </head>
 <body>
@@ -41,7 +41,8 @@
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="contextsettingsdisplay"><code>context.Settings.Display</code><a href="#contextsettingsdisplay" class="hash-link" aria-label="Direct link to contextsettingsdisplay" title="Direct link to contextsettingsdisplay" translate="no">​</a></h3>
 <table><thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>DetailedStackTrace</code></td><td><code>bool</code></td><td><code>false</code></td><td>Includes TUnit internal frames in stack traces. By default, internal frames are hidden to keep failure output focused on user code.</td></tr></tbody></table>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="contextsettingsexecution"><code>context.Settings.Execution</code><a href="#contextsettingsexecution" class="hash-link" aria-label="Direct link to contextsettingsexecution" title="Direct link to contextsettingsexecution" translate="no">​</a></h3>
-<table><thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>FailFast</code></td><td><code>bool</code></td><td><code>false</code></td><td>Cancels the remaining test run after the first test failure.</td></tr></tbody></table>
+<table><thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>FailFast</code></td><td><code>bool</code></td><td><code>false</code></td><td>Cancels the remaining test run after the first test failure.</td></tr><tr><td><code>ThreadPoolTuningEnabled</code></td><td><code>bool</code></td><td><code>true</code></td><td>Raises the thread pool&#x27;s minimum worker thread count when blocking tests starve the pool. See <a class="" href="/docs/execution/parallelism">Controlling Parallelism</a>.</td></tr></tbody></table>
+<p>The <code>TUNIT_DISABLE_THREADPOOL_TUNING</code> environment variable takes precedence over <code>ThreadPoolTuningEnabled</code>.</p>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="contextsettingsreporting"><code>context.Settings.Reporting</code><a href="#contextsettingsreporting" class="hash-link" aria-label="Direct link to contextsettingsreporting" title="Direct link to contextsettingsreporting" translate="no">​</a></h3>
 <table><thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>HtmlReportEnabled</code></td><td><code>bool</code></td><td><code>true</code></td><td>Generates the HTML test report.</td></tr><tr><td><code>JsonReportEnabled</code></td><td><code>bool</code></td><td><code>true</code></td><td>Generates the machine-readable JSON sidecar used by report aggregation.</td></tr><tr><td><code>ArtifactUploadEnabled</code></td><td><code>bool</code></td><td><code>true</code></td><td>Uploads the HTML report as an artifact when supported by the CI environment.</td></tr></tbody></table>
 <p>The corresponding <code>TUNIT_DISABLE_HTML_REPORTER</code>, <code>TUNIT_DISABLE_JSON_REPORT</code>, and <code>TUNIT_DISABLE_ARTIFACT_UPLOAD</code> environment variables take precedence over these values.</p>

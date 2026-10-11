@@ -84,9 +84,12 @@ On Linux and macOS with .NET 8 or later, SIGTERM (sent by `docker stop`, Kuberne
 
 ### `context.Settings.Execution`[​](#contextsettingsexecution "Direct link to contextsettingsexecution")
 
-| Property   | Type   | Default | Description                                                  |
-| ---------- | ------ | ------- | ------------------------------------------------------------ |
-| `FailFast` | `bool` | `false` | Cancels the remaining test run after the first test failure. |
+| Property                  | Type   | Default | Description                                                                                                                                              |
+| ------------------------- | ------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FailFast`                | `bool` | `false` | Cancels the remaining test run after the first test failure.                                                                                             |
+| `ThreadPoolTuningEnabled` | `bool` | `true`  | Raises the thread pool's minimum worker thread count when blocking tests starve the pool. See [Controlling Parallelism](/docs/execution/parallelism.md). |
+
+The `TUNIT_DISABLE_THREADPOOL_TUNING` environment variable takes precedence over `ThreadPoolTuningEnabled`.
 
 ### `context.Settings.Reporting`[​](#contextsettingsreporting "Direct link to contextsettingsreporting")
 
