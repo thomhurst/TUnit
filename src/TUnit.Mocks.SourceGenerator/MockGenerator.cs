@@ -127,6 +127,7 @@ public class MockGenerator : IIncrementalGenerator
         var closedFromAttributes = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Mocks.GenerateMockAttribute",
+                // Assembly-level attribute: the metadata name is the only filter needed.
                 predicate: static (node, _) => true,
                 transform: MockTypeDiscovery.TransformGenerateMockAttributeToClosedGenericRegistrations)
             .SelectMany((registrations, _) => registrations.AsImmutableArray());

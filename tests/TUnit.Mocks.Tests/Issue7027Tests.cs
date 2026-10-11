@@ -173,6 +173,27 @@ public class Issue7027Tests
         }
     }
 
+    public class Outer7027<TOuter>
+    {
+        public interface IInner<TInner>;
+
+        public sealed class Nested;
+    }
+
+    [Test]
+    [Arguments(typeof(int), "System.Int32")]
+    [Arguments(typeof(IStore7027<int>), "TUnit.Mocks.Tests.Issue7027Tests.IStore7027<System.Int32>")]
+    [Arguments(typeof(ILookup7027<Guid, Color7027>), "TUnit.Mocks.Tests.Issue7027Tests.ILookup7027<System.Guid, TUnit.Mocks.Tests.Issue7027Tests.Color7027>")]
+    [Arguments(typeof(Outer7027<int>.IInner<string>), "TUnit.Mocks.Tests.Issue7027Tests.Outer7027<System.Int32>.IInner<System.String>")]
+    [Arguments(typeof(IStore7027<Outer7027<long>.Nested>), "TUnit.Mocks.Tests.Issue7027Tests.IStore7027<TUnit.Mocks.Tests.Issue7027Tests.Outer7027<System.Int64>.Nested>")]
+    [Arguments(typeof(IStore7027<int[,]>), "TUnit.Mocks.Tests.Issue7027Tests.IStore7027<System.Int32[,]>")]
+    [Arguments(typeof(IStore7027<List<int?>>), "TUnit.Mocks.Tests.Issue7027Tests.IStore7027<System.Collections.Generic.List<System.Nullable<System.Int32>>>")]
+    public async Task Native_Aot_Fix_Suggestion_Uses_CSharp_Type_Syntax(Type type, string expected)
+    {
+        // The NotSupportedException tells users to paste this name into Mock.Of<...>() or typeof(...).
+        await Assert.That(MockRegistry.FormatTypeName(type)).IsEqualTo(expected);
+    }
+
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static Mock<IFallbackOnly7027<T>> CreateFallbackOnly<T>() => Mock.Of<IFallbackOnly7027<T>>();
 }

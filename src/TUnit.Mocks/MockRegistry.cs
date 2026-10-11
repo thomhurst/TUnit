@@ -168,7 +168,7 @@ public static class MockRegistry
         }
         // Native AOT reports a missing instantiation as NotSupportedException or a
         // MemberAccessException-derived missing-artifact exception, depending on the version.
-        catch (Exception ex) when (!IsDynamicCodeSupported && ex is NotSupportedException or MemberAccessException or TypeLoadException)
+        catch (Exception ex) when (!IsDynamicCodeSupported && ex is (NotSupportedException or MemberAccessException or TypeLoadException))
         {
             throw new NotSupportedException(
                 $"Cannot create a mock of '{closedType}' under Native AOT: the closed generic mock type was not pre-compiled. " +
@@ -210,21 +210,54 @@ public static class MockRegistry
     private static bool IsDynamicCodeSupported => true;
 #endif
 
-    private static string FormatTypeName(Type type)
+    /// <summary>
+    /// Formats a type as C# source (<c>Ns.Outer&lt;int&gt;.IInner&lt;string&gt;</c>) so the
+    /// suggested <c>Mock.Of</c> / <c>GenerateMock</c> fix can be pasted as-is.
+    /// </summary>
+    internal static string FormatTypeName(Type type)
     {
-        if (!type.IsGenericType)
+        if (type.IsArray)
         {
-            return type.FullName ?? type.Name;
+            return $"{FormatTypeName(type.GetElementType()!)}[{new string(',', type.GetArrayRank() - 1)}]";
         }
 
-        var name = type.GetGenericTypeDefinition().FullName ?? type.Name;
+        if (type.IsGenericParameter)
+        {
+            return type.Name;
+        }
+
+        return type.IsGenericType
+            ? FormatNamedType(type.GetGenericTypeDefinition(), type.GetGenericArguments())
+            : FormatNamedType(type, Type.EmptyTypes);
+    }
+
+    // Reflection flattens every type argument of a nested generic onto the innermost type, outer
+    // ones first; hand each containing type its share so each segment gets its own argument list.
+    private static string FormatNamedType(Type definition, Type[] typeArguments)
+    {
+        var name = definition.Name;
         var tick = name.IndexOf('`');
         if (tick >= 0)
         {
             name = name.Substring(0, tick);
         }
 
-        return $"{name}<{string.Join(", ", type.GetGenericArguments().Select(FormatTypeName))}>";
+        string prefix;
+        var outerCount = 0;
+        if (definition.DeclaringType is { } declaringType)
+        {
+            outerCount = Math.Min(declaringType.GetGenericArguments().Length, typeArguments.Length);
+            prefix = FormatNamedType(declaringType, typeArguments.Take(outerCount).ToArray()) + ".";
+        }
+        else
+        {
+            prefix = string.IsNullOrEmpty(definition.Namespace) ? string.Empty : definition.Namespace + ".";
+        }
+
+        var ownArguments = typeArguments.Skip(outerCount).ToArray();
+        return ownArguments.Length == 0
+            ? prefix + name
+            : $"{prefix}{name}<{string.Join(", ", ownArguments.Select(FormatTypeName))}>";
     }
 
     private static object CreateNonPublicInstance(

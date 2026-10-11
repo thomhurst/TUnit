@@ -179,6 +179,71 @@ public class Issue7027Tests : SnapshotTestBase
     }
 
     [Test]
+    public async Task Open_Containing_Type_Argument_Emits_No_Registrations()
+    {
+        // Outer<T>.IInner<int> looks closed if only the innermost type's arguments are checked.
+        var source = """
+            namespace TestNamespace
+            {
+                public class Outer<TOuter>
+                {
+                    public interface IInner<TInner>
+                    {
+                        TOuter Left(TInner value);
+                    }
+
+                    public sealed class Nested { }
+                }
+
+                public interface IRepository<T>
+                {
+                    T Find(int id);
+                }
+
+                public class Usage
+                {
+                    TUnit.Mocks.Mock<Outer<T>.IInner<int>> CreateInner<T>() => TUnit.Mocks.Mock.Of<Outer<T>.IInner<int>>();
+
+                    TUnit.Mocks.Mock<IRepository<Outer<T>.Nested>> CreateNested<T>() => TUnit.Mocks.Mock.Of<IRepository<Outer<T>.Nested>>();
+                }
+            }
+            """;
+
+        await Assert.That(GetRegistrationSource(source)).IsNull();
+        AssertCompilesWithoutErrors(source);
+    }
+
+    [Test]
+    public async Task Closed_Containing_Type_Argument_Is_Registered()
+    {
+        var source = """
+            namespace TestNamespace
+            {
+                public class Outer<TOuter>
+                {
+                    public sealed class Nested { }
+                }
+
+                public interface IRepository<T>
+                {
+                    T Find(int id);
+                }
+
+                public class Usage
+                {
+                    void M() => _ = TUnit.Mocks.Mock.Of<IRepository<Outer<int>.Nested>>();
+                }
+            }
+            """;
+
+        var registrations = GetRegistrationSource(source);
+
+        await Assert.That(registrations).IsNotNull();
+        await Assert.That(registrations!).Contains("RegisterFactory<global::TestNamespace.IRepository<global::TestNamespace.Outer<int>.Nested>>(");
+        AssertCompilesWithoutErrors(source);
+    }
+
+    [Test]
     public async Task Private_Nested_Type_Argument_Is_Skipped_And_Still_Compiles()
     {
         var source = Contracts + """

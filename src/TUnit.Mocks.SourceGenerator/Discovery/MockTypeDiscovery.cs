@@ -716,13 +716,17 @@ internal static class MockTypeDiscovery
     private static ClosedGenericMockRegistration? CreateClosedGenericRegistration(ITypeSymbol type, Compilation compilation)
     {
         if (type is not INamedTypeSymbol { TypeKind: TypeKind.Interface, IsGenericType: true } namedType
-            || ContainsTypeParameters(namedType)
             || !ContainsTypeParameters(namedType.OriginalDefinition))
         {
             return null;
         }
 
+        // Containing types count too: Outer<T>.IInner<int> inside generic code is still open.
         var typeArguments = GetAllTypeArguments(namedType).ToImmutableArray();
+        if (typeArguments.Any(IsOpen))
+        {
+            return null;
+        }
 
         // The registration is emitted into a top-level generated class, so every type argument must
         // be nameable from there: private/protected nested types, file-local types and error types
@@ -753,6 +757,20 @@ internal static class MockTypeDiscovery
         {
             yield return typeArgument;
         }
+    }
+
+    // Unlike ContainsTypeParameters, also walks containing types (Outer<T>.Nested as an argument).
+    private static bool IsOpen(ITypeSymbol type)
+    {
+        return type switch
+        {
+            ITypeParameterSymbol => true,
+            IArrayTypeSymbol array => IsOpen(array.ElementType),
+            IPointerTypeSymbol pointer => IsOpen(pointer.PointedAtType),
+            INamedTypeSymbol named => named.TypeArguments.Any(IsOpen)
+                || (named.ContainingType is { } containing && IsOpen(containing)),
+            _ => false
+        };
     }
 
     private static bool IsOrContainsFileLocalType(ITypeSymbol type)
