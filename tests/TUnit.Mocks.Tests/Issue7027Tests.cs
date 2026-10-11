@@ -205,6 +205,19 @@ public class Issue7027Tests
             .IsLessThan(message.IndexOf("GenerateMock", StringComparison.Ordinal));
     }
 
+    private readonly record struct PrivateValue7027(int Value);
+
+    [Test]
+    public async Task Static_Extension_Works_With_Private_Nested_Value_Type_Argument()
+    {
+        // The generator cannot register IStore7027<PrivateValue7027> from a top-level class, but the
+        // generic extension infers T at this call site, so no reflection or registration is needed.
+        var mock = IStore7027<PrivateValue7027>.Mock();
+        mock.Find(1).Returns(new PrivateValue7027(11));
+
+        await Assert.That(mock.Object.Find(1)).IsEqualTo(new PrivateValue7027(11));
+    }
+
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static Mock<IFallbackOnly7027<T>> CreateFallbackOnly<T>() => Mock.Of<IFallbackOnly7027<T>>();
 }
