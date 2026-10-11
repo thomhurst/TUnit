@@ -243,8 +243,13 @@ public static class Mock
 
     /// <summary>
     /// Clears the recorded call history on <paramref name="mock"/> while keeping its setups, state,
-    /// auto-tracked property values and event subscriptions.
+    /// auto-tracked property values and event subscriptions. Each setup's invoke count is reset too,
+    /// so <c>VerifyAll</c> only counts calls made afterwards.
     /// </summary>
+    /// <remarks>
+    /// Call it while the mock is idle. The clear is not atomic: a call recorded on another thread at the
+    /// same moment may be lost, and a concurrent verification may see the history cleared before the counts.
+    /// </remarks>
     public static void ClearCalls<T>(Mock<T> mock) where T : class
         => ((IMockCallHistory)mock).ClearCalls();
 
