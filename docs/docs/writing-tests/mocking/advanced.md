@@ -318,6 +318,14 @@ var count = mock.Object.GetCount(); // -1
 
 The provider is consulted **before** auto-mocking and built-in smart defaults.
 
+## Native AOT and Generic Interfaces
+
+Mocks of generic interfaces are generated once, as open types. When a closed type such as `IRepository<int>` is written at a `Mock.Of<T>()` call site, in `MockRepository.Of<T>()`, or in `[assembly: GenerateMock(typeof(IRepository<int>))]`, the generator registers a factory for that closed type. These mocks need no runtime reflection, so they work under Native AOT with any type argument, including value types.
+
+If the closed type is only known at runtime, for example `Mock.Of<IRepository<T>>()` inside generic helper code, TUnit.Mocks builds the type with `MakeGenericType`. Native AOT may not have compiled that instantiation, especially for value-type arguments. In that case mock creation throws a `NotSupportedException` that names the type. To fix it, write the closed type at a call site, or add `[assembly: GenerateMock(typeof(IRepository<int>))]`.
+
+The built-in `DefaultValueProvider` uses reflection to build defaults for `Task<T>`, `ValueTask<T>`, and collection types, so it is not AOT-safe. A custom `IDefaultValueProvider` that does not use reflection works under Native AOT.
+
 ## Reset
 
 Clear all setups, call history, state, and auto-tracked property values:

@@ -113,6 +113,43 @@ public class MockGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(emitResults, AddEmittedSources);
 
+        // Step 3b: Closed generic interfaces named at call sites (Mock.Of<IRepository<int>>()) get
+        // closed factory registrations, so the runtime never closes the open generated mock through
+        // MakeGenericType — which Native AOT cannot do for value-type arguments. See issue #7027.
+        var closedFromMockOf = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: MockTypeDiscovery.IsMockOfInvocation,
+                transform: MockTypeDiscovery.TransformToClosedGenericRegistration)
+            .Where(static registration => registration is not null)
+            .Select(static (registration, _) => registration!)
+            .WithTrackingName(MockTrackingNames.ClosedGenericMockOfInvocations);
+
+        var closedFromAttributes = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                "TUnit.Mocks.GenerateMockAttribute",
+                predicate: static (node, _) => true,
+                transform: MockTypeDiscovery.TransformGenerateMockAttributeToClosedGenericRegistrations)
+            .SelectMany((registrations, _) => registrations.AsImmutableArray());
+
+        var closedEmissions = closedFromMockOf
+            .Collect()
+            .Combine(closedFromAttributes.Collect())
+            .Combine(distinctRequests.Select(static (request, _) => request.Model).Collect())
+            .Select(static (input, _) =>
+            {
+                var ((mockOf, attributes), models) = input;
+                return ClosedGenericRegistrationBuilder.Resolve(mockOf.AddRange(attributes), models);
+            })
+            .WithTrackingName(MockTrackingNames.ClosedGenericEmissions);
+
+        context.RegisterSourceOutput(closedEmissions, static (spc, emissions) =>
+        {
+            if (emissions.Length > 0)
+            {
+                spc.AddSource(ClosedGenericRegistrationBuilder.HintName, ClosedGenericRegistrationBuilder.Build(emissions));
+            }
+        });
+
         // Step 4: TM009 needs the location of the request that produced a failed model. Pairing
         // happens here rather than in the emit step so locations never invalidate emitted source.
         var failures = emitResults

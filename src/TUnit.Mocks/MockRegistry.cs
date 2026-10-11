@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace TUnit.Mocks;
 
@@ -146,9 +147,11 @@ public static class MockRegistry
         return true;
     }
 
+    // Fallback for closed generic interfaces the source generator did not see written out (e.g.
+    // Mock.Of<T>() inside generic code, or an auto-mocked return type). Closed types named at a
+    // Mock.Of call site or in [GenerateMock] get a static closed factory instead (#7027).
     // Attribute-based suppression (not #pragma) so ILC honours it during Native AOT publish.
-    // Only reached for closed generic types without a directly registered factory.
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Generated open generic mock types are rooted via RegisterOpenGenericFactory; reference-type instantiations share canonical code.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Closed types named in source are pre-registered by the generator; on Native AOT any other instantiation that was not pre-compiled fails with a descriptive NotSupportedException.")]
     [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = "Open generic implementation/wrapper types are annotated and preserved by RegisterOpenGenericFactory.")]
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Only constructs source-generated mock types registered through RegisterOpenGenericFactory.")]
     [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Open generic implementation/wrapper types are annotated and preserved by RegisterOpenGenericFactory.")]
@@ -159,6 +162,27 @@ public static class MockRegistry
             throw new ArgumentException($"Interface mock '{closedType}' does not support constructor arguments, but {constructorArgs.Length} were provided.");
         }
 
+        try
+        {
+            return CreateClosedGenericMockCore(closedType, behavior, descriptor);
+        }
+        // Native AOT reports a missing instantiation as NotSupportedException or a
+        // MemberAccessException-derived missing-artifact exception, depending on the version.
+        catch (Exception ex) when (!IsDynamicCodeSupported && ex is NotSupportedException or MemberAccessException or TypeLoadException)
+        {
+            throw new NotSupportedException(
+                $"Cannot create a mock of '{closedType}' under Native AOT: the closed generic mock type was not pre-compiled. " +
+                $"Name the closed type at a call site (Mock.Of<{FormatTypeName(closedType)}>()) or add [assembly: GenerateMock(typeof({FormatTypeName(closedType)}))] so the source generator registers it ahead of time.",
+                ex);
+        }
+    }
+
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "See CreateClosedGenericMock.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = "See CreateClosedGenericMock.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "See CreateClosedGenericMock.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "See CreateClosedGenericMock.")]
+    private static object CreateClosedGenericMockCore(Type closedType, MockBehavior behavior, OpenGenericFactoryDescriptor descriptor)
+    {
         var genericArgs = closedType.GetGenericArguments();
 
         var engineType = typeof(MockEngine<>).MakeGenericType(closedType);
@@ -177,6 +201,30 @@ public static class MockRegistry
 
         var mockType = typeof(Mock<>).MakeGenericType(closedType);
         return Activator.CreateInstance(mockType, impl, engine)!;
+    }
+
+#if NET
+    private static bool IsDynamicCodeSupported => RuntimeFeature.IsDynamicCodeSupported;
+#else
+    // netstandard2.0 consumers never run on Native AOT.
+    private static bool IsDynamicCodeSupported => true;
+#endif
+
+    private static string FormatTypeName(Type type)
+    {
+        if (!type.IsGenericType)
+        {
+            return type.FullName ?? type.Name;
+        }
+
+        var name = type.GetGenericTypeDefinition().FullName ?? type.Name;
+        var tick = name.IndexOf('`');
+        if (tick >= 0)
+        {
+            name = name.Substring(0, tick);
+        }
+
+        return $"{name}<{string.Join(", ", type.GetGenericArguments().Select(FormatTypeName))}>";
     }
 
     private static object CreateNonPublicInstance(
