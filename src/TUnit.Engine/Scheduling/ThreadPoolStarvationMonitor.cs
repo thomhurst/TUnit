@@ -26,6 +26,8 @@ namespace TUnit.Engine.Scheduling;
 /// own short work items keep a small queue at low CPU without any test blocking.
 /// </para>
 /// </summary>
+// The pool minimum is process-wide. One test session runs per process, so one monitor at a time
+// owns it; concurrent sessions in one process would interleave raises and restores.
 internal sealed class ThreadPoolStarvationMonitor : IDisposable
 {
 #if NET
@@ -169,6 +171,8 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
             var cpuTime = getProcessCpuTime();
             var timestamp = Stopwatch.GetTimestamp();
 
+            // Utilization covers only the last sample interval, while the probe may have waited longer.
+            // That is precise enough to tell blocked threads from busy ones.
             var elapsedMs = Stopwatch.GetElapsedTime(previousTimestamp, timestamp).TotalMilliseconds;
             var cpuUtilization = elapsedMs <= 0
                 ? 1
@@ -225,13 +229,16 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
                 if (currentMinWorkerThreads != _raisedMinWorkerThreads)
                 {
                     // User code changed the minimum after the raise; leave it alone.
+                    _logger.LogDebug($"Thread pool starvation monitor stopped: minimum worker threads changed to {currentMinWorkerThreads} by user code");
                     return false;
                 }
 
                 if (ThreadPool.ThreadCount < _raisedMinWorkerThreads)
                 {
                     // The pool is still adding threads for the last raise. Raising again now would
-                    // stack raises, which is what stalled the pool.
+                    // stack raises, which is what stalled the pool. If the pool never reaches the
+                    // minimum (the blocked work is bounded elsewhere), the monitor keeps sampling
+                    // without escalating, which costs only the 50ms sample loop.
                     return true;
                 }
 
@@ -240,11 +247,13 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
 
             if (target <= currentMinWorkerThreads)
             {
+                _logger.LogDebug($"Thread pool starvation monitor stopped: minimum worker threads already at {currentMinWorkerThreads}, at or above target {target}");
                 return false;
             }
 
             if (!ThreadPool.SetMinThreads(target, currentMinIoThreads))
             {
+                _logger.LogDebug($"Thread pool starvation monitor stopped: ThreadPool.SetMinThreads({target}) was rejected");
                 return false;
             }
 
