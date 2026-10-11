@@ -9,6 +9,18 @@ public class MatcherDerivedEvent : MatcherBaseEvent;
 
 public class MatcherOtherEvent : MatcherBaseEvent;
 
+// IEquatable<T> treats every value as equal, while the default Equals(object) compares fields.
+public readonly struct AllEqualId(int value) : IEquatable<AllEqualId>
+{
+    public int Value { get; } = value;
+    public bool Equals(AllEqualId other) => true;
+}
+
+public interface IIdHandler
+{
+    string Handle(AllEqualId id);
+}
+
 public interface IMatcherHandler
 {
     string Handle(MatcherBaseEvent evt);
@@ -203,6 +215,16 @@ public class StringAndTypeMatcherTests
         await Assert.That(handler.Lookup(42)).IsEqualTo("hit");
         await Assert.That(handler.Lookup(43)).IsEqualTo("");
         await Assert.That(handler.Lookup(42L)).IsEqualTo("");
+    }
+
+    [Test]
+    public async Task IsSameAs_Setup_And_Verification_Use_The_Same_Value_Equality()
+    {
+        var mock = IIdHandler.Mock();
+        mock.Handle(IsSameAs(new AllEqualId(1))).Returns("hit");
+
+        await Assert.That(mock.Object.Handle(new AllEqualId(2))).IsEqualTo("hit");
+        mock.Handle(IsSameAs(new AllEqualId(1))).WasCalled(Times.Once);
     }
 
     [Test]

@@ -31,6 +31,8 @@ public class PassThroughValue
     public override string ToString() => "money";
     public virtual bool Equals(string? other) => other == "base";
     public virtual object Describe() => "base";
+    public virtual string ToString<T>() => "base-generic";
+    public virtual int GetHashCode<T>() => 99;
 }
 
 public class PassThroughTests
@@ -278,6 +280,20 @@ public class PassThroughTests
         var strict = PassThroughValue.Mock(MockBehavior.Strict);
         Mock.SetPassThrough(strict, false);
         await Assert.That(() => strict.Object.Equals("base")).Throws<MockStrictBehaviorException>();
+    }
+
+    [Test]
+    public async Task PassThrough_False_Generic_Object_Method_Names_Are_Ordinary_Members()
+    {
+        var loose = PassThroughValue.Mock();
+        Mock.SetPassThrough(loose, false);
+        await Assert.That(loose.Object.ToString<int>()).IsEqualTo("");
+        await Assert.That(loose.Object.GetHashCode<int>()).IsEqualTo(0);
+
+        var strict = PassThroughValue.Mock(MockBehavior.Strict);
+        Mock.SetPassThrough(strict, false);
+        await Assert.That(() => strict.Object.ToString<int>()).Throws<MockStrictBehaviorException>();
+        await Assert.That(() => strict.Object.GetHashCode<int>()).Throws<MockStrictBehaviorException>();
     }
 
     [Test]

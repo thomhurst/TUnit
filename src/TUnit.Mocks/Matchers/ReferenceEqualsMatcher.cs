@@ -31,8 +31,9 @@ internal sealed class ReferenceEqualsMatcher<T> : IArgumentMatcher<T>
         ? EqualityComparer<T>.Default.Equals(_typedExpected, value!)
         : ReferenceEquals(_expected, value);
 
+    // Same comparer as the typed overload, so setup matching and verification agree.
     public bool Matches(object? value) => _byValue
-        ? Equals(_expected, value)
+        ? value is T typed && Matches(typed)
         : ReferenceEquals(_expected, value);
 
     public string Describe() => _byValue

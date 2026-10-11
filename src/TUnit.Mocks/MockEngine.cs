@@ -94,6 +94,13 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     public bool IsWrapMock { get; set; }
 
     /// <summary>
+    /// Member ids of the mocked class's overrides of <c>Equals(object)</c>, <c>GetHashCode()</c> and
+    /// <c>ToString()</c>. Set by generated factory code; see <see cref="IsObjectMethod"/>.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public int[]? ObjectMethodMemberIds { get; set; }
+
+    /// <summary>
     /// Gets or sets a custom default value provider for unconfigured method return types in loose mode.
     /// When set, this provider is consulted before auto-mocking and built-in defaults.
     /// </summary>
@@ -470,13 +477,12 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// implementation when <see cref="PassThrough"/> is false: argument matching, dictionaries and diagnostics
     /// depend on them behaving normally.
     /// </summary>
-    private static bool IsObjectMethod(string memberName, int argumentCount, bool argumentIsObject = false) => argumentCount switch
-    {
-        0 => memberName is "GetHashCode" or "ToString",
-        // Only Equals(object): an Equals(string) or Equals(T) overload is an ordinary member.
-        1 => argumentIsObject && memberName == "Equals",
-        _ => false,
-    };
+    /// <remarks>
+    /// The generator identifies these by symbol (an override whose root is a <see cref="object"/> member), so
+    /// overloads such as <c>Equals(string)</c> or a generic <c>ToString&lt;T&gt;()</c> are ordinary members.
+    /// </remarks>
+    private bool IsObjectMethod(int memberId)
+        => ObjectMethodMemberIds is { } ids && Array.IndexOf(ids, memberId) >= 0;
 
     /// <summary>
     /// For a void/setter call that skips the base implementation (<see cref="PassThrough"/> = false):
@@ -551,7 +557,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// <paramref name="result"/> set) when the base implementation must be skipped. Wrap + strict throws first,
     /// before the <see cref="PassThrough"/> handling; object methods (see <see cref="IsObjectMethod"/>) keep the base.
     /// </summary>
-    private bool SkipBaseForUnmatchedCall<TReturn, TStore>(string memberName, in TStore store, bool isObjectMethod,
+    private bool SkipBaseForUnmatchedCall<TReturn, TStore>(int memberId, string memberName, in TStore store,
         Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue, out TReturn result)
         where TStore : struct, IArgumentStore
     {
@@ -560,7 +566,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
 
-        if (!PassThrough && !isObjectMethod)
+        if (!PassThrough && !IsObjectMethod(memberId))
         {
             result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
@@ -701,10 +707,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             throw new MockStrictBehaviorException(callDesc);
         }
 
-        // The generator routes Equals(object) through the typed overloads (one non-ref-struct parameter),
-        // so a one-argument Equals reaching this untyped path is a generic or ref-struct overload: an
-        // ordinary member, hence argumentIsObject is left false.
-        if (!PassThrough && !IsObjectMethod(memberName, args.Length))
+        if (!PassThrough && !IsObjectMethod(memberId))
         {
             result = ResolveWithoutBase(memberName, args, autoMockFactory, defaultValue);
             return true;

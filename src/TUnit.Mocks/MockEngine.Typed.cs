@@ -172,7 +172,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        return SkipBaseForUnmatchedCall(memberName, store, IsObjectMethod(memberName, 1, typeof(T1) == typeof(object)), autoMockFactory, defaultValue, out result);
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -302,7 +302,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -432,7 +432,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -562,7 +562,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -692,7 +692,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -822,7 +822,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -952,7 +952,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -1082,6 +1082,6 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 }
