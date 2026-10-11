@@ -13,6 +13,11 @@ public class ThreadPoolStarvationMonitorTests
 {
     private const int MaxParallelism = 200;
 
+    // Keeps the first raise target (32 per processor) below the escalation ceiling (64 per
+    // processor) on any core count. With MaxParallelism, a runner with 3 or fewer processors
+    // clamps the first target to the ceiling, so there is nothing left to escalate.
+    private static int EscalationParallelism => Environment.ProcessorCount * 31;
+
     private int _minWorkerThreads;
     private int _minIoThreads;
 
@@ -22,7 +27,9 @@ public class ThreadPoolStarvationMonitorTests
     [After(HookType.Test)]
     public void RestoreMinimum() => ThreadPool.SetMinThreads(_minWorkerThreads, _minIoThreads);
 
-    private static int Cap => ThreadPoolStarvationMonitor.ComputeMaxWorkerThreads(MaxParallelism, Environment.ProcessorCount);
+    private static int Cap => ComputeCap(MaxParallelism);
+
+    private static int ComputeCap(int maxParallelism) => ThreadPoolStarvationMonitor.ComputeMaxWorkerThreads(maxParallelism, Environment.ProcessorCount);
 
     private static int CurrentMinWorkerThreads()
     {
@@ -30,8 +37,8 @@ public class ThreadPoolStarvationMonitorTests
         return workerThreads;
     }
 
-    private static ThreadPoolStarvationMonitor StartMonitor()
-        => ThreadPoolStarvationMonitor.Start(MaxParallelism, new NullLogger())
+    private static ThreadPoolStarvationMonitor StartMonitor(int maxParallelism = MaxParallelism)
+        => ThreadPoolStarvationMonitor.Start(maxParallelism, new NullLogger())
            ?? throw new InvalidOperationException("Monitor did not start");
 
     [Test]
@@ -112,21 +119,22 @@ public class ThreadPoolStarvationMonitorTests
     [Test]
     public async Task Escalates_From_User_Minimum_Already_At_First_Target()
     {
-        ThreadPool.SetMinThreads(Cap, _minIoThreads);
+        var cap = ComputeCap(EscalationParallelism);
+        ThreadPool.SetMinThreads(cap, _minIoThreads);
 
-        var monitor = StartMonitor();
+        var monitor = StartMonitor(EscalationParallelism);
         try
         {
             monitor.TryRaise();
 
-            await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(Math.Min(Cap * 2, Ceiling));
+            await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(Math.Min(cap * 2, Ceiling));
         }
         finally
         {
             monitor.Dispose();
         }
 
-        await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(Cap);
+        await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(cap);
     }
 
     [Test]
@@ -155,16 +163,17 @@ public class ThreadPoolStarvationMonitorTests
     [Test]
     public async Task Escalates_Only_After_Pool_Reaches_Raised_Minimum()
     {
-        var monitor = StartMonitor();
+        var cap = ComputeCap(EscalationParallelism);
+        var monitor = StartMonitor(EscalationParallelism);
         try
         {
             await Assert.That(monitor.TryRaise()).IsTrue();
-            await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(Cap);
+            await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(cap);
 
             // The idle pool has far fewer threads than the raised minimum, so a second
             // starved sample waits for it to catch up instead of stacking another raise.
             await Assert.That(monitor.TryRaise()).IsTrue();
-            await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(Cap);
+            await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(cap);
         }
         finally
         {
