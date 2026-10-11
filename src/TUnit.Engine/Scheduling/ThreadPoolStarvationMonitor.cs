@@ -39,6 +39,9 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
     // than on busy ones, so adding threads helps instead of oversubscribing the cores.
     internal const double StarvedCpuUtilization = 0.5;
 
+    // Upper bound on the raised minimum, per processor.
+    internal const int MaxWorkerThreadsPerProcessor = 64;
+
     // Never disposed: the sampling thread may still be waiting on it after Dispose returns.
     private readonly ManualResetEventSlim _stopSignal = new(false);
     private readonly Lock _lock = new();
@@ -71,7 +74,7 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
             return null;
         }
 
-        if (IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableThreadPoolTuning)))
+        if (EnvironmentFlags.IsSet(EnvironmentConstants.DisableThreadPoolTuning))
         {
             logger.LogDebug($"Thread pool starvation monitor disabled by {EnvironmentConstants.DisableThreadPoolTuning}");
             return null;
@@ -85,8 +88,7 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
 
         ThreadPool.GetMinThreads(out var originalMinWorkerThreads, out _);
 
-        // Headroom above the test limit for timer callbacks, the dynamic test queue and engine work.
-        var maxWorkerThreads = (int)Math.Min((long)maxParallelism + Environment.ProcessorCount, short.MaxValue);
+        var maxWorkerThreads = ComputeMaxWorkerThreads(maxParallelism, Environment.ProcessorCount);
 
         if (originalMinWorkerThreads >= maxWorkerThreads)
         {
@@ -121,10 +123,11 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
         {
             Sample();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // An exception escaping a dedicated thread terminates the process. Monitoring is only
             // an optimization, so stop sampling and let the runtime's own thread injection apply.
+            _logger.LogDebug($"Thread pool starvation monitor stopped after an error: {ex}");
         }
     }
 
@@ -201,6 +204,7 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
             {
                 _minWorkerThreadsBeforeRaise = currentMinWorkerThreads;
                 _raisedMinWorkerThreads = _maxWorkerThreads;
+                _logger.LogDebug($"Thread pool starvation detected; raised minimum worker threads from {currentMinWorkerThreads} to {_maxWorkerThreads}");
             }
         }
     }
@@ -212,11 +216,13 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
     internal static bool IsStarved(TimeSpan probeWait, double cpuUtilization)
         => probeWait >= StarvedProbeWait && cpuUtilization < StarvedCpuUtilization;
 
-    private static bool IsTruthyEnv(string? value)
-        => value is not null
-           && (value == "1"
-               || value.Equals("true", StringComparison.OrdinalIgnoreCase)
-               || value.Equals("yes", StringComparison.OrdinalIgnoreCase));
+    /// <summary>
+    /// The parallel test limit plus headroom for timer callbacks, the dynamic test queue and engine
+    /// work, clamped so an oversized limit (for example <c>--maximum-parallel-tests 10000</c>) cannot
+    /// turn off the runtime's thread injection throttling with a minimum of thousands of threads.
+    /// </summary>
+    internal static int ComputeMaxWorkerThreads(int maxParallelism, int processorCount)
+        => (int)Math.Min((long)maxParallelism + processorCount, (long)processorCount * MaxWorkerThreadsPerProcessor);
 #endif
 
     public void Dispose()
@@ -239,13 +245,15 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
 
             // Leave the pool as we found it unless user code changed the minimum in the meantime.
             ThreadPool.GetMinThreads(out var currentMinWorkerThreads, out var currentMinIoThreads);
-            if (currentMinWorkerThreads == _raisedMinWorkerThreads)
+            if (currentMinWorkerThreads != _raisedMinWorkerThreads)
             {
-                ThreadPool.SetMinThreads(_minWorkerThreadsBeforeRaise, currentMinIoThreads);
+                return;
             }
+
+            ThreadPool.SetMinThreads(_minWorkerThreadsBeforeRaise, currentMinIoThreads);
         }
 
-        _logger.LogDebug($"Thread pool starvation detected while tests ran; minimum worker threads were raised from {_minWorkerThreadsBeforeRaise} to {_raisedMinWorkerThreads}");
+        _logger.LogDebug($"Thread pool starvation monitor stopped; restored minimum worker threads to {_minWorkerThreadsBeforeRaise}");
 #endif
     }
 }

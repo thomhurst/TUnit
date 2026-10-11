@@ -448,23 +448,16 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
     }
 
-    // The truthy vocabulary shared by the TUNIT_DISABLE_* switches.
-    private static bool IsTruthyEnv(string? value)
-        => value is not null &&
-           (value.Equals("true", StringComparison.OrdinalIgnoreCase) ||
-            value.Equals("1", StringComparison.Ordinal) ||
-            value.Equals("yes", StringComparison.OrdinalIgnoreCase));
-
     internal static bool IsHtmlReportEnabled()
-        => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableHtmlReporter))
+        => !EnvironmentFlags.IsSet(EnvironmentConstants.DisableHtmlReporter)
            && TUnitSettings.Default.Reporting.HtmlReportEnabled;
 
     internal static bool IsJsonReportEnabled()
-        => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableJsonReport))
+        => !EnvironmentFlags.IsSet(EnvironmentConstants.DisableJsonReport)
            && TUnitSettings.Default.Reporting.JsonReportEnabled;
 
     internal static bool IsArtifactUploadEnabled()
-        => !IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableArtifactUpload))
+        => !EnvironmentFlags.IsSet(EnvironmentConstants.DisableArtifactUpload)
            && TUnitSettings.Default.Reporting.ArtifactUploadEnabled;
 
     internal bool IsHtmlReportEnabledForRun()

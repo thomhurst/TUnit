@@ -22,6 +22,8 @@ public class ThreadPoolStarvationMonitorTests
     [After(HookType.Test)]
     public void RestoreMinimum() => ThreadPool.SetMinThreads(_minWorkerThreads, _minIoThreads);
 
+    private static int Cap => ThreadPoolStarvationMonitor.ComputeMaxWorkerThreads(MaxParallelism, Environment.ProcessorCount);
+
     private static int CurrentMinWorkerThreads()
     {
         ThreadPool.GetMinThreads(out var workerThreads, out _);
@@ -38,7 +40,7 @@ public class ThreadPoolStarvationMonitorTests
         var monitor = StartMonitor();
 
         monitor.Raise();
-        await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(MaxParallelism + Environment.ProcessorCount);
+        await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(Cap);
 
         monitor.Dispose();
         await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(_minWorkerThreads);
@@ -79,7 +81,7 @@ public class ThreadPoolStarvationMonitorTests
     [Test]
     public async Task Does_Not_Start_When_Minimum_Already_At_Cap()
     {
-        ThreadPool.SetMinThreads(MaxParallelism + Environment.ProcessorCount, _minIoThreads);
+        ThreadPool.SetMinThreads(Cap, _minIoThreads);
 
         await Assert.That(ThreadPoolStarvationMonitor.Start(MaxParallelism, new NullLogger())).IsNull();
     }
@@ -97,6 +99,16 @@ public class ThreadPoolStarvationMonitorTests
         {
             Environment.SetEnvironmentVariable(EnvironmentConstants.DisableThreadPoolTuning, previous);
         }
+    }
+
+    [Test]
+    [Arguments(80, 20, 100)]
+    [Arguments(10000, 20, 1280)]
+    [Arguments(10000, 2, 128)]
+    [Arguments(int.MaxValue, 8, 512)]
+    public async Task Cap_Is_Parallelism_Plus_Processors_Clamped_Per_Processor(int maxParallelism, int processorCount, int expected)
+    {
+        await Assert.That(ThreadPoolStarvationMonitor.ComputeMaxWorkerThreads(maxParallelism, processorCount)).IsEqualTo(expected);
     }
 
     [Test]
