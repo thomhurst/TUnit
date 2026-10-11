@@ -480,13 +480,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     private bool TryResolveUnmatchedReturn<TReturn>(string memberName, Func<MockBehavior, IMock>? autoMockFactory, out TReturn result)
     {
         // Auto-track property getters: return stored value if available
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryGetAutoTrackedValue(memberName, out result))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn typed) { result = typed; return true; }
-                if (trackedValue is null) { result = default!; return true; }
-            }
+            return true;
         }
 
         // Custom default value provider: consulted before auto-mock and built-in defaults.
@@ -501,6 +497,20 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         {
             result = autoMockResult;
             return true;
+        }
+
+        result = default!;
+        return false;
+    }
+
+    /// <summary>Returns the stored value of an auto-tracked property for a getter call, if one was set.</summary>
+    private bool TryGetAutoTrackedValue<TReturn>(string memberName, out TReturn result)
+    {
+        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal)
+            && trackValues.TryGetValue(memberName[4..], out var trackedValue))
+        {
+            if (trackedValue is TReturn typed) { result = typed; return true; }
+            if (trackedValue is null) { result = default!; return true; }
         }
 
         result = default!;
@@ -607,6 +617,11 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             return true;
         }
 
+        if (TryGetValueStoredWhileSkippingBase(memberName, out result))
+        {
+            return true;
+        }
+
         result = defaultValue;
         return false;
     }
@@ -643,6 +658,11 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             return true;
         }
 
+        if (TryGetValueStoredWhileSkippingBase(memberName, out result))
+        {
+            return true;
+        }
+
         result = defaultValue;
         return false;
     }
@@ -651,7 +671,23 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// True when a single-argument setter call should store its value for auto-tracked properties, because
     /// the base setter may be skipped. Checked before boxing the value on the typed paths.
     /// </summary>
-    private bool TracksSkippedSetters => AutoTrackProperties && SkipsBase;
+    private bool TracksSkippedSetters => AutoTrackProperties && !_passThrough;
+
+    /// <summary>
+    /// Inside an object-method base (see <see cref="EnterObjectMethodBase"/>) members run their base, but a
+    /// property value the mock stored while skipping the base setter still wins, so <c>ToString()</c> or
+    /// <c>Equals(object)</c> sees the same value as a direct read of the property.
+    /// </summary>
+    private bool TryGetValueStoredWhileSkippingBase<TReturn>(string memberName, out TReturn result)
+    {
+        if (!_passThrough)
+        {
+            return TryGetAutoTrackedValue(memberName, out result);
+        }
+
+        result = default!;
+        return false;
+    }
 
     /// <summary>Stores an auto-tracked property setter value for an unmatched call that skips the base implementation.</summary>
     private void StoreAutoTrackedSetter(string memberName, object? value)

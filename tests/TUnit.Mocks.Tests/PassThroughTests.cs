@@ -47,6 +47,15 @@ public class PassThroughEquatable : IEquatable<PassThroughEquatable>
     public virtual string Describe() => "id-" + Id;
 }
 
+// Object methods that read auto-trackable properties.
+public class PassThroughNamed
+{
+    public virtual string Name { get; set; } = "base";
+    public override string ToString() => Name;
+    public override bool Equals(object? obj) => obj is PassThroughNamed other && other.Name == Name;
+    public override int GetHashCode() => Name.Length;
+}
+
 public class PassThroughTests
 {
     [Test]
@@ -301,6 +310,22 @@ public class PassThroughTests
         Mock.SetPassThrough(loose, false);
         await Assert.That(loose.Object.Equals(loose.Object)).IsFalse();
         await Assert.That(loose.Object.Describe()).IsEqualTo("");
+    }
+
+    [Test]
+    public async Task PassThrough_False_Object_Methods_See_Auto_Tracked_Property_Values()
+    {
+        var mock = PassThroughNamed.Mock();
+        Mock.SetPassThrough(mock, false);
+        Mock.SetupAllProperties(mock);
+        var value = mock.Object;
+
+        value.Name = "Alice";
+
+        await Assert.That(value.Name).IsEqualTo("Alice");
+        await Assert.That(value.ToString()).IsEqualTo("Alice");
+        await Assert.That(value.GetHashCode()).IsEqualTo(5);
+        await Assert.That(value.Equals(value)).IsTrue();
     }
 
     [Test]
