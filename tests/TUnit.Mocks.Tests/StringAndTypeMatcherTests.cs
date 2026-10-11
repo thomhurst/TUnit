@@ -163,6 +163,18 @@ public class StringAndTypeMatcherTests
     }
 
     [Test]
+    public async Task IsOfType_Accepts_Interface_Of_Nullable_Value_Type_Parameter()
+    {
+        Arg<int?> comparable = IsOfType<IComparable>();
+        Arg<int?> sameType = IsOfType<int?>();
+
+        await Assert.That(comparable.Matcher.Matches(5)).IsTrue();
+        await Assert.That(comparable.Matcher.Matches(null)).IsFalse();
+        await Assert.That(sameType.Matcher.Matches(5)).IsTrue();
+        await Assert.That(() => { Arg<int?> _ = IsOfType<string>(); }).Throws<ArgumentException>();
+    }
+
+    [Test]
     public async Task IsOfType_Works_For_Object_Parameters()
     {
         var mock = IMatcherHandler.Mock();

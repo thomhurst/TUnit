@@ -14,11 +14,16 @@ internal sealed class TypeMatcher<T> : IArgumentMatcher<T>
     {
         var parameterType = typeof(T);
 
+        // A non-null Nullable<X> argument arrives boxed as X, so compare against the underlying types:
+        // reflection doesn't report X's interfaces on Nullable<X>, and Nullable<X> itself is sealed.
+        var underlyingParameterType = Nullable.GetUnderlyingType(parameterType) ?? parameterType;
+        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+
         // Reject types that can never overlap the parameter type, so a mistake fails at setup time
         // instead of silently never matching. An interface may still be implemented by a non-sealed class.
-        var related = parameterType.IsAssignableFrom(type) || type.IsAssignableFrom(parameterType)
-            || (type.IsInterface && !parameterType.IsSealed)
-            || (parameterType.IsInterface && !type.IsSealed);
+        var related = underlyingParameterType.IsAssignableFrom(underlyingType) || underlyingType.IsAssignableFrom(underlyingParameterType)
+            || (underlyingType.IsInterface && !underlyingParameterType.IsSealed)
+            || (underlyingParameterType.IsInterface && !underlyingType.IsSealed);
 
         if (!related)
         {
