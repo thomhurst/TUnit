@@ -431,7 +431,7 @@ public interface IProcessor
 
 
 
-var mock = Mock.Of<IProcessor>();
+var mock = IProcessor.Mock();
 
 mock.Process(Any())
 
