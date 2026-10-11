@@ -211,6 +211,29 @@ public class StringAndTypeMatcherTests
         await Assert.That(ex.Message).Contains("StartsWith(\"abc\")");
     }
 
+    [Test]
+    [Arguments("StartsWith")]
+    [Arguments("EndsWith")]
+    [Arguments("Contains")]
+    public async Task Describe_Uses_The_Public_Arg_Method_Name(string name)
+    {
+        var mock = IMatcherHandler.Mock();
+        mock.Object.Echo("zzz");
+
+        var ex = Assert.Throws<TUnit.Mocks.Exceptions.MockVerificationException>(() =>
+        {
+            var matcher = name switch
+            {
+                "StartsWith" => StartsWith("abc"),
+                "EndsWith" => EndsWith("abc"),
+                _ => Contains("abc"),
+            };
+            mock.Echo(matcher).WasCalled(Times.Once);
+        });
+
+        await Assert.That(ex.Message).Contains($"Arg.{name}(\"abc\")");
+    }
+
     private sealed class EqualsAlwaysTrue
     {
         public override bool Equals(object? obj) => obj is EqualsAlwaysTrue;

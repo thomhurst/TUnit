@@ -349,7 +349,7 @@ svc.GetUser(1);                            // setup kept: still returns Alice
 mock.GetUser(1).WasCalled(Times.Once);     // counts only the call after the clear
 ```
 
-Setups, state, auto-tracked property values and event subscriptions are kept. Each setup's invoke count is reset, so `VerifyAll()` and diagnostics only count calls made after the clear. Sequenced setups (such as `ReturnsSequentially`) keep their position; only the count used by `VerifyAll()` and diagnostics is reset. The call history of cached auto-mocks is cleared too. `MockRepository.ClearCalls()` clears every tracked mock. The instance-style `mock.ClearCalls()` is available on net9 and later; on net8 and older target frameworks use `Mock.ClearCalls(mock)`.
+Setups, state, auto-tracked property values and event subscriptions are kept. Each setup's invoke count is reset, so `VerifyAll()` and diagnostics only count calls made after the clear. Sequenced setups (such as `ReturnsSequentially`) keep their position; only the count used by `VerifyAll()` and diagnostics is reset. The call history of cached auto-mocks is cleared too. Call `ClearCalls()` while the mock is idle: recording is lock-free, so a call made on another thread at the same moment may land in the discarded history and be lost. `MockRepository.ClearCalls()` clears every tracked mock. The instance-style `mock.ClearCalls()` is available on net9 and later; on net8 and older target frameworks use `Mock.ClearCalls(mock)`.
 
 ## Pass-Through on Class Mocks
 
