@@ -576,6 +576,42 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         return false;
     }
 
+    /// <inheritdoc cref="SkipBaseForUnmatchedCall{TStore}(string, in TStore)"/>
+    private bool SkipBaseForUnmatchedCall(string memberName, object?[] args)
+    {
+        if (IsWrapMock && Behavior == MockBehavior.Strict)
+        {
+            throw new MockStrictBehaviorException(FormatCall(memberName, args));
+        }
+
+        if (!PassThrough)
+        {
+            ThrowIfStrictWithoutBase(memberName, args);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <inheritdoc cref="SkipBaseForUnmatchedCall{TReturn, TStore}(int, string, in TStore, Func{MockBehavior, IMock}?, TReturn, out TReturn)"/>
+    private bool SkipBaseForUnmatchedCall<TReturn>(int memberId, string memberName, object?[] args,
+        Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue, out TReturn result)
+    {
+        if (IsWrapMock && Behavior == MockBehavior.Strict)
+        {
+            throw new MockStrictBehaviorException(FormatCall(memberName, args));
+        }
+
+        if (!PassThrough && !IsObjectMethod(memberId))
+        {
+            result = ResolveWithoutBase(memberName, args, autoMockFactory, defaultValue);
+            return true;
+        }
+
+        result = defaultValue;
+        return false;
+    }
+
     /// <summary>Stores an auto-tracked property setter value for an unmatched call that skips the base implementation.</summary>
     private void StoreAutoTrackedSetter(string memberName, object? value)
     {
@@ -623,25 +659,13 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
         ApplyMatchedSetup(matchedSetup);
 
-        if (!setupFound)
+        if (setupFound)
         {
-            callRecord.IsUnmatched = true;
-        }
-
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            var callDesc = FormatCall(memberName, args);
-            throw new MockStrictBehaviorException(callDesc);
-        }
-
-        if (!setupFound && !PassThrough)
-        {
-            ThrowIfStrictWithoutBase(memberName, args);
             return true;
         }
 
-        return setupFound;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, args);
     }
 
     /// <summary>
@@ -699,22 +723,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
         // No setup matched
         callRecord.IsUnmatched = true;
-
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            var callDesc = FormatCall(memberName, args);
-            throw new MockStrictBehaviorException(callDesc);
-        }
-
-        if (!PassThrough && !IsObjectMethod(memberId))
-        {
-            result = ResolveWithoutBase(memberName, args, autoMockFactory, defaultValue);
-            return true;
-        }
-
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberId, memberName, args, autoMockFactory, defaultValue, out result);
     }
 
     /// <summary>
@@ -926,7 +935,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             setup.ResetInvokeCount();
         }
 
-        // Cached auto-mocks (e.g. an interface returned by a member) keep their own history.
+        // Cached auto-mocks (e.g. an interface returned by a member) keep their own history. Each one is a
+        // new mock with its own engine, created lazily for this engine's members, so the cache forms a tree
+        // (never a cycle back to this engine) and the recursion terminates.
         if (Volatile.Read(ref _autoMockCache) is { } autoMocks)
         {
             foreach (var autoMock in autoMocks.Values)

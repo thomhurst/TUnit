@@ -11,5 +11,9 @@ public interface IMockCallHistory
     /// Clears recorded call history and each setup's invoke count, so <c>VerifyAll</c> only counts calls made afterwards.
     /// Setups and state are kept, including the position of sequenced setups (e.g. <c>ReturnsSequentially</c>).
     /// </summary>
+    /// <remarks>
+    /// Call it while the mock is idle. Recording is lock-free, so a call made on another thread at the same
+    /// moment may be recorded into the discarded history and lost.
+    /// </remarks>
     void ClearCalls();
 }

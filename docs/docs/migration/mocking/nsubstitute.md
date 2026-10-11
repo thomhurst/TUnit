@@ -443,7 +443,7 @@ calculator.Discount(Any()).Returns(5m);
 decimal tax = calculator.Object.Tax(100m); // base implementation: 20
 ```
 
-This is different from `Substitute.For<SomeClass>()`, which does not call the base implementation of virtual members. If you depend on that, set `mock.PassThrough = false`; unconfigured virtual members then return default values instead of running the base implementation. Pass constructor arguments as typed parameters: `MyService.Mock("connection", 42)`.
+This is different from `Substitute.For<SomeClass>()`, which does not call the base implementation of virtual members. If you depend on that, set `mock.PassThrough = false` (on net8 and older target frameworks, `Mock.SetPassThrough(mock, false)`); unconfigured virtual members then return default values instead of running the base implementation. Pass constructor arguments as typed parameters: `MyService.Mock("connection", 42)`.
 
 TUnit.Mocks can also configure `protected` virtual and abstract members with the same syntax as public members. To wrap an existing instance of a non-sealed class and override only some of its virtual members, use `Mock.Wrap(instance)`. `Mock.Wrap` does not support interfaces.
 
@@ -453,7 +453,7 @@ TUnit.Mocks can also configure `protected` virtual and abstract members with the
 |---|---|
 | Recursive mocks (interface members return substitutes) | Loose mocks return auto-mocks; use `Mock.Get(instance)` to configure one |
 | `sub.ReceivedCalls()` | `mock.Invocations` (a list of `CallRecord`) |
-| `sub.ClearReceivedCalls()` | `mock.ClearCalls()`; it keeps setups and state |
+| `sub.ClearReceivedCalls()` | `mock.ClearCalls()`, or `Mock.ClearCalls(mock)` on net8 and older; it keeps setups and state |
 | `Substitute.For<IA, IB>()` | `Mock.Of<IA, IB>()` (up to four types) |
 | `.Configure()` before setting up a partial | Not needed; setup never calls the real member |
 

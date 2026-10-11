@@ -440,7 +440,7 @@ calculator.Discount(Any()).Returns(5m);
 decimal tax = calculator.Object.Tax(100m); // base implementation: 20
 ```
 
-If a test depends on FakeItEasy's default behavior, set `mock.PassThrough = false`; unconfigured virtual members then return default values instead of running the base implementation. TUnit.Mocks can also configure `protected` virtual and abstract members with the same syntax as public members.
+If a test depends on FakeItEasy's default behavior, set `mock.PassThrough = false` (on net8 and older target frameworks, `Mock.SetPassThrough(mock, false)`); unconfigured virtual members then return default values instead of running the base implementation. TUnit.Mocks can also configure `protected` virtual and abstract members with the same syntax as public members.
 
 ## Other Features
 
@@ -451,7 +451,7 @@ If a test depends on FakeItEasy's default behavior, set `mock.PassThrough = fals
 | `A.Fake<Func<int, string>>()` | `Mock.OfDelegate<Func<int, string>>()` |
 | `A.CallTo(fake).Where(call => ...)` | No equivalent; configure each member |
 | `Fake.GetCalls(fake)` | `mock.Invocations` (a list of `CallRecord`) |
-| `Fake.ClearRecordedCalls(fake)` | `mock.ClearCalls()`; it keeps setups and state |
+| `Fake.ClearRecordedCalls(fake)` | `mock.ClearCalls()`, or `Mock.ClearCalls(mock)` on net8 and older; it keeps setups and state |
 
 See [Advanced Features](../../writing-tests/mocking/advanced.md) for state machines, diagnostics, custom default values, and `MockRepository`.
 
