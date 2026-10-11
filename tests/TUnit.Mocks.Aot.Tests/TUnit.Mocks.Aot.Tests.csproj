@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Native AOT warning guard for TUnit.Mocks (#7027). Mirrors a consumer publishing with
+       PublishAot + TreatWarningsAsErrors: any trim/AOT warning ILC reports from TUnit.Mocks for
+       ordinary mock usage fails the publish. Keep the tests to everyday APIs that are expected to
+       be warning-free; opt-in reflection features (DefaultValueProvider.Instance, runtime stubs)
+       belong in TUnit.Mocks.Tests. Published and run by the pipeline on Linux with -p:Aot=true. -->
+  <Import Project="..\..\eng\TestProject.props" />
+
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Report every warning individually instead of one IL2104 per assembly. -->
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+    <IsAotCompatible>true</IsAotCompatible>
+    <PublishAot>true</PublishAot>
+    <PublishTrimmed>true</PublishTrimmed>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.Mocks\TUnit.Mocks.csproj" />
+
+    <ProjectReference Include="..\..\src\TUnit.Mocks.SourceGenerator\TUnit.Mocks.SourceGenerator.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Import Project="..\..\src\TUnit.Mocks\TUnit.Mocks.props" />
+  <Import Project="..\..\src\TUnit.Mocks\TUnit.Mocks.targets" />
+  <Import Project="..\..\eng\TestProject.targets" />
+
+</Project>

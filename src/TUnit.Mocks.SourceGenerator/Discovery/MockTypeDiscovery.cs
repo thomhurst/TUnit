@@ -663,6 +663,128 @@ internal static class MockTypeDiscovery
         };
     }
 
+    // ─── Closed generic registrations (#7027) ─────────────────────────
+
+    /// <summary>
+    /// Semantic transform: for <c>Mock.Of&lt;IFoo&lt;int&gt;&gt;()</c> (and <c>MockRepository.Of</c>),
+    /// returns the closed interface so a closed factory can be registered ahead of time.
+    /// </summary>
+    public static ClosedGenericMockRegistration? TransformToClosedGenericRegistration(GeneratorSyntaxContext context, CancellationToken ct)
+    {
+        var invocation = (InvocationExpressionSyntax)context.Node;
+
+        if (context.SemanticModel.GetSymbolInfo(invocation, ct).Symbol is not IMethodSymbol
+            {
+                Name: "Of",
+                TypeArguments.Length: 1,
+                ContainingType.Name: "Mock" or "MockRepository"
+            } method
+            || !IsTUnitMocksNamespace(method.ContainingNamespace))
+        {
+            return null;
+        }
+
+        return CreateClosedGenericRegistration(method.TypeArguments[0], context.SemanticModel.Compilation);
+    }
+
+    /// <summary>
+    /// Closed generic registrations for <c>[assembly: GenerateMock(typeof(IFoo&lt;int&gt;))]</c>.
+    /// </summary>
+    public static EquatableArray<ClosedGenericMockRegistration> TransformGenerateMockAttributeToClosedGenericRegistrations(
+        GeneratorAttributeSyntaxContext context, CancellationToken ct)
+    {
+        var registrations = ImmutableArray.CreateBuilder<ClosedGenericMockRegistration>();
+        foreach (var attr in context.Attributes)
+        {
+            if (attr.AttributeClass?.Name is not ("GenerateMockAttribute" or "GenerateMock")
+                || !IsTUnitMocksNamespace(attr.AttributeClass?.ContainingNamespace)
+                || attr.ConstructorArguments.Length != 1
+                || attr.ConstructorArguments[0].Value is not ITypeSymbol type)
+            {
+                continue;
+            }
+
+            if (CreateClosedGenericRegistration(type, context.SemanticModel.Compilation) is { } registration)
+            {
+                registrations.Add(registration);
+            }
+        }
+
+        return new EquatableArray<ClosedGenericMockRegistration>(registrations.ToImmutable());
+    }
+
+    private static ClosedGenericMockRegistration? CreateClosedGenericRegistration(ITypeSymbol type, Compilation compilation)
+    {
+        if (type is not INamedTypeSymbol { TypeKind: TypeKind.Interface, IsGenericType: true } namedType
+            || !ContainsTypeParameters(namedType.OriginalDefinition))
+        {
+            return null;
+        }
+
+        // Containing types count too: Outer<T>.IInner<int> inside generic code is still open.
+        var typeArguments = GetAllTypeArguments(namedType).ToImmutableArray();
+        if (typeArguments.Any(IsOpen))
+        {
+            return null;
+        }
+
+        // The registration is emitted into a top-level generated class, so every type argument must
+        // be nameable from there: private/protected nested types, file-local types and error types
+        // are left to the reflection fallback rather than breaking the user's build.
+        if (!compilation.IsSymbolAccessibleWithin(namedType, compilation.Assembly)
+            || typeArguments.Any(static t => t.TypeKind == TypeKind.Error || IsOrContainsFileLocalType(t)))
+        {
+            return null;
+        }
+
+        return new ClosedGenericMockRegistration(
+            namedType.OriginalDefinition.GetFullyQualifiedName(),
+            namedType.GetFullyQualifiedName(),
+            new EquatableArray<string>(typeArguments.Select(static t => t.GetFullyQualifiedName()).ToImmutableArray()));
+    }
+
+    private static IEnumerable<ITypeSymbol> GetAllTypeArguments(INamedTypeSymbol namedType)
+    {
+        if (namedType.ContainingType is { } containingType)
+        {
+            foreach (var typeArgument in GetAllTypeArguments(containingType))
+            {
+                yield return typeArgument;
+            }
+        }
+
+        foreach (var typeArgument in namedType.TypeArguments)
+        {
+            yield return typeArgument;
+        }
+    }
+
+    // Unlike ContainsTypeParameters, also walks containing types (Outer<T>.Nested as an argument).
+    private static bool IsOpen(ITypeSymbol type)
+    {
+        return type switch
+        {
+            ITypeParameterSymbol => true,
+            IArrayTypeSymbol array => IsOpen(array.ElementType),
+            IPointerTypeSymbol pointer => IsOpen(pointer.PointedAtType),
+            INamedTypeSymbol named => named.TypeArguments.Any(IsOpen)
+                || (named.ContainingType is { } containing && IsOpen(containing)),
+            _ => false
+        };
+    }
+
+    private static bool IsOrContainsFileLocalType(ITypeSymbol type)
+    {
+        return type switch
+        {
+            IArrayTypeSymbol array => IsOrContainsFileLocalType(array.ElementType),
+            INamedTypeSymbol named => named.IsFileLocal
+                || (named.ContainingType is { } containing && IsOrContainsFileLocalType(containing))
+                || named.TypeArguments.Any(IsOrContainsFileLocalType),
+            _ => false
+        };
+    }
+
     // ─── T.Mock() static extension discovery ─────────────────────────
 
     /// <summary>
