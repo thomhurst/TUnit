@@ -63,30 +63,13 @@ public static class Arg
     /// <summary>
     /// Matches only the same object instance as <paramref name="reference"/> (reference equality).
     /// The parameter type is inferred from context, so a base-typed parameter accepts a derived reference.
+    /// A value type has no identity, so a value-type <paramref name="reference"/> matches an equal value.
     /// </summary>
     /// <exception cref="ArgumentNullException">When <paramref name="reference"/> is null.</exception>
     /// <exception cref="ArgumentException">
-    /// When <paramref name="reference"/> is a boxed value type, which can never be the same instance as an argument.
-    /// Also when the parameter type is a value type or <paramref name="reference"/> is not assignable to it
-    /// (thrown when the matcher is set up).
+    /// When <paramref name="reference"/> is not assignable to the parameter type (thrown when the matcher is set up).
     /// </exception>
-    public static SameAsArg IsSameAs(object reference)
-    {
-        if (reference is null)
-        {
-            throw new ArgumentNullException(nameof(reference));
-        }
-
-        // Each call boxes a value-type argument again, so a boxed reference could never match.
-        if (reference.GetType().IsValueType)
-        {
-            throw new ArgumentException(
-                $"Arg.IsSameAs(...) compares references; a boxed {MockRegistry.FormatTypeName(reference.GetType(), includeNamespace: false)} can never be the same instance as the argument.",
-                nameof(reference));
-        }
-
-        return new(reference);
-    }
+    public static SameAsArg IsSameAs(object reference) => new(reference ?? throw new ArgumentNullException(nameof(reference)));
 
     /// <summary>Matches using a user-defined custom matcher.</summary>
     public static Arg<T> Matches<T>(IArgumentMatcher<T> matcher) => new(matcher);
@@ -148,7 +131,7 @@ public sealed class OfTypeArg
 
 /// <summary>
 /// Sentinel type returned by <see cref="Arg.IsSameAs(object)"/> that implicitly converts to
-/// <see cref="Arg{T}"/> for any reference type T, so the parameter type is inferred from context.
+/// <see cref="Arg{T}"/> for any T, so the parameter type is inferred from context.
 /// Use it directly as an argument; it only converts where an <see cref="Arg{T}"/> is expected, so
 /// <c>var a = IsSameAs(x);</c> cannot be passed on without a typed conversion (declare <c>Arg&lt;T&gt; a = ...</c> instead).
 /// </summary>

@@ -526,6 +526,50 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         return defaultValue;
     }
 
+    /// <summary>
+    /// Decides what an unmatched void call on a partial/wrap mock does. Returns true when the base
+    /// implementation must be skipped. Wrap + strict throws first, before the <see cref="PassThrough"/> handling.
+    /// </summary>
+    private bool SkipBaseForUnmatchedCall<TStore>(string memberName, in TStore store) where TStore : struct, IArgumentStore
+    {
+        if (IsWrapMock && Behavior == MockBehavior.Strict)
+        {
+            throw new MockStrictBehaviorException(FormatCall(memberName, store));
+        }
+
+        if (!PassThrough)
+        {
+            ThrowIfStrictWithoutBase(memberName, store);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Decides what an unmatched call with a return value on a partial/wrap mock does. Returns true (with
+    /// <paramref name="result"/> set) when the base implementation must be skipped. Wrap + strict throws first,
+    /// before the <see cref="PassThrough"/> handling; object methods (see <see cref="IsObjectMethod"/>) keep the base.
+    /// </summary>
+    private bool SkipBaseForUnmatchedCall<TReturn, TStore>(string memberName, in TStore store, bool isObjectMethod,
+        Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue, out TReturn result)
+        where TStore : struct, IArgumentStore
+    {
+        if (IsWrapMock && Behavior == MockBehavior.Strict)
+        {
+            throw new MockStrictBehaviorException(FormatCall(memberName, store));
+        }
+
+        if (!PassThrough && !isObjectMethod)
+        {
+            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
+            return true;
+        }
+
+        result = defaultValue;
+        return false;
+    }
+
     /// <summary>Stores an auto-tracked property setter value for an unmatched call that skips the base implementation.</summary>
     private void StoreAutoTrackedSetter(string memberName, object? value)
     {
@@ -657,6 +701,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             throw new MockStrictBehaviorException(callDesc);
         }
 
+        // The generator routes Equals(object) through the typed overloads (one non-ref-struct parameter),
+        // so a one-argument Equals reaching this untyped path is a generic or ref-struct overload: an
+        // ordinary member, hence argumentIsObject is left false.
         if (!PassThrough && !IsObjectMethod(memberName, args.Length))
         {
             result = ResolveWithoutBase(memberName, args, autoMockFactory, defaultValue);

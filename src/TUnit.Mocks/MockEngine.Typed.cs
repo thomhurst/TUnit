@@ -136,18 +136,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!setupFound && !PassThrough)
-        {
-            ThrowIfStrictWithoutBase(memberName, store);
-            return true;
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -181,18 +172,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!PassThrough && !IsObjectMethod(memberName, 1, typeof(T1) == typeof(object)))
-        {
-            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
-            return true;
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberName, store, IsObjectMethod(memberName, 1, typeof(T1) == typeof(object)), autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -286,18 +266,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!setupFound && !PassThrough)
-        {
-            ThrowIfStrictWithoutBase(memberName, store);
-            return true;
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -331,18 +302,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!PassThrough)
-        {
-            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
-            return true;
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -436,18 +396,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!setupFound && !PassThrough)
-        {
-            ThrowIfStrictWithoutBase(memberName, store);
-            return true;
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -481,18 +432,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!PassThrough)
-        {
-            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
-            return true;
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -586,18 +526,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!setupFound && !PassThrough)
-        {
-            ThrowIfStrictWithoutBase(memberName, store);
-            return true;
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -631,18 +562,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!PassThrough)
-        {
-            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
-            return true;
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -736,18 +656,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!setupFound && !PassThrough)
-        {
-            ThrowIfStrictWithoutBase(memberName, store);
-            return true;
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -781,18 +692,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!PassThrough)
-        {
-            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
-            return true;
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -886,18 +786,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!setupFound && !PassThrough)
-        {
-            ThrowIfStrictWithoutBase(memberName, store);
-            return true;
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -931,18 +822,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!PassThrough)
-        {
-            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
-            return true;
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -1036,18 +916,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!setupFound && !PassThrough)
-        {
-            ThrowIfStrictWithoutBase(memberName, store);
-            return true;
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -1081,18 +952,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!PassThrough)
-        {
-            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
-            return true;
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -1186,18 +1046,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!setupFound && !PassThrough)
-        {
-            ThrowIfStrictWithoutBase(memberName, store);
-            return true;
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -1231,17 +1082,6 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        if (!PassThrough)
-        {
-            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
-            return true;
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberName, store, isObjectMethod: false, autoMockFactory, defaultValue, out result);
     }
 }

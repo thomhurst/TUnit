@@ -4,31 +4,38 @@ namespace TUnit.Mocks.Matchers;
 
 /// <summary>
 /// Matches only the exact same object instance, ignoring any <c>Equals</c> override.
+/// A value type has no identity, so a value-type <c>expected</c> matches an equal value instead
+/// (each call boxes the argument again, so reference equality could never hold).
 /// </summary>
 internal sealed class ReferenceEqualsMatcher<T> : IArgumentMatcher<T>
 {
     private readonly object _expected;
+    private readonly T _typedExpected;
+    private readonly bool _byValue;
 
     public ReferenceEqualsMatcher(object expected)
     {
         _expected = expected ?? throw new ArgumentNullException(nameof(expected));
 
-        if (typeof(T).IsValueType)
-        {
-            throw new ArgumentException(
-                $"Arg.IsSameAs(...) compares references and cannot be used for a parameter of value type {MockRegistry.FormatTypeName(typeof(T), includeNamespace: false)}.");
-        }
-
-        if (expected is not T)
+        if (expected is not T typedExpected)
         {
             throw new ArgumentException(
                 $"Arg.IsSameAs({MockRegistry.FormatTypeName(expected.GetType(), includeNamespace: false)} instance) can never match a parameter of type {MockRegistry.FormatTypeName(typeof(T), includeNamespace: false)}.");
         }
+
+        _typedExpected = typedExpected;
+        _byValue = expected.GetType().IsValueType;
     }
 
-    public bool Matches(T? value) => ReferenceEquals(_expected, value);
+    public bool Matches(T? value) => _byValue
+        ? EqualityComparer<T>.Default.Equals(_typedExpected, value!)
+        : ReferenceEquals(_expected, value);
 
-    public bool Matches(object? value) => ReferenceEquals(_expected, value);
+    public bool Matches(object? value) => _byValue
+        ? Equals(_expected, value)
+        : ReferenceEquals(_expected, value);
 
-    public string Describe() => "Arg.IsSameAs(" + MockRegistry.FormatTypeName(_expected.GetType(), includeNamespace: false) + " instance)";
+    public string Describe() => _byValue
+        ? "Arg.IsSameAs(" + _expected + ")"
+        : "Arg.IsSameAs(" + MockRegistry.FormatTypeName(_expected.GetType(), includeNamespace: false) + " instance)";
 }

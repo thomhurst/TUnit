@@ -31,7 +31,7 @@ TUnit.Mocks automatically imports the `Arg` class via `global using static`, so 
 | `Contains(substring)` | String containing a substring (optional `StringComparison`) |
 | `Contains<TCol, TElem>(item)` | Collection containing an element |
 | `IsOfType<TDerived>()` | Instance of `TDerived` (or a subtype), for a base-typed parameter |
-| `IsSameAs(reference)` | The exact same instance (reference equality) |
+| `IsSameAs(reference)` | The exact same instance (reference equality); an equal value for value types |
 | `HasCount<T>(n)` | Collection with exactly n elements |
 | `IsEmpty<T>()` | Empty collection |
 | `SequenceEquals<TCol, TElem>(expected)` | Collection matching element-by-element |
@@ -179,7 +179,7 @@ Matching is case-sensitive (`StringComparison.Ordinal`) unless you pass a compar
 
 ## Type and Reference Matchers
 
-`IsOfType<TDerived>()` matches an argument that is an instance of `TDerived` or a subtype. The parameter type is inferred, so it lets you constrain a base-typed parameter. `IsSameAs(instance)` matches only that exact instance, ignoring any `Equals` override. Both infer the parameter type from where they are used, so pass them straight into the call; to keep one in a variable, declare it with its type (`Arg<AuditEvent> sameLogout = IsSameAs(logout);`) rather than `var`.
+`IsOfType<TDerived>()` matches an argument that is an instance of `TDerived` or a subtype. The parameter type is inferred, so it lets you constrain a base-typed parameter. `IsSameAs(instance)` matches only that exact instance, ignoring any `Equals` override. A value type has no identity (each call boxes it again), so `IsSameAs(42)` matches an equal value instead. Both infer the parameter type from where they are used, so pass them straight into the call; to keep one in a variable, declare it with its type (`Arg<AuditEvent> sameLogout = IsSameAs(logout);`) rather than `var`.
 
 <!-- doc-test-declaration: split-before=// Usage -->
 ```csharp

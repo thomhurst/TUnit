@@ -186,17 +186,33 @@ public class StringAndTypeMatcherTests
     }
 
     [Test]
-    public async Task IsSameAs_Throws_For_Value_Type_Parameter()
+    public async Task IsSameAs_Throws_For_Unassignable_Value_Type_Parameter()
     {
         await Assert.That(() => { Arg<int> _ = IsSameAs("x"); }).Throws<ArgumentException>();
     }
 
     [Test]
-    public async Task IsSameAs_Throws_For_Boxed_Value_Type_Reference()
+    public async Task IsSameAs_Matches_Equal_Value_For_Boxed_Value_Type()
     {
-        var ex = Assert.Throws<ArgumentException>(() => IsSameAs(42));
+        object sharedBox = 42;
+        var mock = IMatcherHandler.Mock();
+        mock.Lookup(IsSameAs(sharedBox)).Returns("hit");
+        var handler = mock.Object;
 
-        await Assert.That(ex.ParamName).IsEqualTo("reference");
+        await Assert.That(handler.Lookup(sharedBox)).IsEqualTo("hit");
+        await Assert.That(handler.Lookup(42)).IsEqualTo("hit");
+        await Assert.That(handler.Lookup(43)).IsEqualTo("");
+        await Assert.That(handler.Lookup(42L)).IsEqualTo("");
+    }
+
+    [Test]
+    public async Task IsSameAs_Matches_Equal_Value_For_Value_Type_Parameter()
+    {
+        Arg<int> matcher = IsSameAs(42);
+
+        await Assert.That(matcher.Matcher.Matches(42)).IsTrue();
+        await Assert.That(matcher.Matcher.Matches(43)).IsFalse();
+        await Assert.That(matcher.Matcher.Describe()).IsEqualTo("Arg.IsSameAs(42)");
     }
 
     [Test]

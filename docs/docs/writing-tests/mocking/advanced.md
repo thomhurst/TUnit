@@ -344,7 +344,7 @@ The `SetupAllProperties()` flag is preserved across resets.
 
 ## Clearing Recorded Calls
 
-`Reset()` removes everything. To forget only the recorded calls and keep your setups, use `ClearCalls()`. This suits a test that acts twice and verifies only the second act:
+`Reset()` removes setups, call history and state, but keeps configuration. To forget only the recorded calls and keep your setups, use `ClearCalls()`. This suits a test that acts twice and verifies only the second act:
 
 ```csharp
 mock.GetUser(Any()).Returns(new User("Alice"));
