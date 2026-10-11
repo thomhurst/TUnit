@@ -5,6 +5,7 @@ using TUnit.Mocks.Setup.Behaviors;
 using TUnit.Mocks.Verification;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.ComponentModel;
@@ -141,6 +142,34 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
     private ConcurrentDictionary<(string MemberName, Type ReturnType), IMock?> AutoMockCache
         => LazyInitializer.EnsureInitialized(ref _autoMockCache)!;
+
+    // DefaultValueProvider is opt-in (null by default); users who set one accept its trimming/AOT tradeoff.
+    // The source generator emits inline defaults for Task<T>/ValueTask<T>/collections without needing this path.
+    // Attribute-based suppression (not #pragma) so ILC honours it during Native AOT publish.
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "DefaultValueProvider is opt-in; users who configure one accept its trimming requirements.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "DefaultValueProvider is opt-in; users who configure one accept its dynamic code requirements.")]
+    private bool TryGetCustomDefault<TReturn>(out TReturn value)
+    {
+        var provider = DefaultValueProvider;
+        if (provider is not null && provider.CanProvide(typeof(TReturn)))
+        {
+            var customDefault = provider.GetDefaultValue(typeof(TReturn));
+            if (customDefault is TReturn typed)
+            {
+                value = typed;
+                return true;
+            }
+
+            if (customDefault is null)
+            {
+                value = default!;
+                return true;
+            }
+        }
+
+        value = default!;
+        return false;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool TryGetLooseAutoMockResult<TReturn>(string memberName, Func<MockBehavior, IMock>? autoMockFactory, out TReturn result)
@@ -419,16 +448,11 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         }
 
         // Custom default value provider: consulted before auto-mock and built-in defaults.
-        // Suppressed: DefaultValueProvider is opt-in (null by default). Users who set it accept the AOT tradeoff.
-        // The source generator emits inline defaults for Task<T>/ValueTask<T>/collections without needing this path.
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        if (TryGetCustomDefault(out TReturn customDefault))
         {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) { result = typedCustom; return true; }
-            if (customDefault is null) { result = default!; return true; }
+            result = customDefault;
+            return true;
         }
-#pragma warning restore IL3050, IL2026
 
         // Auto-mock: for interface return types in Loose mode, create a functional mock
         if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
