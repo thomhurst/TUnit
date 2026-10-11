@@ -24,6 +24,11 @@ public interface IClearNode
     int Count(int value);
 }
 
+public interface IClearPing
+{
+    void Ping();
+}
+
 public class ClearCallsTests
 {
     [Test]
@@ -262,15 +267,15 @@ public class ClearCallsTests
     [Test]
     public async Task ClearCalls_Never_Exposes_A_Half_Reset_History()
     {
-        var mock = ICalculator.Mock();
-        ICalculator calc = mock.Object;
+        var mock = IClearPing.Mock();
+        IClearPing ping = mock.Object;
 
         var callers = Enumerable.Range(0, 4)
             .Select(_ => Task.Run(() =>
             {
                 for (var i = 0; i < 1000; i++)
                 {
-                    calc.Add(i, i);
+                    ping.Ping();
                 }
             }))
             .ToArray();
@@ -284,20 +289,21 @@ public class ClearCallsTests
 
         await Task.WhenAll(callers.Append(clearer));
 
-        // Records and counts live in one snapshot object, so once the calls settle they must agree,
+        // Ping() has no argument matchers, so WasCalled reads the separate per-member counter,
+        // while Invocations reads the recorded calls. Once the calls settle they must agree,
         // whichever history survived the race.
         var recorded = Mock.Invocations(mock).Count;
-        mock.Add(Any(), Any()).WasCalled(Times.Exactly(recorded));
+        mock.Ping().WasCalled(Times.Exactly(recorded));
 
-        // And a clear followed by fresh calls is exact.
+        // And a clear followed by fresh calls is exact in both.
         Mock.ClearCalls(mock);
         for (var i = 0; i < 10; i++)
         {
-            calc.Add(i, i);
+            ping.Ping();
         }
 
         await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(10);
-        mock.Add(Any(), Any()).WasCalled(Times.Exactly(10));
+        mock.Ping().WasCalled(Times.Exactly(10));
     }
 }
 
