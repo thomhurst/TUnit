@@ -2746,6 +2746,49 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Inherited_Members_Returning_Interfaces_Generate_Their_Auto_Mock_Factories()
+    {
+        // Members inherited from a base class reference the return type's auto-mock factory, so
+        // transitive discovery must walk base classes too, or the factory is never generated.
+        var source = """
+            using TUnit.Mocks;
+
+            public interface ILeaf
+            {
+                int Value { get; }
+            }
+
+            public class Base
+            {
+                public virtual ILeaf this[int index] => throw new System.NotImplementedException();
+                public virtual ILeaf GetLeaf() => throw new System.NotImplementedException();
+                public virtual ILeaf Leaf => throw new System.NotImplementedException();
+            }
+
+            public class Child : Base
+            {
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Child.Mock();
+                }
+            }
+            """;
+
+        var output = GetGeneratedOutput(source);
+
+        AssertContains(output, "ILeafMockFactory");
+        AssertContains(output, "internal static global::TUnit.Mocks.Mock<global::ILeaf> CreateAutoMock(");
+        AssertNoGeneratedError(source, "CS0234");
+        AssertNoGeneratedError(source, "CS0400");
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Abstract_Class_With_Abstract_Indexer()
     {
         // Regression #6516: an abstract indexer took the virtual-member path and emitted a
