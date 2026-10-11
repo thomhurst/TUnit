@@ -43,8 +43,16 @@ internal sealed class StringMatcher : IArgumentMatcher<string>
     public bool Matches(object? value) => value is string s && Matches(s);
 
     public string Describe() => _comparison == StringComparison.Ordinal
-        ? $"Arg.{_mode}(\"{Escape(_text)}\")"
-        : $"Arg.{_mode}(\"{Escape(_text)}\", {_comparison})";
+        ? $"Arg.{FactoryName}(\"{Escape(_text)}\")"
+        : $"Arg.{FactoryName}(\"{Escape(_text)}\", {_comparison})";
+
+    // Names the Arg factory explicitly, so renaming an enum member can't change the description.
+    private string FactoryName => _mode switch
+    {
+        Mode.StartsWith => "StartsWith",
+        Mode.EndsWith => "EndsWith",
+        _ => "Contains",
+    };
 
     // Escapes backslashes and quotes so the description reads as an unambiguous string literal.
     private static string Escape(string text) => text.Replace("\\", "\\\\").Replace("\"", "\\\"");
