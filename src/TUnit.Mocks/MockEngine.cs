@@ -578,6 +578,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             callRecord.IsUnmatched = true;
         }
 
+        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
         if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
         {
             var callDesc = FormatCall(memberName, args);
@@ -649,6 +650,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         // No setup matched
         callRecord.IsUnmatched = true;
 
+        // Wrap + strict deliberately throws before the PassThrough handling below; keep this check first.
         if (IsWrapMock && Behavior == MockBehavior.Strict)
         {
             var callDesc = FormatCall(memberName, args);

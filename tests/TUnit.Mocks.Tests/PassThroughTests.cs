@@ -215,6 +215,21 @@ public class PassThroughTests
     }
 
     [Test]
+    public async Task PassThrough_False_Auto_Tracks_Single_Argument_Setters_But_Not_Indexers()
+    {
+        var mock = PassThroughSubject.Mock();
+        Mock.SetPassThrough(mock, false);
+        Mock.SetupAllProperties(mock);
+        var subject = mock.Object;
+
+        subject.Name = "tracked";
+        subject[5] = "indexer";
+
+        await Assert.That(subject.Name).IsEqualTo("tracked");
+        await Assert.That(subject[5]).IsEqualTo("");
+    }
+
+    [Test]
     public async Task PassThrough_False_Strict_DefaultValueProvider_Behaves_Like_An_Interface_Member()
     {
         var mock = PassThroughSubject.Mock(MockBehavior.Strict);
