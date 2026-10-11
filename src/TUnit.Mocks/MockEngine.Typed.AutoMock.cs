@@ -50,14 +50,10 @@ public sealed partial class MockEngine<T> where T : class
             }
         }
 
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        if (TryGetCustomDefault(out TReturn customDefault))
         {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
+            return customDefault;
         }
-#pragma warning restore IL3050, IL2026
 
         if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
         {
@@ -117,14 +113,10 @@ public sealed partial class MockEngine<T> where T : class
             }
         }
 
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        if (TryGetCustomDefault(out TReturn customDefault))
         {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
+            return customDefault;
         }
-#pragma warning restore IL3050, IL2026
 
         if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
         {
@@ -184,14 +176,10 @@ public sealed partial class MockEngine<T> where T : class
             }
         }
 
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        if (TryGetCustomDefault(out TReturn customDefault))
         {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
+            return customDefault;
         }
-#pragma warning restore IL3050, IL2026
 
         if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
         {
@@ -251,14 +239,10 @@ public sealed partial class MockEngine<T> where T : class
             }
         }
 
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        if (TryGetCustomDefault(out TReturn customDefault))
         {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
+            return customDefault;
         }
-#pragma warning restore IL3050, IL2026
 
         if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
         {
@@ -318,14 +302,10 @@ public sealed partial class MockEngine<T> where T : class
             }
         }
 
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        if (TryGetCustomDefault(out TReturn customDefault))
         {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
+            return customDefault;
         }
-#pragma warning restore IL3050, IL2026
 
         if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
         {
@@ -385,14 +365,10 @@ public sealed partial class MockEngine<T> where T : class
             }
         }
 
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        if (TryGetCustomDefault(out TReturn customDefault))
         {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
+            return customDefault;
         }
-#pragma warning restore IL3050, IL2026
 
         if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
         {
@@ -452,14 +428,10 @@ public sealed partial class MockEngine<T> where T : class
             }
         }
 
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        if (TryGetCustomDefault(out TReturn customDefault))
         {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
+            return customDefault;
         }
-#pragma warning restore IL3050, IL2026
 
         if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
         {
@@ -519,14 +491,10 @@ public sealed partial class MockEngine<T> where T : class
             }
         }
 
-#pragma warning disable IL3050, IL2026
-        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        if (TryGetCustomDefault(out TReturn customDefault))
         {
-            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
-            if (customDefault is TReturn typedCustom) return typedCustom;
-            if (customDefault is null) return default(TReturn)!;
+            return customDefault;
         }
-#pragma warning restore IL3050, IL2026
 
         if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
         {

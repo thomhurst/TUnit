@@ -14,7 +14,9 @@ namespace TUnit.Mocks;
 public static class MockRegistry
 {
     private sealed record OpenGenericFactoryDescriptor(
+        [param: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
         [property: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type OpenImplementationType,
+        [param: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
         [property: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type? OpenWrapperType);
 
     // ConcurrentDictionary is used because module initializers from multiple assemblies
@@ -144,6 +146,12 @@ public static class MockRegistry
         return true;
     }
 
+    // Attribute-based suppression (not #pragma) so ILC honours it during Native AOT publish.
+    // Only reached for closed generic types without a directly registered factory.
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Generated open generic mock types are rooted via RegisterOpenGenericFactory; reference-type instantiations share canonical code.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = "Open generic implementation/wrapper types are annotated and preserved by RegisterOpenGenericFactory.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Only constructs source-generated mock types registered through RegisterOpenGenericFactory.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Open generic implementation/wrapper types are annotated and preserved by RegisterOpenGenericFactory.")]
     private static object CreateClosedGenericMock(Type closedType, MockBehavior behavior, object[] constructorArgs, OpenGenericFactoryDescriptor descriptor)
     {
         if (constructorArgs.Length > 0)
@@ -153,7 +161,6 @@ public static class MockRegistry
 
         var genericArgs = closedType.GetGenericArguments();
 
-#pragma warning disable IL3050, IL2026, IL2055, IL2067
         var engineType = typeof(MockEngine<>).MakeGenericType(closedType);
         var engine = Activator.CreateInstance(engineType, behavior)!;
 
@@ -170,7 +177,6 @@ public static class MockRegistry
 
         var mockType = typeof(Mock<>).MakeGenericType(closedType);
         return Activator.CreateInstance(mockType, impl, engine)!;
-#pragma warning restore IL3050, IL2026, IL2055, IL2067
     }
 
     private static object CreateNonPublicInstance(
