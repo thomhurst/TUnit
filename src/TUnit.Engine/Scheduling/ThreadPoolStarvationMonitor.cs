@@ -57,6 +57,7 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
     private int _minWorkerThreadsBeforeRaise;
     private int _raisedMinWorkerThreads;
     private bool _stopped;
+    private bool _loggedWaitingForPool;
     // Timestamp of the queued probe work item, or 0 once a pool thread has run it.
     private long _probeQueuedAt;
 
@@ -101,16 +102,15 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
         var ceilingWorkerThreads = Math.Min(Environment.ProcessorCount * MaxWorkerThreadsPerProcessor, poolMaxWorkerThreads);
         var maxWorkerThreads = Math.Min(ComputeMaxWorkerThreads(maxParallelism, Environment.ProcessorCount), poolMaxWorkerThreads);
 
-        if (originalMinWorkerThreads >= maxWorkerThreads)
+        ceilingWorkerThreads = Math.Max(maxWorkerThreads, ceilingWorkerThreads);
+
+        if (originalMinWorkerThreads >= ceilingWorkerThreads)
         {
-            // The user already configured enough threads, or the pool maximum leaves no room.
+            // No raise beyond the configured minimum is possible.
             return null;
         }
 
-        var monitor = new ThreadPoolStarvationMonitor(
-            maxWorkerThreads,
-            Math.Max(maxWorkerThreads, ceilingWorkerThreads),
-            logger);
+        var monitor = new ThreadPoolStarvationMonitor(maxWorkerThreads, ceilingWorkerThreads, logger);
 
         // A dedicated thread: the monitor must keep sampling while every pool thread is blocked.
         var thread = new Thread(monitor.Run)
@@ -222,7 +222,12 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
                 // threads only under narrow conditions. Repeated small raises then left the pool stuck
                 // below its new minimum for seconds, but a single raise reliably adds the threads.
                 _minWorkerThreadsBeforeRaise = currentMinWorkerThreads;
-                target = _maxWorkerThreads;
+
+                // A minimum the user already set at or past the first target is treated like an
+                // earlier raise: keyed and dynamic tests can still block more threads than that.
+                target = currentMinWorkerThreads < _maxWorkerThreads
+                    ? _maxWorkerThreads
+                    : ComputeEscalatedMinimum(currentMinWorkerThreads, _ceilingWorkerThreads);
             }
             else
             {
@@ -235,6 +240,12 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
 
                 if (ThreadPool.ThreadCount < _raisedMinWorkerThreads)
                 {
+                    if (!_loggedWaitingForPool)
+                    {
+                        _loggedWaitingForPool = true;
+                        _logger.LogDebug($"Thread pool still starved with {ThreadPool.ThreadCount} threads; waiting for the pool to reach the raised minimum of {_raisedMinWorkerThreads} before escalating");
+                    }
+
                     // The pool is still adding threads for the last raise. Raising again now would
                     // stack raises, which is what stalled the pool. If the pool never reaches the
                     // minimum (the blocked work is bounded elsewhere), the monitor keeps sampling

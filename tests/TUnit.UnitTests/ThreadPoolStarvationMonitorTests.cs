@@ -100,10 +100,39 @@ public class ThreadPoolStarvationMonitorTests
         }
     }
 
+    private static int Ceiling
+    {
+        get
+        {
+            ThreadPool.GetMaxThreads(out var maxWorkerThreads, out _);
+            return Math.Max(Cap, Math.Min(Environment.ProcessorCount * ThreadPoolStarvationMonitor.MaxWorkerThreadsPerProcessor, maxWorkerThreads));
+        }
+    }
+
     [Test]
-    public async Task Does_Not_Start_When_Minimum_Already_At_Cap()
+    public async Task Escalates_From_User_Minimum_Already_At_First_Target()
     {
         ThreadPool.SetMinThreads(Cap, _minIoThreads);
+
+        var monitor = StartMonitor();
+        try
+        {
+            monitor.TryRaise();
+
+            await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(Math.Min(Cap * 2, Ceiling));
+        }
+        finally
+        {
+            monitor.Dispose();
+        }
+
+        await Assert.That(CurrentMinWorkerThreads()).IsEqualTo(Cap);
+    }
+
+    [Test]
+    public async Task Does_Not_Start_When_Minimum_Already_At_Ceiling()
+    {
+        ThreadPool.SetMinThreads(Ceiling, _minIoThreads);
 
         await Assert.That(ThreadPoolStarvationMonitor.Start(MaxParallelism, new NullLogger())).IsNull();
     }
