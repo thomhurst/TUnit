@@ -20,7 +20,7 @@ internal sealed class StringMatcher : IArgumentMatcher<string>
 
     public StringMatcher(Mode mode, string text, StringComparison comparison)
     {
-        _text = text ?? throw new ArgumentNullException(nameof(text));
+        _text = text;
         _mode = mode;
         _comparison = comparison;
     }

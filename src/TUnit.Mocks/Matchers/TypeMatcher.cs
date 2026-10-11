@@ -22,11 +22,13 @@ internal sealed class TypeMatcher<T> : IArgumentMatcher<T>
 
         if (!related)
         {
+            var typeName = MockRegistry.FormatTypeName(type, includeNamespace: false);
+            var parameterTypeName = MockRegistry.FormatTypeName(parameterType, includeNamespace: false);
             // No paramName: the argument is not something the caller passed to a method they called.
             throw new ArgumentException(
-                $"Arg.IsOfType<{type.Name}>() cannot be used for an argument of type {parameterType.Name}: " +
-                $"{type.Name} is unrelated to {parameterType.Name}, so it could never match. " +
-                $"Use a type that can overlap with {parameterType.Name}.");
+                $"Arg.IsOfType<{typeName}>() cannot be used for an argument of type {parameterTypeName}: " +
+                $"{typeName} is unrelated to {parameterTypeName}, so it could never match. " +
+                $"Use a type that can overlap with {parameterTypeName}.");
         }
 
         _type = type;
@@ -36,5 +38,5 @@ internal sealed class TypeMatcher<T> : IArgumentMatcher<T>
 
     public bool Matches(object? value) => value is not null && _type.IsInstanceOfType(value);
 
-    public string Describe() => "Arg.IsOfType<" + _type.Name + ">";
+    public string Describe() => "Arg.IsOfType<" + MockRegistry.FormatTypeName(_type, includeNamespace: false) + ">";
 }

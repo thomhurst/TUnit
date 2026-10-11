@@ -99,12 +99,6 @@ namespace TUnit.Mocks.Generated
                 get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
                 set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
             }
-
-            public bool PassThrough
-            {
-                get => global::TUnit.Mocks.Mock.GetPassThrough(mock);
-                set => global::TUnit.Mocks.Mock.SetPassThrough(mock, value);
-            }
         }
         #endif
     }
@@ -236,12 +230,6 @@ namespace TUnit.Mocks.Generated
             {
                 get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
                 set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
-            }
-
-            public bool PassThrough
-            {
-                get => global::TUnit.Mocks.Mock.GetPassThrough(mock);
-                set => global::TUnit.Mocks.Mock.SetPassThrough(mock, value);
             }
         }
         #endif
@@ -386,12 +374,6 @@ namespace TUnit.Mocks.Generated
             {
                 get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
                 set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
-            }
-
-            public bool PassThrough
-            {
-                get => global::TUnit.Mocks.Mock.GetPassThrough(mock);
-                set => global::TUnit.Mocks.Mock.SetPassThrough(mock, value);
             }
         }
         #endif
@@ -596,12 +578,6 @@ namespace TUnit.Mocks.Generated
             {
                 get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
                 set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
-            }
-
-            public bool PassThrough
-            {
-                get => global::TUnit.Mocks.Mock.GetPassThrough(mock);
-                set => global::TUnit.Mocks.Mock.SetPassThrough(mock, value);
             }
         }
         #endif

@@ -380,7 +380,7 @@ _ = calculator.Object.Discount(100m); // 5 (configured)
 _ = calculator.Object.Tax(100m);      // 0 (base implementation is not called)
 ```
 
-Calls are still recorded and can be verified. `PassThrough` can be changed at any time. It has no effect on interface or abstract members because they have no base implementation. On a `Mock.Wrap(...)` mock, `false` stops unconfigured calls from reaching the wrapped instance. On net8 and older target frameworks, use `Mock.SetPassThrough(mock, false)` and `Mock.GetPassThrough(mock)`.
+Calls are still recorded and can be verified. `PassThrough` can be changed at any time. It has no effect on interface or abstract members because they have no base implementation, so the `PassThrough` property is not generated for interface mocks. On a `Mock.Wrap(...)` mock, `false` stops unconfigured calls from reaching the wrapped instance. On net8 and older target frameworks, use `Mock.SetPassThrough(mock, false)` and `Mock.GetPassThrough(mock)`.
 
 ## Internals Access (experimental)
 

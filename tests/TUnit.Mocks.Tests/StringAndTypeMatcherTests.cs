@@ -105,10 +105,9 @@ public class StringAndTypeMatcherTests
     [Test]
     public async Task String_Matcher_Null_Argument_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => StartsWith(null!));
-        Assert.Throws<ArgumentNullException>(() => EndsWith(null!));
-        Assert.Throws<ArgumentNullException>(() => Contains((string)null!));
-        await Task.CompletedTask;
+        await Assert.That(Assert.Throws<ArgumentNullException>(() => StartsWith(null!)).ParamName).IsEqualTo("prefix");
+        await Assert.That(Assert.Throws<ArgumentNullException>(() => EndsWith(null!)).ParamName).IsEqualTo("suffix");
+        await Assert.That(Assert.Throws<ArgumentNullException>(() => Contains((string)null!)).ParamName).IsEqualTo("substring");
     }
 
     [Test]
@@ -190,6 +189,30 @@ public class StringAndTypeMatcherTests
     public async Task IsSameAs_Throws_For_Value_Type_Parameter()
     {
         await Assert.That(() => { Arg<int> _ = IsSameAs("x"); }).Throws<ArgumentException>();
+    }
+
+    [Test]
+    public async Task IsSameAs_Throws_For_Boxed_Value_Type_Reference()
+    {
+        var ex = Assert.Throws<ArgumentException>(() => IsSameAs(42));
+
+        await Assert.That(ex.ParamName).IsEqualTo("reference");
+    }
+
+    [Test]
+    public async Task IsOfType_Describes_Generic_Types_With_Friendly_Names()
+    {
+        Arg<object> matcher = IsOfType<List<string>>();
+
+        await Assert.That(matcher.Matcher.Describe()).IsEqualTo("Arg.IsOfType<List<String>>");
+    }
+
+    [Test]
+    public async Task IsSameAs_Describes_Generic_Types_With_Friendly_Names()
+    {
+        Arg<object> matcher = IsSameAs(new List<string>());
+
+        await Assert.That(matcher.Matcher.Describe()).IsEqualTo("Arg.IsSameAs(List<String> instance)");
     }
 
     [Test]

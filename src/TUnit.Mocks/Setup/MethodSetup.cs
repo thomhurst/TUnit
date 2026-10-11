@@ -142,7 +142,7 @@ public sealed class MethodSetup
     public void IncrementInvokeCount() => Interlocked.Increment(ref _invokeCount);
 
     /// <summary>Resets the invoke count to zero, so the setup counts as unused again.</summary>
-    public void ResetInvokeCount() => Interlocked.Exchange(ref _invokeCount, 0);
+    internal void ResetInvokeCount() => Interlocked.Exchange(ref _invokeCount, 0);
 
     public void AddBehavior(IBehavior behavior)
     {

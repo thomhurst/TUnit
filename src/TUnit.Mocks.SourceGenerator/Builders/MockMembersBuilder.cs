@@ -1422,7 +1422,10 @@ internal static class MockMembersBuilder
         var emitInvocations = !userNames.Contains("Invocations");
         var emitBehavior = !userNames.Contains("Behavior");
         var emitDefaultValueProvider = !userNames.Contains("DefaultValueProvider");
-        var emitPassThrough = !userNames.Contains("PassThrough");
+        // PassThrough only affects members with a base implementation (partial and wrap mocks);
+        // interface and delegate mocks have none, so the property would be IntelliSense noise.
+        var emitPassThrough = (model.IsWrapMock || (!model.IsInterface && !model.IsDelegateType))
+            && !userNames.Contains("PassThrough");
 
         // Skip entirely when every polyfill name collides with a user member — keeps the
         // separator blank line (below) and the surrounding #if/#endif from being emitted.

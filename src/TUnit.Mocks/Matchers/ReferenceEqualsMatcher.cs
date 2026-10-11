@@ -16,13 +16,13 @@ internal sealed class ReferenceEqualsMatcher<T> : IArgumentMatcher<T>
         if (typeof(T).IsValueType)
         {
             throw new ArgumentException(
-                $"Arg.IsSameAs(...) compares references and cannot be used for a parameter of value type {typeof(T).Name}.");
+                $"Arg.IsSameAs(...) compares references and cannot be used for a parameter of value type {MockRegistry.FormatTypeName(typeof(T), includeNamespace: false)}.");
         }
 
         if (expected is not T)
         {
             throw new ArgumentException(
-                $"Arg.IsSameAs({expected.GetType().Name} instance) can never match a parameter of type {typeof(T).Name}.");
+                $"Arg.IsSameAs({MockRegistry.FormatTypeName(expected.GetType(), includeNamespace: false)} instance) can never match a parameter of type {MockRegistry.FormatTypeName(typeof(T), includeNamespace: false)}.");
         }
     }
 
@@ -30,5 +30,5 @@ internal sealed class ReferenceEqualsMatcher<T> : IArgumentMatcher<T>
 
     public bool Matches(object? value) => ReferenceEquals(_expected, value);
 
-    public string Describe() => "Arg.IsSameAs(" + _expected.GetType().Name + " instance)";
+    public string Describe() => "Arg.IsSameAs(" + MockRegistry.FormatTypeName(_expected.GetType(), includeNamespace: false) + " instance)";
 }

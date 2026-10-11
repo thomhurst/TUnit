@@ -42,15 +42,15 @@ public static class Arg
 
     /// <summary>Matches a string that starts with <paramref name="prefix"/>. Null never matches.</summary>
     public static Arg<string> StartsWith(string prefix, StringComparison comparison = StringComparison.Ordinal)
-        => new(new StringMatcher(StringMatcher.Mode.StartsWith, prefix, comparison));
+        => new(new StringMatcher(StringMatcher.Mode.StartsWith, prefix ?? throw new ArgumentNullException(nameof(prefix)), comparison));
 
     /// <summary>Matches a string that ends with <paramref name="suffix"/>. Null never matches.</summary>
     public static Arg<string> EndsWith(string suffix, StringComparison comparison = StringComparison.Ordinal)
-        => new(new StringMatcher(StringMatcher.Mode.EndsWith, suffix, comparison));
+        => new(new StringMatcher(StringMatcher.Mode.EndsWith, suffix ?? throw new ArgumentNullException(nameof(suffix)), comparison));
 
     /// <summary>Matches a string that contains <paramref name="substring"/>. Null never matches.</summary>
     public static Arg<string> Contains(string substring, StringComparison comparison = StringComparison.Ordinal)
-        => new(new StringMatcher(StringMatcher.Mode.Contains, substring, comparison));
+        => new(new StringMatcher(StringMatcher.Mode.Contains, substring ?? throw new ArgumentNullException(nameof(substring)), comparison));
 
     /// <summary>
     /// Matches an argument that is an instance of <typeparamref name="TDerived"/> (or a type derived from it).
@@ -66,10 +66,27 @@ public static class Arg
     /// </summary>
     /// <exception cref="ArgumentNullException">When <paramref name="reference"/> is null.</exception>
     /// <exception cref="ArgumentException">
-    /// When the parameter type is a value type or <paramref name="reference"/> is not assignable to it
+    /// When <paramref name="reference"/> is a boxed value type, which can never be the same instance as an argument.
+    /// Also when the parameter type is a value type or <paramref name="reference"/> is not assignable to it
     /// (thrown when the matcher is set up).
     /// </exception>
-    public static SameAsArg IsSameAs(object reference) => new(reference ?? throw new ArgumentNullException(nameof(reference)));
+    public static SameAsArg IsSameAs(object reference)
+    {
+        if (reference is null)
+        {
+            throw new ArgumentNullException(nameof(reference));
+        }
+
+        // Each call boxes a value-type argument again, so a boxed reference could never match.
+        if (reference.GetType().IsValueType)
+        {
+            throw new ArgumentException(
+                $"Arg.IsSameAs(...) compares references; a boxed {MockRegistry.FormatTypeName(reference.GetType(), includeNamespace: false)} can never be the same instance as the argument.",
+                nameof(reference));
+        }
+
+        return new(reference);
+    }
 
     /// <summary>Matches using a user-defined custom matcher.</summary>
     public static Arg<T> Matches<T>(IArgumentMatcher<T> matcher) => new(matcher);
