@@ -2789,6 +2789,47 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public async Task Inaccessible_Inherited_Members_Do_Not_Generate_Auto_Mock_Factories()
+    {
+        // Inherited members the mock cannot override (internal or private protected in another
+        // assembly without InternalsVisibleTo) must not pull in a factory for their return type,
+        // which this compilation cannot name (CS0122).
+        var external = CreateExternalAssemblyReference("""
+            internal interface IHiddenLeaf { }
+            internal interface IHiddenProtectedLeaf { }
+            public interface IVisibleLeaf { int Value { get; } }
+
+            public class ExternalBase
+            {
+                internal virtual IHiddenLeaf GetHidden() => null!;
+                private protected virtual IHiddenProtectedLeaf GetHiddenProtected() => null!;
+                public virtual IVisibleLeaf GetVisible() => null!;
+            }
+
+            public class ExternalChild : ExternalBase { }
+            """, "InaccessibleInheritedLib");
+
+        var source = """
+            using TUnit.Mocks;
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = ExternalChild.Mock();
+                }
+            }
+            """;
+
+        var output = GetGeneratedOutput(source, [external]);
+
+        AssertDoesNotContain(output, "IHiddenLeaf");
+        AssertDoesNotContain(output, "IHiddenProtectedLeaf");
+        AssertContains(output, "IVisibleLeafMockFactory");
+        await Task.CompletedTask;
+    }
+
+    [Test]
     public Task Abstract_Class_With_Abstract_Indexer()
     {
         // Regression #6516: an abstract indexer took the virtual-member path and emitted a

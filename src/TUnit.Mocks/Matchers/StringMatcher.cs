@@ -43,6 +43,9 @@ internal sealed class StringMatcher : IArgumentMatcher<string>
     public bool Matches(object? value) => value is string s && Matches(s);
 
     public string Describe() => _comparison == StringComparison.Ordinal
-        ? $"Arg.{_mode}(\"{_text}\")"
-        : $"Arg.{_mode}(\"{_text}\", {_comparison})";
+        ? $"Arg.{_mode}(\"{Escape(_text)}\")"
+        : $"Arg.{_mode}(\"{Escape(_text)}\", {_comparison})";
+
+    // Escapes backslashes and quotes so the description reads as an unambiguous string literal.
+    private static string Escape(string text) => text.Replace("\\", "\\\\").Replace("\"", "\\\"");
 }

@@ -123,6 +123,41 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         set => _passThrough = value;
     }
 
+    // The engine whose Equals(object)/GetHashCode()/ToString() base implementation is running on this
+    // thread. Calls it makes back into the same mock (e.g. Equals(object) -> virtual Equals(T)) pass
+    // through too, so the object method really keeps its base behavior. Those methods are synchronous.
+    [ThreadStatic]
+    private static MockEngine<T>? t_objectMethodBaseEngine;
+
+    /// <summary>
+    /// True when an unmatched virtual call skips the base implementation: <see cref="PassThrough"/> is
+    /// false and no object-method base implementation of this mock is running on this thread.
+    /// </summary>
+    private bool SkipsBase => !_passThrough && !ReferenceEquals(t_objectMethodBaseEngine, this);
+
+    /// <summary>
+    /// Marks the base implementation of an <c>Equals(object)</c>/<c>GetHashCode()</c>/<c>ToString()</c>
+    /// override as running, until the returned scope is disposed. Called by generated code.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ObjectMethodBaseScope EnterObjectMethodBase()
+    {
+        var previous = t_objectMethodBaseEngine;
+        t_objectMethodBaseEngine = this;
+        return new ObjectMethodBaseScope(previous);
+    }
+
+    /// <summary>Restores the previous object-method scope on dispose. See <see cref="EnterObjectMethodBase"/>.</summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public readonly struct ObjectMethodBaseScope : IDisposable
+    {
+        private readonly MockEngine<T>? _previous;
+
+        internal ObjectMethodBaseScope(MockEngine<T>? previous) => _previous = previous;
+
+        public void Dispose() => t_objectMethodBaseEngine = _previous;
+    }
+
     public MockEngine(MockBehavior behavior)
     {
         Behavior = behavior;
@@ -543,7 +578,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
 
-        if (!PassThrough)
+        if (SkipsBase)
         {
             ThrowIfStrictWithoutBase(memberName, store);
             return true;
@@ -566,7 +601,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             throw new MockStrictBehaviorException(FormatCall(memberName, store));
         }
 
-        if (!PassThrough && !IsObjectMethod(memberId))
+        if (SkipsBase && !IsObjectMethod(memberId))
         {
             result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
             return true;
@@ -584,7 +619,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             throw new MockStrictBehaviorException(FormatCall(memberName, args));
         }
 
-        if (!PassThrough)
+        if (SkipsBase)
         {
             ThrowIfStrictWithoutBase(memberName, args);
             return true;
@@ -602,7 +637,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             throw new MockStrictBehaviorException(FormatCall(memberName, args));
         }
 
-        if (!PassThrough && !IsObjectMethod(memberId))
+        if (SkipsBase && !IsObjectMethod(memberId))
         {
             result = ResolveWithoutBase(memberName, args, autoMockFactory, defaultValue);
             return true;
@@ -611,6 +646,12 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         result = defaultValue;
         return false;
     }
+
+    /// <summary>
+    /// True when a single-argument setter call should store its value for auto-tracked properties, because
+    /// the base setter may be skipped. Checked before boxing the value on the typed paths.
+    /// </summary>
+    private bool TracksSkippedSetters => AutoTrackProperties && SkipsBase;
 
     /// <summary>Stores an auto-tracked property setter value for an unmatched call that skips the base implementation.</summary>
     private void StoreAutoTrackedSetter(string memberName, object? value)
@@ -634,7 +675,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         var callRecord = RecordCall(memberId, memberName, args);
 
         // Only a single-argument setter is a plain property; indexers (index + value) are not tracked.
-        if (!PassThrough && args.Length == 1 && AutoTrackProperties) StoreAutoTrackedSetter(memberName, args[0]);
+        if (args.Length == 1 && TracksSkippedSetters) StoreAutoTrackedSetter(memberName, args[0]);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
@@ -922,6 +963,8 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// <remarks>
     /// Recording is lock-free, so a call racing with this method may be recorded into the discarded
     /// history and lost. That is intentional: a call concurrent with a clear has no defined ordering.
+    /// The clear is not atomic either: a verification running at the same time may see the history
+    /// cleared before the invoke counts are.
     /// </remarks>
     public void ClearCalls()
     {

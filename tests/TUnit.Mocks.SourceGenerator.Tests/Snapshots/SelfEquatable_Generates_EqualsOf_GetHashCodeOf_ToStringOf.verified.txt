@@ -35,7 +35,10 @@ file sealed class SelfEquatableSnapshotMockImpl : global::SelfEquatableSnapshot,
         {
             return __result;
         }
-        return base.Equals(obj);
+        using (_engine.EnterObjectMethodBase())
+        {
+            return base.Equals(obj);
+        }
     }
 
     public override int GetHashCode()
@@ -44,7 +47,10 @@ file sealed class SelfEquatableSnapshotMockImpl : global::SelfEquatableSnapshot,
         {
             return __result;
         }
-        return base.GetHashCode();
+        using (_engine.EnterObjectMethodBase())
+        {
+            return base.GetHashCode();
+        }
     }
 
     public override string ToString()
@@ -53,7 +59,10 @@ file sealed class SelfEquatableSnapshotMockImpl : global::SelfEquatableSnapshot,
         {
             return __result;
         }
-        return base.ToString();
+        using (_engine.EnterObjectMethodBase())
+        {
+            return base.ToString();
+        }
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]

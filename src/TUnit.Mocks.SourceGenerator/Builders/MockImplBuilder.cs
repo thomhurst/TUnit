@@ -786,7 +786,21 @@ internal static class MockImplBuilder
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
-            writer.AppendLine($"return base.{EscapeIdentifier(method.Name)}{GetTypeParameterList(method)}({argPassList});");
+            if (method.IsObjectMethodOverride)
+            {
+                // Calls the base Equals/GetHashCode/ToString makes back into this mock must also run
+                // their base implementation when PassThrough is false, or equality still breaks.
+                writer.AppendLine("using (_engine.EnterObjectMethodBase())");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"return base.{EscapeIdentifier(method.Name)}({argPassList});");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+            }
+            else
+            {
+                writer.AppendLine($"return base.{EscapeIdentifier(method.Name)}{GetTypeParameterList(method)}({argPassList});");
+            }
         }
     }
 

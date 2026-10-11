@@ -187,6 +187,28 @@ public class StringAndTypeMatcherTests
     }
 
     [Test]
+    public async Task IsOfType_Overlap_Check_Covers_Classes_And_Interfaces()
+    {
+        // Unrelated classes, and a sealed class with an interface it does not implement, can never match.
+        await Assert.That(() => { Arg<MatcherBaseEvent> _ = IsOfType<string>(); }).Throws<ArgumentException>();
+        await Assert.That(() => { Arg<string> _ = IsOfType<IDisposable>(); }).Throws<ArgumentException>();
+
+        // A non-sealed class may have a subclass that implements the interface, in either direction.
+        Arg<MatcherBaseEvent> classParameter = IsOfType<IDisposable>();
+        Arg<IDisposable> interfaceParameter = IsOfType<MatcherBaseEvent>();
+        await Assert.That(classParameter.Matcher.Matches(new MatcherBaseEvent())).IsFalse();
+        await Assert.That(interfaceParameter.Matcher.Matches(new MemoryStream())).IsFalse();
+    }
+
+    [Test]
+    public async Task String_Matcher_Description_Escapes_Quotes_And_Backslashes()
+    {
+        Arg<string> matcher = Contains("""say "hi" \ bye""");
+
+        await Assert.That(matcher.Matcher.Describe()).IsEqualTo("""Arg.Contains("say \"hi\" \\ bye")""");
+    }
+
+    [Test]
     public async Task IsOfType_Rejects_Interfaces_No_Covariant_Array_Implements()
     {
         await Assert.That(() => { Arg<object[]> _ = IsOfType<IDisposable>(); }).Throws<ArgumentException>();

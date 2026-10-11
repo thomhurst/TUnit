@@ -35,6 +35,18 @@ public class PassThroughValue
     public virtual int GetHashCode<T>() => 99;
 }
 
+// Object methods that delegate to other virtual members, like a typical IEquatable<T> implementation.
+public class PassThroughEquatable : IEquatable<PassThroughEquatable>
+{
+    public int Id { get; init; }
+    public override bool Equals(object? obj) => obj is PassThroughEquatable other && Equals(other);
+    public virtual bool Equals(PassThroughEquatable? other) => other is not null && other.Id == Id;
+    public override int GetHashCode() => ComputeHash();
+    public virtual int ComputeHash() => Id * 31;
+    public override string ToString() => Describe();
+    public virtual string Describe() => "id-" + Id;
+}
+
 public class PassThroughTests
 {
     [Test]
@@ -268,6 +280,27 @@ public class PassThroughTests
             await Assert.That(value.GetHashCode()).IsEqualTo(7);
             await Assert.That(value.ToString()).IsEqualTo("money");
         }
+    }
+
+    [Test]
+    public async Task PassThrough_False_Object_Methods_Pass_Through_Nested_Virtual_Calls()
+    {
+        foreach (var behavior in new[] { MockBehavior.Loose, MockBehavior.Strict })
+        {
+            var mock = PassThroughEquatable.Mock(behavior);
+            Mock.SetPassThrough(mock, false);
+            var value = mock.Object;
+
+            await Assert.That(value.Equals((object)value)).IsTrue();
+            await Assert.That(value.GetHashCode()).IsEqualTo(0);
+            await Assert.That(value.ToString()).IsEqualTo("id-0");
+        }
+
+        // Outside an object method, the same virtual members still skip the base implementation.
+        var loose = PassThroughEquatable.Mock();
+        Mock.SetPassThrough(loose, false);
+        await Assert.That(loose.Object.Equals(loose.Object)).IsFalse();
+        await Assert.That(loose.Object.Describe()).IsEqualTo("");
     }
 
     [Test]

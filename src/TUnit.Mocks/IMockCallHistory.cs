@@ -13,7 +13,8 @@ public interface IMockCallHistory
     /// </summary>
     /// <remarks>
     /// Call it while the mock is idle. Recording is lock-free, so a call made on another thread at the same
-    /// moment may be recorded into the discarded history and lost.
+    /// moment may be recorded into the discarded history and lost, and a verification running at the same
+    /// moment may see the history cleared before the invoke counts are.
     /// </remarks>
     void ClearCalls();
 }

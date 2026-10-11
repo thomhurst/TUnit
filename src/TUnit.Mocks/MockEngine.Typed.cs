@@ -122,7 +122,7 @@ public sealed partial class MockEngine<T> where T : class
         var callRecord = RecordCall(memberId, memberName, store);
 
         // Single-argument setter only; multi-argument setters (indexers) are not auto-tracked.
-        if (!PassThrough && AutoTrackProperties) StoreAutoTrackedSetter(memberName, arg1);
+        if (TracksSkippedSetters) StoreAutoTrackedSetter(memberName, arg1);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, arg1);
 
