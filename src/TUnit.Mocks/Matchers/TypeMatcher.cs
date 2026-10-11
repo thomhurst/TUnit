@@ -20,12 +20,8 @@ internal sealed class TypeMatcher<T> : IArgumentMatcher<T>
         var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 
         // Reject types that can never overlap the parameter type, so a mistake fails at setup time
-        // instead of silently never matching. An interface may still be implemented by a non-sealed class.
-        var related = underlyingParameterType.IsAssignableFrom(underlyingType) || underlyingType.IsAssignableFrom(underlyingParameterType)
-            || (underlyingType.IsInterface && CanHoldSubtypes(underlyingParameterType))
-            || (underlyingParameterType.IsInterface && CanHoldSubtypes(underlyingType));
-
-        if (!related)
+        // instead of silently never matching.
+        if (!CanOverlap(underlyingParameterType, underlyingType))
         {
             var typeName = MockRegistry.FormatTypeName(type, includeNamespace: false);
             var parameterTypeName = MockRegistry.FormatTypeName(parameterType, includeNamespace: false);
@@ -39,10 +35,44 @@ internal sealed class TypeMatcher<T> : IArgumentMatcher<T>
         _type = type;
     }
 
-    // A reference-element array type is sealed, but array covariance lets it hold e.g. a string[]
-    // for object[], which implements interfaces (IList<string>) that object[] itself does not.
-    private static bool CanHoldSubtypes(Type type)
-        => !type.IsSealed || (type.IsArray && !type.GetElementType()!.IsValueType);
+    /// <summary>True when some runtime value could be an instance of both <paramref name="a"/> and <paramref name="b"/>.</summary>
+    private static bool CanOverlap(Type a, Type b)
+        => a.IsAssignableFrom(b) || b.IsAssignableFrom(a)
+            // An interface may still be implemented by a subclass of a non-sealed class.
+            || (b.IsInterface && !a.IsSealed)
+            || (a.IsInterface && !b.IsSealed)
+            || CanOverlapThroughArrayCovariance(a, b)
+            || CanOverlapThroughArrayCovariance(b, a);
+
+    // Generic interfaces a single-dimensional array implements for its element type.
+    private static readonly Type[] ArrayGenericInterfaces =
+    [
+        typeof(IEnumerable<>), typeof(ICollection<>), typeof(IList<>),
+        typeof(IReadOnlyCollection<>), typeof(IReadOnlyList<>),
+    ];
+
+    /// <summary>
+    /// A reference-element array type is sealed, but covariance lets it hold a more derived array:
+    /// an <c>object[]</c> can hold a <c>string[]</c>, which implements <c>IList&lt;string&gt;</c>. So the
+    /// array overlaps such a generic interface when the interface's element type could overlap its own.
+    /// Interfaces arrays never implement (such as <c>IDisposable</c>) still do not overlap.
+    /// </summary>
+    private static bool CanOverlapThroughArrayCovariance(Type array, Type @interface)
+    {
+        if (!array.IsArray || array.GetArrayRank() != 1 || !@interface.IsInterface || !@interface.IsGenericType)
+        {
+            return false;
+        }
+
+        var elementType = array.GetElementType()!;
+        if (elementType.IsValueType || Array.IndexOf(ArrayGenericInterfaces, @interface.GetGenericTypeDefinition()) < 0)
+        {
+            return false;
+        }
+
+        var interfaceElementType = @interface.GetGenericArguments()[0];
+        return !interfaceElementType.IsValueType && CanOverlap(elementType, interfaceElementType);
+    }
 
     public bool Matches(T? value) => value is not null && _type.IsInstanceOfType(value);
 

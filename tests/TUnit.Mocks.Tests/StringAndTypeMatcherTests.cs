@@ -181,6 +181,17 @@ public class StringAndTypeMatcherTests
 
         await Assert.That(matcher.Matcher.Matches(new[] { "a" })).IsTrue();
         await Assert.That(matcher.Matcher.Matches(new object[] { "a" })).IsFalse();
+
+        Arg<IList<string>> reverse = IsOfType<object[]>();
+        await Assert.That(reverse.Matcher.Matches(new[] { "a" })).IsTrue();
+    }
+
+    [Test]
+    public async Task IsOfType_Rejects_Interfaces_No_Covariant_Array_Implements()
+    {
+        await Assert.That(() => { Arg<object[]> _ = IsOfType<IDisposable>(); }).Throws<ArgumentException>();
+        await Assert.That(() => { Arg<object[]> _ = IsOfType<IList<int>>(); }).Throws<ArgumentException>();
+        await Assert.That(() => { Arg<string[]> _ = IsOfType<IList<Uri>>(); }).Throws<ArgumentException>();
     }
 
     [Test]
