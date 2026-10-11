@@ -39,16 +39,16 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
     private readonly ManualResetEventSlim _stopSignal = new(false);
     private readonly Lock _lock = new();
     private readonly ILogger _logger;
-    private readonly int _originalMinWorkerThreads;
     private readonly int _maxWorkerThreads;
+    // The minimum just before the raise, so a value user code set after Start is the one restored.
+    private int _minWorkerThreadsBeforeRaise;
     private int _raisedMinWorkerThreads;
     private bool _stopped;
     // Timestamp of the queued probe work item, or 0 once a pool thread has run it.
     private long _probeQueuedAt;
 
-    private ThreadPoolStarvationMonitor(int originalMinWorkerThreads, int maxWorkerThreads, ILogger logger)
+    private ThreadPoolStarvationMonitor(int maxWorkerThreads, ILogger logger)
     {
-        _originalMinWorkerThreads = originalMinWorkerThreads;
         _maxWorkerThreads = maxWorkerThreads;
         _logger = logger;
     }
@@ -60,7 +60,9 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
     public static ThreadPoolStarvationMonitor? Start(int maxParallelism, ILogger logger)
     {
 #if NET
-        if (OperatingSystem.IsBrowser())
+        // Browser and WASI are single-threaded, and iOS/tvOS do not support reading process CPU
+        // time. Mobile and wasm suites rarely run enough blocking tests in parallel to need this.
+        if (!(OperatingSystem.IsWindows() || OperatingSystem.IsLinux() || OperatingSystem.IsMacOS() || OperatingSystem.IsFreeBSD()))
         {
             return null;
         }
@@ -88,7 +90,7 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
             return null;
         }
 
-        var monitor = new ThreadPoolStarvationMonitor(originalMinWorkerThreads, maxWorkerThreads, logger);
+        var monitor = new ThreadPoolStarvationMonitor(maxWorkerThreads, logger);
 
         // A dedicated thread: the monitor must keep sampling while every pool thread is blocked.
         var thread = new Thread(monitor.Run)
@@ -105,8 +107,28 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
     }
 
 #if NET
-    [UnsupportedOSPlatform("browser")]
+    [SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("linux")]
+    [SupportedOSPlatform("macos")]
+    [SupportedOSPlatform("freebsd")]
     private void Run()
+    {
+        try
+        {
+            Sample();
+        }
+        catch (Exception)
+        {
+            // An exception escaping a dedicated thread terminates the process. Monitoring is only
+            // an optimization, so stop sampling and let the runtime's own thread injection apply.
+        }
+    }
+
+    [SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("linux")]
+    [SupportedOSPlatform("macos")]
+    [SupportedOSPlatform("freebsd")]
+    private void Sample()
     {
         var processorCount = Environment.ProcessorCount;
         var previousCpuTime = GetProcessCpuTime();
@@ -143,7 +165,7 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
         }
     }
 
-    private void Raise()
+    internal void Raise()
     {
         lock (_lock)
         {
@@ -158,15 +180,20 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
             // minimum for seconds, but a single raise reliably adds the threads.
             ThreadPool.GetMinThreads(out var currentMinWorkerThreads, out var currentMinIoThreads);
 
-            if (currentMinWorkerThreads < _maxWorkerThreads
+            if (_raisedMinWorkerThreads == 0
+                && currentMinWorkerThreads < _maxWorkerThreads
                 && ThreadPool.SetMinThreads(_maxWorkerThreads, currentMinIoThreads))
             {
+                _minWorkerThreadsBeforeRaise = currentMinWorkerThreads;
                 _raisedMinWorkerThreads = _maxWorkerThreads;
             }
         }
     }
 
-    [UnsupportedOSPlatform("browser")]
+    [SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("linux")]
+    [SupportedOSPlatform("macos")]
+    [SupportedOSPlatform("freebsd")]
     private static TimeSpan GetProcessCpuTime()
     {
 #if NET9_0_OR_GREATER
@@ -213,11 +240,11 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
             ThreadPool.GetMinThreads(out var currentMinWorkerThreads, out var currentMinIoThreads);
             if (currentMinWorkerThreads == _raisedMinWorkerThreads)
             {
-                ThreadPool.SetMinThreads(_originalMinWorkerThreads, currentMinIoThreads);
+                ThreadPool.SetMinThreads(_minWorkerThreadsBeforeRaise, currentMinIoThreads);
             }
         }
 
-        _logger.LogDebug($"Thread pool starvation detected while tests ran; minimum worker threads were raised from {_originalMinWorkerThreads} to {_raisedMinWorkerThreads}");
+        _logger.LogDebug($"Thread pool starvation detected while tests ran; minimum worker threads were raised from {_minWorkerThreadsBeforeRaise} to {_raisedMinWorkerThreads}");
 #endif
     }
 }
