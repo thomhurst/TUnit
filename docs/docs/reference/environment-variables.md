@@ -140,6 +140,10 @@ By default, TUnit watches the thread pool while tests run. If queued work waits 
 export TUNIT_DISABLE_THREADPOOL_TUNING=1
 ```
 
+**Programmatic equivalent:** `context.Settings.Execution.ThreadPoolTuningEnabled = false` (see [Programmatic Configuration](./programmatic-configuration.md))
+
+**Note:** The environment variable takes precedence over the programmatic setting.
+
 ### TUNIT_EXECUTION_MODE
 
 Controls whether tests run in source-generation (AOT-optimized) mode or reflection mode.

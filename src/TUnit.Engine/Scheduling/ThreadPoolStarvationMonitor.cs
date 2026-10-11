@@ -2,6 +2,7 @@ using TUnit.Core.Logging;
 #if NET
 using System.Diagnostics;
 using System.Runtime.Versioning;
+using TUnit.Core.Settings;
 using TUnit.Engine.Configuration;
 #endif
 
@@ -67,6 +68,12 @@ internal sealed class ThreadPoolStarvationMonitor : IDisposable
         if (IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableThreadPoolTuning)))
         {
             logger.LogDebug($"Thread pool starvation monitor disabled by {EnvironmentConstants.DisableThreadPoolTuning}");
+            return null;
+        }
+
+        if (!TUnitSettings.Default.Execution.ThreadPoolTuningEnabled)
+        {
+            logger.LogDebug("Thread pool starvation monitor disabled by TUnitSettings.Execution.ThreadPoolTuningEnabled");
             return null;
         }
 

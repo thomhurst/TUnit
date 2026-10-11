@@ -3083,6 +3083,7 @@ namespace .Settings
     public sealed class ExecutionSettings
     {
         public bool FailFast { get; set; }
+        public bool ThreadPoolTuningEnabled { get; set; }
     }
     public sealed class ParallelismSettings
     {
