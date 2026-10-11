@@ -150,11 +150,6 @@ public static class MockRegistry
     // Fallback for closed generic interfaces the source generator did not see written out (e.g.
     // Mock.Of<T>() inside generic code, or an auto-mocked return type). Closed types named at a
     // Mock.Of call site or in [GenerateMock] get a static closed factory instead (#7027).
-    // Attribute-based suppression (not #pragma) so ILC honours it during Native AOT publish.
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Closed types named in source are pre-registered by the generator; on Native AOT any other instantiation that was not pre-compiled fails with a descriptive NotSupportedException.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = "Open generic implementation/wrapper types are annotated and preserved by RegisterOpenGenericFactory.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Only constructs source-generated mock types registered through RegisterOpenGenericFactory.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Open generic implementation/wrapper types are annotated and preserved by RegisterOpenGenericFactory.")]
     private static object CreateClosedGenericMock(Type closedType, MockBehavior behavior, object[] constructorArgs, OpenGenericFactoryDescriptor descriptor)
     {
         if (constructorArgs.Length > 0)
@@ -174,10 +169,12 @@ public static class MockRegistry
         }
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "See CreateClosedGenericMock.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = "See CreateClosedGenericMock.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "See CreateClosedGenericMock.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "See CreateClosedGenericMock.")]
+    // Attribute-based suppression (not #pragma) so ILC honours it during Native AOT publish. Kept on
+    // this method only, so anything added to the caller is still analysed.
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Closed types named in source are pre-registered by the generator; on Native AOT any other instantiation that was not pre-compiled fails with a descriptive NotSupportedException.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = "Open generic implementation/wrapper types are annotated and preserved by RegisterOpenGenericFactory.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Only constructs source-generated mock types registered through RegisterOpenGenericFactory.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Open generic implementation/wrapper types are annotated and preserved by RegisterOpenGenericFactory.")]
     private static object CreateClosedGenericMockCore(Type closedType, MockBehavior behavior, OpenGenericFactoryDescriptor descriptor)
     {
         var genericArgs = closedType.GetGenericArguments();

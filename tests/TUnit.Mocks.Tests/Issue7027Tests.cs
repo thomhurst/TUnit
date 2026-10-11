@@ -218,6 +218,26 @@ public class Issue7027Tests
         await Assert.That(mock.Object.Find(1)).IsEqualTo(new PrivateValue7027(11));
     }
 
+    public interface IRegisteredTwice7027<T>
+    {
+        T Value();
+    }
+
+    [Test]
+    public async Task Registering_The_Same_Closed_Type_Twice_Is_Last_Wins()
+    {
+        // Every assembly that names IRepository<int> emits its own module-initializer registration;
+        // the order they run in must not matter and a repeat must not throw.
+        var first = IRegisteredTwice7027<int>.Mock();
+        var second = IRegisteredTwice7027<int>.Mock();
+
+        MockRegistry.RegisterFactory<IRegisteredTwice7027<int>>((_, _) => first);
+        MockRegistry.RegisterFactory<IRegisteredTwice7027<int>>((_, _) => second);
+
+        await Assert.That(MockRegistry.TryGetFactory(typeof(IRegisteredTwice7027<int>), out var factory)).IsTrue();
+        await Assert.That(factory(MockBehavior.Loose, [])).IsSameReferenceAs(second);
+    }
+
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static Mock<IFallbackOnly7027<T>> CreateFallbackOnly<T>() => Mock.Of<IFallbackOnly7027<T>>();
 }
