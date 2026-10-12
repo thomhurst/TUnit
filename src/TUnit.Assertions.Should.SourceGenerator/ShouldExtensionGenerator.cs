@@ -44,6 +44,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     private const string DynamicallyAccessedMembersAttributeName = "DynamicallyAccessedMembersAttribute";
     private const string ShouldGeneratePartialAttributeFullName = "TUnit.Assertions.Should.Attributes.ShouldGeneratePartialAttribute";
     private const string ShouldExtensionsTypeFullName = "TUnit.Assertions.Should.ShouldExtensions";
+    private const string HasSingleItemAssertionTypeName = "TUnit.Assertions.Conditions.HasSingleItemAssertion";
 
     private static readonly SymbolDisplayFormat NoGlobalFormat =
         SymbolDisplayFormat.FullyQualifiedFormat
@@ -1362,7 +1363,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     private static void EmitWrapperMethod(StringBuilder sb, WrapperData wrapper, WrapperMethodData m)
     {
         var positiveName = NameConjugator.Conjugate(m.SourceMethodName);
-        var returnType = $"global::TUnit.Assertions.Should.Core.ShouldAssertion<{wrapper.AssertionTypeArgDisplay}>";
+        var returnType = GetShouldReturnType(m.ReturnTypeFullName, wrapper.AssertionTypeArgDisplay, m.ReturnTypeGenericArgs);
 
         sb.AppendLine();
         if (!string.IsNullOrEmpty(m.RequiresUnreferencedCodeMessage))
@@ -1424,7 +1425,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         sb.AppendLine("        {");
         sb.AppendLine("            inner.Because(__tunit_should_because);");
         sb.AppendLine("        }");
-        sb.AppendLine($"        return new global::TUnit.Assertions.Should.Core.ShouldAssertion<{wrapper.AssertionTypeArgDisplay}>(Context, inner);");
+        sb.AppendLine($"        return new {returnType}(Context, inner);");
         sb.AppendLine("    }");
     }
 
@@ -1479,7 +1480,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             .Where(c => c is not null));
 
         var sourceType = $"global::TUnit.Assertions.Should.Core.IShouldSource<{m.SourceTypeArgDisplay}>";
-        var returnType = $"global::TUnit.Assertions.Should.Core.ShouldAssertion<{m.AssertionTypeArgDisplay}>";
+        var returnType = GetShouldReturnType(m.ReturnTypeFullName, m.AssertionTypeArgDisplay, m.ReturnTypeGenericArgs);
 
         sb.AppendLine();
         if (!string.IsNullOrEmpty(m.RequiresUnreferencedCodeMessage))
@@ -1553,12 +1554,31 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         sb.AppendLine("        {");
         sb.AppendLine("            inner.Because(__tunit_should_because);");
         sb.AppendLine("        }");
-        sb.AppendLine($"        return new global::TUnit.Assertions.Should.Core.ShouldAssertion<{m.AssertionTypeArgDisplay}>(innerContext, inner);");
+        sb.AppendLine($"        return new {returnType}(innerContext, inner);");
         sb.AppendLine("    }");
     }
 
     private static string FormatGenericArgs(EquatableArray<string> args)
         => args.Length == 0 ? string.Empty : "<" + string.Join(", ", args) + ">";
+
+    /// <summary>
+    /// <c>HasSingleItemAssertion</c> hides <c>GetAwaiter()</c> and returns the item.
+    /// <c>ShouldAssertion&lt;T&gt;</c> would bind the base awaiter and return the collection,
+    /// so that one return type is wrapped in <c>ShouldSingleItemAssertion</c>. Predicate and
+    /// dictionary overloads keep <c>ShouldAssertion&lt;T&gt;</c> because their return type name differs.
+    /// </summary>
+    private static string GetShouldReturnType(
+        string returnTypeFullName,
+        string assertionTypeArgDisplay,
+        EquatableArray<string> returnTypeGenericArgs)
+    {
+        if (returnTypeFullName == HasSingleItemAssertionTypeName)
+        {
+            return "global::TUnit.Assertions.Should.Core.ShouldSingleItemAssertion" + FormatGenericArgs(returnTypeGenericArgs);
+        }
+
+        return $"global::TUnit.Assertions.Should.Core.ShouldAssertion<{assertionTypeArgDisplay}>";
+    }
 
     private static MethodData[] DeduplicateMethods(MethodData[] methods)
     {
