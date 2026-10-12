@@ -472,7 +472,7 @@ The built-in `DefaultValueProvider` uses reflection to build defaults for `Task<
 
 ## Reset[​](#reset "Direct link to Reset")
 
-Clear all setups, call history, state, and auto-tracked property values:
+Clear all setups, call history, state, and auto-tracked property values. Configuration such as `Behavior`, `DefaultValueProvider` and `PassThrough` is kept:
 
 ```
 mock.GetUser(Any()).Returns(new User("Alice"));
@@ -491,6 +491,64 @@ _ = mock.Invocations.Count; // 0 (history cleared)
 ```
 
 The `SetupAllProperties()` flag is preserved across resets.
+
+## Clearing Recorded Calls[​](#clearing-recorded-calls "Direct link to Clearing Recorded Calls")
+
+`Reset()` removes setups, call history and state, but keeps configuration. To forget only the recorded calls and keep your setups, use `ClearCalls()`. This suits a test that acts twice and verifies only the second act:
+
+```
+mock.GetUser(Any()).Returns(new User("Alice"));
+
+svc.GetUser(1);
+
+
+
+mock.ClearCalls();
+
+
+
+_ = mock.Invocations.Count;                // 0 (history cleared)
+
+svc.GetUser(1);                            // setup kept: still returns Alice
+
+mock.GetUser(1).WasCalled(Times.Once);     // counts only the call after the clear
+```
+
+Setups, state, auto-tracked property values and event subscriptions are kept. Each setup's invoke count is reset, so `VerifyAll()` and diagnostics only count calls made after the clear. Sequenced setups (such as `ReturnsSequentially`) keep their position; only the count used by `VerifyAll()` and diagnostics is reset. The call history of cached auto-mocks is cleared too. Call `ClearCalls()` while the mock is idle: recording is lock-free, so a call made on another thread at the same moment may land in the discarded history and be lost. The clear is not atomic either, so a verification running at the same moment may see the history cleared before the invoke counts are. `MockRepository.ClearCalls()` clears every tracked mock. The instance-style `mock.ClearCalls()` is available on net9 and later; on net8 and older target frameworks use `Mock.ClearCalls(mock)`.
+
+## Pass-Through on Class Mocks[​](#pass-through-on-class-mocks "Direct link to Pass-Through on Class Mocks")
+
+By default a class mock runs the base implementation of any virtual member you have not configured. Set `PassThrough` to `false` to make unconfigured members behave like interface members instead: loose mocks return smart defaults (and auto-mocks for interface return types), and strict mocks throw `MockStrictBehaviorException` (a configured `DefaultValueProvider` is still consulted first, as for interface members). `Equals(object)`, `GetHashCode()` and `ToString()` keep running the base implementation so equality and dictionary lookups keep working. `Reset()` keeps `PassThrough`, like the other configuration (`Behavior`, `DefaultValueProvider`).
+
+```
+public class ShippingCalculator
+
+{
+
+    public virtual decimal Tax(decimal amount) => amount * 0.2m;
+
+    public virtual decimal Discount(decimal amount) => amount * 0.1m;
+
+}
+
+
+
+// Usage
+
+var calculator = ShippingCalculator.Mock();
+
+calculator.PassThrough = false;
+
+calculator.Discount(Any()).Returns(5m);
+
+
+
+_ = calculator.Object.Discount(100m); // 5 (configured)
+
+_ = calculator.Object.Tax(100m);      // 0 (base implementation is not called)
+```
+
+Calls are still recorded and can be verified. `PassThrough` can be changed at any time. It has no effect on interface or abstract members because they have no base implementation, so the `PassThrough` property is not generated for interface mocks. On a `Mock.Wrap(...)` mock, `false` stops unconfigured calls from reaching the wrapped instance. On net8 and older target frameworks, use `Mock.SetPassThrough(mock, false)` and `Mock.GetPassThrough(mock)`.
 
 ## Internals Access (experimental)[​](#internals-access-experimental "Direct link to Internals Access (experimental)")
 

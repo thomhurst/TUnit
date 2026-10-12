@@ -44,7 +44,7 @@ TUnit.Mocks works with any test framework. You can migrate mocks before, after, 
 | `A.CallToSet(() => fake.Prop).To(value)`                   | `mock.Prop.Set(value)`                                                         |
 | `fake.Event += Raise.With(args)`                           | `mock.Raise{EventName}(args)`                                                  |
 | `Fake.GetCalls(fake)`                                      | `mock.Invocations`                                                             |
-| `Fake.ClearRecordedCalls(fake)`                            | `mock.Reset()` (also clears setups)                                            |
+| `Fake.ClearRecordedCalls(fake)`                            | `mock.ClearCalls()` (keeps setups)                                             |
 
 ## Example Types[​](#example-types "Direct link to Example Types")
 
@@ -570,18 +570,18 @@ calculator.Discount(Any()).Returns(5m);
 decimal tax = calculator.Object.Tax(100m); // base implementation: 20
 ```
 
-If a test depends on FakeItEasy's default behavior, configure each virtual member that the test calls. TUnit.Mocks can also configure `protected` virtual and abstract members with the same syntax as public members.
+If a test depends on FakeItEasy's default behavior, set `mock.PassThrough = false` (on net8 and older target frameworks, `Mock.SetPassThrough(mock, false)`); unconfigured virtual members then return default values instead of running the base implementation. TUnit.Mocks can also configure `protected` virtual and abstract members with the same syntax as public members.
 
 ## Other Features[​](#other-features "Direct link to Other Features")
 
-| FakeItEasy                                  | TUnit.Mocks                                                              |
-| ------------------------------------------- | ------------------------------------------------------------------------ |
-| Members that return interfaces return fakes | Loose mocks return auto-mocks; use `Mock.Get(instance)` to configure one |
-| `A.Dummy<T>()`                              | No equivalent; use `T.Mock()` or a real value                            |
-| `A.Fake<Func<int, string>>()`               | `Mock.OfDelegate<Func<int, string>>()`                                   |
-| `A.CallTo(fake).Where(call => ...)`         | No equivalent; configure each member                                     |
-| `Fake.GetCalls(fake)`                       | `mock.Invocations` (a list of `CallRecord`)                              |
-| `Fake.ClearRecordedCalls(fake)`             | `mock.Reset()`; it also clears setups and state                          |
+| FakeItEasy                                  | TUnit.Mocks                                                                                  |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Members that return interfaces return fakes | Loose mocks return auto-mocks; use `Mock.Get(instance)` to configure one                     |
+| `A.Dummy<T>()`                              | No equivalent; use `T.Mock()` or a real value                                                |
+| `A.Fake<Func<int, string>>()`               | `Mock.OfDelegate<Func<int, string>>()`                                                       |
+| `A.CallTo(fake).Where(call => ...)`         | No equivalent; configure each member                                                         |
+| `Fake.GetCalls(fake)`                       | `mock.Invocations` (a list of `CallRecord`)                                                  |
+| `Fake.ClearRecordedCalls(fake)`             | `mock.ClearCalls()`, or `Mock.ClearCalls(mock)` on net8 and older; it keeps setups and state |
 
 See [Advanced Features](/docs/writing-tests/mocking/advanced.md) for state machines, diagnostics, custom default values, and `MockRepository`.
 
