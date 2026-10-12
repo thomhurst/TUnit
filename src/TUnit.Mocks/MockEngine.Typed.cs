@@ -101,23 +101,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -135,6 +121,9 @@ public sealed partial class MockEngine<T> where T : class
         var store = new ArgumentStore<T1>(arg1);
         var callRecord = RecordCall(memberId, memberName, store);
 
+        // Single-argument setter only; multi-argument setters (indexers) are not auto-tracked.
+        if (TracksSkippedSetters) StoreAutoTrackedSetter(memberName, arg1);
+
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, arg1);
 
         if (behavior is not null)
@@ -147,16 +136,17 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCallWithReturn<TReturn, T1>(int memberId, string memberName, T1 arg1, TReturn defaultValue, out TReturn result)
+        => TryHandleCallWithReturn(memberId, memberName, arg1, defaultValue, out result, null);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TryHandleCallWithReturn<TReturn, T1>(int memberId, string memberName, T1 arg1, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
     {
         RawReturnContext.Clear();
         var store = new ArgumentStore<T1>(arg1);
@@ -182,12 +172,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -249,23 +234,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -295,16 +266,17 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCallWithReturn<TReturn, T1, T2>(int memberId, string memberName, T1 arg1, T2 arg2, TReturn defaultValue, out TReturn result)
+        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, defaultValue, out result, null);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TryHandleCallWithReturn<TReturn, T1, T2>(int memberId, string memberName, T1 arg1, T2 arg2, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
     {
         RawReturnContext.Clear();
         var store = new ArgumentStore<T1, T2>(arg1, arg2);
@@ -330,12 +302,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -397,23 +364,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -443,16 +396,17 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCallWithReturn<TReturn, T1, T2, T3>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, TReturn defaultValue, out TReturn result)
+        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, arg3, defaultValue, out result, null);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TryHandleCallWithReturn<TReturn, T1, T2, T3>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
     {
         RawReturnContext.Clear();
         var store = new ArgumentStore<T1, T2, T3>(arg1, arg2, arg3);
@@ -478,12 +432,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -545,23 +494,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -591,16 +526,17 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, TReturn defaultValue, out TReturn result)
+        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, arg3, arg4, defaultValue, out result, null);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
     {
         RawReturnContext.Clear();
         var store = new ArgumentStore<T1, T2, T3, T4>(arg1, arg2, arg3, arg4);
@@ -626,12 +562,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -693,23 +624,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -739,16 +656,17 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4, T5>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, TReturn defaultValue, out TReturn result)
+        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, arg3, arg4, arg5, defaultValue, out result, null);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4, T5>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
     {
         RawReturnContext.Clear();
         var store = new ArgumentStore<T1, T2, T3, T4, T5>(arg1, arg2, arg3, arg4, arg5);
@@ -774,12 +692,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -841,23 +754,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -887,16 +786,17 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4, T5, T6>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, TReturn defaultValue, out TReturn result)
+        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, arg3, arg4, arg5, arg6, defaultValue, out result, null);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4, T5, T6>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
     {
         RawReturnContext.Clear();
         var store = new ArgumentStore<T1, T2, T3, T4, T5, T6>(arg1, arg2, arg3, arg4, arg5, arg6);
@@ -922,12 +822,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -989,23 +884,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -1035,16 +916,17 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4, T5, T6, T7>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, TReturn defaultValue, out TReturn result)
+        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, defaultValue, out result, null);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4, T5, T6, T7>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
     {
         RawReturnContext.Clear();
         var store = new ArgumentStore<T1, T2, T3, T4, T5, T6, T7>(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
@@ -1070,12 +952,7 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -1137,23 +1014,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, null, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn t) return t;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -1183,16 +1046,17 @@ public sealed partial class MockEngine<T> where T : class
         }
 
         ApplyMatchedSetup(matchedSetup);
-        if (!setupFound) callRecord.IsUnmatched = true;
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        return setupFound;
+        if (setupFound) return true;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, store);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4, T5, T6, T7, T8>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, TReturn defaultValue, out TReturn result)
+        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, defaultValue, out result, null);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4, T5, T6, T7, T8>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
     {
         RawReturnContext.Clear();
         var store = new ArgumentStore<T1, T2, T3, T4, T5, T6, T7, T8>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
@@ -1218,11 +1082,6 @@ public sealed partial class MockEngine<T> where T : class
         if (setupFound) { result = defaultValue; return true; }
 
         callRecord.IsUnmatched = true;
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            throw new MockStrictBehaviorException(FormatCall(memberName, store));
-        }
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberId, memberName, store, autoMockFactory, defaultValue, out result);
     }
 }

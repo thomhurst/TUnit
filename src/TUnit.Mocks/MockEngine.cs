@@ -94,6 +94,13 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     public bool IsWrapMock { get; set; }
 
     /// <summary>
+    /// Member ids of the mocked class's overrides of <c>Equals(object)</c>, <c>GetHashCode()</c> and
+    /// <c>ToString()</c>. Set by generated factory code; see <see cref="IsObjectMethod"/>.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public int[]? ObjectMethodMemberIds { get; set; }
+
+    /// <summary>
     /// Gets or sets a custom default value provider for unconfigured method return types in loose mode.
     /// When set, this provider is consulted before auto-mocking and built-in defaults.
     /// </summary>
@@ -101,6 +108,55 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     public IDefaultValueProvider? DefaultValueProvider { get; set; }
 
     public MockBehavior Behavior { get; }
+
+    private volatile bool _passThrough = true;
+
+    /// <summary>
+    /// When true (the default), an unconfigured virtual member of a class or wrap mock runs the
+    /// base implementation. When false it behaves like an interface member: loose mode returns
+    /// the default value and strict mode throws.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool PassThrough
+    {
+        get => _passThrough;
+        set => _passThrough = value;
+    }
+
+    // The engine whose Equals(object)/GetHashCode()/ToString() base implementation is running on this
+    // thread. Calls it makes back into the same mock (e.g. Equals(object) -> virtual Equals(T)) pass
+    // through too, so the object method really keeps its base behavior. Those methods are synchronous.
+    [ThreadStatic]
+    private static MockEngine<T>? t_objectMethodBaseEngine;
+
+    /// <summary>
+    /// True when an unmatched virtual call skips the base implementation: <see cref="PassThrough"/> is
+    /// false and no object-method base implementation of this mock is running on this thread.
+    /// </summary>
+    private bool SkipsBase => !_passThrough && !ReferenceEquals(t_objectMethodBaseEngine, this);
+
+    /// <summary>
+    /// Marks the base implementation of an <c>Equals(object)</c>/<c>GetHashCode()</c>/<c>ToString()</c>
+    /// override as running, until the returned scope is disposed. Called by generated code.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ObjectMethodBaseScope EnterObjectMethodBase()
+    {
+        var previous = t_objectMethodBaseEngine;
+        t_objectMethodBaseEngine = this;
+        return new ObjectMethodBaseScope(previous);
+    }
+
+    /// <summary>Restores the previous object-method scope on dispose. See <see cref="EnterObjectMethodBase"/>.</summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public readonly struct ObjectMethodBaseScope : IDisposable
+    {
+        private readonly MockEngine<T>? _previous;
+
+        internal ObjectMethodBaseScope(MockEngine<T>? previous) => _previous = previous;
+
+        public void Dispose() => t_objectMethodBaseEngine = _previous;
+    }
 
     public MockEngine(MockBehavior behavior)
     {
@@ -402,26 +458,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         // No setup matched — mark as unmatched for diagnostics
         callRecord.IsUnmatched = true;
 
-        // Auto-track property getters: return stored value if available
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn typed) return typed;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        // Custom default value provider: consulted before auto-mock and built-in defaults.
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        // Auto-mock: for interface return types in Loose mode, create a functional mock
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -431,6 +470,232 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         }
 
         return defaultValue;
+    }
+
+    /// <summary>
+    /// Resolves the value for an unmatched call that is not served by a setup: an auto-tracked
+    /// property value, the custom <see cref="DefaultValueProvider"/>, or a loose auto-mock.
+    /// Returns false when none applies, leaving the caller to apply strict-mode and default handling.
+    /// </summary>
+    private bool TryResolveUnmatchedReturn<TReturn>(string memberName, Func<MockBehavior, IMock>? autoMockFactory, out TReturn result)
+    {
+        // Auto-track property getters: return stored value if available
+        if (TryGetAutoTrackedValue(memberName, out result))
+        {
+            return true;
+        }
+
+        // Custom default value provider: consulted before auto-mock and built-in defaults.
+        if (TryGetCustomDefault(out TReturn customDefault))
+        {
+            result = customDefault;
+            return true;
+        }
+
+        // Auto-mock: for interface return types in Loose mode, create a functional mock
+        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
+        {
+            result = autoMockResult;
+            return true;
+        }
+
+        result = default!;
+        return false;
+    }
+
+    /// <summary>Returns the stored value of an auto-tracked property for a getter call, if one was set.</summary>
+    private bool TryGetAutoTrackedValue<TReturn>(string memberName, out TReturn result)
+    {
+        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal)
+            && trackValues.TryGetValue(memberName[4..], out var trackedValue))
+        {
+            if (trackedValue is TReturn typed) { result = typed; return true; }
+            if (trackedValue is null) { result = default!; return true; }
+        }
+
+        result = default!;
+        return false;
+    }
+
+    /// <summary>
+    /// True for <c>Equals(object)</c>, <c>GetHashCode()</c> and <c>ToString()</c>. These keep running the base
+    /// implementation when <see cref="PassThrough"/> is false: argument matching, dictionaries and diagnostics
+    /// depend on them behaving normally.
+    /// </summary>
+    /// <remarks>
+    /// The generator identifies these by symbol (an override whose root is a <see cref="object"/> member), so
+    /// overloads such as <c>Equals(string)</c> or a generic <c>ToString&lt;T&gt;()</c> are ordinary members.
+    /// </remarks>
+    private bool IsObjectMethod(int memberId)
+        => ObjectMethodMemberIds is { } ids && Array.IndexOf(ids, memberId) >= 0;
+
+    /// <summary>
+    /// For a void/setter call that skips the base implementation (<see cref="PassThrough"/> = false):
+    /// throws in strict mode, since the call was not set up.
+    /// </summary>
+    private void ThrowIfStrictWithoutBase(string memberName, object?[] args)
+    {
+        if (Behavior == MockBehavior.Strict)
+        {
+            throw new MockStrictBehaviorException(FormatCall(memberName, args));
+        }
+    }
+
+    private void ThrowIfStrictWithoutBase<TStore>(string memberName, in TStore store) where TStore : struct, IArgumentStore
+    {
+        if (Behavior == MockBehavior.Strict)
+        {
+            throw new MockStrictBehaviorException(FormatCall(memberName, store));
+        }
+    }
+
+    /// <summary>
+    /// For a call with a return value that skips the base implementation (<see cref="PassThrough"/> = false):
+    /// resolves tracked/default/auto-mock values, or throws in strict mode. Like an interface member, a custom
+    /// <see cref="DefaultValueProvider"/> is consulted before the strict-mode throw.
+    /// </summary>
+    private TReturn ResolveWithoutBase<TReturn>(string memberName, object?[] args, Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue)
+    {
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn resolved))
+        {
+            return resolved;
+        }
+
+        ThrowIfStrictWithoutBase(memberName, args);
+        return defaultValue;
+    }
+
+    private TReturn ResolveWithoutBase<TReturn, TStore>(string memberName, in TStore store, Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue)
+        where TStore : struct, IArgumentStore
+    {
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn resolved))
+        {
+            return resolved;
+        }
+
+        ThrowIfStrictWithoutBase(memberName, store);
+        return defaultValue;
+    }
+
+    /// <summary>
+    /// Decides what an unmatched void call on a partial/wrap mock does. Returns true when the base
+    /// implementation must be skipped. Wrap + strict throws first, before the <see cref="PassThrough"/> handling.
+    /// </summary>
+    private bool SkipBaseForUnmatchedCall<TStore>(string memberName, in TStore store) where TStore : struct, IArgumentStore
+    {
+        if (IsWrapMock && Behavior == MockBehavior.Strict)
+        {
+            throw new MockStrictBehaviorException(FormatCall(memberName, store));
+        }
+
+        if (SkipsBase)
+        {
+            ThrowIfStrictWithoutBase(memberName, store);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Decides what an unmatched call with a return value on a partial/wrap mock does. Returns true (with
+    /// <paramref name="result"/> set) when the base implementation must be skipped. Wrap + strict throws first,
+    /// before the <see cref="PassThrough"/> handling; object methods (see <see cref="IsObjectMethod"/>) keep the base.
+    /// </summary>
+    private bool SkipBaseForUnmatchedCall<TReturn, TStore>(int memberId, string memberName, in TStore store,
+        Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue, out TReturn result)
+        where TStore : struct, IArgumentStore
+    {
+        if (IsWrapMock && Behavior == MockBehavior.Strict)
+        {
+            throw new MockStrictBehaviorException(FormatCall(memberName, store));
+        }
+
+        if (SkipsBase && !IsObjectMethod(memberId))
+        {
+            result = ResolveWithoutBase(memberName, store, autoMockFactory, defaultValue);
+            return true;
+        }
+
+        if (TryGetValueStoredWhileSkippingBase(memberName, out result))
+        {
+            return true;
+        }
+
+        result = defaultValue;
+        return false;
+    }
+
+    /// <inheritdoc cref="SkipBaseForUnmatchedCall{TStore}(string, in TStore)"/>
+    private bool SkipBaseForUnmatchedCall(string memberName, object?[] args)
+    {
+        if (IsWrapMock && Behavior == MockBehavior.Strict)
+        {
+            throw new MockStrictBehaviorException(FormatCall(memberName, args));
+        }
+
+        if (SkipsBase)
+        {
+            ThrowIfStrictWithoutBase(memberName, args);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <inheritdoc cref="SkipBaseForUnmatchedCall{TReturn, TStore}(int, string, in TStore, Func{MockBehavior, IMock}?, TReturn, out TReturn)"/>
+    private bool SkipBaseForUnmatchedCall<TReturn>(int memberId, string memberName, object?[] args,
+        Func<MockBehavior, IMock>? autoMockFactory, TReturn defaultValue, out TReturn result)
+    {
+        if (IsWrapMock && Behavior == MockBehavior.Strict)
+        {
+            throw new MockStrictBehaviorException(FormatCall(memberName, args));
+        }
+
+        if (SkipsBase && !IsObjectMethod(memberId))
+        {
+            result = ResolveWithoutBase(memberName, args, autoMockFactory, defaultValue);
+            return true;
+        }
+
+        if (TryGetValueStoredWhileSkippingBase(memberName, out result))
+        {
+            return true;
+        }
+
+        result = defaultValue;
+        return false;
+    }
+
+    /// <summary>
+    /// True when a single-argument setter call should store its value for auto-tracked properties, because
+    /// the base setter may be skipped. Checked before boxing the value on the typed paths.
+    /// </summary>
+    private bool TracksSkippedSetters => AutoTrackProperties && !_passThrough;
+
+    /// <summary>
+    /// Inside an object-method base (see <see cref="EnterObjectMethodBase"/>) members run their base, but a
+    /// property value the mock stored while skipping the base setter still wins, so <c>ToString()</c> or
+    /// <c>Equals(object)</c> sees the same value as a direct read of the property.
+    /// </summary>
+    private bool TryGetValueStoredWhileSkippingBase<TReturn>(string memberName, out TReturn result)
+    {
+        if (!_passThrough)
+        {
+            return TryGetAutoTrackedValue(memberName, out result);
+        }
+
+        result = default!;
+        return false;
+    }
+
+    /// <summary>Stores an auto-tracked property setter value for an unmatched call that skips the base implementation.</summary>
+    private void StoreAutoTrackedSetter(string memberName, object? value)
+    {
+        if (AutoTrackProperties && memberName.StartsWith("set_", StringComparison.Ordinal))
+        {
+            AutoTrackValues[memberName[4..]] = value;
+        }
     }
 
     /// <summary>
@@ -444,6 +709,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     {
         RawReturnContext.Clear();
         var callRecord = RecordCall(memberId, memberName, args);
+
+        // Only a single-argument setter is a plain property; indexers (index + value) are not tracked.
+        if (args.Length == 1 && TracksSkippedSetters) StoreAutoTrackedSetter(memberName, args[0]);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
@@ -468,18 +736,13 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
         ApplyMatchedSetup(matchedSetup);
 
-        if (!setupFound)
+        if (setupFound)
         {
-            callRecord.IsUnmatched = true;
+            return true;
         }
 
-        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            var callDesc = FormatCall(memberName, args);
-            throw new MockStrictBehaviorException(callDesc);
-        }
-
-        return setupFound;
+        callRecord.IsUnmatched = true;
+        return SkipBaseForUnmatchedCall(memberName, args);
     }
 
     /// <summary>
@@ -537,15 +800,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
         // No setup matched
         callRecord.IsUnmatched = true;
-
-        if (IsWrapMock && Behavior == MockBehavior.Strict)
-        {
-            var callDesc = FormatCall(memberName, args);
-            throw new MockStrictBehaviorException(callDesc);
-        }
-
-        result = defaultValue;
-        return false;
+        return SkipBaseForUnmatchedCall(memberId, memberName, args, autoMockFactory, defaultValue, out result);
     }
 
     /// <summary>
@@ -736,7 +991,43 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     }
 
     /// <summary>
-    /// Clears all setups and call history.
+    /// Clears recorded call history and each setup's invoke count (so <c>VerifyAll</c> and diagnostics
+    /// only count calls made after the clear). Setups, state, auto-tracked property values and
+    /// event subscriptions are kept. Sequenced setups (e.g. <c>ReturnsSequentially</c>) keep their position:
+    /// only the invoke count used by <c>VerifyAll</c> and diagnostics is reset.
+    /// </summary>
+    /// <remarks>
+    /// Recording is lock-free, so a call racing with this method may be recorded into the discarded
+    /// history and lost. That is intentional: a call concurrent with a clear has no defined ordering.
+    /// The clear is not atomic either: a verification running at the same time may see the history
+    /// cleared before the invoke counts are.
+    /// </remarks>
+    public void ClearCalls()
+    {
+        lock (Lock)
+        {
+            _callArrays = null;
+        }
+
+        foreach (var setup in GetSetups())
+        {
+            setup.ResetInvokeCount();
+        }
+
+        // Cached auto-mocks (e.g. an interface returned by a member) keep their own history. Each one is a
+        // new mock with its own engine, created lazily for this engine's members, so the cache forms a tree
+        // (never a cycle back to this engine) and the recursion terminates.
+        if (Volatile.Read(ref _autoMockCache) is { } autoMocks)
+        {
+            foreach (var autoMock in autoMocks.Values)
+            {
+                (autoMock as IMockCallHistory)?.ClearCalls();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Clears all setups and call history. Configuration (<see cref="PassThrough"/>, <see cref="Behavior"/>, <see cref="DefaultValueProvider"/>) is kept.
     /// </summary>
     public void Reset()
     {

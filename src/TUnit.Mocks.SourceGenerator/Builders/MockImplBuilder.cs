@@ -302,7 +302,7 @@ internal static class MockImplBuilder
                 writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
-                writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
+                writer.AppendLine($"var __result = __rawResult is null ? default! : ({method.UnwrappedReturnType})__rawResult;");
             }
             else
             {
@@ -346,7 +346,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            writer.AppendLine($"var __result = ({method.ReturnType})__rawResult!;");
+            writer.AppendLine($"var __result = __rawResult is null ? default! : ({method.ReturnType})__rawResult;");
             EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
@@ -417,7 +417,7 @@ internal static class MockImplBuilder
                 writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
-                writer.AppendLine($"return ({prop.ReturnType})__rawResult!;");
+                writer.AppendLine($"return __rawResult is null ? default! : ({prop.ReturnType})__rawResult;");
                 writer.DecreaseIndent();
                 writer.AppendLine("}");
                 writer.AppendLine($"return _wrappedInstance.{EscapeIdentifier(prop.Name)};");
@@ -723,7 +723,7 @@ internal static class MockImplBuilder
                 writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
-                writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
+                writer.AppendLine($"var __result = __rawResult is null ? default! : ({method.UnwrappedReturnType})__rawResult;");
             }
             else
             {
@@ -769,7 +769,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", "__rawResult")})");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            writer.AppendLine($"var __result = ({method.ReturnType})__rawResult!;");
+            writer.AppendLine($"var __result = __rawResult is null ? default! : ({method.ReturnType})__rawResult;");
             EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
@@ -786,7 +786,21 @@ internal static class MockImplBuilder
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
-            writer.AppendLine($"return base.{EscapeIdentifier(method.Name)}{GetTypeParameterList(method)}({argPassList});");
+            if (method.IsObjectMethodOverride)
+            {
+                // Calls the base Equals/GetHashCode/ToString makes back into this mock must also run
+                // their base implementation when PassThrough is false, or equality still breaks.
+                writer.AppendLine("using (_engine.EnterObjectMethodBase())");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"return base.{EscapeIdentifier(method.Name)}({argPassList});");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+            }
+            else
+            {
+                writer.AppendLine($"return base.{EscapeIdentifier(method.Name)}{GetTypeParameterList(method)}({argPassList});");
+            }
         }
     }
 
@@ -1055,7 +1069,7 @@ internal static class MockImplBuilder
                 writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
-                writer.AppendLine($"return ({prop.ReturnType})__rawResult!;");
+                writer.AppendLine($"return __rawResult is null ? default! : ({prop.ReturnType})__rawResult;");
                 writer.DecreaseIndent();
                 writer.AppendLine("}");
                 writer.AppendLine($"return base.{EscapeIdentifier(prop.Name)};");
@@ -1123,7 +1137,7 @@ internal static class MockImplBuilder
         {
             var argsArray = GetIndexerGetterArgsArray(prop);
             writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
-            writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
+            writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault}{FormatAutoMockFactoryArgument(GetAutoMockFactoryLambda(prop))});");
         }
 
         if (prop.HasSetter)
@@ -1156,15 +1170,18 @@ internal static class MockImplBuilder
         {
             var argsArray = GetIndexerGetterArgsArray(prop);
             writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
+            // Pass the generated auto-mock factory, so a generic return type need not be built by
+            // reflection under Native AOT (as for methods and properties).
+            var autoMockFactory = FormatAutoMockFactoryArgument(GetAutoMockFactoryLambda(prop));
             if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
+                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault}{autoMockFactory});");
             }
             else
             {
                 writer.AppendLine($"{getterPrefix}get");
                 writer.OpenBrace();
-                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault}, out var __result))");
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId.ToString(CultureInfo.InvariantCulture)}, \"get_Item\", {argsArray}, {prop.SmartDefault}, out var __result{autoMockFactory}))");
                 writer.OpenBrace();
                 writer.AppendLine("return __result;");
                 writer.CloseBrace();

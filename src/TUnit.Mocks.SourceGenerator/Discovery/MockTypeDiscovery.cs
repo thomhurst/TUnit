@@ -308,8 +308,19 @@ internal static class MockTypeDiscovery
         Compilation compilation,
         CancellationToken cancellationToken)
     {
-        // Collect all members from the type and its interfaces
+        // Collect all members from the type, its base classes and its interfaces. Inherited class
+        // members are overridden by the generated mock and reference their return type's factory too,
+        // but only those member discovery actually overrides: overridable and accessible from this
+        // compilation (an inaccessible member's return type may itself be unnameable here, CS0122).
         var members = new List<ISymbol>(type.GetMembers());
+        for (var baseType = type.BaseType; baseType is { SpecialType: not SpecialType.System_Object }; baseType = baseType.BaseType)
+        {
+            members.AddRange(baseType.GetMembers().Where(m =>
+                (m.IsVirtual || m.IsAbstract || m.IsOverride)
+                && !m.IsSealed
+                && m.DeclaredAccessibility != Accessibility.Private
+                && MemberDiscovery.IsMemberAccessible(m, compilationAssembly)));
+        }
         foreach (var iface in type.AllInterfaces)
         {
             members.AddRange(iface.GetMembers());

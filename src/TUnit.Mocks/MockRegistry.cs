@@ -218,12 +218,14 @@ public static class MockRegistry
     /// <summary>
     /// Formats a type as C# source (<c>Ns.Outer&lt;int&gt;.IInner&lt;string&gt;</c>) so the
     /// suggested <c>Mock.Of</c> / <c>GenerateMock</c> fix can be pasted as-is.
+    /// With <paramref name="includeNamespace"/> false, namespaces are omitted
+    /// (<c>Outer&lt;Int32&gt;.IInner&lt;String&gt;</c>) for shorter diagnostics.
     /// </summary>
-    internal static string FormatTypeName(Type type)
+    internal static string FormatTypeName(Type type, bool includeNamespace = true)
     {
         if (type.IsArray)
         {
-            return $"{FormatTypeName(type.GetElementType()!)}[{new string(',', type.GetArrayRank() - 1)}]";
+            return $"{FormatTypeName(type.GetElementType()!, includeNamespace)}[{new string(',', type.GetArrayRank() - 1)}]";
         }
 
         if (type.IsGenericParameter)
@@ -232,13 +234,13 @@ public static class MockRegistry
         }
 
         return type.IsGenericType
-            ? FormatNamedType(type.GetGenericTypeDefinition(), type.GetGenericArguments())
-            : FormatNamedType(type, Type.EmptyTypes);
+            ? FormatNamedType(type.GetGenericTypeDefinition(), type.GetGenericArguments(), includeNamespace)
+            : FormatNamedType(type, Type.EmptyTypes, includeNamespace);
     }
 
     // Reflection flattens every type argument of a nested generic onto the innermost type, outer
     // ones first; hand each containing type its share so each segment gets its own argument list.
-    private static string FormatNamedType(Type definition, Type[] typeArguments)
+    private static string FormatNamedType(Type definition, Type[] typeArguments, bool includeNamespace)
     {
         var name = definition.Name;
         var tick = name.IndexOf('`');
@@ -252,17 +254,17 @@ public static class MockRegistry
         if (definition.DeclaringType is { } declaringType)
         {
             outerCount = Math.Min(declaringType.GetGenericArguments().Length, typeArguments.Length);
-            prefix = FormatNamedType(declaringType, typeArguments.Take(outerCount).ToArray()) + ".";
+            prefix = FormatNamedType(declaringType, typeArguments.Take(outerCount).ToArray(), includeNamespace) + ".";
         }
         else
         {
-            prefix = string.IsNullOrEmpty(definition.Namespace) ? string.Empty : definition.Namespace + ".";
+            prefix = !includeNamespace || string.IsNullOrEmpty(definition.Namespace) ? string.Empty : definition.Namespace + ".";
         }
 
         var ownArguments = typeArguments.Skip(outerCount).ToArray();
         return ownArguments.Length == 0
             ? prefix + name
-            : $"{prefix}{name}<{string.Join(", ", ownArguments.Select(FormatTypeName))}>";
+            : $"{prefix}{name}<{string.Join(", ", ownArguments.Select(a => FormatTypeName(a, includeNamespace)))}>";
     }
 
     private static object CreateNonPublicInstance(

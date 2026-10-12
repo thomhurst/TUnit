@@ -162,6 +162,10 @@ namespace TUnit.Mocks.Generated
 
         #if NET9_0_OR_GREATER
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void ClearCalls<Int32>(this global::TUnit.Mocks.Mock<global::INumericNamed<Int32>> mock)
+            => global::TUnit.Mocks.Mock.ClearCalls(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public static void Reset<Int32>(this global::TUnit.Mocks.Mock<global::INumericNamed<Int32>> mock)
             => global::TUnit.Mocks.Mock.Reset(mock);
 

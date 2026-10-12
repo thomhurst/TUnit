@@ -41,23 +41,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn typed) return typed;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -67,10 +53,6 @@ public sealed partial class MockEngine<T> where T : class
 
         return defaultValue;
     }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool TryHandleCallWithReturn<TReturn, T1>(int memberId, string memberName, T1 arg1, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
-        => TryHandleCallWithReturn(memberId, memberName, arg1, defaultValue, out result);
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public TReturn HandleCallWithReturn<TReturn, T1, T2>(int memberId, string memberName, T1 arg1, T2 arg2, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory)
@@ -104,23 +86,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn typed) return typed;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -130,10 +98,6 @@ public sealed partial class MockEngine<T> where T : class
 
         return defaultValue;
     }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool TryHandleCallWithReturn<TReturn, T1, T2>(int memberId, string memberName, T1 arg1, T2 arg2, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
-        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, defaultValue, out result);
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public TReturn HandleCallWithReturn<TReturn, T1, T2, T3>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory)
@@ -167,23 +131,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn typed) return typed;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -193,10 +143,6 @@ public sealed partial class MockEngine<T> where T : class
 
         return defaultValue;
     }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool TryHandleCallWithReturn<TReturn, T1, T2, T3>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
-        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, arg3, defaultValue, out result);
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public TReturn HandleCallWithReturn<TReturn, T1, T2, T3, T4>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory)
@@ -230,23 +176,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn typed) return typed;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -256,10 +188,6 @@ public sealed partial class MockEngine<T> where T : class
 
         return defaultValue;
     }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
-        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, arg3, arg4, defaultValue, out result);
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public TReturn HandleCallWithReturn<TReturn, T1, T2, T3, T4, T5>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory)
@@ -293,23 +221,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn typed) return typed;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -319,10 +233,6 @@ public sealed partial class MockEngine<T> where T : class
 
         return defaultValue;
     }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4, T5>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
-        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, arg3, arg4, arg5, defaultValue, out result);
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public TReturn HandleCallWithReturn<TReturn, T1, T2, T3, T4, T5, T6>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory)
@@ -356,23 +266,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn typed) return typed;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -382,10 +278,6 @@ public sealed partial class MockEngine<T> where T : class
 
         return defaultValue;
     }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4, T5, T6>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
-        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, arg3, arg4, arg5, arg6, defaultValue, out result);
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public TReturn HandleCallWithReturn<TReturn, T1, T2, T3, T4, T5, T6, T7>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory)
@@ -419,23 +311,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn typed) return typed;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -445,10 +323,6 @@ public sealed partial class MockEngine<T> where T : class
 
         return defaultValue;
     }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4, T5, T6, T7>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
-        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, defaultValue, out result);
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public TReturn HandleCallWithReturn<TReturn, T1, T2, T3, T4, T5, T6, T7, T8>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory)
@@ -482,23 +356,9 @@ public sealed partial class MockEngine<T> where T : class
 
         callRecord.IsUnmatched = true;
 
-        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (TryResolveUnmatchedReturn(memberName, autoMockFactory, out TReturn unmatchedResult))
         {
-            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
-            {
-                if (trackedValue is TReturn typed) return typed;
-                if (trackedValue is null) return default(TReturn)!;
-            }
-        }
-
-        if (TryGetCustomDefault(out TReturn customDefault))
-        {
-            return customDefault;
-        }
-
-        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
-        {
-            return autoMockResult;
+            return unmatchedResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -509,7 +369,4 @@ public sealed partial class MockEngine<T> where T : class
         return defaultValue;
     }
 
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool TryHandleCallWithReturn<TReturn, T1, T2, T3, T4, T5, T6, T7, T8>(int memberId, string memberName, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
-        => TryHandleCallWithReturn(memberId, memberName, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, defaultValue, out result);
 }
