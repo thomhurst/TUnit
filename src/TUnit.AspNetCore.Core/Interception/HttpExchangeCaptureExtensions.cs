@@ -41,9 +41,29 @@ public static class HttpExchangeCaptureExtensions
         var capture = new HttpExchangeCapture();
         configure?.Invoke(capture);
 
+        // The last registered capture wins, both for resolution and for the middleware.
         services.AddSingleton(capture);
-        services.AddSingleton<IStartupFilter>(new HttpExchangeCaptureStartupFilter());
+        services.TryAddHttpExchangeCaptureStartupFilter();
 
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the startup filter that installs <see cref="HttpExchangeCaptureMiddleware"/>,
+    /// unless it is already registered. A second filter would record every request twice.
+    /// </summary>
+    internal static IServiceCollection TryAddHttpExchangeCaptureStartupFilter(this IServiceCollection services)
+    {
+        foreach (var descriptor in services)
+        {
+            if (descriptor.ServiceType == typeof(IStartupFilter)
+                && descriptor.ImplementationInstance is HttpExchangeCaptureStartupFilter)
+            {
+                return services;
+            }
+        }
+
+        services.AddSingleton<IStartupFilter>(new HttpExchangeCaptureStartupFilter());
         return services;
     }
 
