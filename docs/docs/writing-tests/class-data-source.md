@@ -116,6 +116,60 @@ public class MyTestClass
 }
 ```
 
+## When Instances Are Created
+
+TUnit constructs `ClassDataSource<T>` instances while it builds tests, before any test runs. This happens for every `SharedType`. Attributes that affect scheduling, such as `[NotInParallel]`, do not change it. With `SharedType.None`, the constructor can also run more than once for each data row.
+
+`IAsyncInitializer.InitializeAsync` runs later, during execution. It runs right before the first test that receives the instance, after the `[Before(Class)]` hooks, and within that test's `[NotInParallel]` constraint.
+
+Keep constructors free of side effects on shared state, such as caches, static fields, or files. Put that work in `InitializeAsync` so it happens in execution order:
+
+```csharp
+public static class ProductCache
+{
+    private static readonly Dictionary<string, Product> Items = new();
+
+    public static void Register(Product product) => Items[product.Name] = product;
+
+    public static bool Contains(string name) => Items.ContainsKey(name);
+
+    public static void Clear() => Items.Clear();
+}
+
+public class Product : IAsyncInitializer
+{
+    public string Name { get; } = "Widget";
+
+    public Task InitializeAsync()
+    {
+        // Runs during execution, so a [NotInParallel] test that clears
+        // the cache cannot run between this registration and the test.
+        ProductCache.Register(this);
+        return Task.CompletedTask;
+    }
+}
+
+public class ProductTests
+{
+    [Test]
+    [NotInParallel]
+    public void Clears_Cache()
+    {
+        ProductCache.Clear();
+    }
+
+    [Test]
+    [NotInParallel]
+    [ClassDataSource<Product>]
+    public async Task Product_Is_Cached(Product product)
+    {
+        await Assert.That(ProductCache.Contains(product.Name)).IsTrue();
+    }
+}
+```
+
+Use `IAsyncInitializer`, not `IAsyncDiscoveryInitializer`, for this work. `IAsyncDiscoveryInitializer` runs while tests are built. See the [test lifecycle](lifecycle.md) for the full order.
+
 # Class Data Source Overloads
 
 If you are using an overload that supports injecting multiple classes at once (e.g. `ClassDataSource<T1, T2, T3>`) then you should specify multiple SharedTypes in an array and keys where applicable.
