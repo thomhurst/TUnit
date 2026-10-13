@@ -1,4 +1,6 @@
 using System.Net;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.AspNetCore;
 using TUnit.AspNetCore.Interception;
@@ -55,6 +57,64 @@ public class HttpCaptureCustomRegistrationTests : WebApplicationTest<TestWebAppF
 
     [Test]
     public async Task HttpCapture_Uses_User_Registration_And_Records_Once()
+    {
+        using var client = Factory.CreateClient();
+        var response = await client.GetAsync("/ping");
+        response.EnsureSuccessStatusCode();
+
+        await Assert.That(HttpCapture!.MaxBodySize).IsEqualTo(4);
+        await Assert.That(HttpCapture.Count).IsEqualTo(1);
+    }
+}
+
+/// <summary>
+/// A capture registered directly as a singleton, without <c>AddHttpExchangeCapture</c>, still gets the
+/// capture middleware when capture is enabled.
+/// </summary>
+public class HttpCaptureDirectRegistrationTests : WebApplicationTest<TestWebAppFactory, Program>
+{
+    private readonly HttpExchangeCapture _capture = new();
+
+    protected override void ConfigureTestOptions(WebApplicationTestOptions options)
+    {
+        options.EnableHttpExchangeCapture = true;
+    }
+
+    protected override void ConfigureTestServices(IServiceCollection services)
+    {
+        services.AddSingleton(_capture);
+    }
+
+    [Test]
+    public async Task Directly_Registered_Capture_Records_Requests()
+    {
+        using var client = Factory.CreateClient();
+        var response = await client.GetAsync("/ping");
+        response.EnsureSuccessStatusCode();
+
+        await Assert.That(HttpCapture).IsSameReferenceAs(_capture);
+        await Assert.That(_capture.Count).IsEqualTo(1);
+    }
+}
+
+/// <summary>
+/// <c>ConfigureWebHostBuilder</c> runs after TUnit registers its default capture, so a capture added
+/// there is registered last. It must win and requests must still be recorded once.
+/// </summary>
+public class HttpCaptureWebHostBuilderRegistrationTests : WebApplicationTest<TestWebAppFactory, Program>
+{
+    protected override void ConfigureTestOptions(WebApplicationTestOptions options)
+    {
+        options.EnableHttpExchangeCapture = true;
+    }
+
+    protected override void ConfigureWebHostBuilder(IWebHostBuilder builder)
+    {
+        builder.ConfigureTestServices(services => services.AddHttpExchangeCapture(capture => capture.MaxBodySize = 4));
+    }
+
+    [Test]
+    public async Task Capture_Added_In_ConfigureWebHostBuilder_Wins_And_Records_Once()
     {
         using var client = Factory.CreateClient();
         var response = await client.GetAsync("/ping");

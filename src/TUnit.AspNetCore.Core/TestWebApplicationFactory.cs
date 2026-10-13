@@ -76,9 +76,13 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
                 {
                     builder.ConfigureTestServices(services =>
                     {
-                        // A capture registered by the test (e.g. to set body limits) takes precedence.
-                        // Registering a second one would shadow it and add the middleware twice.
-                        if (!services.Any(descriptor => descriptor.ServiceType == typeof(HttpExchangeCapture)))
+                        // A capture registered by the test (e.g. to set body limits) takes precedence,
+                        // even when it was registered directly without the capture middleware.
+                        if (services.Any(descriptor => descriptor.ServiceType == typeof(HttpExchangeCapture)))
+                        {
+                            services.TryAddHttpExchangeCaptureStartupFilter();
+                        }
+                        else
                         {
                             services.AddHttpExchangeCapture();
                         }
