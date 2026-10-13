@@ -250,9 +250,17 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     /// Gets the HTTP exchange capture store, if enabled via <see cref="WebApplicationTestOptions.EnableHttpExchangeCapture"/>.
     /// Returns null if HTTP exchange capture is not enabled.
     /// </summary>
+    /// <remarks>
+    /// This is the <see cref="HttpExchangeCapture"/> registered in <see cref="Factory"/>'s services,
+    /// which the capture middleware records into.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown if capture is enabled and the factory is not initialized yet.</exception>
     /// <example>
     /// <code>
-    /// protected override WebApplicationTestOptions Options => new() { EnableHttpExchangeCapture = true };
+    /// protected override void ConfigureTestOptions(WebApplicationTestOptions options)
+    /// {
+    ///     options.EnableHttpExchangeCapture = true;
+    /// }
     ///
     /// [Test]
     /// public async Task CapturesRequests()
@@ -266,5 +274,5 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     /// </code>
     /// </example>
     public HttpExchangeCapture? HttpCapture =>
-        _options.EnableHttpExchangeCapture ? (field ??= new()) : null;
+        _options.EnableHttpExchangeCapture ? Services.GetRequiredService<HttpExchangeCapture>() : null;
 }

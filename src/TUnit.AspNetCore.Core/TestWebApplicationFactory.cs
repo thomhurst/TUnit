@@ -74,7 +74,15 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
 
                 if (options.EnableHttpExchangeCapture)
                 {
-                    builder.ConfigureTestServices(services => services.AddHttpExchangeCapture());
+                    builder.ConfigureTestServices(services =>
+                    {
+                        // A capture registered by the test (e.g. to set body limits) takes precedence.
+                        // Registering a second one would shadow it and add the middleware twice.
+                        if (!services.Any(descriptor => descriptor.ServiceType == typeof(HttpExchangeCapture)))
+                        {
+                            services.AddHttpExchangeCapture();
+                        }
+                    });
                 }
 
                 configureWebHostBuilder?.Invoke(builder);
