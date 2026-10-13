@@ -61,16 +61,24 @@ public abstract class WebApplicationTest
 }
 
 /// <summary>
-/// Base class for ASP.NET Core integration tests where each test creates its own application
+/// Base class for ASP.NET Core integration tests where each test configures its own application
 /// by calling <see cref="CreateFactoryAsync(Action{IWebHostBuilder})"/>.
 /// </summary>
 /// <typeparam name="TFactory">The factory type derived from TestWebApplicationFactory.</typeparam>
 /// <typeparam name="TEntryPoint">The entry point class (typically 'Program') of the application under test.</typeparam>
 /// <remarks>
 /// <para>
+/// Both this class and <see cref="WebApplicationTest{TFactory, TEntryPoint}"/> give every test its own
+/// isolated application. The difference is where the configuration comes from:
+/// <see cref="WebApplicationTest{TFactory, TEntryPoint}"/> builds one application before each test from
+/// the class-level overrides, so every test in the class gets the same configuration. This class builds
+/// nothing before the test; each test calls <see cref="CreateFactoryAsync(Action{IWebHostBuilder})"/>
+/// with its own configuration.
+/// </para>
+/// <para>
 /// Use this class when tests need application configuration that is only known in the test body,
-/// such as a fake that the test creates and asserts on afterwards. No application is built before
-/// the test runs, so a test pays only for the applications it creates.
+/// such as a fake that the test creates and asserts on afterwards. A test pays only for the
+/// applications it creates.
 /// </para>
 /// <para>
 /// Factories returned by <see cref="CreateFactoryAsync(Action{IWebHostBuilder})"/> have the same isolation,
@@ -81,7 +89,7 @@ public abstract class WebApplicationTest
 /// </remarks>
 /// <example>
 /// <code>
-/// public class PaymentTests : OnDemandWebApplicationTest&lt;MyFactory, Program&gt;
+/// public class PaymentTests : PerTestWebApplicationTest&lt;MyFactory, Program&gt;
 /// {
 ///     [Test]
 ///     public async Task Rejects_When_Payment_Fails()
@@ -96,7 +104,7 @@ public abstract class WebApplicationTest
 /// }
 /// </code>
 /// </example>
-public abstract class OnDemandWebApplicationTest<TFactory, TEntryPoint> : WebApplicationTest
+public abstract class PerTestWebApplicationTest<TFactory, TEntryPoint> : WebApplicationTest
     where TFactory : TestWebApplicationFactory<TEntryPoint>, new()
     where TEntryPoint : class
 {
@@ -315,12 +323,12 @@ public abstract class OnDemandWebApplicationTest<TFactory, TEntryPoint> : WebApp
 /// </para>
 /// <para>
 /// To configure the application differently for individual tests, derive from
-/// <see cref="OnDemandWebApplicationTest{TFactory, TEntryPoint}"/> instead, or call
-/// <see cref="OnDemandWebApplicationTest{TFactory, TEntryPoint}.CreateFactoryAsync(Action{IWebHostBuilder})"/>
+/// <see cref="PerTestWebApplicationTest{TFactory, TEntryPoint}"/> instead, or call
+/// <see cref="PerTestWebApplicationTest{TFactory, TEntryPoint}.CreateFactoryAsync(Action{IWebHostBuilder})"/>
 /// to build an additional application alongside <see cref="Factory"/>.
 /// </para>
 /// </remarks>
-public abstract class WebApplicationTest<TFactory, TEntryPoint> : OnDemandWebApplicationTest<TFactory, TEntryPoint>
+public abstract class WebApplicationTest<TFactory, TEntryPoint> : PerTestWebApplicationTest<TFactory, TEntryPoint>
     where TFactory : TestWebApplicationFactory<TEntryPoint>, new()
     where TEntryPoint : class
 {

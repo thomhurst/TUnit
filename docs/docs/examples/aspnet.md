@@ -134,6 +134,7 @@ This ensures:
 The `WebApplicationTest<TFactory, TEntryPoint>` base class provides:
 
 - **Per-test isolation**: Each test gets its own delegating factory via `WithWebHostBuilder`
+- **Class-level configuration**: The override methods configure every test in the class the same way. For configuration that differs per test, see [Per-Test Application Configuration](#per-test-application-configuration)
 - **Shared infrastructure**: The global factory (containers, connections) is shared across tests
 - **Parallel execution**: Tests run in parallel with complete isolation
 - **Lifecycle hooks**: Async setup runs before sync configuration
@@ -269,13 +270,15 @@ protected override void ConfigureWebHostBuilder(IWebHostBuilder builder)
 
 ## Per-Test Application Configuration
 
-The override methods apply to every test in the class. When a test needs its own configuration, such as a fake it creates and asserts on, derive from `OnDemandWebApplicationTest<TFactory, TEntryPoint>` and call `CreateFactoryAsync` in the test:
+`WebApplicationTest` already gives every test its own isolated application, but all tests in a class share the same configuration, because the override methods apply to the whole class.
+
+When a test needs its own configuration, such as a fake it creates and asserts on, derive from `PerTestWebApplicationTest<TFactory, TEntryPoint>` and call `CreateFactoryAsync` in the test:
 
 ```csharp
 using Microsoft.AspNetCore.TestHost;
 using TUnit.AspNetCore;
 
-public class CheckoutTests : OnDemandWebApplicationTest<WebApplicationFactory, Program>
+public class CheckoutTests : PerTestWebApplicationTest<WebApplicationFactory, Program>
 {
     [Test]
     public async Task Checkout_Fails_When_Payment_Is_Declined()
@@ -311,7 +314,7 @@ public sealed class FakePaymentGateway(bool succeed) : IPaymentGateway
 - No application is built before the test. A test pays only for the applications it creates. Each call creates a separate application.
 - `ConfigureTestOptions` and `SetupAsync` still run before the test.
 
-`WebApplicationTest<TFactory, TEntryPoint>` derives from `OnDemandWebApplicationTest`. Its tests can also call `CreateFactoryAsync` to build an extra application next to `Factory`.
+`WebApplicationTest<TFactory, TEntryPoint>` derives from `PerTestWebApplicationTest`. Its tests can also call `CreateFactoryAsync` to build an extra application next to `Factory`.
 
 ## Test Isolation Helpers
 

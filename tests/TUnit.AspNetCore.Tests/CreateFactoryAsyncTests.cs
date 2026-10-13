@@ -7,11 +7,11 @@ using TUnit.AspNetCore.Extensions;
 namespace TUnit.AspNetCore.Tests;
 
 /// <summary>
-/// Coverage for <see cref="OnDemandWebApplicationTest{TFactory,TEntryPoint}"/>: no application is built
+/// Coverage for <see cref="PerTestWebApplicationTest{TFactory,TEntryPoint}"/>: no application is built
 /// before the test, and <c>CreateFactoryAsync</c> layers test-specific configuration over the
 /// class-level overrides.
 /// </summary>
-public class OnDemandWebApplicationTestTests : OnDemandWebApplicationTest<TestWebAppFactory, Program>
+public class PerTestWebApplicationTestTests : PerTestWebApplicationTest<TestWebAppFactory, Program>
 {
     private bool _setupRan;
     private int _configureTestServicesCalls;
