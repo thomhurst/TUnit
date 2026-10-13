@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Runtime.ExceptionServices;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -111,7 +112,9 @@ public abstract class PerTestWebApplicationTest<TFactory, TEntryPoint> : WebAppl
     [ClassDataSource(Shared = [SharedType.PerTestSession])]
     public TFactory GlobalFactory { get; set; } = null!;
 
-    private List<TracedWebApplicationFactory<TEntryPoint>>? _factories;
+    // A test may call CreateFactoryAsync from concurrent tasks, so tracking is locked.
+    private readonly List<TracedWebApplicationFactory<TEntryPoint>> _factories = [];
+    private readonly object _factoriesLock = new();
 
     private protected WebApplicationTestOptions ConfiguredOptions { get; } = new();
 
@@ -174,7 +177,10 @@ public abstract class PerTestWebApplicationTest<TFactory, TEntryPoint> : WebAppl
                     }));
 
         // Tracked before the host build so a factory whose build fails is still disposed after the test.
-        (_factories ??= []).Add(factory);
+        lock (_factoriesLock)
+        {
+            _factories.Add(factory);
+        }
 
         // Services initializes both TestServer and Kestrel; Server only supports TestServer.
         // Semaphore guards only the Services property access (the synchronous host build),
@@ -196,17 +202,36 @@ public abstract class PerTestWebApplicationTest<TFactory, TEntryPoint> : WebAppl
     [EditorBrowsable(EditorBrowsableState.Never)]
     public async Task DisposeFactoryAsync()
     {
-        if (_factories == null)
+        TracedWebApplicationFactory<TEntryPoint>[] factories;
+        lock (_factoriesLock)
         {
-            return;
+            factories = [.. _factories];
+            _factories.Clear();
         }
 
-        foreach (var factory in _factories)
+        // Dispose every factory even if an earlier one throws, so no application outlives the test.
+        List<Exception>? exceptions = null;
+        foreach (var factory in factories)
         {
-            await factory.DisposeAsync();
+            try
+            {
+                await factory.DisposeAsync();
+            }
+            catch (Exception exception)
+            {
+                (exceptions ??= []).Add(exception);
+            }
         }
 
-        _factories = null;
+        if (exceptions is [var single])
+        {
+            ExceptionDispatchInfo.Capture(single).Throw();
+        }
+
+        if (exceptions is not null)
+        {
+            throw new AggregateException(exceptions);
+        }
     }
 
     /// <summary>

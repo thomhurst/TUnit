@@ -1193,7 +1193,7 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
 |--------|-------------|
 | `GetIsolatedName(string baseName)` | Returns `"test_{UniqueId}_{baseName}"` |
 | `GetIsolatedPrefix(string separator = "_")` | Returns `"test{separator}{UniqueId}{separator}"` |
-| `CreateFactoryAsync(Action<IWebHostBuilder>? configure = null)` | Builds an extra isolated application for the current test, with `configure` applied after the class overrides. Disposed after the test. |
+| `CreateFactoryAsync(Action<IWebHostBuilder>? configureWebHostBuilder = null)` | Builds an extra isolated application for the current test, with `configureWebHostBuilder` applied after the class overrides. Disposed after the test. |
 
 ### WebApplicationTestOptions
 
