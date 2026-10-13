@@ -78,7 +78,8 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
                     {
                         // A capture registered by the test (e.g. to set body limits) takes precedence,
                         // even when it was registered directly without the capture middleware.
-                        if (services.Any(descriptor => descriptor.ServiceType == typeof(HttpExchangeCapture)))
+                        // Keyed captures don't count: the middleware and HttpCapture resolve the unkeyed one.
+                        if (services.Any(descriptor => descriptor.ServiceType == typeof(HttpExchangeCapture) && !descriptor.IsKeyedService))
                         {
                             services.TryAddHttpExchangeCaptureStartupFilter();
                         }

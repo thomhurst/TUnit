@@ -125,6 +125,33 @@ public class HttpCaptureWebHostBuilderRegistrationTests : WebApplicationTest<Tes
     }
 }
 
+/// <summary>
+/// A keyed capture registration must not stop TUnit from registering the unkeyed capture
+/// that the middleware and <c>HttpCapture</c> resolve.
+/// </summary>
+public class HttpCaptureKeyedRegistrationTests : WebApplicationTest<TestWebAppFactory, Program>
+{
+    protected override void ConfigureTestOptions(WebApplicationTestOptions options)
+    {
+        options.EnableHttpExchangeCapture = true;
+    }
+
+    protected override void ConfigureTestServices(IServiceCollection services)
+    {
+        services.AddKeyedSingleton("other", new HttpExchangeCapture());
+    }
+
+    [Test]
+    public async Task Unkeyed_Capture_Is_Still_Registered_And_Records()
+    {
+        using var client = Factory.CreateClient();
+        var response = await client.GetAsync("/ping");
+        response.EnsureSuccessStatusCode();
+
+        await Assert.That(HttpCapture!.Count).IsEqualTo(1);
+    }
+}
+
 public class HttpCaptureDisabledTests : WebApplicationTest<TestWebAppFactory, Program>
 {
     [Test]
