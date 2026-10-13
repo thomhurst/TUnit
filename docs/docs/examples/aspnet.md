@@ -267,6 +267,52 @@ protected override void ConfigureWebHostBuilder(IWebHostBuilder builder)
 }
 ```
 
+## Per-Test Application Configuration
+
+The override methods apply to every test in the class. When a test needs its own configuration, such as a fake it creates and asserts on, derive from `OnDemandWebApplicationTest<TFactory, TEntryPoint>` and call `CreateFactoryAsync` in the test:
+
+```csharp
+using Microsoft.AspNetCore.TestHost;
+using TUnit.AspNetCore;
+
+public class CheckoutTests : OnDemandWebApplicationTest<WebApplicationFactory, Program>
+{
+    [Test]
+    public async Task Checkout_Fails_When_Payment_Is_Declined()
+    {
+        var payments = new FakePaymentGateway(succeed: false);
+
+        var factory = await CreateFactoryAsync(builder =>
+            builder.ConfigureTestServices(services =>
+                services.ReplaceService<IPaymentGateway>(payments)));
+
+        using var client = factory.CreateClient();
+        var response = await client.PostAsync("/checkout", null);
+
+        await Assert.That(response.IsSuccessStatusCode).IsFalse();
+        await Assert.That(payments.Charges).IsEqualTo(1);
+    }
+}
+
+public sealed class FakePaymentGateway(bool succeed) : IPaymentGateway
+{
+    public int Charges { get; private set; }
+
+    public Task<ChargeResult> ChargeAsync(decimal amount)
+    {
+        Charges++;
+        return Task.FromResult(new ChargeResult(succeed));
+    }
+}
+```
+
+- `CreateFactoryAsync` runs the class overrides (`ConfigureWebHostBuilder`, `ConfigureTestServices`, `ConfigureTestConfiguration`) first, then the delegate. The delegate can replace anything the class configures.
+- Each factory gets the same isolation, logging, tracing and test context wiring as `Factory`. It is disposed after the test.
+- No application is built before the test. A test pays only for the applications it creates. Each call creates a separate application.
+- `ConfigureTestOptions` and `SetupAsync` still run before the test.
+
+`WebApplicationTest<TFactory, TEntryPoint>` derives from `OnDemandWebApplicationTest`. Its tests can also call `CreateFactoryAsync` to build an extra application next to `Factory`.
+
 ## Test Isolation Helpers
 
 :::tip Available on All Tests
@@ -1144,6 +1190,7 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
 |--------|-------------|
 | `GetIsolatedName(string baseName)` | Returns `"test_{UniqueId}_{baseName}"` |
 | `GetIsolatedPrefix(string separator = "_")` | Returns `"test{separator}{UniqueId}{separator}"` |
+| `CreateFactoryAsync(Action<IWebHostBuilder>? configure = null)` | Builds an extra isolated application for the current test, with `configure` applied after the class overrides. Disposed after the test. |
 
 ### WebApplicationTestOptions
 

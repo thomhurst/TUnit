@@ -61,51 +61,54 @@ public abstract class WebApplicationTest
 }
 
 /// <summary>
-/// Base class for ASP.NET Core integration tests with TUnit.
-/// Provides per-test isolated web application factories via the delegating factory pattern.
+/// Base class for ASP.NET Core integration tests where each test creates its own application
+/// by calling <see cref="CreateFactoryAsync(Action{IWebHostBuilder})"/>.
 /// </summary>
 /// <typeparam name="TFactory">The factory type derived from TestWebApplicationFactory.</typeparam>
 /// <typeparam name="TEntryPoint">The entry point class (typically 'Program') of the application under test.</typeparam>
 /// <remarks>
 /// <para>
-/// This class creates a global <see cref="WebApplicationFactory{TEntryPoint}"/> once per test class type,
-/// then creates a per-test delegating factory using <see cref="WebApplicationFactory{TEntryPoint}.WithWebHostBuilder"/>
-/// for each test. This enables parallel test execution with complete isolation.
+/// Use this class when tests need application configuration that is only known in the test body,
+/// such as a fake that the test creates and asserts on afterwards. No application is built before
+/// the test runs, so a test pays only for the applications it creates.
 /// </para>
 /// <para>
-/// The factory is created in a BeforeTest hook, ensuring all other injected properties
-/// (such as database containers) are available before the factory is configured.
+/// Factories returned by <see cref="CreateFactoryAsync(Action{IWebHostBuilder})"/> have the same isolation,
+/// logging, tracing and test context wiring as <see cref="WebApplicationTest{TFactory, TEntryPoint}.Factory"/>,
+/// and are disposed after the test. Use <see cref="WebApplicationTest{TFactory, TEntryPoint}"/> when every
+/// test in the class uses the same configuration.
 /// </para>
 /// </remarks>
-public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplicationTest
+/// <example>
+/// <code>
+/// public class PaymentTests : OnDemandWebApplicationTest&lt;MyFactory, Program&gt;
+/// {
+///     [Test]
+///     public async Task Rejects_When_Payment_Fails()
+///     {
+///         var payments = new FakePayments(fail: true);
+///         var factory = await CreateFactoryAsync(builder =>
+///             builder.ConfigureTestServices(services => services.ReplaceService&lt;IPayments&gt;(payments)));
+///
+///         using var client = factory.CreateClient();
+///         // ...
+///     }
+/// }
+/// </code>
+/// </example>
+public abstract class OnDemandWebApplicationTest<TFactory, TEntryPoint> : WebApplicationTest
     where TFactory : TestWebApplicationFactory<TEntryPoint>, new()
     where TEntryPoint : class
 {
     [ClassDataSource(Shared = [SharedType.PerTestSession])]
     public TFactory GlobalFactory { get; set; } = null!;
 
-    private TracedWebApplicationFactory<TEntryPoint>? _factory;
+    private List<TracedWebApplicationFactory<TEntryPoint>>? _factories;
 
-    private readonly WebApplicationTestOptions _options = new();
-
-    /// <summary>
-    /// Gets the per-test factory, isolated to the current test.
-    /// All <see cref="TracedWebApplicationFactory{TEntryPoint}.CreateClient()"/> calls on this factory
-    /// automatically inject activity tracing and test context propagation handlers.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown if accessed before test setup.</exception>
-    public TracedWebApplicationFactory<TEntryPoint> Factory => _factory ?? throw new InvalidOperationException(
-            "Factory is not initialized. Ensure the test has started and the BeforeTest hook has run. " +
-            "Do not access Factory during test discovery or in data source methods.");
+    private protected WebApplicationTestOptions ConfiguredOptions { get; } = new();
 
     /// <summary>
-    /// Gets the service provider from the per-test factory.
-    /// Use this to resolve services for verification or setup.
-    /// </summary>
-    public IServiceProvider Services => Factory.Services;
-
-    /// <summary>
-    /// Initializes the isolated web application factory before each test.
+    /// Runs <see cref="ConfigureTestOptions"/> and <see cref="SetupAsync"/> before each test.
     /// This hook runs after all property injection is complete, ensuring
     /// that dependencies like database containers are available.
     /// </summary>
@@ -113,19 +116,57 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     [EditorBrowsable(EditorBrowsableState.Never)]
     public async Task InitializeFactoryAsync(TestContext testContext)
     {
-        ConfigureTestOptions(_options);
+        ConfigureTestOptions(ConfiguredOptions);
 
         // Run async setup first - use this for database/container initialization
         await SetupAsync();
 
-        // Then create factory with sync configuration (required by ASP.NET Core hosting)
-        _factory = new TracedWebApplicationFactory<TEntryPoint>(
+        await OnSetupCompletedAsync(testContext);
+    }
+
+    private protected virtual Task OnSetupCompletedAsync(TestContext testContext) => Task.CompletedTask;
+
+    /// <summary>
+    /// Creates and starts a new isolated application for the current test.
+    /// <paramref name="configureWebHostBuilder"/> runs after the class-level configuration
+    /// (<see cref="ConfigureWebHostBuilder"/>, <see cref="ConfigureTestServices"/> and
+    /// <see cref="ConfigureTestConfiguration"/>), so it can replace services or override
+    /// settings for this test only.
+    /// </summary>
+    /// <param name="configureWebHostBuilder">Test-specific configuration for the web host.</param>
+    /// <returns>The started factory. It is disposed automatically after the test.</returns>
+    /// <remarks>Each call builds a separate application instance.</remarks>
+    /// <exception cref="InvalidOperationException">Thrown when called outside a running test.</exception>
+    protected Task<TracedWebApplicationFactory<TEntryPoint>> CreateFactoryAsync(
+        Action<IWebHostBuilder>? configureWebHostBuilder = null)
+    {
+        var testContext = TestContext.Current
+            ?? throw new InvalidOperationException("CreateFactoryAsync must be called from within a running test.");
+
+        return CreateFactoryAsync(testContext, configureWebHostBuilder);
+    }
+
+    private protected async Task<TracedWebApplicationFactory<TEntryPoint>> CreateFactoryAsync(
+        TestContext testContext,
+        Action<IWebHostBuilder>? configureWebHostBuilder)
+    {
+        // Create factory with sync configuration (required by ASP.NET Core hosting)
+        var factory = new TracedWebApplicationFactory<TEntryPoint>(
             GlobalFactory.GetIsolatedFactory(
                 testContext,
-                _options,
+                ConfiguredOptions,
                 ConfigureTestServices,
                 (_, config) => ConfigureTestConfiguration(config),
-                ConfigureWebHostBuilder));
+                configureWebHostBuilder is null
+                    ? ConfigureWebHostBuilder
+                    : builder =>
+                    {
+                        ConfigureWebHostBuilder(builder);
+                        configureWebHostBuilder(builder);
+                    }));
+
+        // Tracked before the host build so a factory whose build fails is still disposed after the test.
+        (_factories ??= []).Add(factory);
 
         // Services initializes both TestServer and Kestrel; Server only supports TestServer.
         // Semaphore guards only the Services property access (the synchronous host build),
@@ -133,22 +174,31 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
         await ServerInitSemaphore.WaitAsync(testContext.Execution.CancellationToken);
         try
         {
-            await Task.Run(() => _ = _factory.Services, testContext.Execution.CancellationToken);
+            await Task.Run(() => _ = factory.Services, testContext.Execution.CancellationToken);
         }
         finally
         {
             ServerInitSemaphore.Release();
         }
+
+        return factory;
     }
 
     [After(HookType.Test)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public async Task DisposeFactoryAsync()
     {
-        if (_factory != null)
+        if (_factories == null)
         {
-            await _factory.DisposeAsync();
+            return;
         }
+
+        foreach (var factory in _factories)
+        {
+            await factory.DisposeAsync();
+        }
+
+        _factories = null;
     }
 
     /// <summary>
@@ -245,6 +295,57 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     protected virtual void ConfigureWebHostBuilder(IWebHostBuilder builder)
     {
     }
+}
+
+/// <summary>
+/// Base class for ASP.NET Core integration tests with TUnit.
+/// Provides per-test isolated web application factories via the delegating factory pattern.
+/// </summary>
+/// <typeparam name="TFactory">The factory type derived from TestWebApplicationFactory.</typeparam>
+/// <typeparam name="TEntryPoint">The entry point class (typically 'Program') of the application under test.</typeparam>
+/// <remarks>
+/// <para>
+/// This class creates a global <see cref="WebApplicationFactory{TEntryPoint}"/> once per test class type,
+/// then creates a per-test delegating factory using <see cref="WebApplicationFactory{TEntryPoint}.WithWebHostBuilder"/>
+/// for each test. This enables parallel test execution with complete isolation.
+/// </para>
+/// <para>
+/// The factory is created in a BeforeTest hook, ensuring all other injected properties
+/// (such as database containers) are available before the factory is configured.
+/// </para>
+/// <para>
+/// To configure the application differently for individual tests, derive from
+/// <see cref="OnDemandWebApplicationTest{TFactory, TEntryPoint}"/> instead, or call
+/// <see cref="OnDemandWebApplicationTest{TFactory, TEntryPoint}.CreateFactoryAsync(Action{IWebHostBuilder})"/>
+/// to build an additional application alongside <see cref="Factory"/>.
+/// </para>
+/// </remarks>
+public abstract class WebApplicationTest<TFactory, TEntryPoint> : OnDemandWebApplicationTest<TFactory, TEntryPoint>
+    where TFactory : TestWebApplicationFactory<TEntryPoint>, new()
+    where TEntryPoint : class
+{
+    private TracedWebApplicationFactory<TEntryPoint>? _factory;
+
+    /// <summary>
+    /// Gets the per-test factory, isolated to the current test.
+    /// All <see cref="TracedWebApplicationFactory{TEntryPoint}.CreateClient()"/> calls on this factory
+    /// automatically inject activity tracing and test context propagation handlers.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if accessed before test setup.</exception>
+    public TracedWebApplicationFactory<TEntryPoint> Factory => _factory ?? throw new InvalidOperationException(
+            "Factory is not initialized. Ensure the test has started and the BeforeTest hook has run. " +
+            "Do not access Factory during test discovery or in data source methods.");
+
+    /// <summary>
+    /// Gets the service provider from the per-test factory.
+    /// Use this to resolve services for verification or setup.
+    /// </summary>
+    public IServiceProvider Services => Factory.Services;
+
+    private protected override async Task OnSetupCompletedAsync(TestContext testContext)
+    {
+        _factory = await CreateFactoryAsync(testContext, configureWebHostBuilder: null);
+    }
 
     /// <summary>
     /// Gets the HTTP exchange capture store, if enabled via <see cref="WebApplicationTestOptions.EnableHttpExchangeCapture"/>.
@@ -266,5 +367,5 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     /// </code>
     /// </example>
     public HttpExchangeCapture? HttpCapture =>
-        _options.EnableHttpExchangeCapture ? (field ??= new()) : null;
+        ConfiguredOptions.EnableHttpExchangeCapture ? (field ??= new()) : null;
 }
