@@ -289,6 +289,41 @@ public class AppFixture : AspireFixture<Projects.MyAppHost>
 - Use **`ConfigureBuilder`** for service registrations, HTTP client defaults, and other configuration that can be applied _after_ the builder is created.
   :::
 
+### Configuring Fixture Variants
+
+`Args`, `ConfigureAppHost`, and `ConfigureBuilder` are read inside `InitializeAsync`, not in the constructor. To run different AppHost configurations from one fixture type, use `SharedType.Keyed` and implement `IKeyedDataSource`. TUnit sets `Key` before `InitializeAsync` runs, so `Args` can depend on it:
+
+```csharp
+public class AppFixture : AspireFixture<Projects.MyAppHost>, IKeyedDataSource
+{
+    public string Key { get; set; } = "";
+
+    protected override string[] Args => Key switch
+    {
+        "db-only" =>
+        [
+            "--Redis:IsEnabled=false",
+            "--WebApp:IsEnabled=false"
+        ],
+        _ => []
+    };
+}
+
+[ClassDataSource<AppFixture>(Shared = SharedType.Keyed, Key = "db-only")]
+public class MigrationTests(AppFixture fixture)
+{
+    [Test]
+    public async Task Database_Is_Available()
+    {
+        var connectionString = await fixture.GetConnectionStringAsync("postgresdb");
+
+        await Assert.That(connectionString).IsNotNull();
+    }
+}
+```
+
+Tests with the same key share one running AppHost. Each distinct key starts a separate AppHost, so keep the number of variants small. If you only need to drop resources, override `ResourcesToRemove()` instead.
+
 ## Watching Resource Logs
 
 Use `WatchResourceLogs()` inside a test to stream a resource's container logs to the test output. This is invaluable for debugging failures:

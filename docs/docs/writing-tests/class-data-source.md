@@ -60,6 +60,37 @@ The `SharedType` parameter controls how instances are shared across tests:
 - **`SharedType.PerTestSession`** — single instance for the entire test run, shared across assemblies (best for expensive resources like containers)
 - **`SharedType.Keyed`** — share instances based on a key value (use the `Key` parameter)
 
+### Configuring Instances by Key
+
+With `SharedType.Keyed`, each distinct key gets its own instance, and tests that use the same key share it. Implement `IKeyedDataSource` to let one fixture type behave differently for each key. TUnit sets `Key` after the constructor runs and before `InitializeAsync` is called, so initialization can read it:
+
+```csharp
+public class DatabaseFixture : IKeyedDataSource, IAsyncInitializer
+{
+    public string Key { get; set; } = "";
+
+    public bool SeedData { get; private set; }
+
+    public Task InitializeAsync()
+    {
+        SeedData = Key == "seeded";
+        return Task.CompletedTask;
+    }
+}
+
+[ClassDataSource<DatabaseFixture>(Shared = SharedType.Keyed, Key = "seeded")]
+public class ReportTests(DatabaseFixture database)
+{
+    [Test]
+    public async Task Uses_Seeded_Database()
+    {
+        await Assert.That(database.SeedData).IsTrue();
+    }
+}
+```
+
+Every key creates a separate instance, so each variant pays its own setup cost.
+
 ## Initialization and TearDown
 If you need to do some initialization or teardown for when this object is created/disposed, simply implement the `IAsyncInitializer` and/or `IAsyncDisposable` interfaces
 
