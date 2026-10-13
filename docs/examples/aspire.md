@@ -396,6 +396,66 @@ When to use `Args` vs `ConfigureAppHost` vs `ConfigureBuilder`
 * Use **`ConfigureAppHost`** to configure `DistributedApplicationOptions` (e.g., `DisableDashboard`) and `HostApplicationBuilderSettings` — these are passed to `CreateAsync` during builder creation.
 * Use **`ConfigureBuilder`** for service registrations, HTTP client defaults, and other configuration that can be applied *after* the builder is created.
 
+### Configuring Fixture Variants[​](#configuring-fixture-variants "Direct link to Configuring Fixture Variants")
+
+`Args`, `ConfigureAppHost`, and `ConfigureBuilder` are read inside `InitializeAsync`, not in the constructor. To run different AppHost configurations from one fixture type, use `SharedType.Keyed` and implement `IKeyedDataSource`. TUnit sets `Key` before `InitializeAsync` runs, so `Args` can depend on it:
+
+```
+public class AppFixture : AspireFixture<Projects.MyAppHost>, IKeyedDataSource
+
+{
+
+    public string Key { get; set; } = "";
+
+
+
+    protected override string[] Args => Key switch
+
+    {
+
+        "db-only" =>
+
+        [
+
+            "--Redis:IsEnabled=false",
+
+            "--WebApp:IsEnabled=false"
+
+        ],
+
+        _ => []
+
+    };
+
+}
+
+
+
+[ClassDataSource<AppFixture>(Shared = SharedType.Keyed, Key = "db-only")]
+
+public class MigrationTests(AppFixture fixture)
+
+{
+
+    [Test]
+
+    public async Task Database_Is_Available()
+
+    {
+
+        var connectionString = await fixture.GetConnectionStringAsync("postgresdb");
+
+
+
+        await Assert.That(connectionString).IsNotNull();
+
+    }
+
+}
+```
+
+Tests with the same key share one running AppHost. Each distinct key starts a separate AppHost, so keep the number of variants small. If you only need to drop resources, override `ResourcesToRemove()` instead.
+
 ## Watching Resource Logs[​](#watching-resource-logs "Direct link to Watching Resource Logs")
 
 Use `WatchResourceLogs()` inside a test to stream a resource's container logs to the test output. This is invaluable for debugging failures:
