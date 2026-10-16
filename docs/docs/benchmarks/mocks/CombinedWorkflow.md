@@ -9,9 +9,9 @@ sidebar_position: 3
 > Full workflow: create → setup → invoke → verify — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-10-11** from the latest CI run.
+This benchmark was automatically generated on **2026-10-16** from the latest CI run.
 
-**Environment:** Ubuntu Latest • .NET SDK 10.0.401
+**Environment:** Ubuntu Latest • .NET SDK 10.0.402
 :::
 
 ## 📊 Results
@@ -20,12 +20,12 @@ Full workflow: create → setup → invoke → verify:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 1.940 μs | 0.0386 μs | 0.0474 μs | 6.28 KB |
-| Imposter | 2.604 μs | 0.0507 μs | 0.0584 μs | 15.64 KB |
-| Mockolate | 1.615 μs | 0.0317 μs | 0.0297 μs | 7.36 KB |
-| Moq | 404.907 μs | 4.0163 μs | 3.7569 μs | 36.27 KB |
-| NSubstitute | 18.500 μs | 0.1229 μs | 0.1149 μs | 26.72 KB |
-| FakeItEasy | 17.699 μs | 0.2099 μs | 0.1752 μs | 25.52 KB |
+| **TUnit.Mocks** | 1.660 μs | 0.0184 μs | 0.0163 μs | 6.31 KB |
+| Imposter | 2.295 μs | 0.0458 μs | 0.1124 μs | 15.42 KB |
+| Mockolate | 1.531 μs | 0.0306 μs | 0.0300 μs | 7.36 KB |
+| Moq | 245.709 μs | 1.6205 μs | 1.4365 μs | 36.6 KB |
+| NSubstitute | 14.555 μs | 0.0976 μs | 0.0815 μs | 26.72 KB |
+| FakeItEasy | 14.061 μs | 0.0677 μs | 0.0633 μs | 25.52 KB |
 
 ```mermaid
 %%{init: {
@@ -51,8 +51,8 @@ Full workflow: create → setup → invoke → verify:
 xychart-beta
   title "CombinedWorkflow Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (μs)" 0 --> 486
-  bar [1.94, 2.604, 1.615, 404.907, 18.5, 17.699]
+  y-axis "Time (μs)" 0 --> 295
+  bar [1.66, 2.295, 1.531, 245.709, 14.555, 14.061]
 ```
 
 ## 🎯 Key Insights
@@ -65,4 +65,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-10-11T02:43:35.245Z*
+*Last generated: 2026-10-16T03:11:30.127Z*
