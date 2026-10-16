@@ -202,16 +202,18 @@ internal sealed class TestGroupingService : ITestGroupingService
             sortedNotInParallel[i] = notInParallelList[i].Test;
         }
 
+        // Keyed tests with different keys can overlap, so [ExecutionPriority] stays ahead of the hook rank,
+        // as in the parallel sort. Within a priority the rank decides, then the class and Order as above.
         keyedNotInParallelList.Sort((a, b) =>
         {
+            var priorityCompare = b.Priority.Priority.CompareTo(a.Priority.Priority);
+            if (priorityCompare != 0) return priorityCompare;
+
             var rankCompare = CompareHookRank(a.Test, b.Test);
             if (rankCompare != 0) return rankCompare;
 
             var classCompare = string.CompareOrdinal(a.ClassName, b.ClassName);
             if (classCompare != 0) return classCompare;
-
-            var priorityCompare = b.Priority.Priority.CompareTo(a.Priority.Priority);
-            if (priorityCompare != 0) return priorityCompare;
 
             var orderCompare = a.Priority.Order.CompareTo(b.Priority.Order);
             if (orderCompare != 0) return orderCompare;
@@ -234,16 +236,17 @@ internal sealed class TestGroupingService : ITestGroupingService
             var unconstrained = kvp.Value.Unconstrained;
             var keyed = kvp.Value.Keyed;
 
+            // Same precedence as the keyed sort above: priority, then hook rank, then class and Order.
             keyed.Sort((a, b) =>
             {
+                var priorityCompare = b.Item4.Priority.CompareTo(a.Item4.Priority);
+                if (priorityCompare != 0) return priorityCompare;
+
                 var rankCompare = CompareHookRank(a.Item1, b.Item1);
                 if (rankCompare != 0) return rankCompare;
 
                 var classCompare = string.CompareOrdinal(a.Item2, b.Item2);
                 if (classCompare != 0) return classCompare;
-
-                var priorityCompare = b.Item4.Priority.CompareTo(a.Item4.Priority);
-                if (priorityCompare != 0) return priorityCompare;
 
                 var orderCompare = a.Item4.Order.CompareTo(b.Item4.Order);
                 if (orderCompare != 0) return orderCompare;

@@ -74,9 +74,10 @@ public class TestFilteringContext : Context
 
     /// <summary>
     /// Orders the tests by a key. The order decides when tests start. Tests with equal keys keep the default
-    /// order among themselves (class, then <c>[NotInParallel(Order)]</c>), so use a key that distinguishes
-    /// every test for a total order. <c>[ExecutionPriority]</c> still takes precedence for tests that can run
-    /// in parallel, and those tests can still overlap. The order applies within each scheduling phase (parallel,
+    /// order among themselves (class, then <c>[ExecutionPriority]</c>, then <c>[NotInParallel(Order)]</c>), so use
+    /// a key that distinguishes every test for a total order. <c>[ExecutionPriority]</c> still takes precedence for
+    /// tests that can run in parallel, including keyed <c>[NotInParallel("key")]</c> tests, and tests with
+    /// different keys can still overlap. The order applies within each scheduling phase (parallel,
     /// parallel groups, global <c>[NotInParallel]</c>) and never moves a test to another phase. Tests without a
     /// rank, such as <c>[DependsOn]</c> targets re-included after being excluded, start before ranked tests in
     /// the same phase. Calls don't compose: the last call wins, so combine

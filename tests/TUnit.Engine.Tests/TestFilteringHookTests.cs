@@ -133,6 +133,22 @@ public class TestFilteringHookTests(TestMode testMode) : InvokableTestBase(testM
             ]);
     }
 
+    [Test]
+    public async Task OrderTestsBy_Keeps_ExecutionPriority_Ahead_Of_Rank_For_Keyed_Tests()
+    {
+        await RunTestsWithFilter("/*/*/TestFilteringKeyedPriorityTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result =>
+                {
+                    // The hook ranks Low_Priority first, but keyed tests can overlap, so [ExecutionPriority] wins.
+                    StartOf(result, "High_Priority").ShouldBeLessThan(StartOf(result, "Low_Priority"));
+                }
+            ]);
+    }
+
     private static DateTime StartOf(TestRun result, string testName)
         => DateTime.Parse(result.Results.First(x => x.TestName!.StartsWith(testName)).StartTime!);
 }

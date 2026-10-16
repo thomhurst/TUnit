@@ -1,7 +1,17 @@
 using System.Collections.Concurrent;
+using TUnit.Core.Enums;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
+
+internal static class TestFilteringOrderSelection
+{
+    // The ordering assertions expect every test in the class to run, so the hooks only order a run that holds
+    // exactly that class. A single-test filter, or a whole-project run, leaves the default order untouched.
+    public static bool IsWholeClass<TClass>(TestFilteringContext context, int testCount)
+        => context.AllTests.Count == testCount
+           && context.AllTests.All(t => t.Metadata.TestDetails.ClassType == typeof(TClass));
+}
 
 public static class TestFilteringOrderHooks
 {
@@ -13,8 +23,7 @@ public static class TestFilteringOrderHooks
     {
         // Hook ordering changes scheduling for the whole run, so only order when the run is
         // filtered to this class (as the engine test does).
-        if (context.AllTests.Count == 0
-            || context.AllTests.Any(t => t.Metadata.TestDetails.ClassType != typeof(TestFilteringOrderTests)))
+        if (!TestFilteringOrderSelection.IsWholeClass<TestFilteringOrderTests>(context, testCount: 3))
         {
             return;
         }
@@ -57,8 +66,7 @@ public static class TestFilteringRankHooks
     public static void RunSecondGroupFirst(TestFilteringContext context)
     {
         // Only rank when the run is filtered to this class (as the engine test does).
-        if (context.AllTests.Count == 0
-            || context.AllTests.Any(t => t.Metadata.TestDetails.ClassType != typeof(TestFilteringRankTests)))
+        if (!TestFilteringOrderSelection.IsWholeClass<TestFilteringRankTests>(context, testCount: 4))
         {
             return;
         }
@@ -105,8 +113,7 @@ public static class TestFilteringKeyedOrderHooks
     public static void ReverseOrder(TestFilteringContext context)
     {
         // Only order when the run is filtered to this class (as the engine test does).
-        if (context.AllTests.Count == 0
-            || context.AllTests.Any(t => t.Metadata.TestDetails.ClassType != typeof(TestFilteringKeyedOrderTests)))
+        if (!TestFilteringOrderSelection.IsWholeClass<TestFilteringKeyedOrderTests>(context, testCount: 3))
         {
             return;
         }
@@ -137,6 +144,46 @@ public class TestFilteringKeyedOrderTests
         if (TestFilteringKeyedOrderHooks.OrderApplied)
         {
             await Assert.That(TestFilteringKeyedOrderHooks.ExecutedTests.ToArray()).IsEquivalentTo(expectedSoFar, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        }
+    }
+}
+
+public static class TestFilteringKeyedPriorityHooks
+{
+    public static bool OrderApplied;
+    public static readonly ConcurrentQueue<string> ExecutedTests = new();
+
+    [Before(TestFiltering)]
+    public static void RankLowPriorityFirst(TestFilteringContext context)
+    {
+        // Only order when the run is filtered to this class (as the engine test does).
+        if (!TestFilteringOrderSelection.IsWholeClass<TestFilteringKeyedPriorityTests>(context, testCount: 2))
+        {
+            return;
+        }
+
+        // Ranks the Low test first. Keyed tests can overlap, so [ExecutionPriority] must still win.
+        context.OrderTestsBy(t => t.Metadata.TestDetails.TestName.StartsWith("Low") ? 0 : 1);
+        OrderApplied = true;
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class TestFilteringKeyedPriorityTests
+{
+    [Test, NotInParallel("TestFilteringKeyedPriority"), ExecutionPriority(Priority.Low)]
+    public Task Low_Priority() => RecordAndAssert(nameof(Low_Priority), [nameof(High_Priority), nameof(Low_Priority)]);
+
+    [Test, NotInParallel("TestFilteringKeyedPriority"), ExecutionPriority(Priority.High)]
+    public Task High_Priority() => RecordAndAssert(nameof(High_Priority), [nameof(High_Priority)]);
+
+    private static async Task RecordAndAssert(string name, string[] expectedSoFar)
+    {
+        TestFilteringKeyedPriorityHooks.ExecutedTests.Enqueue(name);
+
+        if (TestFilteringKeyedPriorityHooks.OrderApplied)
+        {
+            await Assert.That(TestFilteringKeyedPriorityHooks.ExecutedTests.ToArray()).IsEquivalentTo(expectedSoFar, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         }
     }
 }
