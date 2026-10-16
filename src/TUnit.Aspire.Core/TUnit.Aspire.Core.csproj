@@ -26,10 +26,6 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Testing" />
-    <!-- Aspire.Hosting and StreamJsonRpc pull MessagePack 2.5.302 (GHSA-qhrr-8q5h-9q3h). Raise the floor
-         to the patched 2.x release; 3.x (the central version) is not API-compatible with them.
-         Remove once Aspire depends on a patched MessagePack. -->
-    <PackageReference Include="MessagePack" VersionOverride="2.5.303" />
   </ItemGroup>
 
   <Import Project="..\..\eng\Library.targets" />
