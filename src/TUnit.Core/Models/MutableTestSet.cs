@@ -12,6 +12,7 @@ namespace TUnit.Core;
 internal sealed class MutableTestSet(string stageName)
 {
     private IReadOnlyList<TestContext> _tests = [];
+    private IReadOnlyList<TestContext> _initialTests = [];
     private Dictionary<TestContext, string>? _pendingSkips;
     private Dictionary<TestContext, int>? _pendingRanks;
     private List<TestContext>? _removed;
@@ -42,6 +43,7 @@ internal sealed class MutableTestSet(string stageName)
     public void Initialize(IReadOnlyList<TestContext> tests)
     {
         Replace(tests);
+        _initialTests = tests;
         _pendingSkips = null;
         _pendingRanks = null;
         _removed = null;
@@ -103,10 +105,33 @@ internal sealed class MutableTestSet(string stageName)
 
     public void SetTests(IEnumerable<TestContext> tests)
     {
+        if (tests is null)
+        {
+            throw new ArgumentNullException(nameof(tests));
+        }
+
         ThrowIfSealed();
 
-        var replacement = tests as IReadOnlyList<TestContext> ?? tests.ToArray();
-        var kept = new HashSet<TestContext>(replacement, Helpers.ReferenceEqualityComparer<TestContext>.Instance);
+        // Only tests the stage started with may come back, so every test still goes through dependency
+        // re-inclusion and registration; a duplicate would run twice, so only its first occurrence counts.
+        // Validated before any state changes.
+        var known = new HashSet<TestContext>(_initialTests, Helpers.ReferenceEqualityComparer<TestContext>.Instance);
+        var kept = new HashSet<TestContext>(Helpers.ReferenceEqualityComparer<TestContext>.Instance);
+        var replacement = new List<TestContext>();
+        foreach (var test in tests)
+        {
+            if (test is null || !known.Contains(test))
+            {
+                throw new ArgumentException(
+                    $"Only tests discovered in this run can be set; '{test?.Metadata.TestDetails.TestName ?? "null"}' is not one of them.",
+                    nameof(tests));
+            }
+
+            if (kept.Add(test))
+            {
+                replacement.Add(test);
+            }
+        }
 
         // A test put back after an earlier exclusion is no longer removed.
         _removed?.RemoveAll(kept.Contains);

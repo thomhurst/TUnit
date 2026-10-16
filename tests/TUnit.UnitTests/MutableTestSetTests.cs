@@ -277,6 +277,7 @@ public class MutableTestSetTests
         var provider = CreateProvider();
         var discovery = provider.TestDiscoveryContext;
         var test = CreateTestContext(provider, "A");
+        discovery.TestSet.Initialize([test]);
 
         discovery.AddTests([test]);
         await Assert.That(discovery.AllTests).Count().IsEqualTo(1);
@@ -284,6 +285,71 @@ public class MutableTestSetTests
         discovery.TestSet.Seal();
 
         await Assert.That(() => discovery.AddTests([])).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task DiscoveryContext_AddTests_RejectsTestsFromOutsideTheRun_AndChangesNothing()
+    {
+        var provider = CreateProvider();
+        var discovery = provider.TestDiscoveryContext;
+        var a = CreateTestContext(provider, "A");
+        var b = CreateTestContext(provider, "B");
+        var foreign = CreateTestContext(provider, "Foreign");
+        discovery.TestSet.Initialize([a, b]);
+
+        await Assert.That(() => discovery.AddTests([a, foreign])).Throws<ArgumentException>();
+        await Assert.That(() => discovery.AddTests([a, null!])).Throws<ArgumentException>();
+
+        await Assert.That(discovery.AllTests).IsEquivalentTo([a, b], CollectionOrdering.Matching);
+        await Assert.That(discovery.TestSet.IsModified).IsFalse();
+        await Assert.That(discovery.TestSet.Removed).IsEmpty();
+    }
+
+    [Test]
+    public async Task DiscoveryContext_AddTests_CountsDuplicatesOnce()
+    {
+        var provider = CreateProvider();
+        var discovery = provider.TestDiscoveryContext;
+        var a = CreateTestContext(provider, "A");
+        var b = CreateTestContext(provider, "B");
+        discovery.TestSet.Initialize([a, b]);
+
+        discovery.AddTests([b, a, b, a]);
+
+        await Assert.That(discovery.AllTests).IsEquivalentTo([b, a], CollectionOrdering.Matching);
+        await Assert.That(discovery.TestSet.Removed).IsEmpty();
+    }
+
+    [Test]
+    public async Task DiscoveryContext_SecondRequest_StartsFromAFreshSet()
+    {
+        // The engine reuses the context across requests (e.g. discovery, then execution in the same process).
+        var provider = CreateProvider();
+        var discovery = provider.TestDiscoveryContext;
+        var first = new[] { CreateTestContext(provider, "A"), CreateTestContext(provider, "B") };
+        discovery.TestSet.Initialize(first);
+        discovery.ExcludeTests(t => t.Metadata.TestDetails.TestName == "A");
+        discovery.SkipTests(t => t.Metadata.TestDetails.TestName == "B", "first request");
+        discovery.OrderTestsBy(t => t.Metadata.TestDetails.TestName);
+        discovery.TestSet.Seal();
+
+        var second = new[] { CreateTestContext(provider, "A"), CreateTestContext(provider, "B") };
+        discovery.TestSet.Initialize(second);
+
+        // Nothing from the first request carries over, and the hooks of the second can change the set again.
+        await Assert.That(discovery.AllTests).IsEquivalentTo(second, CollectionOrdering.Matching);
+        await Assert.That(discovery.TestSet.Removed).IsEmpty();
+        await Assert.That(discovery.TestSet.WasReordered).IsFalse();
+        await Assert.That(() => discovery.AddTests([first[1]])).Throws<ArgumentException>();
+
+        discovery.ExcludeTests(t => t.Metadata.TestDetails.TestName == "B");
+        discovery.TestSet.Seal();
+
+        await Assert.That(discovery.AllTests).IsEquivalentTo([second[0]], CollectionOrdering.Matching);
+        await Assert.That(discovery.TestSet.Removed).IsEquivalentTo([second[1]], CollectionOrdering.Matching);
+        await Assert.That(second.Select(t => t.SkipReason)).IsEquivalentTo([(string?)null, null], CollectionOrdering.Matching);
+        await Assert.That(second.Select(t => t.HookRank)).IsEquivalentTo([(int?)null, null], CollectionOrdering.Matching);
+        await Assert.That(first[1].SkipReason).IsEqualTo("first request");
     }
 
     // Matches test "A" and throws for any other test, so a call fails after a predicate already matched.

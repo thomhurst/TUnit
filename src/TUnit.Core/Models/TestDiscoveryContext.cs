@@ -18,8 +18,12 @@ public class TestDiscoveryContext : Context
     internal MutableTestSet TestSet { get; } = new("test discovery");
 
     /// <summary>
-    /// Replaces the discovered tests. Only valid until the <c>[After(TestDiscovery)]</c> hooks have finished.
+    /// Replaces the discovered tests with a subset of them. Tests left out are excluded, as
+    /// with <see cref="ExcludeTests"/>; a test passed more than once counts once. Only valid until the
+    /// <c>[After(TestDiscovery)]</c> hooks have finished.
     /// </summary>
+    /// <exception cref="ArgumentException">A test was not discovered in this run.</exception>
+    /// <exception cref="InvalidOperationException">The <c>[After(TestDiscovery)]</c> hooks have already finished.</exception>
     public void AddTests(IEnumerable<TestContext> tests)
     {
         TestSet.SetTests(tests);
