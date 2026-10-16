@@ -7,6 +7,8 @@ public class GlobalTestHooksAnalyzerTests
     [Test]
     [Arguments("TestDiscovery", "BeforeTestDiscoveryContext context")]
     [Arguments("TestDiscovery", "")]
+    [Arguments("TestFiltering", "TestFilteringContext context")]
+    [Arguments("TestFiltering", "")]
     [Arguments("TestSession", "TestSessionContext context")]
     [Arguments("TestSession", "")]
     [Arguments("Test", "TestContext context")]
@@ -34,6 +36,8 @@ public class GlobalTestHooksAnalyzerTests
     [Test]
     [Arguments("TestDiscovery", "TestDiscoveryContext context")]
     [Arguments("TestDiscovery", "")]
+    [Arguments("TestFiltering", "TestFilteringContext context")]
+    [Arguments("TestFiltering", "")]
     [Arguments("TestSession", "TestSessionContext context")]
     [Arguments("TestSession", "")]
     [Arguments("Test", "TestContext context")]
@@ -332,6 +336,7 @@ public class GlobalTestHooksAnalyzerTests
 
     [Test]
     [Arguments("TestDiscovery", "BeforeTestDiscoveryContext")]
+    [Arguments("TestFiltering", "TestFilteringContext")]
     [Arguments("TestSession", "TestSessionContext")]
     [Arguments("Test", "TestContext")]
     [Arguments("Class", "ClassHookContext")]
@@ -364,6 +369,7 @@ public class GlobalTestHooksAnalyzerTests
 
     [Test]
     [Arguments("TestDiscovery", "TestDiscoveryContext")]
+    [Arguments("TestFiltering", "TestFilteringContext")]
     [Arguments("TestSession", "TestSessionContext")]
     [Arguments("Test", "TestContext")]
     [Arguments("Class", "ClassHookContext")]
@@ -396,6 +402,7 @@ public class GlobalTestHooksAnalyzerTests
 
     [Test]
     [Arguments("TestDiscovery", "BeforeTestDiscoveryContext")]
+    [Arguments("TestFiltering", "TestFilteringContext")]
     [Arguments("TestSession", "TestSessionContext")]
     [Arguments("Assembly", "AssemblyHookContext")]
     public async Task Before_SeparateClass_Error(string hookType, string parameterType)
@@ -426,6 +433,7 @@ public class GlobalTestHooksAnalyzerTests
 
     [Test]
     [Arguments("TestDiscovery", "TestDiscoveryContext")]
+    [Arguments("TestFiltering", "TestFilteringContext")]
     [Arguments("TestSession", "TestSessionContext")]
     [Arguments("Assembly", "AssemblyHookContext")]
     public async Task After_SeparateClass_Error(string hookType, string parameterType)
@@ -450,6 +458,78 @@ public class GlobalTestHooksAnalyzerTests
                   }
                   """,
                 Verifier.Diagnostic(Rules.GlobalHooksSeparateClass)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
+    [Arguments("Before", "TestFilteringContext context")]
+    [Arguments("Before", "TestFilteringContext context, System.Threading.CancellationToken cancellationToken")]
+    [Arguments("Before", "")]
+    [Arguments("After", "TestFilteringContext context")]
+    [Arguments("After", "")]
+    public async Task TestFiltering_Standard_Hook_No_Error(string attribute, string parameters)
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                  using TUnit.Core;
+                  using static TUnit.Core.HookType;
+
+                  public class Hooks
+                  {
+                      [{{attribute}}(TestFiltering)]
+                      public static void Hook({{parameters}})
+                      {
+                      }
+                  }
+                  """
+            );
+    }
+
+    [Test]
+    [Arguments("Before")]
+    [Arguments("After")]
+    public async Task TestFiltering_WrongContext_Error(string attribute)
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                  using TUnit.Core;
+                  using static TUnit.Core.HookType;
+
+                  public class Hooks
+                  {
+                      [{{attribute}}(TestFiltering)]
+                      public static void Hook(TestDiscoveryContext {|#0:context|})
+                      {
+                      }
+                  }
+                  """,
+                Verifier.Diagnostic(Rules.HookUnknownParameters)
+                    .WithLocation(0)
+                    .WithArguments("TestFilteringContext")
+            );
+    }
+
+    [Test]
+    public async Task TestFiltering_Instance_Hook_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
+
+                public class Hooks
+                {
+                    [Before(TestFiltering)]
+                    public void {|#0:Hook|}(TestFilteringContext context)
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.MethodMustBeStatic)
                     .WithLocation(0)
             );
     }

@@ -780,12 +780,14 @@ namespace
         public . ExecuteAfterAssemblyHook(.MethodMetadata hookMethodInfo, .AssemblyHookContext context, <.> action) { }
         public . ExecuteAfterClassHook(.MethodMetadata hookMethodInfo, .ClassHookContext context, <.> action) { }
         public . ExecuteAfterTestDiscoveryHook(.MethodMetadata hookMethodInfo, .TestDiscoveryContext context, <.> action) { }
+        public . ExecuteAfterTestFilteringHook(.MethodMetadata hookMethodInfo, .TestFilteringContext context, <.> action) { }
         public . ExecuteAfterTestHook(.MethodMetadata hookMethodInfo, .TestContext context, <.> action) { }
         public . ExecuteAfterTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action) { }
         protected abstract . ExecuteAsync(<.> action);
         public . ExecuteBeforeAssemblyHook(.MethodMetadata hookMethodInfo, .AssemblyHookContext context, <.> action) { }
         public . ExecuteBeforeClassHook(.MethodMetadata hookMethodInfo, .ClassHookContext context, <.> action) { }
         public . ExecuteBeforeTestDiscoveryHook(.MethodMetadata hookMethodInfo, .BeforeTestDiscoveryContext context, <.> action) { }
+        public . ExecuteBeforeTestFilteringHook(.MethodMetadata hookMethodInfo, .TestFilteringContext context, <.> action) { }
         public . ExecuteBeforeTestHook(.MethodMetadata hookMethodInfo, .TestContext context, <.> action) { }
         public . ExecuteBeforeTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action) { }
         public . ExecuteTest(.TestContext context, <.> action) { }
@@ -864,6 +866,7 @@ namespace
         public static int GetNextAfterEveryClassHookIndex() { }
         public static int GetNextAfterEveryTestHookIndex() { }
         public static int GetNextAfterTestDiscoveryHookIndex() { }
+        public static int GetNextAfterTestFilteringHookIndex() { }
         public static int GetNextAfterTestHookIndex() { }
         public static int GetNextAfterTestSessionHookIndex() { }
         public static int GetNextBeforeAssemblyHookIndex() { }
@@ -872,6 +875,7 @@ namespace
         public static int GetNextBeforeEveryClassHookIndex() { }
         public static int GetNextBeforeEveryTestHookIndex() { }
         public static int GetNextBeforeTestDiscoveryHookIndex() { }
+        public static int GetNextBeforeTestFilteringHookIndex() { }
         public static int GetNextBeforeTestHookIndex() { }
         public static int GetNextBeforeTestSessionHookIndex() { }
     }
@@ -882,6 +886,7 @@ namespace
         Assembly = 2,
         TestSession = 3,
         TestDiscovery = 4,
+        TestFiltering = 5,
     }
     public interface IAccessesInstanceData { }
     public interface IDataSourceAttribute
@@ -1334,6 +1339,7 @@ namespace
         public static readonly .<.<.>> AfterEveryClassHooks;
         public static readonly .<.<.>> AfterEveryTestHooks;
         public static readonly .<.<.>> AfterTestDiscoveryHooks;
+        public static readonly .<.<.>> AfterTestFilteringHooks;
         public static readonly .<, .<.<.>>> AfterTestHooks;
         public static readonly .<.<.>> AfterTestSessionHooks;
         public static readonly .<<.Assembly>> AssemblyLoaders;
@@ -1343,6 +1349,7 @@ namespace
         public static readonly .<.<.>> BeforeEveryClassHooks;
         public static readonly .<.<.>> BeforeEveryTestHooks;
         public static readonly .<.<.>> BeforeTestDiscoveryHooks;
+        public static readonly .<.<.>> BeforeTestFilteringHooks;
         public static readonly .<, .<.<.>>> BeforeTestHooks;
         public static readonly .<.<.>> BeforeTestSessionHooks;
         public static readonly .<.IDynamicTestSource> DynamicTestSources;
@@ -1563,6 +1570,9 @@ namespace
         public required string? TestFilter { get; init; }
         public new static .TestDiscoveryContext? Current { get; }
         public void AddTests(.<.TestContext> tests) { }
+        public void ExcludeTests(<.TestContext, bool> predicate) { }
+        public void OrderTestsBy<TKey>(<.TestContext, TKey> keySelector, .<TKey>? comparer = null) { }
+        public void SkipTests(<.TestContext, bool> predicate, string reason) { }
     }
     public static class TestEntryFactory
     {
@@ -1664,6 +1674,18 @@ namespace
         public int RepeatCount { get; init; }
         public int StartColumnNumber { get; init; }
         public .IDataSourceAttribute[] TestDataSources { get; init; }
+    }
+    public class TestFilteringContext : .Context
+    {
+        public .<.TestContext> AllTests { get; }
+        public .<.AssemblyHookContext> Assemblies { get; }
+        public .<.ClassHookContext> TestClasses { get; }
+        public .TestDiscoveryContext TestDiscoveryContext { get; }
+        public required string? TestFilter { get; init; }
+        public new static .TestFilteringContext? Current { get; }
+        public void ExcludeTests(<.TestContext, bool> predicate) { }
+        public void OrderTestsBy<TKey>(<.TestContext, TKey> keySelector, .<TKey>? comparer = null) { }
+        public void SkipTests(<.TestContext, bool> predicate, string reason) { }
     }
     public class TestInstantiationException : .TestBuilderException
     {
@@ -2068,6 +2090,10 @@ namespace .Exceptions
     {
         public AfterTestException(string message,  innerException) { }
     }
+    public class AfterTestFilteringException : .
+    {
+        public AfterTestFilteringException(string message,  innerException) { }
+    }
     public class AfterTestSessionException : .
     {
         public AfterTestSessionException(string message,  innerException) { }
@@ -2087,6 +2113,10 @@ namespace .Exceptions
     public class BeforeTestException : .
     {
         public BeforeTestException(string message,  innerException) { }
+    }
+    public class BeforeTestFilteringException : .
+    {
+        public BeforeTestFilteringException(string message,  innerException) { }
     }
     public class BeforeTestSessionException : .
     {
@@ -2424,6 +2454,11 @@ namespace .Hooks
         public AfterTestDiscoveryHookMethod() { }
         public override . ExecuteAsync(.TestDiscoveryContext context, .CancellationToken cancellationToken) { }
     }
+    public class AfterTestFilteringHookMethod : .<.TestFilteringContext>, <.>
+    {
+        public AfterTestFilteringHookMethod() { }
+        public override . ExecuteAsync(.TestFilteringContext context, .CancellationToken cancellationToken) { }
+    }
     public class AfterTestHookMethod : .<.TestContext>, <.>
     {
         public AfterTestHookMethod() { }
@@ -2448,6 +2483,11 @@ namespace .Hooks
     {
         public BeforeTestDiscoveryHookMethod() { }
         public override . ExecuteAsync(.BeforeTestDiscoveryContext context, .CancellationToken cancellationToken) { }
+    }
+    public class BeforeTestFilteringHookMethod : .<.TestFilteringContext>, <.>
+    {
+        public BeforeTestFilteringHookMethod() { }
+        public override . ExecuteAsync(.TestFilteringContext context, .CancellationToken cancellationToken) { }
     }
     public class BeforeTestHookMethod : .<.TestContext>, <.>
     {
@@ -2623,11 +2663,13 @@ namespace .Interfaces
         . ExecuteAfterAssemblyHook(.MethodMetadata hookMethodInfo, .AssemblyHookContext context, <.> action);
         . ExecuteAfterClassHook(.MethodMetadata hookMethodInfo, .ClassHookContext context, <.> action);
         . ExecuteAfterTestDiscoveryHook(.MethodMetadata hookMethodInfo, .TestDiscoveryContext context, <.> action);
+        . ExecuteAfterTestFilteringHook(.MethodMetadata hookMethodInfo, .TestFilteringContext context, <.> action);
         . ExecuteAfterTestHook(.MethodMetadata hookMethodInfo, .TestContext context, <.> action);
         . ExecuteAfterTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action);
         . ExecuteBeforeAssemblyHook(.MethodMetadata hookMethodInfo, .AssemblyHookContext context, <.> action);
         . ExecuteBeforeClassHook(.MethodMetadata hookMethodInfo, .ClassHookContext context, <.> action);
         . ExecuteBeforeTestDiscoveryHook(.MethodMetadata hookMethodInfo, .BeforeTestDiscoveryContext context, <.> action);
+        . ExecuteBeforeTestFilteringHook(.MethodMetadata hookMethodInfo, .TestFilteringContext context, <.> action);
         . ExecuteBeforeTestHook(.MethodMetadata hookMethodInfo, .TestContext context, <.> action);
         . ExecuteBeforeTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action);
     }

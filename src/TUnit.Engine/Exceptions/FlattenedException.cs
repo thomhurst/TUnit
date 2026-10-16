@@ -139,9 +139,9 @@ internal sealed class FlattenedException : TUnitFailedException
     private static string? EmbeddedMessage(Exception exception)
     {
         if (exception is BeforeTestException or BeforeClassException or BeforeAssemblyException
-            or BeforeTestSessionException or BeforeTestDiscoveryException
+            or BeforeTestSessionException or BeforeTestDiscoveryException or BeforeTestFilteringException
             or AfterTestException or AfterClassException or AfterAssemblyException
-            or AfterTestSessionException or AfterTestDiscoveryException
+            or AfterTestSessionException or AfterTestDiscoveryException or AfterTestFilteringException
             or TestExecutionException
             || (exception.GetType().FullName == "TUnit.Assertions.Exceptions.AssertionException"
                 && exception.InnerException is AggregateException))

@@ -4,9 +4,11 @@ using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Logging;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Constants;
+using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
@@ -32,6 +34,11 @@ internal sealed class TestDiscoveryService : IDataProducer
     private readonly MetadataDependencyExpander _dependencyExpander;
     private readonly ConcurrentQueue<AbstractExecutableTest> _cachedTests = new();
     private readonly TestDependencyResolver _dependencyResolver = new();
+    private readonly TUnitFrameworkLogger _logger;
+
+    // Tests that hooks excluded from this run (and that no remaining test depends on). Hidden from
+    // TestFinder so TestContext dependency lookups don't see tests that will never get a result.
+    private HashSet<TestContext>? _hookExcludedTests;
 
     public string Uid => "TUnit";
     public string Version => "2.0.0";
@@ -45,8 +52,10 @@ internal sealed class TestDiscoveryService : IDataProducer
         TestExecutor testExecutor,
         TestBuilderPipeline testBuilderPipeline,
         TestFilterService testFilterService,
-        MetadataDependencyExpander dependencyExpander)
+        MetadataDependencyExpander dependencyExpander,
+        TUnitFrameworkLogger logger)
     {
+        _logger = logger;
         _testExecutor = testExecutor;
         _testBuilderPipeline = testBuilderPipeline ?? throw new ArgumentNullException(nameof(testBuilderPipeline));
         _testFilterService = testFilterService;
@@ -72,13 +81,34 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         // Add tests to context and run After(TestDiscovery) hooks before event receivers
         // This marks the end of the discovery phase, before registration begins
-        contextProvider.TestDiscoveryContext.AddTests(ToContextList(allTests));
+        var discoverySet = contextProvider.TestDiscoveryContext.TestSet;
+        discoverySet.Initialize(ToContextList(allTests));
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
         contextProvider.TestDiscoveryContext.RestoreExecutionContext();
+        discoverySet.Seal();
+
+        // Tests excluded by After(TestDiscovery) hooks are dropped for discovery and execution alike,
+        // and their order is kept. allTests keeps every built test so RemoveExcludedTestsFromHookContexts
+        // can prune the excluded ones from their class contexts below.
+        var discoveredTests = discoverySet.IsModified || discoverySet.WasReordered
+            ? ToExecutableTestList(discoverySet.Tests)
+            : allTests;
+
+        // Only allocated when a hook removes tests.
+        HashSet<TestContext>? removedByHooks = null;
+        if (isForExecution)
+        {
+            _hookExcludedTests = null;
+        }
+
+        if (isForExecution && discoverySet.IsModified)
+        {
+            removedByHooks = AddRemovedByHooks(removedByHooks, allTests, discoverySet.Tests);
+        }
 
         // Now invoke event receivers (registration phase)
         // ITestRegisteredEventReceiver can access dependency information and any state set by After(TestDiscovery) hooks
-        await InvokePostResolutionEventsInParallelAsync(allTests).ConfigureAwait(false);
+        await InvokePostResolutionEventsInParallelAsync(discoveredTests).ConfigureAwait(false);
 
         // Apply the filter during discovery too — not just execution — so `--list-tests
         // --treenode-filter X` lists exactly the tests a run with X would execute. Only filter
@@ -90,31 +120,22 @@ internal sealed class TestDiscoveryService : IDataProducer
         var hasRealFilter = filter is not (null or NopFilter);
 #pragma warning restore TPEXP
         var filteredTests = (isForExecution || hasRealFilter)
-            ? _testFilterService.FilterTests(filter, allTests)
-            : allTests;
+            ? _testFilterService.FilterTests(filter, discoveredTests)
+            : discoveredTests;
+
+        var finalTests = isForExecution
+            ? IncludeDependencies(filteredTests)
+            : filteredTests as List<AbstractExecutableTest> ?? [.. filteredTests];
 
         if (isForExecution)
         {
-            var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
-            var queue = new Queue<AbstractExecutableTest>(filteredTests);
+            (finalTests, removedByHooks) = await ExecuteTestFilteringHooksAsync(contextProvider, finalTests, removedByHooks, cancellationToken).ConfigureAwait(false);
 
-            while (queue.Count > 0)
+            if (removedByHooks is not null)
             {
-                var test = queue.Dequeue();
-                foreach (var resolvedDep in test.Dependencies)
-                {
-                    var dependency = resolvedDep.Test;
-                    if (testsToInclude.Add(dependency))
-                    {
-                        queue.Enqueue(dependency);
-                    }
-                }
+                await ReportHookExclusionsAsync(removedByHooks, finalTests).ConfigureAwait(false);
             }
-
-            filteredTests = [.. testsToInclude];
         }
-
-        var finalTests = filteredTests as List<AbstractExecutableTest> ?? [.. filteredTests];
 
         if (isForExecution && finalTests.Count != allTests.Count)
         {
@@ -152,12 +173,124 @@ internal sealed class TestDiscoveryService : IDataProducer
         }
     }
 
+    // Runs Before(TestFiltering) hooks on the tests that passed framework filtering, re-includes
+    // dependencies of the tests they kept, then shows the final set to After(TestFiltering) hooks.
+    private async ValueTask<(List<AbstractExecutableTest> Tests, HashSet<TestContext>? RemovedByHooks)> ExecuteTestFilteringHooksAsync(
+        Core.Services.IContextProvider contextProvider,
+        List<AbstractExecutableTest> tests,
+        HashSet<TestContext>? removedByHooks,
+        CancellationToken cancellationToken)
+    {
+        // No hooks: skip the stage so runs without TestFiltering hooks pay no extra allocations.
+        if (!await _testExecutor.HasTestFilteringHooksAsync().ConfigureAwait(false))
+        {
+            return (tests, removedByHooks);
+        }
+
+        var filteringContext = contextProvider.TestFilteringContext;
+        var filteringSet = filteringContext.TestSet;
+        filteringSet.Initialize(ToContextList(tests));
+
+        await _testExecutor.ExecuteBeforeTestFilteringHooksAsync(cancellationToken).ConfigureAwait(false);
+        filteringContext.RestoreExecutionContext();
+        filteringSet.Seal();
+
+        if (filteringSet.IsModified)
+        {
+            removedByHooks = AddRemovedByHooks(removedByHooks, tests, filteringSet.Tests);
+
+            // As with framework filtering, a test that a kept test depends on still runs.
+            tests = IncludeDependencies(ToExecutableTestList(filteringSet.Tests));
+            filteringSet.Replace(ToContextList(tests));
+        }
+        else if (filteringSet.WasReordered)
+        {
+            tests = ToExecutableTestList(filteringSet.Tests);
+        }
+
+        await _testExecutor.ExecuteAfterTestFilteringHooksAsync(cancellationToken).ConfigureAwait(false);
+        filteringContext.RestoreExecutionContext();
+
+        return (tests, removedByHooks);
+    }
+
+    private static HashSet<TestContext>? AddRemovedByHooks(
+        HashSet<TestContext>? removedByHooks,
+        List<AbstractExecutableTest> before,
+        IReadOnlyList<TestContext> kept)
+    {
+        var keptSet = new HashSet<TestContext>(kept, TUnit.Core.Helpers.ReferenceEqualityComparer<TestContext>.Instance);
+        foreach (var test in before)
+        {
+            if (!keptSet.Contains(test.Context))
+            {
+                removedByHooks ??= new HashSet<TestContext>(TUnit.Core.Helpers.ReferenceEqualityComparer<TestContext>.Instance);
+                removedByHooks.Add(test.Context);
+            }
+        }
+
+        return removedByHooks;
+    }
+
+    // A hook-excluded test that still runs was re-included as a [DependsOn] target: say so, since the
+    // user asked for it to be excluded. Whatever stays excluded is hidden from TestFinder.
+    private async ValueTask ReportHookExclusionsAsync(HashSet<TestContext> removedByHooks, List<AbstractExecutableTest> finalTests)
+    {
+        foreach (var test in finalTests)
+        {
+            if (removedByHooks.Remove(test.Context) && _logger.IsDebugEnabled)
+            {
+                await _logger.LogDebugAsync(
+                    $"Test '{test.TestId}' was excluded by a hook but still runs because a remaining test depends on it ([DependsOn]).").ConfigureAwait(false);
+            }
+        }
+
+        _hookExcludedTests = removedByHooks;
+    }
+
+    // Adds the transitive [DependsOn] targets of the given tests. Input order is preserved and
+    // dependencies that were not already present are appended, so hook ordering survives.
+    private static List<AbstractExecutableTest> IncludeDependencies(IReadOnlyCollection<AbstractExecutableTest> tests)
+    {
+        var result = new List<AbstractExecutableTest>(tests.Count);
+        var testsToInclude = new HashSet<AbstractExecutableTest>();
+        foreach (var test in tests)
+        {
+            if (testsToInclude.Add(test))
+            {
+                result.Add(test);
+            }
+        }
+
+        for (var i = 0; i < result.Count; i++)
+        {
+            foreach (var resolvedDep in result[i].Dependencies)
+            {
+                var dependency = resolvedDep.Test;
+                if (testsToInclude.Add(dependency))
+                {
+                    result.Add(dependency);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static List<AbstractExecutableTest> ToExecutableTestList(IReadOnlyList<TestContext> contexts)
+    {
+        var tests = new List<AbstractExecutableTest>(contexts.Count);
+        foreach (var context in contexts)
+        {
+            tests.Add(context.InternalExecutableTest);
+        }
+
+        return tests;
+    }
+
     // Project the resolved tests onto their contexts into a pre-sized list.
-    // TestDiscoveryContext.AddTests stores its argument directly when it is already an
-    // IReadOnlyList<TestContext> and only calls ToArray() otherwise. A List<TestContext>
-    // satisfies IReadOnlyList<TestContext>, so passing one means AddTests stores it as-is —
-    // we pay a single pre-sized list allocation here instead of a lazy Select() enumerator
-    // plus the ToArray() copy that a Select(...) projection would have forced inside AddTests.
+    // MutableTestSet stores its argument as-is, so a List<TestContext> costs a single pre-sized
+    // allocation instead of a lazy Select() enumerator plus a ToArray() copy.
     private static List<TestContext> ToContextList(List<AbstractExecutableTest> tests)
     {
         var contexts = new List<TestContext>(tests.Count);
@@ -297,9 +430,16 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         // Add tests to context and run After(TestDiscovery) hooks before event receivers
         // This marks the end of the discovery phase, before registration begins
-        contextProvider.TestDiscoveryContext.AddTests(ToContextList(allTests));
+        var discoverySet = contextProvider.TestDiscoveryContext.TestSet;
+        discoverySet.Initialize(ToContextList(allTests));
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
         contextProvider.TestDiscoveryContext.RestoreExecutionContext();
+        discoverySet.Seal();
+
+        if (discoverySet.IsModified || discoverySet.WasReordered)
+        {
+            allTests = ToExecutableTestList(discoverySet.Tests);
+        }
 
         // Now invoke event receivers (registration phase)
         // ITestRegisteredEventReceiver can access dependency information and any state set by After(TestDiscovery) hooks
@@ -424,10 +564,14 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public IEnumerable<TestContext> GetCachedTestContexts()
     {
+        var excluded = _hookExcludedTests;
         var list = new List<TestContext>(_cachedTests.Count);
         foreach (var test in _cachedTests)
         {
-            list.Add(test.Context);
+            if (excluded is null || !excluded.Contains(test.Context))
+            {
+                list.Add(test.Context);
+            }
         }
         return list;
     }

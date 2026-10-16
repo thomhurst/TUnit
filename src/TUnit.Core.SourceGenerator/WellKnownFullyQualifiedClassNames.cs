@@ -28,6 +28,7 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName TestSessionContext = "TUnit.Core.TestSessionContext";
     public static readonly FullyQualifiedTypeName TestDiscoveryContext = "TUnit.Core.TestDiscoveryContext";
     public static readonly FullyQualifiedTypeName BeforeTestDiscoveryContext = "TUnit.Core.BeforeTestDiscoveryContext";
+    public static readonly FullyQualifiedTypeName TestFilteringContext = "TUnit.Core.TestFilteringContext";
 
     public static readonly FullyQualifiedTypeName BeforeAttribute = "TUnit.Core.BeforeAttribute";
     public static readonly FullyQualifiedTypeName AfterAttribute = "TUnit.Core.AfterAttribute";

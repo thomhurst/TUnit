@@ -11,6 +11,13 @@ public partial class TestContext
 
     internal Priority ExecutionPriority { get; set; } = Priority.Normal;
 
+    /// <summary>
+    /// Rank from the last <c>OrderTestsBy</c> hook call that included this test (tests with equal keys share
+    /// a rank); 0 when no hook ordered it. The scheduler sorts by it ahead of its class-name and
+    /// <c>[NotInParallel(Order)]</c> keys, so those still order tests within a rank.
+    /// </summary>
+    internal int HookRank { get; set; }
+
     IReadOnlyList<IParallelConstraint> ITestParallelization.Constraints => ParallelConstraints;
     Priority ITestParallelization.ExecutionPriority
     {

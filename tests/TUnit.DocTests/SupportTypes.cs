@@ -620,11 +620,13 @@ namespace TUnit.DocTests
     public sealed class LoggingHookExecutor : IHookExecutor
     {
         public ValueTask ExecuteBeforeTestDiscoveryHook(MethodMetadata method, BeforeTestDiscoveryContext context, Func<ValueTask> action) => action();
+        public ValueTask ExecuteBeforeTestFilteringHook(MethodMetadata method, TestFilteringContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteBeforeTestSessionHook(MethodMetadata method, TestSessionContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteBeforeAssemblyHook(MethodMetadata method, AssemblyHookContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteBeforeClassHook(MethodMetadata method, ClassHookContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteBeforeTestHook(MethodMetadata method, TestContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteAfterTestDiscoveryHook(MethodMetadata method, TestDiscoveryContext context, Func<ValueTask> action) => action();
+        public ValueTask ExecuteAfterTestFilteringHook(MethodMetadata method, TestFilteringContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteAfterTestSessionHook(MethodMetadata method, TestSessionContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteAfterAssemblyHook(MethodMetadata method, AssemblyHookContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteAfterClassHook(MethodMetadata method, ClassHookContext context, Func<ValueTask> action) => action();
@@ -634,11 +636,13 @@ namespace TUnit.DocTests
     public sealed class MyCustomExecutor : IHookExecutor
     {
         public ValueTask ExecuteBeforeTestDiscoveryHook(MethodMetadata method, BeforeTestDiscoveryContext context, Func<ValueTask> action) => action();
+        public ValueTask ExecuteBeforeTestFilteringHook(MethodMetadata method, TestFilteringContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteBeforeTestSessionHook(MethodMetadata method, TestSessionContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteBeforeAssemblyHook(MethodMetadata method, AssemblyHookContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteBeforeClassHook(MethodMetadata method, ClassHookContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteBeforeTestHook(MethodMetadata method, TestContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteAfterTestDiscoveryHook(MethodMetadata method, TestDiscoveryContext context, Func<ValueTask> action) => action();
+        public ValueTask ExecuteAfterTestFilteringHook(MethodMetadata method, TestFilteringContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteAfterTestSessionHook(MethodMetadata method, TestSessionContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteAfterAssemblyHook(MethodMetadata method, AssemblyHookContext context, Func<ValueTask> action) => action();
         public ValueTask ExecuteAfterClassHook(MethodMetadata method, ClassHookContext context, Func<ValueTask> action) => action();

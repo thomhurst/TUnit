@@ -48,6 +48,18 @@ public class ListTestsFilterTests
         result.StandardOutput.ShouldContain("Fail1");
     }
 
+    [Test]
+    [MethodDataSource(nameof(Modes))]
+    public async Task ListTests_Omits_Tests_Excluded_By_After_TestDiscovery_Hooks(bool reflection)
+    {
+        // After(TestDiscovery) exclusions shape discovery too. TestFiltering hooks run only for
+        // execution, so a test they exclude is still listed.
+        var result = await RunListTestsAsync(reflection, "/*/*/TestFilteringHookTests/*");
+
+        result.StandardOutput.ShouldNotContain("ExcludedAtDiscovery");
+        result.StandardOutput.ShouldContain("ExcludedByHook");
+    }
+
     private static async Task<BufferedCommandResult> RunListTestsAsync(bool reflection, string? filter)
     {
         var testProject = Sourcy.DotNet.Projects.TUnit_TestProject;

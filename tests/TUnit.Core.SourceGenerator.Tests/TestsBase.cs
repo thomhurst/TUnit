@@ -228,7 +228,7 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
         var guidPattern2 = @"_ModuleInitializer_[a-fA-F0-9]{32}";
         scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, guidPattern2, "_ModuleInitializer_GUID", System.Text.RegularExpressions.RegexOptions.None);
 
-        var guidPattern3 = @"_(Before|After|BeforeEvery|AfterEvery)_(Test|Class|Assembly|TestSession|TestDiscovery)_[a-fA-F0-9]{32}";
+        var guidPattern3 = @"_(Before|After|BeforeEvery|AfterEvery)_(Test|Class|Assembly|TestSession|TestDiscovery|TestFiltering)_[a-fA-F0-9]{32}";
         scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, guidPattern3, "_$1_$2_GUID", System.Text.RegularExpressions.RegexOptions.None);
 
         // Scrub version numbers in GeneratedCode attributes (e.g., "1.18.40.0" → "VERSION_SCRUBBED")

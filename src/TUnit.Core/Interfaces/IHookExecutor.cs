@@ -31,6 +31,15 @@ public interface IHookExecutor
     ValueTask ExecuteBeforeTestDiscoveryHook(MethodMetadata hookMethodInfo, BeforeTestDiscoveryContext context, Func<ValueTask> action);
 
     /// <summary>
+    /// Executes a "before test filtering" hook.
+    /// </summary>
+    /// <param name="hookMethodInfo">Metadata about the hook method being executed.</param>
+    /// <param name="context">The context holding the tests that passed framework filtering.</param>
+    /// <param name="action">The hook body to execute.</param>
+    /// <returns>A <see cref="ValueTask"/> representing the asynchronous operation.</returns>
+    ValueTask ExecuteBeforeTestFilteringHook(MethodMetadata hookMethodInfo, TestFilteringContext context, Func<ValueTask> action);
+
+    /// <summary>
     /// Executes a "before test session" hook.
     /// </summary>
     /// <param name="hookMethodInfo">Metadata about the hook method being executed.</param>
@@ -74,6 +83,15 @@ public interface IHookExecutor
     /// <param name="action">The hook body to execute.</param>
     /// <returns>A <see cref="ValueTask"/> representing the asynchronous operation.</returns>
     ValueTask ExecuteAfterTestDiscoveryHook(MethodMetadata hookMethodInfo, TestDiscoveryContext context, Func<ValueTask> action);
+
+    /// <summary>
+    /// Executes an "after test filtering" hook.
+    /// </summary>
+    /// <param name="hookMethodInfo">Metadata about the hook method being executed.</param>
+    /// <param name="context">The context holding the final set of tests to run.</param>
+    /// <param name="action">The hook body to execute.</param>
+    /// <returns>A <see cref="ValueTask"/> representing the asynchronous operation.</returns>
+    ValueTask ExecuteAfterTestFilteringHook(MethodMetadata hookMethodInfo, TestFilteringContext context, Func<ValueTask> action);
 
     /// <summary>
     /// Executes an "after test session" hook.

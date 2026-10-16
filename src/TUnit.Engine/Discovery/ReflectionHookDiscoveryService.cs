@@ -21,6 +21,7 @@ internal sealed class ReflectionHookDiscoveryService
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
     private static readonly ConcurrentDictionary<string, bool> _registeredMethods = new();
     private static readonly ConcurrentDictionary<(string Name, Type Type), bool> _registeredAfterTestDiscoveryHooks = new();
+    private static readonly ConcurrentDictionary<(string Name, Type Type), bool> _registeredAfterTestFilteringHooks = new();
     private static readonly ConcurrentDictionary<MethodInfo, string> _methodKeyCache = new();
     // Cache attribute lookups to avoid repeated reflection calls in hot paths
     private static readonly ConcurrentDictionary<MethodInfo, (BeforeAttribute?, AfterAttribute?, BeforeEveryAttribute?, AfterEveryAttribute?)> _attributeCache = new();
@@ -78,6 +79,8 @@ internal sealed class ReflectionHookDiscoveryService
         Sources.AfterTestSessionHooks.Clear();
         Sources.BeforeTestDiscoveryHooks.Clear();
         Sources.AfterTestDiscoveryHooks.Clear();
+        Sources.BeforeTestFilteringHooks.Clear();
+        Sources.AfterTestFilteringHooks.Clear();
         Sources.BeforeEveryTestHooks.Clear();
         Sources.AfterEveryTestHooks.Clear();
         Sources.BeforeEveryClassHooks.Clear();
@@ -441,6 +444,10 @@ internal sealed class ReflectionHookDiscoveryService
                 };
                 Sources.BeforeTestDiscoveryHooks.Add(new LazyHookEntry<BeforeTestDiscoveryHookMethod>(discoveryHook));
                 break;
+            case HookType.TestFiltering:
+                // [BeforeEvery(TestFiltering)] is treated the same as [Before(TestFiltering)], as for TestDiscovery
+                RegisterBeforeTestFilteringHook(type, method, order);
+                break;
         }
     }
 
@@ -521,6 +528,10 @@ internal sealed class ReflectionHookDiscoveryService
                     };
                     Sources.AfterTestDiscoveryHooks.Add(new LazyHookEntry<AfterTestDiscoveryHookMethod>(discoveryHook));
                 }
+                break;
+            case HookType.TestFiltering:
+                // [AfterEvery(TestFiltering)] is treated the same as [After(TestFiltering)], as for TestDiscovery
+                RegisterAfterTestFilteringHook(type, method, order);
                 break;
         }
     }
@@ -608,6 +619,10 @@ internal sealed class ReflectionHookDiscoveryService
                     Body = CreateHookDelegate<BeforeTestDiscoveryContext>(type, method)
                 };
                 Sources.BeforeTestDiscoveryHooks.Add(new LazyHookEntry<BeforeTestDiscoveryHookMethod>(discoveryHook));
+                break;
+            case HookType.TestFiltering:
+                // [BeforeEvery(TestFiltering)] is treated the same as [Before(TestFiltering)], as for TestDiscovery
+                RegisterBeforeTestFilteringHook(type, method, order);
                 break;
         }
     }
@@ -706,7 +721,56 @@ internal sealed class ReflectionHookDiscoveryService
                     Sources.AfterTestDiscoveryHooks.Add(new LazyHookEntry<AfterTestDiscoveryHookMethod>(discoveryHook));
                 }
                 break;
+            case HookType.TestFiltering:
+                // [AfterEvery(TestFiltering)] is treated the same as [After(TestFiltering)], as for TestDiscovery
+                RegisterAfterTestFilteringHook(type, method, order);
+                break;
         }
+    }
+
+    private static void RegisterBeforeTestFilteringHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        int order)
+    {
+        var hook = new BeforeTestFilteringHookMethod
+        {
+            MethodInfo = CreateMethodMetadata(type, method),
+            HookExecutor = GetHookExecutor(method),
+            Order = order,
+            RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
+            FilePath = "Unknown",
+            LineNumber = 0,
+            Body = CreateHookDelegate<TestFilteringContext>(type, method)
+        };
+        Sources.BeforeTestFilteringHooks.Add(new LazyHookEntry<BeforeTestFilteringHookMethod>(hook));
+    }
+
+    private static void RegisterAfterTestFilteringHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        int order)
+    {
+        var metadata = CreateMethodMetadata(type, method);
+        // Defence in depth, as for After(TestDiscovery): _registeredMethods normally dedups first.
+        if (!_registeredAfterTestFilteringHooks.TryAdd((metadata.Name, metadata.Type), true))
+        {
+            return;
+        }
+
+        var hook = new AfterTestFilteringHookMethod
+        {
+            MethodInfo = metadata,
+            HookExecutor = GetHookExecutor(method),
+            Order = order,
+            RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
+            FilePath = "Unknown",
+            LineNumber = 0,
+            Body = CreateHookDelegate<TestFilteringContext>(type, method)
+        };
+        Sources.AfterTestFilteringHooks.Add(new LazyHookEntry<AfterTestFilteringHookMethod>(hook));
     }
 
     private static void RegisterInstanceBeforeHook(

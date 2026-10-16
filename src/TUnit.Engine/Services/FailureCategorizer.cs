@@ -25,7 +25,8 @@ internal static class FailureCategorizer
             or BeforeClassException
             or BeforeAssemblyException
             or BeforeTestSessionException
-            or BeforeTestDiscoveryException)
+            or BeforeTestDiscoveryException
+            or BeforeTestFilteringException)
         {
             return FailureCategory.Setup;
         }
@@ -35,7 +36,8 @@ internal static class FailureCategorizer
             or AfterClassException
             or AfterAssemblyException
             or AfterTestSessionException
-            or AfterTestDiscoveryException)
+            or AfterTestDiscoveryException
+            or AfterTestFilteringException)
         {
             return FailureCategory.Teardown;
         }

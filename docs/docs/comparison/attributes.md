@@ -49,6 +49,8 @@ Here are TUnit's equivalent attributes to other test frameworks.
 | [After(TestSession)]    | -                                          | -                                  | -                    |
 | [Before(TestDiscovery)] | -                                          | -                                  | -                    |
 | [After(TestDiscovery)]  | -                                          | -                                  | -                    |
+| [Before(TestFiltering)] | -                                          | -                                  | -                    |
+| [After(TestFiltering)]  | -                                          | -                                  | -                    |
 | [BeforeEvery(Test)]     | -                                          | -                                  | -                    |
 | [AfterEvery(Test)]      | -                                          | -                                  | -                    |
 | [BeforeEvery(Class)]    | -                                          | -                                  | -                    |

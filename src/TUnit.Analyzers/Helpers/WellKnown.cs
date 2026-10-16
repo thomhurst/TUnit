@@ -31,6 +31,7 @@ public static class WellKnown
         public static readonly FullyQualifiedTypeName TestSessionContext = GetTypeName("TestSessionContext");
         public static readonly FullyQualifiedTypeName BeforeTestDiscoveryContext = GetTypeName("BeforeTestDiscoveryContext");
         public static readonly FullyQualifiedTypeName TestDiscoveryContext = GetTypeName("TestDiscoveryContext");
+        public static readonly FullyQualifiedTypeName TestFilteringContext = GetTypeName("TestFilteringContext");
 
         public static readonly FullyQualifiedTypeName InheritsTestsAttribute = GetTypeName("InheritsTestsAttribute");
 

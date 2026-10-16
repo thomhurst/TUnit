@@ -22,7 +22,7 @@ public sealed class HookModel : IEquatable<HookModel>
 
     // Hook configuration (using strings to match existing generator API)
     public required string HookKind { get; init; } // "Before", "After", "BeforeEvery", "AfterEvery"
-    public required string HookType { get; init; } // "Test", "Class", "Assembly", "TestSession", "TestDiscovery"
+    public required string HookType { get; init; } // "Test", "Class", "Assembly", "TestSession", "TestDiscovery", "TestFiltering"
     public required int Order { get; init; }
     public required string? HookExecutorTypeName { get; init; }
 

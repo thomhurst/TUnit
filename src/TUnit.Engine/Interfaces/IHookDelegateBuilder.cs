@@ -45,4 +45,6 @@ internal interface IHookDelegateBuilder
 
     ValueTask<IReadOnlyList<NamedHookDelegate<BeforeTestDiscoveryContext>>> CollectBeforeTestDiscoveryHooksAsync();
     ValueTask<IReadOnlyList<NamedHookDelegate<TestDiscoveryContext>>> CollectAfterTestDiscoveryHooksAsync();
+    ValueTask<IReadOnlyList<NamedHookDelegate<TestFilteringContext>>> CollectBeforeTestFilteringHooksAsync();
+    ValueTask<IReadOnlyList<NamedHookDelegate<TestFilteringContext>>> CollectAfterTestFilteringHooksAsync();
 }

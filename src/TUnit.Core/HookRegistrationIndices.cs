@@ -21,6 +21,8 @@ public static class HookRegistrationIndices
     private static int _afterTestSessionHookIndex;
     private static int _beforeTestDiscoveryHookIndex;
     private static int _afterTestDiscoveryHookIndex;
+    private static int _beforeTestFilteringHookIndex;
+    private static int _afterTestFilteringHookIndex;
 
     public static int GetNextBeforeTestHookIndex() => Interlocked.Increment(ref _beforeTestHookIndex);
     public static int GetNextAfterTestHookIndex() => Interlocked.Increment(ref _afterTestHookIndex);
@@ -38,4 +40,6 @@ public static class HookRegistrationIndices
     public static int GetNextAfterTestSessionHookIndex() => Interlocked.Increment(ref _afterTestSessionHookIndex);
     public static int GetNextBeforeTestDiscoveryHookIndex() => Interlocked.Increment(ref _beforeTestDiscoveryHookIndex);
     public static int GetNextAfterTestDiscoveryHookIndex() => Interlocked.Increment(ref _afterTestDiscoveryHookIndex);
+    public static int GetNextBeforeTestFilteringHookIndex() => Interlocked.Increment(ref _beforeTestFilteringHookIndex);
+    public static int GetNextAfterTestFilteringHookIndex() => Interlocked.Increment(ref _afterTestFilteringHookIndex);
 }

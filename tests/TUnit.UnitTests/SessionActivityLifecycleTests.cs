@@ -338,6 +338,9 @@ public class SessionActivityLifecycleTests
         public TestDiscoveryContext TestDiscoveryContext =>
             throw new NotSupportedException();
 
+        public TestFilteringContext TestFilteringContext =>
+            throw new NotSupportedException();
+
         public TestSessionContext TestSessionContext => sessionContext;
 
         public AssemblyHookContext GetOrCreateAssemblyContext(Assembly assembly) =>
@@ -419,6 +422,10 @@ public class SessionActivityLifecycleTests
         public ValueTask<IReadOnlyList<NamedHookDelegate<BeforeTestDiscoveryContext>>> CollectBeforeTestDiscoveryHooksAsync() =>
             new([]);
         public ValueTask<IReadOnlyList<NamedHookDelegate<TestDiscoveryContext>>> CollectAfterTestDiscoveryHooksAsync() =>
+            new([]);
+        public ValueTask<IReadOnlyList<NamedHookDelegate<TestFilteringContext>>> CollectBeforeTestFilteringHooksAsync() =>
+            new([]);
+        public ValueTask<IReadOnlyList<NamedHookDelegate<TestFilteringContext>>> CollectAfterTestFilteringHooksAsync() =>
             new([]);
     }
 

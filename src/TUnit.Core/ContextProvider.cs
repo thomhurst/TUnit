@@ -38,6 +38,15 @@ internal class ContextProvider(IServiceProvider serviceProvider, string testSess
     };
 
     /// <summary>
+    /// Gets or creates the test filtering context
+    /// </summary>
+    [field: AllowNull, MaybeNull]
+    public TestFilteringContext TestFilteringContext => field ??= new TestFilteringContext(TestDiscoveryContext)
+    {
+        TestFilter = testFilter
+    };
+
+    /// <summary>
     /// Gets or creates a test session context
     /// </summary>
     [field: AllowNull, MaybeNull]

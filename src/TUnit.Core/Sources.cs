@@ -43,6 +43,8 @@ public static class Sources
     public static readonly ConcurrentBag<LazyHookEntry<AfterTestSessionHookMethod>> AfterTestSessionHooks = [];
     public static readonly ConcurrentBag<LazyHookEntry<BeforeTestDiscoveryHookMethod>> BeforeTestDiscoveryHooks = [];
     public static readonly ConcurrentBag<LazyHookEntry<AfterTestDiscoveryHookMethod>> AfterTestDiscoveryHooks = [];
+    public static readonly ConcurrentBag<LazyHookEntry<BeforeTestFilteringHookMethod>> BeforeTestFilteringHooks = [];
+    public static readonly ConcurrentBag<LazyHookEntry<AfterTestFilteringHookMethod>> AfterTestFilteringHooks = [];
 
     public static readonly ConcurrentQueue<Func<Task>> GlobalInitializers = [];
     public static readonly ConcurrentQueue<IPropertySource> PropertySources = [];
