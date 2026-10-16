@@ -4,9 +4,16 @@ namespace TUnit.Core;
 /// The test set behind <see cref="TestDiscoveryContext"/> and <see cref="TestFilteringContext"/>:
 /// hooks exclude, skip and order tests through it until the engine seals it.
 /// </summary>
+/// <remarks>
+/// Every operation evaluates all user callbacks before it changes any state, so a callback that throws
+/// leaves the set as it was. Skips and ranks are kept as pending changes and written to the
+/// <see cref="TestContext"/>s only by <see cref="Seal"/>, and only for tests still in the set.
+/// </remarks>
 internal sealed class MutableTestSet(string stageName)
 {
     private IReadOnlyList<TestContext> _tests = [];
+    private Dictionary<TestContext, string>? _pendingSkips;
+    private Dictionary<TestContext, int>? _pendingRanks;
     private ClassHookContext[]? _testClasses;
     private AssemblyHookContext[]? _assemblies;
 
@@ -31,6 +38,8 @@ internal sealed class MutableTestSet(string stageName)
     public void Initialize(IReadOnlyList<TestContext> tests)
     {
         Replace(tests);
+        _pendingSkips = null;
+        _pendingRanks = null;
         IsModified = false;
         WasReordered = false;
         IsSealed = false;
@@ -46,7 +55,46 @@ internal sealed class MutableTestSet(string stageName)
         _assemblies = null;
     }
 
-    public void Seal() => IsSealed = true;
+    /// <summary>
+    /// Ends the stage: applies pending skips and ranks to the tests still in the set, then rejects
+    /// further changes. Tests that hooks excluded are never modified.
+    /// </summary>
+    public void Seal()
+    {
+        if (IsSealed)
+        {
+            return;
+        }
+
+        IsSealed = true;
+
+        var pendingSkips = _pendingSkips;
+        var pendingRanks = _pendingRanks;
+        _pendingSkips = null;
+        _pendingRanks = null;
+
+        if (pendingSkips is null && pendingRanks is null)
+        {
+            return;
+        }
+
+        foreach (var test in _tests)
+        {
+            // A reason set before the stage (e.g. by [Skip]) wins over hook skips.
+            if (pendingSkips is not null
+                && pendingSkips.TryGetValue(test, out var reason)
+                && string.IsNullOrEmpty(test.SkipReason))
+            {
+                test.SkipReason = reason;
+                test.Metadata.TestDetails.ClassInstance = SkippedTestInstance.Instance;
+            }
+
+            if (pendingRanks is not null && pendingRanks.TryGetValue(test, out var rank))
+            {
+                test.HookRank = rank;
+            }
+        }
+    }
 
     public void SetTests(IEnumerable<TestContext> tests)
     {
@@ -64,6 +112,7 @@ internal sealed class MutableTestSet(string stageName)
 
         ThrowIfSealed();
 
+        // All-or-nothing: the kept list is local until every predicate has run.
         var tests = _tests;
         List<TestContext>? kept = null;
         for (var i = 0; i < tests.Count; i++)
@@ -107,14 +156,26 @@ internal sealed class MutableTestSet(string stageName)
 
         ThrowIfSealed();
 
+        // Evaluate every predicate before recording anything, so a throwing predicate changes nothing.
+        List<TestContext>? matches = null;
         foreach (var test in _tests)
         {
-            // Keep the first reason: a test skipped by [Skip] or an earlier hook stays as it was.
-            if (string.IsNullOrEmpty(test.SkipReason) && predicate(test))
+            if (predicate(test))
             {
-                test.SkipReason = reason;
-                test.Metadata.TestDetails.ClassInstance = SkippedTestInstance.Instance;
+                (matches ??= []).Add(test);
             }
+        }
+
+        if (matches is null)
+        {
+            return;
+        }
+
+        _pendingSkips ??= new Dictionary<TestContext, string>(Helpers.ReferenceEqualityComparer<TestContext>.Instance);
+        foreach (var test in matches)
+        {
+            // First reason wins across calls; Seal() also keeps a reason set before the stage.
+            _pendingSkips.TryAdd(test, reason);
         }
     }
 
@@ -146,8 +207,10 @@ internal sealed class MutableTestSet(string stageName)
         });
 
         // Tests with equal keys share a rank, so the scheduler keeps its default order
-        // (class, [NotInParallel(Order)]) among them. Ranks start at 1; 0 means "not ordered".
+        // (class, [NotInParallel(Order)]) among them. Each call replaces the previous ranks
+        // (the last call wins); Seal() writes them to the tests.
         var ordered = new TestContext[tests.Count];
+        var ranks = new Dictionary<TestContext, int>(tests.Count, Helpers.ReferenceEqualityComparer<TestContext>.Instance);
         var rank = 0;
         for (var i = 0; i < indices.Length; i++)
         {
@@ -157,11 +220,12 @@ internal sealed class MutableTestSet(string stageName)
             }
 
             var test = tests[indices[i]];
-            test.HookRank = rank;
+            ranks[test] = rank;
             ordered[i] = test;
         }
 
         Replace(ordered);
+        _pendingRanks = ranks;
         WasReordered = true;
     }
 

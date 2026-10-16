@@ -29,7 +29,7 @@ internal sealed class TestGroupingService : ITestGroupingService
     private struct TestSortKey
     {
         public int ExecutionPriority { get; init; }
-        public int HookRank { get; init; } // 0 unless an OrderTestsBy hook ranked the test
+        public int? HookRank { get; init; } // null unless an OrderTestsBy hook ranked the test
         public string ClassFullName { get; init; } // Cached to avoid repeated property access
         public int NotInParallelOrder { get; init; }
         public NotInParallelConstraint? NotInParallelConstraint { get; init; }
@@ -78,7 +78,7 @@ internal sealed class TestGroupingService : ITestGroupingService
             }
 
             var hookRank = test.Context.HookRank;
-            hasHookRanks |= hookRank != 0;
+            hasHookRanks |= hookRank.HasValue;
 
             var key = new TestSortKey
             {
@@ -96,8 +96,8 @@ internal sealed class TestGroupingService : ITestGroupingService
             var priorityCompare = b.Key.ExecutionPriority.CompareTo(a.Key.ExecutionPriority);
             if (priorityCompare != 0) return priorityCompare;
 
-            // All ranks are 0 unless an OrderTestsBy hook ran, so this only reorders hook-ranked runs.
-            var rankCompare = a.Key.HookRank.CompareTo(b.Key.HookRank);
+            // Ranks are null unless an OrderTestsBy hook ran, so this only reorders hook-ranked runs.
+            var rankCompare = Nullable.Compare(a.Key.HookRank, b.Key.HookRank);
             if (rankCompare != 0) return rankCompare;
 
             var classCompare = string.CompareOrdinal(a.Key.ClassFullName, b.Key.ClassFullName);
@@ -171,11 +171,11 @@ internal sealed class TestGroupingService : ITestGroupingService
             }
         }
 
-        // Sequential buckets group by class before priority; a hook rank (0 unless an OrderTestsBy
+        // Sequential buckets group by class before priority; a hook rank (null unless an OrderTestsBy
         // hook ran) takes precedence over that grouping, and ties keep the existing keys.
         notInParallelList.Sort((a, b) =>
         {
-            var rankCompare = a.Test.Context.HookRank.CompareTo(b.Test.Context.HookRank);
+            var rankCompare = Nullable.Compare(a.Test.Context.HookRank, b.Test.Context.HookRank);
             if (rankCompare != 0) return rankCompare;
 
             var classCompare = string.CompareOrdinal(a.ClassName, b.ClassName);
@@ -195,7 +195,7 @@ internal sealed class TestGroupingService : ITestGroupingService
 
         keyedNotInParallelList.Sort((a, b) =>
         {
-            var rankCompare = a.Test.Context.HookRank.CompareTo(b.Test.Context.HookRank);
+            var rankCompare = Nullable.Compare(a.Test.Context.HookRank, b.Test.Context.HookRank);
             if (rankCompare != 0) return rankCompare;
 
             var classCompare = string.CompareOrdinal(a.ClassName, b.ClassName);
@@ -224,7 +224,7 @@ internal sealed class TestGroupingService : ITestGroupingService
 
             keyed.Sort((a, b) =>
             {
-                var rankCompare = a.Item1.Context.HookRank.CompareTo(b.Item1.Context.HookRank);
+                var rankCompare = Nullable.Compare(a.Item1.Context.HookRank, b.Item1.Context.HookRank);
                 if (rankCompare != 0) return rankCompare;
 
                 var classCompare = string.CompareOrdinal(a.Item2, b.Item2);

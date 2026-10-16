@@ -64,6 +64,10 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken, bool isForExecution)
     {
+        // Each request recomputes the hook exclusions; only execution requests populate them again, so a
+        // discovery-only request never sees state left by an earlier request on this instance.
+        _hookExcludedTests = null;
+
         await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
 #if NET
@@ -96,11 +100,6 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         // Only allocated when a hook removes tests.
         HashSet<TestContext>? removedByHooks = null;
-        if (isForExecution)
-        {
-            _hookExcludedTests = null;
-        }
-
         if (isForExecution && discoverySet.IsModified)
         {
             removedByHooks = AddRemovedByHooks(removedByHooks, allTests, discoverySet.Tests);

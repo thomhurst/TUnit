@@ -48,6 +48,7 @@ public class MutableTestSetTests
         var (context, tests) = CreateFilteringContext("A", "B");
 
         context.SkipTests(t => t.Metadata.TestDetails.TestName == "A", "not tonight");
+        context.TestSet.Seal();
 
         await Assert.That(context.AllTests).Count().IsEqualTo(2);
         await Assert.That(tests[0].SkipReason).IsEqualTo("not tonight");
@@ -62,8 +63,73 @@ public class MutableTestSetTests
 
         context.SkipTests(_ => true, "first");
         context.SkipTests(_ => true, "second");
+        context.TestSet.Seal();
 
         await Assert.That(tests[0].SkipReason).IsEqualTo("first");
+    }
+
+    [Test]
+    public async Task SkipTests_KeepsAReasonSetBeforeTheStage()
+    {
+        var (context, tests) = CreateFilteringContext("A");
+        tests[0].SkipReason = "[Skip]";
+
+        context.SkipTests(_ => true, "hook");
+        context.TestSet.Seal();
+
+        await Assert.That(tests[0].SkipReason).IsEqualTo("[Skip]");
+    }
+
+    [Test]
+    public async Task SkipTests_IsAppliedOnlyWhenTheStageEnds()
+    {
+        var (context, tests) = CreateFilteringContext("A");
+
+        context.SkipTests(_ => true, "later");
+
+        await Assert.That(tests[0].SkipReason).IsNull();
+
+        context.TestSet.Seal();
+
+        await Assert.That(tests[0].SkipReason).IsEqualTo("later");
+    }
+
+    [Test]
+    public async Task SkipTests_ThenExclude_LeavesTheExcludedTestUntouched()
+    {
+        var (context, tests) = CreateFilteringContext("A", "B");
+        var classInstance = tests[0].Metadata.TestDetails.ClassInstance;
+
+        context.SkipTests(_ => true, "skipped");
+        context.ExcludeTests(t => t.Metadata.TestDetails.TestName == "A");
+        context.TestSet.Seal();
+
+        await Assert.That(tests[0].SkipReason).IsNull();
+        await Assert.That(tests[0].Metadata.TestDetails.ClassInstance).IsSameReferenceAs(classInstance);
+        await Assert.That(tests[1].SkipReason).IsEqualTo("skipped");
+    }
+
+    [Test]
+    public async Task SkipTests_WithThrowingPredicate_SkipsNothing()
+    {
+        var (context, tests) = CreateFilteringContext("A", "B");
+
+        // Matches A, then throws on B: nothing may be recorded for A.
+        await Assert.That(() => context.SkipTests(MatchesAThenThrows, "half")).Throws<InvalidOperationException>();
+        context.TestSet.Seal();
+
+        await Assert.That(tests.Select(t => t.SkipReason)).IsEquivalentTo([(string?)null, null], CollectionOrdering.Matching);
+    }
+
+    [Test]
+    public async Task ExcludeTests_WithThrowingPredicate_ChangesNothing()
+    {
+        var (context, tests) = CreateFilteringContext("A", "B");
+
+        await Assert.That(() => context.ExcludeTests(MatchesAThenThrows)).Throws<InvalidOperationException>();
+
+        await Assert.That(context.AllTests).IsEquivalentTo(tests, CollectionOrdering.Matching);
+        await Assert.That(context.TestSet.IsModified).IsFalse();
     }
 
     [Test]
@@ -93,9 +159,10 @@ public class MutableTestSetTests
         var (context, tests) = CreateFilteringContext("B1", "A1", "B2", "C1");
 
         context.OrderTestsBy(t => t.Metadata.TestDetails.TestName[0]);
+        context.TestSet.Seal();
 
         // A1 -> 1; B1, B2 -> 2; C1 -> 3. Equal ranks let the scheduler keep its default order.
-        await Assert.That(tests.Select(t => t.HookRank)).IsEquivalentTo([2, 1, 2, 3], CollectionOrdering.Matching);
+        await Assert.That(tests.Select(t => t.HookRank)).IsEquivalentTo([(int?)2, 1, 2, 3], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -105,16 +172,49 @@ public class MutableTestSetTests
 
         context.OrderTestsBy(t => t.Metadata.TestDetails.TestName);
         context.OrderTestsBy(_ => 0);
+        context.TestSet.Seal();
 
-        await Assert.That(tests.Select(t => t.HookRank)).IsEquivalentTo([1, 1], CollectionOrdering.Matching);
+        await Assert.That(tests.Select(t => t.HookRank)).IsEquivalentTo([(int?)1, 1], CollectionOrdering.Matching);
     }
 
     [Test]
-    public async Task Tests_AreUnranked_UntilOrdered()
+    public async Task Tests_AreUnranked_UntilTheStageEnds()
     {
-        var (_, tests) = CreateFilteringContext("A", "B");
+        var (context, tests) = CreateFilteringContext("A", "B");
 
-        await Assert.That(tests.Select(t => t.HookRank)).IsEquivalentTo([0, 0], CollectionOrdering.Matching);
+        await Assert.That(tests.Select(t => t.HookRank)).IsEquivalentTo([(int?)null, null], CollectionOrdering.Matching);
+
+        context.OrderTestsBy(t => t.Metadata.TestDetails.TestName);
+
+        await Assert.That(tests.Select(t => t.HookRank)).IsEquivalentTo([(int?)null, null], CollectionOrdering.Matching);
+    }
+
+    [Test]
+    public async Task OrderTestsBy_ThenExclude_LeavesTheExcludedTestUnranked()
+    {
+        var (context, tests) = CreateFilteringContext("A", "B");
+
+        context.OrderTestsBy(t => t.Metadata.TestDetails.TestName);
+        context.ExcludeTests(t => t.Metadata.TestDetails.TestName == "A");
+        context.TestSet.Seal();
+
+        await Assert.That(tests[0].HookRank).IsNull();
+        await Assert.That(tests[1].HookRank).IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task OrderTestsBy_WithThrowingKeySelector_ChangesNothing()
+    {
+        var (context, tests) = CreateFilteringContext("B", "A");
+
+        await Assert.That(() => context.OrderTestsBy<string>(
+            t => t.Metadata.TestDetails.TestName == "A" ? throw new InvalidOperationException("boom") : t.Metadata.TestDetails.TestName))
+            .Throws<InvalidOperationException>();
+        context.TestSet.Seal();
+
+        await Assert.That(context.AllTests).IsEquivalentTo(tests, CollectionOrdering.Matching);
+        await Assert.That(context.TestSet.WasReordered).IsFalse();
+        await Assert.That(tests.Select(t => t.HookRank)).IsEquivalentTo([(int?)null, null], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -156,6 +256,10 @@ public class MutableTestSetTests
 
         await Assert.That(() => discovery.AddTests([])).Throws<InvalidOperationException>();
     }
+
+    // Matches test "A" and throws for any other test, so a call fails after a predicate already matched.
+    private static bool MatchesAThenThrows(TestContext test)
+        => test.Metadata.TestDetails.TestName == "A" ? true : throw new InvalidOperationException("boom");
 
     private static (TestFilteringContext Context, TestContext[] Tests) CreateFilteringContext(params string[] names)
     {
