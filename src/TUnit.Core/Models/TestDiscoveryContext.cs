@@ -56,7 +56,8 @@ public class TestDiscoveryContext : Context
     /// Marks the matching tests as skipped. They stay in the run and are reported as skipped with <paramref name="reason"/>.
     /// Tests that are already skipped keep their original reason, and the first reason wins across calls.
     /// Skips take effect when the stage ends, and only for tests still in the set; if the predicate throws,
-    /// nothing is skipped.
+    /// nothing is skipped. The test filter (such as <c>--treenode-filter</c>) runs afterwards, so a skipped test
+    /// it removes is not reported at all.
     /// </summary>
     /// <param name="predicate">Returns <see langword="true"/> for tests to skip.</param>
     /// <param name="reason">The skip reason reported for each matching test.</param>
@@ -68,8 +69,9 @@ public class TestDiscoveryContext : Context
     /// order among themselves (class, then <c>[NotInParallel(Order)]</c>), so use a key that distinguishes
     /// every test for a total order. <c>[ExecutionPriority]</c> still takes precedence for tests that can run
     /// in parallel, and those tests can still overlap. The order applies within each scheduling phase (parallel,
-    /// parallel groups, global <c>[NotInParallel]</c>) and never moves a test to another phase.
-    /// Calls don't compose: the last call wins, so combine
+    /// parallel groups, global <c>[NotInParallel]</c>) and never moves a test to another phase. Tests without a
+    /// rank, such as <c>[DependsOn]</c> targets re-included after being excluded, start before ranked tests in
+    /// the same phase. Calls don't compose: the last call wins, so combine
     /// keys into one, such as <c>(category, name)</c>. The order takes effect when the stage ends.
     /// </summary>
     /// <param name="keySelector">Selects the sort key for a test.</param>

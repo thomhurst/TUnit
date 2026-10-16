@@ -33,6 +33,7 @@ internal sealed class TestGroupingService : ITestGroupingService
         public string ClassFullName { get; init; } // Cached to avoid repeated property access
         public int NotInParallelOrder { get; init; }
         public NotInParallelConstraint? NotInParallelConstraint { get; init; }
+        public int Index { get; init; } // Input position: the final tie-break, since List<T>.Sort is unstable
     }
 
     public ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<AbstractExecutableTest> tests)
@@ -86,7 +87,8 @@ internal sealed class TestGroupingService : ITestGroupingService
                 HookRank = hookRank,
                 ClassFullName = test.Context.ClassContext?.ClassType?.FullName ?? string.Empty,
                 NotInParallelOrder = notInParallelConstraint?.Order ?? int.MaxValue,
-                NotInParallelConstraint = notInParallelConstraint
+                NotInParallelConstraint = notInParallelConstraint,
+                Index = testsWithKeys.Count
             };
             testsWithKeys.Add((test, key));
         }
@@ -103,7 +105,10 @@ internal sealed class TestGroupingService : ITestGroupingService
             var classCompare = string.CompareOrdinal(a.Key.ClassFullName, b.Key.ClassFullName);
             if (classCompare != 0) return classCompare;
 
-            return a.Key.NotInParallelOrder.CompareTo(b.Key.NotInParallelOrder);
+            var orderCompare = a.Key.NotInParallelOrder.CompareTo(b.Key.NotInParallelOrder);
+            if (orderCompare != 0) return orderCompare;
+
+            return a.Key.Index.CompareTo(b.Key.Index);
         });
 
         if (!hasParallelConstraints && traceMessages is null)
@@ -125,11 +130,11 @@ internal sealed class TestGroupingService : ITestGroupingService
         }
 
         var estimatedCount = testsWithKeys.Count;
-        var notInParallelList = new List<(AbstractExecutableTest Test, string ClassName, TestPriority Priority)>(estimatedCount / 4);
-        var keyedNotInParallelList = new List<(AbstractExecutableTest Test, string ClassName, IReadOnlyList<string> ConstraintKeys, TestPriority Priority)>(estimatedCount / 8);
+        var notInParallelList = new List<(AbstractExecutableTest Test, string ClassName, TestPriority Priority, int Index)>(estimatedCount / 4);
+        var keyedNotInParallelList = new List<(AbstractExecutableTest Test, string ClassName, IReadOnlyList<string> ConstraintKeys, TestPriority Priority, int Index)>(estimatedCount / 8);
         var parallelTests = new List<AbstractExecutableTest>(estimatedCount / 2);
         var parallelGroups = new Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>>(capacity: 8);
-        var constrainedParallelGroups = new Dictionary<string, (List<AbstractExecutableTest> Unconstrained, List<(AbstractExecutableTest, string, IReadOnlyList<string>, TestPriority)> Keyed)>(capacity: 8);
+        var constrainedParallelGroups = new Dictionary<string, (List<AbstractExecutableTest> Unconstrained, List<(AbstractExecutableTest, string, IReadOnlyList<string>, TestPriority, int)> Keyed)>(capacity: 8);
 
         foreach (var (test, sortKey) in testsWithKeys)
         {
@@ -148,7 +153,7 @@ internal sealed class TestGroupingService : ITestGroupingService
             if (parallelGroup != null && notInParallel != null)
             {
                 traceMessages?.Add($"Test '{test.TestId}': → ConstrainedParallelGroup '{parallelGroup.Group}' + NotInParallel{FormatParallelLimiterInfo(test)}");
-                ProcessCombinedConstraints(test, sortKey.ClassFullName, parallelGroup, notInParallel, constrainedParallelGroups);
+                ProcessCombinedConstraints(test, sortKey.ClassFullName, sortKey.Index, parallelGroup, notInParallel, constrainedParallelGroups);
             }
             else if (parallelGroup != null)
             {
@@ -162,7 +167,7 @@ internal sealed class TestGroupingService : ITestGroupingService
                     var keys = notInParallel.NotInParallelConstraintKeys.Count > 0 ? $" (keys: {string.Join(", ", notInParallel.NotInParallelConstraintKeys)})" : "";
                     traceMessages.Add($"Test '{test.TestId}': → NotInParallel{keys}{FormatParallelLimiterInfo(test)}");
                 }
-                ProcessNotInParallelConstraint(test, sortKey.ClassFullName, notInParallel, notInParallelList, keyedNotInParallelList);
+                ProcessNotInParallelConstraint(test, sortKey.ClassFullName, sortKey.Index, notInParallel, notInParallelList, keyedNotInParallelList);
             }
             else
             {
@@ -172,7 +177,8 @@ internal sealed class TestGroupingService : ITestGroupingService
         }
 
         // Sequential buckets group by class before priority; a hook rank (null unless an OrderTestsBy
-        // hook ran) takes precedence over that grouping, and ties keep the existing keys.
+        // hook ran) takes precedence over that grouping, and ties keep the existing keys. Full ties fall
+        // back to the input position so the order is deterministic (List<T>.Sort is unstable).
         notInParallelList.Sort((a, b) =>
         {
             var rankCompare = CompareHookRank(a.Test, b.Test);
@@ -184,7 +190,10 @@ internal sealed class TestGroupingService : ITestGroupingService
             var priorityCompare = b.Priority.Priority.CompareTo(a.Priority.Priority);
             if (priorityCompare != 0) return priorityCompare;
 
-            return a.Priority.Order.CompareTo(b.Priority.Order);
+            var orderCompare = a.Priority.Order.CompareTo(b.Priority.Order);
+            if (orderCompare != 0) return orderCompare;
+
+            return a.Index.CompareTo(b.Index);
         });
 
         var sortedNotInParallel = new AbstractExecutableTest[notInParallelList.Count];
@@ -204,7 +213,10 @@ internal sealed class TestGroupingService : ITestGroupingService
             var priorityCompare = b.Priority.Priority.CompareTo(a.Priority.Priority);
             if (priorityCompare != 0) return priorityCompare;
 
-            return a.Priority.Order.CompareTo(b.Priority.Order);
+            var orderCompare = a.Priority.Order.CompareTo(b.Priority.Order);
+            if (orderCompare != 0) return orderCompare;
+
+            return a.Index.CompareTo(b.Index);
         });
 
         var keyedArrays = new (AbstractExecutableTest, IReadOnlyList<string>, int)[keyedNotInParallelList.Count];
@@ -233,7 +245,10 @@ internal sealed class TestGroupingService : ITestGroupingService
                 var priorityCompare = b.Item4.Priority.CompareTo(a.Item4.Priority);
                 if (priorityCompare != 0) return priorityCompare;
 
-                return a.Item4.Order.CompareTo(b.Item4.Order);
+                var orderCompare = a.Item4.Order.CompareTo(b.Item4.Order);
+                if (orderCompare != 0) return orderCompare;
+
+                return a.Item5.CompareTo(b.Item5);
             });
 
             var sortedKeyed = new (AbstractExecutableTest, IReadOnlyList<string>, int)[keyed.Count];
@@ -287,9 +302,10 @@ internal sealed class TestGroupingService : ITestGroupingService
     private static void ProcessNotInParallelConstraint(
         AbstractExecutableTest test,
         string className,
+        int index,
         NotInParallelConstraint constraint,
-        List<(AbstractExecutableTest Test, string ClassName, TestPriority Priority)> notInParallelList,
-        List<(AbstractExecutableTest Test, string ClassName, IReadOnlyList<string> ConstraintKeys, TestPriority Priority)> keyedNotInParallelList)
+        List<(AbstractExecutableTest Test, string ClassName, TestPriority Priority, int Index)> notInParallelList,
+        List<(AbstractExecutableTest Test, string ClassName, IReadOnlyList<string> ConstraintKeys, TestPriority Priority, int Index)> keyedNotInParallelList)
     {
         var order = constraint.Order;
         var priority = test.Context.ExecutionPriority;
@@ -297,11 +313,11 @@ internal sealed class TestGroupingService : ITestGroupingService
 
         if (constraint.NotInParallelConstraintKeys.Count == 0)
         {
-            notInParallelList.Add((test, className, testPriority));
+            notInParallelList.Add((test, className, testPriority, index));
         }
         else
         {
-            keyedNotInParallelList.Add((test, className, constraint.NotInParallelConstraintKeys, testPriority));
+            keyedNotInParallelList.Add((test, className, constraint.NotInParallelConstraintKeys, testPriority, index));
         }
     }
 
@@ -339,9 +355,10 @@ internal sealed class TestGroupingService : ITestGroupingService
     private static void ProcessCombinedConstraints(
         AbstractExecutableTest test,
         string className,
+        int index,
         ParallelGroupConstraint parallelGroup,
         NotInParallelConstraint notInParallel,
-        Dictionary<string, (List<AbstractExecutableTest> Unconstrained, List<(AbstractExecutableTest, string, IReadOnlyList<string>, TestPriority)> Keyed)> constrainedGroups)
+        Dictionary<string, (List<AbstractExecutableTest> Unconstrained, List<(AbstractExecutableTest, string, IReadOnlyList<string>, TestPriority, int)> Keyed)> constrainedGroups)
     {
 #if NET
         ref var group = ref CollectionsMarshal.GetValueRefOrAddDefault(constrainedGroups, parallelGroup.Group, out _);
@@ -362,12 +379,12 @@ internal sealed class TestGroupingService : ITestGroupingService
 
         if (notInParallel.NotInParallelConstraintKeys.Count > 0)
         {
-            group.Keyed.Add((test, className, notInParallel.NotInParallelConstraintKeys, testPriority));
+            group.Keyed.Add((test, className, notInParallel.NotInParallelConstraintKeys, testPriority, index));
         }
         else
         {
             // NotInParallel without keys means sequential within the group
-            group.Keyed.Add((test, className, new List<string> { "__global__" }, testPriority));
+            group.Keyed.Add((test, className, new List<string> { "__global__" }, testPriority, index));
         }
     }
 }

@@ -217,6 +217,8 @@ internal sealed class TestDiscoveryService : IDataProducer
         discoverySet.Initialize(ToContextList(allTests));
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
         discoveryContext.RestoreExecutionContext();
+        // Applies the hooks' skips and ranks. The framework filter runs after this stage, so it can still drop
+        // a test a hook skipped; such a test is simply not reported. TestFiltering hooks run after the filter.
         discoverySet.Seal();
 
         return discoverySet.IsModified || discoverySet.WasReordered

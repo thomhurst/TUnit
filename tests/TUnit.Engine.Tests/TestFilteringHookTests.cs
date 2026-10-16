@@ -111,6 +111,28 @@ public class TestFilteringHookTests(TestMode testMode) : InvokableTestBase(testM
             ]);
     }
 
+    [Test]
+    public async Task OrderTestsBy_Orders_Keyed_NotInParallel_Tests()
+    {
+        await RunTestsWithFilter("/*/*/TestFilteringKeyedOrderTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(3),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(3),
+                result =>
+                {
+                    // Keyed tests run through the constraint-key scheduler. [NotInParallel(Order)] alone would
+                    // run A, B, C; the hook reverses it.
+                    var a = StartOf(result, "Keyed_A");
+                    var b = StartOf(result, "Keyed_B");
+                    var c = StartOf(result, "Keyed_C");
+
+                    c.ShouldBeLessThan(b);
+                    b.ShouldBeLessThan(a);
+                }
+            ]);
+    }
+
     private static DateTime StartOf(TestRun result, string testName)
         => DateTime.Parse(result.Results.First(x => x.TestName!.StartsWith(testName)).StartTime!);
 }

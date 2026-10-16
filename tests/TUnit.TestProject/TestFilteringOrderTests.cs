@@ -95,3 +95,48 @@ public class TestFilteringRankTests
         }
     }
 }
+
+public static class TestFilteringKeyedOrderHooks
+{
+    public static bool OrderApplied;
+    public static readonly ConcurrentQueue<string> ExecutedTests = new();
+
+    [Before(TestFiltering)]
+    public static void ReverseOrder(TestFilteringContext context)
+    {
+        // Only order when the run is filtered to this class (as the engine test does).
+        if (context.AllTests.Count == 0
+            || context.AllTests.Any(t => t.Metadata.TestDetails.ClassType != typeof(TestFilteringKeyedOrderTests)))
+        {
+            return;
+        }
+
+        // Keyed [NotInParallel("key")] tests go through the constraint-key scheduler, not the global sequential
+        // list, so this pins that ranks reach it too: reverse alphabetical, the opposite of the Order values.
+        context.OrderTestsBy(t => t.Metadata.TestDetails.TestName, Comparer<string>.Create((x, y) => string.CompareOrdinal(y, x)));
+        OrderApplied = true;
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class TestFilteringKeyedOrderTests
+{
+    [Test, NotInParallel("TestFilteringKeyedOrder", Order = 1)]
+    public Task Keyed_A() => RecordAndAssert(nameof(Keyed_A), [nameof(Keyed_C), nameof(Keyed_B), nameof(Keyed_A)]);
+
+    [Test, NotInParallel("TestFilteringKeyedOrder", Order = 2)]
+    public Task Keyed_B() => RecordAndAssert(nameof(Keyed_B), [nameof(Keyed_C), nameof(Keyed_B)]);
+
+    [Test, NotInParallel("TestFilteringKeyedOrder", Order = 3)]
+    public Task Keyed_C() => RecordAndAssert(nameof(Keyed_C), [nameof(Keyed_C)]);
+
+    private static async Task RecordAndAssert(string name, string[] expectedSoFar)
+    {
+        TestFilteringKeyedOrderHooks.ExecutedTests.Enqueue(name);
+
+        if (TestFilteringKeyedOrderHooks.OrderApplied)
+        {
+            await Assert.That(TestFilteringKeyedOrderHooks.ExecutedTests.ToArray()).IsEquivalentTo(expectedSoFar, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        }
+    }
+}
