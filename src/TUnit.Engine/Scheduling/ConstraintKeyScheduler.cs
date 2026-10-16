@@ -34,6 +34,8 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         }
 
         // Sort tests by priority. Defensive copy so we don't mutate the caller's array.
+        // This sort must stay stable and ascending: TestGroupingService passes each test's position as
+        // Priority when OrderTestsBy hooks ranked the run (see GetSchedulerPriority).
         // Pack (Priority, OriginalIndex) into a long key to preserve OrderBy's stability
         // (Array.Sort itself is not stable) while using the fast default Int64 comparer.
         // Replaces `tests.OrderBy(...).ToArray()` which allocates iterator + buffer + array.

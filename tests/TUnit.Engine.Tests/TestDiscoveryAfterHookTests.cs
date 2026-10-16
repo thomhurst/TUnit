@@ -19,4 +19,15 @@ public class TestDiscoveryAfterHookTests(TestMode testMode) : InvokableTestBase(
                 _ => FindFile(x => x.Name.StartsWith("TestDiscoveryAfterTests") && x.Extension == ".txt").AssertExists()
             ]);
     }
+
+    [Test]
+    public async Task Overloaded_After_TestDiscovery_Hooks_All_Run()
+    {
+        await RunTestsWithFilter("/*/*/TestDiscoveryOverloadTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1)
+            ]);
+    }
 }

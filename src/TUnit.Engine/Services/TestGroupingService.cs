@@ -175,7 +175,7 @@ internal sealed class TestGroupingService : ITestGroupingService
         // hook ran) takes precedence over that grouping, and ties keep the existing keys.
         notInParallelList.Sort((a, b) =>
         {
-            var rankCompare = Nullable.Compare(a.Test.Context.HookRank, b.Test.Context.HookRank);
+            var rankCompare = CompareHookRank(a.Test, b.Test);
             if (rankCompare != 0) return rankCompare;
 
             var classCompare = string.CompareOrdinal(a.ClassName, b.ClassName);
@@ -195,7 +195,7 @@ internal sealed class TestGroupingService : ITestGroupingService
 
         keyedNotInParallelList.Sort((a, b) =>
         {
-            var rankCompare = Nullable.Compare(a.Test.Context.HookRank, b.Test.Context.HookRank);
+            var rankCompare = CompareHookRank(a.Test, b.Test);
             if (rankCompare != 0) return rankCompare;
 
             var classCompare = string.CompareOrdinal(a.ClassName, b.ClassName);
@@ -224,7 +224,7 @@ internal sealed class TestGroupingService : ITestGroupingService
 
             keyed.Sort((a, b) =>
             {
-                var rankCompare = Nullable.Compare(a.Item1.Context.HookRank, b.Item1.Context.HookRank);
+                var rankCompare = CompareHookRank(a.Item1, b.Item1);
                 if (rankCompare != 0) return rankCompare;
 
                 var classCompare = string.CompareOrdinal(a.Item2, b.Item2);
@@ -273,8 +273,14 @@ internal sealed class TestGroupingService : ITestGroupingService
         return result;
     }
 
-    // ConstraintKeyScheduler stably re-sorts keyed tests by this value. When hooks ranked the run the
-    // list is already in its final order, so its position keeps that order intact.
+    // Hook rank comparison shared by the sequential buckets. Ranks are null unless an OrderTestsBy hook
+    // ran; unranked tests sort first, so runs without hooks keep their existing order.
+    private static int CompareHookRank(AbstractExecutableTest a, AbstractExecutableTest b)
+        => Nullable.Compare(a.Context.HookRank, b.Context.HookRank);
+
+    // Contract with ConstraintKeyScheduler: it stably re-sorts keyed tests by this value (ascending, ties
+    // by array position) and orders waiting candidates by it. When hooks ranked the run the list is already
+    // in its final order, so passing each test's position keeps that order intact.
     private static int GetSchedulerPriority(bool hasHookRanks, TestPriority priority, int sortedIndex)
         => hasHookRanks ? sortedIndex : priority.GetHashCode();
 

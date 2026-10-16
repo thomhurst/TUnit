@@ -29,8 +29,14 @@ public class TestDiscoveryContext : Context
 
     public required string? TestFilter { get; init; }
 
+    /// <summary>
+    /// Gets the assemblies of the tests in <see cref="AllTests"/>, in first-occurrence order.
+    /// </summary>
     public IEnumerable<AssemblyHookContext> Assemblies => TestSet.Assemblies;
 
+    /// <summary>
+    /// Gets the classes of the tests in <see cref="AllTests"/>, in first-occurrence order.
+    /// </summary>
     public IEnumerable<ClassHookContext> TestClasses => TestSet.TestClasses;
 
     /// <summary>
@@ -61,7 +67,9 @@ public class TestDiscoveryContext : Context
     /// Orders the tests by a key. The order decides when tests start. Tests with equal keys keep the default
     /// order among themselves (class, then <c>[NotInParallel(Order)]</c>), so use a key that distinguishes
     /// every test for a total order. <c>[ExecutionPriority]</c> still takes precedence for tests that can run
-    /// in parallel, and those tests can still overlap. Calls don't compose: the last call wins, so combine
+    /// in parallel, and those tests can still overlap. The order applies within each scheduling phase (parallel,
+    /// parallel groups, global <c>[NotInParallel]</c>) and never moves a test to another phase.
+    /// Calls don't compose: the last call wins, so combine
     /// keys into one, such as <c>(category, name)</c>. The order takes effect when the stage ends.
     /// </summary>
     /// <param name="keySelector">Selects the sort key for a test.</param>

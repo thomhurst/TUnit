@@ -23,7 +23,7 @@ unwind in the opposite order:
 flowchart TB
     D1["[Before(TestDiscovery)]"]
     D2["Scan assemblies · create data sources · IAsyncDiscoveryInitializer"]
-    D3["[After(TestDiscovery)]"]
+    D3["ITestDiscoveryEventReceiver · [After(TestDiscovery)]"]
     F1["Framework filtering · [Before(TestFiltering)] / [After(TestFiltering)] · ITestRegisteredEventReceiver"]
     S1["[Before(TestSession)] · IFirstTestInTestSessionEventReceiver"]
     A1["[BeforeEvery(Assembly)] / [Before(Assembly)] · IFirstTestInAssemblyEventReceiver"]
@@ -80,6 +80,10 @@ sequenceDiagram
         Engine->>Data: IAsyncDiscoveryInitializer.InitializeAsync()
     end
 
+    loop For each discovered test
+        Engine->>Events: ITestDiscoveryEventReceiver.OnTestDiscovered()
+    end
+
     Engine->>Hooks: [After(TestDiscovery)]
     Engine->>Engine: Apply --treenode-filter and [Explicit]
     Engine->>Hooks: [Before(TestFiltering)]
@@ -99,6 +103,7 @@ sequenceDiagram
 | **Create Data Sources** | Instantiate `ClassDataSource<T>`, resolve `MethodDataSource`, etc. |
 | **Property Injection** | Resolve and cache property values for data sources |
 | `IAsyncDiscoveryInitializer` | Initialize objects that need to be ready during discovery |
+| `OnTestDiscovered` | Event fires for each discovered test; attributes such as `[Category]` and `[Property]` populate metadata here |
 | `[After(TestDiscovery)]` | Hook runs once after discovery completes. Can exclude, skip and order tests |
 | **Framework Filtering** | Apply `--treenode-filter` and `[Explicit]`; re-include `[DependsOn]` targets |
 | `[Before(TestFiltering)]` | Hook runs once with the tests that will run (execution only). Can exclude, skip and order tests |
@@ -368,6 +373,7 @@ public class MyAttribute : Attribute, ITestStartEventReceiver
 │ → Scan assemblies for [Test] methods                             │
 │ → Create data sources, inject properties                         │
 │ → IAsyncDiscoveryInitializer.InitializeAsync()                   │
+│ → ITestDiscoveryEventReceiver.OnTestDiscovered (per test)        │
 │ [After(TestDiscovery)]                                           │
 │ → Framework filtering (--treenode-filter, [Explicit])            │
 │ [Before(TestFiltering)] / [After(TestFiltering)]                 │

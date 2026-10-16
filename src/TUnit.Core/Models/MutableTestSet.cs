@@ -14,10 +14,14 @@ internal sealed class MutableTestSet(string stageName)
     private IReadOnlyList<TestContext> _tests = [];
     private Dictionary<TestContext, string>? _pendingSkips;
     private Dictionary<TestContext, int>? _pendingRanks;
+    private List<TestContext>? _removed;
     private ClassHookContext[]? _testClasses;
     private AssemblyHookContext[]? _assemblies;
 
     public IReadOnlyList<TestContext> Tests => _tests;
+
+    /// <summary>Tests that hooks removed from the set during this stage, so the engine needn't diff.</summary>
+    public IReadOnlyList<TestContext> Removed => _removed ?? (IReadOnlyList<TestContext>) [];
 
     /// <summary>True when hooks changed which tests are in the set.</summary>
     public bool IsModified { get; private set; }
@@ -40,6 +44,7 @@ internal sealed class MutableTestSet(string stageName)
         Replace(tests);
         _pendingSkips = null;
         _pendingRanks = null;
+        _removed = null;
         IsModified = false;
         WasReordered = false;
         IsSealed = false;
@@ -99,7 +104,22 @@ internal sealed class MutableTestSet(string stageName)
     public void SetTests(IEnumerable<TestContext> tests)
     {
         ThrowIfSealed();
-        Replace(tests as IReadOnlyList<TestContext> ?? tests.ToArray());
+
+        var replacement = tests as IReadOnlyList<TestContext> ?? tests.ToArray();
+        var kept = new HashSet<TestContext>(replacement, Helpers.ReferenceEqualityComparer<TestContext>.Instance);
+
+        // A test put back after an earlier exclusion is no longer removed.
+        _removed?.RemoveAll(kept.Contains);
+
+        foreach (var test in _tests)
+        {
+            if (!kept.Contains(test))
+            {
+                (_removed ??= []).Add(test);
+            }
+        }
+
+        Replace(replacement);
         IsModified = true;
     }
 
@@ -115,11 +135,13 @@ internal sealed class MutableTestSet(string stageName)
         // All-or-nothing: the kept list is local until every predicate has run.
         var tests = _tests;
         List<TestContext>? kept = null;
+        List<TestContext>? removed = null;
         for (var i = 0; i < tests.Count; i++)
         {
             var test = tests[i];
             if (predicate(test))
             {
+                (removed ??= []).Add(test);
                 if (kept is null)
                 {
                     kept = new List<TestContext>(tests.Count - 1);
@@ -138,6 +160,7 @@ internal sealed class MutableTestSet(string stageName)
         if (kept is not null)
         {
             Replace(kept);
+            (_removed ??= []).AddRange(removed!);
             IsModified = true;
         }
     }

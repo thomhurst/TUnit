@@ -32,11 +32,25 @@ public class TestFilteringHookTests(TestMode testMode) : InvokableTestBase(testM
         await RunTestsWithFilter("/*/*/TestFilteringDependencyTests/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(4),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                // Includes HookSkip_PropagatesThroughTheDependencyFailurePath (pins the skip reasons) and a
+                // dependency that is excluded at discovery and re-included with its attributes intact.
+                result => result.ResultSummary.Counters.Total.ShouldBe(7),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(5),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(2),
-                result => result.Results.First(x => x.TestName!.StartsWith("ExcludedDependency")).Outcome.ShouldBe("Passed")
+                result => result.Results.First(x => x.TestName!.StartsWith("ExcludedDependency")).Outcome.ShouldBe("Passed"),
+                result => result.Results.First(x => x.TestName!.StartsWith("ExcludedAtDiscoveryDependency")).Outcome.ShouldBe("Passed")
+            ]);
+    }
+
+    [Test]
+    public async Task Overloaded_After_TestFiltering_Hooks_All_Run()
+    {
+        await RunTestsWithFilter("/*/*/TestFilteringOverloadTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1)
             ]);
     }
 

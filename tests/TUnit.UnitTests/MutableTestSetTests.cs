@@ -20,6 +20,33 @@ public class MutableTestSetTests
     }
 
     [Test]
+    public async Task ExcludeTests_RecordsRemovedTests_AcrossCalls()
+    {
+        var (context, tests) = CreateFilteringContext("A", "B", "C");
+
+        context.ExcludeTests(t => t.Metadata.TestDetails.TestName == "A");
+        context.ExcludeTests(t => t.Metadata.TestDetails.TestName == "C");
+
+        await Assert.That(context.TestSet.Removed).IsEquivalentTo([tests[0], tests[2]], CollectionOrdering.Matching);
+    }
+
+    [Test]
+    public async Task AddTests_RecordsDroppedTests_AndForgetsReAddedOnes()
+    {
+        var provider = CreateProvider();
+        var a = CreateTestContext(provider, "A");
+        var b = CreateTestContext(provider, "B");
+        var discovery = provider.TestDiscoveryContext;
+        discovery.TestSet.Initialize([a, b]);
+
+        discovery.ExcludeTests(t => t.Metadata.TestDetails.TestName == "A");
+        discovery.AddTests([a]);
+
+        // A was excluded and then put back; B was dropped by AddTests.
+        await Assert.That(discovery.TestSet.Removed).IsEquivalentTo([b], CollectionOrdering.Matching);
+    }
+
+    [Test]
     public async Task ExcludeTests_WithNoMatch_DoesNotMarkModified()
     {
         var (context, tests) = CreateFilteringContext("A", "B");
@@ -28,6 +55,7 @@ public class MutableTestSetTests
 
         await Assert.That(context.AllTests).IsEquivalentTo(tests, CollectionOrdering.Matching);
         await Assert.That(context.TestSet.IsModified).IsFalse();
+        await Assert.That(context.TestSet.Removed).IsEmpty();
     }
 
     [Test]
@@ -130,6 +158,7 @@ public class MutableTestSetTests
 
         await Assert.That(context.AllTests).IsEquivalentTo(tests, CollectionOrdering.Matching);
         await Assert.That(context.TestSet.IsModified).IsFalse();
+        await Assert.That(context.TestSet.Removed).IsEmpty();
     }
 
     [Test]

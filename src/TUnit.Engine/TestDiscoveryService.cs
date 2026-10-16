@@ -83,31 +83,15 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         var allTests = await DiscoverAndResolveTestsAsync(testSessionId, filter, isForExecution, cancellationToken).ConfigureAwait(false);
 
-        // Add tests to context and run After(TestDiscovery) hooks before event receivers
-        // This marks the end of the discovery phase, before registration begins
-        var discoverySet = contextProvider.TestDiscoveryContext.TestSet;
-        discoverySet.Initialize(ToContextList(allTests));
-        await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
-        contextProvider.TestDiscoveryContext.RestoreExecutionContext();
-        discoverySet.Seal();
-
         // Tests excluded by After(TestDiscovery) hooks are dropped for discovery and execution alike,
         // and their order is kept. allTests keeps every built test so RemoveExcludedTestsFromHookContexts
         // can prune the excluded ones from their class contexts below.
-        var discoveredTests = discoverySet.IsModified || discoverySet.WasReordered
-            ? ToExecutableTestList(discoverySet.Tests)
-            : allTests;
+        var discoveredTests = await ApplyAfterDiscoveryHooksAsync(contextProvider, allTests, cancellationToken).ConfigureAwait(false);
 
         // Only allocated when a hook removes tests.
-        HashSet<TestContext>? removedByHooks = null;
-        if (isForExecution && discoverySet.IsModified)
-        {
-            removedByHooks = AddRemovedByHooks(removedByHooks, allTests, discoverySet.Tests);
-        }
-
-        // Now invoke event receivers (registration phase)
-        // ITestRegisteredEventReceiver can access dependency information and any state set by After(TestDiscovery) hooks
-        await InvokePostResolutionEventsInParallelAsync(discoveredTests).ConfigureAwait(false);
+        var removedByHooks = isForExecution
+            ? AddRemovedByHooks(null, contextProvider.TestDiscoveryContext.TestSet.Removed)
+            : null;
 
         // Apply the filter during discovery too — not just execution — so `--list-tests
         // --treenode-filter X` lists exactly the tests a run with X would execute. Only filter
@@ -196,7 +180,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         if (filteringSet.IsModified)
         {
-            removedByHooks = AddRemovedByHooks(removedByHooks, tests, filteringSet.Tests);
+            removedByHooks = AddRemovedByHooks(removedByHooks, filteringSet.Removed);
 
             // As with framework filtering, a test that a kept test depends on still runs.
             tests = IncludeDependencies(ToExecutableTestList(filteringSet.Tests));
@@ -213,19 +197,45 @@ internal sealed class TestDiscoveryService : IDataProducer
         return (tests, removedByHooks);
     }
 
-    private static HashSet<TestContext>? AddRemovedByHooks(
-        HashSet<TestContext>? removedByHooks,
-        List<AbstractExecutableTest> before,
-        IReadOnlyList<TestContext> kept)
+    // Finishes discovery for the built tests: runs discovery event receivers, then After(TestDiscovery)
+    // hooks, and returns the tests the hooks kept, in hook order. Shared by both discovery paths so
+    // they can't drift apart.
+    private async ValueTask<List<AbstractExecutableTest>> ApplyAfterDiscoveryHooksAsync(
+        Core.Services.IContextProvider contextProvider,
+        List<AbstractExecutableTest> allTests,
+        CancellationToken cancellationToken)
     {
-        var keptSet = new HashSet<TestContext>(kept, TUnit.Core.Helpers.ReferenceEqualityComparer<TestContext>.Instance);
-        foreach (var test in before)
+        // ITestDiscoveryEventReceivers (e.g. [Category], [Property], [NotInParallel], [Timeout]) run first,
+        // on every built test, so After(TestDiscovery) hooks see complete metadata and any [DependsOn]
+        // target that is excluded and later re-included still has its attributes applied.
+        // ITestRegisteredEventReceiver runs later, at registration, and still sees what the hooks did.
+        await InvokePostResolutionEventsInParallelAsync(allTests).ConfigureAwait(false);
+
+        // This marks the end of the discovery phase, before registration begins.
+        var discoveryContext = contextProvider.TestDiscoveryContext;
+        var discoverySet = discoveryContext.TestSet;
+        discoverySet.Initialize(ToContextList(allTests));
+        await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
+        discoveryContext.RestoreExecutionContext();
+        discoverySet.Seal();
+
+        return discoverySet.IsModified || discoverySet.WasReordered
+            ? ToExecutableTestList(discoverySet.Tests)
+            : allTests;
+    }
+
+    // Collects the tests a stage's hooks removed (MutableTestSet records them, so nothing is diffed).
+    private static HashSet<TestContext>? AddRemovedByHooks(HashSet<TestContext>? removedByHooks, IReadOnlyList<TestContext> removed)
+    {
+        if (removed.Count == 0)
         {
-            if (!keptSet.Contains(test.Context))
-            {
-                removedByHooks ??= new HashSet<TestContext>(TUnit.Core.Helpers.ReferenceEqualityComparer<TestContext>.Instance);
-                removedByHooks.Add(test.Context);
-            }
+            return removedByHooks;
+        }
+
+        removedByHooks ??= new HashSet<TestContext>(TUnit.Core.Helpers.ReferenceEqualityComparer<TestContext>.Instance);
+        foreach (var test in removed)
+        {
+            removedByHooks.Add(test);
         }
 
         return removedByHooks;
@@ -427,22 +437,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         var allTests = await DiscoverAndResolveTestsAsync(
             testSessionId, filter: null, isForExecution: false, cancellationToken).ConfigureAwait(false);
 
-        // Add tests to context and run After(TestDiscovery) hooks before event receivers
-        // This marks the end of the discovery phase, before registration begins
-        var discoverySet = contextProvider.TestDiscoveryContext.TestSet;
-        discoverySet.Initialize(ToContextList(allTests));
-        await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
-        contextProvider.TestDiscoveryContext.RestoreExecutionContext();
-        discoverySet.Seal();
-
-        if (discoverySet.IsModified || discoverySet.WasReordered)
-        {
-            allTests = ToExecutableTestList(discoverySet.Tests);
-        }
-
-        // Now invoke event receivers (registration phase)
-        // ITestRegisteredEventReceiver can access dependency information and any state set by After(TestDiscovery) hooks
-        await InvokePostResolutionEventsInParallelAsync(allTests).ConfigureAwait(false);
+        allTests = await ApplyAfterDiscoveryHooksAsync(contextProvider, allTests, cancellationToken).ConfigureAwait(false);
 
         var independentTests = new List<AbstractExecutableTest>();
         var dependentTests = new List<AbstractExecutableTest>();

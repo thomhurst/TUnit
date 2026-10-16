@@ -15,7 +15,7 @@ public static class TestFilteringHooks
     [After(TestDiscovery)]
     public static void ExcludeAtDiscovery(TestDiscoveryContext context)
     {
-        context.ExcludeTests(t => Is<TestFilteringHookTests>(t, nameof(TestFilteringHookTests.ExcludedAtDiscovery)));
+        context.ExcludeTests(t => t.Metadata.TestDetails.Categories.Contains("TestFilteringExcludedAtDiscovery") || Is<TestFilteringDependencyTests>(t, nameof(TestFilteringDependencyTests.ExcludedAtDiscoveryDependency)));
     }
 
     [Before(TestFiltering)]
@@ -72,7 +72,8 @@ public class TestFilteringHookTests
         throw new InvalidOperationException("Excluded by a [Before(TestFiltering)] hook, so it must never run.");
     }
 
-    [Test]
+    // Excluded by its category, which proves [Category] is applied before [After(TestDiscovery)] hooks run.
+    [Test, Category("TestFilteringExcludedAtDiscovery")]
     public void ExcludedAtDiscovery()
     {
         throw new InvalidOperationException("Excluded by an [After(TestDiscovery)] hook, so it must never run.");
@@ -120,6 +121,36 @@ public class TestFilteringDependencyTests
     public void DependsOnSkippedTest()
     {
         throw new InvalidOperationException("Its dependency was skipped, so it must never run.");
+    }
+
+    // Excluded in [After(TestDiscovery)], then re-included because the next test depends on it.
+    [Test, Category("TestFilteringReincluded")]
+    public void ExcludedAtDiscoveryDependency()
+    {
+    }
+
+    [Test, DependsOn(nameof(ExcludedAtDiscoveryDependency))]
+    public async Task ReincludedDependency_KeepsItsAttributes()
+    {
+        // Discovery receivers ([Category], [NotInParallel], [Timeout], ...) ran for the re-included dependency too.
+        var dependency = TestContext.Current!.Dependencies.GetTests(nameof(ExcludedAtDiscoveryDependency)).Single();
+
+        await Assert.That(dependency.Metadata.TestDetails.Categories).Contains("TestFilteringReincluded");
+    }
+
+    // Pins the path a hook skip takes through dependencies: the hook-skipped test carries the hook's
+    // reason, and its dependent is skipped by the existing "failed dependencies" rule.
+    [Test, DependsOn(nameof(DependsOnSkippedTest), ProceedOnFailure = true)]
+    public async Task HookSkip_PropagatesThroughTheDependencyFailurePath()
+    {
+        var dependencies = TestContext.Current!.Dependencies;
+        var skipped = dependencies.GetTests(nameof(SkippedDependency)).Single().Execution.Result!;
+        var dependent = dependencies.GetTests(nameof(DependsOnSkippedTest)).Single().Execution.Result!;
+
+        await Assert.That(skipped.State).IsEqualTo(TestState.Skipped);
+        await Assert.That(skipped.Exception?.Message).IsEqualTo("Skipped by a TestFiltering hook");
+        await Assert.That(dependent.State).IsEqualTo(TestState.Skipped);
+        await Assert.That(dependent.Exception?.Message).IsEqualTo("Skipped due to failed dependencies");
     }
 }
 
