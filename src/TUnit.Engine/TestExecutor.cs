@@ -782,6 +782,30 @@ internal class TestExecutor
         return _hookExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Whether any [Before/After(TestFiltering)] hooks are registered.
+    /// </summary>
+    public ValueTask<bool> HasTestFilteringHooksAsync()
+    {
+        return _hookExecutor.HasTestFilteringHooksAsync();
+    }
+
+    /// <summary>
+    /// Execute test-filtering before hooks.
+    /// </summary>
+    public ValueTask ExecuteBeforeTestFilteringHooksAsync(CancellationToken cancellationToken)
+    {
+        return _hookExecutor.ExecuteBeforeTestFilteringHooksAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Execute test-filtering after hooks.
+    /// </summary>
+    public ValueTask ExecuteAfterTestFilteringHooksAsync(CancellationToken cancellationToken)
+    {
+        return _hookExecutor.ExecuteAfterTestFilteringHooksAsync(cancellationToken);
+    }
+
 #if NET
     /// <inheritdoc cref="HookExecutor.TryStartSessionActivity"/>
     internal void TryStartSessionActivity() => _hookExecutor.TryStartSessionActivity();

@@ -30,4 +30,10 @@ public enum HookType
     /// Hook to run before/after test discovery
     /// </summary>
     TestDiscovery,
+
+    /// <summary>
+    /// Hook to run once framework filtering has selected the tests to execute, before the test session starts.
+    /// Receives a <see cref="TestFilteringContext"/>.
+    /// </summary>
+    TestFiltering,
 }

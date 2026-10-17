@@ -19,6 +19,11 @@ internal interface IContextProvider
     TestDiscoveryContext TestDiscoveryContext { get; }
 
     /// <summary>
+    /// Gets or creates the test filtering context
+    /// </summary>
+    TestFilteringContext TestFilteringContext { get; }
+
+    /// <summary>
     /// Gets or creates a test session context
     /// </summary>
     TestSessionContext TestSessionContext { get; }

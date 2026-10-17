@@ -23,7 +23,8 @@ unwind in the opposite order:
 flowchart TB
     D1["[Before(TestDiscovery)]"]
     D2["Scan assemblies · create data sources · IAsyncDiscoveryInitializer"]
-    D3["[After(TestDiscovery)] · ITestRegisteredEventReceiver"]
+    D3["ITestDiscoveryEventReceiver · [After(TestDiscovery)]"]
+    F1["Framework filtering · [Before(TestFiltering)] / [After(TestFiltering)] · ITestRegisteredEventReceiver"]
     S1["[Before(TestSession)] · IFirstTestInTestSessionEventReceiver"]
     A1["[BeforeEvery(Assembly)] / [Before(Assembly)] · IFirstTestInAssemblyEventReceiver"]
     C1["[BeforeEvery(Class)] / [Before(Class)] · IFirstTestInClassEventReceiver"]
@@ -32,7 +33,7 @@ flowchart TB
     A2["ILastTestInAssemblyEventReceiver · [After(Assembly)] / [AfterEvery(Assembly)]"]
     S2["ILastTestInTestSessionEventReceiver · [After(TestSession)]"]
 
-    D1 --> D2 --> D3 --> S1 --> A1 --> C1 --> T --> C2 --> A2 --> S2
+    D1 --> D2 --> D3 --> F1 --> S1 --> A1 --> C1 --> T --> C2 --> A2 --> S2
 
     style T fill:#c8e6c9,stroke:#2e7d32,color:#1b5e20
 ```
@@ -79,9 +80,16 @@ sequenceDiagram
         Engine->>Data: IAsyncDiscoveryInitializer.InitializeAsync()
     end
 
-    Engine->>Hooks: [After(TestDiscovery)]
-
     loop For each discovered test
+        Engine->>Events: ITestDiscoveryEventReceiver.OnTestDiscovered()
+    end
+
+    Engine->>Hooks: [After(TestDiscovery)]
+    Engine->>Engine: Apply --treenode-filter and [Explicit]
+    Engine->>Hooks: [Before(TestFiltering)]
+    Engine->>Hooks: [After(TestFiltering)]
+
+    loop For each test that will run
         Engine->>Events: ITestRegisteredEventReceiver.OnTestRegistered()
     end
 ```
@@ -95,7 +103,11 @@ sequenceDiagram
 | **Create Data Sources** | Instantiate `ClassDataSource<T>`, resolve `MethodDataSource`, etc. |
 | **Property Injection** | Resolve and cache property values for data sources |
 | `IAsyncDiscoveryInitializer` | Initialize objects that need to be ready during discovery |
-| `[After(TestDiscovery)]` | Hook runs once after discovery completes |
+| `OnTestDiscovered` | Event fires for each discovered test; attributes such as `[Category]` and `[Property]` populate metadata here |
+| `[After(TestDiscovery)]` | Hook runs once after discovery completes. Can exclude, skip and order tests |
+| **Framework Filtering** | Apply `--treenode-filter` and `[Explicit]`; re-include `[DependsOn]` targets |
+| `[Before(TestFiltering)]` | Hook runs once with the tests that will run (execution only). Can exclude, skip and order tests |
+| `[After(TestFiltering)]` | Hook runs once with the final set of tests (execution only). Read-only |
 | `OnTestRegistered` | Event fires for each test after registration |
 
 :::warning Discovery vs Execution
@@ -338,6 +350,7 @@ public class MyAttribute : Attribute, ITestStartEventReceiver
 | Level | Before | After | Method Type |
 |-------|--------|-------|-------------|
 | Test Discovery | `[Before(TestDiscovery)]` | `[After(TestDiscovery)]` | Static |
+| Test Filtering | `[Before(TestFiltering)]` | `[After(TestFiltering)]` | Static |
 | Test Session | `[Before(TestSession)]` | `[After(TestSession)]` | Static |
 | Assembly | `[Before(Assembly)]` | `[After(Assembly)]` | Static |
 | Class | `[Before(Class)]` | `[After(Class)]` | Static |
@@ -360,7 +373,10 @@ public class MyAttribute : Attribute, ITestStartEventReceiver
 │ → Scan assemblies for [Test] methods                             │
 │ → Create data sources, inject properties                         │
 │ → IAsyncDiscoveryInitializer.InitializeAsync()                   │
+│ → ITestDiscoveryEventReceiver.OnTestDiscovered (per test)        │
 │ [After(TestDiscovery)]                                           │
+│ → Framework filtering (--treenode-filter, [Explicit])            │
+│ [Before(TestFiltering)] / [After(TestFiltering)]                 │
 │ → ITestRegisteredEventReceiver.OnTestRegistered (per test)       │
 └──────────────────────────────────────────────────────────────────┘
                               │

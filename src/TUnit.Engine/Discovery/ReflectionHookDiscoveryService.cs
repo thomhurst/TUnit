@@ -20,7 +20,6 @@ internal sealed class ReflectionHookDiscoveryService
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
     private static readonly ConcurrentDictionary<string, bool> _registeredMethods = new();
-    private static readonly ConcurrentDictionary<(string Name, Type Type), bool> _registeredAfterTestDiscoveryHooks = new();
     private static readonly ConcurrentDictionary<MethodInfo, string> _methodKeyCache = new();
     // Cache attribute lookups to avoid repeated reflection calls in hot paths
     private static readonly ConcurrentDictionary<MethodInfo, (BeforeAttribute?, AfterAttribute?, BeforeEveryAttribute?, AfterEveryAttribute?)> _attributeCache = new();
@@ -78,6 +77,8 @@ internal sealed class ReflectionHookDiscoveryService
         Sources.AfterTestSessionHooks.Clear();
         Sources.BeforeTestDiscoveryHooks.Clear();
         Sources.AfterTestDiscoveryHooks.Clear();
+        Sources.BeforeTestFilteringHooks.Clear();
+        Sources.AfterTestFilteringHooks.Clear();
         Sources.BeforeEveryTestHooks.Clear();
         Sources.AfterEveryTestHooks.Clear();
         Sources.BeforeEveryClassHooks.Clear();
@@ -441,6 +442,10 @@ internal sealed class ReflectionHookDiscoveryService
                 };
                 Sources.BeforeTestDiscoveryHooks.Add(new LazyHookEntry<BeforeTestDiscoveryHookMethod>(discoveryHook));
                 break;
+            case HookType.TestFiltering:
+                // [BeforeEvery(TestFiltering)] is treated the same as [Before(TestFiltering)], as for TestDiscovery
+                RegisterBeforeTestFilteringHook(type, method, order);
+                break;
         }
     }
 
@@ -503,24 +508,11 @@ internal sealed class ReflectionHookDiscoveryService
                 Sources.AfterTestSessionHooks.Add(new LazyHookEntry<AfterTestSessionHookMethod>(sessionHook));
                 break;
             case HookType.TestDiscovery:
-                var discoveryMetadata = CreateMethodMetadata(type, method);
-                // Defence in depth: _registeredMethods.TryAdd above would normally short-circuit
-                // before we reach here, but this guard protects against future refactors that
-                // might bypass the upstream dedup (e.g. a separate registration path).
-                if (_registeredAfterTestDiscoveryHooks.TryAdd((discoveryMetadata.Name, discoveryMetadata.Type), true))
-                {
-                    var discoveryHook = new AfterTestDiscoveryHookMethod
-                    {
-                        MethodInfo = discoveryMetadata,
-                        HookExecutor = GetHookExecutor(method),
-                        Order = order,
-                        RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
-                        FilePath = "Unknown",
-                        LineNumber = 0,
-                        Body = CreateHookDelegate<TestDiscoveryContext>(type, method)
-                    };
-                    Sources.AfterTestDiscoveryHooks.Add(new LazyHookEntry<AfterTestDiscoveryHookMethod>(discoveryHook));
-                }
+                RegisterAfterTestDiscoveryHook(type, method, order);
+                break;
+            case HookType.TestFiltering:
+                // [AfterEvery(TestFiltering)] is treated the same as [After(TestFiltering)], as for TestDiscovery
+                RegisterAfterTestFilteringHook(type, method, order);
                 break;
         }
     }
@@ -609,6 +601,10 @@ internal sealed class ReflectionHookDiscoveryService
                 };
                 Sources.BeforeTestDiscoveryHooks.Add(new LazyHookEntry<BeforeTestDiscoveryHookMethod>(discoveryHook));
                 break;
+            case HookType.TestFiltering:
+                // [BeforeEvery(TestFiltering)] is treated the same as [Before(TestFiltering)], as for TestDiscovery
+                RegisterBeforeTestFilteringHook(type, method, order);
+                break;
         }
     }
 
@@ -687,26 +683,74 @@ internal sealed class ReflectionHookDiscoveryService
                 // AfterEvery(TestDiscovery) is treated the same as After(TestDiscovery)
                 // The source generator ignores the "Every" suffix for TestDiscovery hooks
                 // Register it as a regular After hook to match source-gen behavior
-                var discoveryEveryMetadata = CreateMethodMetadata(type, method);
-                // Defence in depth: _registeredMethods.TryAdd above would normally short-circuit
-                // before we reach here, but this guard protects against future refactors that
-                // might bypass the upstream dedup (e.g. a separate registration path).
-                if (_registeredAfterTestDiscoveryHooks.TryAdd((discoveryEveryMetadata.Name, discoveryEveryMetadata.Type), true))
-                {
-                    var discoveryHook = new AfterTestDiscoveryHookMethod
-                    {
-                        MethodInfo = discoveryEveryMetadata,
-                        HookExecutor = GetHookExecutor(method),
-                        Order = order,
-                        RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
-                        FilePath = "Unknown",
-                        LineNumber = 0,
-                        Body = CreateHookDelegate<TestDiscoveryContext>(type, method)
-                    };
-                    Sources.AfterTestDiscoveryHooks.Add(new LazyHookEntry<AfterTestDiscoveryHookMethod>(discoveryHook));
-                }
+                RegisterAfterTestDiscoveryHook(type, method, order);
+                break;
+            case HookType.TestFiltering:
+                // [AfterEvery(TestFiltering)] is treated the same as [After(TestFiltering)], as for TestDiscovery
+                RegisterAfterTestFilteringHook(type, method, order);
                 break;
         }
+    }
+
+    private static void RegisterAfterTestDiscoveryHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        int order)
+    {
+        // No extra guard here: callers already dedup by full signature through _registeredMethods, and a
+        // (Name, Type) key would drop valid overloads that source-generated mode registers.
+        var hook = new AfterTestDiscoveryHookMethod
+        {
+            MethodInfo = CreateMethodMetadata(type, method),
+            HookExecutor = GetHookExecutor(method),
+            Order = order,
+            RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
+            FilePath = "Unknown",
+            LineNumber = 0,
+            Body = CreateHookDelegate<TestDiscoveryContext>(type, method)
+        };
+        Sources.AfterTestDiscoveryHooks.Add(new LazyHookEntry<AfterTestDiscoveryHookMethod>(hook));
+    }
+
+    private static void RegisterBeforeTestFilteringHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        int order)
+    {
+        var hook = new BeforeTestFilteringHookMethod
+        {
+            MethodInfo = CreateMethodMetadata(type, method),
+            HookExecutor = GetHookExecutor(method),
+            Order = order,
+            RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
+            FilePath = "Unknown",
+            LineNumber = 0,
+            Body = CreateHookDelegate<TestFilteringContext>(type, method)
+        };
+        Sources.BeforeTestFilteringHooks.Add(new LazyHookEntry<BeforeTestFilteringHookMethod>(hook));
+    }
+
+    private static void RegisterAfterTestFilteringHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        int order)
+    {
+        // No extra guard here: callers already dedup by full signature through _registeredMethods, and a
+        // (Name, Type) key would drop valid overloads that source-generated mode registers.
+        var hook = new AfterTestFilteringHookMethod
+        {
+            MethodInfo = CreateMethodMetadata(type, method),
+            HookExecutor = GetHookExecutor(method),
+            Order = order,
+            RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
+            FilePath = "Unknown",
+            LineNumber = 0,
+            Body = CreateHookDelegate<TestFilteringContext>(type, method)
+        };
+        Sources.AfterTestFilteringHooks.Add(new LazyHookEntry<AfterTestFilteringHookMethod>(hook));
     }
 
     private static void RegisterInstanceBeforeHook(

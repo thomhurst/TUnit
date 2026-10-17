@@ -7,4 +7,5 @@ public enum HookLevel
     Assembly,
     TestSession,
     TestDiscovery,
+    TestFiltering,
 }

@@ -430,6 +430,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                 "Assembly" => "AssemblyHookContext",
                 "TestSession" => "TestSessionContext",
                 "TestDiscovery" => isBefore ? "BeforeTestDiscoveryContext" : "TestDiscoveryContext",
+                "TestFiltering" => "TestFilteringContext",
                 _ => null
             };
 
@@ -462,6 +463,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                 2 => "Assembly",
                 3 => "TestSession",
                 4 => "TestDiscovery",
+                5 => "TestFiltering",
                 _ => "Test"
             };
         }
@@ -661,6 +663,8 @@ public class HookMetadataGenerator : IIncrementalGenerator
             ("TestSession", "After" or "AfterEvery", _) => ("AfterTestSessionHooks", null),
             ("TestDiscovery", "Before" or "BeforeEvery", _) => ("BeforeTestDiscoveryHooks", null),
             ("TestDiscovery", "After" or "AfterEvery", _) => ("AfterTestDiscoveryHooks", null),
+            ("TestFiltering", "Before" or "BeforeEvery", _) => ("BeforeTestFilteringHooks", null),
+            ("TestFiltering", "After" or "AfterEvery", _) => ("AfterTestFilteringHooks", null),
             _ => throw new ArgumentException($"Unknown hook: {hook.HookType}/{hook.HookKind}")
         };
     }
@@ -939,6 +943,8 @@ public class HookMetadataGenerator : IIncrementalGenerator
             ("TestDiscovery", "After") => "AfterTestDiscoveryHookMethod",
             ("TestDiscovery", "BeforeEvery") => "BeforeTestDiscoveryHookMethod",
             ("TestDiscovery", "AfterEvery") => "AfterTestDiscoveryHookMethod",
+            ("TestFiltering", "Before" or "BeforeEvery") => "BeforeTestFilteringHookMethod",
+            ("TestFiltering", "After" or "AfterEvery") => "AfterTestFilteringHookMethod",
             _ => "BeforeTestHookMethod"
         };
     }
@@ -955,6 +961,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
             ("TestDiscovery", "After") => "TestDiscoveryContext",
             ("TestDiscovery", "BeforeEvery") => "BeforeTestDiscoveryContext",
             ("TestDiscovery", "AfterEvery") => "TestDiscoveryContext",
+            ("TestFiltering", _) => "TestFilteringContext",
             _ => "TestContext"
         };
     }
@@ -962,7 +969,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
     private static string GetHookIndexMethodName(HookModel hook)
     {
         var prefix = hook.HookKind is "Before" or "BeforeEvery" ? "Before" : "After";
-        var suffix = hook.HookKind.Contains("Every") && hook.HookType != "TestSession" && hook.HookType != "TestDiscovery" ? "Every" : "";
+        var suffix = hook.HookKind.Contains("Every") && hook.HookType is not ("TestSession" or "TestDiscovery" or "TestFiltering") ? "Every" : "";
         var hookType = hook.HookType;
 
         return $"{prefix}{suffix}{hookType}HookIndex()";

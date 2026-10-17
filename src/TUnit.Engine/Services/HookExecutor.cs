@@ -734,6 +734,64 @@ internal sealed class HookExecutor
         }
     }
 
+    public async ValueTask<bool> HasTestFilteringHooksAsync()
+    {
+        var beforeHooks = await _hookCollectionService.CollectBeforeTestFilteringHooksAsync().ConfigureAwait(false);
+        if (beforeHooks.Count > 0)
+        {
+            return true;
+        }
+
+        var afterHooks = await _hookCollectionService.CollectAfterTestFilteringHooksAsync().ConfigureAwait(false);
+        return afterHooks.Count > 0;
+    }
+
+    public async ValueTask ExecuteBeforeTestFilteringHooksAsync(CancellationToken cancellationToken)
+    {
+        var hooks = await _hookCollectionService.CollectBeforeTestFilteringHooksAsync().ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var hook in hooks)
+        {
+            try
+            {
+                _contextProvider.TestFilteringContext.RestoreExecutionContext();
+                await ExecuteHookWithActivityAsync(hook, _contextProvider.TestFilteringContext, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new BeforeTestFilteringException($"BeforeTestFiltering hook failed: {ex.Message}", ex);
+            }
+        }
+    }
+
+    public async ValueTask ExecuteAfterTestFilteringHooksAsync(CancellationToken cancellationToken)
+    {
+        var hooks = await _hookCollectionService.CollectAfterTestFilteringHooksAsync().ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var hook in hooks)
+        {
+            try
+            {
+                _contextProvider.TestFilteringContext.RestoreExecutionContext();
+                await ExecuteHookWithActivityAsync(hook, _contextProvider.TestFilteringContext, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new AfterTestFilteringException($"AfterTestFiltering hook failed: {ex.Message}", ex);
+            }
+        }
+    }
+
 #if NET
     private static async ValueTask ExecuteHookWithActivityAsync<TContext>(NamedHookDelegate<TContext> hook, TContext context, CancellationToken cancellationToken)
         where TContext : Context

@@ -10,7 +10,7 @@
 public class HookAttribute : TUnitAttribute
 {
     /// <summary>
-    /// Gets the scope at which this hook runs (Test, Class, Assembly, TestSession, or TestDiscovery).
+    /// Gets the scope at which this hook runs (Test, Class, Assembly, TestSession, TestDiscovery, or TestFiltering).
     /// </summary>
     public HookType HookType { get; }
 

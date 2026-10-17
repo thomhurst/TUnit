@@ -12,6 +12,12 @@ public abstract class GenericAbstractExecutor : IHookExecutor, ITestExecutor
         return ExecuteAsync(action);
     }
 
+    /// <inheritdoc />
+    public ValueTask ExecuteBeforeTestFilteringHook(MethodMetadata hookMethodInfo, TestFilteringContext context, Func<ValueTask> action)
+    {
+        return ExecuteAsync(action);
+    }
+
     public ValueTask ExecuteBeforeTestSessionHook(MethodMetadata hookMethodInfo, TestSessionContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
@@ -33,6 +39,12 @@ public abstract class GenericAbstractExecutor : IHookExecutor, ITestExecutor
     }
 
     public ValueTask ExecuteAfterTestDiscoveryHook(MethodMetadata hookMethodInfo, TestDiscoveryContext context, Func<ValueTask> action)
+    {
+        return ExecuteAsync(action);
+    }
+
+    /// <inheritdoc />
+    public ValueTask ExecuteAfterTestFilteringHook(MethodMetadata hookMethodInfo, TestFilteringContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);
     }

@@ -14,6 +14,7 @@ namespace TUnit.Core;
 /// Use <c>[Before(HookType.Class)]</c> to run the method once before all tests in the class.
 /// Use <c>[Before(HookType.Assembly)]</c> to run the method once before all tests in the assembly.
 /// Use <c>[Before(HookType.TestSession)]</c> to run the method once per test session.
+/// Use <c>[Before(HookType.TestFiltering)]</c> to exclude, skip or order the tests selected for the run.
 /// </para>
 /// <para>
 /// For hooks that apply globally to every test regardless of class, use <see cref="BeforeEveryAttribute"/> instead.

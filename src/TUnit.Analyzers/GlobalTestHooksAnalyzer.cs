@@ -77,9 +77,9 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 switch (parameterStatus)
                 {
                     case HookParameterStatus.NoParameters:
-                        // TestSession/TestDiscovery hooks rarely need their context — don't nudge.
+                        // TestSession/TestDiscovery/TestFiltering hooks rarely need their context — don't nudge.
                         // Test/Class/Assembly still get the info-level suggestion.
-                        if (hookLevel is HookLevel.TestSession or HookLevel.TestDiscovery)
+                        if (hookLevel is HookLevel.TestSession or HookLevel.TestDiscovery or HookLevel.TestFiltering)
                         {
                             break;
                         }
@@ -113,9 +113,9 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private static bool IsGlobalHook(SymbolAnalysisContext context, AttributeData x, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
-        // For standard hooks (Before/After), only Assembly, TestSession, and TestDiscovery are global
+        // For standard hooks (Before/After), only Assembly, TestSession, TestDiscovery, and TestFiltering are global
         if (x.IsStandardHook(context.Compilation, out _, out hookLevel, out hookType)
-            && hookLevel is HookLevel.Assembly or HookLevel.TestSession or HookLevel.TestDiscovery)
+            && hookLevel is HookLevel.Assembly or HookLevel.TestSession or HookLevel.TestDiscovery or HookLevel.TestFiltering)
         {
             return true;
         }
@@ -136,6 +136,8 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 => (WellKnown.AttributeFullyQualifiedClasses.BeforeTestDiscoveryContext.WithGlobalPrefix, "BeforeTestDiscoveryContext"),
             HookLevel.TestDiscovery
                 => (WellKnown.AttributeFullyQualifiedClasses.TestDiscoveryContext.WithGlobalPrefix, "TestDiscoveryContext"),
+            HookLevel.TestFiltering
+                => (WellKnown.AttributeFullyQualifiedClasses.TestFilteringContext.WithGlobalPrefix, "TestFilteringContext"),
             _ => (null, null)
         };
     }

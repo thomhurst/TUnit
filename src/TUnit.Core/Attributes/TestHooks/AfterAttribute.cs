@@ -14,6 +14,7 @@ namespace TUnit.Core;
 /// Use <c>[After(HookType.Class)]</c> to run the method once after all tests in the class complete.
 /// Use <c>[After(HookType.Assembly)]</c> to run the method once after all tests in the assembly complete.
 /// Use <c>[After(HookType.TestSession)]</c> to run the method once per test session teardown.
+/// Use <c>[After(HookType.TestFiltering)]</c> to inspect the final set of tests selected for the run.
 /// </para>
 /// <para>
 /// For hooks that apply globally to every test regardless of class, use <see cref="AfterEveryAttribute"/> instead.

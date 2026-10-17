@@ -69,7 +69,9 @@ In setup hooks, pass the injected `CancellationToken` to setup operations, inclu
 | `[Before(Class)]` / `[After(Class)]` | `ClassHookContext` |
 | `[Before(Assembly)]` / `[After(Assembly)]` | `AssemblyHookContext` |
 | `[Before(TestSession)]` / `[After(TestSession)]` | `TestSessionContext` |
-| `[Before(TestDiscovery)]` / `[After(TestDiscovery)]` | `BeforeTestDiscoveryContext` |
+| `[Before(TestDiscovery)]` | `BeforeTestDiscoveryContext` |
+| `[After(TestDiscovery)]` | `TestDiscoveryContext` |
+| `[Before(TestFiltering)]` / `[After(TestFiltering)]` | `TestFilteringContext` |
 
 ### Checking Test Results in Cleanup
 
@@ -97,6 +99,7 @@ public async Task Cleanup(TestContext context, CancellationToken cancellationTok
 | `[Before(Assembly)]` | Static | Once before the first test in the assembly. |
 | `[Before(TestSession)]` | Static | Once before the first test in the session. |
 | `[Before(TestDiscovery)]` | Static | Once before any tests are discovered. |
+| `[Before(TestFiltering)]` | Static | Once after framework filtering has selected the tests to run, before the session starts. Can exclude, skip and order tests. |
 
 ### [BeforeEvery(HookType)]
 
@@ -156,7 +159,8 @@ TUnit also supports `IDisposable` and `IAsyncDisposable` on test classes, but `[
 | `[After(Class)]` | Static | Once after the last test in the declaring class. |
 | `[After(Assembly)]` | Static | Once after the last test in the assembly. |
 | `[After(TestSession)]` | Static | Once after the last test in the session. |
-| `[After(TestDiscovery)]` | Static | Once after tests are discovered. |
+| `[After(TestDiscovery)]` | Static | Once after tests are discovered. Can exclude, skip and order tests. |
+| `[After(TestFiltering)]` | Static | Once with the final set of tests to run. Read-only. |
 
 ### [AfterEvery(HookType)]
 
@@ -205,6 +209,60 @@ public class MyTestClass
     }
 }
 ```
+
+## Excluding, Skipping and Ordering Tests
+
+`[After(TestDiscovery)]` and `[Before(TestFiltering)]` hooks can change which tests run and in what order:
+
+- `ExcludeTests(predicate)` removes tests from the run. Excluded tests are not reported.
+- `SkipTests(predicate, reason)` keeps tests in the run but reports them as skipped with the reason.
+- `OrderTestsBy(keySelector, comparer)` orders the tests by a key.
+
+```csharp
+using TUnit.Core;
+
+namespace MyTestProject;
+
+public static class RunSelectionHooks
+{
+    private static readonly bool IsNightlyRun = Environment.GetEnvironmentVariable("NIGHTLY") == "true";
+
+    [After(TestDiscovery)]
+    public static void OnDiscovery(TestDiscoveryContext context)
+    {
+        // Hidden from the run and from test discovery (IDE, --list-tests).
+        context.ExcludeTests(t => t.Metadata.TestDetails.Categories.Contains("Nightly") && !IsNightlyRun);
+    }
+
+    [Before(TestFiltering)]
+    public static void BeforeFiltering(TestFilteringContext context)
+    {
+        // context.AllTests holds the tests that passed --treenode-filter and [Explicit] handling.
+        context.SkipTests(t => t.Metadata.TestDetails.Categories.Contains("Docker") && !IsDockerAvailable(),
+            "Docker is not available");
+
+        context.OrderTestsBy(t => t.Metadata.TestName, StringComparer.Ordinal);
+    }
+
+    [After(TestFiltering)]
+    public static void AfterFiltering(TestFilteringContext context)
+    {
+        Console.WriteLine($"Running {context.AllTests.Count} tests");
+    }
+
+    private static bool IsDockerAvailable() => File.Exists("/var/run/docker.sock");
+}
+```
+
+The stages run in this order: `[Before(TestDiscovery)]`, discovery, `[After(TestDiscovery)]`, framework filtering, `[Before(TestFiltering)]`, `[After(TestFiltering)]`, then the test session.
+
+- **Discovery vs. filtering:** exclusions in `[After(TestDiscovery)]` also apply to discovery requests, so the tests disappear from the IDE and `--list-tests`. `TestFiltering` hooks run only when tests are executed. Use them to decide what runs without hiding tests from discovery.
+- **Dependencies:** if you exclude a test that a remaining test depends on (`[DependsOn]`), it still runs, as with `--treenode-filter`. Run with `--log-level Debug` to see which excluded tests were re-included this way. If you skip it, the tests that depend on it are skipped too, unless the dependency uses `ProceedOnFailure`.
+- **Ordering:** the order decides when tests *start*. Tests with equal keys keep the default order among themselves (by class, then `[ExecutionPriority]`, then `[NotInParallel(Order)]`). So `OrderTestsBy(t => category)` runs the categories in order without breaking each class's `[NotInParallel(Order)]` sequence, and a key that differs for every test, such as `(category, t.Metadata.TestName)`, gives a total order. For tests that can run in parallel, including keyed `[NotInParallel("key")]` tests, `[ExecutionPriority]` still takes precedence over the order, and tests with different keys can still overlap. Use `[NotInParallel]` when the sequence matters. The order applies within each scheduling phase and never moves a test to another phase: the run still starts parallel and keyed `[NotInParallel("key")]` tests first, then each `[ParallelGroup]`, then global `[NotInParallel]` tests. Tests without a rank, such as `[DependsOn]` targets re-included after being excluded, start before ranked tests in the same phase. Calls don't compose like `ThenBy`: if several hooks call `OrderTestsBy`, the last call wins, so combine keys into one instead.
+- **Dependency lookups:** tests excluded by a hook are not returned by `TestContext.Current.Dependencies.GetTests(...)`.
+- **When changes take effect:** skips and ordering are applied when the hook stage ends, and only to tests still in the run, so skipping a test and then excluding it leaves it untouched. If a predicate or key selector throws, that call changes nothing. Framework filtering runs after `[After(TestDiscovery)]`, so a test skipped there and then removed by `--treenode-filter` is not reported at all.
+- **When changes are allowed:** changing the tests after `[After(TestDiscovery)]` hooks have finished, or from an `[After(TestFiltering)]` hook, throws `InvalidOperationException`. This makes the *set* read-only; a hook can still change an individual test through its `TestContext`.
+- Tests added at run time (dynamic tests) do not pass through these hooks.
 
 ## Common Mistakes
 

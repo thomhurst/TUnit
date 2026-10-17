@@ -47,6 +47,8 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     private IReadOnlyList<NamedHookDelegate<TestSessionContext>>? _afterTestSessionHooks;
     private IReadOnlyList<NamedHookDelegate<BeforeTestDiscoveryContext>>? _beforeTestDiscoveryHooks;
     private IReadOnlyList<NamedHookDelegate<TestDiscoveryContext>>? _afterTestDiscoveryHooks;
+    private IReadOnlyList<NamedHookDelegate<TestFilteringContext>>? _beforeTestFilteringHooks;
+    private IReadOnlyList<NamedHookDelegate<TestFilteringContext>>? _afterTestFilteringHooks;
     private IReadOnlyList<NamedHookDelegate<ClassHookContext>>? _beforeEveryClassHooks;
     private IReadOnlyList<NamedHookDelegate<ClassHookContext>>? _afterEveryClassHooks;
     private IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>? _beforeEveryAssemblyHooks;
@@ -86,6 +88,8 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         _afterTestSessionHooks = await BuildGlobalAfterTestSessionHooksAsync();
         _beforeTestDiscoveryHooks = await BuildGlobalBeforeTestDiscoveryHooksAsync();
         _afterTestDiscoveryHooks = await BuildGlobalAfterTestDiscoveryHooksAsync();
+        _beforeTestFilteringHooks = await BuildGlobalBeforeTestFilteringHooksAsync();
+        _afterTestFilteringHooks = await BuildGlobalAfterTestFilteringHooksAsync();
         _beforeEveryClassHooks = await BuildGlobalBeforeEveryClassHooksAsync();
         _afterEveryClassHooks = await BuildGlobalAfterEveryClassHooksAsync();
         _beforeEveryAssemblyHooks = await BuildGlobalBeforeEveryAssemblyHooksAsync();
@@ -94,6 +98,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         var totalHooks = _beforeEveryTestHooks.Count + _afterEveryTestHooks.Count +
                          _beforeTestSessionHooks.Count + _afterTestSessionHooks.Count +
                          _beforeTestDiscoveryHooks.Count + _afterTestDiscoveryHooks.Count +
+                         _beforeTestFilteringHooks.Count + _afterTestFilteringHooks.Count +
                          _beforeEveryClassHooks.Count + _afterEveryClassHooks.Count +
                          _beforeEveryAssemblyHooks.Count + _afterEveryAssemblyHooks.Count;
 
@@ -165,6 +170,12 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
     private Task<IReadOnlyList<NamedHookDelegate<TestDiscoveryContext>>> BuildGlobalAfterTestDiscoveryHooksAsync()
         => BuildGlobalHooksAsync(Sources.AfterTestDiscoveryHooks, CreateStaticHookDelegateAsync, "AfterTestDiscovery");
+
+    private Task<IReadOnlyList<NamedHookDelegate<TestFilteringContext>>> BuildGlobalBeforeTestFilteringHooksAsync()
+        => BuildGlobalHooksAsync(Sources.BeforeTestFilteringHooks, CreateStaticHookDelegateAsync, "BeforeTestFiltering");
+
+    private Task<IReadOnlyList<NamedHookDelegate<TestFilteringContext>>> BuildGlobalAfterTestFilteringHooksAsync()
+        => BuildGlobalHooksAsync(Sources.AfterTestFilteringHooks, CreateStaticHookDelegateAsync, "AfterTestFiltering");
 
     private Task<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> BuildGlobalBeforeEveryClassHooksAsync()
         => BuildGlobalHooksAsync(Sources.BeforeEveryClassHooks, CreateStaticHookDelegateAsync, "BeforeEveryClass");
@@ -572,6 +583,16 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     public ValueTask<IReadOnlyList<NamedHookDelegate<TestDiscoveryContext>>> CollectAfterTestDiscoveryHooksAsync()
     {
         return new ValueTask<IReadOnlyList<NamedHookDelegate<TestDiscoveryContext>>>(_afterTestDiscoveryHooks ?? []);
+    }
+
+    public ValueTask<IReadOnlyList<NamedHookDelegate<TestFilteringContext>>> CollectBeforeTestFilteringHooksAsync()
+    {
+        return new ValueTask<IReadOnlyList<NamedHookDelegate<TestFilteringContext>>>(_beforeTestFilteringHooks ?? []);
+    }
+
+    public ValueTask<IReadOnlyList<NamedHookDelegate<TestFilteringContext>>> CollectAfterTestFilteringHooksAsync()
+    {
+        return new ValueTask<IReadOnlyList<NamedHookDelegate<TestFilteringContext>>>(_afterTestFilteringHooks ?? []);
     }
 
     public ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> CollectBeforeEveryClassHooksAsync()
