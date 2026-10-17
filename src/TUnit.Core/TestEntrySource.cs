@@ -100,7 +100,7 @@ public sealed class TestEntrySource<
         var entry = Resolve()[index];
         return new TestEntryFilterData
         {
-            MethodName = entry.MethodName,
+            MethodName = entry.MethodMetadata.Name,
             ClassName = ClassName,
             Categories = entry.Categories,
             Properties = entry.Properties,
