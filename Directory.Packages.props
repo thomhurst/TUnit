@@ -2,22 +2,26 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-  <!-- Per-TFM versions: the 10.x packages do not support net8.0/net9.0 consumers.
+  <!-- Per-TFM versions: match these packages to the consumer's runtime. Some 10.x packages do not support
+       net8.0/net9.0 consumers at all, and the rest would lift Microsoft.Extensions.* to 10.x on net8.0/net9.0.
        Any project (single- or multi-targeted) that builds for net8.0/net9.0 resolves the matching 8.x/9.x version. -->
   <PropertyGroup>
     <MvcTestingVersion>10.0.12</MvcTestingVersion>
     <LoggingVersion>10.0.12</LoggingVersion>
     <LoggingAbstractionsVersion>10.0.12</LoggingAbstractionsVersion>
+    <HttpVersion>10.0.12</HttpVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <MvcTestingVersion>8.0.31</MvcTestingVersion>
     <LoggingVersion>8.0.1</LoggingVersion>
     <LoggingAbstractionsVersion>8.0.3</LoggingAbstractionsVersion>
+    <HttpVersion>8.0.1</HttpVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <MvcTestingVersion>9.0.20</MvcTestingVersion>
     <LoggingVersion>9.0.20</LoggingVersion>
     <LoggingAbstractionsVersion>9.0.20</LoggingAbstractionsVersion>
+    <HttpVersion>9.0.20</HttpVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Grpc.Core.Api" Version="2.84.0" />
@@ -60,7 +64,7 @@
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.7.23" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="$(HttpVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(LoggingVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(LoggingAbstractionsVersion)" />
     <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="2.1.2" />
