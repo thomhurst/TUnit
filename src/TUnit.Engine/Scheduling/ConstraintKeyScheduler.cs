@@ -109,6 +109,8 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
 
                 // Dispatch to the thread pool: invoking directly would run a synchronous
                 // test body on this loop's thread, serializing every test with distinct keys.
+                // Pass CancellationToken.None so the delegate always runs: the keys are already
+                // taken, and only its finally block releases them and signals waiting tests.
                 var testTask = Task.Run(
                     () => ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTestIndex, cancellationToken),
                     CancellationToken.None);

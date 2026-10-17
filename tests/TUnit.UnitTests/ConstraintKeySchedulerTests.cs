@@ -75,6 +75,8 @@ public class ConstraintKeySchedulerTests
         // The gate finishes and frees the waiter's key after the scheduling loop queues the
         // waiter but before the loop awaits the waiter's start signal. The waiter must still
         // leave the loop's thread, or "later" is never started and the barrier times out.
+        // The gate holds its key until the waiter is queued, so the waiter always takes the
+        // queued path regardless of how quickly the thread pool runs the gate.
         (AbstractExecutableTest Test, IReadOnlyList<string>, int)[] tests =
         [
             Keyed("gate", priority: 0, "key-1"),
@@ -83,12 +85,20 @@ public class ConstraintKeySchedulerTests
         ];
         var gate = tests[0].Test;
 
-        var coordinator = new BlockingTestCoordinator(participantCount: 2, nonBlockingTestId: "gate");
+        var waiterQueued = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var coordinator = new BlockingTestCoordinator(participantCount: 2, nonBlockingTestId: "gate", nonBlockingTestGate: waiterQueued.Task);
         var outputDevice = new TraceOutputDevice(text =>
-            // Runs on the scheduling loop between queueing the waiter and awaiting its signal.
-            text.StartsWith("Queueing test waiter ", StringComparison.Ordinal)
-                ? gate.ExecutionTask!
-                : Task.CompletedTask);
+        {
+            if (!text.StartsWith("Queueing test waiter ", StringComparison.Ordinal))
+            {
+                return Task.CompletedTask;
+            }
+
+            // Runs on the scheduling loop between queueing the waiter and awaiting its signal:
+            // let the gate finish, and hold the loop until it has released the waiter's key.
+            waiterQueued.TrySetResult();
+            return gate.ExecutionTask!;
+        });
         var scheduler = CreateScheduler(coordinator, outputDevice);
 
         await scheduler.ExecuteTestsWithConstraintsAsync(tests, CancellationToken.None);
