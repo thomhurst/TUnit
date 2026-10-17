@@ -26,6 +26,13 @@ public class SourceRegistrar
     /// execution mode, later writes are ignored, so a module initializer from an assembly that
     /// loads mid-run cannot switch a reflection-mode run back to source-generated mode.
     /// </summary>
+    /// <remarks>
+    /// The engine owns this value after startup. Setting it once the engine has selected the
+    /// execution mode has no effect. A write that would have changed the value is reported
+    /// through <see cref="Trace.WriteLine(string)"/>. To choose the mode, use the
+    /// <c>--reflection</c> or <c>--tunit-execution-mode</c> command-line options, the
+    /// <c>TUNIT_EXECUTION_MODE</c> environment variable, or <see cref="ReflectionModeAttribute"/>.
+    /// </remarks>
     public static bool IsEnabled
     {
         get => _isEnabled;
@@ -36,8 +43,16 @@ public class SourceRegistrar
                 if (!_isModeLocked)
                 {
                     _isEnabled = value;
+                    return;
+                }
+
+                if (_isEnabled == value)
+                {
+                    return;
                 }
             }
+
+            ReportIgnoredWrite(value);
         }
     }
 
@@ -53,6 +68,15 @@ public class SourceRegistrar
             _isModeLocked = true;
         }
     }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void ReportIgnoredWrite(bool value)
+    {
+        Trace.WriteLine(value
+            ? "[TUnit.Core] Ignored SourceRegistrar.IsEnabled = true: the engine already selected reflection mode. A generated module initializer from an assembly that loaded after startup usually causes this."
+            : "[TUnit.Core] Ignored SourceRegistrar.IsEnabled = false: the engine already selected source-generated mode. Use --reflection, --tunit-execution-mode, TUNIT_EXECUTION_MODE or [assembly: ReflectionMode] to choose the mode.");
+    }
+
     /// <summary>
     /// Registers an assembly loader.
     /// </summary>
