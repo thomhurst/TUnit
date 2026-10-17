@@ -211,8 +211,8 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
             createAttributes: __Attributes_0,
             attributeGroupIndex: 3),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2136.Tests>(
-            methodName: "GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>",
-            fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>",
+            methodName: "GenericArgumentsTest<MyEnum>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<MyEnum>",
             filePath: "",
             lineNumber: 8,
             hasDataSource: true,

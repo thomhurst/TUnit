@@ -700,7 +700,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             string testName;
             if (methodTypeArgs.Length > 0)
             {
-                testName = $"{methodName}<{string.Join(", ", methodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>";
+                testName = $"{methodName}<{string.Join(", ", methodTypeArgs.Select(t => t.ToTestNameTypeArgument()))}>";
             }
             else
             {
@@ -6092,7 +6092,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         string testName;
         if (methodTypeArgs.Length > 0)
         {
-            var methodTypeArgsString = string.Join(", ", methodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            var methodTypeArgsString = string.Join(", ", methodTypeArgs.Select(t => t.ToTestNameTypeArgument()));
             testName = $"{methodName}<{methodTypeArgsString}>";
         }
         else

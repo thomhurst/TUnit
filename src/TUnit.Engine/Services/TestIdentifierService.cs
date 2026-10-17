@@ -46,6 +46,10 @@ internal static class TestIdentifierService
                 }
                 vsb.Append('>');
             }
+            else
+            {
+                AppendInstantiationSuffix(ref vsb, metadata);
+            }
 
             WriteTypeWithParameters(ref vsb, methodParameters);
             vsb.Append('.');
@@ -103,6 +107,7 @@ internal static class TestIdentifierService
             WriteTypeWithParameters(ref vsb, constructorParameters);
             vsb.Append('.');
             vsb.Append(metadata.TestMethodName);
+            AppendInstantiationSuffix(ref vsb, metadata);
             WriteTypeWithParameters(ref vsb, methodParameters);
             vsb.Append("_Deferred");
 
@@ -143,6 +148,7 @@ internal static class TestIdentifierService
             vsb.Append(combination.ClassLoopIndex);
             vsb.Append('.');
             vsb.Append(metadata.TestMethodName);
+            AppendInstantiationSuffix(ref vsb, metadata);
             WriteTypeWithParameters(ref vsb, methodParameters);
             vsb.Append('.');
             vsb.Append(combination.MethodDataSourceIndex);
@@ -157,6 +163,26 @@ internal static class TestIdentifierService
         finally
         {
             vsb.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Source-gen emits one entry per generic-method instantiation and resolves no type arguments at
+    /// runtime, so its instantiations share a bare <see cref="TestMetadata.TestMethodName"/>. The type
+    /// arguments are the suffix of <see cref="TestMetadata.TestName"/> (<c>Method&lt;int&gt;</c>), so
+    /// append it to keep their ids unique (#7105).
+    /// </summary>
+    private static void AppendInstantiationSuffix(ref ValueStringBuilder vsb, TestMetadata metadata)
+    {
+        var methodName = metadata.TestMethodName;
+        var testName = metadata.TestName;
+
+        if (metadata.MethodMetadata.GenericTypeCount > 0
+            && testName.Length > methodName.Length
+            && testName[methodName.Length] == '<'
+            && testName.StartsWith(methodName, StringComparison.Ordinal))
+        {
+            vsb.Append(testName.AsSpan(methodName.Length));
         }
     }
 

@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Enums;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -307,7 +308,7 @@ internal static class DataGeneratorMetadataCreator
             {
                 Type = type,
                 TypeInfo = new ConcreteType(type),
-                Name = type.Name,
+                Name = TypeNameFormatter.GetNameWithoutGenericArity(type),
                 Namespace = type.Namespace ?? string.Empty,
                 Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? type.Assembly.GetName().FullName ?? "Unknown", () => new AssemblyMetadata
                 {
