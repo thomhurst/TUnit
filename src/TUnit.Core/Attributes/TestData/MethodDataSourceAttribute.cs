@@ -157,9 +157,18 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     {
         if (Factory != null)
         {
+            var factoryYieldedAny = false;
             await foreach (var func in Factory(dataGeneratorMetadata))
             {
+                factoryYieldedAny = true;
                 yield return func;
+            }
+
+            // An empty source runs the test once with no arguments, like NoDataSource (#2862), unless
+            // SkipIfEmpty is set. Same rule as the reflection path below, so both modes agree (#7092).
+            if (!factoryYieldedAny && !SkipIfEmpty)
+            {
+                yield return static () => Task.FromResult<object?[]?>([]);
             }
 
             yield break;

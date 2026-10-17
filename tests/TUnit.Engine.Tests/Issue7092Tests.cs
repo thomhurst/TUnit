@@ -88,6 +88,19 @@ public class Issue7092Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task Empty_Method_Data_Source_Runs_Test_Once_With_No_Arguments()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7092/EmptyMethodDataSourceTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
     public async Task Empty_Method_Data_Source_With_SkipIfEmpty_Is_Reported_As_Skipped()
     {
         await RunTestsWithFilter(
