@@ -29,6 +29,11 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\TUnit\TUnit.csproj" />
         <ProjectReference Include="..\TUnit.TestProject.HtmlReportDefaults\TUnit.TestProject.HtmlReportDefaults.csproj" ReferenceOutputAssembly="false" />
+        <!-- Build-only references: these test applications are launched as child processes from their own
+             bin/<Configuration>/net10.0 folders, so building this project (e.g. from an IDE) must build them too. -->
+        <ProjectReference Include="..\TUnit.TestProject\TUnit.TestProject.csproj" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\TUnit.TestProject.FSharp\TUnit.TestProject.FSharp.fsproj" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\TUnit.TestProject.VB.NET\TUnit.TestProject.VB.NET.vbproj" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <Import Project="..\..\eng\TestProject.targets" />

@@ -21,7 +21,7 @@ public class VB
                     "run",
                     "--no-build",
                     "-f", "net10.0",
-                    "--configuration", "Release",
+                    "--configuration", EnvironmentVariables.BuildConfiguration,
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_",

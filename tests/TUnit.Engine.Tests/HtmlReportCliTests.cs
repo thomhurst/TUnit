@@ -94,7 +94,7 @@ public class DefaultHtmlReportCliTests
             "--no-build",
             "--project", testProject.FullName,
             "--framework", "net10.0",
-            "--configuration", "Release",
+            "--configuration", EnvironmentVariables.BuildConfiguration,
             "--",
             "--treenode-filter", "/*/*/DefaultHtmlReportTests/Pass",
             "--results-directory", resultsDirectory,
