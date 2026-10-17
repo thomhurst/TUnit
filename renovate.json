@@ -55,6 +55,17 @@
       ],
       "matchCurrentVersion": "/^9\\./",
       "allowedVersions": "<10.0.0"
+    },
+    {
+      "description": "Per-TFM versions in Directory.Packages.props: keep the net10.0/default entries on 10.x. Raise alongside adding a net11.0 group.",
+      "matchPackageNames": [
+        "Microsoft.AspNetCore.Mvc.Testing",
+        "Microsoft.Extensions.Http",
+        "Microsoft.Extensions.Logging",
+        "Microsoft.Extensions.Logging.Abstractions"
+      ],
+      "matchCurrentVersion": "/^10\\./",
+      "allowedVersions": "<11.0.0"
     }
   ]
 }
