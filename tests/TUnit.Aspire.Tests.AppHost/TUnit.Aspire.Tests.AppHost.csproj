@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" />
+    <!-- Patched MessagePack (GHSA-qhrr-8q5h-9q3h); see src/TUnit.Aspire.Core/TUnit.Aspire.Core.csproj. -->
+    <PackageReference Include="MessagePack" VersionOverride="2.5.303" />
   </ItemGroup>
 
   <ItemGroup>
