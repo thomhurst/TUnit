@@ -1,4 +1,5 @@
 using TUnit.Assertions.Extensions;
+using TUnit.Core.Executors;
 
 namespace TUnit.Assertions.Tests;
 
@@ -315,6 +316,7 @@ public class CollectionAssertionTests
     }
 
     [Test]
+    [InvariantCulture]
     public async Task All_Predicate_Failure_Message_Contains_Index_And_Value()
     {
         var items = new[] { 2, 4, -5, 8 };
@@ -339,6 +341,7 @@ public class CollectionAssertionTests
     }
 
     [Test]
+    [InvariantCulture]
     public async Task All_Predicate_Failure_Message_Contains_First_Failing_Item()
     {
         var items = new[] { 1, 2, 3, -1, -2, -3 };

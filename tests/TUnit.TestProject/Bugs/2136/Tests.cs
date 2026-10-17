@@ -1,4 +1,5 @@
-﻿using TUnit.TestProject.Attributes;
+﻿using TUnit.Core.Executors;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._2136;
 
@@ -6,6 +7,7 @@ namespace TUnit.TestProject.Bugs._2136;
 public class Tests
 {
     [Test]
+    [InvariantCulture]
     [Arguments(true, "True")]
     [Arguments(1, "1")]
     [Arguments(1.1, "1.1")]

@@ -1,3 +1,4 @@
+using TUnit.Core.Executors;
 using TUnit.Mocks;
 using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Verification;
@@ -174,6 +175,7 @@ public class WrapNoParameterlessCtorTests
     }
 
     [Test]
+    [InvariantCulture]
     public async Task Multiple_Params()
     {
         var mock = Mock.Wrap(new WrapMultiParam("widget", 3, 1.5));

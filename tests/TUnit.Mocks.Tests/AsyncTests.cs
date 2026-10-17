@@ -1,3 +1,4 @@
+using TUnit.Core.Executors;
 using TUnit.Mocks;
 using TUnit.Mocks.Arguments;
 
@@ -429,6 +430,7 @@ public class AsyncTests
     }
 
     [Test]
+    [InvariantCulture]
     public async Task Typed_Throws_On_Async_ValueTask_Method()
     {
         var mock = IAsyncService.Mock();
