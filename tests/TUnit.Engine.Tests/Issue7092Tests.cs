@@ -114,6 +114,32 @@ public class Issue7092Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task GenerateGenericTest_Tuple_Method_Data_Source_Infers_Its_Own_Types()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7092/GenerateGenericTestMethodDataSourceInferenceTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task GenerateGenericTest_Eight_Element_Tuple_Infers_Eight_Types()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7092/GenerateGenericTestEightElementTupleTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
     public async Task Static_Class_Hook_On_Generic_Base_Runs_Once()
     {
         await RunTestsWithFilter(

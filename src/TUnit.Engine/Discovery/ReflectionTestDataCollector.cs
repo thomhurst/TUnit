@@ -1313,7 +1313,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var methodGenericParams = method.GetGenericArguments();
         var processedTypeArguments = new HashSet<Type[]>(TypeArrayComparer.Instance);
 
-        foreach (var (inferredMethod, typeArguments, rows) in InferMethodInstantiationsFromDataSources(method, methodGenericParams.Length))
+        foreach (var (inferredMethod, typeArguments, rows) in InferMethodInstantiationsFromDataSources(concreteClassType, method, methodGenericParams.Length))
         {
             processedTypeArguments.Add(typeArguments);
             yield return (inferredMethod, null, rows);
@@ -1404,12 +1404,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <item>Parameter attributes implementing <see cref="TUnit.Core.Interfaces.IInfersType{T}"/>
     /// (<c>InferTypesFromTypeInferringAttributes</c>). That instantiation runs every data source, so its
     /// <c>Rows</c> is null.</item>
+    /// <item>[MethodDataSource] members of the test class returning <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>
+    /// (<c>InferTypesFromMethodDataSource</c>). That instantiation also runs every data source.</item>
     /// </list>
     /// Sources whose types violate the constraints are skipped. Rows and sources inferring types that are
     /// already instantiated join that instantiation.
     /// </summary>
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT; MakeGenericMethod over types inferred from attribute values")]
     private static List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[]? Rows)> InferMethodInstantiationsFromDataSources(
+        Type testClass,
         MethodInfo method,
         int genericParameterCount)
     {
@@ -1438,6 +1441,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         AddInstantiation(InferTypesFromTypeInferringAttributes(parameters, genericParameterCount), null);
+
+        foreach (var dataSource in dataSources)
+        {
+            if (dataSource is MethodDataSourceAttribute methodDataSource)
+            {
+                AddInstantiation(InferTypesFromMethodDataSource(testClass, methodDataSource, parameters, genericParameterCount), null);
+            }
+        }
 
         var result = new List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[]? Rows)>(instantiations.Count);
         foreach (var (closedMethod, typeArguments, rows) in instantiations)
@@ -1510,9 +1521,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return [typeArguments[0]];
             }
 
-            if (typeArguments is [{ IsGenericType: true } tuple]
-                && tuple.FullName?.StartsWith("System.ValueTuple`", StringComparison.Ordinal) == true
-                && tuple.GetGenericArguments() is { } tupleElements
+            if (typeArguments is [{ } tuple]
+                && GetValueTupleElementTypes(tuple) is { } tupleElements
                 && tupleElements.Length == genericParameterCount)
             {
                 return tupleElements;
@@ -1522,6 +1532,119 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Mirrors the generator's <c>InferTypesFromMethodDataSource</c>. It only reads attributes whose first
+    /// constructor argument is the member name (<c>[MethodDataSource("Rows")]</c> and
+    /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), looks for a static parameterless method of that name
+    /// declared on the test class, and requires its declared return type to be
+    /// <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>. Each tuple element is matched against the test parameter
+    /// at the same position, including type arguments nested in generic parameter types.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source methods")]
+    private static Type[]? InferTypesFromMethodDataSource(
+        Type testClass,
+        MethodDataSourceAttribute methodDataSource,
+        ParameterInfo[] parameters,
+        int genericParameterCount)
+    {
+        var attributeType = methodDataSource.GetType();
+        var namedByString = attributeType == typeof(MethodDataSourceAttribute)
+            ? methodDataSource.ClassProvidingDataSource is null
+            : attributeType.IsGenericType && attributeType.GetGenericTypeDefinition() == typeof(MethodDataSourceAttribute<>);
+        if (!namedByString)
+        {
+            return null;
+        }
+
+        var dataMethod = testClass.GetMethod(
+            methodDataSource.MethodNameProvidingDataSource,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly,
+            binder: null,
+            Type.EmptyTypes,
+            modifiers: null);
+
+        if (dataMethod?.ReturnType is not { IsGenericType: true } returnType
+            || returnType.GetGenericTypeDefinition() != typeof(IEnumerable<>)
+            || returnType.GetGenericArguments()[0] is not { IsGenericType: true } funcType
+            || funcType.GetGenericTypeDefinition() != typeof(Func<>)
+            || GetValueTupleElementTypes(funcType.GetGenericArguments()[0]) is not { } tupleElements)
+        {
+            return null;
+        }
+
+        var typeArguments = new Type?[genericParameterCount];
+        for (var i = 0; i < parameters.Length && i < tupleElements.Length; i++)
+        {
+            MapGenericParameters(parameters[i].ParameterType, tupleElements[i], typeArguments);
+        }
+
+        foreach (var typeArgument in typeArguments)
+        {
+            if (typeArgument is null)
+            {
+                return null;
+            }
+        }
+
+        return typeArguments!;
+    }
+
+    /// <summary>Mirrors the generator's <c>ProcessTypeForGenerics</c>.</summary>
+    private static void MapGenericParameters(Type parameterType, Type actualType, Type?[] typeArguments)
+    {
+        if (parameterType.IsGenericParameter)
+        {
+            if (parameterType.DeclaringMethod is not null)
+            {
+                typeArguments[parameterType.GenericParameterPosition] = actualType;
+            }
+
+            return;
+        }
+
+        if (parameterType.IsGenericType
+            && actualType.IsGenericType
+            && parameterType.GetGenericTypeDefinition() == actualType.GetGenericTypeDefinition())
+        {
+            var parameterArguments = parameterType.GetGenericArguments();
+            var actualArguments = actualType.GetGenericArguments();
+            for (var i = 0; i < parameterArguments.Length && i < actualArguments.Length; i++)
+            {
+                MapGenericParameters(parameterArguments[i], actualArguments[i], typeArguments);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Returns the logical element types of a <see cref="ValueTuple"/> type, or null for any other type.
+    /// The runtime nests elements past the seventh in a <c>TRest</c> tuple, so <c>(int, ..., int)</c> with
+    /// eight elements is <c>ValueTuple&lt;int, ..., int, ValueTuple&lt;int&gt;&gt;</c>. This flattens that
+    /// nesting, as Roslyn's <c>TupleElements</c> does for the generator.
+    /// </summary>
+    private static Type[]? GetValueTupleElementTypes(Type type)
+    {
+        if (!type.IsGenericType || type.Namespace != "System" || !type.Name.StartsWith("ValueTuple`", StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        var arguments = type.GetGenericArguments();
+        if (arguments.Length < 8)
+        {
+            return arguments;
+        }
+
+        if (GetValueTupleElementTypes(arguments[7]) is not { } rest)
+        {
+            return null;
+        }
+
+        var elements = new Type[7 + rest.Length];
+        Array.Copy(arguments, elements, 7);
+        Array.Copy(rest, 0, elements, 7, rest.Length);
+        return elements;
     }
 
     /// <summary>
