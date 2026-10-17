@@ -395,11 +395,25 @@ internal sealed class TestGenericTypeResolver
         // Try the original approach for cases with typed parameters
         var typeMapping = new Dictionary<Type, Type>();
         
+        // A trailing params T[] collects loose values, which do not match the array type itself.
+        // They are left out of inference: the reflection invoker re-infers type arguments from the
+        // declared parameter types, so inferring T from them here would not reach the invocation.
+        // T must come from another argument, or from a lone array value passed as the array.
+        var hasGenericParamsArray = HasGenericParamsArray(methodMetadata, parameterTypes);
+        var lastIndex = parameterTypes.Length - 1;
+
         // Map parameter types to argument types
         for (var i = 0; i < Math.Min(parameterTypes.Length, methodArguments.Length); i++)
         {
             var paramType = parameterTypes[i];
             var argValue = methodArguments[i];
+
+            if (hasGenericParamsArray
+                && i == lastIndex
+                && (methodArguments.Length != parameterTypes.Length || argValue?.GetType().IsArray != true))
+            {
+                continue;
+            }
 
             if (argValue != null)
             {
@@ -448,6 +462,24 @@ internal sealed class TestGenericTypeResolver
         ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypesFromMapping);
         
         return resolvedTypesFromMapping;
+    }
+
+    /// <summary>
+    /// Whether the method's last parameter is a <c>params</c> array whose element involves a
+    /// generic parameter (e.g. <c>params T[]</c>).
+    /// </summary>
+    private static bool HasGenericParamsArray(MethodMetadata methodMetadata, Type[] parameterTypes)
+    {
+        var parameters = methodMetadata.Parameters;
+        if (parameterTypes.Length == 0 || parameters.Length != parameterTypes.Length)
+        {
+            return false;
+        }
+
+        var lastType = parameterTypes[parameterTypes.Length - 1];
+        return lastType.IsArray
+            && lastType.ContainsGenericParameters
+            && parameters[parameters.Length - 1].IsParams;
     }
 
     #if NET8_0_OR_GREATER

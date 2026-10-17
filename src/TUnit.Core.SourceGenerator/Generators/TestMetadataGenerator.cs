@@ -1056,8 +1056,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             p.Type.Name == "CancellationToken" && p.Type.ContainingNamespace?.ToString() == "System.Threading");
         var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
 
+        // A trailing params/array parameter collects the remaining row values, which the
+        // positional casts below cannot express. Bind it like a non-generic method instead,
+        // using the parameters of the closed method.
+        if ((entry.MethodTypeArgs.Length > 0 || entry.ClassTypeArgs.Length > 0)
+            && TryGetClosedParametersWithTrailingArray(testMethod, entry) is { } closedParameters)
+        {
+            var invokedName = entry.MethodTypeArgs.Length > 0
+                ? $"{methodName}<{string.Join(", ", entry.MethodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>"
+                : methodName;
+            GenerateConcreteTestInvokerBody(writer, invokedName, returnPattern, hasCancellationToken, closedParameters);
+        }
         // For any generic context (class or method), we need to substitute type parameters
-        if (entry.MethodTypeArgs.Length > 0 || entry.ClassTypeArgs.Length > 0)
+        else if (entry.MethodTypeArgs.Length > 0 || entry.ClassTypeArgs.Length > 0)
         {
             // Build the method call with proper type substitution
             var parameterCasts = new List<string>();
@@ -1128,6 +1139,69 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .ToArray();
             GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
         }
+    }
+
+    /// <summary>
+    /// Returns the data-bound (non-CancellationToken) parameters of the closed test method when the
+    /// last one collects trailing arguments (<c>params T[]</c> or a plain array). Returns null when
+    /// there is no such parameter, or the closed method cannot be built.
+    /// </summary>
+    private static IParameterSymbol[]? TryGetClosedParametersWithTrailingArray(TestMethodMetadata testMethod, ConcreteInstantiation entry)
+    {
+        var parameters = testMethod.MethodSymbol.Parameters
+            .Where(p => p.Type.Name != "CancellationToken" || p.Type.ContainingNamespace?.ToString() != "System.Threading")
+            .ToArray();
+
+        if (parameters.Length == 0 || !parameters[parameters.Length - 1].CollectsTrailingArguments())
+        {
+            return null;
+        }
+
+        // Keep the method as discovered: an inherited method already carries the type arguments its
+        // derived class supplied to the base (e.g. Derived : Base<int> gives int[] for T[]).
+        var method = testMethod.MethodSymbol;
+
+        if (entry.ClassTypeArgs.Length > 0)
+        {
+            if (testMethod.TypeSymbol.OriginalDefinition.TypeParameters.Length != entry.ClassTypeArgs.Length)
+            {
+                return null;
+            }
+
+            // Close the test class, then find the method on it or on one of its (now closed) base types.
+            var definition = testMethod.MethodSymbol.OriginalDefinition;
+            IMethodSymbol? closedMethod = null;
+            for (INamedTypeSymbol? type = testMethod.TypeSymbol.OriginalDefinition.Construct(entry.ClassTypeArgs);
+                 type is not null && closedMethod is null;
+                 type = type.BaseType)
+            {
+                closedMethod = type.GetMembers(definition.Name)
+                    .OfType<IMethodSymbol>()
+                    .FirstOrDefault(m => SymbolEqualityComparer.Default.Equals(m.OriginalDefinition, definition));
+            }
+
+            if (closedMethod is null)
+            {
+                return null;
+            }
+
+            method = closedMethod;
+        }
+
+        if (entry.MethodTypeArgs.Length > 0)
+        {
+            if (method.TypeParameters.Length != entry.MethodTypeArgs.Length
+                || !SymbolEqualityComparer.Default.Equals(method.ConstructedFrom, method))
+            {
+                return null;
+            }
+
+            method = method.Construct(entry.MethodTypeArgs);
+        }
+
+        return method.Parameters
+            .Where(p => p.Type.Name != "CancellationToken" || p.Type.ContainingNamespace?.ToString() != "System.Threading")
+            .ToArray();
     }
 
     /// <summary>
@@ -5650,6 +5724,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     inferredTypes[typeParam.Name] = argType;
                 }
             }
+            // A lone array value for a trailing params T[] (e.g. [Arguments(new[] { 1, 2 })]) is the
+            // array itself, so T is its element type. Loose values are not used to infer T: reflection
+            // mode cannot bind them yet (https://github.com/thomhurst/TUnit/issues/7099).
+            else if (argIndex == methodParams.Length - 1
+                     && argumentValues.Length == methodParams.Length
+                     && methodParam.IsParams
+                     && methodParam.Type is IArrayTypeSymbol { IsSZArray: true, ElementType: ITypeParameterSymbol elementTypeParam }
+                     && !inferredTypes.ContainsKey(elementTypeParam.Name)
+                     && argValue is { Kind: TypedConstantKind.Array, Type: IArrayTypeSymbol { ElementType: var elementType } })
+            {
+                inferredTypes[elementTypeParam.Name] = elementType;
+            }
         }
 
         // Build the result array in the correct order
@@ -6266,6 +6352,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                 }
             }
+        }
+
+        // Handle arrays like T[] (e.g. a `params T[]` parameter)
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            var elementType = SubstituteTypeParameters(arrayType.ElementType, testMethod, classTypeArgs, methodTypeArgs);
+
+            return SymbolEqualityComparer.Default.Equals(elementType, arrayType.ElementType)
+                ? type
+                : testMethod.CompilationContext.Compilation.CreateArrayTypeSymbol(elementType, arrayType.Rank);
         }
 
         // Handle generic types like IEnumerable<T>, Dictionary<TKey, TValue>, etc.
