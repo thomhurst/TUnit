@@ -17,6 +17,9 @@ internal class ReferencesHelper
                 MetadataReference.CreateFromFile(typeof(Polyfill).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Uri).Assembly.Location),
+                // Not loaded by a plain test run, but loaded by IDE/`dotnet test` server-mode hosts, so it must
+                // be explicit or HttpStatusCode resolves differently depending on how the tests are launched.
+                MetadataReference.CreateFromFile(typeof(System.Net.HttpStatusCode).Assembly.Location),
             ])
             .ToList();
 }
