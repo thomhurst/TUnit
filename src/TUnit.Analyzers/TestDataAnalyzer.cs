@@ -614,7 +614,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     {
                         return true;
                     }
-                    return context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter);
+                    return context.Compilation.CanBindToTestParameter(argument, parameter);
                 });
 
             if (!conversions.All(x => x))
@@ -647,7 +647,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (testParameterTypes.Length == 1
                 && unwrappedTypes.Length == 1
-                && context.Compilation.HasImplicitConversionOrGenericParameter(unwrappedTypes[0],
+                && context.Compilation.CanBindToTestParameter(unwrappedTypes[0],
                     testParameterTypes[0]))
             {
                 return;
