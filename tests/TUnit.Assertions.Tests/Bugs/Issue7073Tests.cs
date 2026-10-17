@@ -302,6 +302,52 @@ public class Issue7073Tests
         await NotEqualsAssertionExtensions.IsNotEqualTo<OneWaySentinelWrapper, string>(Assert.That(OneWaySentinelWrapper.None), "other");
     }
 
+    [Test]
+    public async Task Long_IsEqualTo_NativeInt_CrossTypeOverload_Passes()
+    {
+        // nint -> long is implicit, so C# 13+ binds the same-type long overload.
+        await EqualsAssertionExtensions.IsEqualTo<long, nint>(Assert.That(3L), (nint)3);
+    }
+
+    [Test]
+    public async Task Long_IsEqualTo_NativeInt_CrossTypeOverload_Fails_When_Different()
+    {
+        await Assert.That(async () =>
+                await EqualsAssertionExtensions.IsEqualTo<long, nint>(Assert.That(4L), (nint)3))
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task NativeInt_IsEqualTo_Long_CrossTypeOverload_Chains_The_Long()
+    {
+        // No implicit long -> nint, so the actual nint converts to long.
+        var result = await EqualsAssertionExtensions.IsEqualTo<nint, long>(Assert.That((nint)3), 3L);
+
+        await Assert.That(result).IsEqualTo(3L);
+    }
+
+    [Test]
+    public async Task Long_IsEqualTo_NativeInt_CrossTypeOverload_Chains_The_NativeInt()
+    {
+        var result = await EqualsAssertionExtensions.IsEqualTo<long, nint>(Assert.That(3L), (nint)3)
+            .And.IsEqualTo((nint)3);
+
+        await Assert.That(result).IsEqualTo((nint)3);
+    }
+
+    [Test]
+    public async Task NativeUInt_IsEqualTo_ULong_CrossTypeOverload_Passes()
+    {
+        await EqualsAssertionExtensions.IsEqualTo<ulong, nuint>(Assert.That(3UL), (nuint)3);
+    }
+
+    [Test]
+    public async Task Int_IsEqualTo_NativeInt_Passes()
+    {
+        // int -> nint is implicit, so this binds the cross-type overload on every language version.
+        await EqualsAssertionExtensions.IsEqualTo<int, nint>(Assert.That(3), (nint)3);
+    }
+
     public readonly record struct Cents(int Value);
 
     public readonly record struct Dollars(int Value)
