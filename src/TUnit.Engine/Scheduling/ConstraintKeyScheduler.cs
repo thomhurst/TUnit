@@ -11,14 +11,24 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
     private readonly TUnitFrameworkLogger _logger;
     private readonly HashSetPool _hashSetPool;
 
+    // Constraint keys only exclude tests that share a key, so without this cap distinct
+    // keys would all run at once (#7074). The limiter is the session-wide budget that the
+    // unconstrained phase also draws from, because both phases run concurrently.
+    private readonly MaxParallelismLimiter _maxParallelismLimiter;
+
     public ConstraintKeyScheduler(
         TestRunner testRunner,
         TUnitFrameworkLogger logger,
-        HashSetPool hashSetPool)
+        HashSetPool hashSetPool,
+        MaxParallelismLimiter? maxParallelismLimiter = null)
     {
         _testRunner = testRunner;
         _logger = logger;
         _hashSetPool = hashSetPool;
+        // The engine always passes its shared limiter; the default (the engine's default
+        // cap) is for constructing the scheduler in isolation.
+        _maxParallelismLimiter = maxParallelismLimiter
+            ?? new MaxParallelismLimiter(static () => MaxParallelismLimiter.DefaultMaxParallelism);
     }
 
     #if NET8_0_OR_GREATER
@@ -158,7 +168,20 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
     {
         try
         {
-            await _testRunner.ExecuteTestWithoutExecutionTaskAsync(test, cancellationToken).ConfigureAwait(false);
+            // Take a parallelism slot only after the constraint keys are held: slot holders
+            // are always running tests, never waiting on keys, so the two never deadlock.
+            // Acquired before entering TestRunner so a dependency that reaches this test
+            // first runs it inline instead of waiting behind a slot.
+            var semaphore = _maxParallelismLimiter.Semaphore;
+            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await _testRunner.ExecuteTestWithoutExecutionTaskAsync(test, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
         finally
         {
