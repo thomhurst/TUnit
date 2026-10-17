@@ -88,7 +88,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var logLevelProvider = Register(new LogLevelProvider(CommandLineOptions));
 
         // Determine execution mode early to create appropriate services
-        var useSourceGeneration = SourceRegistrar.IsEnabled = ExecutionModeHelper.IsSourceGenerationMode(CommandLineOptions);
+        // Lock the mode so module initializers of assemblies that load later cannot flip it back.
+        var useSourceGeneration = ExecutionModeHelper.IsSourceGenerationMode(CommandLineOptions);
+        SourceRegistrar.LockExecutionMode(useSourceGeneration);
 
         // Create and register mode-specific hook registrar service
         IHookRegistrar hookDiscoveryService;

@@ -16,8 +16,43 @@ namespace TUnit.Core;
 /// </summary>
 public class SourceRegistrar
 {
-    public static bool IsEnabled { get; set; }
+    private static readonly Lock ModeLock = new();
+    private static volatile bool _isEnabled;
+    private static bool _isModeLocked;
 
+    /// <summary>
+    /// Gets whether the source-generated execution mode is in use.
+    /// Generated module initializers set this to <c>true</c>. Once the engine has chosen the
+    /// execution mode, later writes are ignored, so a module initializer from an assembly that
+    /// loads mid-run cannot switch a reflection-mode run back to source-generated mode.
+    /// </summary>
+    public static bool IsEnabled
+    {
+        get => _isEnabled;
+        set
+        {
+            lock (ModeLock)
+            {
+                if (!_isModeLocked)
+                {
+                    _isEnabled = value;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Sets the execution mode the engine selected and stops later <see cref="IsEnabled"/> writes
+    /// from changing it.
+    /// </summary>
+    internal static void LockExecutionMode(bool useSourceGeneration)
+    {
+        lock (ModeLock)
+        {
+            _isEnabled = useSourceGeneration;
+            _isModeLocked = true;
+        }
+    }
     /// <summary>
     /// Registers an assembly loader.
     /// </summary>
