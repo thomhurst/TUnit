@@ -2,6 +2,7 @@ using CliWrap;
 using CliWrap.Buffered;
 using Shouldly;
 using TUnit.Engine.Tests.Enums;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Engine.Tests;
 
@@ -106,7 +107,7 @@ public class DefaultHtmlReportCliTests
             arguments.Add("--reflection");
         }
 
-        return Cli.Wrap("dotnet")
+        return Cli.Wrap(DotNetCli.Path)
             .WithArguments(arguments)
             .WithWorkingDirectory(testProject.DirectoryName!)
             .WithEnvironmentVariables(new Dictionary<string, string?>

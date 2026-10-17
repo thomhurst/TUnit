@@ -2,6 +2,7 @@
 using CliWrap.Buffered;
 using Shouldly;
 using TUnit.Engine.Tests.Enums;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Engine.Tests;
 
@@ -15,7 +16,7 @@ public class FSharp
         var testProject = Sourcy.DotNet.Projects.TUnit_TestProject_FSharp;
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
-        var command = Cli.Wrap("dotnet")
+        var command = Cli.Wrap(DotNetCli.Path)
             .WithArguments(
                 [
                     "run",

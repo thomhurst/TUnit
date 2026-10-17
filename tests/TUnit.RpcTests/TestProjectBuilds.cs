@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 using CliWrap;
+using CliWrap.Buffered;
+using TUnit.Tests.Shared;
 
 namespace TUnit.RpcTests;
 
@@ -18,15 +20,16 @@ internal static class TestProjectBuilds
 
     private static async Task BuildAsync(string framework, CancellationToken cancellationToken)
     {
-        var result = await Cli.Wrap("dotnet")
+        var result = await Cli.Wrap(DotNetCli.Path)
             .WithWorkingDirectory(WorkingDirectory)
             .WithArguments(["build", "-c", "Debug", "-f", framework, "--nologo", "-v", "quiet"])
             .WithValidation(CommandResultValidation.None)
-            .ExecuteAsync(cancellationToken);
+            .ExecuteBufferedAsync(cancellationToken);
 
         if (result.ExitCode != 0)
         {
-            throw new InvalidOperationException($"Test host pre-build ({framework}) failed with exit code {result.ExitCode}");
+            throw new InvalidOperationException(
+                $"Test host pre-build ({framework}) failed with exit code {result.ExitCode} using '{DotNetCli.Path}':{Environment.NewLine}{result.StandardOutput}{result.StandardError}");
         }
     }
 }

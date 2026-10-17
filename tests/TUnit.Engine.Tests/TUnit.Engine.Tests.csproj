@@ -9,6 +9,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="..\SharedTestHelpers\DotNetCli.cs" Link="Shared\DotNetCli.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.Testing.Platform" />
         <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" />
         <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
