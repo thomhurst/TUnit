@@ -8,7 +8,7 @@ Security fixes are released for the latest published version of TUnit. Please up
 
 Please do **not** open a public issue for security vulnerabilities.
 
-Report privately via [GitHub private vulnerability reporting](https://github.com/thomhurst/TUnit/security/advisories/new). Include:
+Report privately via [GitHub private vulnerability reporting](https://github.com/thomhurst/TUnit/security/advisories/new), or by email to [oss-security-scanner@tomlonghurst.com](mailto:oss-security-scanner@tomlonghurst.com), the project's security contact. Include:
 
 - the affected package(s) and version
 - a description of the issue and its impact
