@@ -16,7 +16,66 @@ namespace TUnit.Core;
 /// </summary>
 public class SourceRegistrar
 {
-    public static bool IsEnabled { get; set; }
+    private static readonly Lock ModeLock = new();
+    private static volatile bool _isEnabled;
+    private static bool _isModeLocked;
+
+    /// <summary>
+    /// Gets whether the source-generated execution mode is in use.
+    /// Generated module initializers set this to <c>true</c>. Once the engine has chosen the
+    /// execution mode, later writes are ignored, so a module initializer from an assembly that
+    /// loads mid-run cannot switch a reflection-mode run back to source-generated mode.
+    /// </summary>
+    /// <remarks>
+    /// The engine owns this value after startup. Setting it once the engine has selected the
+    /// execution mode has no effect. A write that would have changed the value is reported
+    /// through <see cref="Trace.WriteLine(string)"/>. To choose the mode, use the
+    /// <c>--reflection</c> or <c>--tunit-execution-mode</c> command-line options, the
+    /// <c>TUNIT_EXECUTION_MODE</c> environment variable, or <see cref="ReflectionModeAttribute"/>.
+    /// </remarks>
+    public static bool IsEnabled
+    {
+        get => _isEnabled;
+        set
+        {
+            lock (ModeLock)
+            {
+                if (!_isModeLocked)
+                {
+                    _isEnabled = value;
+                    return;
+                }
+
+                if (_isEnabled == value)
+                {
+                    return;
+                }
+            }
+
+            ReportIgnoredWrite(value);
+        }
+    }
+
+    /// <summary>
+    /// Sets the execution mode the engine selected and stops later <see cref="IsEnabled"/> writes
+    /// from changing it.
+    /// </summary>
+    internal static void LockExecutionMode(bool useSourceGeneration)
+    {
+        lock (ModeLock)
+        {
+            _isEnabled = useSourceGeneration;
+            _isModeLocked = true;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void ReportIgnoredWrite(bool value)
+    {
+        Trace.WriteLine(value
+            ? "[TUnit.Core] Ignored SourceRegistrar.IsEnabled = true: the engine already selected reflection mode. A generated module initializer from an assembly that loaded after startup usually causes this."
+            : "[TUnit.Core] Ignored SourceRegistrar.IsEnabled = false: the engine already selected source-generated mode. Use --reflection, --tunit-execution-mode, TUNIT_EXECUTION_MODE or [assembly: ReflectionMode] to choose the mode.");
+    }
 
     /// <summary>
     /// Registers an assembly loader.
