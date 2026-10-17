@@ -65,6 +65,55 @@ internal class GenericParamsArrayCompilationTests
             [Test]
             [Arguments(1, 2, 3)]
             public void Inferred_FromLeading<T>(T first, params T[] rest) { }
+
+            [Test]
+            [Arguments(1, 2, 3)]
+            public void Inferred_FromParams<T>(params T[] values) { }
+
+            [Test]
+            [Arguments(new[] { 4, 5 })]
+            public void Inferred_FromArrayArgument<T>(params T[] values) { }
+        }
+
+        public class ReviewShapes
+        {
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [Arguments(1, 2)]
+            public void Optional_Before_Params<T>(int count = 0, params T[] values) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [MethodDataSource(nameof(Grids))]
+            public void MultiDim<T>(int[,] values) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [MethodDataSource(nameof(Grids))]
+            public void MultiDimGeneric<T>(T[,] values) { }
+
+            public static IEnumerable<int[,]> Grids() => [new int[,] { { 1 } }];
+
+            [Test]
+            [Arguments(1, 2)]
+            public void NonGeneric_Optional_Before_Params(int count = 0, params int[] values) { }
+
+            [Test]
+            [MethodDataSource(nameof(Grids))]
+            public void NonGeneric_MultiDim(int[,] values) { }
+        }
+
+        public abstract class InheritedBase<T>
+        {
+            [Test]
+            [GenerateGenericTest(typeof(string))]
+            [Arguments(1, 2)]
+            public void Inherited<U>(params T[] values) { }
+        }
+
+        [InheritsTests]
+        public class InheritedDerived : InheritedBase<int>
+        {
         }
 
         [GenerateGenericTest(typeof(int))]
@@ -105,5 +154,8 @@ internal class GenericParamsArrayCompilationTests
             .Because($"generated code must compile. Errors:{Environment.NewLine}"
                 + string.Join(Environment.NewLine, errors.Select(e => e.ToString()))
                 + Environment.NewLine + generated);
+
+        // A lone array value for params T[] infers T in both engine modes.
+        await Assert.That(generated).Contains("Inferred_FromArrayArgument<int>");
     }
 }

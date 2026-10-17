@@ -138,7 +138,12 @@ public static class TupleArgumentHelper
                         // rather than `new T[0]`: when T is itself an array (jagged param like
                         // byte[][], element type byte[]) the rank-specifier form `new byte[][0]`
                         // is invalid C# (CS1586/CS0178). See issue #6150.
-                        argumentExpressions.Add($"global::System.Array.Empty<{elementType.GloballyQualified()}>()");
+                        // When optional regular parameters were omitted (argCount < regularParamCount),
+                        // a positional array would bind to the first omitted parameter, so name it.
+                        var namePrefix = argCount < regularParamCount
+                            ? $"@{paramsParam.Name}: "
+                            : string.Empty;
+                        argumentExpressions.Add($"{namePrefix}global::System.Array.Empty<{elementType.GloballyQualified()}>()");
                     }
                     else if (remainingArgCount == 1)
                     {
@@ -185,7 +190,7 @@ public static class TupleArgumentHelper
     /// </summary>
     private static ITypeSymbol? GetTrailingElementType(ITypeSymbol parameterType)
     {
-        if (parameterType is IArrayTypeSymbol array)
+        if (parameterType is IArrayTypeSymbol { IsSZArray: true } array)
         {
             return array.ElementType;
         }

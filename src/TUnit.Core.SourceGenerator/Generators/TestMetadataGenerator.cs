@@ -1157,21 +1157,29 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        var method = testMethod.MethodSymbol.OriginalDefinition;
+        // Keep the method as discovered: an inherited method already carries the type arguments its
+        // derived class supplied to the base (e.g. Derived : Base<int> gives int[] for T[]).
+        var method = testMethod.MethodSymbol;
 
         if (entry.ClassTypeArgs.Length > 0)
         {
-            var declaringType = method.ContainingType;
-            if (!SymbolEqualityComparer.Default.Equals(declaringType, testMethod.TypeSymbol.OriginalDefinition)
-                || declaringType.TypeParameters.Length != entry.ClassTypeArgs.Length)
+            if (testMethod.TypeSymbol.OriginalDefinition.TypeParameters.Length != entry.ClassTypeArgs.Length)
             {
                 return null;
             }
 
-            var closedMethod = declaringType.Construct(entry.ClassTypeArgs)
-                .GetMembers(method.Name)
-                .OfType<IMethodSymbol>()
-                .FirstOrDefault(m => SymbolEqualityComparer.Default.Equals(m.OriginalDefinition, method));
+            // Close the test class, then find the method on it or on one of its (now closed) base types.
+            var definition = testMethod.MethodSymbol.OriginalDefinition;
+            IMethodSymbol? closedMethod = null;
+            for (INamedTypeSymbol? type = testMethod.TypeSymbol.OriginalDefinition.Construct(entry.ClassTypeArgs);
+                 type is not null && closedMethod is null;
+                 type = type.BaseType)
+            {
+                closedMethod = type.GetMembers(definition.Name)
+                    .OfType<IMethodSymbol>()
+                    .FirstOrDefault(m => SymbolEqualityComparer.Default.Equals(m.OriginalDefinition, definition));
+            }
+
             if (closedMethod is null)
             {
                 return null;
@@ -1182,7 +1190,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (entry.MethodTypeArgs.Length > 0)
         {
-            if (method.TypeParameters.Length != entry.MethodTypeArgs.Length)
+            if (method.TypeParameters.Length != entry.MethodTypeArgs.Length
+                || !SymbolEqualityComparer.Default.Equals(method.ConstructedFrom, method))
             {
                 return null;
             }
@@ -5714,6 +5723,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     inferredTypes[typeParam.Name] = argType;
                 }
+            }
+            // A lone array value for a trailing params T[] (e.g. [Arguments(new[] { 1, 2 })]) is the
+            // array itself, so T is its element type. Loose values are not used to infer T: reflection
+            // mode cannot bind them yet (https://github.com/thomhurst/TUnit/issues/7099).
+            else if (argIndex == methodParams.Length - 1
+                     && argumentValues.Length == methodParams.Length
+                     && methodParam.IsParams
+                     && methodParam.Type is IArrayTypeSymbol { IsSZArray: true, ElementType: ITypeParameterSymbol elementTypeParam }
+                     && !inferredTypes.ContainsKey(elementTypeParam.Name)
+                     && argValue is { Kind: TypedConstantKind.Array, Type: IArrayTypeSymbol { ElementType: var elementType } })
+            {
+                inferredTypes[elementTypeParam.Name] = elementType;
             }
         }
 
