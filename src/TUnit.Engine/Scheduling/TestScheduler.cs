@@ -36,7 +36,7 @@ internal sealed class TestScheduler : ITestScheduler
         TUnitFrameworkLogger logger,
         ITestGroupingService groupingService,
         ITUnitMessageBus messageBus,
-        ICommandLineOptions commandLineOptions,
+        Lazy<int> maxParallelism,
         TestStateManager testStateManager,
         TestRunner testRunner,
         CircularDependencyDetector circularDependencyDetector,
@@ -60,7 +60,7 @@ internal sealed class TestScheduler : ITestScheduler
         _dynamicTestQueue = dynamicTestQueue;
         _notInParallelLock = notInParallelLock;
 
-        _maxParallelism = new Lazy<int>(() => GetMaxParallelism(logger, commandLineOptions));
+        _maxParallelism = maxParallelism;
 
 #if !NET
         // The .NET 8+ path uses Parallel.ForEachAsync which caps concurrency via
@@ -553,7 +553,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    private static int GetMaxParallelism(ILogger logger, ICommandLineOptions commandLineOptions)
+    internal static int GetMaxParallelism(ILogger logger, ICommandLineOptions commandLineOptions)
     {
         // "Unlimited" (caller passed 0) resolves to the same cap as the default path.
         // Parallel.ForEachAsync with MaxDegreeOfParallelism = -1 is truly unbounded —

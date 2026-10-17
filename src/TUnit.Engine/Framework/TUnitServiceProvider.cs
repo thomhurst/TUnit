@@ -256,10 +256,15 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testGroupingService = Register<ITestGroupingService>(new TestGroupingService(Logger));
         var circularDependencyDetector = Register(new CircularDependencyDetector());
 
+        // Shared so the unconstrained and keyed NotInParallel schedulers resolve the
+        // same --maximum-parallel-tests cap (and log it once).
+        var maxParallelism = new Lazy<int>(() => TestScheduler.GetMaxParallelism(Logger, CommandLineOptions));
+
         var constraintKeyScheduler = Register<IConstraintKeyScheduler>(new ConstraintKeyScheduler(
             testRunner,
             Logger,
-            hashSetPool));
+            hashSetPool,
+            maxParallelism));
 
         var staticPropertyHandler = Register(new StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, lazyPropertyInjector, objectGraphDiscoveryService));
 
@@ -271,7 +276,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             Logger,
             testGroupingService,
             MessageBus,
-            CommandLineOptions,
+            maxParallelism,
             testStateManager,
             testRunner,
             circularDependencyDetector,

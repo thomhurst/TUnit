@@ -11,14 +11,23 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
     private readonly TUnitFrameworkLogger _logger;
     private readonly HashSetPool _hashSetPool;
 
+    // Caps how many keyed tests run at once, matching the --maximum-parallel-tests cap
+    // the unconstrained phase applies. Constraint keys only exclude tests that share a
+    // key, so without this, distinct keys would all run at once (#7074). Shared across
+    // calls so concurrent keyed batches (e.g. dynamic tests) draw from one budget.
+    private readonly Lazy<SemaphoreSlim> _maxParallelismSemaphore;
+
     public ConstraintKeyScheduler(
         TestRunner testRunner,
         TUnitFrameworkLogger logger,
-        HashSetPool hashSetPool)
+        HashSetPool hashSetPool,
+        Lazy<int> maxParallelism)
     {
         _testRunner = testRunner;
         _logger = logger;
         _hashSetPool = hashSetPool;
+        _maxParallelismSemaphore = new Lazy<SemaphoreSlim>(() =>
+            new SemaphoreSlim(maxParallelism.Value, maxParallelism.Value));
     }
 
     #if NET8_0_OR_GREATER
@@ -158,7 +167,20 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
     {
         try
         {
-            await _testRunner.ExecuteTestWithoutExecutionTaskAsync(test, cancellationToken).ConfigureAwait(false);
+            // Take a parallelism slot only after the constraint keys are held: slot holders
+            // are always running tests, never waiting on keys, so the two never deadlock.
+            // Acquired before entering TestRunner so a dependency that reaches this test
+            // first runs it inline instead of waiting behind a slot.
+            var semaphore = _maxParallelismSemaphore.Value;
+            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await _testRunner.ExecuteTestWithoutExecutionTaskAsync(test, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
         finally
         {
