@@ -1,10 +1,14 @@
 using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Extensions.OutputDevice;
+using Microsoft.Testing.Platform.OutputDevice;
 using TUnit.Core;
+using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
 using TUnit.Engine.Services.TestExecution;
+using MtpLogLevel = Microsoft.Testing.Platform.Logging.LogLevel;
 
 namespace TUnit.UnitTests;
 
@@ -34,11 +38,21 @@ public class ConstraintKeySchedulerTests
     [Test]
     public async Task SynchronousWaiters_ReleasedByTheSameTest_RunConcurrently()
     {
-        // The gate holds both keys, so both waiters queue and are released together from
-        // the gate's key-release path. Neither waiter may run inline on the releasing
-        // thread, or the other is never signalled while the first blocks.
-        var coordinator = new BlockingTestCoordinator(participantCount: 2, nonBlockingTestId: "gate");
-        var scheduler = CreateScheduler(coordinator);
+        // The gate holds both keys until both waiters are queued behind it, so both are
+        // released together from the gate's key-release path. Neither waiter may run inline
+        // on the releasing thread, or the other is never signalled while the first blocks.
+        var bothWaitersQueued = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var coordinator = new BlockingTestCoordinator(participantCount: 2, nonBlockingTestId: "gate", nonBlockingTestGate: bothWaitersQueued.Task);
+        var outputDevice = new TraceOutputDevice(text =>
+        {
+            if (text.StartsWith("Queueing test waiter-2 ", StringComparison.Ordinal))
+            {
+                bothWaitersQueued.TrySetResult();
+            }
+
+            return Task.CompletedTask;
+        });
+        var scheduler = CreateScheduler(coordinator, outputDevice);
 
         (AbstractExecutableTest, IReadOnlyList<string>, int)[] tests =
         [
@@ -51,14 +65,47 @@ public class ConstraintKeySchedulerTests
 
         await Assert.That(coordinator.TimedOutTests).IsEmpty();
         await Assert.That(coordinator.CompletedCount).IsEqualTo(3);
+        await Assert.That(outputDevice.Contains("Unblocking waiting test waiter-1 ")).IsTrue();
+        await Assert.That(outputDevice.Contains("Unblocking waiting test waiter-2 ")).IsTrue();
+    }
+
+    [Test]
+    public async Task SynchronousWaiter_ReleasedBeforeItAwaits_DoesNotBlockLaterTests()
+    {
+        // The gate finishes and frees the waiter's key after the scheduling loop queues the
+        // waiter but before the loop awaits the waiter's start signal. The waiter must still
+        // leave the loop's thread, or "later" is never started and the barrier times out.
+        (AbstractExecutableTest Test, IReadOnlyList<string>, int)[] tests =
+        [
+            Keyed("gate", priority: 0, "key-1"),
+            Keyed("waiter", priority: 1, "key-1"),
+            Keyed("later", priority: 2, "key-2")
+        ];
+        var gate = tests[0].Test;
+
+        var coordinator = new BlockingTestCoordinator(participantCount: 2, nonBlockingTestId: "gate");
+        var outputDevice = new TraceOutputDevice(text =>
+            // Runs on the scheduling loop between queueing the waiter and awaiting its signal.
+            text.StartsWith("Queueing test waiter ", StringComparison.Ordinal)
+                ? gate.ExecutionTask!
+                : Task.CompletedTask);
+        var scheduler = CreateScheduler(coordinator, outputDevice);
+
+        await scheduler.ExecuteTestsWithConstraintsAsync(tests, CancellationToken.None);
+
+        await Assert.That(coordinator.TimedOutTests).IsEmpty();
+        await Assert.That(coordinator.CompletedCount).IsEqualTo(3);
+        await Assert.That(outputDevice.Contains("Unblocking waiting test waiter ")).IsTrue();
     }
 
     private static (AbstractExecutableTest, IReadOnlyList<string>, int) Keyed(string testId, int priority, params string[] keys)
         => (TestRunnerTests.CreateTest(testId), keys, priority);
 
-    private static ConstraintKeyScheduler CreateScheduler(ITestCoordinator coordinator)
+    private static ConstraintKeyScheduler CreateScheduler(ITestCoordinator coordinator, TraceOutputDevice? outputDevice = null)
     {
-        var logger = new TUnitFrameworkLogger(null!, null!, null!, new LogLevelProvider(new EmptyCommandLineOptions()));
+        var logger = outputDevice is null
+            ? new TUnitFrameworkLogger(null!, null!, null!, new LogLevelProvider(new CommandLineOptions(logLevel: null)))
+            : new TUnitFrameworkLogger(null!, outputDevice, new NoOpLogger(), new LogLevelProvider(new CommandLineOptions(logLevel: "Trace")));
 
         var runner = new TestRunner(
             coordinator,
@@ -75,7 +122,11 @@ public class ConstraintKeySchedulerTests
 
     // Runs each test body synchronously, as a non-async [Test] method would, and returns an
     // already-completed ValueTask so nothing in the pipeline yields on the test's behalf.
-    private sealed class BlockingTestCoordinator(int participantCount, string? nonBlockingTestId = null) : ITestCoordinator
+    // The non-blocking test skips the barrier and optionally waits for a gate first.
+    private sealed class BlockingTestCoordinator(
+        int participantCount,
+        string? nonBlockingTestId = null,
+        Task? nonBlockingTestGate = null) : ITestCoordinator
     {
         private readonly Barrier _barrier = new(participantCount);
         private readonly Lock _lock = new();
@@ -97,7 +148,14 @@ public class ConstraintKeySchedulerTests
 
         public ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
         {
-            if (test.TestId != nonBlockingTestId && !_barrier.SignalAndWait(BarrierTimeout, cancellationToken))
+            if (test.TestId == nonBlockingTestId)
+            {
+                return nonBlockingTestGate is null
+                    ? Complete(test)
+                    : CompleteAfterGateAsync(test, nonBlockingTestGate, cancellationToken);
+            }
+
+            if (!_barrier.SignalAndWait(BarrierTimeout, cancellationToken))
             {
                 lock (_lock)
                 {
@@ -105,18 +163,90 @@ public class ConstraintKeySchedulerTests
                 }
             }
 
+            return Complete(test);
+        }
+
+        private async ValueTask CompleteAfterGateAsync(AbstractExecutableTest test, Task gate, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await gate.WaitAsync(BarrierTimeout, cancellationToken).ConfigureAwait(false);
+            }
+            catch (TimeoutException)
+            {
+                lock (_lock)
+                {
+                    _timedOutTests.Add(test.TestId);
+                }
+            }
+
+            await Complete(test).ConfigureAwait(false);
+        }
+
+        private ValueTask Complete(AbstractExecutableTest test)
+        {
             Interlocked.Increment(ref _completedCount);
             test.SetResult(TestState.Passed);
             return default;
         }
     }
 
-    private sealed class EmptyCommandLineOptions : ICommandLineOptions
+    // Receives the scheduler's trace messages, letting a test act at a known point in the
+    // scheduling loop (for example, between queueing a waiter and awaiting its signal).
+    private sealed class TraceOutputDevice(Func<string, Task> onMessage) : IOutputDevice
     {
-        public bool IsOptionSet(string optionName) => false;
+        private readonly Lock _lock = new();
+        private readonly List<string> _messages = [];
+
+        public bool Contains(string prefix)
+        {
+            lock (_lock)
+            {
+                return _messages.Exists(message => message.StartsWith(prefix, StringComparison.Ordinal));
+            }
+        }
+
+        public Task DisplayAsync(IOutputDeviceDataProducer producer, IOutputDeviceData data, CancellationToken cancellationToken)
+        {
+            if (data is not FormattedTextOutputDeviceData textData)
+            {
+                return Task.CompletedTask;
+            }
+
+            lock (_lock)
+            {
+                _messages.Add(textData.Text);
+            }
+
+            return onMessage(textData.Text);
+        }
+    }
+
+    private sealed class NoOpLogger : Microsoft.Testing.Platform.Logging.ILogger
+    {
+        public Task LogAsync<TState>(MtpLogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+            => Task.CompletedTask;
+
+        public void Log<TState>(MtpLogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+        }
+
+        public bool IsEnabled(MtpLogLevel logLevel) => false;
+    }
+
+    private sealed class CommandLineOptions(string? logLevel) : ICommandLineOptions
+    {
+        public bool IsOptionSet(string optionName)
+            => logLevel is not null && optionName == LogLevelCommandProvider.LogLevelOption;
 
         public bool TryGetOptionArgumentList(string optionName, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string[]? arguments)
         {
+            if (IsOptionSet(optionName))
+            {
+                arguments = [logLevel!];
+                return true;
+            }
+
             arguments = null;
             return false;
         }

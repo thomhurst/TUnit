@@ -143,8 +143,15 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         WaitingTestIndex waitingTestIndex,
         CancellationToken cancellationToken)
     {
-        // Wait for signal to start
-        await startSignal.Task.ConfigureAwait(false);
+        // Wait for signal to start, always yielding. The scheduling loop calls this method
+        // directly, and a running test can release our keys between the loop queueing us and
+        // this await. Awaiting that completed signal normally would run a synchronous test
+        // body on the loop's thread and stall every test after it (#7075).
+#if NET8_0_OR_GREATER
+        await startSignal.Task.ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
+#else
+        await new ForceYieldingTaskAwaitable(startSignal.Task);
+#endif
 
         if (_logger.IsTraceEnabled)
             await _logger.LogTraceAsync($"Starting previously queued test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
