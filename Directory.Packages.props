@@ -26,7 +26,7 @@
   <ItemGroup>
     <PackageVersion Include="Grpc.Core.Api" Version="2.84.0" />
     <PackageVersion Include="MassTransit" Version="9.2.3" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.1.0" />
     <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.18" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.6.1" />
@@ -63,7 +63,7 @@
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.7.23" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="$(HttpVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(LoggingVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(LoggingAbstractionsVersion)" />
