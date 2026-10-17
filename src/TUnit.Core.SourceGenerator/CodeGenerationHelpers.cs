@@ -167,6 +167,13 @@ internal static class CodeGenerationHelpers
             // Fall through to regular typeof() handling
         }
 
+        if (typeSymbol is IArrayTypeSymbol && ContainsTypeParameter(typeSymbol))
+        {
+            // An array of a type parameter (e.g. `params T[]`) has no TypeInfo variant, and typeof(T[])
+            // does not compile outside T's scope. Erase it to object, as the parameter's Type already is.
+            return "new global::TUnit.Core.ConcreteType(typeof(object))";
+        }
+
         // Regular concrete type (including fully closed generic types like List<int>)
         var typeOfExpression = GetTypeOfExpression(typeSymbol);
         return $@"new global::TUnit.Core.ConcreteType({typeOfExpression})";
