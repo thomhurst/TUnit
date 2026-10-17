@@ -438,16 +438,39 @@ internal static class ImplicitConversionCache
     }
 
     private static bool IsNumeric(Type type)
-        => (type.IsPrimitive || type == typeof(decimal)) && Type.GetTypeCode(type) is
+        => IsNativeInteger(type) || ((type.IsPrimitive || type == typeof(decimal)) && Type.GetTypeCode(type) is
             TypeCode.SByte or TypeCode.Byte or TypeCode.Int16 or TypeCode.UInt16 or TypeCode.Int32 or TypeCode.UInt32
-            or TypeCode.Int64 or TypeCode.UInt64 or TypeCode.Char or TypeCode.Single or TypeCode.Double or TypeCode.Decimal;
+            or TypeCode.Int64 or TypeCode.UInt64 or TypeCode.Char or TypeCode.Single or TypeCode.Double or TypeCode.Decimal);
 
-    /// <summary>The C# implicit numeric conversions (C# spec §10.2.3) between non-nullable types.</summary>
+    // nint / nuint have TypeCode.Object, so they are matched by type.
+    private static bool IsNativeInteger(Type type) => type == typeof(nint) || type == typeof(nuint);
+
+    /// <summary>The C# implicit numeric conversions (C# spec §10.2.3, including nint / nuint) between non-nullable types.</summary>
     private static bool IsImplicitNumericConversion(Type from, Type to)
     {
         if (!IsNumeric(from) || !IsNumeric(to))
         {
             return false;
+        }
+
+        if (from == typeof(nint))
+        {
+            return Type.GetTypeCode(to) is TypeCode.Int64 or TypeCode.Single or TypeCode.Double or TypeCode.Decimal;
+        }
+
+        if (from == typeof(nuint))
+        {
+            return Type.GetTypeCode(to) is TypeCode.UInt64 or TypeCode.Single or TypeCode.Double or TypeCode.Decimal;
+        }
+
+        if (to == typeof(nint))
+        {
+            return Type.GetTypeCode(from) is TypeCode.SByte or TypeCode.Byte or TypeCode.Int16 or TypeCode.UInt16 or TypeCode.Int32 or TypeCode.Char;
+        }
+
+        if (to == typeof(nuint))
+        {
+            return Type.GetTypeCode(from) is TypeCode.Byte or TypeCode.UInt16 or TypeCode.UInt32 or TypeCode.Char;
         }
 
         var target = Type.GetTypeCode(to);
@@ -483,16 +506,19 @@ internal static class ImplicitConversionCache
         {
             // IConvertible converts char only to and from integral types, so route char through int
             // in both directions: 'A' -> 65 -> 65.0, and 65.0 -> 65 -> 'A'.
-            if (value is char c)
+            // nint / nuint are not IConvertible either, so route them through long / ulong.
+            value = value switch
             {
-                value = (int)c;
-            }
-            else if (target == typeof(char) && value is float or double or decimal)
-            {
-                value = Convert.ToInt32(value, CultureInfo.InvariantCulture);
-            }
+                char c => (int)c,
+                nint n => (long)n,
+                nuint n => (ulong)n,
+                float or double or decimal when target == typeof(char) => Convert.ToInt32(value, CultureInfo.InvariantCulture),
+                _ => value,
+            };
 
-            result = Convert.ChangeType(value, target, CultureInfo.InvariantCulture);
+            result = target == typeof(nint) ? checked((nint)Convert.ToInt64(value, CultureInfo.InvariantCulture))
+                : target == typeof(nuint) ? checked((nuint)Convert.ToUInt64(value, CultureInfo.InvariantCulture))
+                : Convert.ChangeType(value, target, CultureInfo.InvariantCulture);
             return true;
         }
         catch (Exception e) when (e is OverflowException or InvalidCastException)
