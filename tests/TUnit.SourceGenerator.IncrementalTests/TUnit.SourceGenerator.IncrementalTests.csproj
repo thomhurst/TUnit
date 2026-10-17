@@ -5,14 +5,19 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
+        <!-- xUnit v3 on Microsoft.Testing.Platform: global.json makes `dotnet test` MTP-only, so a VSTest
+             project here could not run under `dotnet test` (and would abort a solution-wide run). -->
+        <OutputType>Exe</OutputType>
+        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+        <GenerateTestingPlatformEntryPoint>false</GenerateTestingPlatformEntryPoint>
+        <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
         <!-- Source generator projects (netstandard2.0) bring in older Microsoft.Bcl.AsyncInterfaces -->
-        <NoWarn>$(NoWarn);MSB3277</NoWarn>
+        <NoWarn>$(NoWarn);MSB3277;xUnit1051</NoWarn>
         <RootNamespace>TUnit.Assertions.SourceGenerator.IncrementalTests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk"/>
-        <PackageReference Include="xunit" />
+        <PackageReference Include="xunit.v3" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.7.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
         <PackageReference Include="Microsoft.CodeAnalysis.Common" />
