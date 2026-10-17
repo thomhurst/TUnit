@@ -1,7 +1,7 @@
 # Build environment for Anthropic's OSS Scanner (https://github.com/anthropics/oss-scanner).
 # The scanner builds this with network access, then runs the resulting image with no network.
 # Everything needed to build and test TUnit must therefore be restored here.
-FROM mcr.microsoft.com/dotnet/sdk:10.0
+FROM mcr.microsoft.com/dotnet/sdk:11.0
 
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 \
     DOTNET_NOLOGO=1 \
