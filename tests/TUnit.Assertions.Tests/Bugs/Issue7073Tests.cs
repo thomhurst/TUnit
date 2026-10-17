@@ -71,7 +71,8 @@ public class Issue7073Tests
                 await EqualsAssertionExtensions.IsEqualTo<decimal, int>(Assert.That(3.5m), 3))
             .Throws<AssertionException>();
 
-        await Assert.That(exception!.Message).Contains("received 3.5");
+        // Formatted like the failure message, so this holds in any culture (3,5 in de-DE).
+        await Assert.That(exception!.Message).Contains($"received {3.5m}");
     }
 
     [Test]
@@ -107,7 +108,7 @@ public class Issue7073Tests
                 await EqualsAssertionExtensions.IsEqualTo<decimal?, decimal>(Assert.That((decimal?)null), 3m))
             .Throws<AssertionException>();
 
-        await Assert.That(exception!.Message).Contains("received null");
+        await Assert.That(exception).IsNotNull();
     }
 
     [Test]
@@ -181,6 +182,148 @@ public class Issue7073Tests
     public async Task Null_Object_IsEqualTo_Null_String_CrossTypeOverload_Passes()
     {
         await EqualsAssertionExtensions.IsEqualTo<object, string>(Assert.That((object?)null), (string?)null);
+    }
+
+    [Test]
+    public async Task Failure_Message_Matches_The_Same_Type_Overload()
+    {
+        // The C# 12 binding reports what the generic same-type IsEqualTo<decimal> reports, in any culture.
+        var crossType = await Assert.That(async () =>
+                await EqualsAssertionExtensions.IsEqualTo<decimal, int>(Assert.That(3.5m), 3))
+            .Throws<AssertionException>();
+        var sameType = await Assert.That(async () =>
+                await EqualsAssertionExtensions.IsEqualTo<decimal>(Assert.That(3.5m), 3))
+            .Throws<AssertionException>();
+
+        await Assert.That(crossType!.Message).IsEqualTo(sameType!.Message);
+    }
+
+    [Test]
+    public async Task Null_Failure_Message_Matches_The_Same_Type_Overload()
+    {
+        var crossType = await Assert.That(async () =>
+                await EqualsAssertionExtensions.IsEqualTo<decimal?, decimal>(Assert.That((decimal?)null), 3m))
+            .Throws<AssertionException>();
+        var sameType = await Assert.That(async () =>
+                await EqualsAssertionExtensions.IsEqualTo<decimal?>(Assert.That((decimal?)null), 3m))
+            .Throws<AssertionException>();
+
+        await Assert.That(crossType!.Message).IsEqualTo(sameType!.Message);
+    }
+
+    [Test]
+    public async Task Lifted_User_Defined_Conversion_CrossTypeOverload_Passes()
+    {
+        // Dollars? -> Cents? is the lifted form of `implicit operator Cents(Dollars)`, so C# 13+ binds the
+        // same-type Cents? overload.
+        await EqualsAssertionExtensions.IsEqualTo<Cents?, Dollars?>(Assert.That((Cents?)new Cents(300)), new Dollars(3));
+    }
+
+    [Test]
+    public async Task Lifted_User_Defined_Conversion_CrossTypeOverload_Fails_When_Different()
+    {
+        await Assert.That(async () =>
+                await EqualsAssertionExtensions.IsEqualTo<Cents?, Dollars?>(Assert.That((Cents?)new Cents(301)), new Dollars(3)))
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Lifted_User_Defined_Conversion_Of_The_Actual_Value_Passes()
+    {
+        // No conversion from Cents? to Dollars?, so the actual Dollars? is converted to Cents? (lifted).
+        await EqualsAssertionExtensions.IsEqualTo<Dollars?, Cents?>(Assert.That((Dollars?)new Dollars(3)), new Cents(300));
+    }
+
+    [Test]
+    public async Task Lifted_User_Defined_Conversion_Of_Null_Passes()
+    {
+        await EqualsAssertionExtensions.IsEqualTo<Cents?, Dollars?>(Assert.That((Cents?)null), (Dollars?)null);
+    }
+
+    [Test]
+    public async Task Nullable_Boxing_To_Interface_CrossTypeOverload_Passes()
+    {
+        // int? -> IComparable is a boxing conversion, although Nullable<int> itself does not implement it.
+        await EqualsAssertionExtensions.IsEqualTo<int?, IComparable>(Assert.That((int?)3), (IComparable)3);
+    }
+
+    [Test]
+    public async Task Double_IsEqualTo_Char_CrossTypeOverload_Chains_The_Char()
+    {
+        // char -> double is implicit, so the values compare as double; the chain sees 65.0 as 'A'.
+        var result = await EqualsAssertionExtensions.IsEqualTo<double, char>(Assert.That(65.0), 'A')
+            .And.IsEqualTo('A');
+
+        await Assert.That(result).IsEqualTo('A');
+    }
+
+    [Test]
+    public async Task Int_IsEqualTo_Char_CrossTypeOverload_Chains_The_Char()
+    {
+        var result = await EqualsAssertionExtensions.IsEqualTo<int, char>(Assert.That(65), 'A')
+            .And.IsEqualTo('A');
+
+        await Assert.That(result).IsEqualTo('A');
+    }
+
+    [Test]
+    public async Task IgnoringType_Applies_To_The_Source_Type_Comparison()
+    {
+        // C# 13+ binds the same-type `object` overload here, which honors IgnoringType.
+        var actual = new Stamped { Name = "a", At = new DateTime(2000, 1, 1) };
+        var expected = new Stamped { Name = "a", At = new DateTime(2001, 1, 1) };
+
+        await EqualsAssertionExtensions.IsEqualTo<object, Stamped>(Assert.That((object)actual), expected)
+            .IgnoringType<DateTime>();
+    }
+
+    [Test]
+    public async Task IgnoringType_Applies_To_The_Source_Type_Inequality()
+    {
+        var actual = new Stamped { Name = "a", At = new DateTime(2000, 1, 1) };
+        var expected = new Stamped { Name = "a", At = new DateTime(2001, 1, 1) };
+
+        await Assert.That(async () =>
+                await NotEqualsAssertionExtensions.IsNotEqualTo<object, Stamped>(Assert.That((object)actual), expected)
+                    .IgnoringType<DateTime>())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Failing_Reverse_Conversion_Does_Not_Block_The_Source_Type_Comparison()
+    {
+        // Converting the sentinel back to string throws, but the comparison as the source type passes.
+        await EqualsAssertionExtensions.IsEqualTo<OneWaySentinelWrapper, string>(Assert.That(OneWaySentinelWrapper.None), (string?)null);
+    }
+
+    [Test]
+    public async Task Failing_Reverse_Conversion_Does_Not_Block_The_Source_Type_Inequality()
+    {
+        await NotEqualsAssertionExtensions.IsNotEqualTo<OneWaySentinelWrapper, string>(Assert.That(OneWaySentinelWrapper.None), "other");
+    }
+
+    public readonly record struct Cents(int Value);
+
+    public readonly record struct Dollars(int Value)
+    {
+        public static implicit operator Cents(Dollars dollars) => new(dollars.Value * 100);
+    }
+
+    public sealed class Stamped
+    {
+        public string? Name { get; set; }
+
+        public DateTime At { get; set; }
+    }
+
+    public sealed record OneWaySentinelWrapper(string Value)
+    {
+        public static readonly OneWaySentinelWrapper None = new("<none>");
+
+        public static implicit operator OneWaySentinelWrapper(string? value) => value is null ? None : new(value);
+
+        public static implicit operator string(OneWaySentinelWrapper wrapper)
+            => ReferenceEquals(wrapper, None) ? throw new InvalidOperationException("The sentinel has no string value.") : wrapper.Value;
     }
 
     public sealed class CaseInsensitiveName(string value) : IEquatable<CaseInsensitiveName>

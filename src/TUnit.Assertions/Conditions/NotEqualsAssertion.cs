@@ -16,6 +16,12 @@ public class NotEqualsAssertion<TValue> : Assertion<TValue>
     private readonly IEqualityComparer<TValue>? _comparer;
     private readonly HashSet<Type> _ignoredTypes = new();
 
+    /// <summary>
+    /// The member types excluded via <see cref="IgnoringType{TIgnore}"/>, for assertions that delegate
+    /// their comparison to another <see cref="NotEqualsAssertion{T}"/>.
+    /// </summary>
+    internal IReadOnlyCollection<Type> IgnoredTypes => _ignoredTypes;
+
     public NotEqualsAssertion(
         AssertionContext<TValue> context,
         TValue notExpected,

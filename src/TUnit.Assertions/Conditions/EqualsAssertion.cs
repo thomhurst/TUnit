@@ -30,6 +30,12 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     /// </summary>
     public TValue? Expected => _expected;
 
+    /// <summary>
+    /// The member types excluded via <see cref="IgnoringType{TIgnore}"/>, for assertions that delegate
+    /// their comparison to another <see cref="EqualsAssertion{T}"/>.
+    /// </summary>
+    internal IReadOnlyCollection<Type> IgnoredTypes => _ignoredTypes;
+
     // Constructor 1: Just expected value
     public EqualsAssertion(
         AssertionContext<TValue> context,

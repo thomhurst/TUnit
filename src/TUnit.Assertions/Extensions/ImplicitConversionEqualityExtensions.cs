@@ -39,6 +39,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using System.Text;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
@@ -80,8 +81,10 @@ public static partial class EqualsAssertionExtensions
 
         if (ImplicitConversionCache.TryGetConverter<TOther, TValue>(ConversionNullHandling.InvokeOperator) is { } toSourceType)
         {
+            // Convert the expected value here, as C# 13+ does at the call site of the same-type overload.
+            var expectedAsSource = toSourceType(expected);
             var sourceTyped = source.Context.Map(CrossTypeComparison.CreateSourceTypeMapper<TValue, TOther>(toSourceType));
-            return new SourceTypeEqualsAssertion<TValue, TOther>(sourceTyped, source.Context.Evaluation, toSourceType, expected);
+            return new SourceTypeEqualsAssertion<TValue, TOther>(sourceTyped, source.Context.Evaluation, expected, expectedAsSource);
         }
 
         var converter = ImplicitConversionCache.GetConverter<TValue, TOther>();
@@ -118,8 +121,9 @@ public static partial class NotEqualsAssertionExtensions
 
         if (ImplicitConversionCache.TryGetConverter<TOther, TValue>(ConversionNullHandling.InvokeOperator) is { } toSourceType)
         {
+            var notExpectedAsSource = toSourceType(notExpected);
             var sourceTyped = source.Context.Map(CrossTypeComparison.CreateSourceTypeMapper<TValue, TOther>(toSourceType));
-            return new SourceTypeNotEqualsAssertion<TValue, TOther>(sourceTyped, source.Context.Evaluation, toSourceType, notExpected!);
+            return new SourceTypeNotEqualsAssertion<TValue, TOther>(sourceTyped, source.Context.Evaluation, notExpected!, notExpectedAsSource!);
         }
 
         var converter = ImplicitConversionCache.GetConverter<TValue, TOther>();
@@ -144,15 +148,16 @@ public sealed class CrossTypeOverloadMarker
 
 /// <summary>
 /// Source-type comparison for the cross-type overloads when <c>TOther</c> converts implicitly to
-/// <c>TValue</c> (see the file header). The equality result is computed as <c>TValue</c> by
-/// <see cref="SourceTypeEqualsAssertion{TValue, TOther}"/> and
-/// <see cref="SourceTypeNotEqualsAssertion{TValue, TOther}"/>, which read the source value directly.
+/// <c>TValue</c> (see the file header). <see cref="SourceTypeEqualsAssertion{TValue, TOther}"/> and
+/// <see cref="SourceTypeNotEqualsAssertion{TValue, TOther}"/> delegate the check to the same-type
+/// <see cref="EqualsAssertion{T}"/> / <see cref="NotEqualsAssertion{T}"/> over the source value, so the
+/// result, the failure message and options such as <c>IgnoringType</c> match the same-type overload.
 /// The returned assertion is still typed on <c>TOther</c>, so the mapper only supplies the value that
 /// chained assertions (and <c>await</c>) see: the actual value itself when it already is a <c>TOther</c>
 /// (preserving reference identity), otherwise its exact <c>TOther</c> equivalent. It is never replaced
 /// by the expected value. When there is no exact equivalent (e.g. <c>3.5m</c> for <c>int</c>), the
-/// mapper raises <see cref="CrossTypeValueNotRepresentableException"/>, which the source-type
-/// assertions ignore because their result does not depend on the mapped value.
+/// mapper raises <see cref="CrossTypeValueNotRepresentableException"/>. The source-type assertions do
+/// not read the mapped value, so that only affects chained assertions.
 /// </summary>
 internal static class CrossTypeComparison
 {
@@ -165,29 +170,16 @@ internal static class CrossTypeComparison
     }
 
     /// <summary>
-    /// Compares the source value with the expected value as <typeparamref name="TValue"/>, as the
-    /// same-type overload would. A conversion that throws (e.g. a user-defined operator rejecting
-    /// <see langword="null"/>) is reported as the failure's exception.
+    /// Reads the source value directly, so a failed mapping to <c>TOther</c> never affects the result.
+    /// An exception from evaluating the source itself is passed on and reported as usual.
     /// </summary>
-    public static async Task<(bool Equal, TValue? Actual, Exception? Exception)> CompareAsSourceTypeAsync<TValue, TOther>(
+    public static async Task<EvaluationMetadata<TValue>> GetSourceMetadataAsync<TValue, TOther>(
         EvaluationContext<TValue> source,
-        Func<TOther?, TValue?> toSourceType,
-        TOther? expected)
+        EvaluationMetadata<TOther> mapped)
     {
         // Already evaluated (the mapped context evaluates it first), so this is the cached value.
-        var (actual, _) = await source.GetAsync().ConfigureAwait(false);
-
-        TValue? expectedAsSource;
-        try
-        {
-            expectedAsSource = toSourceType(expected);
-        }
-        catch (Exception e)
-        {
-            return (false, actual, e);
-        }
-
-        return (EqualityComparer<TValue>.Default.Equals(actual!, expectedAsSource!), actual, null);
+        var (actual, exception) = await source.GetAsync().ConfigureAwait(false);
+        return new EvaluationMetadata<TValue>(actual, exception, mapped.StartTime, mapped.EndTime);
     }
 
     public static string Format(object? value) => value?.ToString() ?? "null";
@@ -198,77 +190,67 @@ internal static class CrossTypeComparison
 /// equivalent, e.g. <c>3.5m</c> for <c>int</c>, or <see langword="null"/> for <c>decimal</c>.
 /// </summary>
 internal sealed class CrossTypeValueNotRepresentableException(object? actual, Type sourceType, Type otherType)
-    : Exception($"The value {CrossTypeComparison.Format(actual)} of type '{sourceType}' has no equivalent '{otherType}' value.")
-{
-    public object? Actual { get; } = actual;
-}
+    : Exception($"The value {CrossTypeComparison.Format(actual)} of type '{sourceType}' has no equivalent '{otherType}' value.");
 
 internal sealed class SourceTypeEqualsAssertion<TValue, TOther>(
     AssertionContext<TOther> context,
     EvaluationContext<TValue> source,
-    Func<TOther?, TValue?> toSourceType,
-    TOther? expected)
+    TOther? expected,
+    TValue? expectedAsSource)
     : EqualsAssertion<TOther>(context, expected)
 {
+    private EqualsAssertion<TValue>? _sameType;
+
     protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TOther> metadata)
     {
-        // An exception from evaluating the source itself is reported as usual.
-        if (metadata.Exception is not null and not CrossTypeValueNotRepresentableException)
+        var sourceMetadata = await CrossTypeComparison.GetSourceMetadataAsync(source, metadata).ConfigureAwait(false);
+        return await SameType().InternalCheckAsync(sourceMetadata).ConfigureAwait(false);
+    }
+
+    protected override string GetExpectation() => SameType().InternalGetExpectation();
+
+    // The same-type assertion with this assertion's IgnoringType options (re-applied on each use, as
+    // they can be added after construction). Its own expression builder keeps those calls out of the message.
+    private EqualsAssertion<TValue> SameType()
+    {
+        _sameType ??= new EqualsAssertion<TValue>(new AssertionContext<TValue>(source, new StringBuilder()), expectedAsSource);
+        foreach (var type in IgnoredTypes)
         {
-            return await base.CheckAsync(metadata).ConfigureAwait(false);
+            _sameType.IgnoringType(type);
         }
 
-        var (equal, actual, exception) = await CrossTypeComparison.CompareAsSourceTypeAsync(source, toSourceType, Expected).ConfigureAwait(false);
-        if (exception is not null)
-        {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}", exception);
-        }
-
-        if (equal)
-        {
-            return AssertionResult.Passed;
-        }
-
-        // Prefer the richer TOther failure message (collection previews, member diffs) when the
-        // actual value has a TOther equivalent, but never let it turn a source-type mismatch into a pass.
-        if (metadata.Exception is null)
-        {
-            var typedResult = await base.CheckAsync(metadata).ConfigureAwait(false);
-            if (!typedResult.IsPassed)
-            {
-                return typedResult;
-            }
-        }
-
-        return AssertionResult.Failed($"received {CrossTypeComparison.Format(actual)}");
+        return _sameType;
     }
 }
 
 internal sealed class SourceTypeNotEqualsAssertion<TValue, TOther>(
     AssertionContext<TOther> context,
     EvaluationContext<TValue> source,
-    Func<TOther?, TValue?> toSourceType,
-    TOther notExpected)
+    TOther notExpected,
+    TValue notExpectedAsSource)
     : NotEqualsAssertion<TOther>(context, notExpected)
 {
-    private readonly TOther _notExpected = notExpected;
+    private NotEqualsAssertion<TValue>? _sameType;
 
     protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TOther> metadata)
     {
-        if (metadata.Exception is not null and not CrossTypeValueNotRepresentableException)
+        var sourceMetadata = await CrossTypeComparison.GetSourceMetadataAsync(source, metadata).ConfigureAwait(false);
+        return await SameType().InternalCheckAsync(sourceMetadata).ConfigureAwait(false);
+    }
+
+    protected override string GetExpectation() => SameType().InternalGetExpectation();
+
+    // The same-type assertion with this assertion's IgnoringType options (re-applied on each use, as
+    // they can be added after construction). Its own expression builder keeps those calls out of the message.
+    private NotEqualsAssertion<TValue> SameType()
+    {
+        _sameType ??= new NotEqualsAssertion<TValue>(new AssertionContext<TValue>(source, new StringBuilder()), notExpectedAsSource);
+        foreach (var type in IgnoredTypes)
         {
-            return await base.CheckAsync(metadata).ConfigureAwait(false);
+            _sameType.IgnoringType(type);
         }
 
-        var (equal, actual, exception) = await CrossTypeComparison.CompareAsSourceTypeAsync(source, toSourceType, _notExpected).ConfigureAwait(false);
-        if (exception is not null)
-        {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}", exception);
-        }
-
-        return equal
-            ? AssertionResult.Failed($"received {CrossTypeComparison.Format(actual)}")
-            : AssertionResult.Passed;
+        return _sameType;
     }
 }
 
@@ -336,118 +318,104 @@ internal static class ImplicitConversionCache
     {
         result = default;
 
-        object? candidate;
         if (value is TTo direct)
         {
             // Reference, boxing or identity conversion: keep the actual instance.
-            candidate = direct;
-        }
-        else if (value is null && default(TTo) is null)
-        {
-            candidate = null;
-        }
-        else if (value is not null && TryConvertNumeric(value, Nullable.GetUnderlyingType(typeof(TTo)) ?? typeof(TTo), out var numeric))
-        {
-            candidate = numeric;
-        }
-        else if (TryGetConverter<TFrom, TTo>() is { } converter)
-        {
-            candidate = converter(value);
-        }
-        else
-        {
-            return false;
+            result = direct;
+            return true;
         }
 
-        if (candidate is null && default(TTo) is not null)
-        {
-            return false;
-        }
-
-        var typed = (TTo?)candidate;
-        TFrom? roundTripped;
         try
         {
-            roundTripped = toFrom(typed);
+            object? candidate;
+            if (value is null)
+            {
+                candidate = null;
+            }
+            else if (TryConvertNumeric(value, Nullable.GetUnderlyingType(typeof(TTo)) ?? typeof(TTo), out var numeric))
+            {
+                // Also covers explicit numeric conversions (decimal -> int); the round trip rejects lossy ones.
+                candidate = numeric;
+            }
+            else if (TryGetConverter<TFrom, TTo>() is { } converter)
+            {
+                candidate = converter(value);
+            }
+            else
+            {
+                return false;
+            }
+
+            if (candidate is null && default(TTo) is not null)
+            {
+                return false;
+            }
+
+            var typed = (TTo?)candidate;
+            if (!EqualityComparer<TFrom>.Default.Equals(toFrom(typed)!, value!))
+            {
+                return false;
+            }
+
+            result = typed;
+            return true;
         }
         catch (Exception)
         {
-            // e.g. a user-defined operator that rejects null: there is no exact equivalent.
+            // A user-defined operator rejected the value in either direction: there is no exact equivalent.
             return false;
         }
-
-        if (!EqualityComparer<TFrom>.Default.Equals(roundTripped!, value!))
-        {
-            return false;
-        }
-
-        result = typed;
-        return true;
     }
 
+    /// <summary>
+    /// Builds the C# implicit conversion from <typeparamref name="TFrom"/> to <typeparamref name="TTo"/>, if
+    /// there is one. Values are handled boxed, where <c>T?</c> and <c>T</c> look the same (a boxed
+    /// <c>int?</c> is a boxed <c>int</c> or null), so nullable wrapping and lifting are applied once here
+    /// for every kind of conversion rather than per kind.
+    /// </summary>
     [RequiresUnreferencedCode("Reflects over user-defined operators on TFrom and TTo.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "User-defined operators are public static methods on TFrom or TTo; if trimmed, IsEqualTo throws InvalidOperationException at call time.")]
     private static Func<TFrom?, TTo?>? BuildConverter<TFrom, TTo>(ConversionNullHandling nullHandling)
     {
         var fromType = typeof(TFrom);
         var toType = typeof(TTo);
+        var fromUnderlying = Nullable.GetUnderlyingType(fromType);
+        var toUnderlying = Nullable.GetUnderlyingType(toType);
 
-        // C# allows `public static implicit operator TTo(TFrom)` to be declared on
-        // either participant. Try TFrom first (the common Value Object pattern),
-        // then fall back to TTo for cases where the conversion lives on the target.
-        var op = FindImplicitOperator(fromType, fromType, toType)
-                 ?? FindImplicitOperator(toType, fromType, toType);
-
-        if (op is not null)
+        // A user-defined operator with exactly this signature. C# calls it even with null.
+        if (FindImplicitOperator(fromType, toType) is { } exact)
         {
-            // MethodInfo.Invoke boxes value-type arguments on every call. An
-            // Expression.Lambda<Func<TFrom,TTo>>(...).Compile() avoids the box but
-            // requires [RequiresDynamicCode] which breaks Native AOT compatibility,
-            // so we accept the boxing here.
-            if (nullHandling == ConversionNullHandling.InvokeOperator)
-            {
-                return value => (TTo?)InvokeOperator(op, value);
-            }
-
-            return value =>
-            {
-                if (value is null)
-                {
-                    return default;
-                }
-                return (TTo?)InvokeOperator(op, value);
-            };
+            return nullHandling == ConversionNullHandling.InvokeOperator
+                ? value => (TTo?)InvokeOperator(exact, value)
+                : value => value is null ? default : (TTo?)InvokeOperator(exact, value);
         }
 
-        // Built-in implicit reference, boxing and nullable-wrapping conversions
-        // (string -> object, int -> IComparable, decimal -> decimal?).
-        if (toType.IsAssignableFrom(fromType))
+        // Reference, boxing and nullable-wrapping conversions (string -> object, decimal -> decimal?),
+        // including boxing T? to an interface that T implements (int? -> IComparable).
+        if (toType.IsAssignableFrom(fromType)
+            || (fromUnderlying is not null && !toType.IsValueType && toType.IsAssignableFrom(fromUnderlying)))
         {
             return static value => (TTo?)(object?)value;
         }
 
-        // Built-in implicit numeric conversions and their lifted forms (int -> double,
-        // int -> long?, int? -> decimal?). T? -> U is an explicit conversion, so it is excluded.
-        var fromUnderlying = Nullable.GetUnderlyingType(fromType);
-        var toUnderlying = Nullable.GetUnderlyingType(toType);
+        // T? -> U is explicit. T? -> U? is the lifted form of T -> U, and T -> U? is T -> U followed by wrapping.
         if (fromUnderlying is not null && toUnderlying is null)
         {
             return null;
         }
 
-        var numericTarget = toUnderlying ?? toType;
-        if (IsImplicitNumericConversion(fromUnderlying ?? fromType, numericTarget))
-        {
-            return value =>
-            {
-                if (value is null)
-                {
-                    return default;
-                }
+        var source = fromUnderlying ?? fromType;
+        var target = toUnderlying ?? toType;
 
-                TryConvertNumeric(value, numericTarget, out var converted);
-                return (TTo?)converted;
-            };
+        if (FindImplicitOperator(source, target) is { } op)
+        {
+            // A lifted conversion maps null to null; only a reference-type source passes null to the operator.
+            var invokeOnNull = nullHandling == ConversionNullHandling.InvokeOperator && fromUnderlying is null;
+            return value => value is null && !invokeOnNull ? default : (TTo?)InvokeOperator(op, value);
+        }
+
+        if (IsImplicitNumericConversion(source, target))
+        {
+            return value => value is not null && TryConvertNumeric(value, target, out var converted) ? (TTo?)converted : default;
         }
 
         return null;
@@ -455,6 +423,8 @@ internal static class ImplicitConversionCache
 
     private static object? InvokeOperator(MethodInfo op, object? value)
     {
+        // MethodInfo.Invoke boxes value-type arguments on every call. A compiled expression avoids the box
+        // but requires [RequiresDynamicCode], which breaks Native AOT compatibility, so we accept the boxing.
         try
         {
             return op.Invoke(null, [value]);
@@ -472,7 +442,7 @@ internal static class ImplicitConversionCache
             TypeCode.SByte or TypeCode.Byte or TypeCode.Int16 or TypeCode.UInt16 or TypeCode.Int32 or TypeCode.UInt32
             or TypeCode.Int64 or TypeCode.UInt64 or TypeCode.Char or TypeCode.Single or TypeCode.Double or TypeCode.Decimal;
 
-    /// <summary>The C# implicit numeric conversions (C# spec §10.2.3).</summary>
+    /// <summary>The C# implicit numeric conversions (C# spec §10.2.3) between non-nullable types.</summary>
     private static bool IsImplicitNumericConversion(Type from, Type to)
     {
         if (!IsNumeric(from) || !IsNumeric(to))
@@ -511,8 +481,18 @@ internal static class ImplicitConversionCache
 
         try
         {
-            // IConvertible on char supports only integral targets, so route char through int.
-            result = Convert.ChangeType(value is char c ? (int)c : value, target, CultureInfo.InvariantCulture);
+            // IConvertible converts char only to and from integral types, so route char through int
+            // in both directions: 'A' -> 65 -> 65.0, and 65.0 -> 65 -> 'A'.
+            if (value is char c)
+            {
+                value = (int)c;
+            }
+            else if (target == typeof(char) && value is float or double or decimal)
+            {
+                value = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+            }
+
+            result = Convert.ChangeType(value, target, CultureInfo.InvariantCulture);
             return true;
         }
         catch (Exception e) when (e is OverflowException or InvalidCastException)
@@ -522,12 +502,19 @@ internal static class ImplicitConversionCache
     }
 
     /// <summary>
-    /// Looks for <c>public static implicit operator <paramref name="toType"/>(<paramref name="fromType"/>)</c>
-    /// declared on <paramref name="definedOn"/>. C# requires <paramref name="definedOn"/> to be either
-    /// <paramref name="fromType"/> or <paramref name="toType"/>; we try both call sites.
+    /// Looks for <c>public static implicit operator <paramref name="toType"/>(<paramref name="fromType"/>)</c>.
+    /// C# requires it to be declared on the source or target type (on the underlying type, for an operator
+    /// with a nullable signature), so both are searched.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "User-defined operators are looked up reflectively; warning is surfaced via RequiresUnreferencedCode on public entry points.")]
-    private static MethodInfo? FindImplicitOperator(
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "See IL2072.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "User-defined operators are looked up reflectively; the warning is surfaced via RequiresUnreferencedCode on the public entry points, and if they are trimmed, IsEqualTo throws InvalidOperationException at call time.")]
+    private static MethodInfo? FindImplicitOperator(Type fromType, Type toType)
+    {
+        return FindImplicitOperatorOn(Nullable.GetUnderlyingType(fromType) ?? fromType, fromType, toType)
+               ?? FindImplicitOperatorOn(Nullable.GetUnderlyingType(toType) ?? toType, fromType, toType);
+    }
+
+    private static MethodInfo? FindImplicitOperatorOn(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type definedOn,
         Type fromType,
         Type toType)
