@@ -147,10 +147,9 @@ public class OtlpReceiverIngestionTests
         // Mock upstream stands in for the Aspire dashboard — gates on the api-key header
         // so we can prove the receiver actually propagated it instead of just dropping body
         // bytes onto a permissive endpoint.
-        using var upstreamListener = new HttpListener();
-        var upstreamPort = LoopbackHttpListenerFactory.FindFreePort();
-        upstreamListener.Prefixes.Add($"http://127.0.0.1:{upstreamPort}/");
-        upstreamListener.Start();
+        // Create retries when another listener takes the probed port before this one binds it.
+        var (upstreamListener, upstreamPort) = LoopbackHttpListenerFactory.Create();
+        using var upstreamListenerScope = upstreamListener;
 
         var receivedAuth = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
         var listenerTask = Task.Run(async () =>
@@ -196,10 +195,9 @@ public class OtlpReceiverIngestionTests
     [Test]
     public async Task Receiver_DrainAsync_WaitsForInFlightForwardBeforeReturning()
     {
-        using var upstreamListener = new HttpListener();
-        var upstreamPort = LoopbackHttpListenerFactory.FindFreePort();
-        upstreamListener.Prefixes.Add($"http://127.0.0.1:{upstreamPort}/");
-        upstreamListener.Start();
+        // Create retries when another listener takes the probed port before this one binds it.
+        var (upstreamListener, upstreamPort) = LoopbackHttpListenerFactory.Create();
+        using var upstreamListenerScope = upstreamListener;
 
         var upstreamReceived = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var releaseUpstream = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
