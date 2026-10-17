@@ -120,12 +120,15 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintValidationTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintValidationTests>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.GenericConstraintValidationTests>(
-            methodName: "GenericMethodWithClassConstraint_InvalidType<int>",
-            fullyQualifiedName: "TUnit.TestProject.GenericConstraintValidationTests.GenericMethodWithClassConstraint_InvalidType<int>",
+            methodName: "GenericMethodWithClassConstraint_InvalidType",
+            fullyQualifiedName: "TUnit.TestProject.GenericConstraintValidationTests.GenericMethodWithClassConstraint_InvalidType",
             filePath: "",
             lineNumber: 70,
             hasDataSource: true,
-            testDataSources: new global::TUnit.Core.IDataSourceAttribute[] { new global::TUnit.Core.GenericConstraintViolationDataSource("Type 'Int32' does not satisfy the 'class' constraint for generic parameter 'T'") },
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.GenericConstraintViolationDataSource("Type 'Int32' does not satisfy the 'class' constraint for generic parameter 'T'", new global::TUnit.TestProject.IntDataSourceForConstraint()),
+},
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
@@ -264,12 +267,15 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintValidationTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintValidationTests>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.GenericConstraintValidationTests>(
-            methodName: "GenericMethodWithInterfaceConstraint_InvalidType<global::TUnit.TestProject.NonImplementingClass>",
-            fullyQualifiedName: "TUnit.TestProject.GenericConstraintValidationTests.GenericMethodWithInterfaceConstraint_InvalidType<global::TUnit.TestProject.NonImplementingClass>",
+            methodName: "GenericMethodWithInterfaceConstraint_InvalidType",
+            fullyQualifiedName: "TUnit.TestProject.GenericConstraintValidationTests.GenericMethodWithInterfaceConstraint_InvalidType",
             filePath: "",
             lineNumber: 89,
             hasDataSource: true,
-            testDataSources: new global::TUnit.Core.IDataSourceAttribute[] { new global::TUnit.Core.GenericConstraintViolationDataSource("Type 'NonImplementingClass' does not implement interface 'ITestInterface' required for generic parameter 'T'") },
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.GenericConstraintViolationDataSource("Type 'NonImplementingClass' does not implement interface 'ITestInterface' required for generic parameter 'T'", new global::TUnit.TestProject.NonImplementingClassDataSource()),
+},
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
@@ -408,12 +414,15 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintValidationTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintValidationTests>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.GenericConstraintValidationTests>(
-            methodName: "GenericMethodWithStructConstraint_InvalidType<string>",
-            fullyQualifiedName: "TUnit.TestProject.GenericConstraintValidationTests.GenericMethodWithStructConstraint_InvalidType<string>",
+            methodName: "GenericMethodWithStructConstraint_InvalidType",
+            fullyQualifiedName: "TUnit.TestProject.GenericConstraintValidationTests.GenericMethodWithStructConstraint_InvalidType",
             filePath: "",
             lineNumber: 107,
             hasDataSource: true,
-            testDataSources: new global::TUnit.Core.IDataSourceAttribute[] { new global::TUnit.Core.GenericConstraintViolationDataSource("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'") },
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.GenericConstraintViolationDataSource("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'", new global::TUnit.Core.ArgumentsAttribute("invalid")),
+},
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
@@ -525,12 +534,15 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             createAttributes: __Attributes_0,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.GenericConstraintValidationTests>(
-            methodName: "GenericMethodWithStructConstraint_MixedRows<string>",
-            fullyQualifiedName: "TUnit.TestProject.GenericConstraintValidationTests.GenericMethodWithStructConstraint_MixedRows<string>",
+            methodName: "GenericMethodWithStructConstraint_MixedRows",
+            fullyQualifiedName: "TUnit.TestProject.GenericConstraintValidationTests.GenericMethodWithStructConstraint_MixedRows",
             filePath: "",
             lineNumber: 117,
             hasDataSource: true,
-            testDataSources: new global::TUnit.Core.IDataSourceAttribute[] { new global::TUnit.Core.GenericConstraintViolationDataSource("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'") },
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.GenericConstraintViolationDataSource("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'", new global::TUnit.Core.ArgumentsAttribute("invalid")),
+},
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
@@ -593,12 +605,15 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintValidationTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintValidationTests>[]
     {
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.GenericConstraintValidationTests>(
-            methodName: "GenericMethodWithStructConstraint_SkippedInvalidType<string>",
-            fullyQualifiedName: "TUnit.TestProject.GenericConstraintValidationTests.GenericMethodWithStructConstraint_SkippedInvalidType<string>",
+            methodName: "GenericMethodWithStructConstraint_SkippedInvalidType",
+            fullyQualifiedName: "TUnit.TestProject.GenericConstraintValidationTests.GenericMethodWithStructConstraint_SkippedInvalidType",
             filePath: "",
             lineNumber: 127,
             hasDataSource: true,
-            testDataSources: new global::TUnit.Core.IDataSourceAttribute[] { new global::TUnit.Core.GenericConstraintViolationDataSource("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'") },
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.GenericConstraintViolationDataSource("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'", new global::TUnit.Core.ArgumentsAttribute("invalid")),
+},
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
