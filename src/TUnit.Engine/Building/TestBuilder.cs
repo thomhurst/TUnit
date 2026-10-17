@@ -1206,8 +1206,9 @@ internal sealed class TestBuilder : ITestBuilder
         }
 
         // All skip attributes are basic SkipAttribute instances
-        // Return the first reason (they all should skip), or null if no skip attributes
-        return firstSkipAttribute?.Reason;
+        // Return the first reason (they all should skip), or null if no skip attributes.
+        // An empty reason is normalized, because empty means "custom skip attribute" here (#7077).
+        return firstSkipAttribute is null ? null : SkipAttribute.NormalizeReason(firstSkipAttribute.Reason);
     }
 
     private async ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext, CancellationToken cancellationToken = default)
