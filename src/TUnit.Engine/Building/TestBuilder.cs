@@ -299,7 +299,23 @@ internal sealed class TestBuilder : ITestBuilder
 
                                     var (classDataUnwrapped, classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
                                     classData = classDataUnwrapped;
-                                    var (methodData, methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
+
+                                    object?[]? methodRow;
+                                    try
+                                    {
+                                        methodRow = await methodDataFactory();
+                                    }
+                                    catch (GenericTypeResolutionException ex)
+                                    {
+                                        // The row's inferred type arguments break a generic constraint
+                                        // (GenericConstraintViolationDataSource): fail this row only, so
+                                        // the other rows of the test still build.
+                                        tests.Add(CreateFailedTestForDataGenerationError(metadata, ex,
+                                            CreateRowCombination(classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i)));
+                                        continue;
+                                    }
+
+                                    var (methodData, methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(methodRow ?? [], metadata.MethodMetadata.Parameters);
 
 #if NET
                                 // Re-register: classDataFactory() was called again above and may return
@@ -379,15 +395,17 @@ internal sealed class TestBuilder : ITestBuilder
                                             catch (Exception innerEx)
                                             {
                                                 // If we still can't resolve, create a failed test
-                                                var failedTest = CreateFailedTestForDataGenerationError(metadata, innerEx);
+                                                var failedTest = CreateFailedTestForDataGenerationError(metadata, innerEx,
+                                                    CreateRowCombination(classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i));
                                                 tests.Add(failedTest);
                                                 continue;
                                             }
                                         }
                                         catch (Exception ex)
                                         {
-                                            // If generic resolution fails, create a failed test
-                                            var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
+                                            // If generic resolution fails, create a failed test for this row
+                                            var failedTest = CreateFailedTestForDataGenerationError(metadata, ex,
+                                                CreateRowCombination(classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i));
                                             tests.Add(failedTest);
                                             continue;
                                         }
@@ -1318,6 +1336,28 @@ internal sealed class TestBuilder : ITestBuilder
         return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination());
     }
 
+    /// <summary>
+    /// Identifies the data row a failed test was built from, so that several failing rows of one
+    /// test (for example, rows whose inferred type arguments break a generic constraint) get
+    /// distinct test ids.
+    /// </summary>
+    private static TestDataCombination CreateRowCombination(
+        int classDataAttributeIndex,
+        int classDataLoopIndex,
+        int methodDataAttributeIndex,
+        int methodDataLoopIndex,
+        int repeatIndex)
+    {
+        return new TestDataCombination
+        {
+            ClassDataSourceIndex = classDataAttributeIndex,
+            ClassLoopIndex = classDataLoopIndex,
+            MethodDataSourceIndex = methodDataAttributeIndex,
+            MethodLoopIndex = methodDataLoopIndex,
+            RepeatIndex = repeatIndex
+        };
+    }
+
     private AbstractExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
@@ -2060,12 +2100,14 @@ internal sealed class TestBuilder : ITestBuilder
                 }
                 catch (Exception ex)
                 {
-                    return CreateFailedTestForDataGenerationError(metadata, ex);
+                    return CreateFailedTestForDataGenerationError(metadata, ex,
+                        CreateRowCombination(classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex));
                 }
             }
             catch (Exception ex)
             {
-                return CreateFailedTestForDataGenerationError(metadata, ex);
+                return CreateFailedTestForDataGenerationError(metadata, ex,
+                    CreateRowCombination(classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex));
             }
 
             if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
@@ -2132,7 +2174,8 @@ internal sealed class TestBuilder : ITestBuilder
         }
         catch (Exception ex)
         {
-            return CreateFailedTestForDataGenerationError(metadata, ex);
+            return CreateFailedTestForDataGenerationError(metadata, ex,
+                CreateRowCombination(classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex));
         }
     }
 
