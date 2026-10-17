@@ -69,10 +69,10 @@ public class GenericConstraintValidationTests
 
     [Test]
     [IntDataSourceForConstraint]
-    [Skip("Expected to fail - int violates class constraint")]
+    [EngineTest(ExpectedResult.Failure)]
     public async Task GenericMethodWithClassConstraint_InvalidType<T>(T value) where T : class
     {
-        // This should fail during constraint validation - int is a value type
+        // Never runs: test building fails with a GenericTypeResolutionException in both engine modes (#7097) - int is a value type
         await Task.CompletedTask;
     }
 
@@ -88,10 +88,10 @@ public class GenericConstraintValidationTests
 
     [Test]
     [NonImplementingClassDataSource]
-    [Skip("Expected to fail - NonImplementingClass doesn't implement ITestInterface")]
+    [EngineTest(ExpectedResult.Failure)]
     public async Task GenericMethodWithInterfaceConstraint_InvalidType<T>(T value) where T : ITestInterface
     {
-        // This should fail during constraint validation - NonImplementingClass doesn't implement ITestInterface
+        // Never runs: test building fails with a GenericTypeResolutionException in both engine modes (#7097) - NonImplementingClass doesn't implement ITestInterface
         await Task.CompletedTask;
     }
 
@@ -106,10 +106,30 @@ public class GenericConstraintValidationTests
 
     [Test]
     [Arguments("invalid")]
-    [Skip("Expected to fail - string violates struct constraint")]
+    [EngineTest(ExpectedResult.Failure)]
     public async Task GenericMethodWithStructConstraint_InvalidType<T>(T value) where T : struct
     {
-        // This should fail during constraint validation - string is not a value type
+        // Never runs: test building fails with a GenericTypeResolutionException in both engine modes (#7097) - string is not a value type
+        await Task.CompletedTask;
+    }
+
+    // One valid row and one invalid row: the valid row runs and the invalid row fails, in both modes (#7097)
+    [Test]
+    [Arguments(5)]
+    [Arguments("invalid")]
+    public async Task GenericMethodWithStructConstraint_MixedRows<T>(T value) where T : struct
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+    }
+
+    // A constraint violation is a test-building error, so it is reported as a failure even when the
+    // test is skipped. Both modes must agree (#7097).
+    [Test]
+    [Arguments("invalid")]
+    [Skip("Skip does not hide a generic constraint violation")]
+    [EngineTest(ExpectedResult.Failure)]
+    public async Task GenericMethodWithStructConstraint_SkippedInvalidType<T>(T value) where T : struct
+    {
         await Task.CompletedTask;
     }
 }

@@ -767,6 +767,15 @@ namespace
         public . ExecuteBeforeTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action) { }
         public . ExecuteTest(.TestContext context, <.> action) { }
     }
+    public sealed class GenericConstraintViolationDataSource : .IDataSourceAttribute
+    {
+        public GenericConstraintViolationDataSource(string message) { }
+        public bool DeferEnumeration { get; set; }
+        public string Message { get; }
+        public bool SkipIfEmpty { get; set; }
+        [.(typeof(.GenericConstraintViolationDataSource.<GetDataRowsAsync>d__10))]
+        public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+    }
     public sealed class GenericMethodInfo
     {
         public GenericMethodInfo() { }
