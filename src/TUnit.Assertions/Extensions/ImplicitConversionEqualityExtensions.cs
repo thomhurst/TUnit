@@ -38,6 +38,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
@@ -77,10 +78,10 @@ public static partial class EqualsAssertionExtensions
     {
         source.Context.ExpressionBuilder.Append($".IsEqualTo({expectedExpression})");
 
-        if (ImplicitConversionCache.TryGetConverter<TOther, TValue>() is { } toSourceType)
+        if (ImplicitConversionCache.TryGetConverter<TOther, TValue>(ConversionNullHandling.InvokeOperator) is { } toSourceType)
         {
-            var sourceTyped = source.Context.Map(CrossTypeComparison.CreateSourceTypeMapper<TValue, TOther>(toSourceType, expected));
-            return new SourceTypeEqualsAssertion<TOther>(sourceTyped, expected);
+            var sourceTyped = source.Context.Map(CrossTypeComparison.CreateSourceTypeMapper<TValue, TOther>(toSourceType));
+            return new SourceTypeEqualsAssertion<TValue, TOther>(sourceTyped, source.Context.Evaluation, toSourceType, expected);
         }
 
         var converter = ImplicitConversionCache.GetConverter<TValue, TOther>();
@@ -115,10 +116,10 @@ public static partial class NotEqualsAssertionExtensions
     {
         source.Context.ExpressionBuilder.Append($".IsNotEqualTo({notExpectedExpression})");
 
-        if (ImplicitConversionCache.TryGetConverter<TOther, TValue>() is { } toSourceType)
+        if (ImplicitConversionCache.TryGetConverter<TOther, TValue>(ConversionNullHandling.InvokeOperator) is { } toSourceType)
         {
-            var sourceTyped = source.Context.Map(CrossTypeComparison.CreateSourceTypeMapper<TValue, TOther>(toSourceType, notExpected));
-            return new SourceTypeNotEqualsAssertion<TOther>(sourceTyped, notExpected!);
+            var sourceTyped = source.Context.Map(CrossTypeComparison.CreateSourceTypeMapper<TValue, TOther>(toSourceType));
+            return new SourceTypeNotEqualsAssertion<TValue, TOther>(sourceTyped, source.Context.Evaluation, toSourceType, notExpected!);
         }
 
         var converter = ImplicitConversionCache.GetConverter<TValue, TOther>();
@@ -143,33 +144,50 @@ public sealed class CrossTypeOverloadMarker
 
 /// <summary>
 /// Source-type comparison for the cross-type overloads when <c>TOther</c> converts implicitly to
-/// <c>TValue</c> (see the file header). The returned assertion is still typed on <c>TOther</c>, so the
-/// actual value is mapped to its exact <c>TOther</c> equivalent for any chained assertions. When it
-/// has none (e.g. <c>3.5m</c> for <c>int</c>), it cannot equal the expected value, and the mapper
-/// raises <see cref="CrossTypeValueNotRepresentableException"/>, which
-/// <see cref="SourceTypeEqualsAssertion{TOther}"/> and <see cref="SourceTypeNotEqualsAssertion{TOther}"/>
-/// turn into an ordinary result.
+/// <c>TValue</c> (see the file header). The equality result is computed as <c>TValue</c> by
+/// <see cref="SourceTypeEqualsAssertion{TValue, TOther}"/> and
+/// <see cref="SourceTypeNotEqualsAssertion{TValue, TOther}"/>, which read the source value directly.
+/// The returned assertion is still typed on <c>TOther</c>, so the mapper only supplies the value that
+/// chained assertions (and <c>await</c>) see: the actual value itself when it already is a <c>TOther</c>
+/// (preserving reference identity), otherwise its exact <c>TOther</c> equivalent. It is never replaced
+/// by the expected value. When there is no exact equivalent (e.g. <c>3.5m</c> for <c>int</c>), the
+/// mapper raises <see cref="CrossTypeValueNotRepresentableException"/>, which the source-type
+/// assertions ignore because their result does not depend on the mapped value.
 /// </summary>
 internal static class CrossTypeComparison
 {
     [RequiresUnreferencedCode("Reflects over user-defined operators on TValue and TOther.")]
-    public static Func<TValue?, TOther?> CreateSourceTypeMapper<TValue, TOther>(Func<TOther?, TValue?> toSourceType, TOther? expected)
+    public static Func<TValue?, TOther?> CreateSourceTypeMapper<TValue, TOther>(Func<TOther?, TValue?> toSourceType)
     {
-        return actual =>
+        return actual => ImplicitConversionCache.TryConvertExactly(actual, toSourceType, out var converted)
+            ? converted
+            : throw new CrossTypeValueNotRepresentableException(actual, typeof(TValue), typeof(TOther));
+    }
+
+    /// <summary>
+    /// Compares the source value with the expected value as <typeparamref name="TValue"/>, as the
+    /// same-type overload would. A conversion that throws (e.g. a user-defined operator rejecting
+    /// <see langword="null"/>) is reported as the failure's exception.
+    /// </summary>
+    public static async Task<(bool Equal, TValue? Actual, Exception? Exception)> CompareAsSourceTypeAsync<TValue, TOther>(
+        EvaluationContext<TValue> source,
+        Func<TOther?, TValue?> toSourceType,
+        TOther? expected)
+    {
+        // Already evaluated (the mapped context evaluates it first), so this is the cached value.
+        var (actual, _) = await source.GetAsync().ConfigureAwait(false);
+
+        TValue? expectedAsSource;
+        try
         {
-            // Compare where the same-type overload would: as TValue, after converting the expected value.
-            if (EqualityComparer<TValue>.Default.Equals(actual!, toSourceType(expected)!))
-            {
-                return expected;
-            }
+            expectedAsSource = toSourceType(expected);
+        }
+        catch (Exception e)
+        {
+            return (false, actual, e);
+        }
 
-            if (ImplicitConversionCache.TryConvertExactly(actual, toSourceType, out var converted))
-            {
-                return converted;
-            }
-
-            throw new CrossTypeValueNotRepresentableException(actual, typeof(TValue), typeof(TOther));
-        };
+        return (EqualityComparer<TValue>.Default.Equals(actual!, expectedAsSource!), actual, null);
     }
 
     public static string Format(object? value) => value?.ToString() ?? "null";
@@ -185,22 +203,92 @@ internal sealed class CrossTypeValueNotRepresentableException(object? actual, Ty
     public object? Actual { get; } = actual;
 }
 
-internal sealed class SourceTypeEqualsAssertion<TOther>(AssertionContext<TOther> context, TOther? expected)
+internal sealed class SourceTypeEqualsAssertion<TValue, TOther>(
+    AssertionContext<TOther> context,
+    EvaluationContext<TValue> source,
+    Func<TOther?, TValue?> toSourceType,
+    TOther? expected)
     : EqualsAssertion<TOther>(context, expected)
 {
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TOther> metadata)
-        => metadata.Exception is CrossTypeValueNotRepresentableException notRepresentable
-            ? Task.FromResult(AssertionResult.Failed($"received {CrossTypeComparison.Format(notRepresentable.Actual)}"))
-            : base.CheckAsync(metadata);
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TOther> metadata)
+    {
+        // An exception from evaluating the source itself is reported as usual.
+        if (metadata.Exception is not null and not CrossTypeValueNotRepresentableException)
+        {
+            return await base.CheckAsync(metadata).ConfigureAwait(false);
+        }
+
+        var (equal, actual, exception) = await CrossTypeComparison.CompareAsSourceTypeAsync(source, toSourceType, Expected).ConfigureAwait(false);
+        if (exception is not null)
+        {
+            return AssertionResult.Failed($"threw {exception.GetType().Name}", exception);
+        }
+
+        if (equal)
+        {
+            return AssertionResult.Passed;
+        }
+
+        // Prefer the richer TOther failure message (collection previews, member diffs) when the
+        // actual value has a TOther equivalent, but never let it turn a source-type mismatch into a pass.
+        if (metadata.Exception is null)
+        {
+            var typedResult = await base.CheckAsync(metadata).ConfigureAwait(false);
+            if (!typedResult.IsPassed)
+            {
+                return typedResult;
+            }
+        }
+
+        return AssertionResult.Failed($"received {CrossTypeComparison.Format(actual)}");
+    }
 }
 
-internal sealed class SourceTypeNotEqualsAssertion<TOther>(AssertionContext<TOther> context, TOther notExpected)
+internal sealed class SourceTypeNotEqualsAssertion<TValue, TOther>(
+    AssertionContext<TOther> context,
+    EvaluationContext<TValue> source,
+    Func<TOther?, TValue?> toSourceType,
+    TOther notExpected)
     : NotEqualsAssertion<TOther>(context, notExpected)
 {
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TOther> metadata)
-        => metadata.Exception is CrossTypeValueNotRepresentableException
-            ? AssertionResult._passedTask
-            : base.CheckAsync(metadata);
+    private readonly TOther _notExpected = notExpected;
+
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TOther> metadata)
+    {
+        if (metadata.Exception is not null and not CrossTypeValueNotRepresentableException)
+        {
+            return await base.CheckAsync(metadata).ConfigureAwait(false);
+        }
+
+        var (equal, actual, exception) = await CrossTypeComparison.CompareAsSourceTypeAsync(source, toSourceType, _notExpected).ConfigureAwait(false);
+        if (exception is not null)
+        {
+            return AssertionResult.Failed($"threw {exception.GetType().Name}", exception);
+        }
+
+        return equal
+            ? AssertionResult.Failed($"received {CrossTypeComparison.Format(actual)}")
+            : AssertionResult.Passed;
+    }
+}
+
+/// <summary>
+/// How a converter built from a user-defined operator treats a <see langword="null"/> input.
+/// </summary>
+internal enum ConversionNullHandling
+{
+    /// <summary>
+    /// Map <see langword="null"/> to <see langword="default"/> without calling the operator. Used to
+    /// convert the actual value, so a null wrapper compares as null instead of throwing in an
+    /// operator such as <c>implicit operator string(ProductCode pc) =&gt; pc.Value</c>.
+    /// </summary>
+    ReturnDefault,
+
+    /// <summary>
+    /// Call the operator with <see langword="null"/>, as C# does. Used to convert the expected value to
+    /// the source type, where the same-type overload would run the operator at the call site (#7086).
+    /// </summary>
+    InvokeOperator,
 }
 
 /// <summary>
@@ -210,7 +298,8 @@ internal sealed class SourceTypeNotEqualsAssertion<TOther>(AssertionContext<TOth
 /// </summary>
 internal static class ImplicitConversionCache
 {
-    private static readonly ConcurrentDictionary<(Type From, Type To), Delegate?> Cache = new();
+    // A null value means "no implicit conversion"; GetOrAdd caches that negative result too.
+    private static readonly ConcurrentDictionary<(Type From, Type To, ConversionNullHandling NullHandling), Delegate?> Cache = new();
 
     /// <summary>
     /// Returns the implicit converter from <typeparamref name="TFrom"/> to <typeparamref name="TTo"/>,
@@ -227,13 +316,14 @@ internal static class ImplicitConversionCache
 
     /// <summary>
     /// Returns the implicit converter from <typeparamref name="TFrom"/> to <typeparamref name="TTo"/>,
-    /// or <see langword="null"/> when no implicit conversion exists.
+    /// or <see langword="null"/> when no implicit conversion exists. <paramref name="nullHandling"/>
+    /// controls whether a user-defined operator sees <see langword="null"/> inputs.
     /// </summary>
     [RequiresUnreferencedCode("Reflects over user-defined operators on TFrom and TTo.")]
-    public static Func<TFrom?, TTo?>? TryGetConverter<TFrom, TTo>()
+    public static Func<TFrom?, TTo?>? TryGetConverter<TFrom, TTo>(ConversionNullHandling nullHandling = ConversionNullHandling.ReturnDefault)
     {
-        var key = (typeof(TFrom), typeof(TTo));
-        return (Func<TFrom?, TTo?>?)Cache.GetOrAdd(key, static _ => BuildConverter<TFrom, TTo>());
+        var key = (typeof(TFrom), typeof(TTo), nullHandling);
+        return (Func<TFrom?, TTo?>?)Cache.GetOrAdd(key, static k => BuildConverter<TFrom, TTo>(k.NullHandling));
     }
 
     /// <summary>
@@ -249,7 +339,12 @@ internal static class ImplicitConversionCache
         object? candidate;
         if (value is TTo direct)
         {
+            // Reference, boxing or identity conversion: keep the actual instance.
             candidate = direct;
+        }
+        else if (value is null && default(TTo) is null)
+        {
+            candidate = null;
         }
         else if (value is not null && TryConvertNumeric(value, Nullable.GetUnderlyingType(typeof(TTo)) ?? typeof(TTo), out var numeric))
         {
@@ -270,7 +365,18 @@ internal static class ImplicitConversionCache
         }
 
         var typed = (TTo?)candidate;
-        if (!EqualityComparer<TFrom>.Default.Equals(toFrom(typed)!, value!))
+        TFrom? roundTripped;
+        try
+        {
+            roundTripped = toFrom(typed);
+        }
+        catch (Exception)
+        {
+            // e.g. a user-defined operator that rejects null: there is no exact equivalent.
+            return false;
+        }
+
+        if (!EqualityComparer<TFrom>.Default.Equals(roundTripped!, value!))
         {
             return false;
         }
@@ -281,7 +387,7 @@ internal static class ImplicitConversionCache
 
     [RequiresUnreferencedCode("Reflects over user-defined operators on TFrom and TTo.")]
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "User-defined operators are public static methods on TFrom or TTo; if trimmed, IsEqualTo throws InvalidOperationException at call time.")]
-    private static Func<TFrom?, TTo?>? BuildConverter<TFrom, TTo>()
+    private static Func<TFrom?, TTo?>? BuildConverter<TFrom, TTo>(ConversionNullHandling nullHandling)
     {
         var fromType = typeof(TFrom);
         var toType = typeof(TTo);
@@ -298,13 +404,18 @@ internal static class ImplicitConversionCache
             // Expression.Lambda<Func<TFrom,TTo>>(...).Compile() avoids the box but
             // requires [RequiresDynamicCode] which breaks Native AOT compatibility,
             // so we accept the boxing here.
+            if (nullHandling == ConversionNullHandling.InvokeOperator)
+            {
+                return value => (TTo?)InvokeOperator(op, value);
+            }
+
             return value =>
             {
                 if (value is null)
                 {
                     return default;
                 }
-                return (TTo?)op.Invoke(null, [value]);
+                return (TTo?)InvokeOperator(op, value);
             };
         }
 
@@ -340,6 +451,20 @@ internal static class ImplicitConversionCache
         }
 
         return null;
+    }
+
+    private static object? InvokeOperator(MethodInfo op, object? value)
+    {
+        try
+        {
+            return op.Invoke(null, [value]);
+        }
+        catch (TargetInvocationException e) when (e.InnerException is not null)
+        {
+            // Surface the operator's own exception, as a direct conversion in user code would.
+            ExceptionDispatchInfo.Capture(e.InnerException).Throw();
+            throw;
+        }
     }
 
     private static bool IsNumeric(Type type)

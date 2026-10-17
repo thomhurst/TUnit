@@ -121,4 +121,90 @@ public class Issue7073Tests
     {
         await EqualsAssertionExtensions.IsEqualTo<object, string>(Assert.That((object)"value"), "value");
     }
+
+    [Test]
+    public async Task Object_IsEqualTo_String_CrossTypeOverload_Chains_The_Actual_Reference()
+    {
+        // Equal contents, distinct instances: the chained assertion must see the actual object, not the expected one.
+        var actual = new string('x', 3);
+        var expected = new string('x', 3);
+
+        await EqualsAssertionExtensions.IsEqualTo<object, string>(Assert.That((object)actual), expected)
+            .And.IsSameReferenceAs(actual);
+    }
+
+    [Test]
+    public async Task Object_IsEqualTo_String_CrossTypeOverload_Returns_The_Actual_Reference()
+    {
+        var actual = new string('x', 3);
+        var expected = new string('x', 3);
+
+        var result = await EqualsAssertionExtensions.IsEqualTo<object, string>(Assert.That((object)actual), expected);
+
+        await Assert.That(ReferenceEquals(result, actual)).IsTrue();
+    }
+
+    [Test]
+    public async Task Looser_Equality_CrossTypeOverload_Passes_And_Chains_The_Actual_Value()
+    {
+        // CaseInsensitiveName equality ignores case, so the comparison as the source type passes even
+        // though the string forms differ. The chained assertion sees the actual value's string, "ABC".
+        await EqualsAssertionExtensions.IsEqualTo<CaseInsensitiveName, string>(Assert.That(new CaseInsensitiveName("ABC")), "abc")
+            .And.IsEqualTo("ABC");
+    }
+
+    [Test]
+    public async Task Looser_Equality_CrossTypeOverload_IsNotEqualTo_Fails_When_Equal_As_Source_Type()
+    {
+        await Assert.That(async () =>
+                await NotEqualsAssertionExtensions.IsNotEqualTo<CaseInsensitiveName, string>(Assert.That(new CaseInsensitiveName("ABC")), "abc"))
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Null_Expected_CrossTypeOverload_Invokes_User_Conversion()
+    {
+        // The same-type overload would run `implicit operator NullSentinelWrapper(string?)` on null,
+        // which maps it to the None sentinel, so this passes on C# 13+.
+        await EqualsAssertionExtensions.IsEqualTo<NullSentinelWrapper, string>(Assert.That(NullSentinelWrapper.None), (string?)null);
+    }
+
+    [Test]
+    public async Task Null_Expected_CrossTypeOverload_IsNotEqualTo_Invokes_User_Conversion()
+    {
+        await Assert.That(async () =>
+                await NotEqualsAssertionExtensions.IsNotEqualTo<NullSentinelWrapper, string>(Assert.That(NullSentinelWrapper.None), (string?)null))
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Null_Object_IsEqualTo_Null_String_CrossTypeOverload_Passes()
+    {
+        await EqualsAssertionExtensions.IsEqualTo<object, string>(Assert.That((object?)null), (string?)null);
+    }
+
+    public sealed class CaseInsensitiveName(string value) : IEquatable<CaseInsensitiveName>
+    {
+        public string Value { get; } = value;
+
+        public static implicit operator CaseInsensitiveName(string value) => new(value);
+
+        public static implicit operator string(CaseInsensitiveName name) => name.Value;
+
+        public bool Equals(CaseInsensitiveName? other)
+            => other is not null && string.Equals(Value, other.Value, StringComparison.OrdinalIgnoreCase);
+
+        public override bool Equals(object? obj) => Equals(obj as CaseInsensitiveName);
+
+        public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
+
+        public override string ToString() => Value;
+    }
+
+    public sealed record NullSentinelWrapper(string Value)
+    {
+        public static readonly NullSentinelWrapper None = new("<none>");
+
+        public static implicit operator NullSentinelWrapper(string? value) => value is null ? None : new(value);
+    }
 }
