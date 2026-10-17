@@ -49,7 +49,33 @@ public class Issue7092Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    public async Task Static_Class_Hook_On_Generic_Base_Runs()
+    public async Task GenerateGenericTest_Runs_Rows_For_Their_Inferred_Type()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7092/GenerateGenericTestWithConvertibleArgumentsTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task GenerateGenericTest_Not_Inferred_From_Arguments_Runs_Every_Row()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7092/GenerateGenericTestNotInferredFromArgumentsTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(4),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task Static_Class_Hook_On_Generic_Base_Runs_Once()
     {
         await RunTestsWithFilter(
             "/*/TUnit.TestProject.Bugs._7092/GenericBaseWithClassHookTests/*",

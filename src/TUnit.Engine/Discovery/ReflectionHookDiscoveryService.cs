@@ -315,6 +315,13 @@ internal sealed class ReflectionHookDiscoveryService
         // Discover hooks in each type in the inheritance chain, from base to derived
         foreach (var typeInChain in inheritanceChain)
         {
+            // Static hooks on a constructed generic base (Base<int> reached from Derived : Base<int>) are
+            // registered against the open definition, like the source generator does. Registering the
+            // constructed copy too would give the same hook two keys, so it would run twice.
+            var openGenericDefinition = typeInChain is { IsGenericType: true, IsGenericTypeDefinition: false }
+                ? typeInChain.GetGenericTypeDefinition()
+                : null;
+
             // Use DeclaredOnly to get methods defined in this specific type, not inherited ones
             var methods = typeInChain.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
                 .OrderBy(m =>
@@ -334,34 +341,42 @@ internal sealed class ReflectionHookDiscoveryService
                 .ThenBy(static m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
                 .ToArray();
 
-            foreach (var method in methods)
+            foreach (var declaredMethod in methods)
             {
+                var registrationType = typeInChain;
+                var method = declaredMethod;
+                if (openGenericDefinition is not null && declaredMethod.IsStatic)
+                {
+                    registrationType = openGenericDefinition;
+                    method = GetOpenGenericDefinitionMethod(declaredMethod, openGenericDefinition);
+                }
+
                 // Check for Before attributes
                 var beforeAttributes = method.GetCustomAttributes<BeforeAttribute>(false);
                 foreach (var attr in beforeAttributes)
                 {
-                    RegisterBeforeHook(typeInChain, method, attr, assembly);
+                    RegisterBeforeHook(registrationType, method, attr, assembly);
                 }
 
                 // Check for After attributes
                 var afterAttributes = method.GetCustomAttributes<AfterAttribute>(false);
                 foreach (var attr in afterAttributes)
                 {
-                    RegisterAfterHook(typeInChain, method, attr, assembly);
+                    RegisterAfterHook(registrationType, method, attr, assembly);
                 }
 
                 // Check for BeforeEvery attributes
                 var beforeEveryAttributes = method.GetCustomAttributes<BeforeEveryAttribute>(false);
                 foreach (var attr in beforeEveryAttributes)
                 {
-                    RegisterBeforeEveryHook(typeInChain, method, attr, assembly);
+                    RegisterBeforeEveryHook(registrationType, method, attr, assembly);
                 }
 
                 // Check for AfterEvery attributes
                 var afterEveryAttributes = method.GetCustomAttributes<AfterEveryAttribute>(false);
                 foreach (var attr in afterEveryAttributes)
                 {
-                    RegisterAfterEveryHook(typeInChain, method, attr, assembly);
+                    RegisterAfterEveryHook(registrationType, method, attr, assembly);
                 }
             }
         }
@@ -944,6 +959,22 @@ internal sealed class ReflectionHookDiscoveryService
     }
 
     private static readonly ConcurrentDictionary<(MethodInfo Method, Type ClassType), MethodInfo> _closedGenericHookMethodCache = new();
+    private static readonly ConcurrentDictionary<MethodInfo, MethodInfo> _openGenericHookMethodCache = new();
+
+    /// <summary>
+    /// Maps a method found on a constructed generic type (<c>Base&lt;int&gt;.Hook</c>) back to the same
+    /// method on its open definition (<c>Base&lt;T&gt;.Hook</c>), so every closed copy shares one registration.
+    /// </summary>
+    internal static MethodInfo GetOpenGenericDefinitionMethod(MethodInfo method, Type openGenericDefinition)
+    {
+        if (_openGenericHookMethodCache.TryGetValue(method, out var openMethod))
+        {
+            return openMethod;
+        }
+
+        openMethod = (MethodInfo)MethodBase.GetMethodFromHandle(method.MethodHandle, openGenericDefinition.TypeHandle)!;
+        return _openGenericHookMethodCache.GetOrAdd(method, openMethod);
+    }
 
     private static Type? GetHookContextClassType<T>(T context) => context switch
     {

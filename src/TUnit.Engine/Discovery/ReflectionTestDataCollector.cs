@@ -501,7 +501,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             foreach (var method in testMethods)
             {
                 // Resolve method-level generic instantiations
-                foreach (var (resolvedMethod, failedMetadata) in ResolveMethodInstantiations(type, method))
+                foreach (var (resolvedMethod, failedMetadata, methodArguments) in ResolveMethodInstantiations(type, method))
                 {
                     if (failedMetadata != null)
                     {
@@ -511,7 +511,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     try
                     {
-                        var metadata = BuildTestMetadata(type, resolvedMethod);
+                        var metadata = BuildTestMetadata(type, resolvedMethod, methodArguments: methodArguments);
                         discoveredTests.Add(metadata);
                     }
                     catch (Exception ex)
@@ -619,7 +619,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
 
                 // Resolve method-level generic instantiations
-                foreach (var (resolvedMethod, methodFailedMetadata) in ResolveMethodInstantiations(type, method))
+                foreach (var (resolvedMethod, methodFailedMetadata, methodArguments) in ResolveMethodInstantiations(type, method))
                 {
                     if (methodFailedMetadata != null)
                     {
@@ -632,7 +632,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     try
                     {
-                        testMetadata = BuildTestMetadata(type, resolvedMethod);
+                        testMetadata = BuildTestMetadata(type, resolvedMethod, methodArguments: methodArguments);
                     }
                     catch (Exception ex)
                     {
@@ -699,7 +699,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     if (concreteMethod != null)
                     {
                         // Resolve method-level generic instantiations
-                        foreach (var (resolvedMethod, methodFailedMetadata) in ResolveMethodInstantiations(concreteType, concreteMethod))
+                        foreach (var (resolvedMethod, methodFailedMetadata, methodArguments) in ResolveMethodInstantiations(concreteType, concreteMethod))
                         {
                             if (methodFailedMetadata != null)
                             {
@@ -709,7 +709,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                             // Build test metadata for the concrete type
                             // No class data for GenerateGenericTest - it just provides type arguments
-                            var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, null);
+                            var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, null, methodArguments);
                             discoveredTests.Add(testMetadata);
                         }
                     }
@@ -767,7 +767,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         if (concreteMethod != null)
                         {
                             // Resolve method-level generic instantiations
-                            foreach (var (resolvedMethod, methodFailedMetadata) in ResolveMethodInstantiations(concreteType, concreteMethod))
+                            foreach (var (resolvedMethod, methodFailedMetadata, methodArguments) in ResolveMethodInstantiations(concreteType, concreteMethod))
                             {
                                 if (methodFailedMetadata != null)
                                 {
@@ -779,7 +779,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                                 // The concrete type already has its generic arguments resolved
                                 // For generic types with primary constructors that were resolved from class-level data sources,
                                 // we need to ensure the class data sources contain the specific data for this instantiation
-                                var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, dataRow);
+                                var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, dataRow, methodArguments);
 
                                 discoveredTests.Add(testMetadata);
                             }
@@ -852,7 +852,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     if (concreteMethod != null)
                     {
                         // Resolve method-level generic instantiations
-                        foreach (var (resolvedMethod, methodFailedMetadata) in ResolveMethodInstantiations(concreteType, concreteMethod))
+                        foreach (var (resolvedMethod, methodFailedMetadata, methodArguments) in ResolveMethodInstantiations(concreteType, concreteMethod))
                         {
                             if (methodFailedMetadata != null)
                             {
@@ -863,7 +863,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                             // Build test metadata for the concrete type
                             // No class data for GenerateGenericTest - it just provides type arguments
-                            var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, null);
+                            var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, null, methodArguments);
 
                             successfulTests ??= [];
                             successfulTests.Add(testMetadata);
@@ -956,7 +956,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         if (concreteMethod != null)
                         {
                             // Resolve method-level generic instantiations
-                            foreach (var (resolvedMethod, methodFailedMetadata) in ResolveMethodInstantiations(concreteType, concreteMethod))
+                            foreach (var (resolvedMethod, methodFailedMetadata, methodArguments) in ResolveMethodInstantiations(concreteType, concreteMethod))
                             {
                                 if (methodFailedMetadata != null)
                                 {
@@ -969,7 +969,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                                 // The concrete type already has its generic arguments resolved
                                 // For generic types with primary constructors that were resolved from class-level data sources,
                                 // we need to ensure the class data sources contain the specific data for this instantiation
-                                var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, dataRow);
+                                var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, dataRow, methodArguments);
 
                                 successfulTests ??= [];
                                 successfulTests.Add(testMetadata);
@@ -1082,7 +1082,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
         Type testClass,
         MethodInfo testMethod,
-        object?[]? classData = null)
+        object?[]? classData = null,
+        IDataSourceAttribute[]? methodArguments = null)
     {
         var testName = GenerateTestName(testClass, testMethod);
 
@@ -1117,7 +1118,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 TestClassType = typeForGenericResolution, // Use resolved type for generic resolution (may be constructed generic base)
                 TestMethodName = testMethod.Name,
                 Dependencies = ReflectionAttributeExtractor.ExtractDependencies(testClass, testMethod),
-                DataSources = ReflectionAttributeExtractor.ExtractMethodDataSources(testMethod, testClass),
+                DataSources = methodArguments ?? ReflectionAttributeExtractor.ExtractMethodDataSources(testMethod, testClass),
                 ClassDataSources = classData != null
                     ? [new StaticDataSourceAttribute(new[] { classData })]
                     : ReflectionAttributeExtractor.ExtractDataSources(testClass),
@@ -1280,16 +1281,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Resolves method-level generic instantiations from [GenerateGenericTest] attributes.
     /// For non-generic methods, yields the method as-is.
-    /// For generic methods with [GenerateGenericTest], yields concrete method instantiations.
+    /// For generic methods with [GenerateGenericTest], yields concrete method instantiations the way the
+    /// source generator does: each [Arguments] row first closes the method over the types inferred from its
+    /// own values and runs only there (<c>[Arguments(1)]</c> becomes <c>Test&lt;int&gt;(1)</c>), then each
+    /// [GenerateGenericTest] type set that no row inferred runs with every data source.
+    /// <c>MethodArguments</c> restricts the data sources for that instantiation; null means all of them.
     /// </summary>
-    private static IEnumerable<(MethodInfo Method, TestMetadata? FailedMetadata)> ResolveMethodInstantiations(
+    private static IEnumerable<(MethodInfo Method, TestMetadata? FailedMetadata, IDataSourceAttribute[]? MethodArguments)> ResolveMethodInstantiations(
         Type concreteClassType,
         MethodInfo method)
     {
         // If method is not generic, yield it directly
         if (!method.IsGenericMethodDefinition)
         {
-            yield return (method, null);
+            yield return (method, null, null);
             yield break;
         }
 
@@ -1300,11 +1305,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             // No [GenerateGenericTest] attributes - yield the generic method definition as-is
             // TestBuilder will attempt to infer types from data sources later
-            yield return (method, null);
+            yield return (method, null, null);
             yield break;
         }
 
         var methodGenericParams = method.GetGenericArguments();
+        var processedTypeArguments = new HashSet<Type[]>(TypeArrayComparer.Instance);
+
+        foreach (var (inferredMethod, typeArguments, rows) in InferMethodInstantiationsFromArguments(method, methodGenericParams.Length))
+        {
+            processedTypeArguments.Add(typeArguments);
+            yield return (inferredMethod, null, rows);
+        }
 
         // Process each [GenerateGenericTest] attribute
         foreach (var genAttr in generateGenericTestAttributes)
@@ -1318,7 +1330,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     concreteClassType,
                     method,
                     $"[GenerateGenericTest] on method '{method.Name}' has no type arguments");
-                yield return (method, failedMetadata);
+                yield return (method, failedMetadata, null);
                 continue;
             }
 
@@ -1330,7 +1342,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     $"[GenerateGenericTest] on method '{method.Name}' provides {typeArguments.Length} type argument(s) " +
                     $"but method requires {methodGenericParams.Length}. " +
                     $"Provided: [{string.Join(", ", typeArguments.Select(static t => t.Name))}]");
-                yield return (method, failedMetadata);
+                yield return (method, failedMetadata, null);
+                continue;
+            }
+
+            // An [Arguments] row already produced this instantiation, with only its own rows
+            if (!processedTypeArguments.Add(typeArguments))
+            {
                 continue;
             }
 
@@ -1363,12 +1381,138 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // Yield result outside of try-catch
             if (errorMetadata != null)
             {
-                yield return (method, errorMetadata);
+                yield return (method, errorMetadata, null);
             }
             else if (resolvedMethod != null)
             {
-                yield return (resolvedMethod, null);
+                yield return (resolvedMethod, null, null);
             }
+        }
+    }
+
+    /// <summary>
+    /// Closes <paramref name="method"/> over the types inferred from each of its [Arguments] rows, matching
+    /// the source generator's <c>InferTypesFromArgumentsAttribute</c>: a type parameter is inferred only from
+    /// a non-null value passed directly to a parameter of that type, every type parameter must be inferred,
+    /// and rows whose types violate the constraints are skipped. Rows inferring the same types share one
+    /// instantiation, in declaration order.
+    /// </summary>
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT; MakeGenericMethod over types inferred from attribute values")]
+    private static List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[] Rows)> InferMethodInstantiationsFromArguments(
+        MethodInfo method,
+        int genericParameterCount)
+    {
+        var instantiations = new List<(MethodInfo Method, Type[] TypeArguments, List<IDataSourceAttribute> Rows)>();
+        var argumentsAttributes = method.GetCustomAttributes<ArgumentsAttribute>(inherit: false).ToArray();
+        if (argumentsAttributes.Length == 0)
+        {
+            return [];
+        }
+
+        var parameters = method.GetParameters();
+
+        foreach (var arguments in argumentsAttributes)
+        {
+            var typeArguments = InferMethodTypeArguments(arguments.Values, parameters, genericParameterCount);
+            if (typeArguments is null)
+            {
+                continue;
+            }
+
+            var index = instantiations.FindIndex(x => TypeArrayComparer.Instance.Equals(x.TypeArguments, typeArguments));
+            if (index >= 0)
+            {
+                instantiations[index].Rows.Add(arguments);
+                continue;
+            }
+
+            MethodInfo closedMethod;
+            try
+            {
+                closedMethod = method.MakeGenericMethod(typeArguments);
+            }
+            catch (ArgumentException)
+            {
+                // Constraint violation: the source generator skips the row as well
+                continue;
+            }
+
+            instantiations.Add((closedMethod, typeArguments, [arguments]));
+        }
+
+        var result = new List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[] Rows)>(instantiations.Count);
+        foreach (var (closedMethod, typeArguments, rows) in instantiations)
+        {
+            result.Add((closedMethod, typeArguments, rows.ToArray()));
+        }
+
+        return result;
+    }
+
+    private static Type[]? InferMethodTypeArguments(object?[] values, ParameterInfo[] parameters, int genericParameterCount)
+    {
+        var typeArguments = new Type[genericParameterCount];
+        var count = Math.Min(values.Length, parameters.Length);
+
+        for (var i = 0; i < count; i++)
+        {
+            var parameterType = parameters[i].ParameterType;
+            if (!parameterType.IsGenericParameter || parameterType.DeclaringMethod is null || values[i] is not { } value)
+            {
+                continue;
+            }
+
+            // A Type value is a RuntimeType instance, but the attribute argument is typed System.Type
+            typeArguments[parameterType.GenericParameterPosition] = value is Type ? typeof(Type) : value.GetType();
+        }
+
+        foreach (var typeArgument in typeArguments)
+        {
+            if (typeArgument is null)
+            {
+                return null;
+            }
+        }
+
+        return typeArguments;
+    }
+
+    private sealed class TypeArrayComparer : IEqualityComparer<Type[]>
+    {
+        public static readonly TypeArrayComparer Instance = new();
+
+        public bool Equals(Type[]? x, Type[]? y)
+        {
+            if (ReferenceEquals(x, y))
+            {
+                return true;
+            }
+
+            if (x is null || y is null || x.Length != y.Length)
+            {
+                return false;
+            }
+
+            for (var i = 0; i < x.Length; i++)
+            {
+                if (x[i] != y[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public int GetHashCode(Type[] obj)
+        {
+            var hash = 17;
+            foreach (var type in obj)
+            {
+                hash = unchecked(hash * 31 + type.GetHashCode());
+            }
+
+            return hash;
         }
     }
 
