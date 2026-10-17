@@ -105,7 +105,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
         var assemblies = assembliesList;
 
-        var maxConcurrency = Math.Min(assemblies.Count, Environment.ProcessorCount * 2);
+        var maxConcurrency = Math.Max(1, Math.Min(assemblies.Count, Environment.ProcessorCount * 2));
         var semaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
         var tasks = new Task<List<TestMetadata>>[assemblies.Count];
 
@@ -287,6 +287,38 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 #endif
         ;
 
+    // Matches whole directory names rather than substrings: a substring test on "ref" also
+    // matched user paths such as "C:\src\reflection-tests" or "~/refactoring/", which
+    // silently excluded every test assembly from reflection discovery.
+    private static readonly string[] ExcludedLocationDirectoryNames =
+    [
+        "ref",
+        "runtimes",
+        "Microsoft.NETCore.App",
+        "Microsoft.AspNetCore.App",
+        "Microsoft.WindowsDesktop.App",
+    ];
+
+    internal static bool IsFrameworkOrReferenceAssemblyLocation(string location)
+    {
+        var directory = Path.GetDirectoryName(location);
+        while (!string.IsNullOrEmpty(directory))
+        {
+            var directoryName = Path.GetFileName(directory);
+            foreach (var excluded in ExcludedLocationDirectoryNames)
+            {
+                if (string.Equals(directoryName, excluded, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            directory = Path.GetDirectoryName(directory);
+        }
+
+        return false;
+    }
+
     private static bool ShouldScanAssembly(Assembly assembly)
     {
         var name = assembly.GetName().Name;
@@ -313,12 +345,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         try
         {
             var location = assembly.Location;
-            if (!string.IsNullOrEmpty(location) &&
-                (location.Contains("ref") ||
-                    location.Contains("runtimes") ||
-                    location.Contains("Microsoft.NETCore.App") ||
-                    location.Contains("Microsoft.AspNetCore.App") ||
-                    location.Contains("Microsoft.WindowsDesktop.App")))
+            if (!string.IsNullOrEmpty(location) && IsFrameworkOrReferenceAssemblyLocation(location))
             {
                 return false;
             }

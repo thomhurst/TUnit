@@ -898,9 +898,13 @@ internal sealed class ReflectionHookDiscoveryService
     private static Func<object, TestContext, CancellationToken, ValueTask> CreateInstanceHookDelegate(Type type, MethodInfo method)
     {
         var parameters = method.GetParameters();
+        var declaredOnOpenGeneric = method.DeclaringType?.ContainsGenericParameters == true;
         return async (instance, context, cancellationToken) =>
         {
             object?[] args;
+            var targetMethod = declaredOnOpenGeneric
+                ? CloseOpenGenericHookMethod(method, instance.GetType())
+                : method;
 
             if (parameters.Length == 0)
             {
@@ -926,7 +930,7 @@ internal sealed class ReflectionHookDiscoveryService
                 throw new InvalidOperationException($"Hook method {method.Name} has invalid parameters");
             }
 
-            var result = method.Invoke(instance, args);
+            var result = targetMethod.Invoke(instance, args);
 
             if (result is Task task)
             {
@@ -939,13 +943,58 @@ internal sealed class ReflectionHookDiscoveryService
         };
     }
 
+    private static readonly ConcurrentDictionary<(MethodInfo Method, Type ClassType), MethodInfo> _closedGenericHookMethodCache = new();
+
+    private static Type? GetHookContextClassType<T>(T context) => context switch
+    {
+        ClassHookContext classContext => classContext.ClassType,
+        TestContext testContext => testContext.TestDetails?.ClassType,
+        _ => null,
+    };
+
+    /// <summary>
+    /// Maps a hook method declared on an open generic type definition onto the closed generic type
+    /// found in <paramref name="classType"/>'s inheritance chain. Returns the method unchanged when no
+    /// closed match exists, so the invocation surfaces the original error.
+    /// </summary>
+    internal static MethodInfo CloseOpenGenericHookMethod(MethodInfo method, Type? classType)
+    {
+        if (classType is null || method.DeclaringType is not { IsGenericType: true })
+        {
+            return method;
+        }
+
+        return _closedGenericHookMethodCache.GetOrAdd((method, classType), static key =>
+        {
+            var definition = key.Method.DeclaringType!.GetGenericTypeDefinition();
+            for (var current = key.ClassType; current is not null; current = current.BaseType)
+            {
+                if (current is { IsGenericType: true, ContainsGenericParameters: false }
+                    && current.GetGenericTypeDefinition() == definition)
+                {
+                    return (MethodInfo)MethodBase.GetMethodFromHandle(key.Method.MethodHandle, current.TypeHandle)!;
+                }
+            }
+
+            return key.Method;
+        });
+    }
+
     private static Func<T, CancellationToken, ValueTask> CreateHookDelegate<T>([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type, MethodInfo method)
     {
         var parameters = method.GetParameters();
+        var declaredOnOpenGeneric = method.DeclaringType?.ContainsGenericParameters == true;
         return async (context, cancellationToken) =>
         {
             object?[] args;
             object? instance = method.IsStatic ? null : Activator.CreateInstance(type);
+
+            // A hook declared on an open generic class (e.g. [Before(Class)] on Base<T>) cannot be
+            // invoked as-is; bind it to the closed type of the class being run, as the source
+            // generator does.
+            var targetMethod = declaredOnOpenGeneric
+                ? CloseOpenGenericHookMethod(method, GetHookContextClassType(context))
+                : method;
 
             if (parameters.Length == 0)
             {
@@ -971,7 +1020,7 @@ internal sealed class ReflectionHookDiscoveryService
                 throw new InvalidOperationException($"Hook method {method.Name} has invalid parameters");
             }
 
-            var result = method.Invoke(instance, args);
+            var result = targetMethod.Invoke(instance, args);
 
             if (result is Task task)
             {

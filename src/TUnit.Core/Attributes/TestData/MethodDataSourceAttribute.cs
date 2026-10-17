@@ -165,12 +165,10 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             yield break;
         }
 
-        if (dataGeneratorMetadata.MembersToGenerate.Length == 0)
-        {
-            throw new InvalidOperationException($"No members to generate were provided for {dataGeneratorMetadata.Type}");
-        }
-
-        var item1 = dataGeneratorMetadata.MembersToGenerate[0];
+        // A parameterless test method has no members to generate. That is valid, so don't throw:
+        // the source-generated Factory above never needs them either.
+        var membersToGenerate = dataGeneratorMetadata.MembersToGenerate;
+        var item1 = membersToGenerate.Length > 0 ? membersToGenerate[0] : null;
 
         var targetType = ClassProvidingDataSource
             ?? (item1 as PropertyMetadata)?.ClassMetadata.Type
@@ -260,6 +258,13 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         if (methodResult == null)
         {
             yield break;
+        }
+
+        // ValueTask<T> is neither a Task nor an IEnumerable, so normalise it to Task<T> and let
+        // the Task branch below await it, as the source-generated Factory does.
+        if (TryConvertValueTaskToTask(methodResult) is { } valueTaskAsTask)
+        {
+            methodResult = valueTaskAsTask;
         }
 
         // Compute paramTypes once to avoid repeated LINQ allocations
@@ -545,6 +550,20 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             var disposeTask = (ValueTask)disposeMethod.Invoke(enumerator, null)!;
             await disposeTask.ConfigureAwait(false);
         }
+    }
+
+    private static readonly ConcurrentDictionary<Type, MethodInfo?> ValueTaskAsTaskMethodCache = new();
+
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "ValueTask<T>.AsTask is a public member of a framework type. AOT-safe path available via Factory property.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "ValueTask<T>.AsTask is a public member of a framework type. AOT-safe path available via Factory property.")]
+    private static Task? TryConvertValueTaskToTask(object methodResult)
+    {
+        var asTaskMethod = ValueTaskAsTaskMethodCache.GetOrAdd(methodResult.GetType(), static type =>
+            type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ValueTask<>)
+                ? type.GetMethod(nameof(ValueTask<object>.AsTask), Type.EmptyTypes)
+                : null);
+
+        return asTaskMethod?.Invoke(methodResult, null) as Task;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection usage is documented. AOT-safe path available via Factory property")]

@@ -208,7 +208,106 @@ internal static class ReflectionAttributeExtractor
             }
         }
 
+        if (testMethod is { IsGenericMethod: true, IsGenericMethodDefinition: false })
+        {
+            return FilterArgumentsForClosedGenericMethod(testMethod, dataSources);
+        }
+
         return dataSources;
+    }
+
+    /// <summary>
+    /// For a generic test method closed by <see cref="GenerateGenericTestAttribute"/>, keeps only the
+    /// <see cref="ArgumentsAttribute"/> rows whose values fit the closed generic parameters. The source
+    /// generator does the same at compile time by pairing each <c>[Arguments]</c> row with the
+    /// instantiation inferred from it, so <c>[Arguments(5)]</c> and <c>[Arguments("hello")]</c> on
+    /// <c>Test&lt;T&gt;(T value)</c> become <c>Test&lt;int&gt;(5)</c> and <c>Test&lt;string&gt;("hello")</c>
+    /// rather than also producing <c>Test&lt;int&gt;("hello")</c>. If no row fits, every row is kept so
+    /// the mismatch still surfaces as a failure instead of the test silently disappearing.
+    /// </summary>
+    private static IDataSourceAttribute[] FilterArgumentsForClosedGenericMethod(MethodInfo closedMethod, IDataSourceAttribute[] dataSources)
+    {
+        var hasArguments = false;
+        var hasIncompatible = false;
+        var hasCompatible = false;
+        ParameterInfo[]? closedParameters = null;
+        ParameterInfo[]? definitionParameters = null;
+
+        foreach (var dataSource in dataSources)
+        {
+            if (dataSource is not ArgumentsAttribute arguments)
+            {
+                continue;
+            }
+
+            hasArguments = true;
+            closedParameters ??= closedMethod.GetParameters();
+            definitionParameters ??= closedMethod.GetGenericMethodDefinition().GetParameters();
+
+            if (AreArgumentsCompatible(arguments.Values, closedParameters, definitionParameters))
+            {
+                hasCompatible = true;
+            }
+            else
+            {
+                hasIncompatible = true;
+            }
+        }
+
+        if (!hasArguments || !hasIncompatible || !hasCompatible)
+        {
+            return dataSources;
+        }
+
+        var filtered = new List<IDataSourceAttribute>(dataSources.Length);
+        foreach (var dataSource in dataSources)
+        {
+            if (dataSource is ArgumentsAttribute arguments
+                && !AreArgumentsCompatible(arguments.Values, closedParameters!, definitionParameters!))
+            {
+                continue;
+            }
+
+            filtered.Add(dataSource);
+        }
+
+        return filtered.ToArray();
+    }
+
+    private static bool AreArgumentsCompatible(object?[] values, ParameterInfo[] closedParameters, ParameterInfo[] definitionParameters)
+    {
+        // Rows whose arity differs (params arrays, optional parameters) are left to the normal
+        // argument binding rather than guessed at here.
+        if (values.Length != closedParameters.Length)
+        {
+            return true;
+        }
+
+        for (var i = 0; i < values.Length; i++)
+        {
+            // Only positions typed by a method generic parameter depend on the instantiation.
+            if (!definitionParameters[i].ParameterType.ContainsGenericParameters)
+            {
+                continue;
+            }
+
+            var parameterType = closedParameters[i].ParameterType;
+            var value = values[i];
+
+            if (value is null)
+            {
+                if (parameterType.IsValueType && Nullable.GetUnderlyingType(parameterType) is null)
+                {
+                    return false;
+                }
+            }
+            else if (!parameterType.IsInstanceOfType(value))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access")]
