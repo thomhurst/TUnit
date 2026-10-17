@@ -26,8 +26,8 @@ RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-inst
     && chmod +x /tmp/dotnet-install.sh \
     && /tmp/dotnet-install.sh --jsonfile /src/global.json --install-dir "$DOTNET_ROOT" \
     && for channel in 8.0 9.0; do \
-         /tmp/dotnet-install.sh --channel "$channel" --runtime dotnet --install-dir "$DOTNET_ROOT"; \
-         /tmp/dotnet-install.sh --channel "$channel" --runtime aspnetcore --install-dir "$DOTNET_ROOT"; \
+         /tmp/dotnet-install.sh --channel "$channel" --runtime dotnet --install-dir "$DOTNET_ROOT" || exit 1; \
+         /tmp/dotnet-install.sh --channel "$channel" --runtime aspnetcore --install-dir "$DOTNET_ROOT" || exit 1; \
        done \
     && rm /tmp/dotnet-install.sh \
     && dotnet --info
@@ -56,7 +56,8 @@ for project in \
     tests/TUnit.Assertions.Tests \
     tests/TUnit.Mocks.Tests; do
   echo "=== $project ==="
-  (cd "$project" && timeout 900 dotnet run -c Debug --no-build --framework net10.0) || status=1
+  # --no-restore (not --no-build) so edits made in the image are rebuilt offline before testing.
+  (cd "$project" && timeout 900 dotnet run -c Debug --no-restore --framework net10.0) || status=1
 done
 exit "$status"
 SCRIPT

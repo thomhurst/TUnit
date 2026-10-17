@@ -114,7 +114,7 @@ The boundaries are:
 
 - The image is built in Debug from `TUnit.CI.slnx`, plus `src/TUnit.Reporting.Tool`.
 - Test projects are TUnit apps. Run them with
-  `cd tests/<Project> && dotnet run -c Debug --no-build --framework net10.0`. net8.0 and net9.0 runtimes are
+  `cd tests/<Project> && dotnet run -c Debug --no-restore --framework net10.0`. net8.0 and net9.0 runtimes are
   also installed.
 - `tunit-oss-test` runs the offline-safe suites for the areas above.
 - Relevant suites:
@@ -142,12 +142,14 @@ The boundaries are:
 These are developer and CI tools. Rate by realistic impact on a developer machine or CI runner.
 
 - **Critical:**
-  - Code execution, or theft of CI secrets (`ACTIONS_RUNTIME_TOKEN`, OTLP API keys, cloud credentials), from
-    input the test author does not control: network data, sidecar files from another job, or system-under-test
-    output that TUnit renders.
+  - Code execution on the developer machine or CI runner (outside a browser sandbox), or demonstrated theft of
+    CI secrets (`ACTIONS_RUNTIME_TOKEN`, OTLP API keys, cloud credentials), from input the test author does not
+    control: network data, sidecar files from another job, or system-under-test output that TUnit processes.
   - Code injection through source generator output from ordinary source constructs.
 - **High:**
-  - Stored XSS in the HTML report or merged report from test data or sidecar data.
+  - Stored XSS in the HTML report or merged report from test data or sidecar data. Script running in the
+    report's browser page is High, not Critical, unless the report also shows a concrete path to the Critical
+    outcomes above.
   - Markdown/HTML injection in the GitHub step summary that can spoof results or hide failures.
   - Sending trace or baggage headers to origins outside the configured set.
   - Arbitrary file write or overwrite outside the intended output directory.
