@@ -1,5 +1,4 @@
 using TUnit.Assertions.Extensions;
-using TUnit.Core.Executors;
 
 namespace TUnit.Assertions.Tests;
 
@@ -316,7 +315,6 @@ public class CollectionAssertionTests
     }
 
     [Test]
-    [InvariantCulture]
     public async Task All_Predicate_Failure_Message_Contains_Index_And_Value()
     {
         var items = new[] { 2, 4, -5, 8 };
@@ -325,7 +323,8 @@ public class CollectionAssertionTests
             await Assert.That(items).All(x => x > 0)
         ).Throws<AssertionException>()
         .WithMessageContaining("index 2")
-        .And.WithMessageContaining("[-5]");
+        // Values are formatted with the current culture (e.g. U+2212 MINUS SIGN under sv-SE).
+        .And.WithMessageContaining($"[{-5}]");
     }
 
     [Test]
@@ -341,7 +340,6 @@ public class CollectionAssertionTests
     }
 
     [Test]
-    [InvariantCulture]
     public async Task All_Predicate_Failure_Message_Contains_First_Failing_Item()
     {
         var items = new[] { 1, 2, 3, -1, -2, -3 };
@@ -350,6 +348,6 @@ public class CollectionAssertionTests
             await Assert.That(items).All(x => x > 0)
         ).Throws<AssertionException>()
         .WithMessageContaining("index 3")
-        .And.WithMessageContaining("[-1]");
+        .And.WithMessageContaining($"[{-1}]");
     }
 }

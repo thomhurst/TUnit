@@ -1,4 +1,3 @@
-using TUnit.Core.Executors;
 using TUnit.Mocks;
 using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Verification;
@@ -44,7 +43,7 @@ public class WrapMultiParam
         _count = count;
         _factor = factor;
     }
-    public virtual string Compute() => $"{_label}:{_count}:{_factor}";
+    public virtual string Compute() => FormattableString.Invariant($"{_label}:{_count}:{_factor}");
 }
 
 public class WrapParamsOnly
@@ -175,7 +174,6 @@ public class WrapNoParameterlessCtorTests
     }
 
     [Test]
-    [InvariantCulture]
     public async Task Multiple_Params()
     {
         var mock = Mock.Wrap(new WrapMultiParam("widget", 3, 1.5));
