@@ -59,7 +59,10 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         // Process each test
         foreach (var (test, constraintKeys, priority) in sortedTests)
         {
-            var startSignal = new TaskCompletionSource<bool>();
+            // Run continuations asynchronously: a releasing test signals waiters from its
+            // finally block, and an inline continuation would run the next (possibly
+            // synchronous) test on that thread before the remaining waiters are signalled.
+            var startSignal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             bool canStart;
             lock (lockObject)
@@ -104,7 +107,11 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                     await _logger.LogTraceAsync($"Starting test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
                 startSignal.SetResult(true);
 
-                var testTask = ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTestIndex, cancellationToken);
+                // Dispatch to the thread pool: invoking directly would run a synchronous
+                // test body on this loop's thread, serializing every test with distinct keys.
+                var testTask = Task.Run(
+                    () => ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTestIndex, cancellationToken),
+                    CancellationToken.None);
                 test.ExecutionTask = testTask;
                 activeTasks.Add(testTask);
             }
