@@ -28,3 +28,26 @@ public class GenericMethodSameTypeArgumentsTests
         await Assert.That(value is int or string).IsTrue();
     }
 }
+
+/// <summary>
+/// Per-row settings (Skip, DisplayName, Categories) on rows that share an inferred type must
+/// apply only to their own row.
+/// </summary>
+[EngineTest(ExpectedResult.Pass)]
+public class GenericMethodSameTypeRowSettingsTests
+{
+    [Test]
+    [Arguments(1, Skip = "Only row one is skipped")]
+    [Arguments(2)]
+    [Arguments(3, DisplayName = "Row three", Categories = ["Issue7096RowCategory"])]
+    public async Task RowSettings<T>(T value)
+    {
+        await Assert.That(value).IsNotEqualTo((T)(object)1);
+
+        var context = TestContext.Current!;
+        var isRowThree = Equals(value, 3);
+
+        await Assert.That(context.Metadata.TestDetails.Categories.Contains("Issue7096RowCategory")).IsEqualTo(isRowThree);
+        await Assert.That(context.Metadata.DisplayName == "Row three").IsEqualTo(isRowThree);
+    }
+}

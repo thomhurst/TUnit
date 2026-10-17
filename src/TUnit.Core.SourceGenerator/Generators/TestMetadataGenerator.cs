@@ -1198,7 +1198,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             if (attr.AttributeClass?.Name == "ArgumentsAttribute" && entry.SpecificArgumentsAttribute != null)
             {
-                if (entry.IsSpecificDataSource(attr))
+                // An entry with merged rows emits one test per row from a shared attribute list, so
+                // listing every row here would let one row's Skip/DisplayName/Categories (applied in
+                // ArgumentsAttribute.OnTestRegistered) leak into its siblings. Leave the rows out:
+                // TestBuilder appends the data source that produced each test to that test's
+                // attributes, as it does for non-generic methods, whose list omits data sources too.
+                if (entry.AdditionalArgumentsAttributes is null && entry.IsSpecificDataSource(attr))
                 {
                     filteredAttributes.Add(attr);
                 }
