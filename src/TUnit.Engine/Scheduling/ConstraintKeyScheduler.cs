@@ -11,23 +11,24 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
     private readonly TUnitFrameworkLogger _logger;
     private readonly HashSetPool _hashSetPool;
 
-    // Caps how many keyed tests run at once, matching the --maximum-parallel-tests cap
-    // the unconstrained phase applies. Constraint keys only exclude tests that share a
-    // key, so without this, distinct keys would all run at once (#7074). Shared across
-    // calls so concurrent keyed batches (e.g. dynamic tests) draw from one budget.
-    private readonly Lazy<SemaphoreSlim> _maxParallelismSemaphore;
+    // Constraint keys only exclude tests that share a key, so without this cap distinct
+    // keys would all run at once (#7074). The limiter is the session-wide budget that the
+    // unconstrained phase also draws from, because both phases run concurrently.
+    private readonly MaxParallelismLimiter _maxParallelismLimiter;
 
     public ConstraintKeyScheduler(
         TestRunner testRunner,
         TUnitFrameworkLogger logger,
         HashSetPool hashSetPool,
-        Lazy<int> maxParallelism)
+        MaxParallelismLimiter? maxParallelismLimiter = null)
     {
         _testRunner = testRunner;
         _logger = logger;
         _hashSetPool = hashSetPool;
-        _maxParallelismSemaphore = new Lazy<SemaphoreSlim>(() =>
-            new SemaphoreSlim(maxParallelism.Value, maxParallelism.Value));
+        // The engine always passes its shared limiter; the default (the engine's default
+        // cap) is for constructing the scheduler in isolation.
+        _maxParallelismLimiter = maxParallelismLimiter
+            ?? new MaxParallelismLimiter(static () => MaxParallelismLimiter.DefaultMaxParallelism);
     }
 
     #if NET8_0_OR_GREATER
@@ -171,7 +172,7 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             // are always running tests, never waiting on keys, so the two never deadlock.
             // Acquired before entering TestRunner so a dependency that reaches this test
             // first runs it inline instead of waiting behind a slot.
-            var semaphore = _maxParallelismSemaphore.Value;
+            var semaphore = _maxParallelismLimiter.Semaphore;
             await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {

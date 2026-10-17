@@ -76,3 +76,22 @@ public class GroupedKeyedNotInParallelMaxParallelism7074
     [Test, NotInParallel("7074.g7")] public Task T7() => Probe.RunAsync();
     [Test, NotInParallel("7074.g8")] public Task T8() => Probe.RunAsync();
 }
+
+/// <summary>
+/// Unconstrained and keyed tests run in concurrent scheduling phases, so they must draw
+/// from one shared --maximum-parallel-tests budget rather than one budget each.
+/// </summary>
+[EngineTest(ExpectedResult.Pass)]
+public class MixedKeyedAndUnconstrainedMaxParallelism7074
+{
+    private static readonly ConcurrencyProbe7074 Probe = new();
+
+    [Test] public Task U1() => Probe.RunAsync();
+    [Test] public Task U2() => Probe.RunAsync();
+    [Test] public Task U3() => Probe.RunAsync();
+    [Test] public Task U4() => Probe.RunAsync();
+    [Test, NotInParallel("7074.m1")] public Task K1() => Probe.RunAsync();
+    [Test, NotInParallel("7074.m2")] public Task K2() => Probe.RunAsync();
+    [Test, NotInParallel("7074.m3")] public Task K3() => Probe.RunAsync();
+    [Test, NotInParallel("7074.m4")] public Task K4() => Probe.RunAsync();
+}

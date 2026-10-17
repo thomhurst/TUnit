@@ -6,6 +6,7 @@ namespace TUnit.Engine.Tests.Scheduling;
 /// <summary>
 /// Regression for https://github.com/thomhurst/TUnit/issues/7074.
 /// [NotInParallel] tests with distinct keys must not exceed --maximum-parallel-tests.
+/// Unconstrained and keyed tests run concurrently, so they share the cap rather than getting one each.
 /// The test project asserts the observed peak concurrency against the expected cap.
 /// </summary>
 public class KeyedNotInParallelMaxParallelismTests(TestMode testMode) : InvokableTestBase(testMode)
@@ -15,6 +16,7 @@ public class KeyedNotInParallelMaxParallelismTests(TestMode testMode) : Invokabl
     [Test]
     [Arguments("KeyedNotInParallelMaxParallelism7074")]
     [Arguments("GroupedKeyedNotInParallelMaxParallelism7074")]
+    [Arguments("MixedKeyedAndUnconstrainedMaxParallelism7074")]
     public async Task KeyedNotInParallel_DistinctKeys_RespectMaximumParallelTests(string className)
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
