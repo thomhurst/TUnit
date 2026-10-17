@@ -1282,9 +1282,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// Resolves method-level generic instantiations from [GenerateGenericTest] attributes.
     /// For non-generic methods, yields the method as-is.
     /// For generic methods with [GenerateGenericTest], yields concrete method instantiations the way the
-    /// source generator does: each [Arguments] row first closes the method over the types inferred from its
-    /// own values and runs only there (<c>[Arguments(1)]</c> becomes <c>Test&lt;int&gt;(1)</c>), then each
-    /// [GenerateGenericTest] type set that no row inferred runs with every data source.
+    /// source generator does. First, each data source that infers the type arguments closes the method over
+    /// them (<c>[Arguments(1)]</c> becomes <c>Test&lt;int&gt;(1)</c>; see
+    /// <see cref="InferMethodInstantiationsFromDataSources"/>). Then each [GenerateGenericTest] type set that
+    /// no data source inferred runs with every data source.
     /// <c>MethodArguments</c> restricts the data sources for that instantiation; null means all of them.
     /// </summary>
     private static IEnumerable<(MethodInfo Method, TestMetadata? FailedMetadata, IDataSourceAttribute[]? MethodArguments)> ResolveMethodInstantiations(
@@ -1312,7 +1313,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var methodGenericParams = method.GetGenericArguments();
         var processedTypeArguments = new HashSet<Type[]>(TypeArrayComparer.Instance);
 
-        foreach (var (inferredMethod, typeArguments, rows) in InferMethodInstantiationsFromArguments(method, methodGenericParams.Length))
+        foreach (var (inferredMethod, typeArguments, rows) in InferMethodInstantiationsFromDataSources(method, methodGenericParams.Length))
         {
             processedTypeArguments.Add(typeArguments);
             yield return (inferredMethod, null, rows);
@@ -1346,7 +1347,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 continue;
             }
 
-            // An [Arguments] row already produced this instantiation, with only its own rows
+            // A data source already produced this instantiation
             if (!processedTypeArguments.Add(typeArguments))
             {
                 continue;
@@ -1391,39 +1392,77 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
-    /// Closes <paramref name="method"/> over the types inferred from each of its [Arguments] rows, matching
-    /// the source generator's <c>InferTypesFromArgumentsAttribute</c>: a type parameter is inferred only from
-    /// a non-null value passed directly to a parameter of that type, every type parameter must be inferred,
-    /// and rows whose types violate the constraints are skipped. Rows inferring the same types share one
-    /// instantiation, in declaration order.
+    /// Closes <paramref name="method"/> over the types inferred from its data sources, in the order the source
+    /// generator uses:
+    /// <list type="number">
+    /// <item>Each [Arguments] row (<c>InferTypesFromArgumentsAttribute</c>): a type parameter is inferred only
+    /// from a non-null value passed directly to a parameter of that type, and every type parameter must be
+    /// inferred. The instantiation runs only those rows.</item>
+    /// <item>Each typed data source deriving from <c>DataSourceGeneratorAttribute&lt;T...&gt;</c> or
+    /// <c>AsyncDataSourceGeneratorAttribute&lt;T...&gt;</c> (<c>InferTypesFromDataSourceAttribute</c>). The
+    /// instantiation runs only that source.</item>
+    /// <item>Parameter attributes implementing <see cref="TUnit.Core.Interfaces.IInfersType{T}"/>
+    /// (<c>InferTypesFromTypeInferringAttributes</c>). That instantiation runs every data source, so its
+    /// <c>Rows</c> is null.</item>
+    /// </list>
+    /// Sources whose types violate the constraints are skipped. Rows and sources inferring types that are
+    /// already instantiated join that instantiation.
     /// </summary>
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT; MakeGenericMethod over types inferred from attribute values")]
-    private static List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[] Rows)> InferMethodInstantiationsFromArguments(
+    private static List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[]? Rows)> InferMethodInstantiationsFromDataSources(
         MethodInfo method,
         int genericParameterCount)
     {
-        var instantiations = new List<(MethodInfo Method, Type[] TypeArguments, List<IDataSourceAttribute> Rows)>();
-        var argumentsAttributes = method.GetCustomAttributes<ArgumentsAttribute>(inherit: false).ToArray();
-        if (argumentsAttributes.Length == 0)
+        var instantiations = new List<(MethodInfo Method, Type[] TypeArguments, List<IDataSourceAttribute>? Rows)>();
+        var parameters = method.GetParameters();
+        var dataSources = ReflectionAttributeExtractor.ExtractDataSources(method);
+
+        foreach (var dataSource in dataSources)
         {
-            return [];
+            if (dataSource is ArgumentsAttribute arguments)
+            {
+                AddInstantiation(InferMethodTypeArguments(arguments.Values, parameters, genericParameterCount), arguments);
+            }
         }
 
-        var parameters = method.GetParameters();
-
-        foreach (var arguments in argumentsAttributes)
+        // The generator only infers method type arguments from typed sources when the class is not generic
+        if (method.DeclaringType is { IsGenericType: false })
         {
-            var typeArguments = InferMethodTypeArguments(arguments.Values, parameters, genericParameterCount);
+            foreach (var dataSource in dataSources)
+            {
+                if (dataSource is not ArgumentsAttribute)
+                {
+                    AddInstantiation(InferTypesFromTypedDataSource(dataSource, genericParameterCount), dataSource);
+                }
+            }
+        }
+
+        AddInstantiation(InferTypesFromTypeInferringAttributes(parameters, genericParameterCount), null);
+
+        var result = new List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[]? Rows)>(instantiations.Count);
+        foreach (var (closedMethod, typeArguments, rows) in instantiations)
+        {
+            result.Add((closedMethod, typeArguments, rows?.ToArray()));
+        }
+
+        return result;
+
+        void AddInstantiation(Type[]? typeArguments, IDataSourceAttribute? row)
+        {
             if (typeArguments is null)
             {
-                continue;
+                return;
             }
 
             var index = instantiations.FindIndex(x => TypeArrayComparer.Instance.Equals(x.TypeArguments, typeArguments));
             if (index >= 0)
             {
-                instantiations[index].Rows.Add(arguments);
-                continue;
+                if (row is not null)
+                {
+                    instantiations[index].Rows?.Add(row);
+                }
+
+                return;
             }
 
             MethodInfo closedMethod;
@@ -1433,20 +1472,110 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
             catch (ArgumentException)
             {
-                // Constraint violation: the source generator skips the row as well
+                // Constraint violation: the source generator skips the source as well
+                return;
+            }
+
+            instantiations.Add((closedMethod, typeArguments, row is null ? null : [row]));
+        }
+    }
+
+    /// <summary>
+    /// Mirrors the generator's <c>InferTypesFromDataSourceAttribute</c> for generic methods: reads the type
+    /// arguments of the <c>DataSourceGeneratorAttribute</c> / <c>AsyncDataSourceGeneratorAttribute</c> base.
+    /// One type parameter takes the first type argument; otherwise a single tuple argument with one element
+    /// per type parameter, or one type argument per type parameter.
+    /// </summary>
+    private static Type[]? InferTypesFromTypedDataSource(IDataSourceAttribute dataSource, int genericParameterCount)
+    {
+        for (var baseType = dataSource.GetType().BaseType; baseType is not null; baseType = baseType.BaseType)
+        {
+            if (!baseType.IsGenericType)
+            {
                 continue;
             }
 
-            instantiations.Add((closedMethod, typeArguments, [arguments]));
+            var definition = baseType.GetGenericTypeDefinition();
+            if (definition.Namespace != "TUnit.Core"
+                || !(definition.Name.StartsWith("DataSourceGeneratorAttribute`", StringComparison.Ordinal)
+                     || definition.Name.StartsWith("AsyncDataSourceGeneratorAttribute`", StringComparison.Ordinal)))
+            {
+                continue;
+            }
+
+            var typeArguments = baseType.GetGenericArguments();
+
+            if (genericParameterCount == 1 && typeArguments.Length >= 1)
+            {
+                return [typeArguments[0]];
+            }
+
+            if (typeArguments is [{ IsGenericType: true } tuple]
+                && tuple.FullName?.StartsWith("System.ValueTuple`", StringComparison.Ordinal) == true
+                && tuple.GetGenericArguments() is { } tupleElements
+                && tupleElements.Length == genericParameterCount)
+            {
+                return tupleElements;
+            }
+
+            return typeArguments.Length == genericParameterCount ? typeArguments : null;
         }
 
-        var result = new List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[] Rows)>(instantiations.Count);
-        foreach (var (closedMethod, typeArguments, rows) in instantiations)
+        return null;
+    }
+
+    /// <summary>
+    /// Mirrors the generator's <c>InferTypesFromTypeInferringAttributes</c>: a parameter typed by a method type
+    /// parameter that carries an attribute implementing <c>IInfersType&lt;T&gt;</c> infers that type parameter.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection mode requires dynamic access; attribute interfaces are only read, not invoked")]
+    private static Type[]? InferTypesFromTypeInferringAttributes(ParameterInfo[] parameters, int genericParameterCount)
+    {
+        Type[]? typeArguments = null;
+
+        foreach (var parameter in parameters)
         {
-            result.Add((closedMethod, typeArguments, rows.ToArray()));
+            var parameterType = parameter.ParameterType;
+            if (!parameterType.IsGenericParameter || parameterType.DeclaringMethod is null)
+            {
+                continue;
+            }
+
+            foreach (var attribute in parameter.GetCustomAttributes(inherit: false))
+            {
+                Type? inferred = null;
+                foreach (var implemented in attribute.GetType().GetInterfaces())
+                {
+                    if (implemented.IsGenericType && implemented.GetGenericTypeDefinition() == typeof(TUnit.Core.Interfaces.IInfersType<>))
+                    {
+                        inferred = implemented.GetGenericArguments()[0];
+                        break;
+                    }
+                }
+
+                if (inferred is not null)
+                {
+                    typeArguments ??= new Type[genericParameterCount];
+                    typeArguments[parameterType.GenericParameterPosition] = inferred;
+                    break;
+                }
+            }
         }
 
-        return result;
+        if (typeArguments is null)
+        {
+            return null;
+        }
+
+        foreach (var typeArgument in typeArguments)
+        {
+            if (typeArgument is null)
+            {
+                return null;
+            }
+        }
+
+        return typeArguments;
     }
 
     private static Type[]? InferMethodTypeArguments(object?[] values, ParameterInfo[] parameters, int genericParameterCount)

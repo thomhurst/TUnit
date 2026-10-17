@@ -75,6 +75,32 @@ public class Issue7092Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task GenerateGenericTest_Typed_Data_Source_Runs_For_Its_Inferred_Type()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7092/GenerateGenericTestTypedDataSourceTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task GenerateGenericTest_Covered_By_Typed_Data_Source_Is_Not_Repeated()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7092/GenerateGenericTestCoveredByTypedDataSourceTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
     public async Task Static_Class_Hook_On_Generic_Base_Runs_Once()
     {
         await RunTestsWithFilter(
