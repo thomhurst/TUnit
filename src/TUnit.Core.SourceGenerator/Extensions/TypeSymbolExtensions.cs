@@ -15,7 +15,9 @@ internal static class TypeSymbolExtensions
     /// on the final parameter), since a non-trailing array binds value-by-value, not collected.
     /// </remarks>
     public static bool CollectsTrailingArguments(this IParameterSymbol parameter)
-        => parameter.IsParams || parameter.Type is IArrayTypeSymbol;
+        // Only single-dimensional arrays can be built from loose values; a multidimensional
+        // array such as int[,] binds as a single value.
+        => parameter.IsParams || parameter.Type is IArrayTypeSymbol { IsSZArray: true };
 
     /// <summary>
     /// Determines if the type is a nullable value type (e.g., int?, bool?, MyEnum?)

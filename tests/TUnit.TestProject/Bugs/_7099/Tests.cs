@@ -87,10 +87,10 @@ public class GenericClassParamsArrayTests<T>
 }
 
 /// <summary>
-/// Instantiations inferred from a leading argument. Source-gen mode binds these; reflection mode
-/// still fails to resolve T because it matches every row value against the declared parameter
-/// types (see https://github.com/thomhurst/TUnit/issues/7099), so these are not engine-tested yet.
+/// Instantiations inferred from the row values. T is inferred from a leading T argument or from a
+/// lone array value; loose values collected by the params array are not used for inference yet.
 /// </summary>
+[EngineTest(ExpectedResult.Pass)]
 public class InferredGenericParamsArrayTests
 {
     [Test]
@@ -110,4 +110,53 @@ public class InferredGenericParamsArrayTests
         await Assert.That(first).IsEqualTo((T)(object)"a");
         await Assert.That(rest.Cast<object>().ToArray()).IsEquivalentTo(new object[] { "b" });
     }
+
+    [Test]
+    [Arguments(new[] { 4, 5 })]
+    public async Task Inferred_FromArrayArgument<T>(params T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 4, 5 });
+    }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+public class GenericParamsArrayEdgeCaseTests
+{
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [Arguments(1, 2)]
+    public async Task Optional_Before_Params<T>(int count = 0, params T[] values)
+    {
+        await Assert.That(count).IsEqualTo(1);
+        await Assert.That(values.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 2 });
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [MethodDataSource(nameof(Grids))]
+    public async Task MultiDimensional<T>(T[,] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values.Length).IsEqualTo(4);
+    }
+
+    public static IEnumerable<Func<int[,]>> Grids() => [() => new[,] { { 1, 2 }, { 3, 4 } }];
+}
+
+public abstract class GenericParamsArrayBase<T>
+{
+    [Test]
+    [GenerateGenericTest(typeof(string))]
+    [Arguments(1, 2)]
+    public async Task Inherited<U>(params T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(typeof(U)).IsEqualTo(typeof(string));
+        await Assert.That(values.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 1, 2 });
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[InheritsTests]
+public class GenericParamsArrayDerived : GenericParamsArrayBase<int>;
