@@ -15,6 +15,46 @@
         "Microsoft.NET.StringTools"
       ],
       "allowedVersions": "<18.10.0"
+    },
+    {
+      "description": "Roslyn versions are chosen deliberately: analyzers and generators must load in older compilers (SDKs/IDEs), so they and their tests reference old Roslyn APIs.",
+      "matchPackageNames": [
+        "Microsoft.CodeAnalysis.Common",
+        "Microsoft.CodeAnalysis.CSharp",
+        "Microsoft.CodeAnalysis.CSharp.Workspaces",
+        "Microsoft.CodeAnalysis.Workspaces.Common",
+        "Microsoft.CodeAnalysis.Workspaces.MSBuild"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Microsoft.VisualStudio.Threading.Analyzers 18.12+ is built against Roslyn 4.11, but TUnit.Analyzers.Tests compiles against Roslyn 4.8 (CS1705).",
+      "matchPackageNames": [
+        "Microsoft.VisualStudio.Threading.Analyzers"
+      ],
+      "allowedVersions": "<18.12.0"
+    },
+    {
+      "description": "Per-TFM versions in Directory.Packages.props: keep the net8.0 entries on 8.x.",
+      "matchPackageNames": [
+        "Microsoft.AspNetCore.Mvc.Testing",
+        "Microsoft.Extensions.Http",
+        "Microsoft.Extensions.Logging",
+        "Microsoft.Extensions.Logging.Abstractions"
+      ],
+      "matchCurrentVersion": "/^8\\./",
+      "allowedVersions": "<9.0.0"
+    },
+    {
+      "description": "Per-TFM versions in Directory.Packages.props: keep the net9.0 entries on 9.x.",
+      "matchPackageNames": [
+        "Microsoft.AspNetCore.Mvc.Testing",
+        "Microsoft.Extensions.Http",
+        "Microsoft.Extensions.Logging",
+        "Microsoft.Extensions.Logging.Abstractions"
+      ],
+      "matchCurrentVersion": "/^9\\./",
+      "allowedVersions": "<10.0.0"
     }
   ]
 }
