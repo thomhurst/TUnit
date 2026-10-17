@@ -648,12 +648,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return discoveredTests;
         }
 
+        // Type arguments that break the class's constraints become failed tests for that row or
+        // type only, never a failure of the whole assembly scan (#7107).
+        var constraintViolations = new ReflectionGenericConstraintViolations(genericTypeDefinition, testMethods);
+
         // Check for GenerateGenericTest attributes that explicitly specify type arguments
         var generateGenericTestAttributes = genericTypeDefinition.GetCustomAttributes<GenerateGenericTestAttribute>(inherit: false).ToArray();
         foreach (var genAttr in generateGenericTestAttributes)
         {
             var typeArguments = genAttr.TypeArguments;
-            if (typeArguments.Length == 0)
+            if (typeArguments.Length == 0 || constraintViolations.TryAddClassViolation(typeArguments))
             {
                 continue;
             }
@@ -690,11 +694,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException(
+                discoveredTests.Add(CreateGenericTypeCreationFailedMetadata(genericTypeDefinition, new InvalidOperationException(
                     $"Failed to create concrete type for {genericTypeDefinition.FullName ?? genericTypeDefinition.Name} from [GenerateGenericTest]. " +
                     $"Error: {ex.Message}. " +
                     $"Generic parameter count: {genericTypeDefinition.GetGenericArguments().Length}, " +
-                    $"Type arguments provided: {typeArguments.Length}", ex);
+                    $"Type arguments provided: {typeArguments.Length}", ex)));
             }
         }
 
@@ -704,6 +708,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         if (classDataSources.Length == 0)
         {
             // Return any tests discovered from GenerateGenericTest attributes
+            AddConstraintViolationTests(discoveredTests, constraintViolations);
             return discoveredTests;
         }
 
@@ -721,7 +726,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 // Determine generic type arguments from the data
                 var typeArguments = ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
-                if (typeArguments == null || typeArguments.Length == 0)
+                if (typeArguments == null || typeArguments.Length == 0 || constraintViolations.TryAddClassViolation(typeArguments))
                 {
                     continue;
                 }
@@ -761,17 +766,45 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException(
+                    discoveredTests.Add(CreateGenericTypeCreationFailedMetadata(genericTypeDefinition, new InvalidOperationException(
                         $"Failed to create concrete type for {genericTypeDefinition.FullName ?? genericTypeDefinition.Name}. " +
                         $"Error: {ex.Message}. " +
                         $"Generic parameter count: {genericTypeDefinition.GetGenericArguments().Length}, " +
                         $"Type arguments provided: {typeArguments?.Length ?? 0}, " +
-                        $"Data row length: {dataRow?.Length ?? 0}", ex);
+                        $"Data row length: {dataRow?.Length ?? 0}", ex)));
                 }
             }
         }
 
+        AddConstraintViolationTests(discoveredTests, constraintViolations);
         return discoveredTests;
+    }
+
+    private static void AddConstraintViolationTests(List<TestMetadata> discoveredTests, ReflectionGenericConstraintViolations constraintViolations)
+    {
+        constraintViolations.AddMethodRowViolations();
+        discoveredTests.AddRange(constraintViolations.CreateMetadata());
+    }
+
+    private static TestMetadata CreateGenericTypeCreationFailedMetadata(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type genericTypeDefinition,
+        Exception exception)
+    {
+        // Fails this type instantiation only, instead of the whole assembly scan.
+        return new FailedTestMetadata(exception, $"[GENERIC TYPE CREATION FAILED] {genericTypeDefinition.Name}")
+        {
+            TestName = $"[GENERIC TYPE CREATION FAILED] {genericTypeDefinition.Name}",
+            TestClassType = genericTypeDefinition,
+            TestMethodName = "GenericTypeCreationFailed",
+            FilePath = "Unknown",
+            LineNumber = 0,
+            MethodMetadata = CreateDummyMethodMetadata(genericTypeDefinition, "GenericTypeCreationFailed"),
+            AttributeFactory = () => [],
+            DataSources = [],
+            ClassDataSources = [],
+            PropertyDataSources = []
+        };
     }
 
     private static async IAsyncEnumerable<TestMetadata> DiscoverGenericTestsStreamingAsync(
@@ -796,6 +829,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             yield break;
         }
 
+        // Type arguments that break the class's constraints become failed tests for that row or
+        // type only, never a failure of the whole assembly scan (#7107).
+        var constraintViolations = new ReflectionGenericConstraintViolations(genericTypeDefinition, testMethods);
+
         // Check for GenerateGenericTest attributes that explicitly specify type arguments
         var generateGenericTestAttributes = genericTypeDefinition.GetCustomAttributes<GenerateGenericTestAttribute>(inherit: false).ToArray();
         foreach (var genAttr in generateGenericTestAttributes)
@@ -803,7 +840,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             cancellationToken.ThrowIfCancellationRequested();
 
             var typeArguments = genAttr.TypeArguments;
-            if (typeArguments.Length == 0)
+            if (typeArguments.Length == 0 || constraintViolations.TryAddClassViolation(typeArguments))
             {
                 continue;
             }
@@ -886,6 +923,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         if (classDataSources.Length == 0)
         {
             // GenerateGenericTest tests have already been yielded above
+            constraintViolations.AddMethodRowViolations();
+            foreach (var violationMetadata in constraintViolations.CreateMetadata())
+            {
+                yield return violationMetadata;
+            }
+
             yield break;
         }
 
@@ -907,7 +950,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 // Determine generic type arguments from the data
                 var typeArguments = ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
-                if (typeArguments == null || typeArguments.Length == 0)
+                if (typeArguments == null || typeArguments.Length == 0 || constraintViolations.TryAddClassViolation(typeArguments))
                 {
                     continue;
                 }
@@ -989,6 +1032,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     yield return failedMetadata;
                 }
             }
+        }
+
+        constraintViolations.AddMethodRowViolations();
+        foreach (var violationMetadata in constraintViolations.CreateMetadata())
+        {
+            yield return violationMetadata;
         }
     }
 
@@ -1279,6 +1328,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var methodGenericParams = method.GetGenericArguments();
 
+        // [GenerateGenericTest] types that break the method's constraints. They are reported together
+        // as one failed test per type, with the same message as source-generated mode (#7107).
+        List<string>? constraintViolations = null;
+
         // Process each [GenerateGenericTest] attribute
         foreach (var genAttr in generateGenericTestAttributes)
         {
@@ -1304,6 +1357,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     $"but method requires {methodGenericParams.Length}. " +
                     $"Provided: [{string.Join(", ", typeArguments.Select(static t => t.Name))}]");
                 yield return (method, failedMetadata);
+                continue;
+            }
+
+            if (ReflectionGenericTypeResolver.FindConstraintViolation(method, typeArguments) is { } constraintViolation)
+            {
+                (constraintViolations ??= []).Add(constraintViolation);
                 continue;
             }
 
@@ -1342,6 +1401,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 yield return (resolvedMethod, null);
             }
+        }
+
+        if (constraintViolations != null)
+        {
+            var testAttribute = method.GetCustomAttribute<TestAttribute>();
+            yield return (method, GenericConstraintViolationTestMetadata.Create(
+                concreteClassType,
+                method.Name,
+                ReflectionMetadataBuilder.CreateMethodMetadata(concreteClassType, method),
+                testAttribute?.File ?? "Unknown",
+                testAttribute?.Line ?? 0,
+                constraintViolations));
         }
     }
 
