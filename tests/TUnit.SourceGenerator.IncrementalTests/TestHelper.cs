@@ -110,7 +110,7 @@ internal static class TestHelper
     /// Asserts every output of the tracked step <paramref name="stepName"/> has one of the
     /// <paramref name="allowedReasons"/>, and that the step produced at least one output.
     /// </summary>
-    public static void AssertAllRunReasons(
+    public static async Task AssertAllRunReasons(
         GeneratorRunResult runResult,
         string stepName,
         params IncrementalStepRunReason[] allowedReasons
@@ -120,17 +120,17 @@ internal static class TestHelper
             .SelectMany(x => x.Outputs)
             .ToArray();
 
-        Xunit.Assert.NotEmpty(outputs);
+        await Assert.That(outputs).IsNotEmpty();
         foreach (var output in outputs)
         {
-            Xunit.Assert.Contains(output.Reason, allowedReasons);
+            await Assert.That(allowedReasons).Contains(output.Reason);
         }
     }
 
     /// <summary>
     /// Asserts at least one output of the tracked step <paramref name="stepName"/> has <paramref name="expectedReason"/>.
     /// </summary>
-    public static void AssertAnyRunReason(
+    public static async Task AssertAnyRunReason(
         GeneratorRunResult runResult,
         string stepName,
         IncrementalStepRunReason expectedReason
@@ -141,27 +141,27 @@ internal static class TestHelper
             .Select(x => x.Reason)
             .ToArray();
 
-        Xunit.Assert.Contains(expectedReason, reasons);
+        await Assert.That(reasons).Contains(expectedReason);
     }
 
     /// <summary>
     /// Asserts no source output was re-run, i.e. nothing was regenerated.
     /// </summary>
-    public static void AssertSourceOutputsCached(GeneratorRunResult runResult)
+    public static async Task AssertSourceOutputsCached(GeneratorRunResult runResult)
     {
         var outputs = runResult.TrackedOutputSteps
             .SelectMany(x => x.Value)
             .SelectMany(x => x.Outputs)
             .ToArray();
 
-        Xunit.Assert.NotEmpty(outputs);
+        await Assert.That(outputs).IsNotEmpty();
         foreach (var output in outputs)
         {
-            Xunit.Assert.Equal(IncrementalStepRunReason.Cached, output.Reason);
+            await Assert.That(output.Reason).IsEqualTo(IncrementalStepRunReason.Cached);
         }
     }
 
-    public static void AssertRunReason(
+    public static async Task AssertRunReason(
         GeneratorRunResult runResult,
         string stepName,
         IncrementalStepRunReason expectedStepReason,

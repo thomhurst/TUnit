@@ -62,13 +62,4 @@ public static class Fixture
 
         return compilation;
     }
-
-    public static async Task<string> SourceFromResourceFile(string file)
-    {
-        var currentDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        Assert.NotNull(currentDir);
-        var resourcesDir = Path.Combine(currentDir, "resources");
-
-        return await File.ReadAllTextAsync(Path.Combine(resourcesDir, file));
-    }
 }

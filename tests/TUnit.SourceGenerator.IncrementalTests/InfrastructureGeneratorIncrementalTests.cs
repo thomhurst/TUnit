@@ -20,20 +20,20 @@ public class InfrastructureGeneratorIncrementalTests
         }
         """;
 
-    [Fact]
-    public void EditSource_ShouldNotRegenerate()
+    [Test]
+    public async Task EditSource_ShouldNotRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
         var driver1 = TestHelper.GenerateTracked<InfrastructureGenerator>(compilation1);
-        AssertRunReason(driver1, IncrementalStepRunReason.New);
+        await AssertRunReason(driver1, IncrementalStepRunReason.New);
 
         // Syntax-only edits rerun the cheap Select, whose model is unchanged, so the generated source
         // stays cached. Memo_SyntaxOnlyEdits_ReuseModel checks that the reference walk is skipped.
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReason(driver2, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertSourceOutputsCached(driver2.GetRunResult().Results[0]);
+        await AssertRunReason(driver2, IncrementalStepRunReason.Unchanged);
+        await TestHelper.AssertSourceOutputsCached(driver2.GetRunResult().Results[0]);
 
         var compilation3 = TestHelper.ReplaceMethodDeclaration(compilation1, "Test1",
             """
@@ -44,12 +44,12 @@ public class InfrastructureGeneratorIncrementalTests
             }
             """);
         var driver3 = driver2.RunGenerators(compilation3);
-        AssertRunReason(driver3, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertSourceOutputsCached(driver3.GetRunResult().Results[0]);
+        await AssertRunReason(driver3, IncrementalStepRunReason.Unchanged);
+        await TestHelper.AssertSourceOutputsCached(driver3.GetRunResult().Results[0]);
     }
 
-    [Fact]
-    public void EditSource_DoesNotRetainPreviousCompilation()
+    [Test]
+    public async Task EditSource_DoesNotRetainPreviousCompilation()
     {
         var (driver, firstCompilation, latestCompilation) = RunSourceEdits(10);
 
@@ -61,7 +61,7 @@ public class InfrastructureGeneratorIncrementalTests
 
         // A comparer that reports the new compilation as equal makes the input node keep the old
         // one, pinning its syntax trees and bound state for as long as the driver lives.
-        Xunit.Assert.False(firstCompilation.IsAlive, "The generator driver kept the first compilation alive after syntax-only edits.");
+        await Assert.That(firstCompilation.IsAlive).IsFalse().Because("The generator driver kept the first compilation alive after syntax-only edits.");
         GC.KeepAlive(driver);
         GC.KeepAlive(latestCompilation);
     }
@@ -90,13 +90,13 @@ public class InfrastructureGeneratorIncrementalTests
     private static object? GetExtractedModel(GeneratorDriver driver) =>
         driver.GetRunResult().Results[0].TrackedSteps[InfrastructureGenerator.ExtractAssemblyInfoStep][0].Outputs[0].Value;
 
-    [Fact]
-    public void AddReference_ShouldRegenerate()
+    [Test]
+    public async Task AddReference_ShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
         var driver1 = TestHelper.GenerateTracked<InfrastructureGenerator>(compilation1);
-        AssertRunReason(driver1, IncrementalStepRunReason.New);
+        await AssertRunReason(driver1, IncrementalStepRunReason.New);
 
         // A library that references TUnit.Core must be pre-loaded by TUnitInfrastructure.g.cs.
         var library = CSharpCompilation.Create(
@@ -107,14 +107,14 @@ public class InfrastructureGeneratorIncrementalTests
 
         var compilation2 = compilation1.AddReferences(library.ToMetadataReference());
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReason(driver2, IncrementalStepRunReason.Modified);
+        await AssertRunReason(driver2, IncrementalStepRunReason.Modified);
 
         var generated = driver2.GetRunResult().GeneratedTrees.Single(t => t.FilePath.EndsWith("TUnitInfrastructure.g.cs"));
-        Xunit.Assert.Contains("global::OtherTestLibrary.SharedHooks", generated.ToString());
+        await Assert.That(generated.ToString()).Contains("global::OtherTestLibrary.SharedHooks");
     }
 
-    [Fact]
-    public void EditProjectReference_ShouldRegenerate()
+    [Test]
+    public async Task EditProjectReference_ShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
@@ -122,7 +122,7 @@ public class InfrastructureGeneratorIncrementalTests
         compilation1 = compilation1.AddReferences(library1.ToMetadataReference());
 
         var driver1 = TestHelper.GenerateTracked<InfrastructureGenerator>(compilation1);
-        AssertRunReason(driver1, IncrementalStepRunReason.New);
+        await AssertRunReason(driver1, IncrementalStepRunReason.New);
 
         // In the IDE, editing a referenced project replaces its CompilationReference while the
         // assembly name stays the same. Renaming the only public type must reach the output,
@@ -130,23 +130,23 @@ public class InfrastructureGeneratorIncrementalTests
         var library2 = CreateHookLibrary(compilation1, "RenamedHooks");
         var compilation2 = compilation1.ReplaceReference(compilation1.References.Last(), library2.ToMetadataReference());
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReason(driver2, IncrementalStepRunReason.Modified);
+        await AssertRunReason(driver2, IncrementalStepRunReason.Modified);
 
         var generated = driver2.GetRunResult().GeneratedTrees.Single(t => t.FilePath.EndsWith("TUnitInfrastructure.g.cs")).ToString();
-        Xunit.Assert.Contains("global::OtherTestLibrary.RenamedHooks", generated);
-        Xunit.Assert.DoesNotContain("global::OtherTestLibrary.SharedHooks", generated);
+        await Assert.That(generated).Contains("global::OtherTestLibrary.RenamedHooks");
+        await Assert.That(generated).DoesNotContain("global::OtherTestLibrary.SharedHooks");
 
         // An edit that does not change the extracted model reruns extraction but keeps the output cached.
         var library3 = CreateHookLibrary(compilation1, "RenamedHooks");
         var compilation3 = compilation2.ReplaceReference(compilation2.References.Last(), library3.ToMetadataReference());
         var driver3 = driver2.RunGenerators(compilation3);
-        AssertRunReason(driver3, IncrementalStepRunReason.Unchanged);
+        await AssertRunReason(driver3, IncrementalStepRunReason.Unchanged);
     }
 
     private const string ShadowingSource = "namespace OtherTestLibrary { public class FirstHooks { } }";
 
-    [Fact]
-    public void FreshDriver_SameReferences_DoesNotShareMemo()
+    [Test]
+    public async Task FreshDriver_SameReferences_DoesNotShareMemo()
     {
         var compilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
@@ -154,55 +154,55 @@ public class InfrastructureGeneratorIncrementalTests
         // extracts fresh instead of reusing another driver's result.
         var first = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(compilation));
         var second = GetExtractedModel(TestHelper.GenerateTracked<InfrastructureGenerator>(compilation));
-        Xunit.Assert.NotSame(first, second);
-        Xunit.Assert.Equal(first, second);
+        await Assert.That(second).IsNotSameReferenceAs(first);
+        await Assert.That(second).IsEqualTo(first);
     }
 
-    [Fact]
-    public void EditSource_SourceSensitiveSelectionIsNotReused()
+    [Test]
+    public async Task EditSource_SourceSensitiveSelectionIsNotReused()
     {
         var baseCompilation = CreateWithTwoTypeLibrary();
         var shadowedCompilation = baseCompilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(ShadowingSource));
 
         // The shadowed run must not memoize its (source-dependent) choice for later compilations.
         var driver1 = TestHelper.GenerateTracked<InfrastructureGenerator>(shadowedCompilation);
-        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.SecondHooks)", GenerateInfrastructure(driver1));
+        await Assert.That(GenerateInfrastructure(driver1)).Contains("typeof(global::OtherTestLibrary.SecondHooks)");
 
         var driver2 = driver1.RunGenerators(baseCompilation);
-        AssertRunReason(driver2, IncrementalStepRunReason.Modified);
-        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.FirstHooks)", GenerateInfrastructure(driver2));
+        await AssertRunReason(driver2, IncrementalStepRunReason.Modified);
+        await Assert.That(GenerateInfrastructure(driver2)).Contains("typeof(global::OtherTestLibrary.FirstHooks)");
     }
 
-    [Fact]
-    public void EditSource_ShadowingSelectedType_ShouldRegenerate()
+    [Test]
+    public async Task EditSource_ShadowingSelectedType_ShouldRegenerate()
     {
         var compilation1 = CreateWithTwoTypeLibrary();
         var driver1 = TestHelper.GenerateTracked<InfrastructureGenerator>(compilation1);
-        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.FirstHooks)", GenerateInfrastructure(driver1));
+        await Assert.That(GenerateInfrastructure(driver1)).Contains("typeof(global::OtherTestLibrary.FirstHooks)");
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText(ShadowingSource));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReason(driver2, IncrementalStepRunReason.Modified);
-        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.SecondHooks)", GenerateInfrastructure(driver2));
+        await AssertRunReason(driver2, IncrementalStepRunReason.Modified);
+        await Assert.That(GenerateInfrastructure(driver2)).Contains("typeof(global::OtherTestLibrary.SecondHooks)");
 
         var driver3 = driver2.RunGenerators(compilation1);
-        AssertRunReason(driver3, IncrementalStepRunReason.Modified);
-        Xunit.Assert.Contains("typeof(global::OtherTestLibrary.FirstHooks)", GenerateInfrastructure(driver3));
+        await AssertRunReason(driver3, IncrementalStepRunReason.Modified);
+        await Assert.That(GenerateInfrastructure(driver3)).Contains("typeof(global::OtherTestLibrary.FirstHooks)");
     }
 
     // The driver keeps the previous output instance whenever a rerun produces an equal model, so
     // whether the walk was skipped is only observable on the memo itself: it returns the same
     // instance on a hit and a new one after re-extracting.
 
-    [Fact]
-    public void Memo_SyntaxOnlyEdits_ReuseModel()
+    [Test]
+    public async Task Memo_SyntaxOnlyEdits_ReuseModel()
     {
         var memo = new InfrastructureGenerator.AssemblyInfoMemo();
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
         var model1 = memo.GetAssemblyInfo(compilation1);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
-        Xunit.Assert.Same(model1, memo.GetAssemblyInfo(compilation2));
+        await Assert.That(memo.GetAssemblyInfo(compilation2)).IsSameReferenceAs(model1);
 
         var compilation3 = TestHelper.ReplaceMethodDeclaration(compilation1, "Test1",
             """
@@ -212,11 +212,11 @@ public class InfrastructureGeneratorIncrementalTests
                 var x = 1;
             }
             """);
-        Xunit.Assert.Same(model1, memo.GetAssemblyInfo(compilation3));
+        await Assert.That(memo.GetAssemblyInfo(compilation3)).IsSameReferenceAs(model1);
     }
 
-    [Fact]
-    public void Memo_ReferenceChange_ReExtracts()
+    [Test]
+    public async Task Memo_ReferenceChange_ReExtracts()
     {
         var memo = new InfrastructureGenerator.AssemblyInfoMemo();
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
@@ -224,12 +224,12 @@ public class InfrastructureGeneratorIncrementalTests
 
         var compilation2 = compilation1.AddReferences(CreateHookLibrary(compilation1, "SharedHooks").ToMetadataReference());
         var model2 = memo.GetAssemblyInfo(compilation2);
-        Xunit.Assert.NotSame(model1, model2);
-        Xunit.Assert.NotEqual(model1, model2);
+        await Assert.That(model2).IsNotSameReferenceAs(model1);
+        await Assert.That(model2).IsNotEqualTo(model1);
     }
 
-    [Fact]
-    public void Memo_OptionsOrAssemblyNameChange_ReExtracts()
+    [Test]
+    public async Task Memo_OptionsOrAssemblyNameChange_ReExtracts()
     {
         var memo = new InfrastructureGenerator.AssemblyInfoMemo();
         var baseCompilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
@@ -239,29 +239,29 @@ public class InfrastructureGeneratorIncrementalTests
         // so a new options instance must not reuse the model extracted under the old one.
         var withComparer = baseCompilation.WithOptions(
             baseCompilation.Options.WithAssemblyIdentityComparer(DesktopAssemblyIdentityComparer.Default));
-        Xunit.Assert.True(baseCompilation.ExternalReferences == withComparer.ExternalReferences);
+        await Assert.That(baseCompilation.ExternalReferences == withComparer.ExternalReferences).IsTrue();
         var comparerModel = memo.GetAssemblyInfo(withComparer);
-        Xunit.Assert.NotSame(baseModel, comparerModel);
-        Xunit.Assert.Equal(baseModel, comparerModel);
+        await Assert.That(comparerModel).IsNotSameReferenceAs(baseModel);
+        await Assert.That(comparerModel).IsEqualTo(baseModel);
 
         var withImportOptions = baseCompilation.WithOptions(
             baseCompilation.Options.WithMetadataImportOptions(MetadataImportOptions.All));
         var importModel = memo.GetAssemblyInfo(withImportOptions);
-        Xunit.Assert.NotSame(comparerModel, importModel);
+        await Assert.That(importModel).IsNotSameReferenceAs(comparerModel);
 
         // Syntax-only edits under the new options reuse the memo again.
-        Xunit.Assert.Same(importModel, memo.GetAssemblyInfo(
-            withImportOptions.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"))));
+        await Assert.That(memo.GetAssemblyInfo(
+            withImportOptions.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}")))).IsSameReferenceAs(importModel);
 
         var renamed = withImportOptions.WithAssemblyName("Renamed");
-        Xunit.Assert.True(withImportOptions.ExternalReferences == renamed.ExternalReferences);
+        await Assert.That(withImportOptions.ExternalReferences == renamed.ExternalReferences).IsTrue();
         var renamedModel = memo.GetAssemblyInfo(renamed);
-        Xunit.Assert.NotSame(importModel, renamedModel);
-        Xunit.Assert.Equal("Renamed", renamedModel.AssemblyName);
+        await Assert.That(renamedModel).IsNotSameReferenceAs(importModel);
+        await Assert.That(renamedModel.AssemblyName).IsEqualTo("Renamed");
     }
 
-    [Fact]
-    public void Memo_ScriptCompilation_IsNeverMemoized()
+    [Test]
+    public async Task Memo_ScriptCompilation_IsNeverMemoized()
     {
         var memo = new InfrastructureGenerator.AssemblyInfoMemo();
         var baseCompilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
@@ -274,14 +274,14 @@ public class InfrastructureGeneratorIncrementalTests
             baseCompilation.AssemblyName!,
             CSharpSyntaxTree.ParseText("var x = 1;", CSharpParseOptions.Default.WithKind(SourceCodeKind.Script)),
             baseCompilation.ExternalReferences);
-        Xunit.Assert.True(baseCompilation.ExternalReferences == script.ExternalReferences);
+        await Assert.That(baseCompilation.ExternalReferences == script.ExternalReferences).IsTrue();
 
         var first = memo.GetAssemblyInfo(script);
         var second = memo.GetAssemblyInfo(script.ReplaceSyntaxTree(
             script.SyntaxTrees.Single(),
             CSharpSyntaxTree.ParseText("var y = 2;", CSharpParseOptions.Default.WithKind(SourceCodeKind.Script))));
-        Xunit.Assert.NotSame(baseModel, first);
-        Xunit.Assert.NotSame(first, second);
+        await Assert.That(first).IsNotSameReferenceAs(baseModel);
+        await Assert.That(second).IsNotSameReferenceAs(first);
     }
 
     private static CSharpCompilation CreateWithTwoTypeLibrary()
@@ -305,10 +305,10 @@ public class InfrastructureGeneratorIncrementalTests
             consumer.References.Where(r => r is not CompilationReference),
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-    private static void AssertRunReason(GeneratorDriver driver, IncrementalStepRunReason reason)
+    private static async Task AssertRunReason(GeneratorDriver driver, IncrementalStepRunReason reason)
     {
         var runResult = driver.GetRunResult().Results[0];
 
-        TestHelper.AssertRunReason(runResult, InfrastructureGenerator.ExtractAssemblyInfoStep, reason, 0);
+        await TestHelper.AssertRunReason(runResult, InfrastructureGenerator.ExtractAssemblyInfoStep, reason, 0);
     }
 }

@@ -27,28 +27,28 @@ public class MethodAssertionGeneratorIncrementalTests
         }
         """;
 
-    [Fact]
-    public void AddUnrelatedMethodShouldNotRegenerate()
+    [Test]
+    public async Task AddUnrelatedMethodShouldNotRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultAssertion, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<MethodAssertionGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached);
     }
 
-    [Fact]
-    public void AddNewTypeAssertionShouldRegenerate()
+    [Test]
+    public async Task AddNewTypeAssertionShouldRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultAssertion, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<MethodAssertionGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
             """
@@ -64,18 +64,18 @@ public class MethodAssertionGeneratorIncrementalTests
             }
             """));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached, 0);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.New, 1);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached, 0);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.New, 1);
     }
 
-    [Fact]
-    public void AddNewSameTypeAssertionShouldRegenerate()
+    [Test]
+    public async Task AddNewSameTypeAssertionShouldRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultAssertion, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<MethodAssertionGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
 
         var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "IsNegative",
             """
@@ -87,18 +87,18 @@ public class MethodAssertionGeneratorIncrementalTests
             """
         );
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached, 0);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.New, 1);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached, 0);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.New, 1);
     }
 
-    [Fact]
-    public void ModifyMessageShouldRegenerate()
+    [Test]
+    public async Task ModifyMessageShouldRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultAssertion, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<MethodAssertionGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
 
         var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "IsPositive",
             """
@@ -110,11 +110,11 @@ public class MethodAssertionGeneratorIncrementalTests
             """
             );
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified);
     }
 
-    [Fact]
-    public void ModifyOneContainingTypeShouldOnlyRegenerateThatType()
+    [Test]
+    public async Task ModifyOneContainingTypeShouldOnlyRegenerateThatType()
     {
         var compilation1 = Fixture.CreateLibrary(
             DefaultAssertion,
@@ -150,19 +150,19 @@ public class MethodAssertionGeneratorIncrementalTests
         var driver2 = driver1.RunGenerators(compilation2);
 
         var runResult = driver2.GetRunResult().Results[0];
-        TestHelper.AssertRunReason(runResult, MethodAssertionGenerator.BuildAssertionGroup, IncrementalStepRunReason.Unchanged, 0);
-        TestHelper.AssertRunReason(runResult, MethodAssertionGenerator.BuildAssertionGroup, IncrementalStepRunReason.Modified, 1);
+        await TestHelper.AssertRunReason(runResult, MethodAssertionGenerator.BuildAssertionGroup, IncrementalStepRunReason.Unchanged, 0);
+        await TestHelper.AssertRunReason(runResult, MethodAssertionGenerator.BuildAssertionGroup, IncrementalStepRunReason.Modified, 1);
 
         var sourceOutputReasons = runResult.TrackedOutputSteps
             .SelectMany(x => x.Value)
             .SelectMany(x => x.Outputs)
             .Select(x => x.Reason)
             .ToArray();
-        Xunit.Assert.Single(sourceOutputReasons, IncrementalStepRunReason.Modified);
+        await Assert.That(sourceOutputReasons).HasSingleItem(x => x == IncrementalStepRunReason.Modified);
     }
 
-    [Fact]
-    public void UnrelatedEditWithDiagnosticShouldNotRegenerate()
+    [Test]
+    public async Task UnrelatedEditWithDiagnosticShouldNotRegenerate()
     {
         var brokenTree = CSharpSyntaxTree.ParseText(
             """
@@ -180,13 +180,13 @@ public class MethodAssertionGeneratorIncrementalTests
             brokenTree);
 
         var driver1 = TestHelper.GenerateTracked<MethodAssertionGenerator>(compilation1);
-        Xunit.Assert.Contains(driver1.GetRunResult().Diagnostics, d => d.Id == "TUNITGEN001");
+        await Assert.That(driver1.GetRunResult().Diagnostics).Contains(d => d.Id == "TUNITGEN001");
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
 
         var runResult = driver2.GetRunResult().Results[0];
-        TestHelper.AssertAllRunReasons(runResult, MethodAssertionGenerator.BuildAssertionGroup,
+        await TestHelper.AssertAllRunReasons(runResult, MethodAssertionGenerator.BuildAssertionGroup,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
 
         // Only the diagnostic reporter re-runs (it is paired with the compilation); the generated file stays cached.
@@ -195,18 +195,18 @@ public class MethodAssertionGeneratorIncrementalTests
             .SelectMany(x => x.Outputs)
             .Select(x => x.Reason)
             .ToArray();
-        Xunit.Assert.Single(sourceOutputReasons, reason => reason != IncrementalStepRunReason.Cached);
+        await Assert.That(sourceOutputReasons).HasSingleItem(reason => reason != IncrementalStepRunReason.Cached);
 
-        var diagnostic = Xunit.Assert.Single(runResult.Diagnostics, d => d.Id == "TUNITGEN001");
-        Xunit.Assert.Equal(4, diagnostic.Location.GetLineSpan().StartLinePosition.Line);
+        var diagnostic = await Assert.That(runResult.Diagnostics).HasSingleItem(d => d.Id == "TUNITGEN001");
+        await Assert.That(diagnostic.Location.GetLineSpan().StartLinePosition.Line).IsEqualTo(4);
 
         // The location must stay tied to the syntax tree so #pragma and per-file severities apply.
-        Xunit.Assert.True(diagnostic.Location.IsInSource);
-        Xunit.Assert.Same(brokenTree, diagnostic.Location.SourceTree);
+        await Assert.That(diagnostic.Location.IsInSource).IsTrue();
+        await Assert.That(diagnostic.Location.SourceTree).IsSameReferenceAs(brokenTree);
     }
 
-    [Fact]
-    public void DiagnosticInPathlessTreeKeepsSourceTree()
+    [Test]
+    public async Task DiagnosticInPathlessTreeKeepsSourceTree()
     {
         // Trees parsed without a path all share the empty path, so the path alone cannot identify the tree.
         var brokenTree = CSharpSyntaxTree.ParseText(
@@ -222,17 +222,18 @@ public class MethodAssertionGeneratorIncrementalTests
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultAssertion), brokenTree);
 
         var driver1 = TestHelper.GenerateTracked<MethodAssertionGenerator>(compilation1);
-        Xunit.Assert.Same(brokenTree, Xunit.Assert.Single(driver1.GetRunResult().Diagnostics, d => d.Id == "TUNITGEN001").Location.SourceTree);
+        var firstDiagnostic = await Assert.That(driver1.GetRunResult().Diagnostics).HasSingleItem(d => d.Id == "TUNITGEN001");
+        await Assert.That(firstDiagnostic.Location.SourceTree).IsSameReferenceAs(brokenTree);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
 
-        var diagnostic = Xunit.Assert.Single(driver2.GetRunResult().Diagnostics, d => d.Id == "TUNITGEN001");
-        Xunit.Assert.True(diagnostic.Location.IsInSource);
-        Xunit.Assert.Same(brokenTree, diagnostic.Location.SourceTree);
+        var diagnostic = await Assert.That(driver2.GetRunResult().Diagnostics).HasSingleItem(d => d.Id == "TUNITGEN001");
+        await Assert.That(diagnostic.Location.IsInSource).IsTrue();
+        await Assert.That(diagnostic.Location.SourceTree).IsSameReferenceAs(brokenTree);
     }
 
-    private static void AssertRunReasons(
+    private static async Task AssertRunReasons(
         GeneratorDriver driver,
         IncrementalGeneratorRunReasons reasons,
         int outputIndex = 0
@@ -240,6 +241,6 @@ public class MethodAssertionGeneratorIncrementalTests
     {
         var runResult = driver.GetRunResult().Results[0];
 
-        TestHelper.AssertRunReason(runResult, MethodAssertionGenerator.BuildAssertion, reasons.BuildStep, outputIndex);
+        await TestHelper.AssertRunReason(runResult, MethodAssertionGenerator.BuildAssertion, reasons.BuildStep, outputIndex);
     }
 }

@@ -49,8 +49,8 @@ public class AssertionExtensionGeneratorIncrementalTests
         }
         """;
 
-    [Fact]
-    public void AddUnrelatedTypeShouldNotRegenerate()
+    [Test]
+    public async Task AddUnrelatedTypeShouldNotRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
         var driver1 = TestHelper.GenerateTracked<AssertionExtensionGenerator>(compilation1);
@@ -59,13 +59,13 @@ public class AssertionExtensionGeneratorIncrementalTests
         var driver2 = driver1.RunGenerators(compilation2);
 
         var runResult = driver2.GetRunResult().Results[0];
-        TestHelper.AssertAllRunReasons(runResult, AssertionExtensionGenerator.AssertionExtensionStep,
+        await TestHelper.AssertAllRunReasons(runResult, AssertionExtensionGenerator.AssertionExtensionStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertSourceOutputsCached(runResult);
+        await TestHelper.AssertSourceOutputsCached(runResult);
     }
 
-    [Fact]
-    public void EditUnrelatedTypeShouldNotRegenerate()
+    [Test]
+    public async Task EditUnrelatedTypeShouldNotRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
         var driver1 = TestHelper.GenerateTracked<AssertionExtensionGenerator>(compilation1);
@@ -74,13 +74,13 @@ public class AssertionExtensionGeneratorIncrementalTests
         var driver2 = driver1.RunGenerators(compilation2);
 
         var runResult = driver2.GetRunResult().Results[0];
-        TestHelper.AssertAllRunReasons(runResult, AssertionExtensionGenerator.AssertionExtensionStep,
+        await TestHelper.AssertAllRunReasons(runResult, AssertionExtensionGenerator.AssertionExtensionStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertSourceOutputsCached(runResult);
+        await TestHelper.AssertSourceOutputsCached(runResult);
     }
 
-    [Fact]
-    public void ModifyAssertionClassShouldRegenerateOnlyThatClass()
+    [Test]
+    public async Task ModifyAssertionClassShouldRegenerateOnlyThatClass()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
         var driver1 = TestHelper.GenerateTracked<AssertionExtensionGenerator>(compilation1);
@@ -107,16 +107,16 @@ public class AssertionExtensionGeneratorIncrementalTests
             .SelectMany(x => x.Outputs)
             .Select(x => x.Reason)
             .ToArray();
-        Xunit.Assert.Equal(2, reasons.Length);
-        Xunit.Assert.Contains(reasons[0], new[] { IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged });
-        Xunit.Assert.Equal(IncrementalStepRunReason.Modified, reasons[1]);
+        await Assert.That(reasons.Length).IsEqualTo(2);
+        await Assert.That(new[] { IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged }).Contains(reasons[0]);
+        await Assert.That(reasons[1]).IsEqualTo(IncrementalStepRunReason.Modified);
 
         var sourceOutputReasons = runResult.TrackedOutputSteps
             .SelectMany(x => x.Value)
             .SelectMany(x => x.Outputs)
             .Select(x => x.Reason)
             .ToArray();
-        Xunit.Assert.Single(sourceOutputReasons, IncrementalStepRunReason.Modified);
-        Xunit.Assert.Contains("IsBaz", runResult.GeneratedSources.Single(x => x.HintName == "BarAssertion.Extensions.g.cs").SourceText.ToString());
+        await Assert.That(sourceOutputReasons).HasSingleItem(x => x == IncrementalStepRunReason.Modified);
+        await Assert.That(runResult.GeneratedSources.Single(x => x.HintName == "BarAssertion.Extensions.g.cs").SourceText.ToString()).Contains("IsBaz");
     }
 }

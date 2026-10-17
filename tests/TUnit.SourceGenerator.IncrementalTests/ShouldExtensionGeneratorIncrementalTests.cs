@@ -57,20 +57,20 @@ public class ShouldExtensionGeneratorIncrementalTests
         }
         """;
 
-    [Fact]
-    public void GeneratesFromLocalContainersAndWrappers()
+    [Test]
+    public async Task GeneratesFromLocalContainersAndWrappers()
     {
         var compilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
 
         var driver = TestHelper.GenerateTracked<ShouldExtensionGenerator>(compilation);
 
         var sources = driver.GetRunResult().Results[0].GeneratedSources;
-        Xunit.Assert.Contains("BeFoo", sources.Single(x => x.HintName == "ShouldFooExtensions.g.cs").SourceText.ToString());
-        Xunit.Assert.Contains("BeFooToo", sources.Single(x => x.HintName == "FooWrapper.Generated.g.cs").SourceText.ToString());
+        await Assert.That(sources.Single(x => x.HintName == "ShouldFooExtensions.g.cs").SourceText.ToString()).Contains("BeFoo");
+        await Assert.That(sources.Single(x => x.HintName == "FooWrapper.Generated.g.cs").SourceText.ToString()).Contains("BeFooToo");
     }
 
-    [Fact]
-    public void AddUnrelatedTypeShouldNotRegenerate()
+    [Test]
+    public async Task AddUnrelatedTypeShouldNotRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
         var driver1 = TestHelper.GenerateTracked<ShouldExtensionGenerator>(compilation1);
@@ -78,11 +78,11 @@ public class ShouldExtensionGeneratorIncrementalTests
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
 
-        AssertUnchanged(driver2.GetRunResult().Results[0]);
+        await AssertUnchanged(driver2.GetRunResult().Results[0]);
     }
 
-    [Fact]
-    public void EditUnrelatedTypeShouldNotRegenerate()
+    [Test]
+    public async Task EditUnrelatedTypeShouldNotRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
         var driver1 = TestHelper.GenerateTracked<ShouldExtensionGenerator>(compilation1);
@@ -90,11 +90,11 @@ public class ShouldExtensionGeneratorIncrementalTests
         var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "Method", "public void Method() { var x = 1; }");
         var driver2 = driver1.RunGenerators(compilation2);
 
-        AssertUnchanged(driver2.GetRunResult().Results[0]);
+        await AssertUnchanged(driver2.GetRunResult().Results[0]);
     }
 
-    [Fact]
-    public void ModifyExtensionMethodShouldRegenerate()
+    [Test]
+    public async Task ModifyExtensionMethodShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
         var driver1 = TestHelper.GenerateTracked<ShouldExtensionGenerator>(compilation1);
@@ -107,15 +107,15 @@ public class ShouldExtensionGeneratorIncrementalTests
         var driver2 = driver1.RunGenerators(compilation2);
 
         var runResult = driver2.GetRunResult().Results[0];
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalWrappersStep,
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalWrappersStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalDeclarationsStep, IncrementalStepRunReason.Modified);
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.PayloadStep, IncrementalStepRunReason.Modified);
-        Xunit.Assert.Contains("BeFooish", runResult.GeneratedSources.Single(x => x.HintName == "ShouldFooExtensions.g.cs").SourceText.ToString());
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalDeclarationsStep, IncrementalStepRunReason.Modified);
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.PayloadStep, IncrementalStepRunReason.Modified);
+        await Assert.That(runResult.GeneratedSources.Single(x => x.HintName == "ShouldFooExtensions.g.cs").SourceText.ToString()).Contains("BeFooish");
     }
 
-    [Fact]
-    public void ModifyWrapperShouldRegenerate()
+    [Test]
+    public async Task ModifyWrapperShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
         var driver1 = TestHelper.GenerateTracked<ShouldExtensionGenerator>(compilation1);
@@ -131,18 +131,18 @@ public class ShouldExtensionGeneratorIncrementalTests
         var driver2 = driver1.RunGenerators(compilation2);
 
         var runResult = driver2.GetRunResult().Results[0];
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalContainersStep,
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalContainersStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.PayloadStep, IncrementalStepRunReason.Modified);
-        Xunit.Assert.DoesNotContain(runResult.GeneratedSources, x => x.HintName == "FooWrapper.Generated.g.cs");
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.PayloadStep, IncrementalStepRunReason.Modified);
+        await Assert.That(runResult.GeneratedSources).DoesNotContain(x => x.HintName == "FooWrapper.Generated.g.cs");
     }
 
-    [Fact]
-    public void ModifyWrappedAssertionInOtherFileShouldRegenerateWrapper()
+    [Test]
+    public async Task ModifyWrappedAssertionInOtherFileShouldRegenerateWrapper()
     {
         var compilation1 = Fixture.CreateLibrary(SplitAssertionTree(SplitAssertion), SplitDeclarationsTree());
         var driver1 = TestHelper.GenerateTracked<ShouldExtensionGenerator>(compilation1);
-        Xunit.Assert.Contains("BeFooToo", GetSource(driver1, "FooWrapper.Generated.g.cs"));
+        await Assert.That(GetSource(driver1, "FooWrapper.Generated.g.cs")).Contains("BeFooToo");
 
         var compilation2 = compilation1.ReplaceSyntaxTree(
             compilation1.SyntaxTrees.First(),
@@ -150,20 +150,20 @@ public class ShouldExtensionGeneratorIncrementalTests
         var driver2 = driver1.RunGenerators(compilation2);
 
         var runResult = driver2.GetRunResult().Results[0];
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalWrappersStep,
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalWrappersStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalDeclarationsStep, IncrementalStepRunReason.Modified);
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalDeclarationsStep, IncrementalStepRunReason.Modified);
         var wrapperSource = GetSource(driver2, "FooWrapper.Generated.g.cs");
-        Xunit.Assert.Contains("BeFooThree", wrapperSource);
-        Xunit.Assert.DoesNotContain("BeFooToo", wrapperSource);
+        await Assert.That(wrapperSource).Contains("BeFooThree");
+        await Assert.That(wrapperSource).DoesNotContain("BeFooToo");
     }
 
-    [Fact]
-    public void ModifyReturnedAssertionInOtherFileShouldRegenerateContainer()
+    [Test]
+    public async Task ModifyReturnedAssertionInOtherFileShouldRegenerateContainer()
     {
         var compilation1 = Fixture.CreateLibrary(SplitAssertionTree(SplitAssertion), SplitDeclarationsTree());
         var driver1 = TestHelper.GenerateTracked<ShouldExtensionGenerator>(compilation1);
-        Xunit.Assert.Contains("BeFoo", GetSource(driver1, "ShouldFooExtensions.g.cs"));
+        await Assert.That(GetSource(driver1, "ShouldFooExtensions.g.cs")).Contains("BeFoo");
 
         // The extension no longer maps onto a constructor, so its Should counterpart must disappear.
         var compilation2 = compilation1.ReplaceSyntaxTree(
@@ -174,14 +174,14 @@ public class ShouldExtensionGeneratorIncrementalTests
         var driver2 = driver1.RunGenerators(compilation2);
 
         var runResult = driver2.GetRunResult().Results[0];
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalContainersStep,
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalContainersStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalDeclarationsStep, IncrementalStepRunReason.Modified);
-        Xunit.Assert.DoesNotContain(runResult.GeneratedSources, x => x.HintName == "ShouldFooExtensions.g.cs");
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalDeclarationsStep, IncrementalStepRunReason.Modified);
+        await Assert.That(runResult.GeneratedSources).DoesNotContain(x => x.HintName == "ShouldFooExtensions.g.cs");
     }
 
-    [Fact]
-    public void PartialContainerSplitAcrossFilesGeneratesAllMethodsOnce()
+    [Test]
+    public async Task PartialContainerSplitAcrossFilesGeneratesAllMethodsOnce()
     {
         var compilation1 = Fixture.CreateLibrary(
             SplitAssertionTree(SplitAssertion),
@@ -191,8 +191,8 @@ public class ShouldExtensionGeneratorIncrementalTests
         var driver1 = TestHelper.GenerateTracked<ShouldExtensionGenerator>(compilation1);
 
         var source = GetSource(driver1, "ShouldFooExtensions.g.cs");
-        Xunit.Assert.Single(System.Text.RegularExpressions.Regex.Matches(source, @"> BeFoo\("));
-        Xunit.Assert.Single(System.Text.RegularExpressions.Regex.Matches(source, @"> BeBar\("));
+        await Assert.That(System.Text.RegularExpressions.Regex.Matches(source, @"> BeFoo\(")).HasSingleItem();
+        await Assert.That(System.Text.RegularExpressions.Regex.Matches(source, @"> BeBar\(")).HasSingleItem();
 
         // Editing the part without extension methods changes nothing the generator reads.
         var compilation2 = compilation1.ReplaceSyntaxTree(compilation1.SyntaxTrees.Last(), HelperPartTree("2"));
@@ -200,17 +200,17 @@ public class ShouldExtensionGeneratorIncrementalTests
 
         // No [ShouldGeneratePartial] here, so the wrappers step never runs and is not asserted.
         var runResult = driver2.GetRunResult().Results[0];
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalContainersStep,
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalContainersStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalDeclarationsStep,
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalDeclarationsStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.PayloadStep,
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.PayloadStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertSourceOutputsCached(runResult);
+        await TestHelper.AssertSourceOutputsCached(runResult);
     }
 
-    [Fact]
-    public void GenericAndNestedWrappersResolveByMetadataName()
+    [Test]
+    public async Task GenericAndNestedWrappersResolveByMetadataName()
     {
         // The syntax step hands the resolver hand-built metadata names; a wrong name makes
         // GetTypeByMetadataName return null and the wrapper silently disappears. Cover a
@@ -242,10 +242,10 @@ public class ShouldExtensionGeneratorIncrementalTests
 
         var driver = TestHelper.GenerateTracked<ShouldExtensionGenerator>(compilation);
 
-        Xunit.Assert.Contains("BeFooToo", GetSource(driver, "GenericWrapper.Generated.g.cs"));
+        await Assert.That(GetSource(driver, "GenericWrapper.Generated.g.cs")).Contains("BeFooToo");
         var nestedSource = GetSource(driver, "NestedWrapper.Generated.g.cs");
-        Xunit.Assert.Contains("BeFooToo", nestedSource);
-        Xunit.Assert.Contains("partial class Outer<TOuter>", nestedSource);
+        await Assert.That(nestedSource).Contains("BeFooToo");
+        await Assert.That(nestedSource).Contains("partial class Outer<TOuter>");
     }
 
     private static SyntaxTree HelperPartTree(string value) =>
@@ -338,18 +338,18 @@ public class ShouldExtensionGeneratorIncrementalTests
     private static string GetSource(GeneratorDriver driver, string hintName) =>
         driver.GetRunResult().Results[0].GeneratedSources.Single(x => x.HintName == hintName).SourceText.ToString();
 
-    private static void AssertUnchanged(GeneratorRunResult runResult)
+    private static async Task AssertUnchanged(GeneratorRunResult runResult)
     {
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalContainersStep,
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalContainersStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalWrappersStep,
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalWrappersStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalDeclarationsStep,
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.LocalDeclarationsStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.CompilationDataStep,
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.CompilationDataStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.PayloadStep,
+        await TestHelper.AssertAllRunReasons(runResult, ShouldExtensionGenerator.PayloadStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertSourceOutputsCached(runResult);
+        await TestHelper.AssertSourceOutputsCached(runResult);
     }
 }
