@@ -238,6 +238,8 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+          # Versioning reads the fetched history only; nothing in this job pushes.
+          persist-credentials: false
 
       - name: Setup Dev Drive
         uses: samypr100/setup-dev-drive@v4
