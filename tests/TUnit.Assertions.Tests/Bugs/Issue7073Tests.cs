@@ -462,4 +462,93 @@ public class Issue7073Tests
 
         public static implicit operator NullSentinelWrapper(string? value) => value is null ? None : new(value);
     }
+
+    // Zero-to-enum (C# §10.2.4): C# 13+ binds Assert.That(Level.None).IsEqualTo(0) to the same-type overload,
+    // C# 12 to the cross-type one, so the cross-type overload must compare in the enum type.
+    [Test]
+    public async Task Enum_IsEqualTo_Zero_CrossTypeOverload_Passes()
+    {
+        await EqualsAssertionExtensions.IsEqualTo<Level, int>(Assert.That(Level.None), 0);
+    }
+
+    [Test]
+    public async Task Enum_IsEqualTo_Zero_CrossTypeOverload_Fails_When_Not_Zero()
+    {
+        await Assert.That(async () =>
+                await EqualsAssertionExtensions.IsEqualTo<Level, int>(Assert.That(Level.High), 0))
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Enum_IsNotEqualTo_Zero_CrossTypeOverload_Passes_When_Not_Zero()
+    {
+        await NotEqualsAssertionExtensions.IsNotEqualTo<Level, int>(Assert.That(Level.High), 0);
+    }
+
+    [Test]
+    public async Task NullableEnum_IsEqualTo_LongZero_CrossTypeOverload_Passes()
+    {
+        await EqualsAssertionExtensions.IsEqualTo<Level?, long>(Assert.That((Level?)Level.None), 0L);
+    }
+
+    [Test]
+    public async Task NullableEnum_IsEqualTo_Zero_CrossTypeOverload_Fails_When_Null()
+    {
+        await Assert.That(async () =>
+                await EqualsAssertionExtensions.IsEqualTo<Level?, int>(Assert.That((Level?)null), 0))
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Enum_IsEqualTo_DoubleZero_CrossTypeOverload_Passes()
+    {
+        await EqualsAssertionExtensions.IsEqualTo<Level, double>(Assert.That(Level.None), 0.0);
+    }
+
+    [Test]
+    public async Task Enum_IsEqualTo_Zero_CrossTypeOverload_And_Chain_Sees_Underlying_Value()
+    {
+        await EqualsAssertionExtensions.IsEqualTo<Level, int>(Assert.That(Level.None), 0).And.IsLessThan(1);
+    }
+
+    // C# applies a user-defined operator declared on a base class of the source or target type.
+    [Test]
+    public async Task Derived_IsEqualTo_String_Uses_Base_Class_Operator()
+    {
+        await Assert.That(new DerivedCode("x")).IsEqualTo("x");
+    }
+
+    [Test]
+    public async Task String_IsEqualTo_Derived_Uses_Base_Class_Operator()
+    {
+        await Assert.That("x").IsEqualTo(new DerivedCode("x"));
+    }
+
+    [Test]
+    public async Task Leaf_IsEqualTo_String_Uses_Most_Specific_Base_Class_Operator()
+    {
+        await Assert.That(new LeafCode("x")).IsEqualTo("mid:x");
+    }
+
+    public enum Level
+    {
+        None,
+        High,
+    }
+
+    public class BaseCode(string value)
+    {
+        public string Value { get; } = value;
+
+        public static implicit operator string(BaseCode code) => code.Value;
+    }
+
+    public sealed class DerivedCode(string value) : BaseCode(value);
+
+    public class MidCode(string value) : BaseCode(value)
+    {
+        public static implicit operator string(MidCode code) => "mid:" + code.Value;
+    }
+
+    public sealed class LeafCode(string value) : MidCode(value);
 }

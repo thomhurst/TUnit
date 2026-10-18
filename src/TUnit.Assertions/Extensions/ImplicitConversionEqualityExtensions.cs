@@ -316,15 +316,16 @@ internal static class ImplicitConversionCache
     /// Returns a converter for the C# implicit constant expression conversion (§10.2.11) when it would
     /// apply to <paramref name="value"/>: an <c>int</c> converts to <c>sbyte</c>, <c>byte</c>, <c>short</c>,
     /// <c>ushort</c>, <c>uint</c>, <c>ulong</c>, <c>nint</c> or <c>nuint</c> (or their nullable forms), and a
-    /// <c>long</c> to <c>ulong</c>, when the value is in range. C# 13+ uses it to bind
-    /// <c>Assert.That(0U).IsEqualTo(0)</c> to the same-type overload, while C# 12 binds the cross-type one.
-    /// Whether the argument was a constant is not known at run time, so any in-range value qualifies.
-    /// Returns <see langword="null"/> when the conversion does not apply or the value is out of range.
+    /// <c>long</c> to <c>ulong</c>, when the value is in range. A numeric zero (any numeric type except
+    /// <c>char</c>, as Roslyn accepts) also converts to any enum or nullable enum (§10.2.4). C# 13+ uses these
+    /// to bind <c>Assert.That(0U).IsEqualTo(0)</c> and <c>Assert.That(MyEnum.None).IsEqualTo(0)</c> to the
+    /// same-type overload, while C# 12 binds the cross-type one.
+    /// Whether the argument was a constant is not known at run time, so any qualifying value does.
+    /// Returns <see langword="null"/> when the conversion does not apply or the value does not qualify.
     /// </summary>
     public static Func<TFrom?, TTo?>? TryGetConstantConverter<TFrom, TTo>(TFrom? value)
     {
-        var target = ConstantConversion<TFrom, TTo>.Target;
-        return target is not null && value is not null && TryConvertNumeric(value, target, out _)
+        return value is not null && ConstantConversion<TFrom, TTo>.TryConvert(value, out _)
             ? ConstantConversion<TFrom, TTo>.Converter
             : null;
     }
@@ -332,16 +333,44 @@ internal static class ImplicitConversionCache
     private static class ConstantConversion<TFrom, TTo>
     {
         // The non-nullable target type when a constant TFrom can convert implicitly to TTo, otherwise null.
-        public static readonly Type? Target = GetTarget();
+        private static readonly Type? Target = GetTarget();
 
         public static readonly Func<TFrom?, TTo?> Converter = static value =>
-            value is not null && Target is not null && TryConvertNumeric(value, Target, out var converted)
+            value is not null && TryConvert(value, out var converted)
                 ? (TTo?)converted
-                : throw new OverflowException($"The value {CrossTypeComparison.Format(value)} is out of range for '{typeof(TTo)}'.");
+                : throw new OverflowException($"The value {CrossTypeComparison.Format(value)} has no implicit constant conversion to '{typeof(TTo)}'.");
+
+        public static bool TryConvert(object value, out object? result)
+        {
+            result = null;
+            if (Target is null)
+            {
+                return false;
+            }
+
+            if (Target.IsEnum)
+            {
+                // Only a zero converts implicitly to an enum. -0.0 counts too, as it does for the compiler.
+                if (!TryConvertNumeric(value, typeof(double), out var asDouble) || (double)asDouble! != 0)
+                {
+                    return false;
+                }
+
+                result = Enum.ToObject(Target, 0);
+                return true;
+            }
+
+            return TryConvertNumeric(value, Target, out result);
+        }
 
         private static Type? GetTarget()
         {
             var target = Nullable.GetUnderlyingType(typeof(TTo)) ?? typeof(TTo);
+
+            if (target.IsEnum)
+            {
+                return typeof(TFrom) != typeof(char) && IsNumeric(typeof(TFrom)) ? target : null;
+            }
 
             if (typeof(TFrom) == typeof(int))
             {
@@ -379,7 +408,11 @@ internal static class ImplicitConversionCache
             {
                 candidate = null;
             }
-            else if (TryConvertNumeric(value, Nullable.GetUnderlyingType(typeof(TTo)) ?? typeof(TTo), out var numeric))
+            else if (TryConvertNumeric(
+                         // An enum compares through its underlying number (MyEnum.None -> 0).
+                         value is Enum e ? Convert.ChangeType(e, Enum.GetUnderlyingType(e.GetType()), CultureInfo.InvariantCulture) : value,
+                         Nullable.GetUnderlyingType(typeof(TTo)) ?? typeof(TTo),
+                         out var numeric))
             {
                 // Also covers explicit numeric conversions (decimal -> int); the round trip rejects lossy ones.
                 candidate = numeric;
@@ -577,7 +610,9 @@ internal static class ImplicitConversionCache
     /// <summary>
     /// Looks for <c>public static implicit operator <paramref name="toType"/>(<paramref name="fromType"/>)</c>.
     /// C# requires it to be declared on the source or target type (on the underlying type, for an operator
-    /// with a nullable signature), so both are searched.
+    /// with a nullable signature) or one of their base classes, so both hierarchies are searched. An operator
+    /// taking a base class of <paramref name="fromType"/> also applies; the exact parameter type wins, then the
+    /// most derived one, as C# picks the most specific source type.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "See IL2072.")]
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "User-defined operators are looked up reflectively; the warning is surfaced via RequiresUnreferencedCode on the public entry points, and if they are trimmed, IsEqualTo throws InvalidOperationException at call time.")]
@@ -592,7 +627,10 @@ internal static class ImplicitConversionCache
         Type fromType,
         Type toType)
     {
-        foreach (var method in definedOn.GetMethods(BindingFlags.Public | BindingFlags.Static))
+        MethodInfo? fromBaseClass = null;
+        Type? fromBaseClassParameter = null;
+
+        foreach (var method in definedOn.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
         {
             if (method.Name != "op_Implicit" || method.ReturnType != toType)
             {
@@ -600,12 +638,25 @@ internal static class ImplicitConversionCache
             }
 
             var parameters = method.GetParameters();
-            if (parameters.Length == 1 && parameters[0].ParameterType == fromType)
+            if (parameters.Length != 1)
+            {
+                continue;
+            }
+
+            var parameterType = parameters[0].ParameterType;
+            if (parameterType == fromType)
             {
                 return method;
             }
+
+            if (fromType.IsSubclassOf(parameterType)
+                && (fromBaseClassParameter is null || parameterType.IsSubclassOf(fromBaseClassParameter)))
+            {
+                fromBaseClass = method;
+                fromBaseClassParameter = parameterType;
+            }
         }
 
-        return null;
+        return fromBaseClass;
     }
 }
