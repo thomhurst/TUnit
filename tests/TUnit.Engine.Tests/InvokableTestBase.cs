@@ -12,11 +12,18 @@ namespace TUnit.Engine.Tests;
 [MethodDataSource(nameof(GetTestModes))]
 public abstract class InvokableTestBase(TestMode testMode)
 {
+    // CI runs each mode in its own pipeline module, so the Reflection run can start before the AOT
+    // app is published. Unset, both modes run.
+    private static readonly string? OnlyTestMode = Environment.GetEnvironmentVariable("TUNIT_ENGINE_TEST_MODE");
+
     public static IEnumerable<TestMode> GetTestModes()
     {
-        yield return TestMode.Reflection;
+        if (OnlyTestMode is null or nameof(TestMode.Reflection))
+        {
+            yield return TestMode.Reflection;
+        }
 
-        if (!EnvironmentVariables.IsNetFramework)
+        if (!EnvironmentVariables.IsNetFramework && OnlyTestMode is (null or nameof(TestMode.AOT)))
         {
             yield return TestMode.AOT;
         }

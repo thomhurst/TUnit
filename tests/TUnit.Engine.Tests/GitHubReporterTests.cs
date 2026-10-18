@@ -15,7 +15,7 @@ public class GitHubReporterTests
     [Before(Test)]
     public void ResetEnvironmentBeforeTest()
     {
-        // The CI pipeline (RunEngineTestsModule) launches this process with
+        // The CI pipeline (the RunEngine*TestsModule modules) launches this process with
         // TUNIT_DISABLE_GITHUB_REPORTER=true to prevent the test-runner's own
         // GitHubReporter from writing to the step summary.  Clear ALL reporter-
         // related env vars before every test so each test starts from a known

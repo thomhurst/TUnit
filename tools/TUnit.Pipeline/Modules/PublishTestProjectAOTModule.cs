@@ -10,9 +10,12 @@ using ModularPipelines.Options;
 namespace TUnit.Pipeline.Modules;
 
 // Publishes the TESTPROJECT_AOT app that the engine tests' AOT mode runs. As a module it overlaps
-// the first test modules instead of delaying the whole pipeline. Version props come from
-// $GITHUB_ENV (see .github/workflows/dotnet.yml), so any recompile it triggers stamps the correct
-// AssemblyVersion; PackTUnitFilesModule still waits for it (issue #5622).
+// the first test modules instead of delaying the whole pipeline.
+// The publish builds into its own artifacts tree. The global Aot property flows to every
+// referenced project, so publishing into the shared bin/obj folders recompiled the TUnit.*
+// libraries in place (packing had to wait for it, issue #5622) and rewrote
+// TUnit.TestProject/obj/project.assets.json under the RPC tests (NETSDK1047). Isolated, neither
+// has to wait for this module.
 public class PublishTestProjectAOTModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
@@ -29,6 +32,7 @@ public class PublishTestProjectAOTModule : Module<CommandResult>
             Properties =
             [
                 new KeyValue("Aot", "true"),
+                new KeyValue("ArtifactsPath", Path.Combine(rootDir.Path, "artifacts", "aot-publish")),
             ],
             Framework = "net10.0",
         }, new CommandExecutionOptions
