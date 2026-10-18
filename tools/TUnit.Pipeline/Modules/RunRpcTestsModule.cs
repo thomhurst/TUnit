@@ -9,8 +9,8 @@ using TUnit.Pipeline.Modules.Abstract;
 namespace TUnit.Pipeline.Modules;
 
 [NotInParallel("NetworkTests")]
-// The RPC tests `dotnet build` TUnit.TestProject without a runtime identifier, which re-restores
-// the obj/project.assets.json the AOT publish needs for its RID (NETSDK1047 if they overlap).
+// The RPC tests `dotnet run` TUnit.TestProject, which reads the obj/project.assets.json the AOT
+// publish rewrites for its RID; keep them apart (an overlapping restore caused NETSDK1047).
 [DependsOn<PublishTestProjectAOTModule>]
 public class RunRpcTestsModule : TestBaseModule
 {
@@ -37,6 +37,8 @@ public class RunRpcTestsModule : TestBaseModule
                 EnvironmentVariables = new Dictionary<string, string?>
                 {
                     ["DISABLE_GITHUB_REPORTER"] = "true",
+                    // The workflow's solution build already produced the Release test host.
+                    ["TUNIT_RPC_TESTPROJECT_PREBUILT"] = "true",
                 }
             }
         ));
