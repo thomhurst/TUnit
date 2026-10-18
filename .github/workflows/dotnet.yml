@@ -72,23 +72,11 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v3
 
+      # No NuGet or Playwright cache: PR-scoped entries can't be shared between PRs, and at
+      # ~2.4 GB each they pushed the repository past its cache quota, so every run missed and
+      # then spent up to 3 minutes saving an entry that was evicted within the hour.
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.0.0
-        with:
-          cache: true
-          cache-dependency-path: Directory.Packages.props
-
-      - name: Cache Playwright Browsers
-        uses: actions/cache@v6
-        continue-on-error: true
-        with:
-          path: |
-            ~/.cache/ms-playwright
-            ~/Library/Caches/ms-playwright
-            ~/AppData/Local/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json', '**/package.json', '**/Directory.Packages.props') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
 
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
@@ -136,17 +124,6 @@ jobs:
           "-p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
           "-p:PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
 
-      - name: Publish AOT
-        shell: bash
-        run: >-
-          dotnet publish tests/TUnit.TestProject/TUnit.TestProject.csproj -c Release
-          --use-current-runtime -p:Aot=true -o TESTPROJECT_AOT --framework net10.0
-          "-p:Version=${{ steps.gitversion.outputs.semVer }}"
-          "-p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
-          "-p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
-          "-p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
-          "-p:PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
-
       - name: Expose GitHub Actions Runtime
         uses: actions/github-script@v9
         with:
@@ -168,11 +145,6 @@ jobs:
           environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
           nuget-apikey: ${{ steps.login.outputs.NUGET_API_KEY }}
           publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
-
-      - name: Compile documentation snippets
-        if: matrix.os == 'ubuntu-latest'
-        shell: pwsh
-        run: ./scripts/Verify-DocSnippets.ps1 -PackagesPath . -Version $env:PackageVersion
 
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v7.0.2
@@ -207,3 +179,68 @@ jobs:
         with:
           name: 'NuGetPackages-${{matrix.os}}'
           path: '**/*.*nupkg'
+
+  # Native AOT publishes of the mock test projects, one runner per framework. Run inside the
+  # Ubuntu pipeline they took ~12 minutes serially and held up packaging behind them.
+  mock-aot:
+    name: mock AOT (${{ matrix.framework }})
+    strategy:
+      matrix:
+        framework: [net8.0, net9.0, net10.0]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    env:
+      DISABLE_GITHUB_REPORTER: 'true'
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+
+      # TUnit.Mocks.Aot.Tests sets TreatWarningsAsErrors, so any trim/AOT warning ILC reports
+      # for everyday mock usage fails its publish (#7027).
+      - name: Publish
+        shell: bash
+        run: |
+          for project in TUnit.Mocks.Tests TUnit.Mocks.Aot.Tests; do
+            dotnet publish "tests/$project/$project.csproj" -c Release --use-current-runtime \
+              -p:Aot=true --framework ${{ matrix.framework }} -o "aot/$project"
+          done
+
+      - name: Run
+        shell: bash
+        run: |
+          for project in TUnit.Mocks.Tests TUnit.Mocks.Aot.Tests; do
+            "aot/$project/$project"
+          done
+
+  # Compiles the C# fences in the documentation against freshly packed packages, alongside the
+  # test matrix rather than after the Ubuntu pipeline.
+  doc-snippets:
+    runs-on: ubuntu-latest
+    env:
+      DocsVersion: 1.0.0-docs
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+
+      # Packing reads the Roslyn analyzer/generator variants from their own bin folders, so build
+      # every library project, not just the packed ones.
+      - name: Build libraries
+        shell: bash
+        run: |
+          grep -oE 'src/[^"]+\.(cs|fs|vb)proj' TUnit.CI.slnx | grep -v '/content/' \
+            | jq -R . | jq -s '{solution: {path: "TUnit.CI.slnx", projects: .}}' > libraries.slnf
+          dotnet build libraries.slnf -c Release "-p:Version=$DocsVersion"
+
+      - name: Pack
+        shell: bash
+        run: dotnet pack libraries.slnf -c Release --no-build "-p:Version=$DocsVersion" -o artifacts/doc-packages
+
+      - name: Compile documentation snippets
+        shell: pwsh
+        run: ./scripts/Verify-DocSnippets.ps1 -PackagesPath artifacts/doc-packages -Version $env:DocsVersion
