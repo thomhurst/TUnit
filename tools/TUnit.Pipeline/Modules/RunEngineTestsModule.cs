@@ -25,6 +25,7 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<RunPublicAPITestsModule>]
 [DependsOn<RunSourceGeneratorTestsModule>]
 [DependsOn<RunAssertionsCodeFixersTestsModule>]
+[DependsOn<PublishTestProjectAOTModule>]
 public class RunEngineTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
