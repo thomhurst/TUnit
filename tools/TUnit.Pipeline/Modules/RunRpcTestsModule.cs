@@ -8,6 +8,9 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
+// The RPC tests `dotnet run` TUnit.TestProject, which reads its obj/project.assets.json. The AOT
+// publish restores into its own artifacts tree, so it no longer rewrites that file under them
+// (an overlapping restore caused NETSDK1047).
 [NotInParallel("NetworkTests")]
 public class RunRpcTestsModule : TestBaseModule
 {
@@ -34,6 +37,8 @@ public class RunRpcTestsModule : TestBaseModule
                 EnvironmentVariables = new Dictionary<string, string?>
                 {
                     ["DISABLE_GITHUB_REPORTER"] = "true",
+                    // The workflow's solution build already produced the Release test host.
+                    ["TUNIT_RPC_TESTPROJECT_PREBUILT"] = "true",
                 }
             }
         ));

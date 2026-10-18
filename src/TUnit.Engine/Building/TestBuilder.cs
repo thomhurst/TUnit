@@ -299,7 +299,22 @@ internal sealed class TestBuilder : ITestBuilder
 
                                     var (classDataUnwrapped, classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
                                     classData = classDataUnwrapped;
-                                    var (methodData, methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
+
+                                    object?[] methodRow;
+                                    try
+                                    {
+                                        methodRow = await methodDataFactory() ?? [];
+                                    }
+                                    catch (GenericTypeResolutionException ex) when (methodDataSource is GenericConstraintViolationDataSource)
+                                    {
+                                        // A source-generated row whose inferred type arguments break the method's
+                                        // constraints: fail this row only, as reflection mode does when it resolves
+                                        // the row's type arguments, and keep building the remaining rows.
+                                        tests.Add(CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i));
+                                        continue;
+                                    }
+
+                                    var (methodData, methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(methodRow, metadata.MethodMetadata.Parameters);
 
 #if NET
                                 // Re-register: classDataFactory() was called again above and may return
@@ -379,7 +394,7 @@ internal sealed class TestBuilder : ITestBuilder
                                             catch (Exception innerEx)
                                             {
                                                 // If we still can't resolve, create a failed test
-                                                var failedTest = CreateFailedTestForDataGenerationError(metadata, innerEx);
+                                                var failedTest = CreateFailedTestForDataRowError(metadata, innerEx, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i);
                                                 tests.Add(failedTest);
                                                 continue;
                                             }
@@ -387,7 +402,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         catch (Exception ex)
                                         {
                                             // If generic resolution fails, create a failed test
-                                            var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
+                                            var failedTest = CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i);
                                             tests.Add(failedTest);
                                             continue;
                                         }
@@ -850,6 +865,13 @@ internal sealed class TestBuilder : ITestBuilder
 
     private static readonly IDataSourceAttribute[] _dataSourceArray = [NoDataSource.Instance];
 
+    /// <summary>
+    /// The object whose properties are injected for a data source: the wrapped source of a
+    /// <see cref="GenericConstraintViolationDataSource"/>, whose rows it enumerates, else the source itself.
+    /// </summary>
+    private static object GetInjectionTarget(IDataSourceAttribute dataSource)
+        => dataSource is GenericConstraintViolationDataSource { InnerDataSource: { } inner } ? inner : dataSource;
+
     private ValueTask<IDataSourceAttribute[]> GetDataSourcesAsync(IDataSourceAttribute[] dataSources, CancellationToken cancellationToken = default)
     {
         if (dataSources.Length == 0)
@@ -859,7 +881,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         foreach (var dataSource in dataSources)
         {
-            if (PropertyInjectionCache.HasInjectableProperties(dataSource.GetType()))
+            if (PropertyInjectionCache.HasInjectableProperties(GetInjectionTarget(dataSource).GetType()))
             {
                 return InjectDataSourcePropertiesAsync(dataSources, cancellationToken);
             }
@@ -874,7 +896,7 @@ internal sealed class TestBuilder : ITestBuilder
         // Inject properties into data sources during discovery (IAsyncInitializer deferred to execution)
         foreach (var dataSource in dataSources)
         {
-            await _objectLifecycleService.InjectPropertiesAsync(dataSource, cancellationToken: cancellationToken);
+            await _objectLifecycleService.InjectPropertiesAsync(GetInjectionTarget(dataSource), cancellationToken: cancellationToken);
         }
 
         return dataSources;
@@ -911,7 +933,7 @@ internal sealed class TestBuilder : ITestBuilder
         // Fast path: nothing to inject (e.g. NoDataSource, [Arguments]) — enumerate the source directly.
         // Skips a wrapping async-iterator state machine and, more importantly, avoids materializing the
         // builder context's StateBag/Events (a ConcurrentDictionary per test) just to pass them along.
-        if (!PropertyInjectionCache.HasInjectableProperties(dataSource.GetType()))
+        if (!PropertyInjectionCache.HasInjectableProperties(GetInjectionTarget(dataSource).GetType()))
         {
             return dataSource.GetDataRowsAsync(dataGeneratorMetadata);
         }
@@ -925,15 +947,15 @@ internal sealed class TestBuilder : ITestBuilder
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // Inject properties into data source during discovery (IAsyncInitializer deferred to execution)
-        var propertyInjectedDataSource = await _objectLifecycleService.InjectPropertiesAsync(
-            dataSource,
+        await _objectLifecycleService.InjectPropertiesAsync(
+            GetInjectionTarget(dataSource),
             dataGeneratorMetadata.TestBuilderContext.Current.StateBag,
             dataGeneratorMetadata.TestInformation,
             dataGeneratorMetadata.TestBuilderContext.Current.Events,
             cancellationToken);
 
-        // Now get data rows from the property-injected data source
-        await foreach (var dataRow in propertyInjectedDataSource.GetDataRowsAsync(dataGeneratorMetadata))
+        // Now get data rows from the property-injected data source (properties are injected in place)
+        await foreach (var dataRow in dataSource.GetDataRowsAsync(dataGeneratorMetadata))
         {
             yield return dataRow;
         }
@@ -1316,6 +1338,29 @@ internal sealed class TestBuilder : ITestBuilder
     private AbstractExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
         return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination());
+    }
+
+    /// <summary>
+    /// Creates a failed test for one data row. The row's indexes go into the test id, so several failing
+    /// rows of the same method (or repeats of one row) keep distinct ids, as passing rows do.
+    /// </summary>
+    private AbstractExecutableTest CreateFailedTestForDataRowError(
+        TestMetadata metadata,
+        Exception exception,
+        int classDataAttributeIndex,
+        int classDataLoopIndex,
+        int methodDataAttributeIndex,
+        int methodDataLoopIndex,
+        int repeatIndex)
+    {
+        return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination
+        {
+            ClassDataSourceIndex = classDataAttributeIndex,
+            ClassLoopIndex = classDataLoopIndex,
+            MethodDataSourceIndex = methodDataAttributeIndex,
+            MethodLoopIndex = methodDataLoopIndex,
+            RepeatIndex = repeatIndex
+        });
     }
 
     private AbstractExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination)
@@ -2081,12 +2126,12 @@ internal sealed class TestBuilder : ITestBuilder
                 }
                 catch (Exception ex)
                 {
-                    return CreateFailedTestForDataGenerationError(metadata, ex);
+                    return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex);
                 }
             }
             catch (Exception ex)
             {
-                return CreateFailedTestForDataGenerationError(metadata, ex);
+                return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex);
             }
 
             if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
@@ -2153,7 +2198,9 @@ internal sealed class TestBuilder : ITestBuilder
         }
         catch (Exception ex)
         {
-            return CreateFailedTestForDataGenerationError(metadata, ex);
+            // Includes a GenericConstraintViolationDataSource row whose inferred type arguments break the
+            // method's constraints. The row's indexes keep its id distinct from the method's other rows.
+            return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex);
         }
     }
 

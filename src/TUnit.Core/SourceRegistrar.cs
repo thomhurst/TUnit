@@ -210,4 +210,33 @@ public class SourceRegistrar
             // Another thread added between TryGetValue and TryAdd — retry to merge
         }
     }
+
+    /// <summary>
+    /// Registers test methods of the open generic type <paramref name="genericTypeDefinition"/> whose
+    /// inferred class type arguments break the class's generic constraints. Each message is reported
+    /// as a failed test. Returns a dummy value for use as a static field initializer.
+    /// Multiple calls for the same type are additive.
+    /// </summary>
+    public static int RegisterGenericConstraintViolations([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] Type genericTypeDefinition, Func<GenericConstraintViolationEntry[]> factory)
+    {
+        while (true)
+        {
+            if (Sources.TestEntries.TryGetValue(genericTypeDefinition, out var existing))
+            {
+                if (existing is GenericConstraintViolationEntrySource existingSource)
+                {
+                    existingSource.AddFactory(factory);
+                    return 0;
+                }
+
+                throw new InvalidOperationException(
+                    $"Type mismatch in TestEntries for '{genericTypeDefinition.FullName}': expected {nameof(GenericConstraintViolationEntrySource)}, found {existing.GetType().Name}");
+            }
+
+            if (Sources.TestEntries.TryAdd(genericTypeDefinition, new GenericConstraintViolationEntrySource(genericTypeDefinition, factory)))
+            {
+                return 0;
+            }
+        }
+    }
 }

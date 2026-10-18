@@ -52,7 +52,7 @@ internal sealed class TestHostSession : IAsyncDisposable
             .WithArguments([
                 "run",
                 "--no-build",
-                "-c", "Debug",
+                "-c", TestProjectBuilds.Configuration,
                 "-f", framework,
                 "--server",
                 "--client-port", port.ToString()

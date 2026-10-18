@@ -12,16 +12,17 @@ jobs:
   modularpipeline:
     strategy:
       matrix:
+        # One locale per formatting hazard; each is a full solution build, so don't add another
+        # locale that only repeats one of these.
         # sv-SE: negative numbers use U+2212 MINUS SIGN (also fi-FI, nb-NO, et-EE, lt-LT).
-        # de-DE / fr-FR / pl-PL: decimal comma. tr-TR: dotless i in casing. ar-SA: Arabic number formatting.
-        locale: [fr-FR, pl-PL, de-DE, sv-SE, tr-TR, ar-SA]
+        # fr-FR: decimal comma and a U+202F group separator (de-DE and pl-PL repeat the comma).
+        # tr-TR: dotless i in casing. ar-SA: Arabic number formatting.
+        locale: [fr-FR, sv-SE, tr-TR, ar-SA]
       fail-fast: false
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v7.0.1
-        with:
-          fetch-depth: 0
 
       # Build only: the SDK pinned by global.json builds every target framework.
       - name: Setup .NET

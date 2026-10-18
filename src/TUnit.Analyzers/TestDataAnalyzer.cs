@@ -603,6 +603,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
             
+            // Only a bare type-parameter test parameter reads the inferred type arguments.
+            var inferredTypeArguments = testParameterTypes.Any(t => t is ITypeParameterSymbol)
+                ? CompilationExtensions.InferTypeArguments(unwrappedTypes, testParameterTypes)
+                : null;
+
             var conversions = unwrappedTypes.ZipAll(testParameterTypes,
                 (argument, parameter) => 
                 {
@@ -614,7 +619,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     {
                         return true;
                     }
-                    return context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter);
+                    return context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments);
                 });
 
             if (!conversions.All(x => x))
@@ -647,7 +652,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (testParameterTypes.Length == 1
                 && unwrappedTypes.Length == 1
-                && context.Compilation.HasImplicitConversionOrGenericParameter(unwrappedTypes[0],
+                && context.Compilation.CanBindToTestParameter(unwrappedTypes[0],
                     testParameterTypes[0]))
             {
                 return;

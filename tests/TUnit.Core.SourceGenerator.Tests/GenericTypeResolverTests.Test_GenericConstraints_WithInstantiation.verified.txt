@@ -20,11 +20,11 @@ internal static class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.ConstrainedGenericTestClass<>);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("TestMethod", __classType, typeof(void), __classMetadata);
-    private static global::TUnit.TestProject.ConstrainedGenericTestClass<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    private static global::TUnit.TestProject.ConstrainedGenericTestClass<object> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return new global::TUnit.TestProject.ConstrainedGenericTestClass<string>();
+        return new global::TUnit.TestProject.ConstrainedGenericTestClass<object>();
     }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.ConstrainedGenericTestClass<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.ConstrainedGenericTestClass<object> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {
@@ -45,11 +45,11 @@ internal static class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
             new global::TUnit.Core.GenerateGenericTestAttribute(typeof(object))
         };
     }
-    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ConstrainedGenericTestClass<string>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ConstrainedGenericTestClass<string>>[]
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ConstrainedGenericTestClass<object>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ConstrainedGenericTestClass<object>>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ConstrainedGenericTestClass<string>>(
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ConstrainedGenericTestClass<object>>(
             methodName: "TestMethod",
-            fullyQualifiedName: "TUnit.TestProject.ConstrainedGenericTestClass<string>.TestMethod",
+            fullyQualifiedName: "TUnit.TestProject.ConstrainedGenericTestClass<object>.TestMethod",
             filePath: "",
             lineNumber: 10,
             methodMetadata: __mm_0,
@@ -59,51 +59,23 @@ internal static class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
             createAttributes: __Attributes_0,
             attributeGroupIndex: 0),
     };
-    private static global::TUnit.TestProject.ConstrainedGenericTestClass<object> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
+    public static readonly global::TUnit.Core.GenericConstraintViolationEntry[] ConstraintViolations = new global::TUnit.Core.GenericConstraintViolationEntry[]
     {
-        return new global::TUnit.TestProject.ConstrainedGenericTestClass<object>();
-    }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.ConstrainedGenericTestClass<object> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
-    {
-        try
+        new global::TUnit.Core.GenericConstraintViolationEntry
         {
-            instance.TestMethod();
-            return default(global::System.Threading.Tasks.ValueTask);
-        }
-        catch (global::System.Exception ex)
-        {
-            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-        }
-    }
-    private static global::System.Attribute[] __Attributes_1(int groupIndex)
-    {
-        return new global::System.Attribute[]
-        {
-            new global::TUnit.Core.TestAttribute(),
-            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string)),
-            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(object))
-        };
-    }
-    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ConstrainedGenericTestClass<object>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ConstrainedGenericTestClass<object>>[]
-    {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ConstrainedGenericTestClass<object>>(
-            methodName: "TestMethod",
-            fullyQualifiedName: "TUnit.TestProject.ConstrainedGenericTestClass<object>.TestMethod",
-            filePath: "",
-            lineNumber: 10,
-            methodMetadata: __mm_0,
-            createInstance: __CreateInstance_1,
-            invokeBody: __Invoke_1,
-            methodIndex: 0,
-            createAttributes: __Attributes_1,
-            attributeGroupIndex: 0),
+            MethodName = "TestMethod",
+            FilePath = "",
+            LineNumber = 10,
+            MethodMetadata = __mm_0,
+            Messages = new string[] { "Type arguments 'String' do not satisfy the generic constraints of type 'ConstrainedGenericTestClass`1'" },
+        },
     };
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ConstrainedGenericTestClass<string>>(static () => TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ConstrainedGenericTestClass<object>>(static () => TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod_TestSource.Entries_0);
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ConstrainedGenericTestClass<object>>(static () => TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod_TestSource.Entries_1);
+    static readonly int _r_TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod_TestSource_ConstraintViolations = global::TUnit.Core.SourceRegistrar.RegisterGenericConstraintViolations(typeof(global::TUnit.TestProject.ConstrainedGenericTestClass<>), static () => TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod_TestSource.ConstraintViolations);
 }
