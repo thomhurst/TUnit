@@ -42,13 +42,7 @@ public partial class Tests
         await VerifyTUnit.Verify(publicApi)
             .AddScrubber(sb =>
             {
-                // Scrub source path literals (e.g. hook attributes' caller file path) before the URL regex
-                // mangles them. CI builds embed deterministic "/_/..." paths; local builds embed the full
-                // checkout path, which the generator wraps into "..." + "..." pieces once it exceeds 80 characters.
-                var replaced = System.Text.RegularExpressions.Regex.Replace(
-                    sb.ToString(),
-                    @"""(?:/|[A-Za-z]:(?:\\\\|/))[^""\r\n]*""(?:[ \t]*\+[ \t]*\r?\n[ \t]*""[^""\r\n]*"")*",
-                    @"""PATH_SCRUBBED""");
+                var replaced = ScrubSourcePaths(sb.ToString());
                 sb.Clear();
                 sb.Append(replaced);
                 return sb;
@@ -74,6 +68,14 @@ public partial class Tests
             .UniqueForTargetFrameworkAndVersion(assembly);
     }
 
+    /// <summary>
+    /// Scrubs source path literals (hook attributes' <c>[CallerFilePath]</c> argument) before the URL regex mangles
+    /// them. CI builds embed deterministic "/_/..." paths; local builds embed the full checkout path, which the
+    /// generator wraps into "..." + "..." pieces once it exceeds 80 characters. Only a rooted ".cs" path followed by
+    /// the <c>[CallerLineNumber]</c> argument matches, so public string values such as "/v1" are left alone.
+    /// </summary>
+    internal static string ScrubSourcePaths(string text) => SourcePathRegex().Replace(text, @"""PATH_SCRUBBED""");
+
     private StringBuilder Scrub(StringBuilder text)
     {
         var newText = UrlRegex().Replace(text.ToString(), string.Empty)
@@ -95,10 +97,18 @@ public partial class Tests
     }
 
 
+    private const string SourcePathPattern =
+        @"""(?:/|[A-Za-z]:(?:\\\\|/))[^""\r\n]*(?:""[ \t]*\+[ \t]*\r?\n[ \t]*""[^""\r\n]*)*\.cs""(?=,[ \t]*\d+[,)])";
+
 #if NET
+    [GeneratedRegex(SourcePathPattern)]
+    private static partial Regex SourcePathRegex();
+
     [GeneratedRegex(@"((http|https):\/\/)?(www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})(\/[a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]*)?")]
     public static partial Regex UrlRegex();
 #else
+    private static Regex SourcePathRegex() => new(SourcePathPattern);
+
     public static Regex UrlRegex() =>
         new(
             @"((http|https):\/\/)?(www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})(\/[a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]*)?");

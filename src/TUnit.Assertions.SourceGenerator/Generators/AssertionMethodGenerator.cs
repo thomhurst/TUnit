@@ -974,17 +974,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         if (!string.IsNullOrEmpty(attributeData.ExpectationMessage))
         {
             // Use custom expectation message
-            var expectation = attributeData.ExpectationMessage;
-            if (parameters.Any())
-            {
-                // Use interpolated string for parameter substitution
-                sourceBuilder.AppendLine($"        return $\"to {{(_negated ? \"not \" : \"\")}}{expectation}\";");
-            }
-            else
-            {
-                // No parameters, just return the literal string with negation support
-                sourceBuilder.AppendLine($"        return $\"to {{(_negated ? \"not \" : \"\")}}{expectation}\";");
-            }
+            sourceBuilder.AppendLine($"        return $\"{RenderCustomExpectation(attributeData.ExpectationMessage!)}\";");
         }
         else
         {
@@ -1000,6 +990,25 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("    }");
         sourceBuilder.AppendLine("}");
         sourceBuilder.AppendLine();
+    }
+
+    /// <summary>
+    /// Renders the interpolated-string body of <c>GetExpectation()</c> for a custom <c>ExpectationMessage</c>.
+    /// </summary>
+    /// <remarks>
+    /// The built-in messages omit the leading "to" ("be null or empty") and leave negation to the generator, while
+    /// the documented style spells it out ("to be null or empty", or "to not contain '{value}'" with
+    /// <c>NegateLogic</c>). Both are accepted so neither renders as "to to ..." or "to not not ...".
+    /// </remarks>
+    private static string RenderCustomExpectation(string expectationMessage)
+    {
+        var expectation = expectationMessage.StartsWith("to ", StringComparison.Ordinal)
+            ? expectationMessage.Substring("to ".Length)
+            : expectationMessage;
+
+        return expectation.StartsWith("not ", StringComparison.Ordinal)
+            ? $"to {expectation}"
+            : $"to {{(_negated ? \"not \" : \"\")}}{expectation}";
     }
 
     private static string GenerateAssertConditionClassNameForMethod(INamedTypeSymbol targetType, INamedTypeSymbol containingType, string methodName, IMethodSymbol method)
