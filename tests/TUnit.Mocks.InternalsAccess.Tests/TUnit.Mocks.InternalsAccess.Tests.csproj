@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\SharedTestHelpers\DotNetCli.cs" Link="Shared\DotNetCli.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <TUnitMocksInternalsAccess Include="TUnit.Mocks.InternalsAccess.TargetLib" />
   </ItemGroup>
 
