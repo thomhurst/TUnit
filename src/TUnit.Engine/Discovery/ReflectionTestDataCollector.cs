@@ -1405,7 +1405,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// (<c>InferTypesFromTypeInferringAttributes</c>). That instantiation runs every data source, so its
     /// <c>Rows</c> is null.</item>
     /// <item>[MethodDataSource] members of the test class returning <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>
-    /// (<c>InferTypesFromMethodDataSource</c>). That instantiation also runs every data source.</item>
+    /// (<c>InferTypesFromMethodDataSource</c>). The instantiation runs only that source.</item>
     /// </list>
     /// Sources whose types violate the constraints are skipped. Rows and sources inferring types that are
     /// already instantiated join that instantiation.
@@ -1446,7 +1446,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             if (dataSource is MethodDataSourceAttribute methodDataSource)
             {
-                AddInstantiation(InferTypesFromMethodDataSource(testClass, methodDataSource, parameters, genericParameterCount), null);
+                AddInstantiation(InferTypesFromMethodDataSource(testClass, methodDataSource, parameters, genericParameterCount), methodDataSource);
             }
         }
 

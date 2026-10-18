@@ -127,6 +127,19 @@ public class Issue7092Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task GenerateGenericTest_Inferred_Instantiation_Runs_Only_Its_Own_Method_Data_Source()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7092/GenerateGenericTestMultipleMethodDataSourceInferenceTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(4),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
     public async Task GenerateGenericTest_Eight_Element_Tuple_Infers_Eight_Types()
     {
         await RunTestsWithFilter(

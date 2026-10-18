@@ -23,6 +23,33 @@ public class GenerateGenericTestMethodDataSourceInferenceTests
     }
 }
 
+[EngineTest(ExpectedResult.Pass)]
+public class GenerateGenericTestMultipleMethodDataSourceInferenceTests
+{
+    public static IEnumerable<Func<(int, string)>> IntRows()
+    {
+        yield return () => (1, "a");
+    }
+
+    public static IEnumerable<Func<(string, string)>> StringRows()
+    {
+        yield return () => ("not a number", "b");
+    }
+
+    // Each inferred instantiation runs only the source that inferred it: <int, string> runs IntRows and
+    // <string, string> runs StringRows. The [GenerateGenericTest] instantiation runs both sources.
+    [Test]
+    [GenerateGenericTest(typeof(object), typeof(object))]
+#pragma warning disable TUnit0001 // the analyzer does not resolve T1/T2 from the tuple
+    [MethodDataSource(nameof(IntRows))]
+    [MethodDataSource(nameof(StringRows))]
+#pragma warning restore TUnit0001
+    public async Task Inferred_Instantiation_Runs_Only_Its_Own_Source<T1, T2>(T1 first, T2 second)
+    {
+        await Assert.That(first is T1 && second is T2).IsTrue();
+    }
+}
+
 public class EightIntRowSource : DataSourceGeneratorAttribute<(int, int, int, int, int, int, int, int)>
 {
     protected override IEnumerable<Func<(int, int, int, int, int, int, int, int)>> GenerateDataSources(DataGeneratorMetadata metadata)
