@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.Core;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Assertions.Should.SourceGenerator.Tests;
 
@@ -473,18 +474,9 @@ public class ShouldExtensionGeneratorTests
 
     private static IEnumerable<MetadataReference> GetReferences()
     {
-        // Mirror the loaded assemblies of the test process. Works on both .NET Core
-        // (where TRUSTED_PLATFORM_ASSEMBLIES populates this set) and .NET Framework,
-        // unlike <c>AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")</c> which returns
-        // null on .NET Framework and would leave the in-memory compilation without BCL
-        // references — making symbol resolution silently fail in the generator.
-        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+        foreach (var path in TestHostReferences.AssemblyPaths)
         {
-            if (asm.IsDynamic || string.IsNullOrWhiteSpace(asm.Location))
-            {
-                continue;
-            }
-            yield return MetadataReference.CreateFromFile(asm.Location);
+            yield return MetadataReference.CreateFromFile(path);
         }
 
         yield return MetadataReference.CreateFromFile(typeof(Assertion<>).Assembly.Location);

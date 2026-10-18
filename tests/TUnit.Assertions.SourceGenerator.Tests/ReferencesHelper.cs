@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
@@ -7,9 +8,8 @@ namespace TUnit.Assertions.SourceGenerator.Tests;
 internal class ReferencesHelper
 {
     public static readonly List<PortableExecutableReference> References =
-        AppDomain.CurrentDomain.GetAssemblies()
-            .Where(x => !x.IsDynamic && !string.IsNullOrWhiteSpace(x.Location))
-            .Select(x => MetadataReference.CreateFromFile(x.Location))
+        TestHostReferences.AssemblyPaths
+            .Select(path => MetadataReference.CreateFromFile(path))
             .Concat([
                 // add your app/lib specifics, e.g.:
                 MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location),
@@ -17,9 +17,6 @@ internal class ReferencesHelper
                 MetadataReference.CreateFromFile(typeof(Polyfill).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Uri).Assembly.Location),
-                // Not loaded by a plain test run, but loaded by IDE/`dotnet test` server-mode hosts, so it must
-                // be explicit or HttpStatusCode resolves differently depending on how the tests are launched.
-                MetadataReference.CreateFromFile(typeof(System.Net.HttpStatusCode).Assembly.Location),
             ])
             .ToList();
 }

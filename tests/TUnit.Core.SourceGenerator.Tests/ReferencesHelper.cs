@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
@@ -7,9 +8,8 @@ namespace TUnit.Core.SourceGenerator.Tests;
 internal class ReferencesHelper
 {
     public static readonly List<PortableExecutableReference> References =
-        AppDomain.CurrentDomain.GetAssemblies()
-            .Where(x => !x.IsDynamic && !string.IsNullOrWhiteSpace(x.Location))
-            .Select(x => MetadataReference.CreateFromFile(x.Location))
+        TestHostReferences.AssemblyPaths
+            .Select(path => MetadataReference.CreateFromFile(path))
             .Concat([
                 // add your app/lib specifics, e.g.:
                 MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location),

@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.Attributes;
 using TUnit.Core;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
 
@@ -19,13 +20,10 @@ public static class Fixture
         typeof(TestAttribute).Assembly,
     };
 
-    public static Assembly[] AssemblyReferencesForCodegen =>
-        AppDomain
-            .CurrentDomain.GetAssemblies()
-            .Concat(ImportantAssemblies)
-            .Distinct()
-            .Where(a => !a.IsDynamic)
-            .ToArray();
+    private static readonly string[] AssemblyPathsForCodegen = TestHostReferences.AssemblyPaths
+        .Concat(ImportantAssemblies.Select(static assembly => assembly.Location))
+        .Distinct()
+        .ToArray();
 
     public static DirectoryInfo GetSolutionDirectoryInfo()
     {
@@ -43,15 +41,9 @@ public static class Fixture
 
     public static CSharpCompilation CreateLibrary(params SyntaxTree[] source)
     {
-        var references = new List<MetadataReference>();
-        var assemblies = AssemblyReferencesForCodegen;
-        foreach (Assembly assembly in assemblies)
-        {
-            if (!assembly.IsDynamic)
-            {
-                references.Add(MetadataReference.CreateFromFile(assembly.Location));
-            }
-        }
+        var references = AssemblyPathsForCodegen
+            .Select(static path => (MetadataReference)MetadataReference.CreateFromFile(path))
+            .ToList();
 
         var compilation = CSharpCompilation.Create(
             "Library",
