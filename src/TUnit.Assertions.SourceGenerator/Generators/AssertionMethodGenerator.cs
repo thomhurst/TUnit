@@ -323,7 +323,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         }
 
         // Track all generated classes globally to avoid duplicates across different extension classes
-        var allGeneratedClasses = new HashSet<string>();
+        var allGeneratedClasses = new GeneratedConditionClasses();
 
         // Group by class and generate one file per class. Non-generic attribute data comes first,
         // then generic, so a class using both keeps its existing member order.
@@ -334,6 +334,45 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         {
             var first = classGroup.First().Model;
             GenerateAssertionsForSpecificClass(context, first.ClassName, first.OriginalNamespace, classGroup.Select(x => x.Entry).ToArray(), allGeneratedClasses);
+        }
+    }
+
+    private static string RenameClass(string source, string className, string newName) =>
+        className == newName
+            ? source
+            : Regex.Replace(source, $@"\b{Regex.Escape(className)}\b", newName);
+
+    /// <summary>
+    /// The condition classes emitted so far, across every extension class. A condition class is named after its
+    /// target method, so attributes on the same method share it, which is fine while their sources match (e.g.
+    /// <c>IsNullOrEmpty</c> and its <c>NegateLogic</c> counterpart, which passes the negation to the constructor).
+    /// A class with the same name but a different source, such as a different <c>ExpectationMessage</c>, gets a
+    /// numbered name instead of being dropped, so its attribute keeps its own message.
+    /// </summary>
+    private sealed class GeneratedConditionClasses
+    {
+        private readonly HashSet<string> _names = new(StringComparer.Ordinal);
+        private readonly Dictionary<(string ClassName, string Source), string> _emitted = new();
+
+        /// <summary>
+        /// Returns the name to use for <paramref name="conditionClass"/>, and whether it still has to be emitted.
+        /// </summary>
+        public (string Name, bool IsNew) Claim(ConditionClassModel conditionClass)
+        {
+            var key = (conditionClass.ClassName, conditionClass.Source);
+            if (_emitted.TryGetValue(key, out var existing))
+            {
+                return (existing, false);
+            }
+
+            var name = conditionClass.ClassName;
+            for (var suffix = 2; !_names.Add(name); suffix++)
+            {
+                name = conditionClass.ClassName + suffix.ToString(CultureInfo.InvariantCulture);
+            }
+
+            _emitted.Add(key, name);
+            return (name, true);
         }
     }
 
@@ -357,7 +396,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         string className,
         string? originalNamespace,
         AssertionEntryModel[] entries,
-        HashSet<string> allGeneratedClasses)
+        GeneratedConditionClasses allGeneratedClasses)
     {
         var sourceBuilder = new StringBuilder();
         // Always generate extension methods in TUnit.Assertions.Extensions namespace
@@ -388,6 +427,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         }
 
         // Generate all assert condition classes first
+        var extensionMethodSources = new List<string>(entries.Length);
         foreach (var entry in entries)
         {
             if (entry.MissingMethodMessage is not null)
@@ -403,24 +443,39 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     Location.None));
             }
 
+            var extensionMethodsSource = entry.ExtensionMethodsSource;
+            var namesInEntry = new HashSet<string>(StringComparer.Ordinal);
             foreach (var conditionClass in entry.ConditionClasses)
             {
-                if (!allGeneratedClasses.Add(conditionClass.ClassName))
+                // Overloads that map to the same class name can't be told apart in the extension methods, so the
+                // first one wins, as before
+                if (!namesInEntry.Add(conditionClass.ClassName))
                 {
                     continue;
                 }
 
-                sourceBuilder.Append(conditionClass.Source);
+                var (name, isNew) = allGeneratedClasses.Claim(conditionClass);
+                if (name != conditionClass.ClassName)
+                {
+                    extensionMethodsSource = RenameClass(extensionMethodsSource, conditionClass.ClassName, name);
+                }
+
+                if (isNew)
+                {
+                    sourceBuilder.Append(RenameClass(conditionClass.Source, conditionClass.ClassName, name));
+                }
             }
+
+            extensionMethodSources.Add(extensionMethodsSource);
         }
 
         // Generate extension methods class
         sourceBuilder.AppendLine($"public static partial class {className}");
         sourceBuilder.AppendLine("{");
 
-        foreach (var entry in entries)
+        foreach (var extensionMethodsSource in extensionMethodSources)
         {
-            sourceBuilder.Append(entry.ExtensionMethodsSource);
+            sourceBuilder.Append(extensionMethodsSource);
         }
 
         sourceBuilder.AppendLine("}");

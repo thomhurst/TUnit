@@ -11,9 +11,13 @@ namespace TUnit.Assertions.Tests;
 [AssertionFrom<string>(nameof(string.IsNullOrWhiteSpace), CustomName = "HasTextDocumentedStyle", NegateLogic = true, ExpectationMessage = "to not be null, empty, or whitespace")]
 [AssertionFrom<string>(nameof(string.StartsWith), CustomName = "BeginsWithTextDocumentedStyle", ExpectationMessage = "to start with '{value}'")]
 [AssertionFrom<string>(nameof(string.Contains), CustomName = "LacksTextDocumentedStyle", NegateLogic = true, ExpectationMessage = "to not contain '{value}'")]
+[AssertionFrom<string>(nameof(string.Contains), CustomName = "HasTextSharingMethod", ExpectationMessage = "contain '{value}'")]
 public static partial class DocumentedStyleStringAssertions;
 
-// The generator shares one condition class per target method, so these use their own methods to get their own messages.
+// Same target method as an attribute above, but declared on another class and with another message.
+[AssertionFrom<string>(nameof(string.IsNullOrEmpty), CustomName = "IsVacant", ExpectationMessage = "be vacant")]
+public static partial class SharedMethodStringAssertions;
+
 [AssertionFrom<string>(typeof(ExpectationMessageMethods), nameof(ExpectationMessageMethods.HasText), ExpectationMessage = "contain {{text}} ({text})")]
 [AssertionFrom<string>(typeof(ExpectationMessageMethods), nameof(ExpectationMessageMethods.HasSuffix), ExpectationMessage = "end with {suffix}")]
 [AssertionFrom<string>(typeof(ExpectationMessageMethods), nameof(ExpectationMessageMethods.IsEmptyText), ExpectationMessage = "be \"blank\" \\ empty")]
@@ -92,5 +96,29 @@ public class AssertionFromExpectationMessageTests
         await Assert.That(async () => await Assert.That("Foo").IsEmptyText())
             .Throws<AssertionException>()
             .WithMessageContaining("Expected to be \"blank\" \\ empty");
+    }
+
+    [Test]
+    public async Task Attributes_Sharing_A_Method_Keep_Their_Own_Messages()
+    {
+        await Assert.That(async () => await Assert.That("hello").HasTextSharingMethod("xyz"))
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to contain 'xyz'");
+
+        await Assert.That(async () => await Assert.That("hello").LacksTextDocumentedStyle("ell"))
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to not contain 'ell'");
+    }
+
+    [Test]
+    public async Task Attributes_Sharing_A_Method_Across_Classes_Keep_Their_Own_Messages()
+    {
+        await Assert.That(async () => await Assert.That("Foo").IsVacant())
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to be vacant");
+
+        await Assert.That(async () => await Assert.That("Foo").IsBlankDocumentedStyle())
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to be null or empty");
     }
 }
