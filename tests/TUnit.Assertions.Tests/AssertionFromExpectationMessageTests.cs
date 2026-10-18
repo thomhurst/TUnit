@@ -13,6 +13,21 @@ namespace TUnit.Assertions.Tests;
 [AssertionFrom<string>(nameof(string.Contains), CustomName = "LacksTextDocumentedStyle", NegateLogic = true, ExpectationMessage = "to not contain '{value}'")]
 public static partial class DocumentedStyleStringAssertions;
 
+// The generator shares one condition class per target method, so these use their own methods to get their own messages.
+[AssertionFrom<string>(typeof(ExpectationMessageMethods), nameof(ExpectationMessageMethods.HasText), ExpectationMessage = "contain {{text}} ({text})")]
+[AssertionFrom<string>(typeof(ExpectationMessageMethods), nameof(ExpectationMessageMethods.HasSuffix), ExpectationMessage = "end with {suffix}")]
+[AssertionFrom<string>(typeof(ExpectationMessageMethods), nameof(ExpectationMessageMethods.IsEmptyText), ExpectationMessage = "be \"blank\" \\ empty")]
+public static partial class EscapingStringAssertions;
+
+public static class ExpectationMessageMethods
+{
+    public static bool HasText(string value, string text) => value.Contains(text);
+
+    public static bool HasSuffix(string value, string ending) => value.EndsWith(ending, StringComparison.Ordinal);
+
+    public static bool IsEmptyText(string value) => value.Length == 0;
+}
+
 public class AssertionFromExpectationMessageTests
 {
     [Test]
@@ -53,5 +68,29 @@ public class AssertionFromExpectationMessageTests
         await Assert.That(async () => await Assert.That("hello").LacksTextDocumentedStyle("ell"))
             .Throws<AssertionException>()
             .WithMessageContaining("Expected to not contain 'ell'");
+    }
+
+    [Test]
+    public async Task Escaped_Braces_Stay_Literal()
+    {
+        await Assert.That(async () => await Assert.That("hello").HasText("xyz"))
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to contain {text} (xyz)");
+    }
+
+    [Test]
+    public async Task Placeholder_That_Names_No_Parameter_Stays_Literal()
+    {
+        await Assert.That(async () => await Assert.That("hello").HasSuffix("xyz"))
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to end with {suffix}");
+    }
+
+    [Test]
+    public async Task Quotes_And_Backslashes_Stay_Literal()
+    {
+        await Assert.That(async () => await Assert.That("Foo").IsEmptyText())
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to be \"blank\" \\ empty");
     }
 }

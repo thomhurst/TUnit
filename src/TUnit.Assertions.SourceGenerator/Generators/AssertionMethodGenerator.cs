@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Assertions.SourceGenerator.Models;
 
@@ -979,12 +981,10 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         else
         {
             // Use default expectation message
-            sourceBuilder.Append($"        return $\"{{(_negated ? \"not \" : \"\")}}to satisfy {methodName}");
-            if (parameters.Any())
-            {
-                sourceBuilder.Append($"({string.Join(", ", parameters.Select(p => $"{{_{p.Name}}}"))})");
-            }
-            sourceBuilder.AppendLine("\";");
+            var arguments = parameters.Any()
+                ? $"({string.Join(", ", parameters.Select(p => $"{{_{p.Name}}}"))})"
+                : string.Empty;
+            sourceBuilder.AppendLine($"        return $\"{RenderNegatableExpectation($"satisfy {methodName}{arguments}")}\";");
         }
 
         sourceBuilder.AppendLine("    }");
@@ -996,10 +996,10 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     /// Renders the interpolated-string body of <c>GetExpectation()</c> for a custom <c>ExpectationMessage</c>.
     /// </summary>
     /// <remarks>
-    /// The built-in messages omit the leading "to" ("be null or empty") and leave negation to the generator, while
-    /// the documented style spells it out ("to be null or empty", or "to not contain '{value}'" with
-    /// <c>NegateLogic</c>). Both are accepted so neither renders as "to to ..." or "to not not ...".
-    /// Parameter placeholders such as <c>{value}</c> are rewritten to the generated <c>_value</c> field.
+    /// The canonical form is the positive phrase without the leading "to" ("be null or empty"); the generator adds
+    /// "to" and, with <c>NegateLogic</c>, "not". The documented style that spells these out ("to be null or empty",
+    /// or "to not contain '{value}'" with <c>NegateLogic</c>) is also accepted, so neither renders as "to to ..." or
+    /// "to not not ...".
     /// </remarks>
     private static string RenderCustomExpectation(string expectationMessage, IParameterSymbol[] parameters)
     {
@@ -1007,15 +1007,60 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             ? expectationMessage.Substring("to ".Length)
             : expectationMessage;
 
-        // Replace each parameter placeholder {paramName} with {_paramName}
-        foreach (var parameter in parameters)
-        {
-            expectation = expectation.Replace($"{{{parameter.Name}}}", $"{{_{parameter.Name}}}");
-        }
+        var phrase = RenderMessageText(expectation, parameters);
 
         return expectation.StartsWith("not ", StringComparison.Ordinal)
-            ? $"to {expectation}"
-            : $"to {{(_negated ? \"not \" : \"\")}}{expectation}";
+            ? $"to {phrase}"
+            : RenderNegatableExpectation(phrase);
+    }
+
+    /// <summary>
+    /// The one place the expectation's "to"/"to not" wording is decided, for custom and default messages alike.
+    /// </summary>
+    private static string RenderNegatableExpectation(string phrase) => $"to {{(_negated ? \"not \" : \"\")}}{phrase}";
+
+    /// <summary>
+    /// Renders message text as the body of an interpolated string literal in a single pass: a <c>{name}</c>
+    /// placeholder for a method parameter becomes the generated <c>{_name}</c> field, and everything else stays
+    /// literal text, including escaped braces (<c>{{name}}</c> prints <c>{name}</c>), placeholders that name no
+    /// parameter, stray braces, quotes and backslashes.
+    /// </summary>
+    private static string RenderMessageText(string message, IParameterSymbol[] parameters)
+    {
+        var parameterNames = new HashSet<string>(parameters.Select(p => p.Name), StringComparer.Ordinal);
+        var result = new StringBuilder(message.Length);
+        var literalStart = 0;
+
+        foreach (Match match in MessageTokenRegex.Matches(message))
+        {
+            result.Append(FormatLiteral(message.Substring(literalStart, match.Index - literalStart)));
+
+            var name = match.Groups["name"];
+            if (name.Success && parameterNames.Contains(name.Value))
+            {
+                result.Append("{_").Append(name.Value).Append('}');
+            }
+            else
+            {
+                // An escaped brace pair, an unknown placeholder or a stray brace: keep its text literal
+                var literal = match.Value is "{{" ? "{" : match.Value is "}}" ? "}" : match.Value;
+                result.Append(literal.Replace("{", "{{").Replace("}", "}}"));
+            }
+
+            literalStart = match.Index + match.Length;
+        }
+
+        result.Append(FormatLiteral(message.Substring(literalStart)));
+        return result.ToString();
+    }
+
+    private static readonly Regex MessageTokenRegex = new(@"\{\{|\}\}|\{(?<name>[A-Za-z_][A-Za-z0-9_]*)\}|[{}]");
+
+    // With quote: false, FormatLiteral leaves double quotes unescaped, so quote and strip the outer pair instead
+    private static string FormatLiteral(string text)
+    {
+        var literal = SymbolDisplay.FormatLiteral(text, quote: true);
+        return literal.Substring(1, literal.Length - 2);
     }
 
     private static string GenerateAssertConditionClassNameForMethod(INamedTypeSymbol targetType, INamedTypeSymbol containingType, string methodName, IMethodSymbol method)

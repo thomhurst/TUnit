@@ -283,6 +283,14 @@ await Assert.That("hello").LacksText("ell");  // ❌ Fails: "Expected to not con
 
 **Note:** Negation only works with `bool`-returning methods. `AssertionResult` methods determine their own pass/fail logic.
 
+### How `ExpectationMessage` Is Rendered
+
+For `[AssertionFrom]`, the message is the phrase that follows "Expected". Write it in the positive form, with or without the leading "to":
+
+- The generator adds "to", plus "not" when `NegateLogic = true`: `"be null or empty"` and `"to be null or empty"` both render as "to be null or empty", or "to not be null or empty" when negated.
+- A phrase that already starts with "not" (`"to not contain '{value}'"`) is used as written rather than negated again.
+- `{paramName}` is replaced with that parameter's value. Everything else is literal text: write `{{` and `}}` for literal braces, and a placeholder that names no parameter is printed as is.
+
 ### Referencing Methods on Different Types
 
 ```csharp

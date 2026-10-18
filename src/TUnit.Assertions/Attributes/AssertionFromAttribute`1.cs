@@ -130,7 +130,13 @@ public sealed class AssertionFromAttribute<TTarget> : Attribute
     /// It appears as: "Expected {value} to {expectation} but {actual_result}".
     /// </para>
     /// <para>
-    /// You can use parameter placeholders like {param1}, {param2} which will be replaced with actual values.
+    /// Write the positive phrase without the leading "to", e.g. <c>"be null or empty"</c>: the generator adds "to",
+    /// and "not" when <c>NegateLogic</c> is set. A leading "to " is ignored, and a phrase that already starts with
+    /// "not " (after any "to ") is used as written instead of being negated again.
+    /// </para>
+    /// <para>
+    /// A placeholder such as <c>{value}</c> is replaced with that method parameter's value. Everything else is literal
+    /// text: write <c>{{</c> and <c>}}</c> for literal braces; a placeholder that names no parameter is printed as is.
     /// </para>
     /// </remarks>
     /// <example>
