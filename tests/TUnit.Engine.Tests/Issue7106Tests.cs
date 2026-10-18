@@ -32,6 +32,9 @@ public class Issue7106Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("NullArrayMethodRowOnConstrainedClass", 1)]
     [Arguments("NullFirstOfSharedTypeParameterMethodRow", 1)]
     [Arguments("NullFirstOfSharedTypeParameterWithGenerateGenericTest", 1)]
+    [Arguments("GenericClassArrayMethodRows", 2)]
+    [Arguments("GenericClassEnumerableMethodRow", 1)]
+    [Arguments("GenerateGenericTestWithArrayMethodRow", 2)]
     public async Task Every_Row_Runs(string className, int expectedTests)
     {
         await RunTestsWithFilter(

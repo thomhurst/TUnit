@@ -6072,6 +6072,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return namedType.TypeArguments.Any(ta => ContainsClassTypeParameter(ta, classSymbol));
         }
 
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return ContainsClassTypeParameter(arrayType.ElementType, classSymbol);
+        }
+
         return false;
     }
 
@@ -6084,15 +6089,30 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 inferredTypes[typeParam.Name] = argType;
             }
         }
-        else if (paramType is INamedTypeSymbol paramNamedType && argType is INamedTypeSymbol argNamedType &&
-                 paramNamedType.IsGenericType && argNamedType.IsGenericType &&
-                 paramNamedType.OriginalDefinition.Equals(argNamedType.OriginalDefinition, SymbolEqualityComparer.Default))
+        else if (paramType is INamedTypeSymbol { IsGenericType: true } paramNamedType)
         {
+            // The argument's own type when it matches, else an interface it implements (e.g. IEnumerable<T>
+            // given a string[]), as reflection mode's InferGenericTypeMapping does
+            var argNamedType = argType is INamedTypeSymbol { IsGenericType: true } named
+                               && SymbolEqualityComparer.Default.Equals(named.OriginalDefinition, paramNamedType.OriginalDefinition)
+                ? named
+                : argType.AllInterfaces.FirstOrDefault(i => SymbolEqualityComparer.Default.Equals(i.OriginalDefinition, paramNamedType.OriginalDefinition));
+
+            if (argNamedType == null)
+            {
+                return;
+            }
+
             // Map type arguments recursively
             for (var i = 0; i < paramNamedType.TypeArguments.Length && i < argNamedType.TypeArguments.Length; i++)
             {
                 MapGenericTypeArguments(paramNamedType.TypeArguments[i], argNamedType.TypeArguments[i], inferredTypes);
             }
+        }
+        // T[] given an array infers T from its element type, as in reflection mode
+        else if (paramType is IArrayTypeSymbol paramArrayType && argType is IArrayTypeSymbol argArrayType)
+        {
+            MapGenericTypeArguments(paramArrayType.ElementType, argArrayType.ElementType, inferredTypes);
         }
     }
 
