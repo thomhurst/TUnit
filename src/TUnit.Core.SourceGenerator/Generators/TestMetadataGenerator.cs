@@ -1300,6 +1300,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // Build the method call with proper type substitution
             var parameterCasts = new List<string>();
+            // Row values hold only the data parameters; the engine supplies the CancellationToken,
+            // so a token before a data parameter must not shift the row index.
+            var dataArgIndex = 0;
             for (var i = 0; i < testMethod.MethodSymbol.Parameters.Length; i++)
             {
                 var param = testMethod.MethodSymbol.Parameters[i];
@@ -1310,7 +1313,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 else
                 {
                     var paramType = SubstituteTypeParameters(param.Type, testMethod, entry.ClassTypeArgs, entry.MethodTypeArgs);
-                    parameterCasts.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
+                    parameterCasts.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>(args[{dataArgIndex++.ToString(CultureInfo.InvariantCulture)}])");
                 }
             }
 
@@ -3149,7 +3152,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     // When optional leading parameters are omitted, the trailing array is passed by
                     // name. A positional argument cannot follow it (CS8323), so name the token too.
-                    // When any parameter is left out (e.g. an omitted optional array), a positional
+                    // When any parameter is left out (e.g. an omitted trailing optional), a positional
                     // token would bind to the first omitted slot, so it needs the name as well.
                     var cancellationTokenName = (hasParams && argCount < lastIndex) || argsToPass.Count < parametersFromArgs.Length
                         ? GetCancellationTokenParameterName(parametersFromArgs[lastIndex])

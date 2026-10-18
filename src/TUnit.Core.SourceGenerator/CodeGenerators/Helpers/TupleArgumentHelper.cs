@@ -132,10 +132,19 @@ public static class TupleArgumentHelper
                 {
                     var remainingArgCount = Math.Max(0, argCount - regularParamCount);
 
+                    // When optional regular parameters were omitted (argCount < regularParamCount),
+                    // a positional array would bind to the first omitted parameter, so name it.
+                    var namePrefix = remainingArgCount == 0 && argCount < regularParamCount
+                        ? $"@{paramsParam.Name}: "
+                        : string.Empty;
+
                     if (remainingArgCount == 0 && !paramsParam.IsParams && paramsParam.HasExplicitDefaultValue)
                     {
                         // An omitted optional plain array keeps its declared default (as C# and
-                        // reflection mode do), so leave the argument out rather than passing [].
+                        // reflection mode do). The only default an array parameter can declare is
+                        // null, so pass a typed null rather than leaving the argument out: omitting
+                        // it could bind the call to another overload (e.g. a parameterless M()).
+                        argumentExpressions.Add($"{namePrefix}default({paramsParam.Type.GloballyQualified()})");
                     }
                     else if (remainingArgCount == 0)
                     {
@@ -143,11 +152,6 @@ public static class TupleArgumentHelper
                         // rather than `new T[0]`: when T is itself an array (jagged param like
                         // byte[][], element type byte[]) the rank-specifier form `new byte[][0]`
                         // is invalid C# (CS1586/CS0178). See issue #6150.
-                        // When optional regular parameters were omitted (argCount < regularParamCount),
-                        // a positional array would bind to the first omitted parameter, so name it.
-                        var namePrefix = argCount < regularParamCount
-                            ? $"@{paramsParam.Name}: "
-                            : string.Empty;
                         argumentExpressions.Add($"{namePrefix}global::System.Array.Empty<{elementType.GloballyQualified()}>()");
                     }
                     else if (remainingArgCount == 1)

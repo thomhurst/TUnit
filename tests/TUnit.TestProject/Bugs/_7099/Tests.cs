@@ -272,3 +272,41 @@ public abstract class GenericParamsArrayBase<T>
 [EngineTest(ExpectedResult.Pass)]
 [InheritsTests]
 public class GenericParamsArrayDerived : GenericParamsArrayBase<int>;
+
+/// <summary>
+/// An omitted optional array must still bind to the test method, not to an overload without it.
+/// The overloads throw, so a call that binds to them fails the test.
+/// </summary>
+[EngineTest(ExpectedResult.Pass)]
+public class OptionalArrayOverloadTests
+{
+    [Test]
+    [Arguments]
+    public async Task NonGeneric_Optional_Array(int[]? values = null)
+    {
+        await Assert.That(values).IsNull();
+    }
+
+    // internal: visible to the generated invoker, so it competes in overload resolution.
+    internal Task NonGeneric_Optional_Array() => throw new InvalidOperationException("Bound to the parameterless overload");
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [Arguments]
+    public async Task Generic_Optional_Array<T>(T[]? values = null)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values).IsNull();
+    }
+
+    internal Task Generic_Optional_Array<T>() => throw new InvalidOperationException("Bound to the parameterless overload");
+
+    [Test]
+    [Arguments]
+    public async Task Optional_Array_With_Token(int[]? values = null, CancellationToken token = default)
+    {
+        await Assert.That(values).IsNull();
+    }
+
+    internal Task Optional_Array_With_Token(CancellationToken token) => throw new InvalidOperationException("Bound to the token-only overload");
+}

@@ -154,6 +154,28 @@ internal class GenericParamsArrayCompilationTests
             [Test]
             [Arguments]
             public void NonGeneric_JaggedMultiDim(params int[][,] values) { }
+
+            [Test]
+            [Arguments]
+            public void Overloaded_Optional_Array(int[] values = null) { }
+
+            public void Overloaded_Optional_Array() { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [Arguments]
+            public void Overloaded_Generic_Optional_Array<T>(T[] values = null) { }
+
+            public void Overloaded_Generic_Optional_Array<T>() { }
+
+            [Test]
+            [Arguments(1)]
+            public void Inferred_After_Token<T>(global::System.Threading.CancellationToken token, T value) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(string))]
+            [Arguments("a", 2)]
+            public void Explicit_Token_Between_Values<T>(T first, global::System.Threading.CancellationToken token, int second) { }
         }
 
         public abstract class InheritedBase<T>
@@ -213,7 +235,14 @@ internal class GenericParamsArrayCompilationTests
         await Assert.That(generated).Contains("Inferred_FromPlainArrayArgument<int>");
         await Assert.That(generated).Contains("Inferred_FromPlainArrayArgumentWithToken<int>");
 
-        // An omitted optional plain array keeps its declared default: the argument is left out.
-        await Assert.That(generated).Contains("instance.NonGeneric_Optional_Omitted_Before_Array_With_Token(@token: ");
+        // An omitted optional plain array keeps its declared default. It is passed as a typed null
+        // rather than left out, so the call cannot bind to an overload without the array.
+        await Assert.That(generated).Contains("instance.NonGeneric_Optional_Omitted_Before_Array_With_Token(@values: default(int[]), @token: ");
+        await Assert.That(generated).Contains("instance.Overloaded_Optional_Array(default(int[]))");
+        await Assert.That(generated).Contains("instance.Overloaded_Generic_Optional_Array<int>(default(int[]))");
+
+        // A CancellationToken before a data parameter does not consume a row value.
+        await Assert.That(generated).Contains("instance.Inferred_After_Token<int>(cancellationToken, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]))");
+        await Assert.That(generated).Contains("instance.Explicit_Token_Between_Values<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), cancellationToken, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]))");
     }
 }

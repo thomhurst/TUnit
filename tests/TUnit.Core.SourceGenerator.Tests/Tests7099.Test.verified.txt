@@ -1954,11 +1954,11 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             {
                 case 0:
                     {
-                        return new global::System.Threading.Tasks.ValueTask(instance.Optional_Omitted_Before_Array_With_Token<int>(@token: context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                        return new global::System.Threading.Tasks.ValueTask(instance.Optional_Omitted_Before_Array_With_Token<int>(@values: default(int[]), @token: context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
                     }
                 case 1:
                     {
-                        return new global::System.Threading.Tasks.ValueTask(instance.Optional_Omitted_Before_Array_With_Token<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), @token: context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                        return new global::System.Threading.Tasks.ValueTask(instance.Optional_Omitted_Before_Array_With_Token<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), default(int[]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
                     }
                 case 2:
                     {
@@ -2348,6 +2348,117 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7099_OptionalArrayOverloadTests_Generic_Optional_Array__T____TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests)),
+        Name = "OptionalArrayOverloadTests",
+        Namespace = "TUnit.TestProject.Bugs._7099",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Generic_Optional_Array", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests), "Generic_Optional_Array", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), true)
+}));
+    private static global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            switch (args.Length)
+            {
+                case 0:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Generic_Optional_Array<int>(default(int[])));
+                    }
+                case 1:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Generic_Optional_Array<int>((args[0] is null ? null : args[0] is int[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(args[0]))));
+                    }
+                case 2:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Generic_Optional_Array<int>(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]) }));
+                    }
+                case 3:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Generic_Optional_Array<int>(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]) }));
+                    }
+                case 4:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Generic_Optional_Array<int>(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]) }));
+                    }
+                case 5:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Generic_Optional_Array<int>(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]) }));
+                    }
+                case 6:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Generic_Optional_Array<int>(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]) }));
+                    }
+                default:
+                    return new global::System.Threading.Tasks.ValueTask(instance.Generic_Optional_Array<int>((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>())));
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
+            new global::TUnit.Core.ArgumentsAttribute(),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests>(
+            methodName: "Generic_Optional_Array<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests.Generic_Optional_Array<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 293,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7099_OptionalArrayOverloadTests_Generic_Optional_Array__T____TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests>(static () => TUnit_TestProject_Bugs__7099_OptionalArrayOverloadTests_Generic_Optional_Array__T____TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTests__TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests", new global::TUnit.Core.ClassMetadata
@@ -2419,11 +2530,11 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
                     {
                         case 0:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Omitted_Before_Array_With_Token(@token: context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Omitted_Before_Array_With_Token(@values: default(int[]), @token: context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
                             }
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Omitted_Before_Array_With_Token(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), @token: context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Omitted_Before_Array_With_Token(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), default(int[]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
                             }
                         case 2:
                             {
@@ -2476,7 +2587,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.Optional_Array_Omitted_After_Required_With_Token(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), @token: context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                                return new global::System.Threading.Tasks.ValueTask(instance.Optional_Array_Omitted_After_Required_With_Token(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), default(int[]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
                             }
                         case 2:
                             {
@@ -2694,6 +2805,193 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
 internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests>(static () => TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTests__TestSource.Entries);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7099_OptionalArrayOverloadTests__TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests)),
+        Name = "OptionalArrayOverloadTests",
+        Namespace = "TUnit.TestProject.Bugs._7099",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests);
+    private static global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            switch (methodIndex)
+            {
+                case 0:
+                {
+                    switch (args.Length)
+                    {
+                        case 0:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Array(default(int[])));
+                            }
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Array((args[0] is null ? null : args[0] is int[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(args[0]))));
+                            }
+                        case 2:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Array(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]) }));
+                            }
+                        case 3:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Array(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]) }));
+                            }
+                        case 4:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Array(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]) }));
+                            }
+                        case 5:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Array(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]) }));
+                            }
+                        case 6:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Array(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]) }));
+                            }
+                        default:
+                            return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Array((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>())));
+                    }
+                }
+                case 1:
+                {
+                    var context = global::TUnit.Core.TestContext.Current;
+                    switch (args.Length)
+                    {
+                        case 0:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Optional_Array_With_Token(default(int[]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                            }
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Optional_Array_With_Token((args[0] is null ? null : args[0] is int[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(args[0])), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                            }
+                        case 2:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Optional_Array_With_Token(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]) }, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                            }
+                        case 3:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Optional_Array_With_Token(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]) }, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                            }
+                        case 4:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Optional_Array_With_Token(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]) }, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                            }
+                        case 5:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Optional_Array_With_Token(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]) }, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                            }
+                        case 6:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Optional_Array_With_Token(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]) }, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                            }
+                        default:
+                            return new global::System.Threading.Tasks.ValueTask(instance.Optional_Array_With_Token((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>()), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                    }
+                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes(int groupIndex)
+    {
+        switch (groupIndex)
+        {
+            case 0:
+            {
+                return
+                [
+                    new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+                ];
+            }
+            default:
+                throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
+        }
+    }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests>(
+            methodName: "NonGeneric_Optional_Array",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests.NonGeneric_Optional_Array",
+            filePath: "",
+            lineNumber: 283,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(),
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests), "NonGeneric_Optional_Array", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "values", new global::TUnit.Core.ConcreteType(typeof(int[])), true)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 0,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests>(
+            methodName: "Optional_Array_With_Token",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests.Optional_Array_With_Token",
+            filePath: "",
+            lineNumber: 304,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(),
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests), "Optional_Array_With_Token", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "values", new global::TUnit.Core.ConcreteType(typeof(int[])), true),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 1,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7099_OptionalArrayOverloadTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests>(static () => TUnit_TestProject_Bugs__7099_OptionalArrayOverloadTests__TestSource.Entries);
 }
 
 
