@@ -27,16 +27,13 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly StaticPropertyHandler _staticPropertyHandler;
     private readonly IDynamicTestQueue _dynamicTestQueue;
     private readonly NotInParallelLock _notInParallelLock;
-    private readonly Lazy<int> _maxParallelism;
-#if !NET
-    private readonly Lazy<SemaphoreSlim> _maxParallelismSemaphore;
-#endif
+    private readonly MaxParallelismLimiter _maxParallelismLimiter;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
         ITestGroupingService groupingService,
         ITUnitMessageBus messageBus,
-        ICommandLineOptions commandLineOptions,
+        MaxParallelismLimiter maxParallelismLimiter,
         TestStateManager testStateManager,
         TestRunner testRunner,
         CircularDependencyDetector circularDependencyDetector,
@@ -60,15 +57,7 @@ internal sealed class TestScheduler : ITestScheduler
         _dynamicTestQueue = dynamicTestQueue;
         _notInParallelLock = notInParallelLock;
 
-        _maxParallelism = new Lazy<int>(() => GetMaxParallelism(logger, commandLineOptions));
-
-#if !NET
-        // The .NET 8+ path uses Parallel.ForEachAsync which caps concurrency via
-        // ParallelOptions.MaxDegreeOfParallelism — the semaphore is only needed
-        // for the netstandard2.0 fallback path.
-        _maxParallelismSemaphore = new Lazy<SemaphoreSlim>(() =>
-            new SemaphoreSlim(_maxParallelism.Value, _maxParallelism.Value));
-#endif
+        _maxParallelismLimiter = maxParallelismLimiter;
     }
 
     #if NET
@@ -105,7 +94,7 @@ internal sealed class TestScheduler : ITestScheduler
 
         // Covers every phase that runs user code (static property initializers, tests,
         // session hooks) so blocking tests do not delay timers in other tests.
-        using var starvationMonitor = ThreadPoolStarvationMonitor.Start(_maxParallelism.Value, _logger);
+        using var starvationMonitor = ThreadPoolStarvationMonitor.Start(_maxParallelismLimiter.MaxParallelism, _logger);
 
         // Initialize static properties before tests run
         await _staticPropertyHandler.InitializeStaticPropertiesAsync(cancellationToken).ConfigureAwait(false);
@@ -126,9 +115,26 @@ internal sealed class TestScheduler : ITestScheduler
         // that introduce NIP later (see ExecuteDynamicBatchAsync) keep it on.
         MarkGlobalNotInParallelTests(groupedTests);
 
-        // Execute tests according to their grouping
-        await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
+        bool sessionHooksSucceeded;
+        try
+        {
+            // Execute tests according to their grouping
+            await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            // Also on the fail-fast path, where cancelled tests make the phases throw: the
+            // cancellation callback only starts the session hooks, so await them (and the
+            // static property disposal that follows them) here, before the caller disposes
+            // shared fixtures the hooks may still be using.
+            sessionHooksSucceeded = await RunAfterTestSessionAsync(cancellationToken).ConfigureAwait(false);
+        }
 
+        return sessionHooksSucceeded;
+    }
+
+    private async Task<bool> RunAfterTestSessionAsync(CancellationToken cancellationToken)
+    {
         var sessionHookExceptions = await _afterHookPairTracker.GetOrCreateAfterTestSessionTask(
             () => _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken)).ConfigureAwait(false) ?? [];
 
@@ -222,7 +228,26 @@ internal sealed class TestScheduler : ITestScheduler
         // Start dynamic test queue processing in background
         var dynamicTestProcessingTask = ProcessDynamicTestQueueAsync(cancellationToken);
 
-        await ExecuteAllPhasesAsync(groupedTests, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await ExecuteAllPhasesAsync(groupedTests, cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            // On the fail-fast path the phases throw while dynamic tests may still be running.
+            // Wait for them before the caller runs session teardown; the phase failure wins.
+            _dynamicTestQueue.Complete();
+            try
+            {
+                await dynamicTestProcessingTask.ConfigureAwait(false);
+            }
+            catch
+            {
+                // Swallowed: rethrowing the phase exception below.
+            }
+
+            throw;
+        }
 
         // Mark the queue as complete and wait for remaining dynamic tests to finish
         _dynamicTestQueue.Complete();
@@ -311,7 +336,7 @@ internal sealed class TestScheduler : ITestScheduler
         var dynamicTests = new List<AbstractExecutableTest>();
 
         // Use async signaling instead of polling to eliminate IOCP overhead
-        while (await _dynamicTestQueue.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
+        while (await WaitForDynamicTestsAsync(cancellationToken).ConfigureAwait(false))
         {
             // Dequeue all currently available tests (batch processing)
             while (_dynamicTestQueue.TryDequeue(out var test))
@@ -333,6 +358,13 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
+        // Cancelled (fail-fast or run abort): the queued tests would only be cancelled too, and
+        // the phases would throw on the cancelled token, so stop here.
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+
         // Process any remaining tests after queue completion
         while (_dynamicTestQueue.TryDequeue(out var test))
         {
@@ -348,6 +380,22 @@ internal sealed class TestScheduler : ITestScheduler
                 await _logger.LogTraceAsync($"Executing {dynamicTests.Count} remaining dynamic test(s)").ConfigureAwait(false);
 
             await ExecuteDynamicBatchAsync(dynamicTests, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    // Ends the wait loop instead of faulting when the token is cancelled. The phases can finish
+    // without throwing after fail-fast fires (the failing test was the last to run), and
+    // ExecuteGroupedTestsAsync then awaits this processor on its normal path, so a cancelled
+    // wait would surface as the scheduler's exception.
+    private async ValueTask<bool> WaitForDynamicTestsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _dynamicTestQueue.WaitToReadAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return false;
         }
     }
 
@@ -440,11 +488,7 @@ internal sealed class TestScheduler : ITestScheduler
         // All paths run through the shared limiter so the DOP cap is unified in
         // GetMaxParallelism. "Unlimited" is resolved to the default cap
         // (ProcessorCount * 4) there rather than being a separate code path.
-#if NET
-        return ExecuteWithGlobalLimitAsync(tests, cancellationToken);
-#else
-        return ExecuteWithGlobalLimitAsync(tests, _maxParallelismSemaphore.Value, cancellationToken);
-#endif
+        return ExecuteWithGlobalLimitAsync(tests, _maxParallelismLimiter.Semaphore, cancellationToken);
     }
 
 #if NET
@@ -463,18 +507,30 @@ internal sealed class TestScheduler : ITestScheduler
 #if NET
     private Task ExecuteWithGlobalLimitAsync(
         AbstractExecutableTest[] tests,
+        SemaphoreSlim globalSemaphore,
         CancellationToken cancellationToken)
     {
+        // MaxDegreeOfParallelism bounds this call's workers; the shared semaphore bounds the
+        // session, because the keyed phase and dynamic batches run concurrently with this one.
+        // An uncontended WaitAsync completes synchronously without allocating.
         return Parallel.ForEachAsync(
             tests,
             new ParallelOptions
             {
-                MaxDegreeOfParallelism = _maxParallelism.Value,
+                MaxDegreeOfParallelism = _maxParallelismLimiter.MaxParallelism,
                 CancellationToken = cancellationToken
             },
             async (test, ct) =>
             {
-                await ExecuteScheduledTestAsync(test, ct).ConfigureAwait(false);
+                await globalSemaphore.WaitAsync(ct).ConfigureAwait(false);
+                try
+                {
+                    await ExecuteScheduledTestAsync(test, ct).ConfigureAwait(false);
+                }
+                finally
+                {
+                    globalSemaphore.Release();
+                }
             }
         );
     }
@@ -553,13 +609,12 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    private static int GetMaxParallelism(ILogger logger, ICommandLineOptions commandLineOptions)
+    internal static int GetMaxParallelism(ILogger logger, ICommandLineOptions commandLineOptions)
     {
         // "Unlimited" (caller passed 0) resolves to the same cap as the default path.
         // Parallel.ForEachAsync with MaxDegreeOfParallelism = -1 is truly unbounded —
         // with thousands of tests this saturates IOCP threads, so we always apply a cap.
-        // ProcessorCount * 4 is empirically sized for async/IO-bound workloads.
-        var defaultLimit = Environment.ProcessorCount * 4;
+        var defaultLimit = MaxParallelismLimiter.DefaultMaxParallelism;
 
         // Check command line argument first (highest priority)
         if (commandLineOptions.TryGetOptionArgumentList(

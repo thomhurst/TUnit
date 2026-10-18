@@ -99,12 +99,22 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 return;
             }
 
-            var message = context.CancellationToken.IsCancellationRequested
-                ? "The test run was cancelled."
-                : "Test execution stopped due to fail-fast.";
-            await serviceProvider.Logger.LogErrorAsync(message);
+            if (!context.CancellationToken.IsCancellationRequested)
+            {
+                // Fail-fast (or the engine's own cancellation) fired without the platform's token,
+                // so, as with SIGTERM above, MTP would treat a re-thrown cancellation as unhandled
+                // and crash the host. The tests that ran are already reported; fail the session.
+                await serviceProvider.Logger.LogErrorAsync(serviceProvider.FailFastCancellationSource.IsCancellationRequested
+                    ? "Test execution stopped due to fail-fast."
+                    : "The test run was cancelled.");
+                serviceProvider.SessionFailed = true;
+                return;
+            }
 
-            // Re-throw is safe here — MTP handles OperationCanceledException specially.
+            await serviceProvider.Logger.LogErrorAsync("The test run was cancelled.");
+
+            // Re-throw is safe here: MTP handles OperationCanceledException specially when its own
+            // token was cancelled.
             throw;
         }
         catch (Exception e)

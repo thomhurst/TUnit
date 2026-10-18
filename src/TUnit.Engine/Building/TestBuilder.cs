@@ -1224,7 +1224,7 @@ internal sealed class TestBuilder : ITestBuilder
         var testDetails = new TestDetails(attributes)
         {
             TestId = testId,
-            TestName = metadata.TestName,
+            TestName = GetTestName(metadata, testData),
             ClassType = metadata.TestClassType,
             MethodName = metadata.TestMethodName,
             ClassInstance = PlaceholderInstance.Instance,
@@ -1345,6 +1345,27 @@ internal sealed class TestBuilder : ITestBuilder
                 TestContext = context
             }
         };
+    }
+
+    /// <summary>
+    /// Reflection mode discovers a generic method once, as its open definition, and resolves its
+    /// type arguments per data row. Append them here so the test name matches source-gen mode,
+    /// which emits one entry per instantiation with the type arguments already in its name (#7105).
+    /// </summary>
+    private static string GetTestName(TestMetadata metadata, TestData testData)
+    {
+        var resolvedMethodGenericArguments = testData.ResolvedMethodGenericArguments;
+
+        if (resolvedMethodGenericArguments.Length == 0
+            // Closed by MakeGenericMethod, so the metadata name already has its type arguments.
+            || metadata.GenericMethodTypeArguments is { Length: > 0 }
+            // A custom name (such as a [DisplayName] template) is not decorated.
+            || !string.Equals(metadata.TestName, metadata.TestMethodName, StringComparison.Ordinal))
+        {
+            return metadata.TestName;
+        }
+
+        return TypeNameFormatter.AppendGenericArguments(metadata.TestName, resolvedMethodGenericArguments);
     }
 
     private TestDetails CreateFailedTestDetails(TestMetadata metadata, string testId)

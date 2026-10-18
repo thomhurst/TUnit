@@ -99,7 +99,10 @@ public abstract class InvokableTestBase(TestMode testMode)
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_AOT_",
-                    "--timeout", "5m",
+                    // A whole-session budget, not a hang detector. The [EngineTest=Pass] run takes
+                    // 3.5-5 minutes on Windows CI, so a 5m budget cancelled healthy runs mid-way
+                    // through the sequential global [NotInParallel] tail.
+                    "--timeout", "10m",
                     ..runOptions.AdditionalArguments
                 ]
             )

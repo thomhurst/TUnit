@@ -12,7 +12,9 @@ public class Hooks
             Environment.SetEnvironmentVariable("PWDEBUG", "1");
         }
 
-        var exitCode = Microsoft.Playwright.Program.Main(["install"]);
+        // Tests use Chromium by default (PlaywrightTest.BrowserName). Add "firefox" or "webkit"
+        // here if you override BrowserName, so unused browsers are not downloaded.
+        var exitCode = Microsoft.Playwright.Program.Main(["install", "chromium"]);
         if (exitCode != 0)
         {
             // On Linux, browsers also need system libraries: run `playwright install --with-deps` once.

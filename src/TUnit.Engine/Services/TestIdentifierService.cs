@@ -33,19 +33,7 @@ internal static class TestIdentifierService
 
             // Add method generic type arguments to ensure uniqueness for generic methods
             // e.g., GenericMethod<int> vs GenericMethod<string> should have different IDs
-            if (combination.ResolvedMethodGenericArguments is { Length: > 0 })
-            {
-                vsb.Append('<');
-                for (var i = 0; i < combination.ResolvedMethodGenericArguments.Length; i++)
-                {
-                    if (i > 0)
-                    {
-                        vsb.Append(',');
-                    }
-                    vsb.Append(combination.ResolvedMethodGenericArguments[i].FullName ?? combination.ResolvedMethodGenericArguments[i].Name);
-                }
-                vsb.Append('>');
-            }
+            AppendMethodTypeArguments(ref vsb, metadata, combination.ResolvedMethodGenericArguments);
 
             WriteTypeWithParameters(ref vsb, methodParameters);
             vsb.Append('.');
@@ -103,6 +91,7 @@ internal static class TestIdentifierService
             WriteTypeWithParameters(ref vsb, constructorParameters);
             vsb.Append('.');
             vsb.Append(metadata.TestMethodName);
+            AppendMethodTypeArguments(ref vsb, metadata, null);
             WriteTypeWithParameters(ref vsb, methodParameters);
             vsb.Append("_Deferred");
 
@@ -143,6 +132,7 @@ internal static class TestIdentifierService
             vsb.Append(combination.ClassLoopIndex);
             vsb.Append('.');
             vsb.Append(metadata.TestMethodName);
+            AppendMethodTypeArguments(ref vsb, metadata, null);
             WriteTypeWithParameters(ref vsb, methodParameters);
             vsb.Append('.');
             vsb.Append(combination.MethodDataSourceIndex);
@@ -158,6 +148,43 @@ internal static class TestIdentifierService
         {
             vsb.Dispose();
         }
+    }
+
+    /// <summary>
+    /// Appends a generic-method instantiation's type arguments so that its id is unique, because every
+    /// instantiation shares the bare <see cref="TestMetadata.TestMethodName"/> (#7105). Uses the
+    /// arguments resolved for this test, else the fully qualified identity source-gen emits per
+    /// instantiation, else the arguments the metadata was closed over. Never the display name: it drops
+    /// namespaces, so <c>A.Payload</c> and <c>B.Payload</c> would collide.
+    /// </summary>
+    private static void AppendMethodTypeArguments(ref ValueStringBuilder vsb, TestMetadata metadata, Type[]? resolvedMethodGenericArguments)
+    {
+        if (resolvedMethodGenericArguments is { Length: > 0 })
+        {
+            AppendTypeFullNames(ref vsb, resolvedMethodGenericArguments);
+        }
+        else if (metadata.MethodTypeArgumentsIdentity is { } identity)
+        {
+            vsb.Append(identity);
+        }
+        else if (metadata.GenericMethodTypeArguments is { Length: > 0 } closedArguments)
+        {
+            AppendTypeFullNames(ref vsb, closedArguments);
+        }
+    }
+
+    private static void AppendTypeFullNames(ref ValueStringBuilder vsb, Type[] types)
+    {
+        vsb.Append('<');
+        for (var i = 0; i < types.Length; i++)
+        {
+            if (i > 0)
+            {
+                vsb.Append(',');
+            }
+            vsb.Append(types[i].FullName ?? types[i].Name);
+        }
+        vsb.Append('>');
     }
 
     private static void WriteTypeNameWithGenerics(ref ValueStringBuilder vsb, Type type)

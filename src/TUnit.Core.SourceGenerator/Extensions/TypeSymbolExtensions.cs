@@ -51,4 +51,129 @@ internal static class TypeSymbolExtensions
         }
         return null;
     }
+    /// <summary>
+    /// Formats a generic-method type argument for a test name, such as the <c>int</c> in
+    /// <c>Method&lt;int&gt;</c>: C# keywords for built-in types, no namespaces, <c>T?</c> for
+    /// nullable value types, <c>(T1, T2)</c> for value tuples, <c>T[]</c> for arrays and
+    /// <c>Outer.Inner</c> for nested types.
+    /// </summary>
+    /// <remarks>
+    /// Must stay in step with <c>TypeNameFormatter.GetCSharpTypeName</c> in TUnit.Core, which formats
+    /// the same names at runtime in reflection mode. Both modes must produce the same name (#7105).
+    /// </remarks>
+    public static string ToTestNameTypeArgument(this ITypeSymbol type)
+    {
+        var builder = new System.Text.StringBuilder();
+        AppendTestNameTypeArgument(builder, type);
+        return builder.ToString();
+    }
+
+    private static void AppendTestNameTypeArgument(System.Text.StringBuilder builder, ITypeSymbol type)
+    {
+        switch (type)
+        {
+            case ITypeParameterSymbol:
+                builder.Append(type.Name);
+                return;
+            case IDynamicTypeSymbol:
+                builder.Append("object");
+                return;
+            case IArrayTypeSymbol array:
+                AppendTestNameTypeArgument(builder, array.ElementType);
+                builder.Append('[');
+                builder.Append(',', array.Rank - 1);
+                builder.Append(']');
+                return;
+            case IPointerTypeSymbol pointer:
+                AppendTestNameTypeArgument(builder, pointer.PointedAtType);
+                builder.Append('*');
+                return;
+        }
+
+        if (GetTestNameKeyword(type.SpecialType) is { } keyword)
+        {
+            builder.Append(keyword);
+            return;
+        }
+
+        if (type is not INamedTypeSymbol named)
+        {
+            builder.Append(type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+            return;
+        }
+
+        named = named.TupleUnderlyingType ?? named;
+
+        if (named.IsGenericType && named.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
+        {
+            AppendTestNameTypeArgument(builder, named.TypeArguments[0]);
+            builder.Append('?');
+            return;
+        }
+
+        if (named is { Name: "ValueTuple", Arity: >= 2 and <= 7, ContainingType: null }
+            && named.ContainingNamespace is { Name: "System", ContainingNamespace.IsGlobalNamespace: true })
+        {
+            builder.Append('(');
+            AppendTestNameTypeArguments(builder, named.TypeArguments);
+            builder.Append(')');
+            return;
+        }
+
+        AppendTestNameNamedType(builder, named);
+    }
+
+    private static void AppendTestNameNamedType(System.Text.StringBuilder builder, INamedTypeSymbol named)
+    {
+        if (named.ContainingType is { } containingType)
+        {
+            AppendTestNameNamedType(builder, containingType);
+            builder.Append('.');
+        }
+
+        builder.Append(named.Name);
+
+        if (named.Arity > 0)
+        {
+            builder.Append('<');
+            AppendTestNameTypeArguments(builder, named.TypeArguments);
+            builder.Append('>');
+        }
+    }
+
+    private static void AppendTestNameTypeArguments(System.Text.StringBuilder builder, IReadOnlyList<ITypeSymbol> typeArguments)
+    {
+        for (var i = 0; i < typeArguments.Count; i++)
+        {
+            if (i > 0)
+            {
+                builder.Append(", ");
+            }
+
+            AppendTestNameTypeArgument(builder, typeArguments[i]);
+        }
+    }
+
+    private static string? GetTestNameKeyword(SpecialType specialType) => specialType switch
+    {
+        SpecialType.System_Boolean => "bool",
+        SpecialType.System_Byte => "byte",
+        SpecialType.System_SByte => "sbyte",
+        SpecialType.System_Char => "char",
+        SpecialType.System_Decimal => "decimal",
+        SpecialType.System_Double => "double",
+        SpecialType.System_Single => "float",
+        SpecialType.System_Int16 => "short",
+        SpecialType.System_UInt16 => "ushort",
+        SpecialType.System_Int32 => "int",
+        SpecialType.System_UInt32 => "uint",
+        SpecialType.System_Int64 => "long",
+        SpecialType.System_UInt64 => "ulong",
+        SpecialType.System_String => "string",
+        SpecialType.System_Object => "object",
+        SpecialType.System_Void => "void",
+        SpecialType.System_IntPtr => "nint",
+        SpecialType.System_UIntPtr => "nuint",
+        _ => null,
+    };
 }

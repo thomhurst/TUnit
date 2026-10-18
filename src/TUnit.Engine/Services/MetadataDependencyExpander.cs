@@ -28,7 +28,24 @@ internal sealed class TestMetadataEqualityComparer : IEqualityComparer<TestMetad
 
         return x.TestClassType == y.TestClassType &&
                x.TestMethodName == y.TestMethodName &&
-               x.TestName == y.TestName;
+               x.TestName == y.TestName &&
+               // The test name drops namespaces, so instantiations over A.Payload and B.Payload share
+               // it (#7105). Their type arguments still tell them apart.
+               x.MethodTypeArgumentsIdentity == y.MethodTypeArgumentsIdentity &&
+               SameTypes(x.GenericMethodTypeArguments, y.GenericMethodTypeArguments);
+    }
+
+    private static bool SameTypes(Type[]? x, Type[]? y)
+    {
+        if (ReferenceEquals(x, y)) return true;
+        if (x is null || y is null || x.Length != y.Length) return false;
+
+        for (var i = 0; i < x.Length; i++)
+        {
+            if (x[i] != y[i]) return false;
+        }
+
+        return true;
     }
 
     public int GetHashCode(TestMetadata obj)

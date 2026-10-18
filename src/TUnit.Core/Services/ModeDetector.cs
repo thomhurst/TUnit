@@ -5,5 +5,5 @@ namespace TUnit.Core.Services;
 /// </summary>
 public static class ModeDetector
 {
-    public static bool IsSourceGenerationAvailable => SourceRegistrar.IsEnabled;
+    public static bool IsSourceGenerationAvailable => SourceRegistrar.IsSourceGenerationAvailable;
 }

@@ -88,7 +88,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var logLevelProvider = Register(new LogLevelProvider(CommandLineOptions));
 
         // Determine execution mode early to create appropriate services
-        var useSourceGeneration = SourceRegistrar.IsEnabled = ExecutionModeHelper.IsSourceGenerationMode(CommandLineOptions);
+        // Lock the mode so module initializers of assemblies that load later cannot flip it back.
+        var useSourceGeneration = ExecutionModeHelper.IsSourceGenerationMode(CommandLineOptions);
+        SourceRegistrar.LockExecutionMode(useSourceGeneration);
 
         // Create and register mode-specific hook registrar service
         IHookRegistrar hookDiscoveryService;
@@ -256,10 +258,15 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testGroupingService = Register<ITestGroupingService>(new TestGroupingService(Logger));
         var circularDependencyDetector = Register(new CircularDependencyDetector());
 
+        // One --maximum-parallel-tests budget shared by the unconstrained and keyed
+        // NotInParallel schedulers, whose phases run concurrently (#7074).
+        var maxParallelismLimiter = new MaxParallelismLimiter(() => TestScheduler.GetMaxParallelism(Logger, CommandLineOptions));
+
         var constraintKeyScheduler = Register<IConstraintKeyScheduler>(new ConstraintKeyScheduler(
             testRunner,
             Logger,
-            hashSetPool));
+            hashSetPool,
+            maxParallelismLimiter));
 
         var staticPropertyHandler = Register(new StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, lazyPropertyInjector, objectGraphDiscoveryService));
 
@@ -271,7 +278,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             Logger,
             testGroupingService,
             MessageBus,
-            CommandLineOptions,
+            maxParallelismLimiter,
             testStateManager,
             testRunner,
             circularDependencyDetector,

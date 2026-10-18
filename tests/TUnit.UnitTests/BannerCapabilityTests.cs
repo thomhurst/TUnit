@@ -57,7 +57,7 @@ public class BannerCapabilityTests
         // With no CLI or environment override, the engine falls back to whether generated sources
         // registered themselves (false when EnableTUnitSourceGeneration=false strips the generator).
         var options = new FakeCommandLineOptions();
-        var expected = SourceRegistrar.IsEnabled
+        var expected = SourceRegistrar.IsSourceGenerationAvailable
             ? EngineMode.SourceGenerated
             : EngineMode.Reflection;
 

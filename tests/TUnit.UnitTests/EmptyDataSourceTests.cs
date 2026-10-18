@@ -36,7 +36,8 @@ public class EmptyDataSourceTests
         // - They yield exactly one result with empty parameter array []
         // - The test executes once with no parameters  
         // - No "test instance is null" or other framework errors occur
-        await Assert.That(true).IsTrue();
+        // Runs in both source-gen and reflection mode (#7092).
+        await Assert.That(TestContext.Current!.Metadata.TestDetails.TestMethodArguments).IsEmpty();
     }
 
     /// <summary>
