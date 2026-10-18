@@ -1338,15 +1338,42 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var values = arguments.Values;
         var typeMapping = new Dictionary<Type, Type>();
+        Dictionary<Type, Type>? parameterMapping = null;
 
         for (var i = 0; i < parameters.Length && i < values.Length; i++)
         {
             var parameterType = parameters[i].ParameterType;
-            if (parameterType.ContainsGenericParameters)
+            if (!parameterType.ContainsGenericParameters)
             {
-                // Match the source generator: Roslyn types a null element of the params object?[]
-                // argument as object
-                InferGenericTypeMapping(parameterType, values[i] is { } value ? GetArgumentInferenceType(value) : typeof(object), typeMapping);
+                continue;
+            }
+
+            // Match the source generator: Roslyn types a null element of the params object?[]
+            // argument as object
+            var argumentType = values[i] is { } value ? GetArgumentInferenceType(value) : typeof(object);
+
+            // Also match its first-wins rule across parameters: the first parameter that uses a type
+            // parameter fixes it, so Run(T first, T second) with [Arguments(null, 1)] infers T = object
+            if (parameterType.IsGenericParameter)
+            {
+                if (!typeMapping.ContainsKey(parameterType))
+                {
+                    typeMapping[parameterType] = argumentType;
+                }
+
+                continue;
+            }
+
+            parameterMapping ??= new Dictionary<Type, Type>();
+            parameterMapping.Clear();
+            InferGenericTypeMapping(parameterType, argumentType, parameterMapping);
+
+            foreach (var mapping in parameterMapping)
+            {
+                if (!typeMapping.ContainsKey(mapping.Key))
+                {
+                    typeMapping[mapping.Key] = mapping.Value;
+                }
             }
         }
 

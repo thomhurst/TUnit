@@ -30,6 +30,37 @@ public class NullElementMethodRowInfersObject<T>
     }
 }
 
+// When several parameters use T, the first one fixes it, as in the source generator: the null first
+// value infers object, and the later 1 does not replace it with int.
+[EngineTest(ExpectedResult.Pass)]
+public class NullFirstOfSharedTypeParameterMethodRow<T>
+{
+    [Test]
+    [Arguments(null, 1)]
+    public async Task Run(T first, T second)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(object));
+        await Assert.That(first).IsNull();
+        await Assert.That((object?)second).IsEqualTo(1);
+    }
+}
+
+// The same row lands on the instantiation [GenerateGenericTest(typeof(object))] lists, so the class
+// runs once as C<object> in both modes, with no extra C<int> in reflection mode.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(object))]
+public class NullFirstOfSharedTypeParameterWithGenerateGenericTest<T>
+{
+    [Test]
+    [Arguments(null, 1)]
+    public async Task Run(T first, T second)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(object));
+        await Assert.That(first).IsNull();
+        await Assert.That((object?)second).IsEqualTo(1);
+    }
+}
+
 // The null row infers no type, so it neither runs nor is reported as breaking the struct constraint.
 [EngineTest(ExpectedResult.Pass)]
 public class NullArrayMethodRowOnConstrainedClass<T> where T : struct
