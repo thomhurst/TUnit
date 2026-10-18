@@ -15,11 +15,22 @@ var categoryOption = new Option<string[]>(
     DefaultValueFactory = _ => []
 };
 
+var ignoreCategoryOption = new Option<string[]>(
+    name: "--ignore-categories")
+{
+    Arity = ArgumentArity.ZeroOrMore,
+    AllowMultipleArgumentsPerToken = true,
+    Description = "Categories to skip when no --categories are given.",
+    DefaultValueFactory = _ => []
+};
+
 var rootCommand = new RootCommand("The pipeline for building, testing and packaging TUnit");
 rootCommand.Add(categoryOption);
+rootCommand.Add(ignoreCategoryOption);
 rootCommand.SetAction(async parseResult =>
 {
     var categories = parseResult.GetValue(categoryOption)!;
+    var ignoreCategories = parseResult.GetValue(ignoreCategoryOption)!;
 
     var builder = Pipeline.CreateBuilder();
     builder.Configuration.AddEnvironmentVariables();
@@ -33,7 +44,7 @@ rootCommand.SetAction(async parseResult =>
     }
     else
     {
-        builder.IgnoreCategories("ReadMe");
+        builder.IgnoreCategories(["ReadMe", ..ignoreCategories]);
     }
 
     await builder.Build().RunAsync();

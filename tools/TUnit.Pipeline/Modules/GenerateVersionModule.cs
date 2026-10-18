@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Git.Models;
@@ -6,6 +7,7 @@ using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
 
+[ModuleCategory(PipelineCategories.Packaging)]
 public class GenerateVersionModule : Module<GitVersionInformation>
 {
     protected override async Task<GitVersionInformation?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)

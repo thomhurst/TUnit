@@ -28,6 +28,7 @@ public class TestVBNugetPackageModule : AbstractTestNugetPackageModule
     public override string ProjectName => "TUnit.NugetTester.VB.vbproj";
 }
 
+[ModuleCategory(PipelineCategories.NuGetPackageTests)]
 [DependsOn<GenerateVersionModule>]
 [DependsOn<CopyToLocalNuGetModule>]
 public abstract class AbstractTestNugetPackageModule : TestBaseModule

@@ -10,6 +10,7 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
+[ModuleCategory(PipelineCategories.NuGetPackageTests)]
 [DependsOn<GenerateVersionModule>]
 [DependsOn<CopyToLocalNuGetModule>]
 public class TestAspNetCoreNugetPackageModule : TestBaseModule

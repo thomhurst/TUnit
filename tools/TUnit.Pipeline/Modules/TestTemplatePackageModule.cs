@@ -8,6 +8,7 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
+[ModuleCategory(PipelineCategories.NuGetPackageTests)]
 [DependsOn<CopyToLocalNuGetModule>]
 [DependsOn<GenerateVersionModule>]
 public class TestTemplatePackageModule : Module<CommandResult>
