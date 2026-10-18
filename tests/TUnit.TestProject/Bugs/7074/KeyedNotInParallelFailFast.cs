@@ -1,3 +1,4 @@
+using TUnit.Core.Enums;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._7074;
@@ -24,7 +25,9 @@ public class KeyedNotInParallelFailFast7074
     [ClassDataSource<FailFastSessionFixture7074>(Shared = SharedType.PerTestSession)]
     public required FailFastSessionFixture7074 Fixture { get; init; }
 
-    [Test, NotInParallel("7074.ff1")]
+    // Critical priority makes Fails the first keyed test scheduled, so it takes the only
+    // parallelism slot and fails while the Waits tests are still queued for that slot.
+    [Test, NotInParallel("7074.ff1"), ExecutionPriority(Priority.Critical)]
     public void Fails() => throw new InvalidOperationException("Intentional failure to trigger fail-fast");
 
     [Test, NotInParallel("7074.ff2")] public Task Waits1() => Task.Delay(100);

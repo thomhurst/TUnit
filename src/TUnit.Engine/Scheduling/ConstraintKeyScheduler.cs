@@ -20,15 +20,12 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         TestRunner testRunner,
         TUnitFrameworkLogger logger,
         HashSetPool hashSetPool,
-        MaxParallelismLimiter? maxParallelismLimiter = null)
+        MaxParallelismLimiter maxParallelismLimiter)
     {
         _testRunner = testRunner;
         _logger = logger;
         _hashSetPool = hashSetPool;
-        // The engine always passes its shared limiter; the default (the engine's default
-        // cap) is for constructing the scheduler in isolation.
-        _maxParallelismLimiter = maxParallelismLimiter
-            ?? new MaxParallelismLimiter(static () => MaxParallelismLimiter.DefaultMaxParallelism);
+        _maxParallelismLimiter = maxParallelismLimiter;
     }
 
     #if NET8_0_OR_GREATER

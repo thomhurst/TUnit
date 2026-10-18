@@ -25,6 +25,9 @@ public class KeyedNotInParallelFailFastTests(TestMode testMode) : InvokableTestB
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Failed"),
                 result => result.ResultSummary.Counters.Failed.ShouldBeGreaterThanOrEqualTo(1),
+                // Fails runs first and holds the only slot, so fail-fast must cancel at least one
+                // Waits test that was still queued for it.
+                result => result.ResultSummary.Counters.Passed.ShouldBeLessThan(4),
                 _ => File.Exists(markerPath).ShouldBeTrue($"Marker file '{markerPath}' was not written: the After(TestSession) hook was not awaited"),
                 _ => File.ReadAllText(markerPath).ShouldBe("FixtureDisposedDuringHook=False"),
             ],
