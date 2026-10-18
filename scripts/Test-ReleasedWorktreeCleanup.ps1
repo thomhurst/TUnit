@@ -68,6 +68,20 @@ try {
     Assert (-not (Test-Path $path)) 'Detached checkout survived release.'
     Assert ((& git -C $repo rev-parse "refs/heads/retained-worktrees/$head") -eq $head) 'Detached commit was lost.'
 
+    # Git for Windows follows a junction while deleting: release must detach it, not empty its target.
+    if ($IsWindows) {
+        $path = New-Checkout junction
+        $outside = Join-Path $testRoot 'outside-store'
+        New-Item -ItemType Directory $outside | Out-Null
+        Set-Content (Join-Path $outside 'keep.txt') 'outside the worktree'
+        New-Item -ItemType Directory (Join-Path $path 'bin') | Out-Null
+        New-Item -ItemType Junction -Path (Join-Path $path 'bin/pkg') -Target $outside | Out-Null
+        $key = Claim junction $path
+        Lock release -LockName $key
+        Assert (-not (Test-Path $path)) 'Checkout containing a junction survived release.'
+        Assert (Test-Path (Join-Path $outside 'keep.txt')) 'Release deleted files through a junction.'
+    }
+
     foreach ($kind in @('tracked', 'untracked', 'ignored', 'locked', 'main', 'foreign', 'harness', 'reassigned')) {
         $path = switch ($kind) {
             main { $repo }

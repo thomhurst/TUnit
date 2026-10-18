@@ -7,6 +7,7 @@
 #     known generated directories. Never force-discard possible work.
 #   - CLEAR untracked build artifacts (node_modules/bin/obj/etc.) — they are not work.
 #   - CLEAR root-level workflow output covered by the repository's .gitignore.
+#   - DETACH directory junctions and symlinks before deleting, so no delete follows a link.
 #   - Long-path safe: git's own delete now works because core.longpaths=true is set
 #     system-wide; the `\\?\` extended-length Remove-Item is kept as a fallback for
 #     environments where that config is missing (Windows only; see Remove-DirectoryTree).
@@ -20,6 +21,35 @@ function Remove-DirectoryTree {
     # no-ops. The prefix means nothing on Linux/macOS, where it makes the path unresolvable.
     $target = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { '\\?\' + ($Path -replace '/', '\') } else { $Path }
     Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+# Git for Windows follows a directory junction while deleting a worktree: it empties the
+# target, then fails with "Directory not empty" on the link and leaves a remnant without
+# its .git file. Package managers link node_modules packages with junctions, and a junction
+# can also point into another checkout or a shared store. Delete each link itself, never its
+# target, before any recursive delete. Returns whether no directory link remains.
+function Remove-WorktreeDirectoryLinks {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Worktree,
+        [string]$Label = ''
+    )
+
+    if (-not $IsWindows) { return $true }
+
+    # Get-ChildItem does not recurse through links, so every match is a link to remove.
+    $find = { @(Get-ChildItem -LiteralPath $Worktree -Directory -Recurse -Force -Attributes ReparsePoint -ErrorAction SilentlyContinue) }
+    foreach ($link in (& $find)) {
+        # DirectoryInfo.Delete() without recursion removes the reparse point only.
+        try { $link.Delete() } catch { Write-Host "Could not detach directory link $($link.FullName): $_" }
+    }
+
+    $remaining = & $find
+    if ($remaining.Count -gt 0) {
+        Write-Host "WARNING: worktree $Label kept: $($remaining.Count) directory link(s) could not be detached, first $($remaining[0].FullName): $Worktree"
+        return $false
+    }
+    return $true
 }
 
 function New-OrdinalStringMap {
@@ -215,21 +245,14 @@ function Remove-MergedWorktree {
         return
     }
 
+    if (-not (Remove-WorktreeDirectoryLinks -Worktree $Worktree -Label $Label)) { return }
+
     # Primary path: let git remove it (force clears untracked artifacts; tracked is clean).
     git -C $Repo worktree remove --force $Worktree 2>$null
 
     # Fallback for long-path failures (only if core.longpaths is somehow off).
     if (Test-Path -LiteralPath $Worktree) {
-        # Avoid recursing through a package-manager junction if one exists in a docs
-        # worktree. Leave it for manual cleanup instead of risking deletion outside
-        # the worktree.
-        $junction = Get-ChildItem -LiteralPath $Worktree -Directory -Recurse -Force -Filter node_modules -ErrorAction SilentlyContinue |
-            Where-Object { ($_.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 } |
-            Select-Object -First 1
-        if ($junction) {
-            Write-Host "WARNING: worktree $Label requires manual removal -- detach the node_modules junction at $($junction.FullName) first, then re-run cleanup: $Worktree"
-            return
-        }
+        if (-not (Remove-WorktreeDirectoryLinks -Worktree $Worktree -Label $Label)) { return }
         Remove-DirectoryTree -Path $Worktree
     }
 

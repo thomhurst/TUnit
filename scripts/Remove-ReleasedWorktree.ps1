@@ -70,6 +70,10 @@ function Remove-ReleasedWorktree {
     # Move this child shell out of the directory before deleting it on Windows.
     Set-Location -LiteralPath $repo
     [Environment]::CurrentDirectory = $repo
+    if (-not (Remove-WorktreeDirectoryLinks -Worktree $target)) {
+        Write-Host "Preserving released worktree with directory links that could not be detached: $target"
+        return
+    }
     git -C $repo -c core.longpaths=true worktree remove --force -- $target
     if ($LASTEXITCODE -ne 0) { throw "Could not remove released worktree: $target" }
     Write-Host "Removed released worktree: $target"
