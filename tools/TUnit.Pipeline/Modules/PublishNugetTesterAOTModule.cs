@@ -11,6 +11,7 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
+[ModuleCategory(PipelineCategories.NuGetPackageTests)]
 [DependsOn<TestNugetPackageModule>]
 [DependsOn<GenerateVersionModule>]
 [DependsOn<CopyToLocalNuGetModule>]

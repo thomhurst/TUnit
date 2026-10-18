@@ -145,6 +145,9 @@ jobs:
           environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
           nuget-apikey: ${{ steps.login.outputs.NUGET_API_KEY }}
           publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
+          # Windows tests the packages in the nuget-package-tests-windows job instead: with every
+          # .NET Framework TFM they competed with the engine tests for this runner's CPUs.
+          ignore-categories: ${{ matrix.os == 'windows-latest' && 'NuGetPackageTests' || '' }}
 
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v7.0.2
@@ -216,6 +219,76 @@ jobs:
           for project in TUnit.Mocks.Tests TUnit.Mocks.Aot.Tests; do
             "aot/$project/$project"
           done
+
+  # Tests the packed packages on Windows, including every .NET Framework TFM, on a runner of its
+  # own. Linux and macOS still test them inside the matrix pipeline.
+  nuget-package-tests-windows:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Dev Drive
+        uses: samypr100/setup-dev-drive@v4
+        with:
+          drive-size: 10GB
+          trusted-dev-drive: true
+          env-mapping: |
+            NUGET_PACKAGES,{{ DEV_DRIVE }}/.nuget/packages
+            TEMP,{{ DEV_DRIVE }}/tmp
+            TMP,{{ DEV_DRIVE }}/tmp
+
+      - name: Setup .NET Framework
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+
+      - name: Enable Long Paths
+        run: |
+          New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+        shell: pwsh
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4
+        with:
+          versionSpec: '6.7.x'
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4
+
+      # See the matching step in the modularpipeline job (issue #5622).
+      - name: Export version env vars
+        shell: bash
+        run: |
+          {
+            echo "Version=${{ steps.gitversion.outputs.semVer }}"
+            echo "AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
+            echo "FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
+            echo "InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
+            echo "PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
+          } >> "$GITHUB_ENV"
+
+      # Only what packing needs: every library project (packing reads the Roslyn variants from
+      # their own bin folders) and the pipeline itself.
+      - name: Build
+        shell: bash
+        run: |
+          grep -oE 'src/[^"]+\.(cs|fs|vb)proj' TUnit.CI.slnx | grep -v '/content/' \
+            | jq -R . | jq -s '{solution: {path: "TUnit.CI.slnx", projects: .}}' > libraries.slnf
+          dotnet build libraries.slnf -c Release
+          dotnet build tools/TUnit.Pipeline/TUnit.Pipeline.csproj -c Release
+
+      - name: Run Pipeline
+        uses: ./.github/actions/execute-pipeline
+        with:
+          categories: Packaging NuGetPackageTests
+          admin-token: ${{ github.token }}
 
   # Compiles the C# fences in the documentation against freshly packed packages, alongside the
   # test matrix rather than after the Ubuntu pipeline.

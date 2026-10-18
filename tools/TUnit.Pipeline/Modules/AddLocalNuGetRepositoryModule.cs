@@ -1,4 +1,5 @@
-﻿using ModularPipelines.Context;
+﻿using ModularPipelines.Attributes;
+using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.FileSystem;
@@ -7,6 +8,7 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
+[ModuleCategory(PipelineCategories.Packaging)]
 public class AddLocalNuGetRepositoryModule : Module<Folder>
 {
     protected override async Task<Folder?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)

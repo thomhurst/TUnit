@@ -5,6 +5,7 @@ using ModularPipelines.Modules;
 using File = ModularPipelines.FileSystem.File;
 
 namespace TUnit.Pipeline.Modules;
+[ModuleCategory(PipelineCategories.Packaging)]
 [DependsOn<PackTUnitFilesModule>]
 [DependsOn<AddLocalNuGetRepositoryModule>]
 public class CopyToLocalNuGetModule : Module<List<File>>

@@ -1,9 +1,11 @@
-﻿using ModularPipelines.Context;
+﻿using File = ModularPipelines.FileSystem.File;
+using ModularPipelines.Attributes;
+using ModularPipelines.Context;
 using ModularPipelines.Modules;
-using File = ModularPipelines.FileSystem.File;
 
 namespace TUnit.Pipeline.Modules;
 
+[ModuleCategory(PipelineCategories.Packaging)]
 public class GetPackageProjectsModule : Module<List<File>>
 {
     protected override async Task<List<File>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)

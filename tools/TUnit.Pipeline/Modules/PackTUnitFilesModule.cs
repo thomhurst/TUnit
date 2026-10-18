@@ -14,6 +14,7 @@ namespace TUnit.Pipeline.Modules;
 // a racing recompile without version props would ship strong-name-mismatched packages.
 // Version props come from $GITHUB_ENV (see .github/workflows/dotnet.yml) so recompiles
 // also stamp the correct AssemblyVersion. See issue #5622.
+[ModuleCategory(PipelineCategories.Packaging)]
 [DependsOn<GetPackageProjectsModule>]
 [DependsOn<GenerateVersionModule>]
 [DependsOn<PublishTestProjectAOTModule>]

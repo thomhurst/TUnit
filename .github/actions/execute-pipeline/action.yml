@@ -5,6 +5,10 @@ inputs:
     description: Categories to run
     required: false
     default: ''
+  ignore-categories:
+    description: Categories to skip
+    required: false
+    default: ''
   admin-token:
     description: 'Admin token'
     required: true
@@ -30,7 +34,7 @@ runs:
   steps:
     - name: Run Pipeline
       shell: bash
-      run: dotnet run -c Release --no-build --categories ${{ inputs.categories }}
+      run: dotnet run -c Release --no-build --categories ${{ inputs.categories }} --ignore-categories ${{ inputs.ignore-categories }}
       working-directory: "tools/TUnit.Pipeline"
       env:
         ADMIN_TOKEN: ${{ inputs.admin-token }}
