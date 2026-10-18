@@ -164,7 +164,7 @@ public class TestRunnerTests
             new NotInParallelLock());
     }
 
-    private static AbstractExecutableTest CreateTest(
+    internal static AbstractExecutableTest CreateTest(
         string testId,
         AbstractExecutableTest[]? dependencies = null)
     {
@@ -311,7 +311,7 @@ public class TestRunnerTests
         }
     }
 
-    private sealed class FakeMessageBus : ITUnitMessageBus
+    internal sealed class FakeMessageBus : ITUnitMessageBus
     {
         public ValueTask Discovered(TestContext testContext)
         {

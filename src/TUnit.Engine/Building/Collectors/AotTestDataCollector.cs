@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
@@ -401,7 +402,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             Type = type,
             Class = new ClassMetadata
             {
-                Name = type.Name,
+                Name = TypeNameFormatter.GetNameWithoutGenericArity(type),
                 Type = type,
                 TypeInfo = new ConcreteType(type),
                 Namespace = type.Namespace ?? string.Empty,

@@ -48,6 +48,7 @@ internal static class TUnit_TestProject_ValueTaskResultTests_GenericMethodValueT
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ValueTaskResultTests>(
             methodName: "GenericMethodValueTaskResult<int>",
             fullyQualifiedName: "TUnit.TestProject.ValueTaskResultTests.GenericMethodValueTaskResult<int>",
+            methodTypeArgumentsIdentity: "<int>",
             filePath: "",
             lineNumber: 8,
             methodMetadata: __mm_0,
