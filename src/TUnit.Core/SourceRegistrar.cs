@@ -58,7 +58,8 @@ public class SourceRegistrar
 
     /// <summary>
     /// Sets the execution mode the engine selected and stops later <see cref="IsEnabled"/> writes
-    /// from changing it.
+    /// from changing it. A later call, such as from another engine instance in the same process,
+    /// replaces the locked value, so the most recent engine run decides the mode.
     /// </summary>
     internal static void LockExecutionMode(bool useSourceGeneration)
     {
