@@ -26,7 +26,9 @@
 // TOther -> TValue is implicit (exactly the case C# 13+ binds to the same-type overload), and only
 // otherwise convert the actual value to TOther. Built-in implicit conversions (numeric widening,
 // nullable wrapping, reference/boxing) count alongside user-defined operators, so e.g.
-// `Assert.That(3).IsEqualTo(3.0)` works on every language version too.
+// `Assert.That(3).IsEqualTo(3.0)` works on every language version too. The value-dependent implicit
+// constant conversion (`Assert.That(0U).IsEqualTo(0)`, int constant -> uint) also counts when the value
+// is in range, because C# 13+ binds those calls to the same-type overload as well.
 //
 // History: #5765 / #6276 / #6280 tried to fix this purely via ORP + a LangVersion bump in
 // TUnit.Assertions.props. That bump is a no-op for the real failure because ORP honoring tracks
@@ -79,7 +81,8 @@ public static partial class EqualsAssertionExtensions
     {
         source.Context.ExpressionBuilder.Append($".IsEqualTo({expectedExpression})");
 
-        if (ImplicitConversionCache.TryGetConverter<TOther, TValue>(ConversionNullHandling.InvokeOperator) is { } toSourceType)
+        if ((ImplicitConversionCache.TryGetConverter<TOther, TValue>(ConversionNullHandling.InvokeOperator)
+             ?? ImplicitConversionCache.TryGetConstantConverter<TOther, TValue>(expected)) is { } toSourceType)
         {
             // Convert the expected value here, as C# 13+ does at the call site of the same-type overload.
             var expectedAsSource = toSourceType(expected);
@@ -119,7 +122,8 @@ public static partial class NotEqualsAssertionExtensions
     {
         source.Context.ExpressionBuilder.Append($".IsNotEqualTo({notExpectedExpression})");
 
-        if (ImplicitConversionCache.TryGetConverter<TOther, TValue>(ConversionNullHandling.InvokeOperator) is { } toSourceType)
+        if ((ImplicitConversionCache.TryGetConverter<TOther, TValue>(ConversionNullHandling.InvokeOperator)
+             ?? ImplicitConversionCache.TryGetConstantConverter<TOther, TValue>(notExpected)) is { } toSourceType)
         {
             var notExpectedAsSource = toSourceType(notExpected);
             var sourceTyped = source.Context.Map(CrossTypeComparison.CreateSourceTypeMapper<TValue, TOther>(toSourceType));
@@ -306,6 +310,49 @@ internal static class ImplicitConversionCache
     {
         var key = (typeof(TFrom), typeof(TTo), nullHandling);
         return (Func<TFrom?, TTo?>?)Cache.GetOrAdd(key, static k => BuildConverter<TFrom, TTo>(k.NullHandling));
+    }
+
+    /// <summary>
+    /// Returns a converter for the C# implicit constant expression conversion (§10.2.11) when it would
+    /// apply to <paramref name="value"/>: an <c>int</c> converts to <c>sbyte</c>, <c>byte</c>, <c>short</c>,
+    /// <c>ushort</c>, <c>uint</c>, <c>ulong</c>, <c>nint</c> or <c>nuint</c> (or their nullable forms), and a
+    /// <c>long</c> to <c>ulong</c>, when the value is in range. C# 13+ uses it to bind
+    /// <c>Assert.That(0U).IsEqualTo(0)</c> to the same-type overload, while C# 12 binds the cross-type one.
+    /// Whether the argument was a constant is not known at run time, so any in-range value qualifies.
+    /// Returns <see langword="null"/> when the conversion does not apply or the value is out of range.
+    /// </summary>
+    public static Func<TFrom?, TTo?>? TryGetConstantConverter<TFrom, TTo>(TFrom? value)
+    {
+        var target = ConstantConversion<TFrom, TTo>.Target;
+        return target is not null && value is not null && TryConvertNumeric(value, target, out _)
+            ? ConstantConversion<TFrom, TTo>.Converter
+            : null;
+    }
+
+    private static class ConstantConversion<TFrom, TTo>
+    {
+        // The non-nullable target type when a constant TFrom can convert implicitly to TTo, otherwise null.
+        public static readonly Type? Target = GetTarget();
+
+        public static readonly Func<TFrom?, TTo?> Converter = static value =>
+            value is not null && Target is not null && TryConvertNumeric(value, Target, out var converted)
+                ? (TTo?)converted
+                : throw new OverflowException($"The value {CrossTypeComparison.Format(value)} is out of range for '{typeof(TTo)}'.");
+
+        private static Type? GetTarget()
+        {
+            var target = Nullable.GetUnderlyingType(typeof(TTo)) ?? typeof(TTo);
+
+            if (typeof(TFrom) == typeof(int))
+            {
+                return IsNativeInteger(target) || Type.GetTypeCode(target) is TypeCode.SByte or TypeCode.Byte
+                    or TypeCode.Int16 or TypeCode.UInt16 or TypeCode.UInt32 or TypeCode.UInt64
+                    ? target
+                    : null;
+            }
+
+            return typeof(TFrom) == typeof(long) && target == typeof(ulong) ? target : null;
+        }
     }
 
     /// <summary>

@@ -348,6 +348,61 @@ public class Issue7073Tests
         await EqualsAssertionExtensions.IsEqualTo<int, nint>(Assert.That(3), (nint)3);
     }
 
+    [Test]
+    public async Task UInt_IsEqualTo_Int_Constant_CrossTypeOverload_Passes()
+    {
+        // C# 13+ binds the same-type uint overload via the constant conversion 0 -> uint; C# 12 binds this one.
+        await EqualsAssertionExtensions.IsEqualTo<uint, int>(Assert.That(0U), 0);
+    }
+
+    [Test]
+    public async Task UInt_IsEqualTo_Int_Constant_CrossTypeOverload_Fails_When_Different()
+    {
+        await Assert.That(async () =>
+                await EqualsAssertionExtensions.IsEqualTo<uint, int>(Assert.That(1U), 0))
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task UInt_IsNotEqualTo_Int_Constant_CrossTypeOverload_Passes_When_Different()
+    {
+        await NotEqualsAssertionExtensions.IsNotEqualTo<uint, int>(Assert.That(1U), 0);
+    }
+
+    [Test]
+    public async Task UInt_IsNotEqualTo_Int_Constant_CrossTypeOverload_Fails_When_Equal()
+    {
+        await Assert.That(async () =>
+                await NotEqualsAssertionExtensions.IsNotEqualTo<uint, int>(Assert.That(0U), 0))
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task NullableByte_IsEqualTo_Int_Constant_CrossTypeOverload_Passes()
+    {
+        await EqualsAssertionExtensions.IsEqualTo<byte?, int>(Assert.That((byte?)7), 7);
+    }
+
+    [Test]
+    public async Task ULong_IsEqualTo_Long_Constant_CrossTypeOverload_Chains_The_Long()
+    {
+        var result = await EqualsAssertionExtensions.IsEqualTo<ulong, long>(Assert.That(5UL), 5L)
+            .And.IsEqualTo(5L);
+
+        await Assert.That(result).IsEqualTo(5L);
+    }
+
+    [Test]
+    public async Task UInt_IsEqualTo_Out_Of_Range_Int_CrossTypeOverload_Still_Reports_No_Conversion()
+    {
+        // -1 has no uint equivalent, so C# 13+ binds this overload too and there is no conversion either way.
+        var exception = await Assert.That(async () =>
+                await EqualsAssertionExtensions.IsEqualTo<uint, int>(Assert.That(0U), -1))
+            .Throws<AssertionException>();
+
+        await Assert.That(exception!.InnerException).IsTypeOf<InvalidOperationException>();
+    }
+
     public readonly record struct Cents(int Value);
 
     public readonly record struct Dollars(int Value)
