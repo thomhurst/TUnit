@@ -118,6 +118,23 @@ public class InferredGenericParamsArrayTests
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
         await Assert.That(values.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 4, 5 });
     }
+
+    [Test]
+    [Arguments(new[] { 1 }, new[] { 2 })]
+    public async Task Inferred_ArrayElements<T>(T first, params T[] rest)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int[]));
+        await Assert.That(rest.Length).IsEqualTo(1);
+        await Assert.That(((int[])(object)rest[0]!)[0]).IsEqualTo(2);
+    }
+
+    [Test]
+    [Arguments(1, 2, 3)]
+    public async Task Inferred_FromLeading_PlainArray<T>(T first, T[] rest)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(rest.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 2, 3 });
+    }
 }
 
 [EngineTest(ExpectedResult.Pass)]
@@ -147,6 +164,25 @@ public class GenericParamsArrayEdgeCaseTests
     {
         await Assert.That(count).IsEqualTo(42);
         await Assert.That(values).IsEmpty();
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [Arguments]
+    public async Task Optional_Omitted_Before_Array_With_Token<T>(int count = 42, T[]? values = null, CancellationToken token = default)
+    {
+        await Assert.That(count).IsEqualTo(42);
+        // Source-gen passes an empty array; reflection mode applies the declared default (null).
+        await Assert.That(values ?? []).IsEmpty();
+    }
+
+    [Test]
+    [Arguments]
+    public async Task NonGeneric_Optional_Omitted_Before_Array_With_Token(int count = 42, int[]? values = null, CancellationToken token = default)
+    {
+        await Assert.That(count).IsEqualTo(42);
+        // Source-gen passes an empty array; reflection mode applies the declared default (null).
+        await Assert.That(values ?? []).IsEmpty();
     }
 
     [Test]

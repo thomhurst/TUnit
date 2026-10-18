@@ -3027,6 +3027,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
+    /// <summary>
+    /// Returns the name of the CancellationToken parameter of the method that declares
+    /// <paramref name="parameter"/>, or null when it has none.
+    /// </summary>
+    private static string? GetCancellationTokenParameterName(IParameterSymbol parameter)
+        => (parameter.ContainingSymbol as IMethodSymbol)?.Parameters
+            .LastOrDefault(p => p.Type.Name == "CancellationToken" && p.Type.ContainingNamespace?.ToString() == "System.Threading")
+            ?.Name;
+
     private static void GenerateConcreteTestInvokerBody(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs, bool wrapInTryCatch = true)
     {
         // Wrap entire body in try-catch to handle synchronous exceptions. The class-level
@@ -3136,7 +3145,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Add CancellationToken if present
                 if (hasCancellationToken)
                 {
-                    argsToPass.Add("context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None");
+                    const string cancellationTokenArgument = "context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None";
+
+                    // When optional leading parameters are omitted, the trailing array is passed by
+                    // name. A positional argument cannot follow it (CS8323), so name the token too.
+                    var cancellationTokenName = hasParams && argCount < lastIndex
+                        ? GetCancellationTokenParameterName(parametersFromArgs[lastIndex])
+                        : null;
+
+                    argsToPass.Add(cancellationTokenName is null
+                        ? cancellationTokenArgument
+                        : $"@{cancellationTokenName}: {cancellationTokenArgument}");
                 }
 
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";

@@ -106,6 +106,23 @@ internal class GenericParamsArrayCompilationTests
             [Test]
             [MethodDataSource(nameof(Grids))]
             public void NonGeneric_MultiDim(int[,] values) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [Arguments(1, 2)]
+            public void Optional_Before_Array_With_Token<T>(int count = 42, T[] values = null, global::System.Threading.CancellationToken token = default) { }
+
+            [Test]
+            [Arguments]
+            public void NonGeneric_Optional_Omitted_Before_Array_With_Token(int count = 42, int[] values = null, global::System.Threading.CancellationToken token = default) { }
+
+            [Test]
+            [Arguments(new[] { 1 }, new[] { 2 })]
+            public void Inferred_ArrayElements<T>(T first, params T[] rest) { }
+
+            [Test]
+            [Arguments(1, 2, 3)]
+            public void Inferred_FromLeading_PlainArray<T>(T first, T[] rest) { }
         }
 
         public abstract class InheritedBase<T>

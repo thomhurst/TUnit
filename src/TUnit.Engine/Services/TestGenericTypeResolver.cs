@@ -395,7 +395,7 @@ internal sealed class TestGenericTypeResolver
         // Try the original approach for cases with typed parameters
         var typeMapping = new Dictionary<Type, Type>();
         
-        // A trailing params T[] collects loose values, which do not match the array type itself.
+        // A trailing params T[] (or plain T[]) collects loose values, which do not match the array type itself.
         // They are left out of inference: the reflection invoker re-infers type arguments from the
         // declared parameter types, so inferring T from them here would not reach the invocation.
         // T must come from another argument, or from a lone array value passed as the array.
@@ -408,10 +408,21 @@ internal sealed class TestGenericTypeResolver
             var paramType = parameterTypes[i];
             var argValue = methodArguments[i];
 
-            if (hasGenericParamsArray
-                && i == lastIndex
-                && (methodArguments.Length != parameterTypes.Length || argValue?.GetType().IsArray != true))
+            if (hasGenericParamsArray && i == lastIndex)
             {
+                // A lone array value may be the array itself (normal form) or one element of it
+                // (expanded form, e.g. T = int[] from a leading argument). Use it for inference only
+                // when the normal form agrees with what the other arguments inferred.
+                if (methodArguments.Length == parameterTypes.Length
+                    && argValue?.GetType() is { IsArray: true } lastArgType)
+                {
+                    var normalFormMapping = new Dictionary<Type, Type>(typeMapping);
+                    if (TryInferTypeMapping(paramType, lastArgType, normalFormMapping))
+                    {
+                        typeMapping = normalFormMapping;
+                    }
+                }
+
                 continue;
             }
 
@@ -465,8 +476,9 @@ internal sealed class TestGenericTypeResolver
     }
 
     /// <summary>
-    /// Whether the method's last parameter is a <c>params</c> array whose element involves a
-    /// generic parameter (e.g. <c>params T[]</c>).
+    /// Whether the method's last parameter collects trailing values and involves a generic
+    /// parameter: a <c>params T[]</c>, or a plain single-dimensional <c>T[]</c>, which the
+    /// reflection invoker also fills from loose values.
     /// </summary>
     private static bool HasGenericParamsArray(MethodMetadata methodMetadata, Type[] parameterTypes)
     {
@@ -479,7 +491,7 @@ internal sealed class TestGenericTypeResolver
         var lastType = parameterTypes[parameterTypes.Length - 1];
         return lastType.IsArray
             && lastType.ContainsGenericParameters
-            && parameters[parameters.Length - 1].IsParams;
+            && (parameters[parameters.Length - 1].IsParams || lastType.GetArrayRank() == 1);
     }
 
     #if NET8_0_OR_GREATER

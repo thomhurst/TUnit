@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+using System.Buffers;
 using System.Collections.Concurrent;
 #if NET8_0_OR_GREATER
 using System.Collections.Frozen;
@@ -2320,7 +2320,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     for (var j = 0; j < methodParams.Length && j < args.Length; j++)
                     {
                         var arg = args[j];
-                        if (arg != null)
+                        if (arg != null && arg != Type.Missing)
                         {
                             var paramType = methodParams[j].ParameterType;
                             var argType = arg.GetType();
@@ -2388,9 +2388,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         var paramType = parameters[i].ParameterType;
                         var arg = args[i];
 
-                        if (arg == null)
+                        if (arg == null || arg == Type.Missing)
                         {
-                            castedArgs[i] = null;
+                            // Type.Missing marks an omitted optional parameter; Invoke applies its default.
+                            castedArgs[i] = arg;
                             continue;
                         }
 
@@ -2514,9 +2515,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         var paramType = parameters[i].ParameterType;
                         var arg = args[i];
 
-                        if (arg == null)
+                        if (arg == null || arg == Type.Missing)
                         {
-                            castedArgs[i] = null;
+                            // Type.Missing marks an omitted optional parameter; Invoke applies its default.
+                            castedArgs[i] = arg;
                             continue;
                         }
 

@@ -101,8 +101,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
             if (hasCancellationToken)
             {
-                // Insert CancellationToken at the correct position
-                var argsWithToken = new object?[args.Length + 1];
+                // Insert CancellationToken at the correct position. When the row omits optional
+                // parameters before the token, mark those slots Type.Missing so the invoker applies
+                // their declared defaults, as the source-generated invoker does.
+                var argsWithToken = new object?[Math.Max(args.Length + 1, cancellationTokenIndex + 1)];
                 var argIndex = 0;
 
                 for (var i = 0; i < argsWithToken.Length; i++)
@@ -114,6 +116,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                     else if (argIndex < args.Length)
                     {
                         argsWithToken[i] = args[argIndex++];
+                    }
+                    else
+                    {
+                        argsWithToken[i] = Type.Missing;
                     }
                 }
 
