@@ -1,3 +1,4 @@
+using TUnit.Core.Services;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._7089;
@@ -16,20 +17,26 @@ public class ExecutionModeLockTests
         // The engine has already selected and locked the mode by the time a test runs. Capture it
         // rather than inferring it from the command line, which is only one way to select it.
         var selectedSourceGeneration = SourceRegistrar.IsEnabled;
+        var sourceGenerationAvailable = ModeDetector.IsSourceGenerationAvailable;
 
         try
         {
-            // What a late-loading assembly's generated module initializer does.
+            // What a late-loading assembly's generated module initializer does. The write must not
+            // change the selected mode, but it must still record that source generation is
+            // available, so a later engine instance in the process can fall back to it.
             SourceRegistrar.IsEnabled = true;
             await Assert.That(SourceRegistrar.IsEnabled).IsEqualTo(selectedSourceGeneration);
+            await Assert.That(ModeDetector.IsSourceGenerationAvailable).IsTrue();
 
             SourceRegistrar.IsEnabled = false;
             await Assert.That(SourceRegistrar.IsEnabled).IsEqualTo(selectedSourceGeneration);
+            await Assert.That(ModeDetector.IsSourceGenerationAvailable).IsFalse();
         }
         finally
         {
-            // Without the fix the writes above stick; put the value back for the rest of the run.
-            SourceRegistrar.IsEnabled = selectedSourceGeneration;
+            // Without the fix the writes above stick. Once the mode is locked this write only
+            // restores the availability signal; the selected mode stays as it is.
+            SourceRegistrar.IsEnabled = sourceGenerationAvailable;
         }
     }
 }

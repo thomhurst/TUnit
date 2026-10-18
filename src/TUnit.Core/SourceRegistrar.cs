@@ -18,13 +18,15 @@ public class SourceRegistrar
 {
     private static readonly Lock ModeLock = new();
     private static volatile bool _isEnabled;
+    private static volatile bool _isSourceGenerationAvailable;
     private static bool _isModeLocked;
 
     /// <summary>
     /// Gets whether the source-generated execution mode is in use.
     /// Generated module initializers set this to <c>true</c>. Once the engine has chosen the
-    /// execution mode, later writes are ignored, so a module initializer from an assembly that
-    /// loads mid-run cannot switch a reflection-mode run back to source-generated mode.
+    /// execution mode, later writes do not change it, so a module initializer from an assembly that
+    /// loads mid-run cannot switch a reflection-mode run back to source-generated mode. Every write
+    /// still updates <see cref="IsSourceGenerationAvailable"/>.
     /// </summary>
     /// <remarks>
     /// The engine owns this value after startup. Setting it once the engine has selected the
@@ -40,6 +42,8 @@ public class SourceRegistrar
         {
             lock (ModeLock)
             {
+                _isSourceGenerationAvailable = value;
+
                 if (!_isModeLocked)
                 {
                     _isEnabled = value;
@@ -55,6 +59,14 @@ public class SourceRegistrar
             ReportIgnoredWrite(value);
         }
     }
+
+    /// <summary>
+    /// Gets whether generated module initializers registered source-generated tests, independent of
+    /// the execution mode the engine selected. Writes to <see cref="IsEnabled"/> update this value
+    /// even after the mode is locked, so a later engine instance in the same process that has no
+    /// explicit mode option still falls back to source-generated mode when it is available.
+    /// </summary>
+    internal static bool IsSourceGenerationAvailable => _isSourceGenerationAvailable;
 
     /// <summary>
     /// Sets the execution mode the engine selected and stops later <see cref="IsEnabled"/> writes
