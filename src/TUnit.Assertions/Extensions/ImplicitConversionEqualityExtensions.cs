@@ -401,14 +401,19 @@ internal static class ImplicitConversionCache
             return true;
         }
 
+        if (value is null)
+        {
+            // C# passes null to a user-defined operator, which may map it to a non-null TTo (a sentinel such
+            // as Wrapper.None). Prefer that equivalent, as `(TTo)actual` would give, then null itself.
+            return (TryGetConverter<TFrom, TTo>(ConversionNullHandling.InvokeOperator) is { } forward
+                    && TryRoundTrip(value, v => forward(v), toFrom, out result))
+                   || TryRoundTrip(value, static _ => null, toFrom, out result);
+        }
+
+        object? candidate;
         try
         {
-            object? candidate;
-            if (value is null)
-            {
-                candidate = null;
-            }
-            else if (TryConvertNumeric(
+            if (TryConvertNumeric(
                          // An enum compares through its underlying number (MyEnum.None -> 0).
                          value is Enum e ? Convert.ChangeType(e, Enum.GetUnderlyingType(e.GetType()), CultureInfo.InvariantCulture) : value,
                          Nullable.GetUnderlyingType(typeof(TTo)) ?? typeof(TTo),
@@ -425,13 +430,32 @@ internal static class ImplicitConversionCache
             {
                 return false;
             }
+        }
+        catch (Exception)
+        {
+            // A user-defined operator rejected the value: there is no exact equivalent.
+            return false;
+        }
 
-            if (candidate is null && default(TTo) is not null)
+        return TryRoundTrip(value, _ => candidate, toFrom, out result);
+    }
+
+    /// <summary>
+    /// Accepts the <typeparamref name="TTo"/> value that <paramref name="candidate"/> produces for
+    /// <paramref name="value"/> when <paramref name="toFrom"/> converts it back to exactly <paramref name="value"/>.
+    /// </summary>
+    private static bool TryRoundTrip<TFrom, TTo>(TFrom? value, Func<TFrom?, object?> candidate, Func<TTo?, TFrom?> toFrom, out TTo? result)
+    {
+        result = default;
+        try
+        {
+            var converted = candidate(value);
+            if (converted is null && default(TTo) is not null)
             {
                 return false;
             }
 
-            var typed = (TTo?)candidate;
+            var typed = (TTo?)converted;
             if (!EqualityComparer<TFrom>.Default.Equals(toFrom(typed)!, value!))
             {
                 return false;
@@ -611,25 +635,41 @@ internal static class ImplicitConversionCache
     /// Looks for <c>public static implicit operator <paramref name="toType"/>(<paramref name="fromType"/>)</c>.
     /// C# requires it to be declared on the source or target type (on the underlying type, for an operator
     /// with a nullable signature) or one of their base classes, so both hierarchies are searched. An operator
-    /// taking a base class of <paramref name="fromType"/> also applies; the exact parameter type wins, then the
-    /// most derived one, as C# picks the most specific source type.
+    /// taking a base class of <paramref name="fromType"/> also applies; candidates from both hierarchies are
+    /// ranked together, the exact parameter type winning, then the most derived one, as C# picks the most
+    /// specific source type (§10.5.4).
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "See IL2072.")]
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "User-defined operators are looked up reflectively; the warning is surfaced via RequiresUnreferencedCode on the public entry points, and if they are trimmed, IsEqualTo throws InvalidOperationException at call time.")]
     private static MethodInfo? FindImplicitOperator(Type fromType, Type toType)
     {
-        return FindImplicitOperatorOn(Nullable.GetUnderlyingType(fromType) ?? fromType, fromType, toType)
-               ?? FindImplicitOperatorOn(Nullable.GetUnderlyingType(toType) ?? toType, fromType, toType);
+        MethodInfo? best = null;
+        Type? bestParameter = null;
+
+        var sourceDeclaring = Nullable.GetUnderlyingType(fromType) ?? fromType;
+        var targetDeclaring = Nullable.GetUnderlyingType(toType) ?? toType;
+
+        if (CollectImplicitOperators(sourceDeclaring, fromType, toType, ref best, ref bestParameter) || targetDeclaring == sourceDeclaring)
+        {
+            return best;
+        }
+
+        CollectImplicitOperators(targetDeclaring, fromType, toType, ref best, ref bestParameter);
+        return best;
     }
 
-    private static MethodInfo? FindImplicitOperatorOn(
+    /// <summary>
+    /// Updates <paramref name="best"/> with any more specific applicable operator declared on
+    /// <paramref name="definedOn"/> or its base classes. Returns <see langword="true"/> once an operator
+    /// taking exactly <paramref name="fromType"/> is found, as nothing can be more specific.
+    /// </summary>
+    private static bool CollectImplicitOperators(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type definedOn,
         Type fromType,
-        Type toType)
+        Type toType,
+        ref MethodInfo? best,
+        ref Type? bestParameter)
     {
-        MethodInfo? fromBaseClass = null;
-        Type? fromBaseClassParameter = null;
-
         foreach (var method in definedOn.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
         {
             if (method.Name != "op_Implicit" || method.ReturnType != toType)
@@ -646,17 +686,19 @@ internal static class ImplicitConversionCache
             var parameterType = parameters[0].ParameterType;
             if (parameterType == fromType)
             {
-                return method;
+                best = method;
+                bestParameter = parameterType;
+                return true;
             }
 
             if (fromType.IsSubclassOf(parameterType)
-                && (fromBaseClassParameter is null || parameterType.IsSubclassOf(fromBaseClassParameter)))
+                && (bestParameter is null || parameterType.IsSubclassOf(bestParameter)))
             {
-                fromBaseClass = method;
-                fromBaseClassParameter = parameterType;
+                best = method;
+                bestParameter = parameterType;
             }
         }
 
-        return fromBaseClass;
+        return false;
     }
 }

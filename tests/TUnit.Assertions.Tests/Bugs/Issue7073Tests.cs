@@ -551,4 +551,63 @@ public class Issue7073Tests
     }
 
     public sealed class LeafCode(string value) : MidCode(value);
+
+    // C# ranks operators from the source AND target hierarchies together: the target's operator taking the
+    // derived source type beats the inherited one taking its base class.
+    [Test]
+    public async Task Target_Operator_On_Derived_Source_Beats_Source_Base_Class_Operator()
+    {
+        Label direct = new SourceDerived("x");
+        await Assert.That(direct.Text).IsEqualTo("derived:x");
+
+        await Assert.That(new SourceDerived("x")).IsEqualTo(new Label("derived:x"));
+    }
+
+    [Test]
+    public async Task Target_Operator_On_Derived_Source_Beats_Source_Base_Class_Operator_IsNotEqualTo()
+    {
+        await Assert.That(new SourceDerived("x")).IsNotEqualTo(new Label("base:x"));
+    }
+
+    // C# runs `implicit operator RoundTripSentinel(string?)` on a null actual value, giving the None
+    // sentinel, so that is what the cross-type assertion returns rather than null.
+    [Test]
+    public async Task Null_Actual_CrossTypeOverload_Returns_Forward_Converted_Sentinel()
+    {
+        var result = await EqualsAssertionExtensions.IsEqualTo<string, RoundTripSentinel>(Assert.That((string?)null), RoundTripSentinel.None);
+
+        await Assert.That(result).IsSameReferenceAs(RoundTripSentinel.None);
+    }
+
+    [Test]
+    public async Task Null_Actual_CrossTypeOverload_Falls_Back_To_Null_Without_Forward_Operator()
+    {
+        var result = await EqualsAssertionExtensions.IsEqualTo<object, string>(Assert.That((object?)null), (string?)null);
+
+        await Assert.That(result).IsNull();
+    }
+
+    public class SourceBase(string value)
+    {
+        public string Value { get; } = value;
+
+        public static implicit operator Label(SourceBase source) => new("base:" + source.Value);
+    }
+
+    public sealed class SourceDerived(string value) : SourceBase(value);
+
+    public sealed record Label(string Text)
+    {
+        public static implicit operator Label(SourceDerived source) => new("derived:" + source.Value);
+    }
+
+    public sealed record RoundTripSentinel(string Value)
+    {
+        public static readonly RoundTripSentinel None = new("<none>");
+
+        public static implicit operator RoundTripSentinel(string? value) => value is null ? None : new(value);
+
+        public static implicit operator string?(RoundTripSentinel? wrapper)
+            => wrapper is null || ReferenceEquals(wrapper, None) ? null : wrapper.Value;
+    }
 }
