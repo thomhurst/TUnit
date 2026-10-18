@@ -92,7 +92,9 @@ public class KeyedNotInParallelFailFastTests(TestMode testMode) : InvokableTestB
     /// When the failing test is the last one to run, the phases finish without throwing, so the
     /// scheduler awaits the dynamic test queue processor on its normal path. Its wait on the
     /// queue must end cleanly on the cancelled token instead of surfacing an
-    /// OperationCanceledException that crashes the host.
+    /// OperationCanceledException. The framework would turn that exception into a failed session
+    /// (exit code 10) rather than a crash, so only exit code 2 ("at least one test failed") proves
+    /// the scheduler itself ended cleanly.
     /// </summary>
     [Test]
     public async Task FailFast_WhenFailingTestRunsLast_EndsSessionWithoutCrash()
@@ -102,7 +104,7 @@ public class KeyedNotInParallelFailFastTests(TestMode testMode) : InvokableTestB
 
         await RunTestsWithFilter("/*/*/KeyedNotInParallelFailFast7074/Fails",
         [
-            _ => process.AssertEndedWithoutCrash(),
+            _ => process.AssertEndedWithoutCrash(2),
             result => result.ResultSummary.Outcome.ShouldBe("Failed"),
             result => result.ResultSummary.Counters.Total.ShouldBe(1),
             result => result.ResultSummary.Counters.Failed.ShouldBe(1),
@@ -118,16 +120,21 @@ internal sealed class ProcessResultCapture
 {
     public BufferedCommandResult? Result { get; set; }
 
-    public void AssertEndedWithoutCrash()
+    public void AssertEndedWithoutCrash(params int[] expectedExitCodes)
     {
+        if (expectedExitCodes.Length == 0)
+        {
+            // MTP's "at least one test failed" or "test session failed" codes, not a runtime crash.
+            expectedExitCodes = [2, 10];
+        }
+
         var result = Result.ShouldNotBeNull();
         var output = result.StandardOutput + result.StandardError;
 
         // The runtime's crash banner for an exception that escaped Main.
         output.ShouldNotContain("Unhandled exception. ");
 
-        // MTP's "at least one test failed" or "test session failed" codes, not a runtime crash.
-        result.ExitCode.ShouldBeOneOf(2, 10);
+        result.ExitCode.ShouldBeOneOf(expectedExitCodes);
     }
 }
 
