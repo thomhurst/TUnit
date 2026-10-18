@@ -78,6 +78,12 @@ internal sealed class ReflectionGenericConstraintViolations(
 
             foreach (var argumentsAttribute in testMethod.GetCustomAttributes<ArgumentsAttribute>(inherit: false))
             {
+                // [Arguments(null)] (a null params array) infers no type, as in the source generator
+                if (argumentsAttribute.IsNullValuesArray)
+                {
+                    continue;
+                }
+
                 var typeArguments = InferClassTypeArguments(classGenericParameters, parameters, argumentsAttribute.Values);
                 if (typeArguments == null)
                 {

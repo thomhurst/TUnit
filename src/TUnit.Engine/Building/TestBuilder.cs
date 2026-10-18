@@ -881,7 +881,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         foreach (var dataSource in dataSources)
         {
-            if (PropertyInjectionCache.HasInjectableProperties(GetInjectionTarget(dataSource).GetType()))
+            if (PropertyInjectionCache.HasInjectableProperties(SourceToInject(dataSource).GetType()))
             {
                 return InjectDataSourcePropertiesAsync(dataSources, cancellationToken);
             }
@@ -896,11 +896,19 @@ internal sealed class TestBuilder : ITestBuilder
         // Inject properties into data sources during discovery (IAsyncInitializer deferred to execution)
         foreach (var dataSource in dataSources)
         {
-            await _objectLifecycleService.InjectPropertiesAsync(GetInjectionTarget(dataSource), cancellationToken: cancellationToken);
+            await _objectLifecycleService.InjectPropertiesAsync(SourceToInject(dataSource), cancellationToken: cancellationToken);
         }
 
         return dataSources;
     }
+
+    /// <summary>
+    /// A partition of a data source's rows holds plain values, but the source it was taken from joins
+    /// the test's attributes (see <see cref="ScopeRowAttributesToTest"/>), so that source receives the
+    /// property injection the test's other data sources do before its callbacks run.
+    /// </summary>
+    private static object SourceToInject(IDataSourceAttribute dataSource) =>
+        dataSource is StaticDataSourceAttribute { PartitionOf: { } partitionedSource } ? partitionedSource : GetInjectionTarget(dataSource);
 
     /// <summary>
     /// Ensures a data source is initialized before use and returns data rows.
@@ -1238,10 +1246,7 @@ internal sealed class TestBuilder : ITestBuilder
         // Use attributes from context if available, or create new ones
         var attributes = testBuilderContext.InitializedAttributes ?? await InitializeAttributesAsync(metadata.GetOrCreateAttributes(), cancellationToken);
 
-        if (testBuilderContext.DataSourceAttribute != null && testBuilderContext.DataSourceAttribute is not NoDataSource)
-        {
-            attributes = [..attributes, (Attribute)testBuilderContext.DataSourceAttribute];
-        }
+        attributes = ScopeRowAttributesToTest(attributes, testBuilderContext.ClassDataSourceAttribute, testBuilderContext.DataSourceAttribute);
 
         var testDetails = new TestDetails(attributes)
         {
@@ -1434,6 +1439,67 @@ internal sealed class TestBuilder : ITestBuilder
             AttributesByType = AttributeDictionaryHelper.Empty
         };
     }
+
+    /// <summary>
+    /// Gives a test the data sources that produced it. A data source that is also an
+    /// <see cref="ITestRegisteredEventReceiver"/>, such as <see cref="ArgumentsAttribute"/>, carries
+    /// per-row settings (Skip, DisplayName, Categories), so only the producing row may stay in the
+    /// test's attributes: a class's attributes list every class-level row, and listing them all
+    /// would apply one row's settings to its siblings (#7106). The producing class and method data
+    /// sources are appended instead.
+    /// </summary>
+    internal static Attribute[] ScopeRowAttributesToTest(Attribute[] attributes, IDataSourceAttribute? classDataSource, IDataSourceAttribute? methodDataSource)
+    {
+        // Reflection discovery splits a class data source whose rows infer different generic type
+        // arguments into one partition per instantiation. The partition stands in for the original
+        // source's data only, so the original keeps its place here and its registration callback.
+        if (classDataSource is StaticDataSourceAttribute { PartitionOf: { } partitionedSource })
+        {
+            classDataSource = partitionedSource;
+        }
+
+        var appendClass = IsRowScopedDataSource(classDataSource);
+        var appendMethod = methodDataSource is not null and not NoDataSource;
+
+        var rowAttributeCount = 0;
+        foreach (var attribute in attributes)
+        {
+            if (IsRowScopedDataSource(attribute))
+            {
+                rowAttributeCount++;
+            }
+        }
+
+        if (rowAttributeCount == 0 && !appendClass && !appendMethod)
+        {
+            return attributes;
+        }
+
+        var result = new Attribute[attributes.Length - rowAttributeCount + (appendClass ? 1 : 0) + (appendMethod ? 1 : 0)];
+        var index = 0;
+        foreach (var attribute in attributes)
+        {
+            if (!IsRowScopedDataSource(attribute))
+            {
+                result[index++] = attribute;
+            }
+        }
+
+        if (appendClass)
+        {
+            result[index++] = (Attribute)classDataSource!;
+        }
+
+        if (appendMethod)
+        {
+            result[index] = (Attribute)methodDataSource!;
+        }
+
+        return result;
+    }
+
+    private static bool IsRowScopedDataSource(object? attribute) =>
+        attribute is IDataSourceAttribute and ITestRegisteredEventReceiver and Attribute;
 
     private ValueTask<Attribute[]> InitializeAttributesAsync(Attribute[] attributes, CancellationToken cancellationToken = default)
     {
