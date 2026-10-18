@@ -1388,6 +1388,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
+        // The shared binder passes a single token. A method declaring several keeps the positional
+        // path, which passes the token to each of them.
+        if (testMethod.MethodSymbol.Parameters.Length - parameters.Length > 1)
+        {
+            return null;
+        }
+
         // Keep the method as discovered: an inherited method already carries the type arguments its
         // derived class supplied to the base (e.g. Derived : Base<int> gives int[] for T[]).
         var method = testMethod.MethodSymbol;
@@ -3073,22 +3080,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// argument before that position was omitted or named (an omitted optional before the
     /// trailing array), the token is appended by name instead, which C# allows after named arguments.
     /// </summary>
-    private static void InsertLeadingCancellationToken(List<string> arguments, int tokenIndex, IParameterSymbol[] parametersFromArgs, string tokenArgument)
+    private static void InsertLeadingCancellationToken(List<InvocationArgument> arguments, int tokenIndex, IParameterSymbol[] parametersFromArgs, string tokenArgument)
     {
         var positional = tokenIndex <= arguments.Count;
         for (var i = 0; positional && i < tokenIndex; i++)
         {
-            positional = !arguments[i].StartsWith("@", StringComparison.Ordinal);
+            positional = !arguments[i].IsNamed;
         }
 
         if (positional)
         {
-            arguments.Insert(tokenIndex, tokenArgument);
+            arguments.Insert(tokenIndex, new InvocationArgument(tokenArgument));
         }
         else
         {
             var tokenName = ((IMethodSymbol)parametersFromArgs[parametersFromArgs.Length - 1].ContainingSymbol).Parameters[tokenIndex].Name;
-            arguments.Add($"@{tokenName}: {tokenArgument}");
+            arguments.Add(new InvocationArgument(tokenArgument, tokenName));
         }
     }
 
@@ -3220,9 +3227,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                     else
                     {
-                        argsToPass.Add(cancellationTokenName is null
-                            ? cancellationTokenArgument
-                            : $"@{cancellationTokenName}: {cancellationTokenArgument}");
+                        argsToPass.Add(new InvocationArgument(cancellationTokenArgument, cancellationTokenName));
                     }
                 }
 
@@ -3266,7 +3271,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                     else
                     {
-                        dynamicArgs.Add(cancellationTokenArgument);
+                        dynamicArgs.Add(new InvocationArgument(cancellationTokenArgument));
                     }
                 }
 

@@ -787,6 +787,87 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayTests_Explicit_Array_Before_Two_Tokens__CAB1EC5C_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests)),
+        Name = "GenericParamsArrayTests",
+        Namespace = "TUnit.TestProject.Bugs._7099",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Explicit_Array_Before_Two_Tokens", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests), "Explicit_Array_Before_Two_Tokens", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "values", new global::TUnit.Core.ConcreteType(typeof(int[])), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "first", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "second", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Explicit_Array_Before_Two_Tokens<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int[]>(args[0]), cancellationToken, cancellationToken));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
+            new global::TUnit.Core.ArgumentsAttribute(new[] { 1, 2 }),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests>(
+            methodName: "Explicit_Array_Before_Two_Tokens<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayTests.Explicit_Array_Before_Two_Tokens<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 75,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(new[] { 1, 2 }),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7099_GenericParamsArrayTests_Explicit_Array_Before_Two_Tokens__CAB1EC5C_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests>(static () => TUnit_TestProject_Bugs__7099_GenericParamsArrayTests_Explicit_Array_Before_Two_Tokens__CAB1EC5C_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7099_GenericClassParamsArrayTests_T_ClassTypeParameter__T___TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7099.GenericClassParamsArrayTests<>", new global::TUnit.Core.ClassMetadata
@@ -868,7 +949,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             methodName: "ClassTypeParameter",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericClassParamsArrayTests<int>.ClassTypeParameter",
             filePath: "",
-            lineNumber: 80,
+            lineNumber: 90,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -983,7 +1064,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new g
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests.Inferred_FromLeading<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 96,
+            lineNumber: 106,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1098,7 +1179,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new g
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests.Inferred_FromLeading_Reference<string>",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 105,
+            lineNumber: 115,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1208,7 +1289,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests.Inferred_FromArrayArgument<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 114,
+            lineNumber: 124,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1318,7 +1399,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests.Inferred_FromPlainArrayArgument<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 122,
+            lineNumber: 132,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1430,7 +1511,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests.Inferred_FromPlainArrayArgument_With_Token<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 130,
+            lineNumber: 140,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1545,7 +1626,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new g
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests.Inferred_ArrayElements<int[]>",
             methodTypeArgumentsIdentity: "<int[]>",
             filePath: "",
-            lineNumber: 138,
+            lineNumber: 148,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1660,7 +1741,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new g
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests.Inferred_FromLeading_PlainArray<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 147,
+            lineNumber: 157,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1777,7 +1858,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new g
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests.Inferred_FromLeading_After_Token<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 155,
+            lineNumber: 165,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1895,7 +1976,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new g
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests.Inferred_FromLeading_Around_Token<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 165,
+            lineNumber: 175,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2011,7 +2092,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Optional_Before_Params<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 179,
+            lineNumber: 189,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2127,7 +2208,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Optional_Omitted_Before_Params<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 188,
+            lineNumber: 198,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2245,7 +2326,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Optional_Omitted_Before_Array_With_Token<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 205,
+            lineNumber: 215,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2324,7 +2405,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.MultiDimensional<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 232,
+            lineNumber: 242,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2440,7 +2521,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.PlainArray_Before_Token<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 251,
+            lineNumber: 261,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2553,7 +2634,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Token_Before_Params<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 267,
+            lineNumber: 277,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2671,7 +2752,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Token_Between_Leading_And_Params<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 277,
+            lineNumber: 287,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2782,7 +2863,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[][,]), "values", n
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.JaggedMultiDimensional<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 287,
+            lineNumber: 297,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2896,7 +2977,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests.Generic_Optional_Array<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 333,
+            lineNumber: 343,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3158,7 +3239,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
             methodName: "NonGeneric_Optional_Omitted_Before_Params",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.NonGeneric_Optional_Omitted_Before_Params",
             filePath: "",
-            lineNumber: 197,
+            lineNumber: 207,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3180,7 +3261,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
             methodName: "NonGeneric_Optional_Omitted_Before_Array_With_Token",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.NonGeneric_Optional_Omitted_Before_Array_With_Token",
             filePath: "",
-            lineNumber: 215,
+            lineNumber: 225,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3203,7 +3284,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
             methodName: "Optional_Omitted_Without_Params",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Optional_Omitted_Without_Params",
             filePath: "",
-            lineNumber: 224,
+            lineNumber: 234,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3225,7 +3306,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
             methodName: "Optional_Array_Omitted_After_Required_With_Token",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Optional_Array_Omitted_After_Required_With_Token",
             filePath: "",
-            lineNumber: 243,
+            lineNumber: 253,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3248,7 +3329,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
             methodName: "NonGeneric_PlainArray_Before_Token",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.NonGeneric_PlainArray_Before_Token",
             filePath: "",
-            lineNumber: 260,
+            lineNumber: 270,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3414,7 +3495,7 @@ internal static class TUnit_TestProject_Bugs__7099_OptionalArrayOverloadTests__T
             methodName: "NonGeneric_Optional_Array",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests.NonGeneric_Optional_Array",
             filePath: "",
-            lineNumber: 323,
+            lineNumber: 333,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3435,7 +3516,7 @@ internal static class TUnit_TestProject_Bugs__7099_OptionalArrayOverloadTests__T
             methodName: "Optional_Array_With_Token",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests.Optional_Array_With_Token",
             filePath: "",
-            lineNumber: 344,
+            lineNumber: 354,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3553,7 +3634,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "values", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayDerived.Inherited<string>",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 304,
+            lineNumber: 314,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

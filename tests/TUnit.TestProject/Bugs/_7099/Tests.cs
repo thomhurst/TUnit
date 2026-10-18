@@ -71,6 +71,16 @@ public class GenericParamsArrayTests
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
         await Assert.That(values.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 1, 2 });
     }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [Arguments(new[] { 1, 2 })]
+    public async Task Explicit_Array_Before_Two_Tokens<T>(int[] values, CancellationToken first, CancellationToken second)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values).IsEquivalentTo(new[] { 1, 2 });
+        await Assert.That(first.CanBeCanceled).IsTrue();
+    }
 }
 
 [EngineTest(ExpectedResult.Pass)]

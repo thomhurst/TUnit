@@ -206,6 +206,11 @@ internal class GenericParamsArrayCompilationTests
             [GenerateGenericTest(typeof(int))]
             [Arguments]
             public void Omitted_Optional_Before_Token_And_Params<T>(int count = 42, global::System.Threading.CancellationToken token = default, params T[] values) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [Arguments(new[] { 1, 2 })]
+            public void Array_Before_Two_Tokens<T>(int[] values, global::System.Threading.CancellationToken first, global::System.Threading.CancellationToken second) { }
         }
 
         public abstract class InheritedBase<T>
@@ -277,5 +282,7 @@ internal class GenericParamsArrayCompilationTests
         // A CancellationToken before a trailing array keeps its declared position.
         await Assert.That(generated).Contains("instance.Token_Before_Params<int>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, new int[] {");
         await Assert.That(generated).Contains("instance.Token_Between_Leading_And_Params<int>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, new int[] {");
+        // Every declared token receives the test's token, not just the first.
+        await Assert.That(generated).Contains("instance.Array_Before_Two_Tokens<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int[]>(args[0]), cancellationToken, cancellationToken)");
     }
 }
