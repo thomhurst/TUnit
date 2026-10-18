@@ -23,7 +23,7 @@ public abstract class InvokableTestBase(TestMode testMode)
             yield return TestMode.Reflection;
         }
 
-        if (!EnvironmentVariables.IsNetFramework && OnlyTestMode is null or nameof(TestMode.AOT))
+        if (!EnvironmentVariables.IsNetFramework && OnlyTestMode is (null or nameof(TestMode.AOT)))
         {
             yield return TestMode.AOT;
         }

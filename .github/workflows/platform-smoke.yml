@@ -119,17 +119,20 @@ jobs:
         run: sudo xcode-select --switch /Applications/Xcode_27.0.app
       # Boots in the background while the workloads install and the app builds.
       - name: Start the iOS simulator
+        id: ios-simulator
         run: |
           device=$(xcrun simctl list devices available --json | jq -er '.devices["com.apple.CoreSimulator.SimRuntime.iOS-27-0"] | map(select(.name == "iPhone 17")) | first | .udid // error("Required preinstalled simulator is missing")')
           xcrun simctl boot "$device"
           echo "IosDevice=$device" >> "$GITHUB_ENV"
+      # Runs even when the iOS simulator fails to boot, so tvOS and Mac Catalyst still run.
       - name: Install the Apple workloads
         id: workloads
+        if: ${{ !cancelled() }}
         run: dotnet workload install ios tvos maccatalyst
 
       - name: Build the iOS smoke test
         id: ios-build
-        if: ${{ !cancelled() && steps.workloads.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.workloads.outcome == 'success' && steps.ios-simulator.outcome == 'success' }}
         env:
           SmokePlatform: iOS
         run: dotnet build tests/TUnit.PlatformSmoke -c Debug
