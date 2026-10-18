@@ -2025,6 +2025,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("DeferEnumeration = true,");
         }
 
+        // Same for SkipIfEmpty: without it an empty source yields no test at all instead of a
+        // skipped one, unlike reflection mode which reads the attribute as declared.
+        var skipIfEmptyProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "SkipIfEmpty");
+        if (skipIfEmptyProperty is { Key: not null, Value.IsNull: false } && skipIfEmptyProperty.Value.Value is true)
+        {
+            writer.AppendLine("SkipIfEmpty = true,");
+        }
+
         // Set the Factory property as a single expression calling a shared TUnit.Core helper.
         // The helper holds the (previously inlined) async iterator body, so each call site avoids
         // a per-data-source compiler-generated state machine class (#6227). Only the per-test-unique
@@ -5867,9 +5875,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        // Find the method in the test class
-        var testClass = testMethod.TypeSymbol;
-        var dataMethod = testClass.GetMembers(methodName)
+        // Find the method in the test class, or in T for [MethodDataSource<T>("Rows")]
+        var providerType = mdsAttr.AttributeClass is { IsGenericType: true, TypeArguments: [INamedTypeSymbol genericProvider] }
+            ? genericProvider
+            : testMethod.TypeSymbol;
+        var dataMethod = providerType.GetMembers(methodName)
             .OfType<IMethodSymbol>()
             .FirstOrDefault(m => m.IsStatic && m.Parameters.Length == 0);
 
