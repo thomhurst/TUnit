@@ -8,10 +8,10 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
+// The RPC tests `dotnet run` TUnit.TestProject, which reads its obj/project.assets.json. The AOT
+// publish restores into its own artifacts tree, so it no longer rewrites that file under them
+// (an overlapping restore caused NETSDK1047).
 [NotInParallel("NetworkTests")]
-// The RPC tests `dotnet run` TUnit.TestProject, which reads the obj/project.assets.json the AOT
-// publish rewrites for its RID; keep them apart (an overlapping restore caused NETSDK1047).
-[DependsOn<PublishTestProjectAOTModule>]
 public class RunRpcTestsModule : TestBaseModule
 {
     protected override IEnumerable<string> TestableFrameworks =>

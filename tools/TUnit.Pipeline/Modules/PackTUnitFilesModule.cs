@@ -8,15 +8,14 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
-// Must run after any module that may recompile packable projects (the AOT publish rebuilds its
-// TUnit.* references).
+// Must run after any module that may recompile packable projects into their bin folders.
 // This module uses NoBuild=true and packs whatever bin/Release/{tfm}/*.dll is on disk, so
 // a racing recompile without version props would ship strong-name-mismatched packages.
 // Version props come from $GITHUB_ENV (see .github/workflows/dotnet.yml) so recompiles
-// also stamp the correct AssemblyVersion. See issue #5622.
+// also stamp the correct AssemblyVersion. See issue #5622. The AOT publishes build into
+// their own artifacts trees, so they no longer touch those folders.
 [DependsOn<GetPackageProjectsModule>]
 [DependsOn<GenerateVersionModule>]
-[DependsOn<PublishTestProjectAOTModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
     // Packages in beta ship with a "-beta" suffix appended to their version. The suffix is
