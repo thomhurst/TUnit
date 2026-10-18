@@ -82,6 +82,17 @@ public class Issue7073Tests
     }
 
     [Test]
+    public async Task Decimal_IsEqualTo_Int_CrossTypeOverload_And_Chain_Reports_The_Equality_Failure()
+    {
+        // 3.5m has no int equivalent; the equality failure must be reported, not the mapping error.
+        var exception = await Assert.That(async () =>
+                await EqualsAssertionExtensions.IsEqualTo<decimal, int>(Assert.That(3.5m), 3).And.IsGreaterThan(1))
+            .Throws<AssertionException>();
+
+        await Assert.That(exception!.Message).Contains($"received {3.5m}");
+    }
+
+    [Test]
     public async Task Decimal_IsNotEqualTo_Int_CrossTypeOverload_Passes_When_Different()
     {
         await NotEqualsAssertionExtensions.IsNotEqualTo<decimal, int>(Assert.That(3.5m), 3);
