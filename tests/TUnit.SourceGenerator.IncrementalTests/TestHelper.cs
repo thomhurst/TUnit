@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
+namespace TUnit.SourceGenerator.IncrementalTests;
 
 internal static class TestHelper
 {

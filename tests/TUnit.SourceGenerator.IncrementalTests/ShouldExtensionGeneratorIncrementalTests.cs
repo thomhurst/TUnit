@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using ShouldGenerator::TUnit.Assertions.Should.SourceGenerator;
 
-namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
+namespace TUnit.SourceGenerator.IncrementalTests;
 
 public class ShouldExtensionGeneratorIncrementalTests
 {

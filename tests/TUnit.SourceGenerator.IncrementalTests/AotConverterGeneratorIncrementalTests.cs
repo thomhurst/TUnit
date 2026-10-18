@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.Generators;
 using TUnit.Core.SourceGenerator.Models;
 
-namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
+namespace TUnit.SourceGenerator.IncrementalTests;
 
 public class AotConverterGeneratorIncrementalTests
 {

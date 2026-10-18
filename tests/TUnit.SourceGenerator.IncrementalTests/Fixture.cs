@@ -6,7 +6,7 @@ using TUnit.Assertions.Attributes;
 using TUnit.Core;
 using TUnit.Tests.Shared;
 
-namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
+namespace TUnit.SourceGenerator.IncrementalTests;
 
 public static class Fixture
 {

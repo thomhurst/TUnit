@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.SourceGenerator.Generators;
 
-namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
+namespace TUnit.SourceGenerator.IncrementalTests;
 
 public class MethodAssertionGeneratorIncrementalTests
 {
