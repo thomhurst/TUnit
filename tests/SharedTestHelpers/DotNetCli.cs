@@ -1,6 +1,6 @@
 using System;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace TUnit.Tests.Shared;
@@ -13,9 +13,8 @@ namespace TUnit.Tests.Shared;
 /// installation it builds and runs tests with (on macOS, apps started from the Dock or Finder get a different
 /// <c>PATH</c> than a terminal). That <c>dotnet</c> can lack an SDK satisfying <c>global.json</c> and exit with
 /// 155 (<c>SdkResolveFailure</c>). Prefer the installation that is running the current test process, as long as it
-/// has an SDK: a runtime-only installation cannot run
-/// <c>dotnet build</c>, so <c>PATH</c> is the better bet there. The SDK check is a heuristic: it only looks for an
-/// installed SDK, not one that satisfies <c>global.json</c>.
+/// resolves an SDK for this repository: a runtime-only installation, or one whose SDKs don't satisfy
+/// <c>global.json</c>, cannot run <c>dotnet build</c> here, so <c>PATH</c> is the better bet there.
 /// </remarks>
 internal static class DotNetCli
 {
@@ -23,12 +22,12 @@ internal static class DotNetCli
     public static string Path { get; } = Resolve();
 
     /// <summary>
-    /// Prefers <c>DOTNET_HOST_PATH</c>, then the muxer of the installation running this process when it has an SDK,
-    /// and otherwise falls back to <c>dotnet</c> on <c>PATH</c>.
+    /// Prefers <c>DOTNET_HOST_PATH</c>, then the muxer of the installation running this process when it resolves an
+    /// SDK for this repository, and otherwise falls back to <c>dotnet</c> on <c>PATH</c>.
     /// </summary>
     private static string Resolve()
     {
-        // Set by the .NET CLI for processes it starts (e.g. under `dotnet test`).
+        // Set by the .NET CLI for processes it starts (e.g. under `dotnet test`), so it already resolved an SDK.
         var hostPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
         if (!string.IsNullOrEmpty(hostPath) && File.Exists(hostPath))
         {
@@ -40,13 +39,49 @@ internal static class DotNetCli
         var root = System.IO.Path.GetFullPath(System.IO.Path.Combine(runtimeDirectory, "..", "..", ".."));
         var muxer = System.IO.Path.Combine(root, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "dotnet.exe" : "dotnet");
 
-        return File.Exists(muxer) && HasSdk(root) ? muxer : "dotnet";
+        return File.Exists(muxer) && ResolvesSdk(muxer) ? muxer : "dotnet";
     }
 
-    /// <summary>Whether the installation at <paramref name="root"/> has at least one SDK under <c>sdk/</c>.</summary>
-    private static bool HasSdk(string root)
+    /// <summary>
+    /// Whether <paramref name="muxer"/> resolves an SDK from the test assembly's directory, which lies inside the
+    /// repository: <c>dotnet --version</c> applies <c>global.json</c> the same way the child builds do and fails, with
+    /// 155, exactly when they would.
+    /// </summary>
+    private static bool ResolvesSdk(string muxer)
     {
-        var sdkDirectory = System.IO.Path.Combine(root, "sdk");
-        return Directory.Exists(sdkDirectory) && Directory.EnumerateDirectories(sdkDirectory).Any();
+        try
+        {
+            using var process = Process.Start(new ProcessStartInfo(muxer, "--version")
+            {
+                WorkingDirectory = AppContext.BaseDirectory,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+            });
+
+            if (process is null)
+            {
+                return false;
+            }
+
+            // Drain both streams so neither can fill up and block the process
+            var output = process.StandardOutput.ReadToEndAsync();
+            var error = process.StandardError.ReadToEndAsync();
+
+            if (!process.WaitForExit(30_000))
+            {
+                process.Kill();
+                return false;
+            }
+
+            _ = output.Result;
+            _ = error.Result;
+            return process.ExitCode == 0;
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception or IOException)
+        {
+            return false;
+        }
     }
 }
