@@ -1076,9 +1076,10 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
     /// <summary>
     /// Renders message text as the body of an interpolated string literal in a single pass: a <c>{name}</c>
-    /// placeholder for a method parameter becomes the generated <c>{_name}</c> field, and everything else stays
-    /// literal text, including escaped braces (<c>{{name}}</c> prints <c>{name}</c>), placeholders that name no
-    /// parameter, stray braces, quotes and backslashes.
+    /// placeholder for a method parameter (any valid identifier, not only ASCII) becomes the generated
+    /// <c>{_name}</c> field, as does <c>{_name}</c> itself, which messages could reference before placeholders were
+    /// parsed. Everything else stays literal text, including escaped braces (<c>{{name}}</c> prints
+    /// <c>{name}</c>), placeholders that name no parameter, stray braces, quotes and backslashes.
     /// </summary>
     private static string RenderMessageText(string message, IParameterSymbol[] parameters)
     {
@@ -1091,15 +1092,24 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             result.Append(FormatLiteral(message.Substring(literalStart, match.Index - literalStart)));
 
             var name = match.Groups["name"];
-            if (name.Success && parameterNames.Contains(name.Value))
+            var parameterName = !name.Success ? null
+                : parameterNames.Contains(name.Value) ? name.Value
+                : name.Value.StartsWith("_", StringComparison.Ordinal) && parameterNames.Contains(name.Value.Substring(1)) ? name.Value.Substring(1)
+                : null;
+
+            if (parameterName is not null)
             {
-                result.Append("{_").Append(name.Value).Append('}');
+                result.Append("{_").Append(parameterName).Append('}');
+            }
+            else if (name.Success)
+            {
+                // A placeholder that names no parameter: keep its text, braces included, literal
+                result.Append("{{").Append(FormatLiteral(name.Value)).Append("}}");
             }
             else
             {
-                // An escaped brace pair, an unknown placeholder or a stray brace: keep its text literal
-                var literal = match.Value is "{{" ? "{" : match.Value is "}}" ? "}" : match.Value;
-                result.Append(literal.Replace("{", "{{").Replace("}", "}}"));
+                // An escaped brace pair or a stray brace: keep the brace literal
+                result.Append(match.Value[0] is '{' ? "{{" : "}}");
             }
 
             literalStart = match.Index + match.Length;
@@ -1109,7 +1119,9 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         return result.ToString();
     }
 
-    private static readonly Regex MessageTokenRegex = new(@"\{\{|\}\}|\{(?<name>[A-Za-z_][A-Za-z0-9_]*)\}|[{}]");
+    // Any brace-free text between single braces is a placeholder candidate; it is only substituted when it names a
+    // parameter, so matching broadly keeps non-ASCII identifiers working without a hand-written identifier grammar
+    private static readonly Regex MessageTokenRegex = new(@"\{\{|\}\}|\{(?<name>[^{}]*)\}|[{}]");
 
     // With quote: false, FormatLiteral leaves double quotes unescaped, so quote and strip the outer pair instead
     private static string FormatLiteral(string text)

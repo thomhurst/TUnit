@@ -21,7 +21,15 @@ public static partial class SharedMethodStringAssertions;
 [AssertionFrom<string>(typeof(ExpectationMessageMethods), nameof(ExpectationMessageMethods.HasText), ExpectationMessage = "contain {{text}} ({text})")]
 [AssertionFrom<string>(typeof(ExpectationMessageMethods), nameof(ExpectationMessageMethods.HasSuffix), ExpectationMessage = "end with {suffix}")]
 [AssertionFrom<string>(typeof(ExpectationMessageMethods), nameof(ExpectationMessageMethods.IsEmptyText), ExpectationMessage = "be \"blank\" \\ empty")]
+[AssertionFrom<string>(typeof(ExpectationMessageMethods), nameof(ExpectationMessageMethods.HasWanted), ExpectationMessage = "contain {önskad}")]
+[AssertionFrom<string>(typeof(ExpectationMessageMethods), nameof(ExpectationMessageMethods.HasPrefix), ExpectationMessage = "start with {_prefix}")]
 public static partial class EscapingStringAssertions;
+
+// Three attributes on one method, each with its own message: the condition classes get numbered names.
+[AssertionFrom<string>(nameof(string.EndsWith), CustomName = "EndsWithFirst", ExpectationMessage = "end with {value} (first)")]
+[AssertionFrom<string>(nameof(string.EndsWith), CustomName = "EndsWithSecond", ExpectationMessage = "end with {value} (second)")]
+[AssertionFrom<string>(nameof(string.EndsWith), CustomName = "EndsWithThird", ExpectationMessage = "end with {value} (third)")]
+public static partial class ThreeMessagesStringAssertions;
 
 public static class ExpectationMessageMethods
 {
@@ -30,6 +38,10 @@ public static class ExpectationMessageMethods
     public static bool HasSuffix(string value, string ending) => value.EndsWith(ending, StringComparison.Ordinal);
 
     public static bool IsEmptyText(string value) => value.Length == 0;
+
+    public static bool HasWanted(string value, string önskad) => value.Contains(önskad);
+
+    public static bool HasPrefix(string value, string prefix) => value.StartsWith(prefix, StringComparison.Ordinal);
 }
 
 public class AssertionFromExpectationMessageTests
@@ -120,5 +132,47 @@ public class AssertionFromExpectationMessageTests
         await Assert.That(async () => await Assert.That("Foo").IsBlankDocumentedStyle())
             .Throws<AssertionException>()
             .WithMessageContaining("Expected to be null or empty");
+    }
+
+    [Test]
+    public async Task Non_Ascii_Placeholder_Is_Substituted()
+    {
+        await Assert.That(async () => await Assert.That("hello").HasWanted("xyz"))
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to contain xyz");
+    }
+
+    [Test]
+    public async Task Generated_Field_Placeholder_Is_Still_Substituted()
+    {
+        await Assert.That(async () => await Assert.That("hello").HasPrefix("xyz"))
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to start with xyz");
+    }
+
+    [Test]
+    public async Task Three_Attributes_Sharing_A_Method_Keep_Their_Own_Messages()
+    {
+        await Assert.That(async () => await Assert.That("hello").EndsWithFirst("xyz"))
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to end with xyz (first)");
+
+        await Assert.That(async () => await Assert.That("hello").EndsWithSecond("xyz"))
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to end with xyz (second)");
+
+        await Assert.That(async () => await Assert.That("hello").EndsWithThird("xyz"))
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to end with xyz (third)");
+    }
+
+    [Test]
+    public async Task Classes_Sharing_A_Method_Get_Numbered_Names()
+    {
+        var assembly = typeof(AssertionFromExpectationMessageTests).Assembly;
+
+        await Assert.That(assembly.GetType("TUnit.Assertions.Extensions.StringEndsWithWithStringAssertion")).IsNotNull();
+        await Assert.That(assembly.GetType("TUnit.Assertions.Extensions.StringEndsWithWithStringAssertion2")).IsNotNull();
+        await Assert.That(assembly.GetType("TUnit.Assertions.Extensions.StringEndsWithWithStringAssertion3")).IsNotNull();
     }
 }
