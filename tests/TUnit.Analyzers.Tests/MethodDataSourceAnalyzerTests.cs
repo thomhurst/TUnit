@@ -1592,4 +1592,81 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     .WithArguments("string", "T")
             );
     }
+
+    [Test]
+    public async Task Generic_Method_With_Self_Referencing_Constraint_And_Satisfying_Reference_Type_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value, int marker) where T : IComparable<T> => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(string, int)>> Data() { yield return () => ("a", 1); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Unsatisfied_Self_Referencing_Constraint_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value, int marker) where T : IComparable<T> => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(object, int)>> Data() { yield return () => (new object(), 1); }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("object, int", "T, int")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Interface_Constraint_And_Nullable_Value_Type_Data_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : IComparable => Task.CompletedTask;
+
+                    public static IEnumerable<Func<int?>> Data() { yield return () => 1; }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("int?", "T")
+            );
+    }
 }

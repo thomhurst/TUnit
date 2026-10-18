@@ -107,13 +107,22 @@ public static class CompilationExtensions
             return false;
         }
 
-        foreach (var constraintType in typeParameter.ConstraintTypes)
+        foreach (var declaredConstraintType in typeParameter.ConstraintTypes)
         {
-            // Constraints such as `where T : IComparable<T>` depend on the inferred type arguments; skip them
-            // rather than guess.
-            if (ContainsTypeParameter(constraintType))
+            // Self-referencing constraints such as `where T : IComparable<T>` are checked with the argument type
+            // substituted for T. Constraints that mention other type parameters depend on type arguments that
+            // are not known here, so they are skipped rather than guessed.
+            var constraintType = SubstituteTypeParameter(compilation, declaredConstraintType, typeParameter, argumentType);
+            if (constraintType is null || ContainsTypeParameter(constraintType))
             {
                 continue;
+            }
+
+            // A nullable value type never satisfies a constraint type (C# spec: interface and base class
+            // constraints both exclude Nullable<T>), even though its boxing conversion is implicit.
+            if (isNullableValueType)
+            {
+                return false;
             }
 
             // Constraints are satisfied by identity, implicit reference or boxing conversions only.
@@ -138,6 +147,42 @@ public static class CompilationExtensions
         return type is INamedTypeSymbol { TypeKind: TypeKind.Class, IsAbstract: false } namedType
             && namedType.InstanceConstructors.Any(c =>
                 c.Parameters.Length == 0 && c.DeclaredAccessibility == Accessibility.Public);
+    }
+
+    /// <summary>
+    /// Replaces <paramref name="typeParameter"/> with <paramref name="replacement"/> inside <paramref name="type"/>.
+    /// Returns <see langword="null"/> when the type has a shape the substitution does not handle.
+    /// </summary>
+    private static ITypeSymbol? SubstituteTypeParameter(Compilation compilation, ITypeSymbol type,
+        ITypeParameterSymbol typeParameter, ITypeSymbol replacement)
+    {
+        switch (type)
+        {
+            case ITypeParameterSymbol:
+                return SymbolEqualityComparer.Default.Equals(type, typeParameter) ? replacement : type;
+            case IArrayTypeSymbol arrayType:
+                var elementType = SubstituteTypeParameter(compilation, arrayType.ElementType, typeParameter, replacement);
+                return elementType is null ? null : compilation.CreateArrayTypeSymbol(elementType, arrayType.Rank);
+            case INamedTypeSymbol namedType when !ContainsTypeParameter(namedType):
+                return namedType;
+            case INamedTypeSymbol { IsGenericType: true } namedType
+                when namedType.ContainingType is null || !ContainsTypeParameter(namedType.ContainingType):
+                var typeArguments = new ITypeSymbol[namedType.TypeArguments.Length];
+                for (var i = 0; i < typeArguments.Length; i++)
+                {
+                    var typeArgument = SubstituteTypeParameter(compilation, namedType.TypeArguments[i], typeParameter, replacement);
+                    if (typeArgument is null)
+                    {
+                        return null;
+                    }
+
+                    typeArguments[i] = typeArgument;
+                }
+
+                return namedType.OriginalDefinition.Construct(typeArguments);
+            default:
+                return null;
+        }
     }
 
     private static bool ContainsTypeParameter(ITypeSymbol type)
