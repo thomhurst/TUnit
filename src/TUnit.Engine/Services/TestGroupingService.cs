@@ -178,22 +178,21 @@ internal sealed class TestGroupingService : ITestGroupingService
             sortedNotInParallel[i] = notInParallelList[i].Test;
         }
 
-        keyedNotInParallelList.Sort((a, b) =>
-        {
-            var classCompare = string.CompareOrdinal(a.ClassName, b.ClassName);
-            if (classCompare != 0) return classCompare;
-
-            var priorityCompare = b.Priority.Priority.CompareTo(a.Priority.Priority);
-            if (priorityCompare != 0) return priorityCompare;
-
-            return a.Priority.Order.CompareTo(b.Priority.Order);
-        });
+        // Keyed tests are handed to ConstraintKeyScheduler with an int sort key. It must be a rank
+        // derived from TestPriority's ordering: a hash code does not preserve that ordering (#7088).
+        keyedNotInParallelList.Sort(static (a, b) => CompareKeyed(a.Priority, a.ClassName, b.Priority, b.ClassName));
 
         var keyedArrays = new (AbstractExecutableTest, IReadOnlyList<string>, int)[keyedNotInParallelList.Count];
+        var keyedRank = 0;
         for (int i = 0; i < keyedNotInParallelList.Count; i++)
         {
             var item = keyedNotInParallelList[i];
-            keyedArrays[i] = (item.Test, item.ConstraintKeys, item.Priority.GetHashCode());
+            if (i > 0 && item.Priority != keyedNotInParallelList[i - 1].Priority)
+            {
+                keyedRank++;
+            }
+
+            keyedArrays[i] = (item.Test, item.ConstraintKeys, keyedRank);
         }
 
         // Convert constrained parallel groups to the final format
@@ -204,22 +203,19 @@ internal sealed class TestGroupingService : ITestGroupingService
             var unconstrained = kvp.Value.Unconstrained;
             var keyed = kvp.Value.Keyed;
 
-            keyed.Sort((a, b) =>
-            {
-                var classCompare = string.CompareOrdinal(a.Item2, b.Item2);
-                if (classCompare != 0) return classCompare;
-
-                var priorityCompare = b.Item4.Priority.CompareTo(a.Item4.Priority);
-                if (priorityCompare != 0) return priorityCompare;
-
-                return a.Item4.Order.CompareTo(b.Item4.Order);
-            });
+            keyed.Sort(static (a, b) => CompareKeyed(a.Item4, a.Item2, b.Item4, b.Item2));
 
             var sortedKeyed = new (AbstractExecutableTest, IReadOnlyList<string>, int)[keyed.Count];
+            var groupRank = 0;
             for (int i = 0; i < keyed.Count; i++)
             {
                 var item = keyed[i];
-                sortedKeyed[i] = (item.Item1, item.Item3, item.Item4.GetHashCode());
+                if (i > 0 && item.Item4 != keyed[i - 1].Item4)
+                {
+                    groupRank++;
+                }
+
+                sortedKeyed[i] = (item.Item1, item.Item3, groupRank);
             }
 
             finalConstrainedGroups[groupName] = new GroupedConstrainedTests
@@ -250,6 +246,17 @@ internal sealed class TestGroupingService : ITestGroupingService
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Orders keyed NotInParallel tests by <see cref="TestPriority"/> (highest priority first, then
+    /// ascending Order), with class name as a deterministic tie-break. Tests that compare equal on
+    /// priority share a scheduler rank, so ConstraintKeyScheduler's stable sort keeps this order.
+    /// </summary>
+    private static int CompareKeyed(TestPriority a, string aClassName, TestPriority b, string bClassName)
+    {
+        var priorityCompare = a.CompareTo(b);
+        return priorityCompare != 0 ? priorityCompare : string.CompareOrdinal(aClassName, bClassName);
     }
 
     private static void ProcessNotInParallelConstraint(

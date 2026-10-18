@@ -1,59 +1,59 @@
 {
-  "timestamp": "2026-10-11T00:39:42.544Z",
+  "timestamp": "2026-10-18T00:34:22.692Z",
   "category": "AsyncTests",
   "environment": {
     "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)",
-    "sdk": ".NET SDK 10.0.401",
-    "host": ".NET 10.0.12 (10.0.12, 10.0.1226.42308), X64 RyuJIT x86-64-v4"
+    "sdk": ".NET SDK 10.0.402",
+    "host": ".NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v4"
   },
   "results": [
     {
       "Method": "TUnit",
-      "Version": "1.73.19",
-      "Mean": "406.2 ms",
-      "Error": "9.03 ms",
-      "StdDev": "26.20 ms",
-      "Median": "397.2 ms"
+      "Version": "1.75.0",
+      "Mean": "398.9 ms",
+      "Error": "7.28 ms",
+      "StdDev": "6.45 ms",
+      "Median": "398.3 ms"
     },
     {
       "Method": "NUnit",
       "Version": "5.0.0",
-      "Mean": "785.1 ms",
-      "Error": "15.56 ms",
-      "StdDev": "40.44 ms",
-      "Median": "781.2 ms"
+      "Mean": "757.5 ms",
+      "Error": "15.13 ms",
+      "StdDev": "14.86 ms",
+      "Median": "753.7 ms"
     },
     {
       "Method": "MSTest",
       "Version": "4.5.1",
-      "Mean": "737.3 ms",
-      "Error": "14.72 ms",
-      "StdDev": "34.99 ms",
-      "Median": "735.4 ms"
+      "Mean": "749.2 ms",
+      "Error": "14.44 ms",
+      "StdDev": "21.61 ms",
+      "Median": "751.9 ms"
     },
     {
       "Method": "xUnit3",
       "Version": "4.0.2",
-      "Mean": "801.1 ms",
-      "Error": "15.84 ms",
-      "StdDev": "45.18 ms",
-      "Median": "795.5 ms"
+      "Mean": "807.0 ms",
+      "Error": "15.03 ms",
+      "StdDev": "17.30 ms",
+      "Median": "803.2 ms"
     },
     {
       "Method": "TUnit_AOT",
-      "Version": "1.73.19",
-      "Mean": "120.7 ms",
-      "Error": "1.77 ms",
-      "StdDev": "1.66 ms",
-      "Median": "120.8 ms"
+      "Version": "1.75.0",
+      "Mean": "118.1 ms",
+      "Error": "0.48 ms",
+      "StdDev": "0.43 ms",
+      "Median": "118.1 ms"
     },
     {
       "Method": "xUnit3_AOT",
       "Version": "4.0.2",
-      "Mean": "123.2 ms",
-      "Error": "2.38 ms",
-      "StdDev": "2.74 ms",
-      "Median": "123.2 ms"
+      "Mean": "121.0 ms",
+      "Error": "0.74 ms",
+      "StdDev": "0.65 ms",
+      "Median": "121.1 ms"
     }
   ]
 }

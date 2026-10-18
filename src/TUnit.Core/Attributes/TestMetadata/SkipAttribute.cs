@@ -39,6 +39,17 @@ namespace TUnit.Core;
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true)]
 public class SkipAttribute : Attribute, ITestRegisteredEventReceiver
 {
+    /// <summary>
+    /// The skip reason reported when a skip is requested with a null or empty reason.
+    /// The engine treats an empty skip reason as "not skipped", so it must never be stored as-is.
+    /// </summary>
+    internal const string DefaultReason = "No reason provided";
+
+    /// <summary>
+    /// Returns <paramref name="reason"/>, or <see cref="DefaultReason"/> when it is null or empty.
+    /// </summary>
+    internal static string NormalizeReason(string? reason) => string.IsNullOrEmpty(reason) ? DefaultReason : reason!;
+
     public string Reason { get; }
 
     public SkipAttribute(string reason)
