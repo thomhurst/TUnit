@@ -767,6 +767,26 @@ namespace
         public . ExecuteBeforeTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action) { }
         public . ExecuteTest(.TestContext context, <.> action) { }
     }
+    public class GenericConstraintViolationDataSource : , .IDataSourceAttribute
+    {
+        public bool DeferEnumeration { get; set; }
+        public .IDataSourceAttribute? InnerDataSource { get; }
+        public string Message { get; }
+        public bool SkipIfEmpty { get; set; }
+        [.(typeof(.GenericConstraintViolationDataSource.<GetDataRowsAsync>d__15))]
+        public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public static .GenericConstraintViolationDataSource Create(string message) { }
+        public static .GenericConstraintViolationDataSource Create(string message, .IDataSourceAttribute innerDataSource) { }
+    }
+    public sealed class GenericConstraintViolationEntry
+    {
+        public GenericConstraintViolationEntry() { }
+        public required string FilePath { get; init; }
+        public required int LineNumber { get; init; }
+        public required string[] Messages { get; init; }
+        public required .MethodMetadata MethodMetadata { get; init; }
+        public required string MethodName { get; init; }
+    }
     public sealed class GenericMethodInfo
     {
         public GenericMethodInfo() { }
@@ -1273,6 +1293,7 @@ namespace
         public static int RegisterDynamic(.IDynamicTestSource testSource) { }
         public static int RegisterEntries<T>(<.TestEntry<T>[]> factory)
             where T :  class { }
+        public static int RegisterGenericConstraintViolations( genericTypeDefinition, <.GenericConstraintViolationEntry[]> factory) { }
         public static void RegisterGlobalInitializer(<.> initializer) { }
         public static int RegisterHook<T>(.<.<T>> bag, int registrationIndex, <int, T> factory)
             where T : . { }

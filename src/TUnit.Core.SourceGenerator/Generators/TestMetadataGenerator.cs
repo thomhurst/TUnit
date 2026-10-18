@@ -474,6 +474,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Replace(".g.cs", "_TestSource");
 
         List<ConcreteInstantiation> concreteInstantiations;
+        List<string> classConstraintViolations = [];
 
         if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
         {
@@ -494,9 +495,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else
         {
             // Collect all concrete type instantiations for this generic test method
-            concreteInstantiations = CollectConcreteInstantiations(testMethod, className);
+            concreteInstantiations = CollectConcreteInstantiations(testMethod, className, out classConstraintViolations);
 
-            if (concreteInstantiations.Count == 0)
+            if (concreteInstantiations.Count == 0 && classConstraintViolations.Count == 0)
             {
                 // No concrete types could be resolved — skip this method.
                 // The test won't be discovered, which matches the behavior of
@@ -622,6 +623,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             registrationIndex++;
         }
 
+        if (classConstraintViolations.Count > 0)
+        {
+            EmitClassConstraintViolationEntries(writer, testMethod, classConstraintViolations);
+        }
+
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -633,6 +639,37 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{concreteClassName}>(static () => {uniqueClassName}.Entries_{registrationIndex.ToString(CultureInfo.InvariantCulture)})");
             registrationIndex++;
         }
+
+        if (classConstraintViolations.Count > 0)
+        {
+            EmitRegistrationField(writer, $"{uniqueClassName}_ConstraintViolations",
+                $"global::TUnit.Core.SourceRegistrar.RegisterGenericConstraintViolations(typeof({className}), static () => {uniqueClassName}.ConstraintViolations)");
+        }
+    }
+
+    /// <summary>
+    /// Emits the test method's class type arguments that break the class's generic constraints. A
+    /// <c>TestEntry&lt;T&gt;</c> cannot be emitted for such a closed type, so the entry is registered
+    /// against the open generic type and the engine reports one failed test per message, the same
+    /// failures reflection mode reports (#7107).
+    /// </summary>
+    private static void EmitClassConstraintViolationEntries(CodeWriter writer, TestMethodMetadata testMethod, List<string> messages)
+    {
+        writer.AppendLine("public static readonly global::TUnit.Core.GenericConstraintViolationEntry[] ConstraintViolations = new global::TUnit.Core.GenericConstraintViolationEntry[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("new global::TUnit.Core.GenericConstraintViolationEntry");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"MethodName = \"{EscapeString(testMethod.MethodSymbol.Name)}\",");
+        writer.AppendLine($"FilePath = {SymbolDisplay.FormatLiteral(testMethod.FilePath ?? "", quote: true)},");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber.ToString(CultureInfo.InvariantCulture)},");
+        writer.AppendLine("MethodMetadata = __mm_0,");
+        writer.AppendLine($"Messages = new string[] {{ {string.Join(", ", messages.Select(m => $"\"{EscapeString(m)}\""))} }},");
+        writer.Unindent();
+        writer.AppendLine("},");
+        writer.Unindent();
+        writer.AppendLine("};");
     }
 
     /// <summary>
@@ -656,6 +693,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         public List<AttributeData>? AdditionalArgumentsAttributes { get; set; }
 
         public bool HasParameterizedConstructor { get; init; }
+
+        /// <summary>
+        /// Set when data attributes, <c>[GenerateGenericTest]</c> or <c>IInfersType&lt;T&gt;</c> inferred
+        /// method type arguments that break the method's generic constraints. The entry cannot call
+        /// the method, so each violation reports its rows as failed tests (matching reflection mode)
+        /// instead of being dropped. All violations of one concrete class share one entry.
+        /// </summary>
+        public List<MethodConstraintViolation>? MethodConstraintViolations { get; init; }
 
         public bool IsSpecificDataSource(AttributeData attribute)
         {
@@ -685,14 +730,39 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
+    /// Method type arguments that break the method's generic constraints, and the rows that inferred them.
+    /// </summary>
+    /// <param name="Message">The constraint failure, worded as in reflection mode.</param>
+    /// <param name="RowSource">The data attribute whose rows inferred the type arguments, if any.</param>
+    /// <param name="AllMethodDataSources">The type arguments came from the method's parameters
+    /// (<c>IInfersType&lt;T&gt;</c>), so every method data source's rows report the failure.</param>
+    private sealed record MethodConstraintViolation(string Message, AttributeData? RowSource, bool AllMethodDataSources);
+
+    /// <summary>
+    /// Where the class type arguments of a constraint violation came from. The order matches the
+    /// order in which reflection mode discovers them, so both modes report the failures in the same
+    /// order (and so with the same test ids).
+    /// </summary>
+    private enum ClassViolationSource
+    {
+        GenerateGenericTest = 0,
+        ClassArguments = 1,
+        MethodArguments = 2,
+    }
+
+    /// <summary>
     /// Collects all concrete type instantiations for this generic test method.
     /// </summary>
-    private static List<ConcreteInstantiation> CollectConcreteInstantiations(TestMethodMetadata testMethod, string className)
+    private static List<ConcreteInstantiation> CollectConcreteInstantiations(TestMethodMetadata testMethod, string className, out List<string> classConstraintViolations)
     {
         var compilation = testMethod.CompilationContext.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
         var results = new List<ConcreteInstantiation>();
         var processedTypeCombinations = new HashSet<string>();
+
+        // Class type arguments that break the class's constraints, one per row or type (#7107).
+        var classViolations = new List<(ClassViolationSource Source, int Order, string Message)>();
+        var reportedClassViolations = new HashSet<string>();
 
         // Instantiations built from a method-level [Arguments] row, keyed by type combination, so
         // later rows inferring the same types join that instantiation rather than being dropped.
@@ -701,32 +771,73 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var classTypeArgCount = testMethod.IsGenericType ? testMethod.TypeSymbol.TypeParameters.Length : 0;
         var methodTypeArgCount = testMethod.IsGenericMethod ? testMethod.MethodSymbol.TypeParameters.Length : 0;
 
-        void TryAddInstantiation(ITypeSymbol[] typeArguments, AttributeData? specificAttr = null, bool isMethodArgumentsRow = false)
+        // reportMethodConstraintViolation: the type arguments were inferred from method-level data,
+        // [GenerateGenericTest] or IInfersType<T>. If they break the method's constraints, emit an
+        // entry that fails with the same message as reflection mode instead of silently dropping the
+        // row (#7097, #7107).
+        // reportClassViolationAs: likewise for class type arguments that break the class's
+        // constraints; violationSource identifies the row or type, so each one is reported once.
+        // isMethodArgumentsRow: a method [Arguments] row on a generic method in a non-generic class.
+        // Rows that infer the same valid type arguments share one instantiation, and each still runs.
+        void TryAddInstantiation(
+            ITypeSymbol[] typeArguments,
+            AttributeData? specificAttr = null,
+            bool reportMethodConstraintViolation = false,
+            ClassViolationSource? reportClassViolationAs = null,
+            AttributeData? violationSource = null,
+            bool isMethodArgumentsRow = false)
         {
-            var typeKey = BuildTypeKey(typeArguments);
-            if (!processedTypeCombinations.Add(typeKey))
+            var classTypeArgs = classTypeArgCount > 0 ? typeArguments.Take(classTypeArgCount).ToArray() : Array.Empty<ITypeSymbol>();
+            var methodTypeArgs = methodTypeArgCount > 0 ? typeArguments.Skip(classTypeArgCount).ToArray() : Array.Empty<ITypeSymbol>();
+
+            // Validate constraints
+            if (classTypeArgs.Length > 0 && !ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypeArgs, testMethod.CompilationContext.Compilation))
             {
-                if (isMethodArgumentsRow
-                    && specificAttr is not null
-                    && methodArgumentsInstantiations is not null
-                    && methodArgumentsInstantiations.TryGetValue(typeKey, out var existing))
+                // A TestEntry cannot be emitted for a closed type that breaks its own constraints, so
+                // the violation is emitted against the open generic type instead.
+                if (reportClassViolationAs is { } classViolationSource
+                    && (violationSource ?? specificAttr) is { } source
+                    && reportedClassViolations.Add(((int)classViolationSource).ToString(CultureInfo.InvariantCulture) + "|" + GetAttributeKey(source)))
                 {
-                    (existing.AdditionalArgumentsAttributes ??= []).Add(specificAttr);
+                    classViolations.Add((classViolationSource, classViolations.Count, DescribeConstraintViolation(
+                        testMethod.TypeSymbol.TypeParameters, classTypeArgs, $"type '{testMethod.TypeSymbol.MetadataName}'", testMethod.CompilationContext.Compilation)));
                 }
 
                 return;
             }
 
-            var classTypeArgs = classTypeArgCount > 0 ? typeArguments.Take(classTypeArgCount).ToArray() : Array.Empty<ITypeSymbol>();
-            var methodTypeArgs = methodTypeArgCount > 0 ? typeArguments.Skip(classTypeArgCount).ToArray() : Array.Empty<ITypeSymbol>();
+            string? methodConstraintViolation = null;
+            // Method constraints may name class type parameters (`where U : IEnumerable<T>`), so they
+            // are checked with this instantiation's class type arguments substituted in.
+            if (methodTypeArgs.Length > 0 && !ValidateTypeConstraints(testMethod.MethodSymbol, methodTypeArgs, testMethod.CompilationContext.Compilation, testMethod.TypeSymbol, classTypeArgs))
+            {
+                if (!reportMethodConstraintViolation || methodTypeArgs.Length != testMethod.MethodSymbol.TypeParameters.Length)
+                {
+                    return;
+                }
 
-            // Validate constraints
-            if (classTypeArgs.Length > 0 && !ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypeArgs))
-            {
-                return;
+                methodConstraintViolation = DescribeMethodConstraintViolation(testMethod.MethodSymbol, methodTypeArgs, testMethod.CompilationContext.Compilation, testMethod.TypeSymbol, classTypeArgs);
             }
-            if (methodTypeArgs.Length > 0 && !ValidateTypeConstraints(testMethod.MethodSymbol, methodTypeArgs))
+
+            var typeKey = BuildTypeKey(typeArguments);
+            if (methodConstraintViolation != null)
             {
+                // Each invalid row source is reported once, even when it infers the same types as another.
+                var rowSource = violationSource ?? specificAttr;
+                typeKey = $"{typeKey}|{(rowSource is null ? "*" : GetAttributeKey(rowSource))}";
+            }
+
+            if (!processedTypeCombinations.Add(typeKey))
+            {
+                if (isMethodArgumentsRow
+                    && methodConstraintViolation == null
+                    && specificAttr is not null
+                    && methodArgumentsInstantiations is not null
+                    && methodArgumentsInstantiations.TryGetValue(typeKey, out var existingRowInstantiation))
+                {
+                    (existingRowInstantiation.AdditionalArgumentsAttributes ??= []).Add(specificAttr);
+                }
+
                 return;
             }
 
@@ -742,9 +853,28 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 concreteClassName = className;
             }
 
-            // Build test name
+            MethodConstraintViolation? violation = null;
+            if (methodConstraintViolation != null)
+            {
+                violation = new MethodConstraintViolation(
+                    methodConstraintViolation,
+                    // [GenerateGenericTest] (the violation source) has no rows: it reports one failure.
+                    RowSource: violationSource is null ? specificAttr : null,
+                    AllMethodDataSources: specificAttr is null && violationSource is null);
+
+                // All violations of one concrete class share one entry, so that each failing row gets
+                // its own data source index, and so its own test id.
+                var existing = results.FirstOrDefault(r => r.MethodConstraintViolations != null && r.ConcreteClassName == concreteClassName);
+                if (existing != null)
+                {
+                    existing.MethodConstraintViolations!.Add(violation);
+                    return;
+                }
+            }
+
+            // Build test name. A violation entry is named after the method alone, as in reflection mode.
             string testName;
-            if (methodTypeArgs.Length > 0)
+            if (methodTypeArgs.Length > 0 && violation == null)
             {
                 testName = $"{methodName}<{string.Join(", ", methodTypeArgs.Select(t => t.ToTestNameTypeArgument()))}>";
             }
@@ -777,14 +907,26 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 MethodName = methodName,
                 SpecificArgumentsAttribute = specificAttr,
                 HasParameterizedConstructor = hasParameterizedConstructor,
+                MethodConstraintViolations = violation == null ? null : [violation],
             };
 
             results.Add(instantiation);
 
-            if (isMethodArgumentsRow && specificAttr is not null)
+            if (isMethodArgumentsRow && violation == null && specificAttr is not null)
             {
                 (methodArgumentsInstantiations ??= new Dictionary<string, ConcreteInstantiation>())[typeKey] = instantiation;
             }
+        }
+
+        // A class row combined with a generic method row. A class violation is reported once per
+        // class row; a method violation once per method row, as reflection mode reports it when
+        // the row's inferred method type arguments fail to resolve.
+        void TryAddCombinedArgumentsInstantiation(ITypeSymbol[] classTypes, ITypeSymbol[] combinedTypes, AttributeData classAttr, AttributeData methodAttr)
+        {
+            TryAddInstantiation(combinedTypes, classAttr,
+                reportMethodConstraintViolation: true,
+                reportClassViolationAs: ClassViolationSource.ClassArguments,
+                violationSource: ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes, compilation) ? methodAttr : classAttr);
         }
 
         // Single-pass classification of method attributes into named buckets, replacing the
@@ -850,7 +992,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var combinedTypes = new ITypeSymbol[classTypes.Length + methodTypes.Length];
                     Array.Copy(classTypes, 0, combinedTypes, 0, classTypes.Length);
                     Array.Copy(methodTypes, 0, combinedTypes, classTypes.Length, methodTypes.Length);
-                    TryAddInstantiation(combinedTypes, classAttr);
+                    TryAddCombinedArgumentsInstantiation(classTypes, combinedTypes, classAttr, methodAttr);
                 }
             }
         }
@@ -867,7 +1009,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             foreach (var argAttr in allArgumentsAttributes)
             {
                 ITypeSymbol[]? inferredTypes;
-                if (testMethod.IsGenericType && classArgumentsAttributes.Contains(argAttr))
+                var isClassArgumentsAttribute = testMethod.IsGenericType && classArgumentsAttributes.Contains(argAttr);
+                if (isClassArgumentsAttribute)
                 {
                     inferredTypes = InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, argAttr, compilation);
                 }
@@ -880,6 +1023,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Method rows on a generic method in a non-generic class: several rows may infer
                     // the same T (e.g. [Arguments(1)] [Arguments(2)]) and each must still run.
                     TryAddInstantiation(inferredTypes, argAttr,
+                        reportMethodConstraintViolation: !isClassArgumentsAttribute,
+                        reportClassViolationAs: isClassArgumentsAttribute ? ClassViolationSource.ClassArguments : null,
                         isMethodArgumentsRow: testMethod is { IsGenericType: false, IsGenericMethod: true });
                 }
             }
@@ -888,12 +1033,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Handle generic classes with non-generic methods that have method-level Arguments
         if (testMethod is { IsGenericType: true, IsGenericMethod: false } && methodArgumentsAttributes.Count > 0)
         {
+            // When [GenerateGenericTest] or a class-level data source already supplies the class type
+            // arguments, a method row's values need not infer them: [GenerateGenericTest(typeof(object))]
+            // with [Arguments(1)] runs C<object>, so the C<int> inferred here is not reported as a
+            // violation. Reflection mode applies the same rule.
+            var classTypeArgumentsSupplied = testMethod.TypeSymbol.GetAttributes().Any(a =>
+                a.AttributeClass is { } attributeClass
+                && (attributeClass.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute")
+                    || DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)));
+
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
                 var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation);
                 if (inferredTypes is { Length: > 0 })
                 {
-                    TryAddInstantiation(inferredTypes, methodArgAttr);
+                    TryAddInstantiation(inferredTypes, methodArgAttr,
+                        reportClassViolationAs: classTypeArgumentsSupplied ? null : ClassViolationSource.MethodArguments);
                 }
             }
         }
@@ -904,7 +1059,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var inferredTypes = InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr);
             if (inferredTypes is { Length: > 0 })
             {
-                TryAddInstantiation(inferredTypes, dataSourceAttr);
+                TryAddInstantiation(inferredTypes, dataSourceAttr, reportMethodConstraintViolation: true);
             }
         }
 
@@ -914,7 +1069,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var inferredTypes = InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol);
             if (inferredTypes is { Length: > 0 })
             {
-                TryAddInstantiation(inferredTypes);
+                TryAddInstantiation(inferredTypes, reportMethodConstraintViolation: true);
             }
         }
 
@@ -946,7 +1101,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var inferredTypes = InferTypesFromMethodDataSource(testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
                 {
-                    TryAddInstantiation(inferredTypes, mdsAttr);
+                    TryAddInstantiation(inferredTypes, mdsAttr, reportMethodConstraintViolation: true);
                 }
             }
         }
@@ -966,13 +1121,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             var methodInferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodArgAttr, compilation);
                             if (methodInferredTypes is { Length: > 0 })
                             {
-                                TryAddInstantiation(classInferredTypes.Concat(methodInferredTypes).ToArray(), argAttr);
+                                TryAddCombinedArgumentsInstantiation(classInferredTypes, classInferredTypes.Concat(methodInferredTypes).ToArray(), argAttr, methodArgAttr);
                             }
                         }
                     }
                     else
                     {
-                        TryAddInstantiation(classInferredTypes, argAttr);
+                        TryAddInstantiation(classInferredTypes, argAttr, reportClassViolationAs: ClassViolationSource.ClassArguments);
                     }
                 }
             }
@@ -983,53 +1138,61 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             var methodGenericTestAttrs = testMethod.IsGenericMethod && generateGenericTestBucket is not null
                 ? generateGenericTestBucket
-                    .Select(ExtractTypeArgsFromGenerateGenericTestAttribute)
-                    .Where(t => t is { Length: > 0 })
+                    .Select(a => (Attribute: a, TypeArgs: ExtractTypeArgsFromGenerateGenericTestAttribute(a)))
+                    .Where(t => t.TypeArgs is { Length: > 0 })
                     .ToList()
-                : new List<ITypeSymbol[]?>();
+                : [];
 
             var classGenericTestAttrs = testMethod.IsGenericType
                 ? testMethod.TypeSymbol.GetAttributes()
                     .Where(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
-                    .Select(ExtractTypeArgsFromGenerateGenericTestAttribute)
-                    .Where(t => t is { Length: > 0 })
+                    .Select(a => (Attribute: a, TypeArgs: ExtractTypeArgsFromGenerateGenericTestAttribute(a)))
+                    .Where(t => t.TypeArgs is { Length: > 0 })
                     .ToList()
-                : new List<ITypeSymbol[]?>();
+                : [];
 
             if (testMethod is { IsGenericType: true, IsGenericMethod: true } && classGenericTestAttrs.Count > 0 && methodGenericTestAttrs.Count > 0)
             {
                 // Cartesian product of class and method type args
-                foreach (var classTypeArgs in classGenericTestAttrs)
+                foreach (var classGenericTest in classGenericTestAttrs)
                 {
-                    foreach (var methodTypeArgs in methodGenericTestAttrs)
+                    foreach (var methodGenericTest in methodGenericTestAttrs)
                     {
-                        if (classTypeArgs != null && methodTypeArgs != null)
-                        {
-                            var combined = classTypeArgs.Concat(methodTypeArgs).ToArray();
-                            TryAddInstantiation(combined);
-                        }
+                        var combined = classGenericTest.TypeArgs!.Concat(methodGenericTest.TypeArgs!).ToArray();
+                        TryAddInstantiation(combined,
+                            reportMethodConstraintViolation: true,
+                            reportClassViolationAs: ClassViolationSource.GenerateGenericTest,
+                            violationSource: ValidateClassTypeConstraints(testMethod.TypeSymbol, classGenericTest.TypeArgs!, testMethod.CompilationContext.Compilation)
+                                ? methodGenericTest.Attribute
+                                : classGenericTest.Attribute);
                     }
                 }
             }
             else
             {
                 // Only class or only method
-                foreach (var typeArgs in classGenericTestAttrs)
+                foreach (var classGenericTest in classGenericTestAttrs)
                 {
-                    if (typeArgs != null)
-                    {
-                        TryAddInstantiation(typeArgs);
-                    }
+                    TryAddInstantiation(classGenericTest.TypeArgs!,
+                        reportClassViolationAs: ClassViolationSource.GenerateGenericTest,
+                        violationSource: classGenericTest.Attribute);
                 }
-                foreach (var typeArgs in methodGenericTestAttrs)
+                foreach (var methodGenericTest in methodGenericTestAttrs)
                 {
-                    if (typeArgs != null)
-                    {
-                        TryAddInstantiation(typeArgs);
-                    }
+                    TryAddInstantiation(methodGenericTest.TypeArgs!,
+                        reportMethodConstraintViolation: true,
+                        violationSource: methodGenericTest.Attribute);
                 }
             }
         }
+
+        // Reflection mode reports class-level [GenerateGenericTest] types first, then class rows,
+        // then method rows; each group keeps declaration order.
+        classConstraintViolations = classViolations
+            .OrderBy(v => v.Source)
+            .ThenBy(v => v.Order)
+            .Select(v => v.Message)
+            .ToList();
 
         return results;
     }
@@ -1111,6 +1274,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var hasCancellationToken = testMethod.MethodSymbol.Parameters.Any(p =>
             p.Type.Name == "CancellationToken" && p.Type.ContainingNamespace?.ToString() == "System.Threading");
         var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
+
+        if (entry.MethodConstraintViolations is [var violation, ..])
+        {
+            // The method cannot be called with these type arguments (it would not compile). The
+            // entry's data sources already fail test building, so this body is never reached.
+            writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException(\"{EscapeString(violation.Message)}\")));");
+            return;
+        }
 
         // For any generic context (class or method), we need to substitute type parameters
         if (entry.MethodTypeArgs.Length > 0 || entry.ClassTypeArgs.Length > 0)
@@ -1348,9 +1519,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (testMethod is { IsGenericType: true, IsGenericMethod: true })
             {
+                // Only the method rows that infer this entry's method type arguments: a row that
+                // infers other types belongs to another instantiation (or fails its constraints).
+                var compilation = testMethod.CompilationContext.Compilation;
                 var additionalMethodDataSources = methodSymbol.GetAttributes()
                     .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute" &&
-                                !entry.IsSpecificDataSource(a));
+                                !entry.IsSpecificDataSource(a) &&
+                                InferredTypesMatch(InferTypesFromArgumentsAttribute(methodSymbol, a, compilation), entry.MethodTypeArgs));
                 methodDataSources.AddRange(additionalMethodDataSources);
             }
 
@@ -1369,7 +1544,42 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .ToArray();
         }
 
-        if (methodDataSources.Count > 0)
+        if (entry.MethodConstraintViolations is { Count: > 0 } violations)
+        {
+            // Replace the method data sources with ones whose rows fail test building with the
+            // constraint message: one failed test per invalid row, as reflection mode reports.
+            var dsWriter = new CodeWriter(includeHeader: false);
+            dsWriter.AppendLine("new global::TUnit.Core.IDataSourceAttribute[]");
+            dsWriter.AppendLine("{");
+            dsWriter.Indent();
+            var allMethodDataSources = methodSymbol.GetAttributes()
+                .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+                .ToList();
+            foreach (var violation in violations)
+            {
+                var rowSources = violation.RowSource is { } rowSource
+                    ? [rowSource]
+                    : violation.AllMethodDataSources ? allMethodDataSources : [];
+                var message = $"\"{EscapeString(violation.Message)}\"";
+
+                if (rowSources.Count == 0)
+                {
+                    dsWriter.AppendLine($"global::TUnit.Core.GenericConstraintViolationDataSource.Create({message}),");
+                    continue;
+                }
+
+                foreach (var rowSourceAttribute in rowSources)
+                {
+                    var rowWriter = new CodeWriter(includeHeader: false);
+                    GenerateDataSourceAttribute(rowWriter, testMethod.CompilationContext, rowSourceAttribute, methodSymbol, concreteTypeSymbol);
+                    dsWriter.AppendLine($"global::TUnit.Core.GenericConstraintViolationDataSource.Create({message}, {rowWriter.ToString().Trim().TrimEnd(',')}),");
+                }
+            }
+            dsWriter.Unindent();
+            dsWriter.Append("}");
+            writer.AppendLine($"testDataSources: {dsWriter},");
+        }
+        else if (methodDataSources.Count > 0)
         {
             var dsWriter = new CodeWriter(includeHeader: false);
             dsWriter.AppendLine("new global::TUnit.Core.IDataSourceAttribute[]");
@@ -4768,8 +4978,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
 
                     // Validate constraints for both class and method separately
-                    var constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes) &&
-                                          ValidateTypeConstraints(testMethod.MethodSymbol, methodTypes);
+                    var constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes, testMethod.CompilationContext.Compilation) &&
+                                          ValidateTypeConstraints(testMethod.MethodSymbol, methodTypes, testMethod.CompilationContext.Compilation, testMethod.TypeSymbol, classTypes);
 
                     if (!constraintsValid)
                     {
@@ -4827,12 +5037,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (testMethod is { IsGenericType: true, IsGenericMethod: false })
                     {
                         // For generic class only, validate class constraints
-                        constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes);
+                        constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes, testMethod.CompilationContext.Compilation);
                     }
                     else if (testMethod.IsGenericMethod)
                     {
                         // For generic method (with or without generic class), validate method constraints
-                        constraintsValid = ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes);
+                        constraintsValid = ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes, testMethod.CompilationContext.Compilation);
                     }
 
                     if (!constraintsValid)
@@ -4866,7 +5076,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
 
                     // Validate class type constraints
-                    var constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes);
+                    var constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes, testMethod.CompilationContext.Compilation);
 
                     if (!constraintsValid)
                     {
@@ -4903,12 +5113,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 if (testMethod is { IsGenericType: true, IsGenericMethod: false })
                 {
                     // For generic class only, validate class constraints
-                    constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes);
+                    constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes, testMethod.CompilationContext.Compilation);
                 }
                 else if (testMethod.IsGenericMethod)
                 {
                     // For generic method (with or without generic class), validate method constraints
-                    constraintsValid = ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes);
+                    constraintsValid = ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes, testMethod.CompilationContext.Compilation);
                 }
 
                 if (!constraintsValid)
@@ -4935,7 +5145,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 if (processedTypeCombinations.Add(typeKey))
                 {
                     // Validate constraints
-                    if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
+                    if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes, testMethod.CompilationContext.Compilation))
                     {
                         // Generate a concrete instantiation for this type combination
                         writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
@@ -4964,7 +5174,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (processedTypeCombinations.Add(typeKey))
                     {
                         // Validate constraints for the generic class
-                        if (ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes))
+                        if (ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes, testMethod.CompilationContext.Compilation))
                         {
                             // Generate a concrete instantiation for this type combination
                             writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
@@ -4988,7 +5198,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 if (processedTypeCombinations.Add(typeKey))
                 {
                     // Validate constraints for the generic class
-                    if (ValidateClassTypeConstraints(testMethod.TypeSymbol, typedDataSourceInferredTypes))
+                    if (ValidateClassTypeConstraints(testMethod.TypeSymbol, typedDataSourceInferredTypes, testMethod.CompilationContext.Compilation))
                     {
                         // Generate a concrete instantiation for this type combination
                         writer.AppendLine($"[{string.Join(" + \",\" + ", typedDataSourceInferredTypes.Select(FormatTypeForRuntimeName))}] = ");
@@ -5017,7 +5227,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (processedTypeCombinations.Add(typeKey))
                     {
                         // Validate constraints
-                        if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
+                        if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes, testMethod.CompilationContext.Compilation))
                         {
                             // Generate a concrete instantiation for this type combination
                             writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
@@ -5061,8 +5271,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                                 if (processedTypeCombinations.Add(typeKey))
                                 {
                                     // Validate constraints for both class and method type parameters
-                                    if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classInferredTypes) &&
-                                        ValidateTypeConstraints(testMethod.MethodSymbol, methodInferredTypes))
+                                    if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classInferredTypes, testMethod.CompilationContext.Compilation) &&
+                                        ValidateTypeConstraints(testMethod.MethodSymbol, methodInferredTypes, testMethod.CompilationContext.Compilation, testMethod.TypeSymbol, classInferredTypes))
                                     {
                                         // Generate a concrete instantiation for this type combination
                                         writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(FormatTypeForRuntimeName))}] = ");
@@ -5082,7 +5292,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         if (processedTypeCombinations.Add(typeKey))
                         {
                             // Validate constraints for the generic class type parameters
-                            if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classInferredTypes))
+                            if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classInferredTypes, testMethod.CompilationContext.Compilation))
                             {
                                 // Generate a concrete instantiation for this type combination
                                 writer.AppendLine($"[{string.Join(" + \",\" + ", classInferredTypes.Select(FormatTypeForRuntimeName))}] = ");
@@ -5185,8 +5395,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 foreach (var methodTypeArgs in methodTypeArgSets)
                 {
                     // Validate both class and method constraints
-                    if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypeArgs) &&
-                        ValidateTypeConstraints(testMethod.MethodSymbol, methodTypeArgs))
+                    if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypeArgs, testMethod.CompilationContext.Compilation) &&
+                        ValidateTypeConstraints(testMethod.MethodSymbol, methodTypeArgs, testMethod.CompilationContext.Compilation, testMethod.TypeSymbol, classTypeArgs))
                     {
                         // Combine class + method type arguments
                         var combinedTypes = classTypeArgs.Concat(methodTypeArgs).ToArray();
@@ -5207,7 +5417,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Only class is generic
             foreach (var classTypeArgs in classTypeArgSets)
             {
-                if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypeArgs))
+                if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypeArgs, testMethod.CompilationContext.Compilation))
                 {
                     var typeKey = BuildTypeKey(classTypeArgs);
                     if (processedTypeCombinations.Add(typeKey))
@@ -5224,7 +5434,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Only method is generic
             foreach (var methodTypeArgs in methodTypeArgSets)
             {
-                if (ValidateTypeConstraints(testMethod.MethodSymbol, methodTypeArgs))
+                if (ValidateTypeConstraints(testMethod.MethodSymbol, methodTypeArgs, testMethod.CompilationContext.Compilation))
                 {
                     var typeKey = BuildTypeKey(methodTypeArgs);
                     if (processedTypeCombinations.Add(typeKey))
@@ -5286,79 +5496,26 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return result;
     }
 
-    private static bool ValidateClassTypeConstraints(INamedTypeSymbol classSymbol, ITypeSymbol[] typeArguments)
+    private static bool ValidateClassTypeConstraints(INamedTypeSymbol classSymbol, ITypeSymbol[] typeArguments, Compilation compilation)
     {
         var typeParams = classSymbol.TypeParameters;
 
-        if (typeParams.Length != typeArguments.Length)
-        {
-            return false;
-        }
-
-        for (var i = 0; i < typeParams.Length; i++)
-        {
-            var typeParam = typeParams[i];
-            var typeArg = typeArguments[i];
-
-            // Check struct constraint
-            if (typeParam.HasValueTypeConstraint)
-            {
-                if (!typeArg.IsValueType || typeArg.IsReferenceType)
-                {
-                    return false;
-                }
-            }
-
-            // Check class constraint
-            if (typeParam.HasReferenceTypeConstraint)
-            {
-                if (!typeArg.IsReferenceType)
-                {
-                    return false;
-                }
-            }
-
-            // Check specific type constraints
-            foreach (var constraintType in typeParam.ConstraintTypes)
-            {
-                // Substitute type parameters in the constraint type with the actual type arguments
-                var substitutedConstraint = SubstituteTypeParameters(constraintType, typeParams, typeArguments);
-
-                // For interface constraints, check if the type implements the interface
-                if (substitutedConstraint.TypeKind == TypeKind.Interface)
-                {
-                    if (!TypeImplementsInterface(typeArg, substitutedConstraint))
-                    {
-                        return false;
-                    }
-                }
-                // For base class constraints, check if the type derives from the class
-                else if (substitutedConstraint.TypeKind == TypeKind.Class)
-                {
-                    var baseType = typeArg.BaseType;
-                    var found = false;
-                    while (baseType != null)
-                    {
-                        if (SymbolEqualityComparer.Default.Equals(baseType, substitutedConstraint))
-                        {
-                            found = true;
-                            break;
-                        }
-                        baseType = baseType.BaseType;
-                    }
-                    if (!found && !SymbolEqualityComparer.Default.Equals(typeArg, substitutedConstraint))
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        return true;
+        return typeParams.Length == typeArguments.Length
+            && !HasConstraintViolation(typeParams, typeArguments, compilation);
     }
 
-    private static ITypeSymbol SubstituteTypeParameters(ITypeSymbol type, ImmutableArray<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments)
+    private static ITypeSymbol SubstituteTypeParameters(ITypeSymbol type, ImmutableArray<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments, Compilation? compilation = null)
     {
+        // An array of a type parameter (e.g. the U[] in IEnumerable<U[]>): substitute the element type.
+        // Building the new array type needs the compilation.
+        if (type is IArrayTypeSymbol arrayType && compilation != null)
+        {
+            var substitutedElement = SubstituteTypeParameters(arrayType.ElementType, typeParams, typeArguments, compilation);
+            return SymbolEqualityComparer.Default.Equals(substitutedElement, arrayType.ElementType)
+                ? type
+                : compilation.CreateArrayTypeSymbol(substitutedElement, arrayType.Rank);
+        }
+
         // If the type is a type parameter, substitute it with the corresponding type argument
         if (type is ITypeParameterSymbol typeParam)
         {
@@ -5372,8 +5529,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return type;
         }
 
-        // If the type is a named type with type arguments (e.g., IComparable<T>), substitute recursively
-        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
+        // If the type is a named type with type arguments (e.g., IComparable<T>), substitute recursively.
+        // A nested type's TypeArguments are only its own, so its containing type (the Outer<U> of
+        // Outer<U>.IOut<string>) is substituted separately.
+        if (type is INamedTypeSymbol namedType)
         {
             var originalTypeArgs = namedType.TypeArguments;
             var newTypeArgs = new ITypeSymbol[originalTypeArgs.Length];
@@ -5381,41 +5540,97 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             for (var i = 0; i < originalTypeArgs.Length; i++)
             {
-                newTypeArgs[i] = SubstituteTypeParameters(originalTypeArgs[i], typeParams, typeArguments);
+                newTypeArgs[i] = SubstituteTypeParameters(originalTypeArgs[i], typeParams, typeArguments, compilation);
                 if (!SymbolEqualityComparer.Default.Equals(newTypeArgs[i], originalTypeArgs[i]))
                 {
                     anyChanged = true;
                 }
             }
 
+            if (namedType.ContainingType is { } containingType
+                && SubstituteTypeParameters(containingType, typeParams, typeArguments, compilation) is INamedTypeSymbol substitutedContaining
+                && !SymbolEqualityComparer.Default.Equals(substitutedContaining, containingType))
+            {
+                foreach (var member in substitutedContaining.GetTypeMembers(namedType.Name, namedType.Arity))
+                {
+                    if (SymbolEqualityComparer.Default.Equals(member.OriginalDefinition, namedType.OriginalDefinition))
+                    {
+                        return namedType.Arity > 0 ? member.Construct(newTypeArgs) : member;
+                    }
+                }
+
+                return type;
+            }
+
             if (anyChanged)
             {
-                return namedType.OriginalDefinition.Construct(newTypeArgs);
+                // ConstructedFrom keeps the containing type's type arguments.
+                return namedType.ConstructedFrom.Construct(newTypeArgs);
             }
         }
 
         return type;
     }
 
-    private static bool TypeImplementsInterface(ITypeSymbol type, ITypeSymbol interfaceType)
+    /// <summary>
+    /// Whether <paramref name="type"/> satisfies the base type or interface constraint
+    /// <paramref name="constraint"/> under C# rules: an identity, implicit reference or boxing
+    /// conversion. This accepts variant interfaces (for example, <c>List&lt;string&gt;</c> for
+    /// <c>IEnumerable&lt;object&gt;</c>), as C# and reflection's <c>IsAssignableFrom</c> do.
+    /// </summary>
+    private static bool SatisfiesTypeConstraint(ITypeSymbol type, ITypeSymbol constraint, Compilation compilation)
     {
-        // Check if the type directly implements the interface
-        if (type.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, interfaceType)))
+        if (SymbolEqualityComparer.Default.Equals(type, constraint))
         {
             return true;
         }
 
-        // For generic interfaces, also check if the type implements a constructed version
-        if (interfaceType is INamedTypeSymbol { IsGenericType: true } genericInterface)
+        // A constraint accepts a boxing conversion only from a non-nullable value type: int? boxes to
+        // IComparable, but Run<int?>() with 'where T : IComparable' is CS0313, and reflection mode rejects it too.
+        var isNullableValueType = type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
+
+        if (compilation is CSharpCompilation csharpCompilation)
         {
-            var originalDef = genericInterface.OriginalDefinition;
-            return type.AllInterfaces.Any(i =>
-                i.IsGenericType &&
-                SymbolEqualityComparer.Default.Equals(i.OriginalDefinition, originalDef) &&
-                ((IEnumerable<ITypeSymbol>)i.TypeArguments).SequenceEqual(genericInterface.TypeArguments, SymbolEqualityComparer.Default));
+            var conversion = csharpCompilation.ClassifyConversion(type, constraint);
+            return conversion.Exists
+                && conversion.IsImplicit
+                && (conversion.IsIdentity || conversion.IsReference || (conversion.IsBoxing && !isNullableValueType));
         }
 
-        return false;
+        var commonConversion = compilation.ClassifyCommonConversion(type, constraint);
+        return commonConversion.Exists
+            && commonConversion.IsImplicit
+            && !commonConversion.IsUserDefined
+            && (commonConversion.IsIdentity || commonConversion.IsReference || (type.IsValueType && !isNullableValueType && !constraint.IsValueType));
+    }
+
+    /// <summary>
+    /// Whether a row's inferred type arguments are <paramref name="expected"/>. A row whose types
+    /// cannot be inferred is kept, as before.
+    /// </summary>
+    private static bool InferredTypesMatch(ITypeSymbol[]? inferred, ITypeSymbol[] expected)
+    {
+        if (inferred is not { Length: > 0 })
+        {
+            return true;
+        }
+
+        return ((IEnumerable<ITypeSymbol>)inferred).SequenceEqual(expected, SymbolEqualityComparer.Default);
+    }
+
+    /// <summary>
+    /// Whether <paramref name="type"/> satisfies a <c>new()</c> constraint: a value type, or a
+    /// non-abstract class with a public parameterless constructor.
+    /// </summary>
+    private static bool SatisfiesConstructorConstraint(ITypeSymbol type)
+    {
+        if (type.IsValueType)
+        {
+            return true;
+        }
+
+        return type is INamedTypeSymbol { IsAbstract: false, TypeKind: TypeKind.Class } named
+            && named.InstanceConstructors.Any(static c => c.Parameters.Length == 0 && c.DeclaredAccessibility == Accessibility.Public);
     }
 
     private static ITypeSymbol[]? InferClassTypesFromMethodArguments(INamedTypeSymbol classSymbol, IMethodSymbol methodSymbol, AttributeData argAttr, Compilation compilation)
@@ -6061,82 +6276,153 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static bool ValidateTypeConstraints(IMethodSymbol method, ITypeSymbol[] typeArguments)
+    /// <summary>
+    /// Validates the method's own type arguments. Class type parameters are validated separately by
+    /// <see cref="ValidateClassTypeConstraints"/>, but a method constraint may name them
+    /// (<c>where U : IEnumerable&lt;T&gt;</c>), so the class's type arguments, when known, are
+    /// substituted into the method's constraints before they are checked.
+    /// </summary>
+    private static bool ValidateTypeConstraints(IMethodSymbol method, ITypeSymbol[] typeArguments, Compilation compilation,
+        INamedTypeSymbol? classSymbol = null, ITypeSymbol[]? classTypeArguments = null)
     {
-        // Only validate method type parameters here - class type parameters are validated separately
-        // by ValidateClassTypeConstraints in the cartesian product loop
         var methodTypeParams = method.TypeParameters;
 
-        if (methodTypeParams.Length != typeArguments.Length)
-        {
-            return false;
-        }
-
-        return ValidateTypeParameterConstraints(methodTypeParams, typeArguments);
+        return methodTypeParams.Length == typeArguments.Length
+            && !TryFindConstraintViolation(methodTypeParams, typeArguments, compilation, out _, classSymbol, classTypeArguments);
     }
 
-    private static bool ValidateTypeParameterConstraints(ImmutableArray<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments)
+    /// <summary>
+    /// Describes the first method generic constraint that <paramref name="typeArguments"/> breaks.
+    /// The wording matches <c>TestGenericTypeResolver.ValidateAgainstConstraints</c> in TUnit.Engine,
+    /// so source-generated and reflection modes report the same failure message.
+    /// </summary>
+    private static string DescribeMethodConstraintViolation(IMethodSymbol method, ITypeSymbol[] typeArguments, Compilation compilation,
+        INamedTypeSymbol? classSymbol = null, ITypeSymbol[]? classTypeArguments = null)
+        => DescribeConstraintViolation(method.TypeParameters, typeArguments, $"method '{method.Name}'", compilation, classSymbol, classTypeArguments);
+
+    /// <summary>
+    /// A key that identifies one attribute application, so that each invalid row or type is
+    /// reported once even when it is visited by several inference passes.
+    /// </summary>
+    private static string GetAttributeKey(AttributeData attribute)
     {
-        for (var i = 0; i < typeParams.Length; i++)
+        return attribute.ApplicationSyntaxReference is { } reference
+            ? $"{reference.SyntaxTree.FilePath}:{reference.Span.Start.ToString(CultureInfo.InvariantCulture)}"
+            : RuntimeHelpers.GetHashCode(attribute).ToString(CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// Describes the first generic constraint of <paramref name="typeParams"/> that
+    /// <paramref name="typeArguments"/> break. The wording matches <c>TestGenericTypeResolver</c> and
+    /// <c>ReflectionGenericTypeResolver.FindConstraintViolation</c> in TUnit.Engine, so
+    /// source-generated and reflection modes report the same failure message.
+    /// </summary>
+    private static string DescribeConstraintViolation(ImmutableArray<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments, string owner, Compilation compilation,
+        INamedTypeSymbol? outerType = null, ITypeSymbol[]? outerTypeArguments = null)
+    {
+        if (TryFindConstraintViolation(typeParams, typeArguments, compilation, out var message, outerType, outerTypeArguments) && message != null)
+        {
+            return message;
+        }
+
+        // A constraint without a specific message (such as new()): reflection mode reports the
+        // MakeGenericType/MakeGenericMethod failure with this wording.
+        var typeArgumentNames = string.Join(", ", typeArguments.Select(GetRuntimeTypeName));
+        return $"Type arguments '{typeArgumentNames}' do not satisfy the generic constraints of {owner}";
+    }
+
+    /// <summary>
+    /// The name that <c>System.Type.Name</c> gives <paramref name="type"/>, so constraint messages read the
+    /// same in both modes. Roslyn gives arrays an empty <c>MetadataName</c>; reflection names them <c>Int32[]</c>.
+    /// </summary>
+    private static string GetRuntimeTypeName(ITypeSymbol type) => type switch
+    {
+        IArrayTypeSymbol array => GetRuntimeTypeName(array.ElementType)
+            + (array.Rank == 1 ? "[]" : "[" + new string(',', array.Rank - 1) + "]"),
+        _ => type.MetadataName,
+    };
+
+    private static bool HasConstraintViolation(ImmutableArray<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments, Compilation compilation)
+        => TryFindConstraintViolation(typeParams, typeArguments, compilation, out _);
+
+    /// <summary>
+    /// Finds the first generic constraint of <paramref name="typeParams"/> that
+    /// <paramref name="typeArguments"/> break, checked in the engine's order: struct, class, base
+    /// type, interfaces, then new(). <paramref name="message"/> is <c>null</c> for a constraint that
+    /// the engine reports without a specific message.
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="outerType"/> and <paramref name="outerTypeArguments"/> give the containing class's
+    /// type arguments when <paramref name="typeParams"/> are a method's, so a method constraint naming a
+    /// class type parameter is checked against that parameter's type argument.
+    /// </remarks>
+    private static bool TryFindConstraintViolation(ImmutableArray<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments, Compilation compilation, out string? message,
+        INamedTypeSymbol? outerType = null, ITypeSymbol[]? outerTypeArguments = null)
+    {
+        var substitutionParams = typeParams;
+        var substitutionArguments = typeArguments;
+        if (outerType is { TypeParameters.Length: > 0 } && outerTypeArguments is { } outerArguments
+            && outerArguments.Length == outerType.TypeParameters.Length)
+        {
+            substitutionParams = outerType.TypeParameters.AddRange(typeParams);
+            substitutionArguments = outerArguments.Concat(typeArguments).ToArray();
+        }
+
+        for (var i = 0; i < typeParams.Length && i < typeArguments.Length; i++)
         {
             var typeParam = typeParams[i];
             var typeArg = typeArguments[i];
 
-            // Check struct constraint
-            if (typeParam.HasValueTypeConstraint)
+            // Nullable<T> is a value type but never satisfies 'struct'.
+            if (typeParam.HasValueTypeConstraint
+                && (!typeArg.IsValueType || typeArg.IsReferenceType || typeArg.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T))
             {
-                if (!typeArg.IsValueType || typeArg.IsReferenceType)
-                {
-                    return false;
-                }
+                message = $"Type '{GetRuntimeTypeName(typeArg)}' does not satisfy the 'struct' constraint for generic parameter '{typeParam.Name}'";
+                return true;
             }
 
-            // Check class constraint
-            if (typeParam.HasReferenceTypeConstraint)
+            if (typeParam.HasReferenceTypeConstraint && !typeArg.IsReferenceType)
             {
-                if (!typeArg.IsReferenceType)
-                {
-                    return false;
-                }
+                message = $"Type '{GetRuntimeTypeName(typeArg)}' does not satisfy the 'class' constraint for generic parameter '{typeParam.Name}'";
+                return true;
             }
 
-            // Check interface constraints
+            // The engine checks the base type constraint before interface constraints. A constraint
+            // naming another type parameter (`where T : U`) is checked against U's type argument.
             foreach (var constraintType in typeParam.ConstraintTypes)
             {
-                // Substitute type parameters in the constraint type with the actual type arguments
-                var substitutedConstraint = SubstituteTypeParameters(constraintType, typeParams, typeArguments);
-
-                if (substitutedConstraint.TypeKind == TypeKind.Interface)
+                var substitutedConstraint = SubstituteTypeParameters(constraintType, substitutionParams, substitutionArguments, compilation);
+                if (substitutedConstraint.TypeKind is not (TypeKind.Interface or TypeKind.TypeParameter or TypeKind.Error)
+                    && !SatisfiesTypeConstraint(typeArg, substitutedConstraint, compilation))
                 {
-                    // Check if the type argument implements the interface
-                    if (!TypeImplementsInterface(typeArg, substitutedConstraint))
-                    {
-                        return false;
-                    }
+                    message = $"Type '{GetRuntimeTypeName(typeArg)}' does not satisfy the base type constraint '{GetRuntimeTypeName(substitutedConstraint)}' for generic parameter '{typeParam.Name}'";
+                    return true;
                 }
-                else if (substitutedConstraint.TypeKind == TypeKind.Class)
+            }
+
+            foreach (var constraintType in typeParam.ConstraintTypes)
+            {
+                var substitutedConstraint = SubstituteTypeParameters(constraintType, substitutionParams, substitutionArguments, compilation);
+                if (substitutedConstraint.TypeKind == TypeKind.Interface
+                    && !SatisfiesTypeConstraint(typeArg, substitutedConstraint, compilation))
                 {
-                    // Check if the type argument derives from the base class
-                    var baseType = typeArg.BaseType;
-                    var found = false;
-                    while (baseType != null)
-                    {
-                        if (SymbolEqualityComparer.Default.Equals(baseType, substitutedConstraint))
-                        {
-                            found = true;
-                            break;
-                        }
-                        baseType = baseType.BaseType;
-                    }
-                    if (!found)
-                    {
-                        return false;
-                    }
+                    message = $"Type '{GetRuntimeTypeName(typeArg)}' does not implement interface '{GetRuntimeTypeName(substitutedConstraint)}' required for generic parameter '{typeParam.Name}'";
+                    return true;
                 }
             }
         }
 
-        return true;
+        for (var i = 0; i < typeParams.Length && i < typeArguments.Length; i++)
+        {
+            if (typeParams[i].HasConstructorConstraint && !SatisfiesConstructorConstraint(typeArguments[i]))
+            {
+                message = null;
+                return true;
+            }
+        }
+
+        message = null;
+        return false;
     }
 
     private static void GenerateConcreteTestMetadata(
