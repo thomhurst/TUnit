@@ -43,7 +43,7 @@ public class EncodingIsSingleByteAssertion : Assertion<System.Text.Encoding>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be single-byte encoding";
+        return $"to {(_negated ? "not " : "")}be single-byte encoding";
     }
 }
 

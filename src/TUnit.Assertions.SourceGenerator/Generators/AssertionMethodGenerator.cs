@@ -978,12 +978,12 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             if (parameters.Any())
             {
                 // Use interpolated string for parameter substitution
-                sourceBuilder.AppendLine($"        return $\"{{(_negated ? \"not \" : \"\")}} {expectation}\";");
+                sourceBuilder.AppendLine($"        return $\"to {{(_negated ? \"not \" : \"\")}}{expectation}\";");
             }
             else
             {
                 // No parameters, just return the literal string with negation support
-                sourceBuilder.AppendLine($"        return $\"{{(_negated ? \"not \" : \"\")}} {expectation}\";");
+                sourceBuilder.AppendLine($"        return $\"to {{(_negated ? \"not \" : \"\")}}{expectation}\";");
             }
         }
         else

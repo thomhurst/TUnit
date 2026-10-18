@@ -43,7 +43,7 @@ public class DirectoryInfoExistsAssertion : Assertion<System.IO.DirectoryInfo>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} exist";
+        return $"to {(_negated ? "not " : "")}exist";
     }
 }
 

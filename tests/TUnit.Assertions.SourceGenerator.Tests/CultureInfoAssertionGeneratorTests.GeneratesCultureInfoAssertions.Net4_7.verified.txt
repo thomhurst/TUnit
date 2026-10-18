@@ -43,7 +43,7 @@ public class CultureInfoIsNeutralCultureAssertion : Assertion<System.Globalizati
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be a neutral culture";
+        return $"to {(_negated ? "not " : "")}be a neutral culture";
     }
 }
 
@@ -79,7 +79,7 @@ public class CultureInfoIsReadOnlyAssertion : Assertion<System.Globalization.Cul
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be read-only culture";
+        return $"to {(_negated ? "not " : "")}be read-only culture";
     }
 }
 
