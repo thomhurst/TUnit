@@ -14,7 +14,8 @@ namespace TUnit.Tests.Shared;
 /// <c>PATH</c> than a terminal). That <c>dotnet</c> can lack an SDK satisfying <c>global.json</c> and exit with
 /// 155 (<c>SdkResolveFailure</c>). Prefer the installation that is running the current test process, as long as it
 /// has an SDK: a runtime-only installation cannot run
-/// <c>dotnet build</c>, so <c>PATH</c> is the better bet there.
+/// <c>dotnet build</c>, so <c>PATH</c> is the better bet there. The SDK check is a heuristic: it only looks for an
+/// installed SDK, not one that satisfies <c>global.json</c>.
 /// </remarks>
 internal static class DotNetCli
 {
