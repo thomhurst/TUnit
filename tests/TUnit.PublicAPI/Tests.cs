@@ -42,12 +42,13 @@ public partial class Tests
         await VerifyTUnit.Verify(publicApi)
             .AddScrubber(sb =>
             {
-                // Scrub deterministic source paths (e.g. "/_/TUnit.OpenTelemetry/File.cs")
-                // before the URL regex mangles them into bare "/_/".
+                // Scrub source path literals (e.g. hook attributes' caller file path) before the URL regex
+                // mangles them. CI builds embed deterministic "/_/..." paths; local builds embed the full
+                // checkout path, which the generator wraps into "..." + "..." pieces once it exceeds 80 characters.
                 var replaced = System.Text.RegularExpressions.Regex.Replace(
                     sb.ToString(),
-                    @"/_/[^""\s,)]*",
-                    "PATH_SCRUBBED");
+                    @"""(?:/|[A-Za-z]:(?:\\\\|/))[^""\r\n]*""(?:[ \t]*\+[ \t]*\r?\n[ \t]*""[^""\r\n]*"")*",
+                    @"""PATH_SCRUBBED""");
                 sb.Clear();
                 sb.Append(replaced);
                 return sb;
