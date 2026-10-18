@@ -33,23 +33,7 @@ internal static class TestIdentifierService
 
             // Add method generic type arguments to ensure uniqueness for generic methods
             // e.g., GenericMethod<int> vs GenericMethod<string> should have different IDs
-            if (combination.ResolvedMethodGenericArguments is { Length: > 0 })
-            {
-                vsb.Append('<');
-                for (var i = 0; i < combination.ResolvedMethodGenericArguments.Length; i++)
-                {
-                    if (i > 0)
-                    {
-                        vsb.Append(',');
-                    }
-                    vsb.Append(combination.ResolvedMethodGenericArguments[i].FullName ?? combination.ResolvedMethodGenericArguments[i].Name);
-                }
-                vsb.Append('>');
-            }
-            else
-            {
-                AppendInstantiationSuffix(ref vsb, metadata);
-            }
+            AppendMethodTypeArguments(ref vsb, metadata, combination.ResolvedMethodGenericArguments);
 
             WriteTypeWithParameters(ref vsb, methodParameters);
             vsb.Append('.');
@@ -107,7 +91,7 @@ internal static class TestIdentifierService
             WriteTypeWithParameters(ref vsb, constructorParameters);
             vsb.Append('.');
             vsb.Append(metadata.TestMethodName);
-            AppendInstantiationSuffix(ref vsb, metadata);
+            AppendMethodTypeArguments(ref vsb, metadata, null);
             WriteTypeWithParameters(ref vsb, methodParameters);
             vsb.Append("_Deferred");
 
@@ -148,7 +132,7 @@ internal static class TestIdentifierService
             vsb.Append(combination.ClassLoopIndex);
             vsb.Append('.');
             vsb.Append(metadata.TestMethodName);
-            AppendInstantiationSuffix(ref vsb, metadata);
+            AppendMethodTypeArguments(ref vsb, metadata, null);
             WriteTypeWithParameters(ref vsb, methodParameters);
             vsb.Append('.');
             vsb.Append(combination.MethodDataSourceIndex);
@@ -167,23 +151,40 @@ internal static class TestIdentifierService
     }
 
     /// <summary>
-    /// Source-gen emits one entry per generic-method instantiation and resolves no type arguments at
-    /// runtime, so its instantiations share a bare <see cref="TestMetadata.TestMethodName"/>. The type
-    /// arguments are the suffix of <see cref="TestMetadata.TestName"/> (<c>Method&lt;int&gt;</c>), so
-    /// append it to keep their ids unique (#7105).
+    /// Appends a generic-method instantiation's type arguments so that its id is unique, because every
+    /// instantiation shares the bare <see cref="TestMetadata.TestMethodName"/> (#7105). Uses the
+    /// arguments resolved for this test, else the fully qualified identity source-gen emits per
+    /// instantiation, else the arguments the metadata was closed over. Never the display name: it drops
+    /// namespaces, so <c>A.Payload</c> and <c>B.Payload</c> would collide.
     /// </summary>
-    private static void AppendInstantiationSuffix(ref ValueStringBuilder vsb, TestMetadata metadata)
+    private static void AppendMethodTypeArguments(ref ValueStringBuilder vsb, TestMetadata metadata, Type[]? resolvedMethodGenericArguments)
     {
-        var methodName = metadata.TestMethodName;
-        var testName = metadata.TestName;
-
-        if (metadata.MethodMetadata.GenericTypeCount > 0
-            && testName.Length > methodName.Length
-            && testName[methodName.Length] == '<'
-            && testName.StartsWith(methodName, StringComparison.Ordinal))
+        if (resolvedMethodGenericArguments is { Length: > 0 })
         {
-            vsb.Append(testName.AsSpan(methodName.Length));
+            AppendTypeFullNames(ref vsb, resolvedMethodGenericArguments);
         }
+        else if (metadata.MethodTypeArgumentsIdentity is { } identity)
+        {
+            vsb.Append(identity);
+        }
+        else if (metadata.GenericMethodTypeArguments is { Length: > 0 } closedArguments)
+        {
+            AppendTypeFullNames(ref vsb, closedArguments);
+        }
+    }
+
+    private static void AppendTypeFullNames(ref ValueStringBuilder vsb, Type[] types)
+    {
+        vsb.Append('<');
+        for (var i = 0; i < types.Length; i++)
+        {
+            if (i > 0)
+            {
+                vsb.Append(',');
+            }
+            vsb.Append(types[i].FullName ?? types[i].Name);
+        }
+        vsb.Append('>');
     }
 
     private static void WriteTypeNameWithGenerics(ref ValueStringBuilder vsb, Type type)

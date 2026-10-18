@@ -1191,6 +1191,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine($"methodName: \"{EscapeString(entry.TestName)}\",");
         writer.AppendLine($"fullyQualifiedName: \"{EscapeString(fullyQualifiedName)}\",");
+
+        // The test name drops namespaces, so give the test id the fully qualified type arguments
+        // to keep instantiations over same-named types from different namespaces distinct.
+        if (entry.MethodTypeArgs.Length > 0)
+        {
+            var identity = $"<{string.Join(", ", entry.MethodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>";
+            writer.AppendLine($"methodTypeArgumentsIdentity: \"{EscapeString(identity)}\",");
+        }
         WriteSourceLocationArguments(writer, testMethod);
         WriteFilterDataArguments(writer, testMethod);
 

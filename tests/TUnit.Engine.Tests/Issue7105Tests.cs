@@ -40,6 +40,21 @@ public class Issue7105Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task Same_Named_Type_Arguments_From_Different_Namespaces_Stay_Distinct()
+    {
+        // Both display as SameSimpleName<SamePayload>; their ids must still differ or one is lost.
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7105/GenericMethodNames/SameSimpleName",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.Results.Select(x => x.TestName).ToArray()
+                    .ShouldBe(new[] { "SameSimpleName<SamePayload>", "SameSimpleName<SamePayload>" })
+            ]);
+    }
+
+    [Test]
     public async Task Generic_Class_Path_Has_No_Arity_Suffix()
     {
         await RunTestsWithFilter(

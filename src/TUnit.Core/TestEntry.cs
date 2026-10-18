@@ -33,6 +33,13 @@ public sealed class TestEntry<
     /// </summary>
     public required string MethodName { get; init; }
 
+    /// <summary>
+    /// For an instantiation of a generic test method, its fully qualified type arguments (for example
+    /// <c>&lt;global::A.Payload&gt;</c>). <see cref="MethodName"/> drops namespaces, so test ids use this
+    /// to tell apart instantiations over same-named types from different namespaces.
+    /// </summary>
+    public string? MethodTypeArgumentsIdentity { get; init; }
+
     /// <summary>Fully qualified name: Namespace.Class.Method</summary>
     public required string FullyQualifiedName { get; init; }
 
@@ -128,6 +135,7 @@ public sealed class TestEntry<
             // The bare method name, as in reflection mode: it forms the tree-node filter path and
             // the MTP method identifier's method name (#7105). TestName keeps the type arguments.
             TestMethodName = MethodMetadata.Name,
+            MethodTypeArgumentsIdentity = MethodTypeArgumentsIdentity,
             Dependencies = Dependencies,
             DataSources = TestDataSources,
             ClassDataSources = ClassDataSources,

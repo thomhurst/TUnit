@@ -20,6 +20,12 @@ public class GenericMethodNames
     [GenerateGenericTest(typeof(List<int>))]
     [GenerateGenericTest(typeof(int?))]
     public async Task Generated<T>() => await Assert.That(typeof(T)).IsNotNull();
+
+    // Same simple name, different namespaces: same display name, distinct test ids.
+    [Test]
+    [GenerateGenericTest(typeof(First.SamePayload))]
+    [GenerateGenericTest(typeof(Second.SamePayload))]
+    public async Task SameSimpleName<T>() => await Assert.That(typeof(T)).IsNotNull();
 }
 
 [Arguments(5)]
