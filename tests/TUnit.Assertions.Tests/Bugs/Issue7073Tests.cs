@@ -521,7 +521,9 @@ public class Issue7073Tests
     [Test]
     public async Task String_IsEqualTo_Derived_Uses_Base_Class_Operator()
     {
-        await Assert.That("x").IsEqualTo(new DerivedCode("x"));
+        // C# 13+ binds Assert.That("x").IsEqualTo(new DerivedCode("x")) to the same-type string
+        // overload, so call the cross-type overload explicitly to cover its expected-value lookup.
+        await EqualsAssertionExtensions.IsEqualTo<string, DerivedCode>(Assert.That("x"), new DerivedCode("x"));
     }
 
     [Test]
