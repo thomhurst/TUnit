@@ -46,4 +46,37 @@ public class KeyedNotInParallelFailFastTests(TestMode testMode) : InvokableTestB
             }
         }
     }
+
+    private const string DynamicMarkerVariable = "TUNIT_7074_DYNAMIC_MARKER_PATH";
+
+    [Test]
+    public async Task FailFast_WithRunningDynamicTest_AwaitsDynamicTestBeforeFixtureDisposal()
+    {
+        var markerPath = Path.Combine(Path.GetTempPath(), $"tunit-7074-dynamic-{Guid.NewGuid():N}.txt");
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+
+        try
+        {
+            await RunTestsWithFilter("/*/*/KeyedNotInParallelFailFastDynamic7074/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Failed.ShouldBeGreaterThanOrEqualTo(1),
+                _ => File.Exists(markerPath).ShouldBeTrue($"Marker file '{markerPath}' was not written: the session ended before the dynamic test finished"),
+                _ => File.ReadAllText(markerPath).ShouldBe("FixtureDisposedDuringDynamicTest=False"),
+            ],
+            new RunOptions()
+                .WithArgument("--fail-fast")
+                .WithArgument("--maximum-parallel-tests")
+                .WithArgument("2")
+                .WithEnvironmentVariable(DynamicMarkerVariable, markerPath)
+                .WithForcefulCancellationToken(cts.Token));
+        }
+        finally
+        {
+            if (File.Exists(markerPath))
+            {
+                File.Delete(markerPath);
+            }
+        }
+    }
 }

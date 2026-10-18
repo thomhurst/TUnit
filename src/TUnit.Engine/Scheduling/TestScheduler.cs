@@ -228,7 +228,26 @@ internal sealed class TestScheduler : ITestScheduler
         // Start dynamic test queue processing in background
         var dynamicTestProcessingTask = ProcessDynamicTestQueueAsync(cancellationToken);
 
-        await ExecuteAllPhasesAsync(groupedTests, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await ExecuteAllPhasesAsync(groupedTests, cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            // On the fail-fast path the phases throw while dynamic tests may still be running.
+            // Wait for them before the caller runs session teardown; the phase failure wins.
+            _dynamicTestQueue.Complete();
+            try
+            {
+                await dynamicTestProcessingTask.ConfigureAwait(false);
+            }
+            catch
+            {
+                // Swallowed: rethrowing the phase exception below.
+            }
+
+            throw;
+        }
 
         // Mark the queue as complete and wait for remaining dynamic tests to finish
         _dynamicTestQueue.Complete();

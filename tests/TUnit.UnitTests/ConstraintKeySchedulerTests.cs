@@ -127,7 +127,9 @@ public class ConstraintKeySchedulerTests
             new ParallelLimitLockProvider(),
             new NotInParallelLock());
 
-        return new ConstraintKeyScheduler(runner, logger, new HashSetPool());
+        // Fixed cap well above any barrier's participant count, so the session-wide slot
+        // budget never limits these tests regardless of the machine's processor count.
+        return new ConstraintKeyScheduler(runner, logger, new HashSetPool(), new MaxParallelismLimiter(() => 16));
     }
 
     // Runs each test body synchronously, as a non-async [Test] method would, and returns an
