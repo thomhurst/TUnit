@@ -9,6 +9,9 @@ using TUnit.Pipeline.Modules.Abstract;
 namespace TUnit.Pipeline.Modules;
 
 [NotInParallel("NetworkTests")]
+// The RPC tests `dotnet build` TUnit.TestProject without a runtime identifier, which re-restores
+// the obj/project.assets.json the AOT publish needs for its RID (NETSDK1047 if they overlap).
+[DependsOn<PublishTestProjectAOTModule>]
 public class RunRpcTestsModule : TestBaseModule
 {
     protected override IEnumerable<string> TestableFrameworks =>
