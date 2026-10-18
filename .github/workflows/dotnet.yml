@@ -189,6 +189,8 @@ jobs:
         framework: [net8.0, net9.0, net10.0]
       fail-fast: false
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       DISABLE_GITHUB_REPORTER: 'true'
 
@@ -219,6 +221,8 @@ jobs:
   # test matrix rather than after the Ubuntu pipeline.
   doc-snippets:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       DocsVersion: 1.0.0-docs
 
