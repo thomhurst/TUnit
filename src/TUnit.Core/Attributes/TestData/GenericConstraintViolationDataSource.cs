@@ -60,12 +60,32 @@ public class GenericConstraintViolationDataSource : Attribute, IDataSourceAttrib
     public IDataSourceAttribute? InnerDataSource { get; }
 
     /// <inheritdoc />
-    /// <remarks>Mirrors the inner data source, so an empty source behaves as it would without the wrapper.</remarks>
-    public bool SkipIfEmpty { get => InnerDataSource?.SkipIfEmpty ?? false; set { } }
+    /// <remarks>Forwards to the inner data source, so an empty source behaves as it would without the wrapper.</remarks>
+    public bool SkipIfEmpty
+    {
+        get => InnerDataSource?.SkipIfEmpty ?? false;
+        set
+        {
+            if (InnerDataSource is not null)
+            {
+                InnerDataSource.SkipIfEmpty = value;
+            }
+        }
+    }
 
     /// <inheritdoc />
-    /// <remarks>Mirrors the inner data source.</remarks>
-    public bool DeferEnumeration { get => InnerDataSource?.DeferEnumeration ?? false; set { } }
+    /// <remarks>Forwards to the inner data source.</remarks>
+    public bool DeferEnumeration
+    {
+        get => InnerDataSource?.DeferEnumeration ?? false;
+        set
+        {
+            if (InnerDataSource is not null)
+            {
+                InnerDataSource.DeferEnumeration = value;
+            }
+        }
+    }
 
     /// <inheritdoc />
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)

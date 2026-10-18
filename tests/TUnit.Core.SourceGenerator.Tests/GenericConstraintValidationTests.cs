@@ -53,6 +53,7 @@ internal class GenericConstraintValidationTests : TestsBase
             await Assert.That(SourceFor("ArrayCovariantInterfaceConstraintMatch")).DoesNotContain(violation);
             await Assert.That(SourceFor("NestedVariantInterfaceConstraintMatch")).DoesNotContain(violation);
             await Assert.That(SourceFor("DelegateVariantInterfaceConstraintMatch")).DoesNotContain(violation);
+            await Assert.That(SourceFor("ArrayOfTypeParameterConstraintMatch")).DoesNotContain(violation);
 
             // A nested interface's containing type arguments must match too: this row is reported, not emitted as a call.
             var nestedMismatch = SourceFor("NestedInterfaceWithOtherContainingTypeArgument");
@@ -63,5 +64,12 @@ internal class GenericConstraintValidationTests : TestsBase
             var classAndMethodRows = SourceFor("MixedMethodRows");
             await Assert.That(Count(classAndMethodRows, violation)).IsEqualTo(1);
             await Assert.That(classAndMethodRows).Contains(violation + "\"Type 'String' does not satisfy the 'struct' constraint for generic parameter 'TMethod'\"");
+
+            // A method constraint that mentions the class type parameter is checked with the class type argument:
+            // TMethod=int satisfies IComparable<int> and is called, TMethod=string is reported.
+            var classTypeParameterRows = SourceFor("ClassTypeParameterConstraintRows");
+            await Assert.That(Count(classTypeParameterRows, violation)).IsEqualTo(1);
+            await Assert.That(classTypeParameterRows).Contains("instance.ClassTypeParameterConstraintRows<int>(");
+            await Assert.That(classTypeParameterRows).Contains(violation + "\"Type 'String' does not implement interface 'IComparable`1' required for generic parameter 'TMethod'\"");
         });
 }

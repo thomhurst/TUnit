@@ -50,7 +50,8 @@ internal sealed class TestGenericTypeResolver
                 metadata.MethodMetadata,
                 metadata.GenericMethodInfo,
                 testData.MethodData,
-                parameterTypes);
+                parameterTypes,
+                result.ResolvedClassGenericArguments);
         }
 
         return result;
@@ -119,7 +120,7 @@ internal sealed class TestGenericTypeResolver
         }
 
         // Validate against constraints from metadata
-        ValidateAgainstConstraints(genericTypeInfo.Constraints, resolvedTypes);
+        ValidateAgainstConstraints(genericTypeInfo.Constraints, resolvedTypes, classTypeArguments: resolvedTypes);
 
         return resolvedTypes;
     }
@@ -131,7 +132,8 @@ internal sealed class TestGenericTypeResolver
         MethodMetadata methodMetadata,
         GenericMethodInfo genericMethodInfo,
         object?[] methodArguments,
-        Type[] parameterTypes)
+        Type[] parameterTypes,
+        Type[] classTypeArguments)
     {
         // Handle the case where some parameter types are Object (placeholders for generic parameters)
         // This happens when data sources provide untyped data or when we have mixed generic/non-generic parameters
@@ -161,7 +163,7 @@ internal sealed class TestGenericTypeResolver
                         resolvedTypes[0] = methodArguments[i]!.GetType();
                         
                         // Validate against constraints from metadata
-                        ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes);
+                        ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes, classTypeArguments);
                         
                         return resolvedTypes;
                     }
@@ -199,7 +201,7 @@ internal sealed class TestGenericTypeResolver
                 }
                 
                 // Validate against constraints from metadata
-                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes);
+                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes, classTypeArguments);
                 
                 return resolvedTypes;
             }
@@ -365,7 +367,7 @@ internal sealed class TestGenericTypeResolver
                 }
                 
                 // Validate against constraints from metadata
-                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes);
+                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes, classTypeArguments);
                 
                 return resolvedTypes;
             }
@@ -386,7 +388,7 @@ internal sealed class TestGenericTypeResolver
                 }
                 
                 // Validate against constraints from metadata
-                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes);
+                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes, classTypeArguments);
                 
                 return resolvedTypes;
             }
@@ -445,7 +447,7 @@ internal sealed class TestGenericTypeResolver
         }
         
         // Validate against constraints from metadata
-        ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypesFromMapping);
+        ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypesFromMapping, classTypeArguments);
         
         return resolvedTypesFromMapping;
     }
@@ -596,9 +598,16 @@ internal sealed class TestGenericTypeResolver
         return parameterType.IsAssignableFrom(argumentType);
     }
 
+    /// <param name="constraints">The constraints of the generic parameters that <paramref name="resolvedTypes"/> fill.</param>
+    /// <param name="resolvedTypes">The resolved type arguments, one per constraint.</param>
+    /// <param name="classTypeArguments">
+    /// The resolved type arguments of the test class, substituted for class type parameters that a constraint
+    /// mentions (e.g. <c>where TMethod : IComparable&lt;TClass&gt;</c>).
+    /// </param>
     private static void ValidateAgainstConstraints(
         GenericParameterConstraints[] constraints,
-        Type[] resolvedTypes)
+        Type[] resolvedTypes,
+        Type[] classTypeArguments)
     {
         for (var i = 0; i < Math.Min(constraints.Length, resolvedTypes.Length); i++)
         {
@@ -630,16 +639,20 @@ internal sealed class TestGenericTypeResolver
             }
 
             // Check base type constraint
-            if (constraint.BaseTypeConstraint != null &&
-                !constraint.BaseTypeConstraint.IsAssignableFrom(resolvedType))
+            if (constraint.BaseTypeConstraint != null)
             {
-                throw new GenericTypeResolutionException(
-                    $"Type '{resolvedType.Name}' does not satisfy the base type constraint '{constraint.BaseTypeConstraint.Name}' for generic parameter '{constraint.ParameterName}'");
+                var baseTypeConstraint = SubstituteGenericParameters(constraint.BaseTypeConstraint, classTypeArguments, resolvedTypes);
+                if (!baseTypeConstraint.IsAssignableFrom(resolvedType))
+                {
+                    throw new GenericTypeResolutionException(
+                        $"Type '{resolvedType.Name}' does not satisfy the base type constraint '{baseTypeConstraint.Name}' for generic parameter '{constraint.ParameterName}'");
+                }
             }
 
             // Check interface constraints
-            foreach (var interfaceConstraint in constraint.InterfaceConstraints)
+            foreach (var constraintType in constraint.InterfaceConstraints)
             {
+                var interfaceConstraint = SubstituteGenericParameters(constraintType, classTypeArguments, resolvedTypes);
                 if (!interfaceConstraint.IsAssignableFrom(resolvedType))
                 {
                     throw new GenericTypeResolutionException(
@@ -647,6 +660,62 @@ internal sealed class TestGenericTypeResolver
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Replaces the generic parameters in a constraint type (e.g. <c>IComparable&lt;T&gt;</c> or
+    /// <c>IEnumerable&lt;U[]&gt;</c>) with their resolved type arguments, so the constraint can be checked
+    /// with <see cref="Type.IsAssignableFrom"/>. Class type parameters come from <paramref name="classTypeArguments"/>
+    /// and method type parameters from <paramref name="methodTypeArguments"/>. A parameter with no resolved
+    /// argument leaves the constraint unchanged.
+    /// </summary>
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Only constraint types that mention generic parameters are rebuilt. Those come from open generic tests, which are resolved at runtime in reflection mode only; source-generated tests are already closed.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = "The generic definition and its arguments come from the constraint and the resolved test types, which are already in use.")]
+    private static Type SubstituteGenericParameters(Type type, Type[] classTypeArguments, Type[] methodTypeArguments)
+    {
+        if (!type.ContainsGenericParameters)
+        {
+            return type;
+        }
+
+        if (type.IsGenericParameter)
+        {
+            var typeArguments = type.DeclaringMethod != null ? methodTypeArguments : classTypeArguments;
+            var position = type.GenericParameterPosition;
+            return position < typeArguments.Length ? typeArguments[position] : type;
+        }
+
+        if (type.IsArray)
+        {
+            var elementType = type.GetElementType()!;
+            var substitutedElement = SubstituteGenericParameters(elementType, classTypeArguments, methodTypeArguments);
+            if (substitutedElement.ContainsGenericParameters)
+            {
+                return type;
+            }
+
+            // A single-dimensional zero-based array (T[]) differs from a rank-1 multi-dimensional one (T[*])
+            return type == elementType.MakeArrayType()
+                ? substitutedElement.MakeArrayType()
+                : substitutedElement.MakeArrayType(type.GetArrayRank());
+        }
+
+        if (type.IsGenericType)
+        {
+            var typeArguments = type.GetGenericArguments();
+            for (var i = 0; i < typeArguments.Length; i++)
+            {
+                typeArguments[i] = SubstituteGenericParameters(typeArguments[i], classTypeArguments, methodTypeArguments);
+                if (typeArguments[i].ContainsGenericParameters)
+                {
+                    return type;
+                }
+            }
+
+            return type.GetGenericTypeDefinition().MakeGenericType(typeArguments);
+        }
+
+        return type;
     }
 }
 

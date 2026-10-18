@@ -351,6 +351,15 @@ public class GenericConstraintRowParityTests
         await Assert.That(typeof(T)).IsEqualTo(typeof(List<string[]>));
     }
 
+    // (List<string[]>, string) satisfies 'where T : IEnumerable<U[]>' once U is substituted inside the array
+    [Test]
+    [StringArrayListAndStringDataSourceForConstraint]
+    [EngineTest(ExpectedResult.Pass)]
+    public async Task ArrayOfTypeParameterConstraintMatch<T, U>(T value, U element) where T : IEnumerable<U[]>
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(List<string[]>));
+    }
+
     // List<Func<string>> only satisfies 'where T : IEnumerable<Func<object>>' through interface plus delegate variance
     [Test]
     [StringFuncListDataSourceForConstraint]
@@ -405,6 +414,15 @@ public class StringArrayListDataSourceForConstraint : DataSourceGeneratorAttribu
     protected override IEnumerable<Func<List<string[]>>> GenerateDataSources(DataGeneratorMetadata metadata)
     {
         yield return () => [["a"]];
+    }
+}
+
+// Data source whose first type satisfies 'where T : IEnumerable<U[]>' once U is inferred from its second type
+public class StringArrayListAndStringDataSourceForConstraint : DataSourceGeneratorAttribute<List<string[]>, string>
+{
+    protected override IEnumerable<Func<(List<string[]>, string)>> GenerateDataSources(DataGeneratorMetadata metadata)
+    {
+        yield return () => ([["a"]], "a");
     }
 }
 
@@ -483,6 +501,21 @@ public class GenericConstraintClassAndMethodArgumentsTests<TClass>(TClass classV
     [Arguments(5)]
     [Arguments("invalid")]
     public async Task MixedMethodRows<TMethod>(TMethod value) where TMethod : struct
+    {
+        await Assert.That(classValue).IsEqualTo((TClass)(object)1);
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
+    }
+}
+
+// A method constraint that mentions the class type parameter is checked against the class type argument:
+// int satisfies 'IComparable<int>' and runs, string does not and fails, in both modes.
+[Arguments(1)]
+public class GenericConstraintMethodReferencesClassTests<TClass>(TClass classValue)
+{
+    [Test]
+    [Arguments(5)]
+    [Arguments("invalid")]
+    public async Task ClassTypeParameterConstraintRows<TMethod>(TMethod value) where TMethod : IComparable<TClass>
     {
         await Assert.That(classValue).IsEqualTo((TClass)(object)1);
         await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));

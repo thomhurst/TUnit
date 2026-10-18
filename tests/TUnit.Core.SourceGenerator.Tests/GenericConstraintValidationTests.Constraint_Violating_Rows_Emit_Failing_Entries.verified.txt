@@ -1585,6 +1585,85 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_GenericConstraintRowParityTests_ArrayOfTypeParameterConstraintMatch__T_U_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericConstraintRowParityTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.GenericConstraintRowParityTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.GenericConstraintRowParityTests)),
+        Name = "GenericConstraintRowParityTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.GenericConstraintRowParityTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("ArrayOfTypeParameterConstraintMatch", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 2, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.GenericConstraintRowParityTests), "ArrayOfTypeParameterConstraintMatch", false, 2, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, true, "T"), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "element", new global::TUnit.Core.GenericParameter(1, true, "U"), false)
+}));
+    private static global::TUnit.TestProject.GenericConstraintRowParityTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.GenericConstraintRowParityTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.GenericConstraintRowParityTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.ArrayOfTypeParameterConstraintMatch<global::System.Collections.Generic.List<string[]>, string>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.List<string[]>>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1])));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.TestProject.StringArrayListAndStringDataSourceForConstraint(),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintRowParityTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintRowParityTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.GenericConstraintRowParityTests>(
+            methodName: "ArrayOfTypeParameterConstraintMatch<List<string[]>, string>",
+            fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.ArrayOfTypeParameterConstraintMatch<List<string[]>, string>",
+            methodTypeArgumentsIdentity: "<global::System.Collections.Generic.List<string[]>, string>",
+            filePath: "",
+            lineNumber: 355,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.TestProject.StringArrayListAndStringDataSourceForConstraint(),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_GenericConstraintRowParityTests_ArrayOfTypeParameterConstraintMatch__T_U_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.GenericConstraintRowParityTests>(static () => TUnit_TestProject_GenericConstraintRowParityTests_ArrayOfTypeParameterConstraintMatch__T_U_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_GenericConstraintRowParityTests_DelegateVariantInterfaceConstraintMatch__T_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericConstraintRowParityTests", new global::TUnit.Core.ClassMetadata
@@ -1634,7 +1713,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.DelegateVariantInterfaceConstraintMatch<List<Func<string>>>",
             methodTypeArgumentsIdentity: "<global::System.Collections.Generic.List<global::System.Func<string>>>",
             filePath: "",
-            lineNumber: 355,
+            lineNumber: 364,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1712,7 +1791,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.NestedVariantInterfaceConstraintMatch<MatchingOuterPayload>",
             methodTypeArgumentsIdentity: "<global::TUnit.TestProject.MatchingOuterPayload>",
             filePath: "",
-            lineNumber: 365,
+            lineNumber: 374,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1783,7 +1862,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.NestedInterfaceWithOtherContainingTypeArgument",
             methodTypeArgumentsIdentity: "<global::TUnit.TestProject.MismatchedOuterPayload>",
             filePath: "",
-            lineNumber: 374,
+            lineNumber: 383,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1854,7 +1933,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.TwoInvalidInstanceDataSourceRows",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 384,
+            lineNumber: 393,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1925,7 +2004,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.InvalidRowWhoseFactoryThrows",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 393,
+            lineNumber: 402,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2033,7 +2112,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintClassAndMethodArgumentsTests<int>.MixedMethodRows<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 482,
+            lineNumber: 500,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2054,7 +2133,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintClassAndMethodArgumentsTests<int>.MixedMethodRows",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 482,
+            lineNumber: 500,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2075,4 +2154,137 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_GenericConstraintClassAndMethodArgumentsTests_TClass_MixedMethodRows__TMethod_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.GenericConstraintClassAndMethodArgumentsTests<int>>(static () => TUnit_TestProject_GenericConstraintClassAndMethodArgumentsTests_TClass_MixedMethodRows__TMethod_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_GenericConstraintMethodReferencesClassTests_TClass_ClassTypeParamete_31D9FD5A_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<>), [new global::TUnit.Core.GenericParameter(0, false, "TClass")]),
+        Name = "GenericConstraintMethodReferencesClassTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "classValue", new global::TUnit.Core.GenericParameter(0, false, "TClass"), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("ClassTypeParameterConstraintRows", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<>), "ClassTypeParameterConstraintRows", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, true, "TMethod"), false)
+}));
+    private static global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return (global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>), new object[] { 1 })!;
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        switch (methodIndex)
+        {
+            case 0:
+            {
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.ClassTypeParameterConstraintRows<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
+            }
+            case 1:
+            {
+                return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("Type 'String' does not implement interface 'IComparable`1' required for generic parameter 'TMethod'")));
+            }
+            default:
+                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        switch (groupIndex)
+        {
+            case 0:
+            {
+                return new global::System.Attribute[]
+                {
+                    new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.ArgumentsAttribute(1)
+                };
+            }
+            case 1:
+            {
+                return new global::System.Attribute[]
+                {
+                    new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.ArgumentsAttribute(1)
+                };
+            }
+            default:
+                throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
+        }
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>>(
+            methodName: "ClassTypeParameterConstraintRows<int>",
+            fullyQualifiedName: "TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>.ClassTypeParameterConstraintRows<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 515,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(5),
+},
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(1),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>>(
+            methodName: "ClassTypeParameterConstraintRows",
+            fullyQualifiedName: "TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>.ClassTypeParameterConstraintRows",
+            methodTypeArgumentsIdentity: "<string>",
+            filePath: "",
+            lineNumber: 515,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.GenericConstraintViolationDataSource.Create("Type 'String' does not implement interface 'IComparable`1' required for generic parameter 'TMethod'"),
+},
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(1),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 1,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 1),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_GenericConstraintMethodReferencesClassTests_TClass_ClassTypeParamete_31D9FD5A_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>>(static () => TUnit_TestProject_GenericConstraintMethodReferencesClassTests_TClass_ClassTypeParamete_31D9FD5A_TestSource.Entries_0);
 }
