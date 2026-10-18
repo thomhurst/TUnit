@@ -1922,4 +1922,52 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task Generic_Class_With_GenerateGenericTest_And_Type_Parameter_Method_Parameter_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                [GenerateGenericTest(typeof(int))]
+                public class MyClass<T>
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest(T value) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<int>> Data() { yield return () => 1; }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Class_Type_Parameter_Constraints_Are_Not_Checked_Against_Method_Data()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                [Arguments(1)]
+                public class MyClass<T>(T seed) where T : struct
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest(T value) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<string>> Data() { yield return () => "a"; }
+                }
+                """
+            );
+    }
 }

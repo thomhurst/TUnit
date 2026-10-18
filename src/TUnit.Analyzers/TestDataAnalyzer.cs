@@ -603,7 +603,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
             
-            var inferredTypeArguments = CompilationExtensions.InferTypeArguments(unwrappedTypes, testParameterTypes);
+            // Only a bare type-parameter test parameter reads the inferred type arguments.
+            var inferredTypeArguments = testParameterTypes.Any(t => t is ITypeParameterSymbol)
+                ? CompilationExtensions.InferTypeArguments(unwrappedTypes, testParameterTypes)
+                : null;
 
             var conversions = unwrappedTypes.ZipAll(testParameterTypes,
                 (argument, parameter) => 

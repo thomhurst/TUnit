@@ -33,6 +33,7 @@ public static class WellKnown
         public static readonly FullyQualifiedTypeName TestDiscoveryContext = GetTypeName("TestDiscoveryContext");
 
         public static readonly FullyQualifiedTypeName InheritsTestsAttribute = GetTypeName("InheritsTestsAttribute");
+        public static readonly FullyQualifiedTypeName GenerateGenericTestAttribute = GetTypeName("GenerateGenericTestAttribute");
 
         public static readonly FullyQualifiedTypeName NotInParallelAttribute = GetTypeName("NotInParallelAttribute");
         public static readonly FullyQualifiedTypeName DependsOnAttribute = GetTypeName("DependsOnAttribute");

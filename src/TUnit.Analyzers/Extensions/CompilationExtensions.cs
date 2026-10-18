@@ -1,5 +1,6 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers.Extensions;
 
@@ -75,6 +76,13 @@ public static class CompilationExtensions
                 return true;
             }
 
+            // A class type parameter is resolved from the class data and constructor arguments, not from the
+            // method's data row, so the row says nothing about which type argument it gets.
+            if (typeParameter.DeclaringMethod is null)
+            {
+                return true;
+            }
+
             if (inferredTypeArguments is not null && !inferredTypeArguments.ContainsKey(typeParameter))
             {
                 return true;
@@ -110,6 +118,13 @@ public static class CompilationExtensions
             {
                 // A type parameter nested in a constructed parameter type can also drive the inference.
                 CollectTypeParameters(parameterType, uncertain);
+                continue;
+            }
+
+            // Class type parameters are not inferred from the method's data row.
+            if (typeParameter.DeclaringMethod is null)
+            {
+                uncertain.Add(typeParameter);
                 continue;
             }
 
@@ -185,10 +200,13 @@ public static class CompilationExtensions
         var declaringSymbol = (ISymbol?) typeParameter.DeclaringMethod ?? typeParameter.DeclaringType;
 
         return declaringSymbol is not null && declaringSymbol.GetAttributes().Any(attribute =>
-            attribute.AttributeClass is { Name: "GenerateGenericTestAttribute" } attributeClass
-            && attributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core");
+            attribute.AttributeClass?.IsGloballyQualifiedNonGeneric(
+                WellKnown.AttributeFullyQualifiedClasses.GenerateGenericTestAttribute.WithGlobalPrefix) == true);
     }
 
+    // Keep in step with TestMetadataGenerator.ValidateTypeParameterConstraints in TUnit.Core.SourceGenerator,
+    // which validates the same type arguments at generation time. This check fails open: any shape it cannot
+    // decide for certain is accepted, so a gap here is a missed diagnostic rather than a false TUnit0001.
     private static bool CanSatisfyConstraints(this Compilation compilation, ITypeSymbol argumentType,
         ITypeParameterSymbol typeParameter, IReadOnlyDictionary<ITypeParameterSymbol, ITypeSymbol>? inferredTypeArguments)
     {
