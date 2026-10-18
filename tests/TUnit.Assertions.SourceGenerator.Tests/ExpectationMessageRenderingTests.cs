@@ -58,7 +58,16 @@ internal class ExpectationMessageRenderingTests
     }
 
     [Test]
-    public async Task Overloads_Sharing_A_Condition_Class_Are_Reported()
+    public async Task Generated_Source_Has_No_Unresolved_Class_Names()
+    {
+        var (sources, _) = AssertionMethodGeneratorRunner.Run(MessagesSource);
+
+        await Assert.That(sources).IsNotEmpty();
+        await Assert.That(sources.Where(source => source.Contains('\u0001'))).IsEmpty();
+    }
+
+    [Test]
+    public async Task Overloads_Sharing_A_Condition_Class_Are_Reported_At_The_Attribute()
     {
         var (_, diagnostics) = AssertionMethodGeneratorRunner.Run(
             """
@@ -76,7 +85,12 @@ internal class ExpectationMessageRenderingTests
             public static partial class OverloadAssertions;
             """);
 
-        await Assert.That(diagnostics.Select(x => x.Id)).Contains("TU0002");
+        var diagnostic = diagnostics.Single(x => x.Id == "TU0002");
+        var lineSpan = diagnostic.Location.GetLineSpan();
+
+        await Assert.That(lineSpan.Path).IsEqualTo(AssertionMethodGeneratorRunner.InputPath);
+        // Line 10 (0-based): the [AssertionFrom] line
+        await Assert.That(lineSpan.StartLinePosition.Line).IsEqualTo(10);
     }
 
     [Test]

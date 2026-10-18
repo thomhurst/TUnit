@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using TUnit.Assertions.SourceGenerator.Models;
 
 namespace TUnit.Assertions.SourceGenerator.Generators;
@@ -137,7 +138,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     requiresGenericTypeParameter,
                     treatAsInstance,
                     expectationMessage,
-                    isUnboundGeneric
+                    isUnboundGeneric,
+                    attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation()
                 );
 
                 attributeDataList.Add(createAssertionAttributeData);
@@ -245,7 +247,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     requiresGenericTypeParameter,
                     treatAsInstance,
                     expectationMessage,
-                    isUnboundGeneric
+                    isUnboundGeneric,
+                    attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation()
                 );
 
                 attributeDataList.Add(createAssertionAttributeData);
@@ -349,21 +352,14 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
     /// <summary>
     /// How pre-rendered source refers to a condition class: its name between markers that cannot occur in C# source,
-    /// so the emit step, which alone knows the final name, can substitute it with a plain replace.
+    /// so the emit step, which alone knows the final name, can substitute it with a plain replace. A reference that is
+    /// never resolved leaves a marker behind, which fails the build loudly rather than binding to a wrong class.
     /// </summary>
     private static string ClassNameReference(string className) => $"{ClassNameMarker}{className}{ClassNameMarker}";
 
     /// <summary>Substitutes <paramref name="name"/> for every reference to the <paramref name="className"/> class.</summary>
     private static string ResolveClassName(string source, string className, string name) =>
         source.Replace(ClassNameReference(className), name);
-
-    /// <summary>
-    /// Resolves any references left over (e.g. to a class an entry did not render) to the class's own name.
-    /// </summary>
-    private static string ResolveRemainingClassNames(string source) =>
-        source.IndexOf(ClassNameMarker) < 0
-            ? source
-            : Regex.Replace(source, $"{ClassNameMarker}([^{ClassNameMarker}]*){ClassNameMarker}", "$1");
 
     /// <summary>
     /// The condition classes emitted so far, across every extension class. A condition class is named after its
@@ -463,26 +459,24 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                         "TUnit.Assertions",
                         DiagnosticSeverity.Error,
                         true),
-                    Location.None));
+                    AttributeLocationModel.ToLocation(entry.AttributeLocation)));
+            }
+
+            foreach (var collidingClassName in entry.CollidingClassNames)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(OverloadsShareConditionClass, AttributeLocationModel.ToLocation(entry.AttributeLocation), collidingClassName));
             }
 
             var extensionMethodsSource = entry.ExtensionMethodsSource;
-            var sourcesInEntry = new Dictionary<string, string>(StringComparer.Ordinal);
+            var namesInEntry = new HashSet<string>(StringComparer.Ordinal);
             foreach (var conditionClass in entry.ConditionClasses)
             {
                 // Overloads that map to the same class name can't be told apart in the extension methods, so the
-                // first one wins, as before; say so when the dropped one would have been different
-                if (sourcesInEntry.TryGetValue(conditionClass.ClassName, out var firstSource))
+                // first one wins, as before (reported above when the others would have been different)
+                if (!namesInEntry.Add(conditionClass.ClassName))
                 {
-                    if (firstSource != conditionClass.Source)
-                    {
-                        context.ReportDiagnostic(Diagnostic.Create(OverloadsShareConditionClass, Location.None, conditionClass.ClassName));
-                    }
-
                     continue;
                 }
-
-                sourcesInEntry.Add(conditionClass.ClassName, conditionClass.Source);
 
                 var (name, isNew) = allGeneratedClasses.Claim(conditionClass);
                 extensionMethodsSource = ResolveClassName(extensionMethodsSource, conditionClass.ClassName, name);
@@ -493,7 +487,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 }
             }
 
-            extensionMethodSources.Add(ResolveRemainingClassNames(extensionMethodsSource));
+            extensionMethodSources.Add(extensionMethodsSource);
         }
 
         // Generate extension methods class
@@ -520,7 +514,20 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         var conditionClasses = RenderConditionClasses(attributeData, out var missingMethodMessage);
         var extensionMethodsSource = RenderExtensionMethods(attributeData);
 
-        return new AssertionEntryModel(conditionClasses, missingMethodMessage, extensionMethodsSource);
+        // Overloads that map to the same class name but would generate different classes; only the first is emitted
+        var collidingClassNames = conditionClasses
+            .GroupBy(x => x.ClassName, StringComparer.Ordinal)
+            .Where(group => group.Select(x => x.Source).Distinct(StringComparer.Ordinal).Skip(1).Any())
+            .Select(group => group.Key)
+            .ToImmutableEquatableArray();
+
+        // Only keep the location when there is something to report: it changes with every edit above the attribute,
+        // and would otherwise stop unrelated edits from being cached
+        var attributeLocation = missingMethodMessage is not null || collidingClassNames.Count > 0
+            ? AttributeLocationModel.From(attributeData.AttributeLocation)
+            : null;
+
+        return new AssertionEntryModel(conditionClasses, missingMethodMessage, extensionMethodsSource, collidingClassNames, attributeLocation);
     }
 
     private static ImmutableEquatableArray<ConditionClassModel> RenderConditionClasses(CreateAssertionAttributeData attributeData, out string? missingMethodMessage)
@@ -1464,8 +1471,25 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     private sealed record AssertionEntryModel(
         ImmutableEquatableArray<ConditionClassModel> ConditionClasses,
         string? MissingMethodMessage,
-        string ExtensionMethodsSource
+        string ExtensionMethodsSource,
+        ImmutableEquatableArray<string> CollidingClassNames,
+        AttributeLocationModel? AttributeLocation
     );
+
+    /// <summary>
+    /// Equatable stand-in for the [AssertionFrom] attribute's <see cref="Location"/>, which references its
+    /// <see cref="SyntaxTree"/> and would keep old compilations alive in the incremental cache.
+    /// </summary>
+    private sealed record AttributeLocationModel(string FilePath, TextSpan Span, LinePositionSpan LineSpan)
+    {
+        public static AttributeLocationModel? From(Location? location) =>
+            location is { IsInSource: true } && location.GetLineSpan() is { Path: { Length: > 0 } path } lineSpan
+                ? new AttributeLocationModel(path, location.SourceSpan, lineSpan.Span)
+                : null;
+
+        public static Location ToLocation(AttributeLocationModel? model) =>
+            model is null ? Location.None : Location.Create(model.FilePath, model.Span, model.LineSpan);
+    }
 
     private sealed record ConditionClassModel(
         string ClassName,
@@ -1484,6 +1508,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         bool RequiresGenericTypeParameter,
         bool TreatAsInstance,
         string? ExpectationMessage,
-        bool IsUnboundGeneric
+        bool IsUnboundGeneric,
+        Location? AttributeLocation
     );
 }

@@ -15,6 +15,9 @@ internal static class AssertionMethodGeneratorRunner
     private static readonly Regex ExpectationRegex = new(
         @"protected override string GetExpectation\(\)\s*\{\s*return (?<expectation>[^\r\n]*);");
 
+    /// <summary>The path the input source is parsed with, so diagnostics can point into it.</summary>
+    public const string InputPath = "Input.cs";
+
     /// <summary>Runs the generator over <paramref name="source"/> and returns its generated sources and diagnostics.</summary>
     public static (string[] Sources, ImmutableArray<Diagnostic> Diagnostics) Run(string source)
     {
@@ -28,7 +31,7 @@ internal static class AssertionMethodGeneratorRunner
         var compilation = CSharpCompilation.Create(
                 nameof(AssertionMethodGeneratorRunner),
                 [
-                    CSharpSyntaxTree.ParseText(source, parseOptions),
+                    CSharpSyntaxTree.ParseText(source, parseOptions, path: InputPath),
                     CSharpSyntaxTree.ParseText(
                         """
                         global using global::System;
