@@ -14,6 +14,7 @@ namespace TUnit.Pipeline.Modules;
 // Version props come from $GITHUB_ENV (see .github/workflows/dotnet.yml) so recompiles
 // also stamp the correct AssemblyVersion. See issue #5622. The AOT publishes build into
 // their own artifacts trees, so they no longer touch those folders.
+[ModuleCategory(PipelineCategories.Packaging)]
 [DependsOn<GetPackageProjectsModule>]
 [DependsOn<GenerateVersionModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
