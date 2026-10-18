@@ -103,6 +103,10 @@ internal sealed class TestScheduler : ITestScheduler
             return true;
         }
 
+        // Covers every phase that runs user code (static property initializers, tests,
+        // session hooks) so blocking tests do not delay timers in other tests.
+        using var starvationMonitor = ThreadPoolStarvationMonitor.Start(_maxParallelism.Value, _logger);
+
         // Initialize static properties before tests run
         await _staticPropertyHandler.InitializeStaticPropertiesAsync(cancellationToken).ConfigureAwait(false);
 

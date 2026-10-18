@@ -19,6 +19,7 @@ namespace
         public BrowserTest(.BrowserTypeLaunchOptions options) { }
         public .IBrowser Browser { get; }
         public virtual bool PropagateTraceContext { get; }
+        public virtual .<string>? TraceContextOrigins { get; }
         [.Before(., "", 0)]
         public . BrowserSetup() { }
         [.After(., "", 0)]
@@ -32,6 +33,7 @@ namespace
         public required .BrowserFixture BrowserFixture { get; init; }
         public .IBrowserContext Context { get; }
         protected virtual bool PropagateTraceContext { get; }
+        protected virtual .<string>? TraceContextOrigins { get; }
         public virtual . DisposeAsync() { }
         protected virtual .BrowserNewContextOptions GetContextOptions() { }
         public virtual . InitializeAsync() { }

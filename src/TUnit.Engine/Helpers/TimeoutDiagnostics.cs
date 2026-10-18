@@ -41,6 +41,11 @@ internal static class TimeoutDiagnostics
         var sb = new StringBuilder(baseMessage);
 
         AppendTaskStatus(sb, executionTask, executionException);
+#if NET
+        ThreadPool.GetMaxThreads(out var maxWorkerThreads, out _);
+        ThreadPool.GetAvailableThreads(out var availableWorkerThreads, out _);
+        AppendThreadPoolDiagnostics(sb, ThreadPool.ThreadCount, maxWorkerThreads - availableWorkerThreads, ThreadPool.PendingWorkItemCount);
+#endif
         AppendStackTraceDiagnostics(sb);
 
         return sb.ToString();
@@ -88,6 +93,49 @@ internal static class TimeoutDiagnostics
         sb.Append(": ");
         sb.Append(exception.Message);
     }
+
+#if NET
+    /// <summary>
+    /// Appends a thread pool snapshot. A backlog of queued work means continuations and timer
+    /// callbacks were waiting for a thread, so the timeout may be caused by other tests blocking.
+    /// </summary>
+    internal static void AppendThreadPoolDiagnostics(StringBuilder sb, int threadCount, int busyWorkerThreads, long pendingWorkItems)
+    {
+        ThreadPool.GetMinThreads(out var minWorkerThreads, out _);
+        ThreadPool.GetMaxThreads(out var maxWorkerThreads, out _);
+
+        sb.AppendLine();
+        sb.AppendLine();
+        sb.Append("--- Thread Pool ---");
+        sb.AppendLine();
+        sb.Append("Threads: ");
+        sb.Append(threadCount);
+        sb.Append(", busy: ");
+        sb.Append(busyWorkerThreads);
+        sb.Append(", pending work items: ");
+        sb.Append(pendingWorkItems);
+        sb.Append(", min worker threads: ");
+        sb.Append(minWorkerThreads);
+        sb.Append(", max worker threads: ");
+        sb.Append(maxWorkerThreads);
+
+        if (IsThreadPoolSaturated(threadCount, busyWorkerThreads, pendingWorkItems))
+        {
+            sb.AppendLine();
+            sb.Append("The thread pool appears saturated. This timeout may be caused by blocking calls ");
+            sb.Append("(.Result, .Wait(), Thread.Sleep, synchronous I/O) in other concurrently running tests ");
+            sb.Append("rather than by this test. Use async APIs throughout, or limit concurrency for heavy tests ");
+            sb.Append("with [ParallelLimiter<T>] or --maximum-parallel-tests.");
+        }
+    }
+
+    /// <summary>
+    /// Work is waiting and every pool thread is busy. Even one queued timer callback counts: it
+    /// cannot run until a thread frees up.
+    /// </summary>
+    internal static bool IsThreadPoolSaturated(int threadCount, int busyWorkerThreads, long pendingWorkItems)
+        => pendingWorkItems > 0 && busyWorkerThreads >= threadCount;
+#endif
 
     private static void AppendStackTraceDiagnostics(StringBuilder sb)
     {

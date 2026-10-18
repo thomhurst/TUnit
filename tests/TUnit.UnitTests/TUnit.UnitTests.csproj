@@ -16,6 +16,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\TUnit\TUnit.csproj" />
+      <ProjectReference Include="..\..\src\TUnit.FsCheck\TUnit.FsCheck.csproj" />
       <ProjectReference Include="..\..\src\TUnit.Playwright\TUnit.Playwright.csproj" />
     </ItemGroup>
 

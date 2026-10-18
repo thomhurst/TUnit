@@ -23,6 +23,7 @@ Use the SDK selected by `global.json`. Shared build settings live in `Directory.
 - Use `pwsh scripts/Remove-MergedWorktrees.ps1` for squash-safe merged-worktree cleanup; `-WhatIf` reports removal candidates and preserved files.
 - When asked to clean up worktrees, remove those for merged or `[gone]` branches without per-item confirmation. Preserve branches unless deletion is requested.
 - Verify review findings against the code before fixing them. If a reviewer or user reaffirms a disputed finding after one reasoned objection, implement it.
+- Resolve each PR review thread, whether a human or a bot opened it, as soon as you have dispositioned it: the fix is pushed to the PR head and your reply names the commit, or your reply pushes back on the finding with evidence. Leave a thread open only while it has no disposition. If the reviewer replies after your disposition, unresolve the thread and handle the reply.
 
 ## References
 

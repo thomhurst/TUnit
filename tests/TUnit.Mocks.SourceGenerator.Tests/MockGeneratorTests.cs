@@ -2703,6 +2703,133 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Indexers_Returning_Interfaces_Pass_The_Auto_Mock_Factory()
+    {
+        // Indexer getters pass the generated auto-mock factory like methods and properties, so an
+        // auto-mocked generic return type need not be built by reflection under Native AOT.
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IChild<T>
+            {
+                T Value { get; }
+            }
+
+            public interface IIndexedLookup<T>
+            {
+                IChild<T> this[int index] { get; }
+            }
+
+            public abstract class IndexedBase<T>
+            {
+                public abstract IChild<T> this[string key] { get; }
+                public virtual IChild<T> this[int index] => throw new System.NotImplementedException();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var lookup = IIndexedLookup<int>.Mock();
+                    var partial = IndexedBase<int>.Mock();
+                }
+            }
+            """;
+
+        var output = GetGeneratedOutput(source);
+
+        AssertContains(output, "\"get_Item\", new object?[] { key }, default!, static __behavior =>");
+        AssertContains(output, "out var __result, static __behavior =>");
+        AssertNoGeneratedError(source, "CS1503");
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Inherited_Members_Returning_Interfaces_Generate_Their_Auto_Mock_Factories()
+    {
+        // Members inherited from a base class reference the return type's auto-mock factory, so
+        // transitive discovery must walk base classes too, or the factory is never generated.
+        var source = """
+            using TUnit.Mocks;
+
+            public interface ILeaf
+            {
+                int Value { get; }
+            }
+
+            public class Base
+            {
+                public virtual ILeaf this[int index] => throw new System.NotImplementedException();
+                public virtual ILeaf GetLeaf() => throw new System.NotImplementedException();
+                public virtual ILeaf Leaf => throw new System.NotImplementedException();
+            }
+
+            public class Child : Base
+            {
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Child.Mock();
+                }
+            }
+            """;
+
+        var output = GetGeneratedOutput(source);
+
+        AssertContains(output, "ILeafMockFactory");
+        AssertContains(output, "internal static global::TUnit.Mocks.Mock<global::ILeaf> CreateAutoMock(");
+        AssertNoGeneratedError(source, "CS0234");
+        AssertNoGeneratedError(source, "CS0400");
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public async Task Inaccessible_Inherited_Members_Do_Not_Generate_Auto_Mock_Factories()
+    {
+        // Inherited members the mock cannot override (internal or private protected in another
+        // assembly without InternalsVisibleTo) must not pull in a factory for their return type,
+        // which this compilation cannot name (CS0122).
+        var external = CreateExternalAssemblyReference("""
+            internal interface IHiddenLeaf { }
+            internal interface IHiddenProtectedLeaf { }
+            public interface IVisibleLeaf { int Value { get; } }
+
+            public class ExternalBase
+            {
+                internal virtual IHiddenLeaf GetHidden() => null!;
+                private protected virtual IHiddenProtectedLeaf GetHiddenProtected() => null!;
+                public virtual IVisibleLeaf GetVisible() => null!;
+            }
+
+            public class ExternalChild : ExternalBase { }
+            """, "InaccessibleInheritedLib");
+
+        var source = """
+            using TUnit.Mocks;
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = ExternalChild.Mock();
+                }
+            }
+            """;
+
+        var output = GetGeneratedOutput(source, [external]);
+
+        AssertDoesNotContain(output, "IHiddenLeaf");
+        AssertDoesNotContain(output, "IHiddenProtectedLeaf");
+        AssertContains(output, "IVisibleLeafMockFactory");
+        await Task.CompletedTask;
+    }
+
+    [Test]
     public Task Abstract_Class_With_Abstract_Indexer()
     {
         // Regression #6516: an abstract indexer took the virtual-member path and emitted a

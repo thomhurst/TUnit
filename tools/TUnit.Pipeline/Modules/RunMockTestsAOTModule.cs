@@ -25,18 +25,21 @@ public class RunMockTestsAOTModule : Module<IReadOnlyList<CommandResult>>
 
         var rootDir = context.Git().RootDirectory.AssertExists().Path;
 
-        foreach (var framework in new[] { "net8.0", "net9.0", "net10.0" })
+        foreach (var (projectName, outputPrefix) in PublishMockTestsAOTModule.AotProjects)
         {
-            var exePath = Path.Combine(rootDir, $"MOCKTESTS_AOT_{framework}", "TUnit.Mocks.Tests");
-
-            var runResult = await context.SubModule<CommandResult>($"Run-AOT-{framework}", async () =>
+            foreach (var framework in new[] { "net8.0", "net9.0", "net10.0" })
             {
-                return await context.Shell.Bash.Command(
-                    new BashCommandOptions($"DISABLE_GITHUB_REPORTER=true \"{exePath}\""),
-                    cancellationToken);
-            });
+                var exePath = Path.Combine(rootDir, $"{outputPrefix}_{framework}", projectName);
 
-            results.Add(runResult);
+                var runResult = await context.SubModule<CommandResult>($"Run-AOT-{projectName}-{framework}", async () =>
+                {
+                    return await context.Shell.Bash.Command(
+                        new BashCommandOptions($"DISABLE_GITHUB_REPORTER=true \"{exePath}\""),
+                        cancellationToken);
+                });
+
+                results.Add(runResult);
+            }
         }
 
         return results;

@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Text;
@@ -92,22 +93,29 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
     }
 
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, typeof(CancellationTokenArbitrary))]
-    private Config CreateConfig()
+    internal Config CreateConfig()
     {
-        var config = Config.QuickThrowOnFailure
+        // VerboseThrowOnFailure is QuickThrowOnFailure plus output of every generated argument and shrink step.
+        var config = (_propertyAttribute.Verbose ? Config.VerboseThrowOnFailure : Config.QuickThrowOnFailure)
             .WithMaxTest(_propertyAttribute.MaxTest)
             .WithMaxRejected(_propertyAttribute.MaxFail)
             .WithStartSize(_propertyAttribute.StartSize)
-            .WithEndSize(_propertyAttribute.EndSize);
+            .WithEndSize(_propertyAttribute.EndSize)
+            .WithQuietOnSuccess(_propertyAttribute.QuietOnSuccess);
 
-        if (!string.IsNullOrEmpty(_propertyAttribute.Replay))
+        // Any ParallelRunConfig switches FsCheck to its thread-pool runner, even with a degree of 1,
+        // so only opt in when invocations may actually overlap.
+        if (_propertyAttribute.Parallelism > 1)
         {
-            var parts = _propertyAttribute.Replay!.Split(',');
-            if (parts.Length >= 1 && ulong.TryParse(parts[0].Trim(), out var seed1))
-            {
-                var seed2 = parts.Length >= 2 && ulong.TryParse(parts[1].Trim(), out var s2) ? s2 : 0UL;
-                config = config.WithReplay(seed1, seed2);
-            }
+            config = config.WithParallelRunConfig(new ParallelRunConfig(_propertyAttribute.Parallelism));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_propertyAttribute.Replay))
+        {
+            var (seed, gamma, size) = ParseReplay(_propertyAttribute.Replay!);
+            config = size is { } replaySize
+                ? config.WithReplay(seed, gamma, replaySize)
+                : config.WithReplay(seed, gamma);
         }
 
         // Register a default Arbitrary<CancellationToken> that surfaces TestContext's
@@ -118,6 +126,48 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
             (_propertyAttribute.Arbitrary ?? []).Append(typeof(CancellationTokenArbitrary)));
 
         return config;
+    }
+
+    /// <summary>
+    /// Parses the values FsCheck reports on failure: "seed,gamma" (whole run) or "seed,gamma,size"
+    /// (failing step only), optionally in the one pair of parentheses FsCheck prints them in.
+    /// </summary>
+    /// <remarks>
+    /// A seed alone is rejected rather than paired with a default gamma: FsCheck never reports a seed
+    /// without its gamma, and any other gamma replays a different run than the one that failed.
+    /// </remarks>
+    private static (ulong Seed, ulong Gamma, int? Size) ParseReplay(string replay)
+    {
+        var value = replay.Trim();
+
+        // Strip only one enclosing pair. Any other parenthesis stays and fails the number parsing below.
+        if (value.Length >= 2 && value[0] == '(' && value[value.Length - 1] == ')')
+        {
+            value = value.Substring(1, value.Length - 2);
+        }
+
+        var parts = value.Split(',');
+
+        if (parts.Length is 2 or 3
+            && ulong.TryParse(parts[0].Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var seed)
+            && ulong.TryParse(parts[1].Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var gamma)
+            && gamma % 2 == 1)
+        {
+            if (parts.Length == 2)
+            {
+                return (seed, gamma, null);
+            }
+
+            if (int.TryParse(parts[2].Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var size))
+            {
+                return (seed, gamma, size);
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Invalid {nameof(FsCheckPropertyAttribute.Replay)} value '{replay}'. Use the values FsCheck reports on failure: " +
+            "\"seed,gamma\" to replay the whole run, or \"seed,gamma,size\" to replay only the failing step. " +
+            "The gamma must be odd; surrounding parentheses are allowed.");
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2060", Justification = "FsCheck requires reflection")]

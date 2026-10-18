@@ -309,7 +309,7 @@ public interface IProcessor
     bool Process(string input);
 }
 
-var mock = Mock.Of<IProcessor>();
+var mock = IProcessor.Mock();
 mock.Process(Any())
     .Returns(true)
     .RaisesProcessCompleted(EventArgs.Empty)   // strongly-typed auto-raise event

@@ -18,6 +18,7 @@ public class TUnitSettingsTests
     private int? _savedMaximumParallelTests;
     private bool _savedDetailedStackTrace;
     private bool _savedFailFast;
+    private bool _savedThreadPoolTuningEnabled;
     private bool _savedHtmlReportEnabled;
     private bool _savedJsonReportEnabled;
     private bool _savedArtifactUploadEnabled;
@@ -32,6 +33,7 @@ public class TUnitSettingsTests
         _savedMaximumParallelTests = TUnitSettings.Default.Parallelism.MaximumParallelTests;
         _savedDetailedStackTrace = TUnitSettings.Default.Display.DetailedStackTrace;
         _savedFailFast = TUnitSettings.Default.Execution.FailFast;
+        _savedThreadPoolTuningEnabled = TUnitSettings.Default.Execution.ThreadPoolTuningEnabled;
         _savedHtmlReportEnabled = TUnitSettings.Default.Reporting.HtmlReportEnabled;
         _savedJsonReportEnabled = TUnitSettings.Default.Reporting.JsonReportEnabled;
         _savedArtifactUploadEnabled = TUnitSettings.Default.Reporting.ArtifactUploadEnabled;
@@ -47,6 +49,7 @@ public class TUnitSettingsTests
         TUnitSettings.Default.Parallelism.MaximumParallelTests = _savedMaximumParallelTests;
         TUnitSettings.Default.Display.DetailedStackTrace = _savedDetailedStackTrace;
         TUnitSettings.Default.Execution.FailFast = _savedFailFast;
+        TUnitSettings.Default.Execution.ThreadPoolTuningEnabled = _savedThreadPoolTuningEnabled;
         TUnitSettings.Default.Reporting.HtmlReportEnabled = _savedHtmlReportEnabled;
         TUnitSettings.Default.Reporting.JsonReportEnabled = _savedJsonReportEnabled;
         TUnitSettings.Default.Reporting.ArtifactUploadEnabled = _savedArtifactUploadEnabled;
@@ -62,6 +65,7 @@ public class TUnitSettingsTests
         await Assert.That(TUnitSettings.Default.Parallelism.MaximumParallelTests).IsNull();
         await Assert.That(TUnitSettings.Default.Display.DetailedStackTrace).IsFalse();
         await Assert.That(TUnitSettings.Default.Execution.FailFast).IsFalse();
+        await Assert.That(TUnitSettings.Default.Execution.ThreadPoolTuningEnabled).IsTrue();
         await Assert.That(TUnitSettings.Default.Reporting.HtmlReportEnabled).IsTrue();
         await Assert.That(TUnitSettings.Default.Reporting.JsonReportEnabled).IsTrue();
         await Assert.That(TUnitSettings.Default.Reporting.ArtifactUploadEnabled).IsTrue();
@@ -73,6 +77,18 @@ public class TUnitSettingsTests
         TUnitSettings.Default.Timeouts.DefaultTestTimeout = TimeSpan.FromMinutes(10);
         await Assert.That(TUnitSettings.Default.Timeouts.DefaultTestTimeout).IsEqualTo(TimeSpan.FromMinutes(10));
     }
+
+#if NET
+    [Test]
+    public async Task ThreadPoolTuning_Disabled_In_Settings_Does_Not_Start_Monitor()
+    {
+        TUnitSettings.Default.Execution.ThreadPoolTuningEnabled = false;
+
+        using var monitor = TUnit.Engine.Scheduling.ThreadPoolStarvationMonitor.Start(maxParallelism: 1000, new TUnit.Core.Logging.NullLogger());
+
+        await Assert.That(monitor).IsNull();
+    }
+#endif
 
     [Test]
     public async Task Reporting_Settings_Can_Be_Modified()

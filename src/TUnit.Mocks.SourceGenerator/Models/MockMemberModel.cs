@@ -37,6 +37,12 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public int SetterMemberId { get; init; }
     public bool IsIndexer { get; init; }
     public bool IsGenericMethod { get; init; }
+
+    /// <summary>
+    /// True for an override of <see cref="object.Equals(object)"/>, <see cref="object.GetHashCode"/> or
+    /// <see cref="object.ToString"/>. These keep their base implementation when <c>PassThrough</c> is false.
+    /// </summary>
+    public bool IsObjectMethodOverride { get; init; }
     public EquatableArray<MockParameterModel> Parameters { get; init; } = EquatableArray<MockParameterModel>.Empty;
     public EquatableArray<MockTypeParameterModel> TypeParameters { get; init; } = EquatableArray<MockTypeParameterModel>.Empty;
     public string? ExplicitInterfaceName { get; init; }
@@ -179,6 +185,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && SetterMemberId == other.SetterMemberId
             && IsIndexer == other.IsIndexer
             && IsGenericMethod == other.IsGenericMethod
+            && IsObjectMethodOverride == other.IsObjectMethodOverride
             && Parameters.Equals(other.Parameters)
             && TypeParameters.Equals(other.TypeParameters)
             && ExplicitInterfaceName == other.ExplicitInterfaceName
@@ -217,6 +224,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + ReturnType.GetHashCode();
             hash = hash * 31 + Parameters.GetHashCode();
             hash = hash * 31 + IsStaticAbstract.GetHashCode();
+            hash = hash * 31 + IsObjectMethodOverride.GetHashCode();
             hash = hash * 31 + OverrideAccessModifier.GetHashCode();
             hash = hash * 31 + GetterAccessModifier.GetHashCode();
             hash = hash * 31 + SetterAccessModifier.GetHashCode();

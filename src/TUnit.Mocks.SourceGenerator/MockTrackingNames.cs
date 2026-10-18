@@ -11,4 +11,6 @@ internal static class MockTrackingNames
     public const string DistinctRequests = nameof(DistinctRequests);
     public const string DistinctModels = nameof(DistinctModels);
     public const string EmitResults = nameof(EmitResults);
+    public const string ClosedGenericMockOfInvocations = nameof(ClosedGenericMockOfInvocations);
+    public const string ClosedGenericEmissions = nameof(ClosedGenericEmissions);
 }

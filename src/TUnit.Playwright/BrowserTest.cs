@@ -17,16 +17,34 @@ public class BrowserTest : PlaywrightTest
     public IBrowser Browser { get; internal set; } = null!;
 
     /// <summary>
-    /// Seeds each <see cref="IBrowserContext"/> created via <see cref="NewContext"/>
-    /// with W3C <c>traceparent</c>/<c>baggage</c> headers from the current test's
-    /// <see cref="System.Diagnostics.Activity"/>. Override to <c>false</c> to avoid
-    /// leaking trace ids to third-party domains the page contacts.
+    /// Adds W3C <c>traceparent</c>/<c>baggage</c> headers from the current test's
+    /// <see cref="System.Diagnostics.Activity"/> to requests that contexts created via
+    /// <see cref="NewContext"/> send to <see cref="TraceContextOrigins"/>. Override to
+    /// <c>false</c> to disable propagation entirely.
     /// </summary>
     /// <remarks>
     /// Has no effect on <c>netstandard2.0</c> targets — the engine's Activity plumbing
     /// is .NET-only.
     /// </remarks>
     public virtual bool PropagateTraceContext => true;
+
+    /// <summary>
+    /// Origins (for example <c>https://localhost:5001</c>) whose requests receive trace
+    /// context headers. Defaults to <c>null</c>, which uses the origin of
+    /// <see cref="BrowserNewContextOptions.BaseURL"/>; when no base URL is set, no headers
+    /// are sent. Requests to other origins never receive the headers, so third-party
+    /// CORS requests are not preflighted and trace ids do not leak.
+    /// </summary>
+    /// <remarks>
+    /// Headers are added by a context route, which disables Playwright's HTTP cache for
+    /// that context; set <see cref="PropagateTraceContext"/> to <c>false</c> to keep the cache.
+    /// Routes you register later run first; call <c>route.FallbackAsync()</c> rather than
+    /// <c>route.ContinueAsync()</c> in them to keep the headers. Context routes do not see
+    /// WebSocket traffic or requests handled by a service worker, so those requests get no
+    /// headers. Playwright keeps the headers when a routed request is redirected, including
+    /// redirects to another origin.
+    /// </remarks>
+    public virtual IReadOnlyList<string>? TraceContextOrigins => null;
 
     private readonly List<Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording)>> _contexts = [];
     private readonly Lock _contextsLock = new();
@@ -35,12 +53,12 @@ public class BrowserTest : PlaywrightTest
     public async Task<IBrowserContext> NewContext(BrowserNewContextOptions options)
     {
         var owner = TestContext.Current;
-        options = PlaywrightTelemetryHeaders.Merge(options, PropagateTraceContext);
+        var traceContext = PlaywrightTraceContextRoute.Create(PropagateTraceContext, TraceContextOrigins, options);
         Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording)> creation;
         lock (_contextsLock)
         {
             var browser = Browser ?? throw new InvalidOperationException("Cannot create a browser context before setup or after teardown has started.");
-            creation = CreateContextAsync(browser, options, owner);
+            creation = CreateContextAsync(browser, options, traceContext, owner);
             // Track pending creation too, so teardown waits for every context it owns.
             _contexts.Add(creation);
         }
@@ -49,9 +67,22 @@ public class BrowserTest : PlaywrightTest
     }
 
     private static async Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording)> CreateContextAsync(
-        IBrowser browser, BrowserNewContextOptions options, TestContext? owner)
+        IBrowser browser, BrowserNewContextOptions options, PlaywrightTraceContextRoute? traceContext, TestContext? owner)
     {
         var context = await browser.NewContextAsync(options).ConfigureAwait(false);
+        if (traceContext is not null)
+        {
+            try
+            {
+                await traceContext.RegisterAsync(context).ConfigureAwait(false);
+            }
+            catch
+            {
+                await context.CloseAsync().ConfigureAwait(false);
+                throw;
+            }
+        }
+
         var recording = !string.IsNullOrEmpty(options.RecordVideoDir) && owner is not null
             ? new PlaywrightVideoRecorder(context, owner)
             : null;

@@ -105,7 +105,8 @@ public class TestRegisteredContext
     /// <param name="reason">The reason why the test is being skipped</param>
     public void SetSkipped(string reason)
     {
-        TestContext.SkipReason = reason;
+        // An empty reason would otherwise read as "not skipped" (#7077).
+        TestContext.SkipReason = SkipAttribute.NormalizeReason(reason);
         TestContext.Metadata.TestDetails.ClassInstance = SkippedTestInstance.Instance;
     }
 

@@ -60,6 +60,37 @@ The `SharedType` parameter controls how instances are shared across tests:
 - **`SharedType.PerTestSession`** — single instance for the entire test run, shared across assemblies (best for expensive resources like containers)
 - **`SharedType.Keyed`** — share instances based on a key value (use the `Key` parameter)
 
+### Configuring Instances by Key
+
+With `SharedType.Keyed`, each distinct key gets its own instance, and tests that use the same key share it. Implement `IKeyedDataSource` to let one fixture type behave differently for each key. TUnit sets `Key` after the constructor runs and before `InitializeAsync` is called, so initialization can read it:
+
+```csharp
+public class DatabaseFixture : IKeyedDataSource, IAsyncInitializer
+{
+    public string Key { get; set; } = "";
+
+    public bool SeedData { get; private set; }
+
+    public Task InitializeAsync()
+    {
+        SeedData = Key == "seeded";
+        return Task.CompletedTask;
+    }
+}
+
+[ClassDataSource<DatabaseFixture>(Shared = SharedType.Keyed, Key = "seeded")]
+public class ReportTests(DatabaseFixture database)
+{
+    [Test]
+    public async Task Uses_Seeded_Database()
+    {
+        await Assert.That(database.SeedData).IsTrue();
+    }
+}
+```
+
+Every key creates a separate instance, so each variant pays its own setup cost.
+
 ## Initialization and TearDown
 If you need to do some initialization or teardown for when this object is created/disposed, simply implement the `IAsyncInitializer` and/or `IAsyncDisposable` interfaces
 
@@ -84,6 +115,60 @@ public class MyTestClass
     }
 }
 ```
+
+## When Instances Are Created
+
+TUnit constructs `ClassDataSource<T>` instances while it builds tests, before any test runs. This happens for every `SharedType`. Attributes that affect scheduling, such as `[NotInParallel]`, do not change it. With `SharedType.None`, the constructor can also run more than once for each data row.
+
+`IAsyncInitializer.InitializeAsync` runs later, during execution. It runs right before the first test that receives the instance, after the `[Before(Class)]` hooks, and within that test's `[NotInParallel]` constraint.
+
+Keep constructors free of side effects on shared state, such as caches, static fields, or files. Put that work in `InitializeAsync` so it happens in execution order:
+
+```csharp
+public static class ProductCache
+{
+    private static readonly Dictionary<string, Product> Items = new();
+
+    public static void Register(Product product) => Items[product.Name] = product;
+
+    public static bool Contains(string name) => Items.ContainsKey(name);
+
+    public static void Clear() => Items.Clear();
+}
+
+public class Product : IAsyncInitializer
+{
+    public string Name { get; } = "Widget";
+
+    public Task InitializeAsync()
+    {
+        // Runs during execution, so a [NotInParallel] test that clears
+        // the cache cannot run between this registration and the test.
+        ProductCache.Register(this);
+        return Task.CompletedTask;
+    }
+}
+
+public class ProductTests
+{
+    [Test]
+    [NotInParallel]
+    public void Clears_Cache()
+    {
+        ProductCache.Clear();
+    }
+
+    [Test]
+    [NotInParallel]
+    [ClassDataSource<Product>]
+    public async Task Product_Is_Cached(Product product)
+    {
+        await Assert.That(ProductCache.Contains(product.Name)).IsTrue();
+    }
+}
+```
+
+Use `IAsyncInitializer`, not `IAsyncDiscoveryInitializer`, for this work. `IAsyncDiscoveryInitializer` runs while tests are built. See the [test lifecycle](lifecycle.md) for the full order.
 
 # Class Data Source Overloads
 

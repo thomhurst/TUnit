@@ -15,6 +15,12 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<RunMockTestsModule>]
 public class PublishMockTestsAOTModule : Module<IReadOnlyList<CommandResult>>
 {
+    internal static readonly (string ProjectName, string OutputPrefix)[] AotProjects =
+    [
+        ("TUnit.Mocks.Tests", "MOCKTESTS_AOT"),
+        ("TUnit.Mocks.Aot.Tests", "MOCKAOTTESTS_AOT"),
+    ];
+
     protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
         .WithSkipWhen(_ => EnvironmentVariables.IsNetFramework || !RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
             ? SkipDecision.Skip("Only runs on Linux")
@@ -27,40 +33,45 @@ public class PublishMockTestsAOTModule : Module<IReadOnlyList<CommandResult>>
 
         var rootDir = context.Git().RootDirectory.AssertExists().Path;
 
-        var testProject = context.Git()
-            .RootDirectory
-            .AssertExists()
-            .FindFile(x => x.Name == "TUnit.Mocks.Tests.csproj")
-            .AssertExists();
-
-        foreach (var framework in new[] { "net8.0", "net9.0", "net10.0" })
+        // TUnit.Mocks.Aot.Tests sets TreatWarningsAsErrors, so any trim/AOT warning ILC reports
+        // for everyday mock usage fails its publish (#7027).
+        foreach (var (projectName, outputPrefix) in AotProjects)
         {
-            var result = await context.SubModule<CommandResult>($"AOT-Publish-{framework}", async () =>
-            {
-                return await context.DotNet().Publish(new DotNetPublishOptions
-                {
-                    ProjectSolution = testProject.Path,
-                    Runtime = RuntimeIdentifiers.Current,
-                    Configuration = "Release",
-                    Output = Path.Combine(rootDir, $"MOCKTESTS_AOT_{framework}"),
-                    Properties =
-                    [
-                        new KeyValue("Aot", "true"),
-                    ],
-                    Framework = framework,
-                }, new CommandExecutionOptions
-                {
-                    LogSettings = new CommandLoggingOptions
-                    {
-                        ShowCommandArguments = true,
-                        ShowStandardError = true,
-                        ShowExecutionTime = true,
-                        ShowExitCode = true
-                    }
-                }, cancellationToken);
-            });
+            var testProject = context.Git()
+                .RootDirectory
+                .AssertExists()
+                .FindFile(x => x.Name == $"{projectName}.csproj")
+                .AssertExists();
 
-            results.Add(result);
+            foreach (var framework in new[] { "net8.0", "net9.0", "net10.0" })
+            {
+                var result = await context.SubModule<CommandResult>($"AOT-Publish-{projectName}-{framework}", async () =>
+                {
+                    return await context.DotNet().Publish(new DotNetPublishOptions
+                    {
+                        ProjectSolution = testProject.Path,
+                        Runtime = RuntimeIdentifiers.Current,
+                        Configuration = "Release",
+                        Output = Path.Combine(rootDir, $"{outputPrefix}_{framework}"),
+                        Properties =
+                        [
+                            new KeyValue("Aot", "true"),
+                        ],
+                        Framework = framework,
+                    }, new CommandExecutionOptions
+                    {
+                        LogSettings = new CommandLoggingOptions
+                        {
+                            ShowCommandArguments = true,
+                            ShowStandardError = true,
+                            ShowExecutionTime = true,
+                            ShowExitCode = true
+                        }
+                    }, cancellationToken);
+                });
+
+                results.Add(result);
+            }
         }
 
         return results;

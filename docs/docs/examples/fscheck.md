@@ -95,9 +95,10 @@ The `[FsCheckProperty]` attribute supports several configuration options:
 | `MaxFail` | 1000 | Maximum rejected tests before failing |
 | `StartSize` | 1 | Starting size for test generation |
 | `EndSize` | 100 | Ending size for test generation |
-| `Replay` | null | Seed to replay a specific test run |
-| `Verbose` | false | Output all generated arguments |
-| `QuietOnSuccess` | false | Suppress output on passing tests |
+| `Replay` | null | Replay a reported run: `"seed,gamma"` or `"seed,gamma,size"` (see [Reproducing Failures](#reproducing-failures)) |
+| `Verbose` | false | Write every generated argument and shrink step to the test output |
+| `QuietOnSuccess` | false | Suppress the `Ok, passed N tests.` summary on passing tests |
+| `Parallelism` | 1 | Degree of parallelism for property invocations; above 1, the property must be thread-safe |
 | `Arbitrary` | null | Types containing custom Arbitrary instances |
 
 ### Example with Configuration
@@ -113,10 +114,15 @@ public bool ListConcatenationPreservesElements(int[] first, int[] second)
 
 ## Reproducing Failures
 
-When a property test fails, FsCheck reports the seed that can be used to reproduce the failure. Use the `Replay` property to run the test with a specific seed:
+When a property test fails, FsCheck's message contains the `(seed,gamma)` the run started from and, after more than one test, a `Replay directly at failing step with (seed,gamma,size)` hint. Copy either value into the `Replay` property, with or without the parentheses:
+
+- `"seed,gamma"` replays the whole run.
+- `"seed,gamma,size"` replays only the failing step.
+
+The gamma is required: FsCheck always reports it next to the seed, and the same seed with a different gamma generates a different run. A value in any other format fails the test with an explanation.
 
 ```csharp
-[Test, FsCheckProperty(Replay = "12345,67890")]
+[Test, FsCheckProperty(Replay = "(12345,67891)")]
 public bool MyProperty(int value)
 {
     return value >= 0; // Will reproduce the same failing case

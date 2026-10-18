@@ -3,7 +3,7 @@
   "isRoot": true,
   "tools": {
     "microsoft.templateengine.authoring.cli": {
-      "version": "10.0.401",
+      "version": "10.0.402",
       "commands": [
         "dotnet-template-authoring"
       ],
@@ -17,7 +17,7 @@
       "rollForward": true
     },
     "dotnet-trace": {
-      "version": "10.0.745401",
+      "version": "10.0.750501",
       "commands": [
         "dotnet-trace"
       ],

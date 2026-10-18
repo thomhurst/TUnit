@@ -41,24 +41,26 @@ public class FsCheckPropertyAttribute : Attribute, ITestRegisteredEventReceiver,
     public int EndSize { get; set; } = 100;
 
     /// <summary>
-    /// If set, replay the test using this seed. Format: "seed1,seed2" or just "seed1".
-    /// Useful for reproducing failures.
+    /// If set, replay a previous run using the values FsCheck reports on failure.
+    /// Format: "seed,gamma" replays the whole run; "seed,gamma,size" replays only the failing step.
+    /// The parentheses FsCheck prints around these values are allowed. Any other value fails the test.
     /// </summary>
     public string? Replay { get; set; }
 
     /// <summary>
-    /// If true, output all generated arguments to the test output.
+    /// If true, write every generated argument and every shrink step to the test output.
     /// </summary>
     public bool Verbose { get; set; }
 
     /// <summary>
-    /// If true, suppress output on passing tests.
+    /// If true, suppress FsCheck's "Ok, passed N tests." summary on passing tests.
     /// </summary>
     public bool QuietOnSuccess { get; set; }
 
     /// <summary>
-    /// The level of parallelism to use when running tests.
-    /// Default is 1 (no parallelism within property execution).
+    /// The degree of parallelism FsCheck uses to invoke the property (its <c>ParallelRunConfig.MaxDegreeOfParallelism</c>).
+    /// Default is 1; any value below 2 invokes the property sequentially.
+    /// Above 1, the property must be safe to invoke concurrently on the same class instance.
     /// </summary>
     public int Parallelism { get; set; } = 1;
 

@@ -54,6 +54,21 @@ public interface IAmazonService : IServiceConfig
         ClientConfig clientConfig);
 }
 
+public class StaticAbstractClientFactory
+{
+    public virtual IAmazonService? Client => throw new InvalidOperationException("base should not run");
+
+    public virtual IAmazonService? Create() => throw new InvalidOperationException("base should not run");
+}
+
+/// <summary>Claims it can provide any type, returning an object that is not an <see cref="IAmazonService"/>.</summary>
+public class CatchAllDefaultValueProvider : IDefaultValueProvider
+{
+    public bool CanProvide(Type type) => true;
+
+    public object? GetDefaultValue(Type type) => new object();
+}
+
 /// <summary>
 /// Integration tests for static abstract interface member mock support.
 /// Uses the generated bridge interface (_Mockable) because C# CS8920 prevents
@@ -267,5 +282,30 @@ public class StaticAbstractMemberTests
     private static IAmazonService? CallCreateDefaultServiceClient<T>(AWSCredentials creds, ClientConfig config)
         where T : IAmazonService
         => T.CreateDefaultServiceClient(creds, config);
+
+    [Test]
+    public async Task PassThrough_False_Unconfigured_Static_Abstract_Returns_Return_Null()
+    {
+        var mock = StaticAbstractClientFactory.Mock();
+        Mock.SetPassThrough(mock, false);
+
+        var clientIsNull = mock.Object.Client is null;
+        var createdIsNull = mock.Object.Create() is null;
+
+        await Assert.That(clientIsNull).IsTrue();
+        await Assert.That(createdIsNull).IsTrue();
+    }
+
+    [Test]
+    public async Task PassThrough_False_Catch_All_Provider_Mismatch_Is_Not_Silently_Swallowed()
+    {
+        var mock = StaticAbstractClientFactory.Mock();
+        Mock.SetPassThrough(mock, false);
+        Mock.SetDefaultValueProvider(mock, new CatchAllDefaultValueProvider());
+
+        // Same as interface members: a non-null value of the wrong type fails loudly instead of becoming default.
+        await Assert.That(() => { _ = mock.Object.Client; }).Throws<InvalidCastException>();
+        await Assert.That(() => { _ = mock.Object.Create(); }).Throws<InvalidCastException>();
+    }
 }
 #endif

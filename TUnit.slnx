@@ -79,6 +79,7 @@
     <Project Path="tests/TUnit.Core.SourceGenerator.Tests/TUnit.Core.SourceGenerator.Tests.csproj" />
     <Project Path="tests/TUnit.Engine.Tests/TUnit.Engine.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.Analyzers.Tests/TUnit.Mocks.Analyzers.Tests.csproj" />
+    <Project Path="tests/TUnit.Mocks.Aot.Tests/TUnit.Mocks.Aot.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.Http.Tests/TUnit.Mocks.Http.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.InternalsAccess.TargetLib/TUnit.Mocks.InternalsAccess.TargetLib.csproj" />
     <Project Path="tests/TUnit.Mocks.InternalsAccess.Tests/TUnit.Mocks.InternalsAccess.Tests.csproj" />

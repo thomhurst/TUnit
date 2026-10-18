@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="FsCheck" />
+    <InternalsVisibleTo Include="TUnit.UnitTests" Key="$(PublicKey)" />
   </ItemGroup>
 
   <ItemGroup>

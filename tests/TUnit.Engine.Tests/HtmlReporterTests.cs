@@ -20,6 +20,11 @@ namespace TUnit.Engine.Tests;
 
 public class HtmlReporterTests
 {
+    // A reporter's activity collector listens process-wide, so it also records "test session"
+    // spans that other tests emit, and BuildReportData then reports that span's duration as the
+    // run duration. Tests that emit a session span or assert the run duration share this key.
+    private const string SessionSpanKey = "HtmlReporterSessionSpan";
+
     [Test]
     public void CommandProvider_DefaultMode_Exposes_Legacy_Options()
     {
@@ -95,6 +100,7 @@ public class HtmlReporterTests
     }
 
     [Test]
+    [NotInParallel(SessionSpanKey)]
     public async Task Stopping_Activity_Collection_Preserves_Spans_For_Report_Data(CancellationToken cancellationToken)
     {
         using var reporter = new HtmlReporter(new MockExtension());
@@ -575,12 +581,13 @@ public class HtmlReporterTests
     }
 
     [Test]
+    [NotInParallel(SessionSpanKey)]
     public async Task BuildReportData_Ignores_Default_Start_Timestamps()
     {
         // #6942: tests that never started (e.g. skipped before execution) carry a default
         // TimingInfo whose StartTime is 0001-01-01. Neither the run duration nor the per-test
         // StartTime may be derived from it, or the report shows ~17,757,303 hours.
-        var reporter = new HtmlReporter(new MockExtension());
+        using var reporter = new HtmlReporter(new MockExtension());
 
         var start = DateTimeOffset.UtcNow;
         var ranNode = CreateTimedNode("ran-1", "RanTest", PassedTestNodeStateProperty.CachedInstance,

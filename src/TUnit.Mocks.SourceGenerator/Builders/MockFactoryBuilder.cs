@@ -170,6 +170,7 @@ internal static class MockFactoryBuilder
             {
                 writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{model.FullyQualifiedName}>(behavior);");
                 writer.AppendLine("engine.IsWrapMock = true;");
+                EmitObjectMethodMemberIds(writer, model);
                 EmitConstructionScope(writer, model, safeName, () =>
                 {
                     writer.AppendLine($"var impl = new {safeName}WrapMockImpl(engine, instance);");
@@ -211,6 +212,7 @@ internal static class MockFactoryBuilder
             {
                 writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{model.FullyQualifiedName}>(behavior);");
                 EmitSecondaryInterfaceRegistrations(writer, model);
+                EmitObjectMethodMemberIds(writer, model);
 
                 EmitConstructionScope(writer, model, safeName, () =>
                 {
@@ -221,6 +223,21 @@ internal static class MockFactoryBuilder
                     writer.AppendLine("return mock;");
                 });
             }
+        }
+    }
+
+    /// <summary>
+    /// Tells the engine which members override <c>Equals(object)</c> / <c>GetHashCode()</c> / <c>ToString()</c>,
+    /// so they keep their base implementation when <c>PassThrough</c> is false. No-op when the class overrides none.
+    /// </summary>
+    private static void EmitObjectMethodMemberIds(CodeWriter writer, MockTypeModel model)
+    {
+        var ids = model.Methods.Where(m => m.IsObjectMethodOverride)
+            .Select(m => m.MemberId.ToString(CultureInfo.InvariantCulture))
+            .ToArray();
+        if (ids.Length > 0)
+        {
+            writer.AppendLine($"engine.ObjectMethodMemberIds = new int[] {{ {string.Join(", ", ids)} }};");
         }
     }
 
