@@ -18,6 +18,10 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<PackTUnitFilesModule>]
 [DependsOn<TestNugetPackageModule>]
 [DependsOn<RunEngineTestsModule>]
+// The engine modules no longer wait for these, so a release has to.
+[DependsOn<RunEngineAotTestsModule>]
+[DependsOn<RunRpcTestsModule>(Optional = true)]
+[DependsOn<RunPlaywrightTestsModule>(Optional = true)]
 [DependsOn<TestFSharpNugetPackageModule>]
 [DependsOn<TestVBNugetPackageModule>]
 public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<CommandResult[]>
