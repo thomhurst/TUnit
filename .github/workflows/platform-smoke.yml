@@ -27,18 +27,19 @@ jobs:
           - platform: Android
             os: ubuntu-latest
             workload: android
+          # The .NET 11 Apple workloads (27.x) require Xcode 27, which only the xcode-27 image has.
           - platform: iOS
-            os: macos-26
+            os: xcode-27
             workload: ios
             device: iPhone 17
-            simulator: iOS-26-5
+            simulator: iOS-27-0
           - platform: tvOS
-            os: macos-26
+            os: xcode-27
             workload: tvos
-            device: Apple TV
-            simulator: tvOS-26-5
+            device: Apple TV 4K (3rd generation)
+            simulator: tvOS-27-0
           - platform: MacCatalyst
-            os: macos-26
+            os: xcode-27
             workload: maccatalyst
           - platform: WASI
             os: ubuntu-latest
@@ -59,7 +60,7 @@ jobs:
           restore-keys: platform-smoke-${{ runner.os }}-${{ runner.arch }}-${{ matrix.platform }}-
       - name: Select the installed Xcode
         if: runner.os == 'macOS'
-        run: sudo xcode-select --switch /Applications/Xcode_26.6.app
+        run: sudo xcode-select --switch /Applications/Xcode_27.0.app
       - name: Start the installed Apple simulator
         if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
         run: |

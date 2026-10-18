@@ -26,18 +26,18 @@ public class PerTestServerStartupTests : TestsBase
     [DisplayName("Server startup time is recorded accurately")]
     public async Task Server_Startup_Time_Is_Recorded()
     {
-        // Add small buffer to account for DateTime precision differences
-        var beforeCall = DateTime.UtcNow.AddMilliseconds(-500);
-
+        // The Before(Test) hook that builds Factory starts the server before this body runs,
+        // so a timestamp taken here can be later than startup. SetupAsync runs before that build.
         _ = Factory.CreateClient();
 
-        var afterCall = DateTime.UtcNow.AddMilliseconds(500);
+        var afterCall = DateTime.UtcNow;
 
+        await Assert.That(SetupCalledAt).IsNotNull();
         await Assert.That(StartupCalledAt).IsNotNull();
-        await Assert.That(StartupCalledAt!.Value).IsGreaterThanOrEqualTo(beforeCall)
-            .Because("Server startup should occur around when we call CreateClient");
+        await Assert.That(StartupCalledAt!.Value).IsGreaterThanOrEqualTo(SetupCalledAt!.Value)
+            .Because("Server startup happens after SetupAsync, when the factory is built");
         await Assert.That(StartupCalledAt!.Value).IsLessThanOrEqualTo(afterCall)
-            .Because("Server startup should complete around when CreateClient returns");
+            .Because("Server startup should complete before CreateClient returns");
     }
 
     [Test]

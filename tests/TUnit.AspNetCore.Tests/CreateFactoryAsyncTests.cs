@@ -133,7 +133,8 @@ public class PerTestWebApplicationTestTests : PerTestWebApplicationTest<TestWebA
 /// </summary>
 /// <remarks>
 /// Uses its own factory type, so it gets its own session-shared global factory. That factory disposes
-/// its derived factories again at session end; the failing hosted service only fails its first stop, and
+/// its derived factories again at session end, so the failing hosted service stops failing once the test
+/// has seen its failure.
 /// <see cref="TestWebApplicationFactory{TEntryPoint}.SuppressHostedServiceExecutionContextFlow"/> is off
 /// because its wrapper replays the first stop result, which would fail that second disposal too.
 /// </remarks>
@@ -142,14 +143,23 @@ public class PerTestWebApplicationTestDisposalFailureTests : PerTestWebApplicati
     [Test]
     public async Task DisposeFactoryAsync_Disposes_Remaining_Factories_When_One_Throws()
     {
-        var failing = await CreateFactoryAsync(builder =>
-            builder.ConfigureTestServices(services => services.AddHostedService<ThrowingOnStopService>()));
+        var stopFailure = new ThrowingOnStopService();
+        await CreateFactoryAsync(builder =>
+            builder.ConfigureTestServices(services => services.AddHostedService(_ => stopFailure)));
         var healthy = await CreateFactoryAsync(builder =>
             builder.ConfigureTestServices(services => services.AddSingleton<DisposalProbe>()));
 
         var probe = healthy.Services.GetRequiredService<DisposalProbe>();
 
-        await Assert.That(DisposeFactoryAsync).Throws<Exception>().WithMessageContaining(ThrowingOnStopService.Message);
+        try
+        {
+            await Assert.That(DisposeFactoryAsync).Throws<Exception>().WithMessageContaining(ThrowingOnStopService.Message);
+        }
+        finally
+        {
+            stopFailure.StopFailing();
+        }
+
         await Assert.That(probe.IsDisposed).IsTrue();
     }
 }
@@ -217,18 +227,27 @@ public sealed class DisposalProbe : IDisposable
 }
 
 /// <summary>
-/// Fails the first stop only, so the global factory's second disposal at session end succeeds.
+/// Fails every stop until <see cref="StopFailing"/> is called, so the global factory's second
+/// disposal at session end succeeds.
 /// </summary>
+/// <remarks>
+/// It must not fail only the first stop. A minimal-hosting app stops its host twice, concurrently:
+/// once from <c>WebApplicationFactory.DisposeAsync</c> and once from its own <c>app.Run()</c>,
+/// which wakes on <c>ApplicationStopping</c>. When <c>app.Run()</c> made the first call, the
+/// disposal saw a clean stop and the test failed.
+/// </remarks>
 public sealed class ThrowingOnStopService : Microsoft.Extensions.Hosting.IHostedService
 {
     public const string Message = "Stop failed on purpose.";
 
-    private int _stopCalls;
+    private volatile bool _failStops = true;
 
     public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
     public Task StopAsync(CancellationToken cancellationToken) =>
-        Interlocked.Increment(ref _stopCalls) == 1
+        _failStops
             ? throw new InvalidOperationException(Message)
             : Task.CompletedTask;
+
+    public void StopFailing() => _failStops = false;
 }

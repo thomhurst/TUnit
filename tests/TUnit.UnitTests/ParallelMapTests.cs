@@ -1,3 +1,4 @@
+using System.Threading.Tasks.Sources;
 using TUnit.Engine.Utilities;
 
 namespace TUnit.UnitTests;
@@ -107,29 +108,48 @@ public class ParallelMapTests
     [Test]
     public async Task SelectorException_StopsSiblingsPullingNewItems()
     {
+        // Every worker takes one item and suspends on it, so the test decides the order:
+        // first item 0 faults, then the siblings finish. Letting the items race instead
+        // made this flaky: a worker preempted between the fault and parking the cursor
+        // let its siblings process all items.
         const int count = 10_000;
+        const int workers = 4;
         var invoked = 0;
+        var allWorkersBusy = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var siblingsGate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var faultingItem = new ObservableValueTaskSource<int>();
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            ParallelMap.ForParallelAsync(
-                count,
-                async i =>
+        var run = ParallelMap.ForParallelValueAsync(
+            count,
+            i =>
+            {
+                if (Interlocked.Increment(ref invoked) == workers)
                 {
-                    Interlocked.Increment(ref invoked);
+                    allWorkersBusy.SetResult();
+                }
 
-                    if (i == 0)
-                    {
-                        throw new InvalidOperationException("fail fast");
-                    }
+                return i == 0 ? faultingItem.ValueTask : new ValueTask<int>(WaitForGateAsync(i));
+            },
+            workers);
 
-                    await Task.Yield();
-                    return i;
-                },
-                Environment.ProcessorCount));
+        await allWorkersBusy.Task;
+        await faultingItem.Awaited;
 
-        // The parked cursor must prevent the full list from being processed.
-        // In-flight items may still complete, so allow generous slack.
-        await Assert.That(invoked).IsLessThan(count);
+        // The source runs continuations synchronously, so the worker's catch block has
+        // parked the cursor by the time SetException returns.
+        faultingItem.SetException(new InvalidOperationException("fail fast"));
+        siblingsGate.SetResult();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => run);
+
+        // Only the items taken before the fault ran; the parked cursor stopped the rest.
+        await Assert.That(invoked).IsEqualTo(workers);
+
+        async Task<int> WaitForGateAsync(int i)
+        {
+            await siblingsGate.Task;
+            return i;
+        }
     }
 
     [Test]
@@ -191,5 +211,31 @@ public class ParallelMapTests
                 return;
             }
         } while (Interlocked.CompareExchange(ref location, value, snapshot) != snapshot);
+    }
+
+    /// <summary>
+    /// A value-task source that reports when its awaiter suspends on it and, once completed,
+    /// runs that awaiter's continuation synchronously on the completing thread.
+    /// </summary>
+    private sealed class ObservableValueTaskSource<T> : IValueTaskSource<T>
+    {
+        private readonly TaskCompletionSource _awaited = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private ManualResetValueTaskSourceCore<T> _core;
+
+        public ValueTask<T> ValueTask => new(this, _core.Version);
+
+        public Task Awaited => _awaited.Task;
+
+        public void SetException(Exception exception) => _core.SetException(exception);
+
+        public T GetResult(short token) => _core.GetResult(token);
+
+        public ValueTaskSourceStatus GetStatus(short token) => _core.GetStatus(token);
+
+        public void OnCompleted(Action<object?> continuation, object? state, short token, ValueTaskSourceOnCompletedFlags flags)
+        {
+            _core.OnCompleted(continuation, state, token, flags);
+            _awaited.TrySetResult();
+        }
     }
 }

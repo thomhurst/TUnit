@@ -12,7 +12,8 @@ internal record GroupedTests
     public required AbstractExecutableTest[] NotInParallel { get; init; }
     
     // Array of tests with their constraint keys - no duplication
-    // Tests are pre-sorted by priority
+    // Tests are pre-sorted by priority. Priority is a dense rank (0 runs first) derived from
+    // TestPriority's ordering, not a hash, so ConstraintKeyScheduler can sort on it directly.
     public required (AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, int Priority)[] KeyedNotInParallel { get; init; }
     
     // Array of groups with nested arrays for maximum iteration performance
@@ -36,7 +37,8 @@ internal record GroupedConstrainedTests
     
     /// <summary>
     /// Tests that have both ParallelGroup and NotInParallel constraints
-    /// These must respect their constraint keys even within the parallel group
+    /// These must respect their constraint keys even within the parallel group.
+    /// Priority is a dense rank (0 runs first), as for <see cref="GroupedTests.KeyedNotInParallel"/>.
     /// </summary>
     public required (AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, int Priority)[] KeyedTests { get; init; }
 }
