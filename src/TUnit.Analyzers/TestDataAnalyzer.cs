@@ -603,6 +603,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
             
+            var inferredTypeArguments = CompilationExtensions.InferExactTypeArguments(unwrappedTypes, testParameterTypes);
+
             var conversions = unwrappedTypes.ZipAll(testParameterTypes,
                 (argument, parameter) => 
                 {
@@ -614,7 +616,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     {
                         return true;
                     }
-                    return context.Compilation.CanBindToTestParameter(argument, parameter);
+                    return context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments);
                 });
 
             if (!conversions.All(x => x))

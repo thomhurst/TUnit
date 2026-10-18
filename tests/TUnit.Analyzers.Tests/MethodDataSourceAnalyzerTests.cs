@@ -1669,4 +1669,188 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     .WithArguments("int?", "T")
             );
     }
+
+    [Test]
+    public async Task Generic_Method_With_GenerateGenericTest_And_Data_Not_Convertible_To_Its_Type_Argument_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public sealed class A { }
+                public sealed class B { }
+
+                public class MyClass
+                {
+                    [GenerateGenericTest(typeof(B))]
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<A>> Data() { yield return () => new A(); }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("A", "T")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Multiple_GenerateGenericTest_And_One_Unconvertible_Type_Argument_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [GenerateGenericTest(typeof(long), typeof(string))]
+                    [GenerateGenericTest(typeof(Guid), typeof(string))]
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T1, T2>(T1 first, T2 second) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, string)>> Data() { yield return () => (1, "a"); }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("int, string", "T1, T2")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_GenerateGenericTest_Ignores_Data_Type_Constraints()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [GenerateGenericTest(typeof(object))]
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : class => Task.CompletedTask;
+
+                    public static IEnumerable<Func<int>> Data() { yield return () => 1; }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Constraint_On_Peer_Type_Parameter_That_Is_Unsatisfied_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T, U>(T first, U second) where T : IComparable<U> => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, string)>> Data() { yield return () => (1, "a"); }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("int, string", "T, U")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Constraint_On_Peer_Type_Parameter_That_Is_Satisfied_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T, U>(T first, U second) where T : IComparable<U> => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, int)>> Data() { yield return () => (1, 2); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Constraint_On_Peer_Type_Parameter_With_Inexact_Data_Is_Not_Flagged()
+    {
+        // `object` data may hold a value whose run-time type satisfies the constraint, so the peer type argument
+        // is not known and the constraint is not checked.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T, U>(T first, U second) where T : IComparable<U> => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, object)>> Data() { yield return () => (1, 2); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Repeated_Type_Parameter_And_Different_Data_Types_Is_Not_Flagged()
+    {
+        // The value bound to the other occurrence is converted at run time (numeric, IConvertible and conversion
+        // operators), so differing data types do not prove a mismatch.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T first, T second) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, long)>> Data() { yield return () => (1, 2L); }
+                }
+                """
+            );
+    }
 }
