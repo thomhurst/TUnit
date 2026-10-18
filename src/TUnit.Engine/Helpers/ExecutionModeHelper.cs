@@ -26,7 +26,7 @@ internal static class ExecutionModeHelper
     /// 3. Command line --tunit-execution-mode
     /// 4. Assembly-level [ReflectionMode] attribute
     /// 5. Environment variable TUNIT_EXECUTION_MODE
-    /// 6. Default (SourceRegistrar.IsEnabled)
+    /// 6. Default (SourceRegistrar.IsSourceGenerationAvailable)
     /// </remarks>
     public static bool IsSourceGenerationMode(ICommandLineOptions commandLineOptions)
     {
@@ -82,6 +82,6 @@ internal static class ExecutionModeHelper
             }
         }
 
-        return SourceRegistrar.IsEnabled;
+        return SourceRegistrar.IsSourceGenerationAvailable;
     }
 }
