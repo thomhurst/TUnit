@@ -647,7 +647,41 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         public required string TestName { get; init; }
         public required string MethodName { get; init; }
         public AttributeData? SpecificArgumentsAttribute { get; init; }
+
+        /// <summary>
+        /// Further method-level [Arguments] rows that infer the same type arguments as
+        /// <see cref="SpecificArgumentsAttribute"/>. They share this instantiation, so each row
+        /// still yields its own test instead of being dropped as a duplicate type combination.
+        /// </summary>
+        public List<AttributeData>? AdditionalArgumentsAttributes { get; set; }
+
         public bool HasParameterizedConstructor { get; init; }
+
+        public bool IsSpecificDataSource(AttributeData attribute)
+        {
+            if (SpecificArgumentsAttribute is null)
+            {
+                return false;
+            }
+
+            if (AreSameAttribute(attribute, SpecificArgumentsAttribute))
+            {
+                return true;
+            }
+
+            if (AdditionalArgumentsAttributes is { } additional)
+            {
+                foreach (var additionalAttribute in additional)
+                {
+                    if (AreSameAttribute(attribute, additionalAttribute))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 
     /// <summary>
@@ -660,14 +694,26 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var results = new List<ConcreteInstantiation>();
         var processedTypeCombinations = new HashSet<string>();
 
+        // Instantiations built from a method-level [Arguments] row, keyed by type combination, so
+        // later rows inferring the same types join that instantiation rather than being dropped.
+        Dictionary<string, ConcreteInstantiation>? methodArgumentsInstantiations = null;
+
         var classTypeArgCount = testMethod.IsGenericType ? testMethod.TypeSymbol.TypeParameters.Length : 0;
         var methodTypeArgCount = testMethod.IsGenericMethod ? testMethod.MethodSymbol.TypeParameters.Length : 0;
 
-        void TryAddInstantiation(ITypeSymbol[] typeArguments, AttributeData? specificAttr = null)
+        void TryAddInstantiation(ITypeSymbol[] typeArguments, AttributeData? specificAttr = null, bool isMethodArgumentsRow = false)
         {
             var typeKey = BuildTypeKey(typeArguments);
             if (!processedTypeCombinations.Add(typeKey))
             {
+                if (isMethodArgumentsRow
+                    && specificAttr is not null
+                    && methodArgumentsInstantiations is not null
+                    && methodArgumentsInstantiations.TryGetValue(typeKey, out var existing))
+                {
+                    (existing.AdditionalArgumentsAttributes ??= []).Add(specificAttr);
+                }
+
                 return;
             }
 
@@ -721,7 +767,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
 
-            results.Add(new ConcreteInstantiation
+            var instantiation = new ConcreteInstantiation
             {
                 ConcreteClassName = concreteClassName,
                 TypeArguments = typeArguments,
@@ -731,7 +777,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 MethodName = methodName,
                 SpecificArgumentsAttribute = specificAttr,
                 HasParameterizedConstructor = hasParameterizedConstructor,
-            });
+            };
+
+            results.Add(instantiation);
+
+            if (isMethodArgumentsRow && specificAttr is not null)
+            {
+                (methodArgumentsInstantiations ??= new Dictionary<string, ConcreteInstantiation>())[typeKey] = instantiation;
+            }
         }
 
         // Single-pass classification of method attributes into named buckets, replacing the
@@ -824,7 +877,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
                 if (inferredTypes is { Length: > 0 })
                 {
-                    TryAddInstantiation(inferredTypes, argAttr);
+                    // Method rows on a generic method in a non-generic class: several rows may infer
+                    // the same T (e.g. [Arguments(1)] [Arguments(2)]) and each must still run.
+                    TryAddInstantiation(inferredTypes, argAttr,
+                        isMethodArgumentsRow: testMethod is { IsGenericType: false, IsGenericMethod: true });
                 }
             }
         }
@@ -1142,7 +1198,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             if (attr.AttributeClass?.Name == "ArgumentsAttribute" && entry.SpecificArgumentsAttribute != null)
             {
-                if (AreSameAttribute(attr, entry.SpecificArgumentsAttribute))
+                // An entry with merged rows emits one test per row from a shared attribute list, so
+                // listing every row here would let one row's Skip/DisplayName/Categories (applied in
+                // ArgumentsAttribute.OnTestRegistered) leak into its siblings. Leave the rows out:
+                // TestBuilder appends the data source that produced each test to that test's
+                // attributes, as it does for non-generic methods, whose list omits data sources too.
+                if (entry.AdditionalArgumentsAttributes is null && entry.IsSpecificDataSource(attr))
                 {
                     filteredAttributes.Add(attr);
                 }
@@ -1274,19 +1335,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (entry.SpecificArgumentsAttribute != null)
         {
             methodDataSources = methodSymbol.GetAttributes()
-                .Where(a => AreSameAttribute(a, entry.SpecificArgumentsAttribute))
+                .Where(entry.IsSpecificDataSource)
                 .ToList();
 
             if (testMethod is { IsGenericType: true, IsGenericMethod: true })
             {
                 var additionalMethodDataSources = methodSymbol.GetAttributes()
                     .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute" &&
-                                !AreSameAttribute(a, entry.SpecificArgumentsAttribute));
+                                !entry.IsSpecificDataSource(a));
                 methodDataSources.AddRange(additionalMethodDataSources);
             }
 
             classDataSources = typeSymbol.GetAttributesIncludingBaseTypes()
-                .Where(a => AreSameAttribute(a, entry.SpecificArgumentsAttribute))
+                .Where(entry.IsSpecificDataSource)
                 .ToArray();
         }
         else
