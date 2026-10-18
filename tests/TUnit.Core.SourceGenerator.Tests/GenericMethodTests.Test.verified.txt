@@ -97,6 +97,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "expected", n
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.GenericMethodTests>(
             methodName: "AggregateBy_HasExpectedOutput<int, int, int>",
             fullyQualifiedName: "TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput<int, int, int>",
+            methodTypeArgumentsIdentity: "<int, int, int>",
             filePath: "",
             lineNumber: 8,
             hasDataSource: true,
@@ -116,6 +117,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "expected", n
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.GenericMethodTests>(
             methodName: "AggregateBy_HasExpectedOutput<string, string, string>",
             fullyQualifiedName: "TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput<string, string, string>",
+            methodTypeArgumentsIdentity: "<string, string, string>",
             filePath: "",
             lineNumber: 8,
             hasDataSource: true,

@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Building;
 
@@ -61,7 +62,7 @@ internal static class ReflectionMetadataBuilder
 
             return new ClassMetadata
             {
-                Name = type.Name,
+                Name = TypeNameFormatter.GetNameWithoutGenericArity(type),
                 Type = type,
                 TypeInfo = CreateTypeInfo(type),
                 Namespace = type.Namespace ?? string.Empty,

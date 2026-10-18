@@ -746,7 +746,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             string testName;
             if (methodTypeArgs.Length > 0)
             {
-                testName = $"{methodName}<{string.Join(", ", methodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>";
+                testName = $"{methodName}<{string.Join(", ", methodTypeArgs.Select(t => t.ToTestNameTypeArgument()))}>";
             }
             else
             {
@@ -1252,6 +1252,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine($"methodName: \"{EscapeString(entry.TestName)}\",");
         writer.AppendLine($"fullyQualifiedName: \"{EscapeString(fullyQualifiedName)}\",");
+
+        // The test name drops namespaces, so give the test id the fully qualified type arguments
+        // to keep instantiations over same-named types from different namespaces distinct.
+        if (entry.MethodTypeArgs.Length > 0)
+        {
+            var identity = $"<{string.Join(", ", entry.MethodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>";
+            writer.AppendLine($"methodTypeArgumentsIdentity: \"{EscapeString(identity)}\",");
+        }
         WriteSourceLocationArguments(writer, testMethod);
         WriteFilterDataArguments(writer, testMethod);
 
@@ -6153,7 +6161,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         string testName;
         if (methodTypeArgs.Length > 0)
         {
-            var methodTypeArgsString = string.Join(", ", methodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            var methodTypeArgsString = string.Join(", ", methodTypeArgs.Select(t => t.ToTestNameTypeArgument()));
             testName = $"{methodName}<{methodTypeArgsString}>";
         }
         else

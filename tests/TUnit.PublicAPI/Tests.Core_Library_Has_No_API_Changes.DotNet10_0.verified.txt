@@ -1588,7 +1588,8 @@ namespace
                     .TestDependency[]? dependencies = null,
                     .IDataSourceAttribute[]? testDataSources = null,
                     .IDataSourceAttribute[]? classDataSources = null,
-                    .InjectableProperty[]? injectableProperties = null)
+                    .InjectableProperty[]? injectableProperties = null,
+                    string? methodTypeArgumentsIdentity = null)
             where T :  class { }
         public static .TestEntry<T> CreateWithClassMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T>(
                     string methodName,
@@ -1660,6 +1661,7 @@ namespace
         public required int MethodIndex { get; init; }
         public required .MethodMetadata MethodMetadata { get; init; }
         public required string MethodName { get; init; }
+        public string? MethodTypeArgumentsIdentity { get; init; }
         public string[] Properties { get; init; }
         public int RepeatCount { get; init; }
         public int StartColumnNumber { get; init; }
