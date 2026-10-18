@@ -28,8 +28,9 @@ public class Issue7096Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     public async Task Same_Type_Arguments_Rows_All_Run()
     {
+        // Trailing '*': source-gen names the method node "SameType<int>", reflection "SameType".
         await RunTestsWithFilter(
-            "/*/TUnit.TestProject.Bugs._7096/GenericMethodSameTypeArgumentsTests/SameType",
+            "/*/TUnit.TestProject.Bugs._7096/GenericMethodSameTypeArgumentsTests/SameType*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(3),
@@ -42,7 +43,7 @@ public class Issue7096Tests(TestMode testMode) : InvokableTestBase(testMode)
     public async Task Mixed_Type_Arguments_Rows_All_Run()
     {
         await RunTestsWithFilter(
-            "/*/TUnit.TestProject.Bugs._7096/GenericMethodSameTypeArgumentsTests/MixedTypes",
+            "/*/TUnit.TestProject.Bugs._7096/GenericMethodSameTypeArgumentsTests/MixedTypes*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(4),

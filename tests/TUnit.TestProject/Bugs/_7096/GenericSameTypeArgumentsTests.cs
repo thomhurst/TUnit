@@ -39,7 +39,7 @@ public class GenericMethodSameTypeRowSettingsTests
     [Test]
     [Arguments(1, Skip = "Only row one is skipped")]
     [Arguments(2)]
-    [Arguments(3, DisplayName = "Row three", Categories = ["Issue7096RowCategory"])]
+    [Arguments(3, DisplayName = "Row three", Categories = new[] { "Issue7096RowCategory" })]
     public async Task RowSettings<T>(T value)
     {
         await Assert.That(value).IsNotEqualTo((T)(object)1);
