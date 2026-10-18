@@ -337,14 +337,33 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         }
     }
 
+    private static readonly DiagnosticDescriptor OverloadsShareConditionClass = new(
+        "TU0002",
+        "Overloads share a generated assertion class",
+        "More than one overload maps to the generated assertion class '{0}'; only the first one is generated, and the extension methods for the others use it",
+        "TUnit.Assertions",
+        DiagnosticSeverity.Warning,
+        true);
+
+    private const char ClassNameMarker = '\u0001';
+
     /// <summary>
-    /// Replaces whole-word occurrences of <paramref name="className"/> in pre-rendered source. Generated code only
-    /// uses a condition class name as an identifier (declaration, constructor, <c>new</c>, return types, <c>cref</c>).
+    /// How pre-rendered source refers to a condition class: its name between markers that cannot occur in C# source,
+    /// so the emit step, which alone knows the final name, can substitute it with a plain replace.
     /// </summary>
-    private static string RenameClass(string source, string className, string newName) =>
-        className == newName
+    private static string ClassNameReference(string className) => $"{ClassNameMarker}{className}{ClassNameMarker}";
+
+    /// <summary>Substitutes <paramref name="name"/> for every reference to the <paramref name="className"/> class.</summary>
+    private static string ResolveClassName(string source, string className, string name) =>
+        source.Replace(ClassNameReference(className), name);
+
+    /// <summary>
+    /// Resolves any references left over (e.g. to a class an entry did not render) to the class's own name.
+    /// </summary>
+    private static string ResolveRemainingClassNames(string source) =>
+        source.IndexOf(ClassNameMarker) < 0
             ? source
-            : Regex.Replace(source, $@"\b{Regex.Escape(className)}\b", newName);
+            : Regex.Replace(source, $"{ClassNameMarker}([^{ClassNameMarker}]*){ClassNameMarker}", "$1");
 
     /// <summary>
     /// The condition classes emitted so far, across every extension class. A condition class is named after its
@@ -448,29 +467,33 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             }
 
             var extensionMethodsSource = entry.ExtensionMethodsSource;
-            var namesInEntry = new HashSet<string>(StringComparer.Ordinal);
+            var sourcesInEntry = new Dictionary<string, string>(StringComparer.Ordinal);
             foreach (var conditionClass in entry.ConditionClasses)
             {
                 // Overloads that map to the same class name can't be told apart in the extension methods, so the
-                // first one wins, as before
-                if (!namesInEntry.Add(conditionClass.ClassName))
+                // first one wins, as before; say so when the dropped one would have been different
+                if (sourcesInEntry.TryGetValue(conditionClass.ClassName, out var firstSource))
                 {
+                    if (firstSource != conditionClass.Source)
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(OverloadsShareConditionClass, Location.None, conditionClass.ClassName));
+                    }
+
                     continue;
                 }
 
+                sourcesInEntry.Add(conditionClass.ClassName, conditionClass.Source);
+
                 var (name, isNew) = allGeneratedClasses.Claim(conditionClass);
-                if (name != conditionClass.ClassName)
-                {
-                    extensionMethodsSource = RenameClass(extensionMethodsSource, conditionClass.ClassName, name);
-                }
+                extensionMethodsSource = ResolveClassName(extensionMethodsSource, conditionClass.ClassName, name);
 
                 if (isNew)
                 {
-                    sourceBuilder.Append(RenameClass(conditionClass.Source, conditionClass.ClassName, name));
+                    sourceBuilder.Append(ResolveClassName(conditionClass.Source, conditionClass.ClassName, name));
                 }
             }
 
-            extensionMethodSources.Add(extensionMethodsSource);
+            extensionMethodSources.Add(ResolveRemainingClassNames(extensionMethodsSource));
         }
 
         // Generate extension methods class
@@ -660,7 +683,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         var containingType = attributeData.ContainingType;
         var methodName = attributeData.MethodName;
 
-        var className = GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod);
+        var className = ClassNameReference(GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod));
 
         // Determine which parameters to skip
         IParameterSymbol[] parameters;
@@ -1257,7 +1280,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         var methodName = attributeData.MethodName;
 
         var baseMethodName = attributeData.CustomName ?? methodName;
-        var className = GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod);
+        var className = ClassNameReference(GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod));
 
         var actualMethodName = baseMethodName;
         if (staticMethod.Parameters.Length > 1)
