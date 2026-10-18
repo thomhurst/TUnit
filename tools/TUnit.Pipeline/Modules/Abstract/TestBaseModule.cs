@@ -11,9 +11,19 @@ namespace TUnit.Pipeline.Modules.Abstract;
 
 public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 {
+    /// <summary>
+    /// Frameworks to run. Defaults to every modern TFM the repo targets; frameworks the project did not
+    /// build are skipped (see <see cref="HasFrameworkOutput"/>), so net10.0-only projects run once.
+    /// Override only to add a legacy TFM (net472 on Windows) or to deliberately narrow the set.
+    /// </summary>
     protected virtual IEnumerable<string> TestableFrameworks
     {
-        get { yield return "net10.0"; }
+        get
+        {
+            yield return "net10.0";
+            yield return "net9.0";
+            yield return "net8.0";
+        }
     }
 
     /// <summary>True on Windows, where legacy .NET Framework TFMs (net4xx) can be tested.</summary>
