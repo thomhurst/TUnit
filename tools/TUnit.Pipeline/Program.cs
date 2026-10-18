@@ -20,13 +20,20 @@ var ignoreCategoryOption = new Option<string[]>(
 {
     Arity = ArgumentArity.ZeroOrMore,
     AllowMultipleArgumentsPerToken = true,
-    Description = "Categories to skip when no --categories are given.",
+    Description = "Categories to skip. Cannot be combined with --categories.",
     DefaultValueFactory = _ => []
 };
 
 var rootCommand = new RootCommand("The pipeline for building, testing and packaging TUnit");
 rootCommand.Add(categoryOption);
 rootCommand.Add(ignoreCategoryOption);
+rootCommand.Validators.Add(result =>
+{
+    if (result.GetValue(categoryOption) is { Length: > 0 } && result.GetValue(ignoreCategoryOption) is { Length: > 0 })
+    {
+        result.AddError("--ignore-categories cannot be combined with --categories.");
+    }
+});
 rootCommand.SetAction(async parseResult =>
 {
     var categories = parseResult.GetValue(categoryOption)!;

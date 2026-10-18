@@ -35,13 +35,17 @@ runs:
     - name: Run Pipeline
       shell: bash
       run: |
-        args=(--categories ${{ inputs.categories }})
-        if [ -n "${{ inputs.ignore-categories }}" ]; then
-          args+=(--ignore-categories ${{ inputs.ignore-categories }})
+        read -ra categories <<< "$PIPELINE_CATEGORIES"
+        read -ra ignore_categories <<< "$PIPELINE_IGNORE_CATEGORIES"
+        args=(--categories "${categories[@]}")
+        if [ ${#ignore_categories[@]} -gt 0 ]; then
+          args+=(--ignore-categories "${ignore_categories[@]}")
         fi
         dotnet run -c Release --no-build "${args[@]}"
       working-directory: "tools/TUnit.Pipeline"
       env:
+        PIPELINE_CATEGORIES: ${{ inputs.categories }}
+        PIPELINE_IGNORE_CATEGORIES: ${{ inputs.ignore-categories }}
         ADMIN_TOKEN: ${{ inputs.admin-token }}
         GITHUB_TOKEN: ${{ github.token }}
         DOTNET_ENVIRONMENT: ${{ inputs.environment }}

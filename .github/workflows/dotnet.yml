@@ -288,6 +288,10 @@ jobs:
         run: |
           grep -oE 'src/[^"]+\.(cs|fs|vb)proj' TUnit.CI.slnx | grep -v '/content/' \
             | jq -R . | jq -s '{solution: {path: "TUnit.CI.slnx", projects: .}}' > libraries.slnf
+          if [ "$(jq '.solution.projects | length' libraries.slnf)" -eq 0 ]; then
+            echo "::error::No library projects found in TUnit.CI.slnx; update the filter in this step."
+            exit 1
+          fi
           dotnet build libraries.slnf -c Release
           dotnet build tools/TUnit.Pipeline/TUnit.Pipeline.csproj -c Release
 
