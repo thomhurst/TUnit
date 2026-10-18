@@ -73,6 +73,16 @@ Run all tests with the name `AcceptCookiesTest`:
 dotnet run --treenode-filter "/*/*/*/AcceptCookiesTest"
 ```
 
+### Filter generic tests
+
+Path segments use the names as declared, without type arguments, in both source-generated and reflection mode. A generic class `Repository<T>` is matched by `Repository` (not ``Repository`1``), and a generic method `Method<T>` is matched by `Method`. One filter therefore selects every instantiation:
+
+```bash
+dotnet run --treenode-filter "/*/*/Repository/Method"
+```
+
+The type arguments appear in the display name instead, written as C# source with keyword aliases and without namespaces: `Method<int>(5)`, `Method<string>(s)`, `Method<List<int>>`.
+
 ### Filter by namespace
 
 Run all tests in a specific namespace:
