@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace TUnit.Analyzers.Extensions;
@@ -47,17 +47,19 @@ public static class CompilationExtensions
 
         return compilation.HasImplicitConversion(argumentType?.OriginalDefinition, parameterType?.OriginalDefinition);
     }
+
     /// <summary>
     /// Whether a data source value of <paramref name="argumentType"/> can bind to a test parameter of
     /// <paramref name="parameterType"/>. A bare type-parameter target accepts any argument type, because the
-    /// type argument is inferred from the data (or supplied by <c>[GenerateGenericTest]</c>). The only exception
-    /// is an argument that can never satisfy the type parameter's constraints, which is still a mismatch.
-    /// With <c>[GenerateGenericTest]</c>, the data is instead only rejected when it can never convert to a type
-    /// argument the attribute supplies.
+    /// type argument is inferred from the data (or supplied by <c>[GenerateGenericTest]</c>) and the values are
+    /// converted to it at run time. The only exception is a type argument that is certainly inferred from the data
+    /// and can never satisfy the type parameter's constraints, which is still a mismatch.
     /// </summary>
     /// <param name="inferredTypeArguments">
-    /// Type arguments inferred from the other parameters of the same data row (see
-    /// <see cref="InferExactTypeArguments"/>), used to check constraints that mention another type parameter.
+    /// The type arguments inferred from the data row (see <see cref="InferTypeArguments"/>). A type parameter
+    /// missing from it has no certain inference, so its constraints are not checked. When <see langword="null"/>,
+    /// <paramref name="parameterType"/> is the only test parameter, so <paramref name="argumentType"/> is the
+    /// inferred type argument.
     /// </param>
     public static bool CanBindToTestParameter(this Compilation compilation, ITypeSymbol? argumentType,
         ITypeSymbol? parameterType,
@@ -65,10 +67,17 @@ public static class CompilationExtensions
     {
         if (parameterType is ITypeParameterSymbol typeParameter && argumentType is not null)
         {
-            var generatedTypeArguments = GetGenerateGenericTestTypeArguments(typeParameter);
-            if (generatedTypeArguments is not null)
+            // With [GenerateGenericTest] the attribute supplies the type argument and the generated call converts
+            // the data to it through CastHelper (run-time types, IConvertible, string parsing, conversion operators,
+            // AotConverterRegistry, ...). None of that is visible here, so the data is never rejected.
+            if (HasGenerateGenericTestAttribute(typeParameter))
             {
-                return CanConvertToGeneratedTypeArguments(compilation, argumentType, generatedTypeArguments);
+                return true;
+            }
+
+            if (inferredTypeArguments is not null && !inferredTypeArguments.ContainsKey(typeParameter))
+            {
+                return true;
             }
 
             return compilation.CanSatisfyConstraints(argumentType, typeParameter, inferredTypeArguments);
@@ -78,38 +87,78 @@ public static class CompilationExtensions
     }
 
     /// <summary>
-    /// Maps each type parameter that is a bare test parameter type to the data type bound to it, when that mapping
-    /// is certain: every bare occurrence of the type parameter receives the same data type, and that type is
-    /// exact (a non-nullable value type or a sealed class), so the run-time type argument cannot differ from it.
-    /// Uncertain type parameters are left out, and constraints that mention them are skipped.
+    /// Maps each type parameter to the data type it is inferred as, when that is certain: every test parameter
+    /// that mentions the type parameter is the bare type parameter, and all of them receive the same data type.
+    /// Otherwise the inference depends on which occurrence wins (the generator takes the last one and converts the
+    /// other values to it), so the type parameter is left out.
     /// </summary>
-    public static Dictionary<ITypeParameterSymbol, ITypeSymbol> InferExactTypeArguments(
+    public static Dictionary<ITypeParameterSymbol, ITypeSymbol> InferTypeArguments(
         IReadOnlyList<ITypeSymbol?> argumentTypes, IReadOnlyList<ITypeSymbol?> parameterTypes)
     {
         var inferred = new Dictionary<ITypeParameterSymbol, ITypeSymbol>(SymbolEqualityComparer.Default);
-        var conflicting = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
+        var uncertain = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
 
-        for (var i = 0; i < argumentTypes.Count && i < parameterTypes.Count; i++)
+        for (var i = 0; i < parameterTypes.Count; i++)
         {
-            if (parameterTypes[i] is not ITypeParameterSymbol typeParameter || conflicting.Contains(typeParameter))
+            var parameterType = parameterTypes[i];
+            if (parameterType is null)
             {
                 continue;
             }
 
-            var argumentType = argumentTypes[i];
-            if (argumentType is null || !IsExactType(argumentType)
+            if (parameterType is not ITypeParameterSymbol typeParameter)
+            {
+                // A type parameter nested in a constructed parameter type can also drive the inference.
+                CollectTypeParameters(parameterType, uncertain);
+                continue;
+            }
+
+            var argumentType = i < argumentTypes.Count ? argumentTypes[i] : null;
+            if (argumentType is null
                 || (inferred.TryGetValue(typeParameter, out var existing)
                     && !SymbolEqualityComparer.Default.Equals(existing, argumentType)))
             {
-                conflicting.Add(typeParameter);
-                inferred.Remove(typeParameter);
+                uncertain.Add(typeParameter);
                 continue;
             }
 
             inferred[typeParameter] = argumentType;
         }
 
+        foreach (var typeParameter in uncertain)
+        {
+            inferred.Remove(typeParameter);
+        }
+
         return inferred;
+    }
+
+    private static void CollectTypeParameters(ITypeSymbol type, HashSet<ITypeParameterSymbol> result)
+    {
+        switch (type)
+        {
+            case ITypeParameterSymbol typeParameter:
+                result.Add(typeParameter);
+                break;
+            case IArrayTypeSymbol arrayType:
+                CollectTypeParameters(arrayType.ElementType, result);
+                break;
+            case IPointerTypeSymbol pointerType:
+                CollectTypeParameters(pointerType.PointedAtType, result);
+                break;
+            case INamedTypeSymbol namedType:
+                foreach (var typeArgument in namedType.TypeArguments)
+                {
+                    CollectTypeParameters(typeArgument, result);
+                }
+
+                if (namedType.ContainingType is { } containingType)
+                {
+                    CollectTypeParameters(containingType, result);
+                }
+
+                break;
+        }
     }
 
     private static bool IsExactType(ITypeSymbol type)
@@ -129,98 +178,15 @@ public static class CompilationExtensions
     }
 
     /// <summary>
-    /// The type argument each <c>[GenerateGenericTest]</c> on the declaring member supplies for
-    /// <paramref name="typeParameter"/>, or <see langword="null"/> when there is no such attribute. An entry is
-    /// <see langword="null"/> when that attribute's type argument cannot be resolved to a closed type.
+    /// Whether the method or type that declares <paramref name="typeParameter"/> has <c>[GenerateGenericTest]</c>.
     /// </summary>
-    private static List<ITypeSymbol?>? GetGenerateGenericTestTypeArguments(ITypeParameterSymbol typeParameter)
+    private static bool HasGenerateGenericTestAttribute(ITypeParameterSymbol typeParameter)
     {
         var declaringSymbol = (ISymbol?) typeParameter.DeclaringMethod ?? typeParameter.DeclaringType;
-        if (declaringSymbol is null)
-        {
-            return null;
-        }
 
-        var typeParameterCount = declaringSymbol is IMethodSymbol method
-            ? method.TypeParameters.Length
-            : ((INamedTypeSymbol) declaringSymbol).TypeParameters.Length;
-
-        List<ITypeSymbol?>? result = null;
-
-        foreach (var attribute in declaringSymbol.GetAttributes())
-        {
-            if (attribute.AttributeClass is not { Name: "GenerateGenericTestAttribute" } attributeClass
-                || attributeClass.ContainingNamespace?.ToDisplayString() != "TUnit.Core")
-            {
-                continue;
-            }
-
-            result ??= [];
-
-            ITypeSymbol? typeArgument = null;
-            if (attribute.ConstructorArguments is [{ Kind: TypedConstantKind.Array } typeArguments]
-                && typeArguments.Values.Length == typeParameterCount
-                && typeArguments.Values[typeParameter.Ordinal].Value is ITypeSymbol supplied
-                && supplied is not IErrorTypeSymbol
-                && supplied is not INamedTypeSymbol { IsUnboundGenericType: true }
-                && !ContainsTypeParameter(supplied))
-            {
-                typeArgument = supplied;
-            }
-
-            result.Add(typeArgument);
-        }
-
-        return result;
-    }
-
-    private static bool CanConvertToGeneratedTypeArguments(Compilation compilation, ITypeSymbol argumentType,
-        List<ITypeSymbol?> generatedTypeArguments)
-    {
-        // Each attribute closes the test over its type argument, and the generated call converts every data value
-        // to it with CastHelper. That conversion goes well beyond C# implicit conversions: it uses the value's
-        // run-time type (which can be narrower than the declared one), IConvertible, string parsing, single-element
-        // enumerable unwrapping and user-defined explicit operators. Only report data that can never convert:
-        // an exact type (its run-time type cannot be narrower) that takes none of those paths and has no
-        // conversion of any kind to the type argument. The attribute's own type arguments are what must satisfy
-        // the constraints, not the data type.
-        if (!IsExactType(argumentType) || IsRuntimeConvertible(compilation, argumentType))
-        {
-            return true;
-        }
-
-        foreach (var generatedTypeArgument in generatedTypeArguments)
-        {
-            if (generatedTypeArgument is null or IArrayTypeSymbol || generatedTypeArgument.TypeKind == TypeKind.Dynamic)
-            {
-                continue;
-            }
-
-            if (!compilation.ClassifyConversion(argumentType, generatedTypeArgument).Exists)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Whether CastHelper may convert a value of <paramref name="type"/> through a path that compile-time
-    /// conversions do not model: IConvertible, string parsing or single-element enumerable unwrapping.
-    /// </summary>
-    private static bool IsRuntimeConvertible(Compilation compilation, ITypeSymbol type)
-    {
-        if (type.SpecialType == SpecialType.System_String)
-        {
-            return true;
-        }
-
-        var convertible = compilation.GetTypeByMetadataName("System.IConvertible");
-        var enumerable = compilation.GetSpecialType(SpecialType.System_Collections_IEnumerable);
-
-        return type.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, convertible)
-            || SymbolEqualityComparer.Default.Equals(i, enumerable));
+        return declaringSymbol is not null && declaringSymbol.GetAttributes().Any(attribute =>
+            attribute.AttributeClass is { Name: "GenerateGenericTestAttribute" } attributeClass
+            && attributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core");
     }
 
     private static bool CanSatisfyConstraints(this Compilation compilation, ITypeSymbol argumentType,
@@ -258,8 +224,8 @@ public static class CompilationExtensions
         {
             // Self-referencing constraints such as `where T : IComparable<T>` are checked with the argument type
             // substituted for T. Other type parameters are substituted with the type arguments inferred from the
-            // rest of the data row when those are certain. Constraints still mentioning a type parameter depend on
-            // type arguments that are not known here, so they are skipped rather than guessed.
+            // rest of the data row when those are certain and exact. Constraints still mentioning a type parameter
+            // depend on type arguments that are not known here, so they are skipped rather than guessed.
             var constraintType = SubstituteTypeParameters(compilation, declaredConstraintType, typeParameter,
                 argumentType, inferredTypeArguments);
             if (constraintType is null || ContainsTypeParameter(constraintType))
@@ -315,8 +281,11 @@ public static class CompilationExtensions
                     return replacement;
                 }
 
+                // A peer is only substituted when its data type is exact, so the run-time type argument cannot
+                // differ from it.
                 return otherReplacements is not null
                     && otherReplacements.TryGetValue(otherTypeParameter, out var otherReplacement)
+                    && IsExactType(otherReplacement)
                         ? otherReplacement
                         : type;
             case IArrayTypeSymbol arrayType:

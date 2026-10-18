@@ -603,7 +603,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
             
-            var inferredTypeArguments = CompilationExtensions.InferExactTypeArguments(unwrappedTypes, testParameterTypes);
+            var inferredTypeArguments = CompilationExtensions.InferTypeArguments(unwrappedTypes, testParameterTypes);
 
             var conversions = unwrappedTypes.ZipAll(testParameterTypes,
                 (argument, parameter) => 

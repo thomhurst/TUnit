@@ -1,4 +1,4 @@
-﻿using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.TestDataAnalyzer>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.TestDataAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
@@ -1671,8 +1671,9 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
-    public async Task Generic_Method_With_GenerateGenericTest_And_Data_Not_Convertible_To_Its_Type_Argument_Is_Flagged()
+    public async Task Generic_Method_With_GenerateGenericTest_And_Data_Without_A_CSharp_Conversion_Is_Not_Flagged()
     {
+        // CastHelper can still convert the value at run time, for example through AotConverterRegistry.
         await Verifier
             .VerifyAnalyzerAsync(
                 """
@@ -1687,22 +1688,42 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 public class MyClass
                 {
                     [GenerateGenericTest(typeof(B))]
-                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [MethodDataSource(nameof(Data))]
                     [Test]
                     public Task MyTest<T>(T value) => Task.CompletedTask;
 
                     public static IEnumerable<Func<A>> Data() { yield return () => new A(); }
                 }
-                """,
-
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
-                    .WithLocation(0)
-                    .WithArguments("A", "T")
+                """
             );
     }
 
     [Test]
-    public async Task Generic_Method_With_Multiple_GenerateGenericTest_And_One_Unconvertible_Type_Argument_Is_Flagged()
+    public async Task Generic_Method_With_Repeated_Type_Parameter_And_Data_Violating_Constraint_In_One_Occurrence_Is_Not_Flagged()
+    {
+        // The type argument is inferred from the last occurrence (int) and the other value is converted to it.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T first, T second) where T : struct => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(string, int)>> Data() { yield return () => ("1", 2); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Repeated_Type_Parameter_And_Same_Data_Type_Violating_Constraint_Is_Flagged()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -1714,19 +1735,17 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 
                 public class MyClass
                 {
-                    [GenerateGenericTest(typeof(Guid), typeof(string))]
-                    [GenerateGenericTest(typeof(long), typeof(string))]
                     [{|#0:MethodDataSource(nameof(Data))|}]
                     [Test]
-                    public Task MyTest<T1, T2>(T1 first, T2 second) => Task.CompletedTask;
+                    public Task MyTest<T>(T first, T second) where T : struct => Task.CompletedTask;
 
-                    public static IEnumerable<Func<(Guid, string)>> Data() { yield return () => (Guid.Empty, "a"); }
+                    public static IEnumerable<Func<(string, string)>> Data() { yield return () => ("1", "2"); }
                 }
                 """,
 
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
-                    .WithArguments("Guid, string", "T1, T2")
+                    .WithArguments("string, string", "T, T")
             );
     }
 
