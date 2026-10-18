@@ -1,7 +1,7 @@
-﻿using File = ModularPipelines.FileSystem.File;
-using ModularPipelines.Attributes;
+﻿using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.Modules;
+using File = ModularPipelines.FileSystem.File;
 
 namespace TUnit.Pipeline.Modules;
 
