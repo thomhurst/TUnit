@@ -297,6 +297,20 @@ jobs:
           categories: Packaging NuGetPackageTests
           admin-token: ${{ github.token }}
 
+      - name: Upload Diagnostic Logs
+        uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: TestingPlatformDiagnosticLogs-nuget-package-tests-windows
+          path: '**/log_*.diag'
+
+      - name: Upload Hang Dumps
+        uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: HangDump-nuget-package-tests-windows
+          path: '**/hangdump*'
+
   # Compiles the C# fences in the documentation against freshly packed packages, alongside the
   # test matrix rather than after the Ubuntu pipeline.
   doc-snippets:
