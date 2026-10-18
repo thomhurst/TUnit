@@ -2206,6 +2206,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         => parameter.GetCustomAttributesData()
             .Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.ParamCollectionAttribute");
 
+    // Source-generated invokers omit trailing arguments a row leaves out, so the compiler applies
+    // the declared defaults. Mirror that for MethodBase.Invoke: Type.Missing makes the runtime use
+    // a parameter's default value, where a null slot would bind default(T) instead.
+    private static void FillOmittedOptionalArguments(ParameterInfo[] parameters, object?[] castedArgs, int suppliedCount, int endExclusive)
+    {
+        for (var i = suppliedCount; i < endExclusive; i++)
+        {
+            if (parameters[i].HasDefaultValue)
+            {
+                castedArgs[i] = Type.Missing;
+            }
+        }
+    }
+
     private static bool IsCovariantCompatible(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType)
     {
         // Only check for generic interface covariance
@@ -2306,7 +2320,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     for (var j = 0; j < methodParams.Length && j < args.Length; j++)
                     {
                         var arg = args[j];
-                        if (arg != null)
+                        if (arg != null && arg != Type.Missing)
                         {
                             var paramType = methodParams[j].ParameterType;
                             var argType = arg.GetType();
@@ -2354,7 +2368,21 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // parameter (e.g. `string[] names`). Both collect remaining loose arguments
                 // into the array, letting `[Arguments(["a", "b"])]` map onto a single array
                 // parameter (issue #6120).
-                var lastParam = parameters.Length > 0 ? parameters[^1] : null;
+                // The engine passes a trailing CancellationToken as the last argument. Exclude it so
+                // an array just before it (T[] values, CancellationToken token) collects the row
+                // values, as source-gen mode does.
+                var dataParameterCount = parameters.Length;
+                var dataArgumentCount = args.Length;
+                if (parameters.Length > 1
+                    && parameters[^1].ParameterType == typeof(CancellationToken)
+                    && args.Length > 0
+                    && args[^1] is CancellationToken)
+                {
+                    dataParameterCount--;
+                    dataArgumentCount--;
+                }
+
+                var lastParam = dataParameterCount > 0 ? parameters[dataParameterCount - 1] : null;
                 var paramsElementType = lastParam != null ? GetTrailingElementType(lastParam) : null;
                 // A plain trailing array always collects (matches source-gen). A non-array collection
                 // only collects when it is a params collection (C# 13, ParamCollectionAttribute).
@@ -2366,17 +2394,29 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 if (isParamsArray && lastParam != null)
                 {
                     // Handle params array / params collection parameter
-                    var regularParamsCount = parameters.Length - 1;
+                    var regularParamsCount = dataParameterCount - 1;
+
+                    if (dataParameterCount < parameters.Length)
+                    {
+                        castedArgs[^1] = args[^1];
+
+                        // Slots padded with Type.Missing for omitted optional parameters are not row values.
+                        while (dataArgumentCount > 0 && args[dataArgumentCount - 1] == Type.Missing)
+                        {
+                            dataArgumentCount--;
+                        }
+                    }
 
                     // Process regular parameters first
-                    for (var i = 0; i < regularParamsCount && i < args.Length; i++)
+                    for (var i = 0; i < regularParamsCount && i < dataArgumentCount; i++)
                     {
                         var paramType = parameters[i].ParameterType;
                         var arg = args[i];
 
-                        if (arg == null)
+                        if (arg == null || arg == Type.Missing)
                         {
-                            castedArgs[i] = null;
+                            // Type.Missing marks an omitted optional parameter; Invoke applies its default.
+                            castedArgs[i] = arg;
                             continue;
                         }
 
@@ -2400,11 +2440,21 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         }
                     }
 
+                    FillOmittedOptionalArguments(parameters, castedArgs, dataArgumentCount, regularParamsCount);
+
                     // Collect remaining arguments into params array
                     var paramsStartIndex = regularParamsCount;
-                    var paramsCount = Math.Max(0, args.Length - paramsStartIndex);
+                    var paramsCount = Math.Max(0, dataArgumentCount - paramsStartIndex);
 
-                    if (paramsElementType != null)
+                    if (paramsCount == 0
+                        && lastParam.HasDefaultValue
+                        && !lastParam.IsDefined(typeof(ParamArrayAttribute), false)
+                        && !IsParamCollection(lastParam))
+                    {
+                        // An omitted optional plain array keeps its declared default, as in source-gen mode.
+                        castedArgs[regularParamsCount] = Type.Missing;
+                    }
+                    else if (paramsElementType != null)
                     {
                         // C# params semantics:
                         // - If single arg is null, pass null (not array with null element)
@@ -2498,9 +2548,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         var paramType = parameters[i].ParameterType;
                         var arg = args[i];
 
-                        if (arg == null)
+                        if (arg == null || arg == Type.Missing)
                         {
-                            castedArgs[i] = null;
+                            // Type.Missing marks an omitted optional parameter; Invoke applies its default.
+                            castedArgs[i] = arg;
                             continue;
                         }
 
@@ -2523,6 +2574,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             castedArgs[i] = CastHelper.Cast(paramType, arg);
                         }
                     }
+
+                    FillOmittedOptionalArguments(parameters, castedArgs, args.Length, parameters.Length);
                 }
 
                 var result = methodToInvoke.Invoke(instance, castedArgs);

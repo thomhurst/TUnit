@@ -397,11 +397,55 @@ internal sealed class TestGenericTypeResolver
         // Try the original approach for cases with typed parameters
         var typeMapping = new Dictionary<Type, Type>();
         
-        // Map parameter types to argument types
-        for (var i = 0; i < Math.Min(parameterTypes.Length, methodArguments.Length); i++)
+        // A trailing params T[] (or plain T[]) collects loose values, which do not match the array type itself.
+        // They are left out of inference: the reflection invoker re-infers type arguments from the
+        // declared parameter types, so inferring T from them here would not reach the invocation.
+        // T must come from another argument, or from a lone array value passed as the array.
+        // Row values bind to the data parameters only: the engine supplies a CancellationToken parameter
+        // wherever it is declared, so it takes no row value (as in source-gen mode). An array just before
+        // a trailing token (T[] values, CancellationToken token) is still the trailing array.
+        var dataParameterCount = 0;
+        var lastDataParameterIndex = -1;
+        for (var i = 0; i < parameterTypes.Length; i++)
         {
-            var paramType = parameterTypes[i];
+            if (parameterTypes[i] != typeof(CancellationToken))
+            {
+                dataParameterCount++;
+                lastDataParameterIndex = i;
+            }
+        }
+
+        var hasGenericParamsArray = HasGenericParamsArray(methodMetadata, parameterTypes, lastDataParameterIndex);
+
+        // Map parameter types to argument types; parameterIndex skips CancellationToken parameters
+        var parameterIndex = 0;
+        for (var i = 0; i < Math.Min(dataParameterCount, methodArguments.Length); i++, parameterIndex++)
+        {
+            while (parameterTypes[parameterIndex] == typeof(CancellationToken))
+            {
+                parameterIndex++;
+            }
+
+            var paramType = parameterTypes[parameterIndex];
             var argValue = methodArguments[i];
+
+            if (hasGenericParamsArray && parameterIndex == lastDataParameterIndex)
+            {
+                // A lone array value may be the array itself (normal form) or one element of it
+                // (expanded form, e.g. T = int[] from a leading argument). Use it for inference only
+                // when the normal form agrees with what the other arguments inferred.
+                if (methodArguments.Length == dataParameterCount
+                    && argValue?.GetType() is { IsArray: true } lastArgType)
+                {
+                    var normalFormMapping = new Dictionary<Type, Type>(typeMapping);
+                    if (TryInferTypeMapping(paramType, lastArgType, normalFormMapping))
+                    {
+                        typeMapping = normalFormMapping;
+                    }
+                }
+
+                continue;
+            }
 
             if (argValue != null)
             {
@@ -450,6 +494,25 @@ internal sealed class TestGenericTypeResolver
         ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypesFromMapping, classTypeArguments);
         
         return resolvedTypesFromMapping;
+    }
+
+    /// <summary>
+    /// Whether the method's last data parameter collects trailing values and involves a generic
+    /// parameter: a <c>params T[]</c>, or a plain single-dimensional <c>T[]</c>, which the
+    /// reflection invoker also fills from loose values.
+    /// </summary>
+    private static bool HasGenericParamsArray(MethodMetadata methodMetadata, Type[] parameterTypes, int lastDataParameterIndex)
+    {
+        var parameters = methodMetadata.Parameters;
+        if (lastDataParameterIndex < 0 || parameters.Length != parameterTypes.Length)
+        {
+            return false;
+        }
+
+        var lastType = parameterTypes[lastDataParameterIndex];
+        return lastType.IsArray
+            && lastType.ContainsGenericParameters
+            && (parameters[lastDataParameterIndex].IsParams || lastType.GetArrayRank() == 1);
     }
 
     #if NET8_0_OR_GREATER
