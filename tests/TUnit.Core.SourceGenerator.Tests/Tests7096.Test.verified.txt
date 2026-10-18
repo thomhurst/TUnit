@@ -51,6 +51,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7096.GenericMethodSameTypeArgumentsTests>(
             methodName: "SameType<int>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7096.GenericMethodSameTypeArgumentsTests.SameType<int>",
+            methodTypeArgumentsIdentity: "<int>",
             filePath: "",
             lineNumber: 12,
             hasDataSource: true,
@@ -164,6 +165,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7096.GenericMethodSameTypeArgumentsTests>(
             methodName: "MixedTypes<int>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7096.GenericMethodSameTypeArgumentsTests.MixedTypes<int>",
+            methodTypeArgumentsIdentity: "<int>",
             filePath: "",
             lineNumber: 21,
             hasDataSource: true,
@@ -181,6 +183,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7096.GenericMethodSameTypeArgumentsTests>(
             methodName: "MixedTypes<string>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7096.GenericMethodSameTypeArgumentsTests.MixedTypes<string>",
+            methodTypeArgumentsIdentity: "<string>",
             filePath: "",
             lineNumber: 21,
             hasDataSource: true,
@@ -258,6 +261,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7096.GenericMethodSameTypeRowSettingsTests>(
             methodName: "RowSettings<int>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7096.GenericMethodSameTypeRowSettingsTests.RowSettings<int>",
+            methodTypeArgumentsIdentity: "<int>",
             filePath: "",
             lineNumber: 39,
             hasDataSource: true,
