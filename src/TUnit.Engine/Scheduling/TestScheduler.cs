@@ -336,7 +336,7 @@ internal sealed class TestScheduler : ITestScheduler
         var dynamicTests = new List<AbstractExecutableTest>();
 
         // Use async signaling instead of polling to eliminate IOCP overhead
-        while (await _dynamicTestQueue.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
+        while (await WaitForDynamicTestsAsync(cancellationToken).ConfigureAwait(false))
         {
             // Dequeue all currently available tests (batch processing)
             while (_dynamicTestQueue.TryDequeue(out var test))
@@ -358,6 +358,13 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
+        // Cancelled (fail-fast or run abort): the queued tests would only be cancelled too, and
+        // the phases would throw on the cancelled token, so stop here.
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+
         // Process any remaining tests after queue completion
         while (_dynamicTestQueue.TryDequeue(out var test))
         {
@@ -373,6 +380,22 @@ internal sealed class TestScheduler : ITestScheduler
                 await _logger.LogTraceAsync($"Executing {dynamicTests.Count} remaining dynamic test(s)").ConfigureAwait(false);
 
             await ExecuteDynamicBatchAsync(dynamicTests, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    // Ends the wait loop instead of faulting when the token is cancelled. The phases can finish
+    // without throwing after fail-fast fires (the failing test was the last to run), and
+    // ExecuteGroupedTestsAsync then awaits this processor on its normal path, so a cancelled
+    // wait would surface as the scheduler's exception.
+    private async ValueTask<bool> WaitForDynamicTestsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _dynamicTestQueue.WaitToReadAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return false;
         }
     }
 
