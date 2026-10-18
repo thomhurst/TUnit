@@ -30,8 +30,10 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
             // Test projects no longer multi-target every TFM by default (see TestProject.props).
             // Skip frameworks that this project did not actually build to avoid spurious
             // "process cannot find the file" errors for missing per-TFM output binaries.
+            // Only --no-build runs depend on prebuilt output: the NuGet tester modules let
+            // `dotnet run` build against the packed packages, so probing them would skip them all.
             var configuration = testOptions.Configuration ?? "Release";
-            if (!HasFrameworkOutput(context.Logger, executionOptions, framework, configuration))
+            if (testOptions.NoBuild == true && !HasFrameworkOutput(context.Logger, executionOptions, framework, configuration))
             {
                 context.Logger.LogInformation("Skipping {Framework}: no build output found for this test project.", framework);
                 continue;
