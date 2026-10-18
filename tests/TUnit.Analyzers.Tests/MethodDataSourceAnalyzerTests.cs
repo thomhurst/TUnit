@@ -1,4 +1,4 @@
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.TestDataAnalyzer>;
+﻿using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.TestDataAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
@@ -1714,19 +1714,69 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 
                 public class MyClass
                 {
-                    [GenerateGenericTest(typeof(long), typeof(string))]
                     [GenerateGenericTest(typeof(Guid), typeof(string))]
+                    [GenerateGenericTest(typeof(long), typeof(string))]
                     [{|#0:MethodDataSource(nameof(Data))|}]
                     [Test]
                     public Task MyTest<T1, T2>(T1 first, T2 second) => Task.CompletedTask;
 
-                    public static IEnumerable<Func<(int, string)>> Data() { yield return () => (1, "a"); }
+                    public static IEnumerable<Func<(Guid, string)>> Data() { yield return () => (Guid.Empty, "a"); }
                 }
                 """,
 
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
-                    .WithArguments("int, string", "T1, T2")
+                    .WithArguments("Guid, string", "T1, T2")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_GenerateGenericTest_And_Numeric_String_Data_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [GenerateGenericTest(typeof(int))]
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<string>> Data() { yield return () => "1"; }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_GenerateGenericTest_And_Data_Narrowed_At_Run_Time_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [GenerateGenericTest(typeof(MemoryStream))]
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<Stream>> Data() { yield return () => new MemoryStream(); }
+                }
+                """
             );
     }
 

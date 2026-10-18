@@ -52,7 +52,8 @@ public static class CompilationExtensions
     /// <paramref name="parameterType"/>. A bare type-parameter target accepts any argument type, because the
     /// type argument is inferred from the data (or supplied by <c>[GenerateGenericTest]</c>). The only exception
     /// is an argument that can never satisfy the type parameter's constraints, which is still a mismatch.
-    /// With <c>[GenerateGenericTest]</c>, the data must instead convert to every type argument the attribute supplies.
+    /// With <c>[GenerateGenericTest]</c>, the data is instead only rejected when it can never convert to a type
+    /// argument the attribute supplies.
     /// </summary>
     /// <param name="inferredTypeArguments">
     /// Type arguments inferred from the other parameters of the same data row (see
@@ -176,25 +177,50 @@ public static class CompilationExtensions
     private static bool CanConvertToGeneratedTypeArguments(Compilation compilation, ITypeSymbol argumentType,
         List<ITypeSymbol?> generatedTypeArguments)
     {
-        // Open or unresolved argument types are accepted.
-        if (argumentType is ITypeParameterSymbol or IErrorTypeSymbol || argumentType.TypeKind == TypeKind.Dynamic)
+        // Each attribute closes the test over its type argument, and the generated call converts every data value
+        // to it with CastHelper. That conversion goes well beyond C# implicit conversions: it uses the value's
+        // run-time type (which can be narrower than the declared one), IConvertible, string parsing, single-element
+        // enumerable unwrapping and user-defined explicit operators. Only report data that can never convert:
+        // an exact type (its run-time type cannot be narrower) that takes none of those paths and has no
+        // conversion of any kind to the type argument. The attribute's own type arguments are what must satisfy
+        // the constraints, not the data type.
+        if (!IsExactType(argumentType) || IsRuntimeConvertible(compilation, argumentType))
         {
             return true;
         }
 
-        // Each attribute closes the test over its type argument and the data is converted to it, so the data has
-        // to convert just as it would for a concrete parameter of that type. The attribute's own type arguments
-        // are what must satisfy the constraints, not the data type.
         foreach (var generatedTypeArgument in generatedTypeArguments)
         {
-            if (generatedTypeArgument is not null
-                && !compilation.HasImplicitConversionOrGenericParameter(argumentType, generatedTypeArgument))
+            if (generatedTypeArgument is null or IArrayTypeSymbol || generatedTypeArgument.TypeKind == TypeKind.Dynamic)
+            {
+                continue;
+            }
+
+            if (!compilation.ClassifyConversion(argumentType, generatedTypeArgument).Exists)
             {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Whether CastHelper may convert a value of <paramref name="type"/> through a path that compile-time
+    /// conversions do not model: IConvertible, string parsing or single-element enumerable unwrapping.
+    /// </summary>
+    private static bool IsRuntimeConvertible(Compilation compilation, ITypeSymbol type)
+    {
+        if (type.SpecialType == SpecialType.System_String)
+        {
+            return true;
+        }
+
+        var convertible = compilation.GetTypeByMetadataName("System.IConvertible");
+        var enumerable = compilation.GetSpecialType(SpecialType.System_Collections_IEnumerable);
+
+        return type.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, convertible)
+            || SymbolEqualityComparer.Default.Equals(i, enumerable));
     }
 
     private static bool CanSatisfyConstraints(this Compilation compilation, ITypeSymbol argumentType,
