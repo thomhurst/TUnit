@@ -1186,8 +1186,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // Reflection mode reports class-level [GenerateGenericTest] types first, then class rows,
-        // then method rows; each group keeps declaration order.
+        // Reflection mode (ReflectionGenericConstraintViolations in TUnit.Engine) reports class-level
+        // [GenerateGenericTest] types first, then class rows, then method rows; each group keeps
+        // declaration order. Keep the two in step: the order decides the failed tests' ids.
         classConstraintViolations = classViolations
             .OrderBy(v => v.Source)
             .ThenBy(v => v.Order)

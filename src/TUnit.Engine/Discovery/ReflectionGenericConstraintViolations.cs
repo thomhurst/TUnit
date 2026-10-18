@@ -141,13 +141,20 @@ internal sealed class ReflectionGenericConstraintViolations(
         for (var i = 0; i < parameters.Length && i < values.Length; i++)
         {
             var parameterType = parameters[i].ParameterType;
-            if (!parameterType.IsGenericParameter || parameterType.DeclaringMethod != null || values[i] is not { } value)
+            if (!parameterType.IsGenericParameter || parameterType.DeclaringMethod != null)
             {
                 continue;
             }
 
+            // Match the source generator: Roslyn types a null element of the params object?[] argument
+            // as object, and a Type value as System.Type rather than its RuntimeType instance.
             var position = parameterType.GenericParameterPosition;
-            typeArguments[position] ??= value.GetType();
+            typeArguments[position] ??= values[i] switch
+            {
+                null => typeof(object),
+                Type => typeof(Type),
+                var value => value.GetType()
+            };
         }
 
         foreach (var typeArgument in typeArguments)

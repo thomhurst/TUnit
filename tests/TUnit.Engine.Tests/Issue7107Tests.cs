@@ -283,4 +283,20 @@ public class Issue7107Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.Results.Single(x => x.Outcome == "Failed").Output?.ErrorInfo?.Message.ShouldContain(expectedMessage)
             ]);
     }
+
+    [Test]
+    [Arguments("NullMethodRowInfersClassConstraintTests", "Type 'Object' does not satisfy the 'struct' constraint for generic parameter 'T'")]
+    [Arguments("TypeValueMethodRowInfersClassConstraintTests", "Type 'Type' does not satisfy the 'struct' constraint for generic parameter 'T'")]
+    public async Task Method_Row_Infers_The_Class_Type_As_The_Source_Generator_Does(string className, string expectedMessage)
+    {
+        // A null value infers object and a Type value infers System.Type, in both modes.
+        await RunTestsWithFilter(
+            $"{Namespace}/{className}*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.Results.Single().TestName.ShouldBe("Run"),
+                result => result.Results.Single().Output?.ErrorInfo?.Message.ShouldContain(expectedMessage)
+            ]);
+    }
 }

@@ -275,3 +275,20 @@ public class NestedTypeConstraintViolationTests
     public async Task Run<T, U>() where T : ConstraintOuter<U>.IOut<string>
         => await Task.CompletedTask;
 }
+
+// A null method row, typed or not, infers object for the class type argument, because Roslyn types
+// the null element of the params object?[] argument as object. A Type value infers System.Type,
+// not RuntimeType.
+public class NullMethodRowInfersClassConstraintTests<T> where T : struct
+{
+    [Test]
+    [Arguments((string?)null)]
+    public async Task Run(T value) => await Assert.That(value).IsNotEqualTo(default(T));
+}
+
+public class TypeValueMethodRowInfersClassConstraintTests<T> where T : struct
+{
+    [Test]
+    [Arguments(typeof(int))]
+    public async Task Run(T value) => await Assert.That(value).IsNotEqualTo(default(T));
+}
