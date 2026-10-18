@@ -5875,9 +5875,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        // Find the method in the test class
-        var testClass = testMethod.TypeSymbol;
-        var dataMethod = testClass.GetMembers(methodName)
+        // Find the method in the test class, or in T for [MethodDataSource<T>("Rows")]
+        var providerType = mdsAttr.AttributeClass is { IsGenericType: true, TypeArguments: [INamedTypeSymbol genericProvider] }
+            ? genericProvider
+            : testMethod.TypeSymbol;
+        var dataMethod = providerType.GetMembers(methodName)
             .OfType<IMethodSymbol>()
             .FirstOrDefault(m => m.IsStatic && m.Parameters.Length == 0);
 

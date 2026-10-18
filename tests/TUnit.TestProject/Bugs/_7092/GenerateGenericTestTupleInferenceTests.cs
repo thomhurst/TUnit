@@ -73,3 +73,61 @@ public class GenerateGenericTestEightElementTupleTests
         await Assert.That(h).IsEqualTo((T8)(object)8);
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+public class GenerateGenericTestDuplicateMethodDataSourceInferenceTests
+{
+    public static IEnumerable<Func<(int, string)>> FirstRows()
+    {
+        yield return () => (1, "a");
+    }
+
+    public static IEnumerable<Func<(int, string)>> SecondRows()
+    {
+        yield return () => (2, "b");
+    }
+
+    // Both sources infer <int, string>. Source-gen mode keeps only the first source for that instantiation, so
+    // <int, string> runs FirstRows and <object, object> runs both sources: three tests. Reflection mode also ran
+    // SecondRows for <int, string>.
+    [Test]
+    [GenerateGenericTest(typeof(object), typeof(object))]
+#pragma warning disable TUnit0001 // the analyzer does not resolve T1/T2 from the tuple
+    [MethodDataSource(nameof(FirstRows))]
+    [MethodDataSource(nameof(SecondRows))]
+#pragma warning restore TUnit0001
+    public async Task Duplicate_Inferred_Types_Keep_The_First_Source<T1, T2>(T1 first, T2 second)
+    {
+        await Assert.That(first is T1 && second is T2).IsTrue();
+    }
+}
+
+public class GenericMethodDataSourceProvider7092
+{
+    public static IEnumerable<Func<(int, string)>> Rows()
+    {
+        yield return () => (1, "a");
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class GenerateGenericTestGenericMethodDataSourceProviderTests
+{
+    // Same name as the provider's member, with different element types. [MethodDataSource<T>] must infer
+    // from T's Rows (<int, string>), not from this one (<string, string>).
+    public static IEnumerable<Func<(string, string)>> Rows()
+    {
+        yield return () => ("x", "y");
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(object), typeof(object))]
+#pragma warning disable TUnit0001 // the analyzer does not resolve T1/T2 from the tuple
+    [MethodDataSource<GenericMethodDataSourceProvider7092>(nameof(GenericMethodDataSourceProvider7092.Rows))]
+#pragma warning restore TUnit0001
+    public async Task Generic_Method_Data_Source_Infers_From_Its_Provider<T1, T2>(T1 first, T2 second)
+    {
+        await Assert.That(first is T1 && second is T2).IsTrue();
+        await Assert.That(first).IsEqualTo((T1)(object)1);
+    }
+}

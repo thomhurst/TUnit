@@ -1405,8 +1405,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <item>[MethodDataSource] members of the test class returning <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>
     /// (<c>InferTypesFromMethodDataSource</c>). The instantiation runs only that source.</item>
     /// </list>
-    /// Sources whose types violate the constraints are skipped. Rows and sources inferring types that are
-    /// already instantiated join that instantiation.
+    /// Sources whose types violate the constraints are skipped. Sources inferring types that are already
+    /// instantiated are dropped, except further [Arguments] rows of a method on a non-generic class, which join
+    /// the instantiation an earlier [Arguments] row created.
     /// </summary>
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT; MakeGenericMethod over types inferred from attribute values")]
     private static List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[]? Rows)> InferMethodInstantiationsFromDataSources(
@@ -1418,11 +1419,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var parameters = method.GetParameters();
         var dataSources = ReflectionAttributeExtractor.ExtractDataSources(method);
 
+        // Mirrors the generator's isMethodArgumentsRow: only [Arguments] rows of a generic method on a non-generic
+        // class join an instantiation that an earlier [Arguments] row created. Any other source inferring types
+        // that are already instantiated is dropped, as the generator's processedTypeCombinations does.
+        var joinsArgumentsRows = !testClass.IsGenericType;
+
         foreach (var dataSource in dataSources)
         {
             if (dataSource is ArgumentsAttribute arguments)
             {
-                AddInstantiation(InferMethodTypeArguments(arguments.Values, parameters, genericParameterCount), arguments);
+                AddInstantiation(InferMethodTypeArguments(arguments.Values, parameters, genericParameterCount), arguments, isMethodArgumentsRow: joinsArgumentsRows);
             }
         }
 
@@ -1456,7 +1462,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         return result;
 
-        void AddInstantiation(Type[]? typeArguments, IDataSourceAttribute? row)
+        void AddInstantiation(Type[]? typeArguments, IDataSourceAttribute? row, bool isMethodArgumentsRow = false)
         {
             if (typeArguments is null)
             {
@@ -1466,9 +1472,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             var index = instantiations.FindIndex(x => TypeArrayComparer.Instance.Equals(x.TypeArguments, typeArguments));
             if (index >= 0)
             {
-                if (row is not null)
+                // [Arguments] rows are processed first, so an instantiation whose rows are [Arguments] rows was
+                // created by one
+                if (isMethodArgumentsRow
+                    && row is not null
+                    && instantiations[index].Rows is [ArgumentsAttribute, ..] rows)
                 {
-                    instantiations[index].Rows?.Add(row);
+                    rows.Add(row);
                 }
 
                 return;
@@ -1536,7 +1546,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// Mirrors the generator's <c>InferTypesFromMethodDataSource</c>. It only reads attributes whose first
     /// constructor argument is the member name (<c>[MethodDataSource("Rows")]</c> and
     /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), looks for a static parameterless method of that name
-    /// declared on the test class, and requires its declared return type to be
+    /// declared on the test class (or on <c>T</c>), and requires its declared return type to be
     /// <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>. Each tuple element is matched against the test parameter
     /// at the same position, including type arguments nested in generic parameter types.
     /// </summary>
@@ -1556,7 +1566,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return null;
         }
 
-        var dataMethod = testClass.GetMethod(
+        // [MethodDataSource<T>("Rows")] reads Rows from T, not from the test class
+        var providerType = methodDataSource.ClassProvidingDataSource ?? testClass;
+        var dataMethod = providerType.GetMethod(
             methodDataSource.MethodNameProvidingDataSource,
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly,
             binder: null,

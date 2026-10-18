@@ -39,3 +39,26 @@ public class GenerateGenericTestCoveredByTypedDataSourceTests
         await Assert.That(value!.GetType()).IsEqualTo(typeof(T));
     }
 }
+
+public class IntRowSource7092 : DataSourceGeneratorAttribute<int>
+{
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata metadata)
+    {
+        yield return () => 2;
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class GenerateGenericTestTypedDataSourceDuplicatingArgumentsTests
+{
+    // [Arguments(1)] and the typed source both infer <int>. Source-gen mode keeps only the [Arguments] row for
+    // <int>, and [GenerateGenericTest(typeof(int))] adds nothing: one test. Reflection mode also ran <int>(2).
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [Arguments(1)]
+    [IntRowSource7092]
+    public async Task Typed_Source_Inferring_An_Existing_Type_Is_Dropped<T>(T value)
+    {
+        await Assert.That(value).IsEqualTo((T)(object)1);
+    }
+}
