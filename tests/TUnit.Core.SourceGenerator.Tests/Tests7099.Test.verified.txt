@@ -1867,7 +1867,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.MultiDimensional<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 194,
+            lineNumber: 196,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2076,7 +2076,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
             methodName: "NonGeneric_Optional_Omitted_Before_Array_With_Token",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.NonGeneric_Optional_Omitted_Before_Array_With_Token",
             filePath: "",
-            lineNumber: 178,
+            lineNumber: 179,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2099,7 +2099,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
             methodName: "Optional_Omitted_Without_Params",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Optional_Omitted_Without_Params",
             filePath: "",
-            lineNumber: 186,
+            lineNumber: 188,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2217,7 +2217,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "values", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayDerived.Inherited<string>",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 211,
+            lineNumber: 213,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
