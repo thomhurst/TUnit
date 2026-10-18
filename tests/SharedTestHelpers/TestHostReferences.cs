@@ -14,6 +14,10 @@ namespace TUnit.Tests.Shared;
 /// that a plain run does not, so types such as <c>System.Net.HttpStatusCode</c> resolved or not and generator output
 /// differed between launches. On .NET, <c>TRUSTED_PLATFORM_ASSEMBLIES</c> lists the app's whole deployment
 /// (framework plus deps.json) up front. .NET Framework has no such list, so it keeps the loaded assemblies.
+/// <para>
+/// Neither source has a defined order (the TPA order differs between Linux and macOS hosts), and generators emit
+/// referenced assemblies in reference order, so the paths are sorted to keep snapshots identical on every host.
+/// </para>
 /// </remarks>
 internal static class TestHostReferences
 {
@@ -21,14 +25,15 @@ internal static class TestHostReferences
 
     private static string[] Resolve()
     {
-        if (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") is string trustedPlatformAssemblies)
-        {
-            return trustedPlatformAssemblies.Split(new[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries);
-        }
+        var paths = AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") is string trustedPlatformAssemblies
+            ? trustedPlatformAssemblies.Split(new[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries)
+            : AppDomain.CurrentDomain.GetAssemblies()
+                .Where(assembly => !assembly.IsDynamic && !string.IsNullOrWhiteSpace(assembly.Location))
+                .Select(assembly => assembly.Location);
 
-        return AppDomain.CurrentDomain.GetAssemblies()
-            .Where(assembly => !assembly.IsDynamic && !string.IsNullOrWhiteSpace(assembly.Location))
-            .Select(assembly => assembly.Location)
+        return paths
+            .OrderBy(Path.GetFileName, StringComparer.Ordinal)
+            .ThenBy(path => path, StringComparer.Ordinal)
             .ToArray();
     }
 }
