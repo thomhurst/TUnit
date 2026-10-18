@@ -1394,8 +1394,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// generator uses:
     /// <list type="number">
     /// <item>Each [Arguments] row (<c>InferTypesFromArgumentsAttribute</c>): a type parameter is inferred only
-    /// from a non-null value passed directly to a parameter of that type, and every type parameter must be
-    /// inferred. The instantiation runs only those rows.</item>
+    /// from a value passed directly to a parameter of that type (a null value infers <c>object</c>), and every
+    /// type parameter must be inferred. The instantiation runs only those rows.</item>
     /// <item>Each typed data source deriving from <c>DataSourceGeneratorAttribute&lt;T...&gt;</c> or
     /// <c>AsyncDataSourceGeneratorAttribute&lt;T...&gt;</c> (<c>InferTypesFromDataSourceAttribute</c>). The
     /// instantiation runs only that source.</item>
@@ -1719,13 +1719,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         for (var i = 0; i < count; i++)
         {
             var parameterType = parameters[i].ParameterType;
-            if (!parameterType.IsGenericParameter || parameterType.DeclaringMethod is null || values[i] is not { } value)
+            if (!parameterType.IsGenericParameter || parameterType.DeclaringMethod is null)
             {
                 continue;
             }
 
-            // A Type value is a RuntimeType instance, but the attribute argument is typed System.Type
-            typeArguments[parameterType.GenericParameterPosition] = value is Type ? typeof(Type) : value.GetType();
+            // A Type value is a RuntimeType instance, but the attribute argument is typed System.Type. A null
+            // value, typed or not, is an element of the params object?[] argument, which Roslyn types as object,
+            // so the generator infers object for it ([Arguments((string?)null)] runs as Test<object>(null)).
+            typeArguments[parameterType.GenericParameterPosition] = values[i] switch
+            {
+                null => typeof(object),
+                Type => typeof(Type),
+                var value => value.GetType()
+            };
         }
 
         foreach (var typeArgument in typeArguments)
