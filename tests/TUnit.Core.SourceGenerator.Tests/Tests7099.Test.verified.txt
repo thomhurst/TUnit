@@ -1689,6 +1689,241 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTests_Inferred_FromLeading_Afte_D192BA4B_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests)),
+        Name = "InferredGenericParamsArrayTests",
+        Namespace = "TUnit.TestProject.Bugs._7099",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Inferred_FromLeading_After_Token", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests), "Inferred_FromLeading_After_Token", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "first", new global::TUnit.Core.GenericParameter(0, true, "T"), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            var context = global::TUnit.Core.TestContext.Current;
+            switch (args.Length)
+            {
+                case 1:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_After_Token<int>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::System.Array.Empty<int>()));
+                    }
+                case 2:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_After_Token<int>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is int[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(args[1]))));
+                    }
+                case 3:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_After_Token<int>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]) }));
+                    }
+                case 4:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_After_Token<int>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]) }));
+                    }
+                case 5:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_After_Token<int>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]) }));
+                    }
+                case 6:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_After_Token<int>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]) }));
+                    }
+                case 7:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_After_Token<int>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[6]) }));
+                    }
+                default:
+                    if (args.Length < 1)
+                    {
+                        throw new global::System.ArgumentException($"Expected at least 1 argument, but got {args.Length}");
+                    }
+                    return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_After_Token<int>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args.Length > 1 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(1, args.Length - 1), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>())));
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(1, 2, 3),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests>(
+            methodName: "Inferred_FromLeading_After_Token<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests.Inferred_FromLeading_After_Token<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 155,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(1, 2, 3),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTests_Inferred_FromLeading_Afte_D192BA4B_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests>(static () => TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTests_Inferred_FromLeading_Afte_D192BA4B_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTests_Inferred_FromLeading_Arou_07BB3F22_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests)),
+        Name = "InferredGenericParamsArrayTests",
+        Namespace = "TUnit.TestProject.Bugs._7099",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Inferred_FromLeading_Around_Token", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests), "Inferred_FromLeading_Around_Token", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "label", new global::TUnit.Core.ConcreteType(typeof(string)), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "first", new global::TUnit.Core.GenericParameter(0, true, "T"), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            var context = global::TUnit.Core.TestContext.Current;
+            switch (args.Length)
+            {
+                case 2:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_Around_Token<int>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::System.Array.Empty<int>()));
+                    }
+                case 3:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_Around_Token<int>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), (args[2] is null ? null : args[2] is int[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(args[2]))));
+                    }
+                case 4:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_Around_Token<int>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]) }));
+                    }
+                case 5:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_Around_Token<int>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]) }));
+                    }
+                case 6:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_Around_Token<int>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]) }));
+                    }
+                case 7:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_Around_Token<int>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[6]) }));
+                    }
+                case 8:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_Around_Token<int>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[6]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[7]) }));
+                    }
+                default:
+                    if (args.Length < 2)
+                    {
+                        throw new global::System.ArgumentException($"Expected at least 2 arguments, but got {args.Length}");
+                    }
+                    return new global::System.Threading.Tasks.ValueTask(instance.Inferred_FromLeading_Around_Token<int>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), (args.Length > 2 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(2, args.Length - 2), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>())));
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute("label", 1, 2),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests>(
+            methodName: "Inferred_FromLeading_Around_Token<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests.Inferred_FromLeading_Around_Token<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 165,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute("label", 1, 2),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTests_Inferred_FromLeading_Arou_07BB3F22_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests>(static () => TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTests_Inferred_FromLeading_Arou_07BB3F22_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTests_Optional_Before_Params__int_T___TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests", new global::TUnit.Core.ClassMetadata
@@ -1776,7 +2011,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Optional_Before_Params<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 159,
+            lineNumber: 179,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1892,7 +2127,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Optional_Omitted_Before_Params<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 168,
+            lineNumber: 188,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2010,7 +2245,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Optional_Omitted_Before_Array_With_Token<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 185,
+            lineNumber: 205,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2089,7 +2324,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.MultiDimensional<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 212,
+            lineNumber: 232,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2205,7 +2440,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.PlainArray_Before_Token<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 231,
+            lineNumber: 251,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2318,7 +2553,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Token_Before_Params<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 247,
+            lineNumber: 267,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2436,7 +2671,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Token_Between_Leading_And_Params<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 257,
+            lineNumber: 277,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2547,7 +2782,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[][,]), "values", n
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.JaggedMultiDimensional<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 267,
+            lineNumber: 287,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2661,7 +2896,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests.Generic_Optional_Array<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 313,
+            lineNumber: 333,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2923,7 +3158,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
             methodName: "NonGeneric_Optional_Omitted_Before_Params",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.NonGeneric_Optional_Omitted_Before_Params",
             filePath: "",
-            lineNumber: 177,
+            lineNumber: 197,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2945,7 +3180,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
             methodName: "NonGeneric_Optional_Omitted_Before_Array_With_Token",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.NonGeneric_Optional_Omitted_Before_Array_With_Token",
             filePath: "",
-            lineNumber: 195,
+            lineNumber: 215,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2968,7 +3203,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
             methodName: "Optional_Omitted_Without_Params",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Optional_Omitted_Without_Params",
             filePath: "",
-            lineNumber: 204,
+            lineNumber: 224,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2990,7 +3225,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
             methodName: "Optional_Array_Omitted_After_Required_With_Token",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Optional_Array_Omitted_After_Required_With_Token",
             filePath: "",
-            lineNumber: 223,
+            lineNumber: 243,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3013,7 +3248,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
             methodName: "NonGeneric_PlainArray_Before_Token",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.NonGeneric_PlainArray_Before_Token",
             filePath: "",
-            lineNumber: 240,
+            lineNumber: 260,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3179,7 +3414,7 @@ internal static class TUnit_TestProject_Bugs__7099_OptionalArrayOverloadTests__T
             methodName: "NonGeneric_Optional_Array",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests.NonGeneric_Optional_Array",
             filePath: "",
-            lineNumber: 303,
+            lineNumber: 323,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3200,7 +3435,7 @@ internal static class TUnit_TestProject_Bugs__7099_OptionalArrayOverloadTests__T
             methodName: "Optional_Array_With_Token",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests.Optional_Array_With_Token",
             filePath: "",
-            lineNumber: 324,
+            lineNumber: 344,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3318,7 +3553,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "values", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7099.GenericParamsArrayDerived.Inherited<string>",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 284,
+            lineNumber: 304,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

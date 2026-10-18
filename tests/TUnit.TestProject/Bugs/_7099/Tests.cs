@@ -151,6 +151,26 @@ public class InferredGenericParamsArrayTests
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
         await Assert.That(rest.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 2, 3 });
     }
+
+    [Test]
+    [Arguments(1, 2, 3)]
+    public async Task Inferred_FromLeading_After_Token<T>(CancellationToken token, T first, params T[] rest)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(token.CanBeCanceled).IsTrue();
+        await Assert.That(first).IsEqualTo((T)(object)1);
+        await Assert.That(rest.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 2, 3 });
+    }
+
+    [Test]
+    [Arguments("label", 1, 2)]
+    public async Task Inferred_FromLeading_Around_Token<T>(string label, CancellationToken token, T first, params T[] rest)
+    {
+        await Assert.That(label).IsEqualTo("label");
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(first).IsEqualTo((T)(object)1);
+        await Assert.That(rest.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 2 });
+    }
 }
 
 [EngineTest(ExpectedResult.Pass)]

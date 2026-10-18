@@ -399,21 +399,35 @@ internal sealed class TestGenericTypeResolver
         // They are left out of inference: the reflection invoker re-infers type arguments from the
         // declared parameter types, so inferring T from them here would not reach the invocation.
         // T must come from another argument, or from a lone array value passed as the array.
-        // Row values bind to the data parameters only: a trailing CancellationToken is supplied by the
-        // engine, so an array just before it (T[] values, CancellationToken token) is the trailing array.
-        var dataParameterCount = parameterTypes.Length > 0 && parameterTypes[parameterTypes.Length - 1] == typeof(CancellationToken)
-            ? parameterTypes.Length - 1
-            : parameterTypes.Length;
-        var hasGenericParamsArray = HasGenericParamsArray(methodMetadata, parameterTypes, dataParameterCount);
-        var lastIndex = dataParameterCount - 1;
-
-        // Map parameter types to argument types
-        for (var i = 0; i < Math.Min(dataParameterCount, methodArguments.Length); i++)
+        // Row values bind to the data parameters only: the engine supplies a CancellationToken parameter
+        // wherever it is declared, so it takes no row value (as in source-gen mode). An array just before
+        // a trailing token (T[] values, CancellationToken token) is still the trailing array.
+        var dataParameterCount = 0;
+        var lastDataParameterIndex = -1;
+        for (var i = 0; i < parameterTypes.Length; i++)
         {
-            var paramType = parameterTypes[i];
+            if (parameterTypes[i] != typeof(CancellationToken))
+            {
+                dataParameterCount++;
+                lastDataParameterIndex = i;
+            }
+        }
+
+        var hasGenericParamsArray = HasGenericParamsArray(methodMetadata, parameterTypes, lastDataParameterIndex);
+
+        // Map parameter types to argument types; parameterIndex skips CancellationToken parameters
+        var parameterIndex = 0;
+        for (var i = 0; i < Math.Min(dataParameterCount, methodArguments.Length); i++, parameterIndex++)
+        {
+            while (parameterTypes[parameterIndex] == typeof(CancellationToken))
+            {
+                parameterIndex++;
+            }
+
+            var paramType = parameterTypes[parameterIndex];
             var argValue = methodArguments[i];
 
-            if (hasGenericParamsArray && i == lastIndex)
+            if (hasGenericParamsArray && parameterIndex == lastDataParameterIndex)
             {
                 // A lone array value may be the array itself (normal form) or one element of it
                 // (expanded form, e.g. T = int[] from a leading argument). Use it for inference only
@@ -481,22 +495,22 @@ internal sealed class TestGenericTypeResolver
     }
 
     /// <summary>
-    /// Whether the method's last parameter collects trailing values and involves a generic
+    /// Whether the method's last data parameter collects trailing values and involves a generic
     /// parameter: a <c>params T[]</c>, or a plain single-dimensional <c>T[]</c>, which the
     /// reflection invoker also fills from loose values.
     /// </summary>
-    private static bool HasGenericParamsArray(MethodMetadata methodMetadata, Type[] parameterTypes, int dataParameterCount)
+    private static bool HasGenericParamsArray(MethodMetadata methodMetadata, Type[] parameterTypes, int lastDataParameterIndex)
     {
         var parameters = methodMetadata.Parameters;
-        if (dataParameterCount == 0 || parameters.Length != parameterTypes.Length)
+        if (lastDataParameterIndex < 0 || parameters.Length != parameterTypes.Length)
         {
             return false;
         }
 
-        var lastType = parameterTypes[dataParameterCount - 1];
+        var lastType = parameterTypes[lastDataParameterIndex];
         return lastType.IsArray
             && lastType.ContainsGenericParameters
-            && (parameters[dataParameterCount - 1].IsParams || lastType.GetArrayRank() == 1);
+            && (parameters[lastDataParameterIndex].IsParams || lastType.GetArrayRank() == 1);
     }
 
     #if NET8_0_OR_GREATER
