@@ -65,6 +65,11 @@ public static partial class EqualsAssertionExtensions
     /// source value is converted implicitly to <typeparamref name="TOther"/> and compared to
     /// <paramref name="expected"/> using <see cref="EqualsAssertion{T}"/>.
     /// </summary>
+    /// <remarks>
+    /// The conversion of <paramref name="expected"/> to <typeparamref name="TValue"/> runs when this method is
+    /// called, as it would at the call site of the same-type overload, so an exception thrown by a user-defined
+    /// implicit operator surfaces here rather than when the assertion is awaited.
+    /// </remarks>
     [OverloadResolutionPriority(-1)]
     [RequiresUnreferencedCode("Looks up implicit conversion operators via reflection. Trimming may remove user-defined operators.")]
     public static EqualsAssertion<TOther> IsEqualTo<TValue, TOther>(
@@ -106,6 +111,11 @@ public static partial class NotEqualsAssertionExtensions
     /// Otherwise the source value is converted implicitly to <typeparamref name="TOther"/> and
     /// compared to <paramref name="notExpected"/> using <see cref="NotEqualsAssertion{T}"/>.
     /// </summary>
+    /// <remarks>
+    /// The conversion of <paramref name="notExpected"/> to <typeparamref name="TValue"/> runs when this method is
+    /// called, as it would at the call site of the same-type overload, so an exception thrown by a user-defined
+    /// implicit operator surfaces here rather than when the assertion is awaited.
+    /// </remarks>
     [OverloadResolutionPriority(-1)]
     [RequiresUnreferencedCode("Looks up implicit conversion operators via reflection. Trimming may remove user-defined operators.")]
     public static NotEqualsAssertion<TOther> IsNotEqualTo<TValue, TOther>(
