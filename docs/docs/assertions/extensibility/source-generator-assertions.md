@@ -239,8 +239,8 @@ Use `[AssertionFrom]` to create assertions from existing methods in libraries or
 using TUnit.Assertions.Attributes;
 
 [AssertionFrom<string>(nameof(string.IsNullOrEmpty), CustomName = "IsBlank", ExpectationMessage = "to be null or empty")]
-[AssertionFrom<string>(nameof(string.StartsWith), CustomName = "BeginsWithText", ExpectationMessage = "to start with {value}")]
-[AssertionFrom<string>(nameof(string.EndsWith), CustomName = "EndsWithText", ExpectationMessage = "to end with {value}")]
+[AssertionFrom<string>(nameof(string.StartsWith), CustomName = "BeginsWithText", ExpectationMessage = "to start with '{value}'")]
+[AssertionFrom<string>(nameof(string.EndsWith), CustomName = "EndsWithText", ExpectationMessage = "to end with '{value}'")]
 public static partial class StringAssertionExtensions
 {
 }

@@ -135,7 +135,7 @@ public sealed class AssertionFromAttribute<TTarget> : Attribute
     /// </remarks>
     /// <example>
     /// <code>
-    /// [AssertionFrom&lt;string&gt;("StartsWith", ExpectationMessage = "start with {value}")]
+    /// [AssertionFrom&lt;string&gt;("StartsWith", ExpectationMessage = "start with '{value}'")]
     /// // Error message: "Expected 'hello' to start with 'xyz' but..."
     /// </code>
     /// </example>

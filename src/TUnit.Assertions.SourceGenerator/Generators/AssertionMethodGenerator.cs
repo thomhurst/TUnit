@@ -974,7 +974,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         if (!string.IsNullOrEmpty(attributeData.ExpectationMessage))
         {
             // Use custom expectation message
-            sourceBuilder.AppendLine($"        return $\"{RenderCustomExpectation(attributeData.ExpectationMessage!)}\";");
+            sourceBuilder.AppendLine($"        return $\"{RenderCustomExpectation(attributeData.ExpectationMessage!, parameters)}\";");
         }
         else
         {
@@ -999,12 +999,19 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     /// The built-in messages omit the leading "to" ("be null or empty") and leave negation to the generator, while
     /// the documented style spells it out ("to be null or empty", or "to not contain '{value}'" with
     /// <c>NegateLogic</c>). Both are accepted so neither renders as "to to ..." or "to not not ...".
+    /// Parameter placeholders such as <c>{value}</c> are rewritten to the generated <c>_value</c> field.
     /// </remarks>
-    private static string RenderCustomExpectation(string expectationMessage)
+    private static string RenderCustomExpectation(string expectationMessage, IParameterSymbol[] parameters)
     {
         var expectation = expectationMessage.StartsWith("to ", StringComparison.Ordinal)
             ? expectationMessage.Substring("to ".Length)
             : expectationMessage;
+
+        // Replace each parameter placeholder {paramName} with {_paramName}
+        foreach (var parameter in parameters)
+        {
+            expectation = expectation.Replace($"{{{parameter.Name}}}", $"{{_{parameter.Name}}}");
+        }
 
         return expectation.StartsWith("not ", StringComparison.Ordinal)
             ? $"to {expectation}"
