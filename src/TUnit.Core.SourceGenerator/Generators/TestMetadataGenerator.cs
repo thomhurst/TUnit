@@ -1273,7 +1273,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var methodName = entry.MethodName;
         var hasCancellationToken = testMethod.MethodSymbol.Parameters.Any(p =>
-            p.Type.Name == "CancellationToken" && p.Type.ContainingNamespace?.ToString() == "System.Threading");
+            p.Type.IsCancellationToken());
         var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
 
         if (entry.MethodConstraintViolations is [var violation, ..])
@@ -1284,22 +1284,36 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return;
         }
 
+        // A trailing params/array parameter collects the remaining row values, which the
+        // positional casts below cannot express. Bind it like a non-generic method instead,
+        // using the parameters of the closed method.
+        if ((entry.MethodTypeArgs.Length > 0 || entry.ClassTypeArgs.Length > 0)
+            && TryGetClosedParametersWithTrailingArray(testMethod, entry) is { } closedParameters)
+        {
+            var invokedName = entry.MethodTypeArgs.Length > 0
+                ? $"{methodName}<{string.Join(", ", entry.MethodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>"
+                : methodName;
+            GenerateConcreteTestInvokerBody(writer, invokedName, returnPattern, hasCancellationToken, closedParameters);
+        }
         // For any generic context (class or method), we need to substitute type parameters
-        if (entry.MethodTypeArgs.Length > 0 || entry.ClassTypeArgs.Length > 0)
+        else if (entry.MethodTypeArgs.Length > 0 || entry.ClassTypeArgs.Length > 0)
         {
             // Build the method call with proper type substitution
             var parameterCasts = new List<string>();
+            // Row values hold only the data parameters; the engine supplies the CancellationToken,
+            // so a token before a data parameter must not shift the row index.
+            var dataArgIndex = 0;
             for (var i = 0; i < testMethod.MethodSymbol.Parameters.Length; i++)
             {
                 var param = testMethod.MethodSymbol.Parameters[i];
-                if (param.Type.Name == "CancellationToken" && param.Type.ContainingNamespace?.ToString() == "System.Threading")
+                if (param.Type.IsCancellationToken())
                 {
                     parameterCasts.Add("cancellationToken");
                 }
                 else
                 {
                     var paramType = SubstituteTypeParameters(param.Type, testMethod, entry.ClassTypeArgs, entry.MethodTypeArgs);
-                    parameterCasts.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
+                    parameterCasts.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>(args[{dataArgIndex++.ToString(CultureInfo.InvariantCulture)}])");
                 }
             }
 
@@ -1352,10 +1366,83 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // Non-generic — use standard invoke (shouldn't normally reach here for generic path)
             var parametersFromArgs = testMethod.MethodSymbol.Parameters
-                .Where(p => p.Type.Name != "CancellationToken" || p.Type.ContainingNamespace?.ToString() != "System.Threading")
+                .Where(p => !p.Type.IsCancellationToken())
                 .ToArray();
             GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
         }
+    }
+
+    /// <summary>
+    /// Returns the data-bound (non-CancellationToken) parameters of the closed test method when the
+    /// last one collects trailing arguments (<c>params T[]</c> or a plain array). Returns null when
+    /// there is no such parameter, or the closed method cannot be built.
+    /// </summary>
+    private static IParameterSymbol[]? TryGetClosedParametersWithTrailingArray(TestMethodMetadata testMethod, ConcreteInstantiation entry)
+    {
+        var parameters = testMethod.MethodSymbol.Parameters
+            .Where(p => !p.Type.IsCancellationToken())
+            .ToArray();
+
+        if (parameters.Length == 0 || !parameters[parameters.Length - 1].CollectsTrailingArguments())
+        {
+            return null;
+        }
+
+        // The shared binder passes a single token. A method declaring several keeps the positional
+        // path, which passes the token to each of them.
+        if (testMethod.MethodSymbol.Parameters.Length - parameters.Length > 1)
+        {
+            return null;
+        }
+
+        // Keep the method as discovered: an inherited method already carries the type arguments its
+        // derived class supplied to the base (e.g. Derived : Base<int> gives int[] for T[]).
+        var method = testMethod.MethodSymbol;
+
+        if (entry.ClassTypeArgs.Length > 0)
+        {
+            if (testMethod.TypeSymbol.OriginalDefinition.TypeParameters.Length != entry.ClassTypeArgs.Length)
+            {
+                return null;
+            }
+
+            // Close the test class, then find the method on it or on one of its (now closed) base types.
+            var definition = testMethod.MethodSymbol.OriginalDefinition;
+            IMethodSymbol? closedMethod = null;
+            for (INamedTypeSymbol? type = testMethod.TypeSymbol.OriginalDefinition.Construct(entry.ClassTypeArgs);
+                 type is not null && closedMethod is null;
+                 type = type.BaseType)
+            {
+                closedMethod = type.GetMembers(definition.Name)
+                    .OfType<IMethodSymbol>()
+                    .FirstOrDefault(m => SymbolEqualityComparer.Default.Equals(m.OriginalDefinition, definition));
+            }
+
+            if (closedMethod is null)
+            {
+                return null;
+            }
+
+            method = closedMethod;
+        }
+
+        if (entry.MethodTypeArgs.Length > 0)
+        {
+            if (method.TypeParameters.Length != entry.MethodTypeArgs.Length
+                || !SymbolEqualityComparer.Default.Equals(method.ConstructedFrom, method))
+            {
+                return null;
+            }
+
+            method = method.Construct(entry.MethodTypeArgs);
+        }
+
+        // Select by the declared positions: once closed, a data parameter of type T can itself be a
+        // CancellationToken (e.g. [GenerateGenericTest(typeof(CancellationToken))]) and must stay a data argument.
+        var closedParameters = method.Parameters;
+        return parameters
+            .Select(p => closedParameters[p.Ordinal])
+            .ToArray();
     }
 
     /// <summary>
@@ -2953,6 +3040,65 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
+    /// <summary>
+    /// Returns the name of the CancellationToken parameter of the method that declares
+    /// <paramref name="parameter"/>, or null when it has none.
+    /// </summary>
+    private static string? GetCancellationTokenParameterName(IParameterSymbol parameter)
+        => (parameter.ContainingSymbol as IMethodSymbol)?.Parameters
+            .LastOrDefault(p => p.OriginalDefinition.Type.IsCancellationToken())
+            ?.Name;
+
+    /// <summary>
+    /// Returns the declared index of the CancellationToken parameter when it precedes the last
+    /// data parameter of the method declaring <paramref name="parametersFromArgs"/>, or -1 when
+    /// the token is trailing (or absent) and is appended after the data arguments.
+    /// </summary>
+    private static int GetLeadingCancellationTokenIndex(IParameterSymbol[] parametersFromArgs)
+    {
+        if (parametersFromArgs.Length == 0
+            || parametersFromArgs[parametersFromArgs.Length - 1].ContainingSymbol is not IMethodSymbol method)
+        {
+            return -1;
+        }
+
+        var parameters = method.Parameters;
+        for (var i = 0; i < parameters.Length - 1; i++)
+        {
+            // Check the declared type: a closed T that happens to be CancellationToken is a data parameter.
+            if (parameters[i].OriginalDefinition.Type.IsCancellationToken())
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Inserts a non-trailing CancellationToken argument at its declared position. When an
+    /// argument before that position was omitted or named (an omitted optional before the
+    /// trailing array), the token is appended by name instead, which C# allows after named arguments.
+    /// </summary>
+    private static void InsertLeadingCancellationToken(List<InvocationArgument> arguments, int tokenIndex, IParameterSymbol[] parametersFromArgs, string tokenArgument)
+    {
+        var positional = tokenIndex <= arguments.Count;
+        for (var i = 0; positional && i < tokenIndex; i++)
+        {
+            positional = !arguments[i].IsNamed;
+        }
+
+        if (positional)
+        {
+            arguments.Insert(tokenIndex, new InvocationArgument(tokenArgument));
+        }
+        else
+        {
+            var tokenName = ((IMethodSymbol)parametersFromArgs[parametersFromArgs.Length - 1].ContainingSymbol).Parameters[tokenIndex].Name;
+            arguments.Add(new InvocationArgument(tokenArgument, tokenName));
+        }
+    }
+
     private static void GenerateConcreteTestInvokerBody(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs, bool wrapInTryCatch = true)
     {
         // Wrap entire body in try-catch to handle synchronous exceptions. The class-level
@@ -3062,7 +3208,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Add CancellationToken if present
                 if (hasCancellationToken)
                 {
-                    argsToPass.Add("context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None");
+                    const string cancellationTokenArgument = "context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None";
+
+                    // When optional leading parameters are omitted, the trailing array is passed by
+                    // name. A positional argument cannot follow it (CS8323), so name the token too.
+                    // When any parameter is left out (e.g. an omitted trailing optional), a positional
+                    // token would bind to the first omitted slot, so it needs the name as well.
+                    var cancellationTokenName = (hasParams && argCount < lastIndex) || argsToPass.Count < parametersFromArgs.Length
+                        ? GetCancellationTokenParameterName(parametersFromArgs[lastIndex])
+                        : null;
+
+                    // A token declared before the data parameters (only reachable for generic methods,
+                    // whose token may sit anywhere) goes back to its declared position.
+                    var tokenIndex = GetLeadingCancellationTokenIndex(parametersFromArgs);
+                    if (tokenIndex >= 0)
+                    {
+                        InsertLeadingCancellationToken(argsToPass, tokenIndex, parametersFromArgs, cancellationTokenArgument);
+                    }
+                    else
+                    {
+                        argsToPass.Add(new InvocationArgument(cancellationTokenArgument, cancellationTokenName));
+                    }
                 }
 
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";
@@ -3097,7 +3263,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var dynamicArgs = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", "args.Length");
                 if (hasCancellationToken)
                 {
-                    dynamicArgs.Add("context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None");
+                    const string cancellationTokenArgument = "context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None";
+                    var tokenIndex = GetLeadingCancellationTokenIndex(parametersFromArgs);
+                    if (tokenIndex >= 0)
+                    {
+                        InsertLeadingCancellationToken(dynamicArgs, tokenIndex, parametersFromArgs, cancellationTokenArgument);
+                    }
+                    else
+                    {
+                        dynamicArgs.Add(new InvocationArgument(cancellationTokenArgument));
+                    }
                 }
 
                 var dynamicMethodCall = $"instance.{methodName}({string.Join(", ", dynamicArgs)})";
@@ -5893,19 +6068,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         var argumentValues = argAttr.ConstructorArguments[0].Values;
-        var methodParams = method.Parameters;
+
+        // Row values bind to the data parameters only; the engine supplies the CancellationToken.
+        var methodParams = method.Parameters
+            .Where(p => !p.Type.IsCancellationToken())
+            .ToArray();
 
         // For each value in the params array
         for (var argIndex = 0; argIndex < argumentValues.Length && argIndex < methodParams.Length; argIndex++)
         {
             var methodParam = methodParams[argIndex];
             var argValue = argumentValues[argIndex];
-
-            // Skip if this is a CancellationToken parameter
-            if (methodParam.Type.Name == "CancellationToken")
-            {
-                continue;
-            }
 
             // Check if the method parameter type is a generic type parameter
             if (methodParam.Type is ITypeParameterSymbol typeParam)
@@ -5942,6 +6115,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     inferredTypes[typeParam.Name] = argType;
                 }
+            }
+            // A lone array value for a trailing params T[] or plain T[] (e.g. [Arguments(new[] { 1, 2 })])
+            // is the array itself, so T is its element type. Loose values are not used to infer T:
+            // reflection mode cannot bind them yet (https://github.com/thomhurst/TUnit/issues/7099).
+            else if (argIndex == methodParams.Length - 1
+                     && argumentValues.Length == methodParams.Length
+                     && methodParam.CollectsTrailingArguments()
+                     && methodParam.Type is IArrayTypeSymbol { IsSZArray: true, ElementType: ITypeParameterSymbol elementTypeParam }
+                     && !inferredTypes.ContainsKey(elementTypeParam.Name)
+                     && argValue is { Kind: TypedConstantKind.Array, Type: IArrayTypeSymbol { ElementType: var elementType } })
+            {
+                inferredTypes[elementTypeParam.Name] = elementType;
             }
         }
 
@@ -6632,6 +6817,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                 }
             }
+        }
+
+        // Handle arrays like T[] (e.g. a `params T[]` parameter)
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            var elementType = SubstituteTypeParameters(arrayType.ElementType, testMethod, classTypeArgs, methodTypeArgs);
+
+            return SymbolEqualityComparer.Default.Equals(elementType, arrayType.ElementType)
+                ? type
+                : testMethod.CompilationContext.Compilation.CreateArrayTypeSymbol(elementType, arrayType.Rank);
         }
 
         // Handle generic types like IEnumerable<T>, Dictionary<TKey, TValue>, etc.

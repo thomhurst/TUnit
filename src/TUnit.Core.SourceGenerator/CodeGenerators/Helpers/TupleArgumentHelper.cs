@@ -4,6 +4,17 @@ using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
+/// <summary>
+/// An argument of a generated method call. <see cref="Name"/> is set when the argument must be
+/// passed by name (e.g. a trailing array after omitted optional parameters).
+/// </summary>
+public readonly record struct InvocationArgument(string Expression, string? Name = null)
+{
+    public bool IsNamed => Name is not null;
+
+    public override string ToString() => Name is null ? Expression : $"@{Name}: {Expression}";
+}
+
 public static class TupleArgumentHelper
 {
     /// <summary>
@@ -32,10 +43,10 @@ public static class TupleArgumentHelper
     /// <param name="parameters">The method parameters</param>
     /// <param name="argumentsArrayName">The name of the arguments array</param>
     /// <param name="argumentCount">The actual number of arguments provided</param>
-    /// <returns>List of argument expressions for method invocation</returns>
-    public static List<string> GenerateArgumentAccessWithParams(IList<IParameterSymbol> parameters, string argumentsArrayName, object argumentCount)
+    /// <returns>The arguments for the method invocation, in declaration order</returns>
+    public static List<InvocationArgument> GenerateArgumentAccessWithParams(IList<IParameterSymbol> parameters, string argumentsArrayName, object argumentCount)
     {
-        var argumentExpressions = new List<string>();
+        var argumentExpressions = new List<InvocationArgument>();
 
         // Parse argument count - can be an int or a string expression
         int argCount;
@@ -69,7 +80,7 @@ public static class TupleArgumentHelper
                 {
                     var param = parameters[i];
                     var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])";
-                    argumentExpressions.Add(castExpression);
+                    argumentExpressions.Add(new InvocationArgument(castExpression));
                 }
             }
             else
@@ -78,7 +89,7 @@ public static class TupleArgumentHelper
                 {
                     var param = parameters[i];
                     var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])";
-                    argumentExpressions.Add(castExpression);
+                    argumentExpressions.Add(new InvocationArgument(castExpression));
                 }
             }
         }
@@ -95,7 +106,7 @@ public static class TupleArgumentHelper
                 {
                     var param = parameters[i];
                     var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])";
-                    argumentExpressions.Add(castExpression);
+                    argumentExpressions.Add(new InvocationArgument(castExpression));
                 }
             }
             else
@@ -104,7 +115,7 @@ public static class TupleArgumentHelper
                 {
                     var param = parameters[i];
                     var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])";
-                    argumentExpressions.Add(castExpression);
+                    argumentExpressions.Add(new InvocationArgument(castExpression));
                 }
             }
 
@@ -126,19 +137,33 @@ public static class TupleArgumentHelper
                     // extension-method chain — generated files don't import System.Linq unless the
                     // project has ImplicitUsings enabled, so the extension form fails to compile (CS1061).
                     var arrayInit = $"({argumentsArrayName}.Length > {regularParamCount.ToString(CultureInfo.InvariantCulture)} ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range({regularParamCount.ToString(CultureInfo.InvariantCulture)}, {rangeCount}), i => global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[i]))) : global::System.Array.Empty<{elementType.GloballyQualified()}>())";
-                    argumentExpressions.Add(arrayInit);
+                    argumentExpressions.Add(new InvocationArgument(arrayInit));
                 }
                 else
                 {
                     var remainingArgCount = Math.Max(0, argCount - regularParamCount);
 
-                    if (remainingArgCount == 0)
+                    // When optional regular parameters were omitted (argCount < regularParamCount),
+                    // a positional array would bind to the first omitted parameter, so name it.
+                    var arrayName = remainingArgCount == 0 && argCount < regularParamCount
+                        ? paramsParam.Name
+                        : null;
+
+                    if (remainingArgCount == 0 && !paramsParam.IsParams && paramsParam.HasExplicitDefaultValue)
+                    {
+                        // An omitted optional plain array keeps its declared default (as C# and
+                        // reflection mode do). The only default an array parameter can declare is
+                        // null, so pass a typed null rather than leaving the argument out: omitting
+                        // it could bind the call to another overload (e.g. a parameterless M()).
+                        argumentExpressions.Add(new InvocationArgument($"default({paramsParam.Type.GloballyQualified()})", arrayName));
+                    }
+                    else if (remainingArgCount == 0)
                     {
                         // No arguments for params array - pass empty array. Use Array.Empty<T>()
                         // rather than `new T[0]`: when T is itself an array (jagged param like
                         // byte[][], element type byte[]) the rank-specifier form `new byte[][0]`
                         // is invalid C# (CS1586/CS0178). See issue #6150.
-                        argumentExpressions.Add($"global::System.Array.Empty<{elementType.GloballyQualified()}>()");
+                        argumentExpressions.Add(new InvocationArgument($"global::System.Array.Empty<{elementType.GloballyQualified()}>()", arrayName));
                     }
                     else if (remainingArgCount == 1)
                     {
@@ -152,7 +177,7 @@ public static class TupleArgumentHelper
                         // MatrixAttribute subclass for a MyEnum[] parameter — issue #6678).
                         var singleArg = $"{argumentsArrayName}[{regularParamCount.ToString(CultureInfo.InvariantCulture)}]";
                         var checkAndCast = $"({singleArg} is null ? null : {singleArg} is {paramsParam.Type.GloballyQualified()} arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<{elementType.GloballyQualified()}>({singleArg}))";
-                        argumentExpressions.Add(checkAndCast);
+                        argumentExpressions.Add(new InvocationArgument(checkAndCast));
                     }
                     else
                     {
@@ -162,7 +187,13 @@ public static class TupleArgumentHelper
                         {
                             arrayElements.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])");
                         }
-                        argumentExpressions.Add($"new {elementType.GloballyQualified()}[] {{ {string.Join(", ", arrayElements)} }}");
+                        // Name the full array type rather than appending [] to the element type:
+                        // for a multidimensional element (params int[][,]) `new int[,][]` would
+                        // reverse the ranks and not compile. Collection interfaces still need T[].
+                        var arrayType = paramsParam.Type is IArrayTypeSymbol
+                            ? paramsParam.Type.GloballyQualified()
+                            : $"{elementType.GloballyQualified()}[]";
+                        argumentExpressions.Add(new InvocationArgument($"new {arrayType} {{ {string.Join(", ", arrayElements)} }}"));
                     }
                 }
             }
@@ -170,7 +201,7 @@ public static class TupleArgumentHelper
             {
                 // Fallback if we can't determine element type
                 var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{paramsParam.Type.GloballyQualified()}>({argumentsArrayName}[{regularParamCount.ToString(CultureInfo.InvariantCulture)}])";
-                argumentExpressions.Add(castExpression);
+                argumentExpressions.Add(new InvocationArgument(castExpression));
             }
         }
 
@@ -185,7 +216,7 @@ public static class TupleArgumentHelper
     /// </summary>
     private static ITypeSymbol? GetTrailingElementType(ITypeSymbol parameterType)
     {
-        if (parameterType is IArrayTypeSymbol array)
+        if (parameterType is IArrayTypeSymbol { IsSZArray: true } array)
         {
             return array.ElementType;
         }
