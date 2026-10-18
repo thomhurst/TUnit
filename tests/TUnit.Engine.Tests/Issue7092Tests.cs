@@ -179,6 +179,19 @@ public class Issue7092Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task GenerateGenericTest_Repeated_Arguments_Rows_Run_On_A_Generic_Class()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7092/GenerateGenericTestGenericClassArgumentsRowsTests*/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
     public async Task GenerateGenericTest_Eight_Element_Tuple_Infers_Eight_Types()
     {
         await RunTestsWithFilter(

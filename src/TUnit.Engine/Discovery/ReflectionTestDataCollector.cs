@@ -1406,8 +1406,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// (<c>InferTypesFromMethodDataSource</c>). The instantiation runs only that source.</item>
     /// </list>
     /// Sources whose types violate the constraints are skipped. Sources inferring types that are already
-    /// instantiated are dropped, except further [Arguments] rows of a method on a non-generic class, which join
-    /// the instantiation an earlier [Arguments] row created.
+    /// instantiated are dropped, except further [Arguments] rows, which join the instantiation an earlier
+    /// [Arguments] row created.
     /// </summary>
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT; MakeGenericMethod over types inferred from attribute values")]
     private static List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[]? Rows)> InferMethodInstantiationsFromDataSources(
@@ -1419,16 +1419,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var parameters = method.GetParameters();
         var dataSources = ReflectionAttributeExtractor.ExtractDataSources(method);
 
-        // Mirrors the generator's isMethodArgumentsRow: only [Arguments] rows of a generic method on a non-generic
-        // class join an instantiation that an earlier [Arguments] row created. Any other source inferring types
-        // that are already instantiated is dropped, as the generator's processedTypeCombinations does.
-        var joinsArgumentsRows = !testClass.IsGenericType;
-
+        // Further [Arguments] rows inferring types that an earlier [Arguments] row instantiated join that
+        // instantiation, as the generator does: on a non-generic class through isMethodArgumentsRow, and on a
+        // generic class because an instantiation built from class and method rows runs every method [Arguments]
+        // row. Any other source inferring types that are already instantiated is dropped, as the generator's
+        // processedTypeCombinations does.
         foreach (var dataSource in dataSources)
         {
             if (dataSource is ArgumentsAttribute arguments)
             {
-                AddInstantiation(InferMethodTypeArguments(arguments.Values, parameters, genericParameterCount), arguments, isMethodArgumentsRow: joinsArgumentsRows);
+                AddInstantiation(InferMethodTypeArguments(arguments.Values, parameters, genericParameterCount), arguments, isMethodArgumentsRow: true);
             }
         }
 
