@@ -3039,6 +3039,55 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .LastOrDefault(p => p.Type.Name == "CancellationToken" && p.Type.ContainingNamespace?.ToString() == "System.Threading")
             ?.Name;
 
+    /// <summary>
+    /// Returns the declared index of the CancellationToken parameter when it precedes the last
+    /// data parameter of the method declaring <paramref name="parametersFromArgs"/>, or -1 when
+    /// the token is trailing (or absent) and is appended after the data arguments.
+    /// </summary>
+    private static int GetLeadingCancellationTokenIndex(IParameterSymbol[] parametersFromArgs)
+    {
+        if (parametersFromArgs.Length == 0
+            || parametersFromArgs[parametersFromArgs.Length - 1].ContainingSymbol is not IMethodSymbol method)
+        {
+            return -1;
+        }
+
+        var parameters = method.Parameters;
+        for (var i = 0; i < parameters.Length - 1; i++)
+        {
+            if (parameters[i].Type.Name == "CancellationToken" && parameters[i].Type.ContainingNamespace?.ToString() == "System.Threading")
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Inserts a non-trailing CancellationToken argument at its declared position. When an
+    /// argument before that position was omitted or named (an omitted optional before the
+    /// trailing array), the token is appended by name instead, which C# allows after named arguments.
+    /// </summary>
+    private static void InsertLeadingCancellationToken(List<string> arguments, int tokenIndex, IParameterSymbol[] parametersFromArgs, string tokenArgument)
+    {
+        var positional = tokenIndex <= arguments.Count;
+        for (var i = 0; positional && i < tokenIndex; i++)
+        {
+            positional = !arguments[i].StartsWith("@", StringComparison.Ordinal);
+        }
+
+        if (positional)
+        {
+            arguments.Insert(tokenIndex, tokenArgument);
+        }
+        else
+        {
+            var tokenName = ((IMethodSymbol)parametersFromArgs[parametersFromArgs.Length - 1].ContainingSymbol).Parameters[tokenIndex].Name;
+            arguments.Add($"@{tokenName}: {tokenArgument}");
+        }
+    }
+
     private static void GenerateConcreteTestInvokerBody(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs, bool wrapInTryCatch = true)
     {
         // Wrap entire body in try-catch to handle synchronous exceptions. The class-level
@@ -3158,9 +3207,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         ? GetCancellationTokenParameterName(parametersFromArgs[lastIndex])
                         : null;
 
-                    argsToPass.Add(cancellationTokenName is null
-                        ? cancellationTokenArgument
-                        : $"@{cancellationTokenName}: {cancellationTokenArgument}");
+                    // A token declared before the data parameters (only reachable for generic methods,
+                    // whose token may sit anywhere) goes back to its declared position.
+                    var tokenIndex = GetLeadingCancellationTokenIndex(parametersFromArgs);
+                    if (tokenIndex >= 0)
+                    {
+                        InsertLeadingCancellationToken(argsToPass, tokenIndex, parametersFromArgs, cancellationTokenArgument);
+                    }
+                    else
+                    {
+                        argsToPass.Add(cancellationTokenName is null
+                            ? cancellationTokenArgument
+                            : $"@{cancellationTokenName}: {cancellationTokenArgument}");
+                    }
                 }
 
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";
@@ -3195,7 +3254,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var dynamicArgs = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", "args.Length");
                 if (hasCancellationToken)
                 {
-                    dynamicArgs.Add("context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None");
+                    const string cancellationTokenArgument = "context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None";
+                    var tokenIndex = GetLeadingCancellationTokenIndex(parametersFromArgs);
+                    if (tokenIndex >= 0)
+                    {
+                        InsertLeadingCancellationToken(dynamicArgs, tokenIndex, parametersFromArgs, cancellationTokenArgument);
+                    }
+                    else
+                    {
+                        dynamicArgs.Add(cancellationTokenArgument);
+                    }
                 }
 
                 var dynamicMethodCall = $"instance.{methodName}({string.Join(", ", dynamicArgs)})";

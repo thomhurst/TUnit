@@ -176,6 +176,26 @@ internal class GenericParamsArrayCompilationTests
             [GenerateGenericTest(typeof(string))]
             [Arguments("a", 2)]
             public void Explicit_Token_Between_Values<T>(T first, global::System.Threading.CancellationToken token, int second) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [Arguments(1, 2)]
+            public void Token_Before_Params<T>(global::System.Threading.CancellationToken token, params T[] values) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [Arguments("label", 1, 2)]
+            public void Token_Between_Leading_And_Params<T>(string label, global::System.Threading.CancellationToken token, params T[] values) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [Arguments]
+            public void Token_Before_Omitted_Optional_And_Params<T>(global::System.Threading.CancellationToken token, int count = 42, params T[] values) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [Arguments]
+            public void Omitted_Optional_Before_Token_And_Params<T>(int count = 42, global::System.Threading.CancellationToken token = default, params T[] values) { }
         }
 
         public abstract class InheritedBase<T>
@@ -244,5 +264,8 @@ internal class GenericParamsArrayCompilationTests
         // A CancellationToken before a data parameter does not consume a row value.
         await Assert.That(generated).Contains("instance.Inferred_After_Token<int>(cancellationToken, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]))");
         await Assert.That(generated).Contains("instance.Explicit_Token_Between_Values<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), cancellationToken, global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]))");
+        // A CancellationToken before a trailing array keeps its declared position.
+        await Assert.That(generated).Contains("instance.Token_Before_Params<int>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, new int[] {");
+        await Assert.That(generated).Contains("instance.Token_Between_Leading_And_Params<int>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, new int[] {");
     }
 }

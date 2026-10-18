@@ -246,6 +246,26 @@ public class GenericParamsArrayEdgeCaseTests
 
     [Test]
     [GenerateGenericTest(typeof(int))]
+    [Arguments(1, 2)]
+    public async Task Token_Before_Params<T>(CancellationToken token, params T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(token.CanBeCanceled).IsTrue();
+        await Assert.That(values.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 1, 2 });
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [Arguments("label", 1, 2)]
+    public async Task Token_Between_Leading_And_Params<T>(string label, CancellationToken token, params T[] values)
+    {
+        await Assert.That(label).IsEqualTo("label");
+        await Assert.That(token.CanBeCanceled).IsTrue();
+        await Assert.That(values.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 1, 2 });
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
     [MethodDataSource(nameof(GridRows))]
     public async Task JaggedMultiDimensional<T>(params int[][,] values)
     {
