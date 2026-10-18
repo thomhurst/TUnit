@@ -16,8 +16,9 @@ public sealed class FailFastSessionFixture7074 : IAsyncDisposable
 
 /// <summary>
 /// With --fail-fast and --maximum-parallel-tests 1, the failing keyed test cancels the keyed
-/// tests still waiting for a parallelism slot. The After(TestSession) hook must still be awaited
-/// before the session disposes shared fixtures, rather than left running in the background.
+/// tests queued behind it, so the scheduling phases throw. The After(TestSession) hook must
+/// still be awaited before the session disposes shared fixtures, rather than left running in
+/// the background.
 /// </summary>
 [EngineTest(ExpectedResult.Failure)]
 public class KeyedNotInParallelFailFast7074
@@ -25,15 +26,19 @@ public class KeyedNotInParallelFailFast7074
     [ClassDataSource<FailFastSessionFixture7074>(Shared = SharedType.PerTestSession)]
     public required FailFastSessionFixture7074 Fixture { get; init; }
 
-    // Critical priority makes Fails the first keyed test scheduled, so it takes the only
-    // parallelism slot and fails while the Waits tests are still queued for that slot.
-    [Test, NotInParallel("7074.ff1"), ExecutionPriority(Priority.Critical)]
+    // All tests share one key. The scheduler hands keys out in priority order while it walks
+    // the tests, so Critical priority deterministically gives Fails the key first, and the
+    // Waits tests queue behind it. (With distinct keys every test would start at once and race
+    // for the single parallelism slot, so a Waits test could run before Fails.) When Fails
+    // releases the key, fail-fast has already cancelled the token, so each Waits test throws
+    // on its cancelled slot wait instead of running.
+    [Test, NotInParallel("7074.ff"), ExecutionPriority(Priority.Critical)]
     public void Fails() => throw new InvalidOperationException("Intentional failure to trigger fail-fast");
 
-    [Test, NotInParallel("7074.ff2")] public Task Waits1() => Task.Delay(100);
-    [Test, NotInParallel("7074.ff3")] public Task Waits2() => Task.Delay(100);
-    [Test, NotInParallel("7074.ff4")] public Task Waits3() => Task.Delay(100);
-    [Test, NotInParallel("7074.ff5")] public Task Waits4() => Task.Delay(100);
+    [Test, NotInParallel("7074.ff")] public Task Waits1() => Task.Delay(100);
+    [Test, NotInParallel("7074.ff")] public Task Waits2() => Task.Delay(100);
+    [Test, NotInParallel("7074.ff")] public Task Waits3() => Task.Delay(100);
+    [Test, NotInParallel("7074.ff")] public Task Waits4() => Task.Delay(100);
 
     // No-op unless the engine test opted in via the environment variable, so this hook is
     // inert for every other TestProject invocation.
