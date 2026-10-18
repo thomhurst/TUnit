@@ -180,14 +180,12 @@ jobs:
           name: 'NuGetPackages-${{matrix.os}}'
           path: '**/*.*nupkg'
 
-  # Native AOT publishes of the mock test projects, one runner per framework. Run inside the
-  # Ubuntu pipeline they took ~12 minutes serially and held up packaging behind them.
+  # Native AOT publishes of the mock test projects. Run inside the Ubuntu pipeline they held up
+  # packaging behind them. One runner publishes every framework in turn (~10 minutes, well inside
+  # the matrix jobs): a runner per framework spent a third of each job on setup and took two more
+  # of the runners that every push competes for.
   mock-aot:
-    name: mock AOT (${{ matrix.framework }})
-    strategy:
-      matrix:
-        framework: [net8.0, net9.0, net10.0]
-      fail-fast: false
+    name: mock AOT
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -201,21 +199,30 @@ jobs:
         uses: actions/setup-dotnet@v6.0.0
 
       # TUnit.Mocks.Aot.Tests sets TreatWarningsAsErrors, so any trim/AOT warning ILC reports
-      # for everyday mock usage fails its publish (#7027).
-      - name: Publish
+      # for everyday mock usage fails its publish (#7027). Every framework still runs after an
+      # earlier one fails, so a single run reports them all.
+      - name: Publish and run
         shell: bash
         run: |
-          for project in TUnit.Mocks.Tests TUnit.Mocks.Aot.Tests; do
-            dotnet publish "tests/$project/$project.csproj" -c Release --use-current-runtime \
-              -p:Aot=true --framework ${{ matrix.framework }} -o "aot/$project"
+          failed=()
+          for framework in net8.0 net9.0 net10.0; do
+            for project in TUnit.Mocks.Tests TUnit.Mocks.Aot.Tests; do
+              echo "::group::$project ($framework)"
+              if dotnet publish "tests/$project/$project.csproj" -c Release --use-current-runtime \
+                  -p:Aot=true --framework "$framework" -o "aot/$framework/$project" \
+                && "aot/$framework/$project/$project"; then
+                echo "::endgroup::"
+              else
+                echo "::endgroup::"
+                echo "::error::$project failed on $framework"
+                failed+=("$project ($framework)")
+              fi
+            done
           done
-
-      - name: Run
-        shell: bash
-        run: |
-          for project in TUnit.Mocks.Tests TUnit.Mocks.Aot.Tests; do
-            "aot/$project/$project"
-          done
+          if (( ${#failed[@]} )); then
+            printf 'Failed: %s\n' "${failed[@]}"
+            exit 1
+          fi
 
   # Compiles the C# fences in the documentation against freshly packed packages, alongside the
   # test matrix rather than after the Ubuntu pipeline.
