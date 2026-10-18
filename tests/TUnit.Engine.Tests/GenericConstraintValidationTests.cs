@@ -108,6 +108,7 @@ public class GenericConstraintValidationTests(TestMode testMode) : InvokableTest
     [Arguments("ArrayCovariantInterfaceConstraintMatch")]
     [Arguments("NestedVariantInterfaceConstraintMatch")]
     [Arguments("DelegateVariantInterfaceConstraintMatch")]
+    [Arguments("ArrayOfTypeParameterConstraintMatch")]
     public async Task Legal_Type_Argument_Runs(string methodName)
     {
         await RunTestsWithFilter(
@@ -143,6 +144,20 @@ public class GenericConstraintValidationTests(TestMode testMode) : InvokableTest
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1),
                 result => result.Results.Single(x => x.Outcome == "Failed").Output?.ErrorInfo?.Message
                     .ShouldContain("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'TMethod'")
+            ]);
+    }
+
+    [Test]
+    public async Task Method_Constraint_On_Class_Type_Parameter_Uses_The_Class_Type_Argument()
+    {
+        await RunTestsWithFilter(
+            "/*/*/GenericConstraintMethodReferencesClassTests*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.Results.Single(x => x.Outcome == "Failed").Output?.ErrorInfo?.Message
+                    .ShouldContain("Type 'String' does not implement interface 'IComparable`1' required for generic parameter 'TMethod'")
             ]);
     }
 }
