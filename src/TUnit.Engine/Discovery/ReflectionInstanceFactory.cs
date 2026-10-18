@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Discovery;
@@ -164,7 +165,7 @@ internal static class ReflectionInstanceFactory
         {
             Type = type,
             TypeInfo = new ConcreteType(type),
-            Name = type.Name,
+            Name = TypeNameFormatter.GetNameWithoutGenericArity(type),
             Namespace = type.Namespace ?? string.Empty,
             Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? "Unknown", () => new AssemblyMetadata
             {

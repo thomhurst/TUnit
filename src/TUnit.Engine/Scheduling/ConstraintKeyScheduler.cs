@@ -66,7 +66,10 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         // Process each test
         foreach (var (test, constraintKeys, priority) in sortedTests)
         {
-            var startSignal = new TaskCompletionSource<bool>();
+            // Run continuations asynchronously: a releasing test signals waiters from its
+            // finally block, and an inline continuation would run the next (possibly
+            // synchronous) test on that thread before the remaining waiters are signalled.
+            var startSignal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             bool canStart;
             lock (lockObject)
@@ -111,7 +114,13 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                     await _logger.LogTraceAsync($"Starting test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
                 startSignal.SetResult(true);
 
-                var testTask = ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTestIndex, cancellationToken);
+                // Dispatch to the thread pool: invoking directly would run a synchronous
+                // test body on this loop's thread, serializing every test with distinct keys.
+                // Pass CancellationToken.None so the delegate always runs: the keys are already
+                // taken, and only its finally block releases them and signals waiting tests.
+                var testTask = Task.Run(
+                    () => ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTestIndex, cancellationToken),
+                    CancellationToken.None);
                 test.ExecutionTask = testTask;
                 activeTasks.Add(testTask);
             }
@@ -143,8 +152,15 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         WaitingTestIndex waitingTestIndex,
         CancellationToken cancellationToken)
     {
-        // Wait for signal to start
-        await startSignal.Task.ConfigureAwait(false);
+        // Wait for signal to start, always yielding. The scheduling loop calls this method
+        // directly, and a running test can release our keys between the loop queueing us and
+        // this await. Awaiting that completed signal normally would run a synchronous test
+        // body on the loop's thread and stall every test after it (#7075).
+#if NET8_0_OR_GREATER
+        await startSignal.Task.ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
+#else
+        await new ForceYieldingTaskAwaitable(startSignal.Task);
+#endif
 
         if (_logger.IsTraceEnabled)
             await _logger.LogTraceAsync($"Starting previously queued test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);

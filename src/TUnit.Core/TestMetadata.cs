@@ -53,6 +53,13 @@ public abstract class TestMetadata
 
     public Type[]? GenericMethodTypeArguments { get; init; }
 
+    /// <summary>
+    /// The fully qualified type arguments of a source-generated generic-method instantiation, such as
+    /// <c>&lt;global::A.Payload&gt;</c>. Test ids use it because <see cref="TestName"/> drops namespaces,
+    /// so instantiations over same-named types from different namespaces would otherwise share an id.
+    /// </summary>
+    internal string? MethodTypeArgumentsIdentity { get; init; }
+
     public required Func<Attribute[]> AttributeFactory { get; init; }
 
     /// <summary>

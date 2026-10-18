@@ -1141,12 +1141,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         // For constructed generic methods (e.g., from MakeGenericMethod), include type arguments
-        // This matches source-gen behavior where test names include type args like "MethodName<int>"
+        // formatted as source-gen formats them, like "MethodName<int>" (#7105)
         if (testMethod.IsGenericMethod && !testMethod.IsGenericMethodDefinition)
         {
-            var typeArgs = testMethod.GetGenericArguments();
-            var typeArgNames = string.Join(", ", typeArgs.Select(static t => t.Name));
-            return $"{testMethod.Name}<{typeArgNames}>";
+            return TypeNameFormatter.AppendGenericArguments(testMethod.Name, testMethod.GetGenericArguments());
         }
 
         // Default format - just method name
@@ -1458,7 +1456,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             Type = type,
             Class = new ClassMetadata
             {
-                Name = type.Name,
+                Name = TypeNameFormatter.GetNameWithoutGenericArity(type),
                 Type = type,
                 TypeInfo = new ConcreteType(type),
                 Namespace = type.Namespace ?? string.Empty,
