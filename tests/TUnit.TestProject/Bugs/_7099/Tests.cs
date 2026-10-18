@@ -134,6 +134,31 @@ public class GenericParamsArrayEdgeCaseTests
 
     [Test]
     [GenerateGenericTest(typeof(int))]
+    [Arguments]
+    public async Task Optional_Omitted_Before_Params<T>(int count = 42, params T[] values)
+    {
+        await Assert.That(count).IsEqualTo(42);
+        await Assert.That(values).IsEmpty();
+    }
+
+    [Test]
+    [Arguments]
+    public async Task NonGeneric_Optional_Omitted_Before_Params(int count = 42, params int[] values)
+    {
+        await Assert.That(count).IsEqualTo(42);
+        await Assert.That(values).IsEmpty();
+    }
+
+    [Test]
+    [Arguments(1)]
+    public async Task Optional_Omitted_Without_Params(int first, int count = 42)
+    {
+        await Assert.That(first).IsEqualTo(1);
+        await Assert.That(count).IsEqualTo(42);
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
     [MethodDataSource(nameof(Grids))]
     public async Task MultiDimensional<T>(T[,] values)
     {

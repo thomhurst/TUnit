@@ -84,6 +84,11 @@ internal class GenericParamsArrayCompilationTests
 
             [Test]
             [GenerateGenericTest(typeof(int))]
+            [Arguments]
+            public void Optional_Omitted_Before_Params<T>(int count = 42, params T[] values) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
             [MethodDataSource(nameof(Grids))]
             public void MultiDim<T>(int[,] values) { }
 

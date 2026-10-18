@@ -2206,6 +2206,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         => parameter.GetCustomAttributesData()
             .Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.ParamCollectionAttribute");
 
+    // Source-generated invokers omit trailing arguments a row leaves out, so the compiler applies
+    // the declared defaults. Mirror that for MethodBase.Invoke: Type.Missing makes the runtime use
+    // a parameter's default value, where a null slot would bind default(T) instead.
+    private static void FillOmittedOptionalArguments(ParameterInfo[] parameters, object?[] castedArgs, int suppliedCount, int endExclusive)
+    {
+        for (var i = suppliedCount; i < endExclusive; i++)
+        {
+            if (parameters[i].HasDefaultValue)
+            {
+                castedArgs[i] = Type.Missing;
+            }
+        }
+    }
+
     private static bool IsCovariantCompatible(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType)
     {
         // Only check for generic interface covariance
@@ -2400,6 +2414,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         }
                     }
 
+                    FillOmittedOptionalArguments(parameters, castedArgs, args.Length, regularParamsCount);
+
                     // Collect remaining arguments into params array
                     var paramsStartIndex = regularParamsCount;
                     var paramsCount = Math.Max(0, args.Length - paramsStartIndex);
@@ -2523,6 +2539,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             castedArgs[i] = CastHelper.Cast(paramType, arg);
                         }
                     }
+
+                    FillOmittedOptionalArguments(parameters, castedArgs, args.Length, parameters.Length);
                 }
 
                 var result = methodToInvoke.Invoke(instance, castedArgs);
