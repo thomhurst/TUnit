@@ -1293,4 +1293,681 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     .WithLocation(0)
             );
     }
+
+    // https://github.com/thomhurst/TUnit/issues/7104: a type-parameter test parameter accepts any data type.
+
+    [Test]
+    public async Task Generic_Method_With_GenerateGenericTest_And_Tuple_Data_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [GenerateGenericTest(typeof(long), typeof(string))]
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T1, T2>(T1 first, T2 second) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, string)>> Data() { yield return () => (1, "a"); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Tuple_Data_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T1, T2>(T1 first, T2 second) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, string)>> Data() { yield return () => (1, "a"); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Single_Type_Parameter_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<int>> Data() { yield return () => 1; }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Single_Type_Parameter_And_Plain_Enumerable_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value) => Task.CompletedTask;
+
+                    public static IEnumerable<int> Data() { yield return 1; }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Mixed_Generic_And_Concrete_Parameters_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T first, string second) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, string)>> Data() { yield return () => (1, "a"); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Satisfied_Constraint_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : struct, IComparable => Task.CompletedTask;
+
+                    public static IEnumerable<Func<int>> Data() { yield return () => 1; }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Self_Referencing_Constraint_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : IComparable<T> => Task.CompletedTask;
+
+                    public static IEnumerable<Func<int>> Data() { yield return () => 1; }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Mismatched_Concrete_Parameter_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T first, int second) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, string)>> Data() { yield return () => (1, "a"); }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("int, string", "T, int")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Struct_Constraint_And_Reference_Type_Data_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : struct => Task.CompletedTask;
+
+                    public static IEnumerable<Func<string>> Data() { yield return () => "a"; }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("string", "T")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Class_Constraint_And_Value_Type_Data_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : class => Task.CompletedTask;
+
+                    public static IEnumerable<Func<int>> Data() { yield return () => 1; }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("int", "T")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Unsatisfied_Interface_Constraint_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : IDisposable => Task.CompletedTask;
+
+                    public static IEnumerable<Func<int>> Data() { yield return () => 1; }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("int", "T")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Constructor_Constraint_And_No_Parameterless_Constructor_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : new() => Task.CompletedTask;
+
+                    public static IEnumerable<Func<string>> Data() { yield return () => "a"; }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("string", "T")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Self_Referencing_Constraint_And_Satisfying_Reference_Type_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value, int marker) where T : IComparable<T> => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(string, int)>> Data() { yield return () => ("a", 1); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Unsatisfied_Self_Referencing_Constraint_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value, int marker) where T : IComparable<T> => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(object, int)>> Data() { yield return () => (new object(), 1); }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("object, int", "T, int")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Interface_Constraint_And_Nullable_Value_Type_Data_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : IComparable => Task.CompletedTask;
+
+                    public static IEnumerable<Func<int?>> Data() { yield return () => 1; }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("int?", "T")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_GenerateGenericTest_And_Data_Without_A_CSharp_Conversion_Is_Not_Flagged()
+    {
+        // CastHelper can still convert the value at run time, for example through AotConverterRegistry.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public sealed class A { }
+                public sealed class B { }
+
+                public class MyClass
+                {
+                    [GenerateGenericTest(typeof(B))]
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<A>> Data() { yield return () => new A(); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Repeated_Type_Parameter_And_Data_Violating_Constraint_In_One_Occurrence_Is_Not_Flagged()
+    {
+        // The type argument is inferred from the last occurrence (int) and the other value is converted to it.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T first, T second) where T : struct => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(string, int)>> Data() { yield return () => ("1", 2); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Repeated_Type_Parameter_And_Same_Data_Type_Violating_Constraint_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T first, T second) where T : struct => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(string, string)>> Data() { yield return () => ("1", "2"); }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("string, string", "T, T")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_GenerateGenericTest_And_Numeric_String_Data_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [GenerateGenericTest(typeof(int))]
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<string>> Data() { yield return () => "1"; }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_GenerateGenericTest_And_Data_Narrowed_At_Run_Time_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [GenerateGenericTest(typeof(MemoryStream))]
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<Stream>> Data() { yield return () => new MemoryStream(); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_GenerateGenericTest_Ignores_Data_Type_Constraints()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [GenerateGenericTest(typeof(object))]
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : class => Task.CompletedTask;
+
+                    public static IEnumerable<Func<int>> Data() { yield return () => 1; }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Constraint_On_Peer_Type_Parameter_That_Is_Unsatisfied_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T, U>(T first, U second) where T : IComparable<U> => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, string)>> Data() { yield return () => (1, "a"); }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("int, string", "T, U")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Constraint_On_Peer_Type_Parameter_That_Is_Satisfied_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T, U>(T first, U second) where T : IComparable<U> => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, int)>> Data() { yield return () => (1, 2); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Constraint_On_Peer_Type_Parameter_With_Inexact_Data_Is_Not_Flagged()
+    {
+        // `object` data may hold a value whose run-time type satisfies the constraint, so the peer type argument
+        // is not known and the constraint is not checked.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T, U>(T first, U second) where T : IComparable<U> => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, object)>> Data() { yield return () => (1, 2); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Repeated_Type_Parameter_And_Different_Data_Types_Is_Not_Flagged()
+    {
+        // The value bound to the other occurrence is converted at run time (numeric, IConvertible and conversion
+        // operators), so differing data types do not prove a mismatch.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest<T>(T first, T second) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(int, long)>> Data() { yield return () => (1, 2L); }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Class_With_GenerateGenericTest_And_Type_Parameter_Method_Parameter_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                [GenerateGenericTest(typeof(int))]
+                public class MyClass<T>
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest(T value) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<int>> Data() { yield return () => 1; }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Class_Type_Parameter_Constraints_Are_Not_Checked_Against_Method_Data()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                [Arguments(1)]
+                public class MyClass<T>(T seed) where T : struct
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public Task MyTest(T value) => Task.CompletedTask;
+
+                    public static IEnumerable<Func<string>> Data() { yield return () => "a"; }
+                }
+                """
+            );
+    }
 }
