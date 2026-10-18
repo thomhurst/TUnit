@@ -1,4 +1,4 @@
-using System.Buffers;
+﻿using System.Buffers;
 using System.Collections.Concurrent;
 #if NET8_0_OR_GREATER
 using System.Collections.Frozen;

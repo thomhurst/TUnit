@@ -1273,7 +1273,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var methodName = entry.MethodName;
         var hasCancellationToken = testMethod.MethodSymbol.Parameters.Any(p =>
-            p.Type.Name == "CancellationToken" && p.Type.ContainingNamespace?.ToString() == "System.Threading");
+            p.Type.IsCancellationToken());
         var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
 
         if (entry.MethodConstraintViolations is [var violation, ..])
@@ -1306,7 +1306,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             for (var i = 0; i < testMethod.MethodSymbol.Parameters.Length; i++)
             {
                 var param = testMethod.MethodSymbol.Parameters[i];
-                if (param.Type.Name == "CancellationToken" && param.Type.ContainingNamespace?.ToString() == "System.Threading")
+                if (param.Type.IsCancellationToken())
                 {
                     parameterCasts.Add("cancellationToken");
                 }
@@ -1366,7 +1366,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // Non-generic — use standard invoke (shouldn't normally reach here for generic path)
             var parametersFromArgs = testMethod.MethodSymbol.Parameters
-                .Where(p => p.Type.Name != "CancellationToken" || p.Type.ContainingNamespace?.ToString() != "System.Threading")
+                .Where(p => !p.Type.IsCancellationToken())
                 .ToArray();
             GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
         }
@@ -1380,7 +1380,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static IParameterSymbol[]? TryGetClosedParametersWithTrailingArray(TestMethodMetadata testMethod, ConcreteInstantiation entry)
     {
         var parameters = testMethod.MethodSymbol.Parameters
-            .Where(p => p.Type.Name != "CancellationToken" || p.Type.ContainingNamespace?.ToString() != "System.Threading")
+            .Where(p => !p.Type.IsCancellationToken())
             .ToArray();
 
         if (parameters.Length == 0 || !parameters[parameters.Length - 1].CollectsTrailingArguments())
@@ -1430,8 +1430,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             method = method.Construct(entry.MethodTypeArgs);
         }
 
-        return method.Parameters
-            .Where(p => p.Type.Name != "CancellationToken" || p.Type.ContainingNamespace?.ToString() != "System.Threading")
+        // Select by the declared positions: once closed, a data parameter of type T can itself be a
+        // CancellationToken (e.g. [GenerateGenericTest(typeof(CancellationToken))]) and must stay a data argument.
+        var closedParameters = method.Parameters;
+        return parameters
+            .Select(p => closedParameters[p.Ordinal])
             .ToArray();
     }
 
@@ -3036,7 +3039,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// </summary>
     private static string? GetCancellationTokenParameterName(IParameterSymbol parameter)
         => (parameter.ContainingSymbol as IMethodSymbol)?.Parameters
-            .LastOrDefault(p => p.Type.Name == "CancellationToken" && p.Type.ContainingNamespace?.ToString() == "System.Threading")
+            .LastOrDefault(p => p.OriginalDefinition.Type.IsCancellationToken())
             ?.Name;
 
     /// <summary>
@@ -3055,7 +3058,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var parameters = method.Parameters;
         for (var i = 0; i < parameters.Length - 1; i++)
         {
-            if (parameters[i].Type.Name == "CancellationToken" && parameters[i].Type.ContainingNamespace?.ToString() == "System.Threading")
+            // Check the declared type: a closed T that happens to be CancellationToken is a data parameter.
+            if (parameters[i].OriginalDefinition.Type.IsCancellationToken())
             {
                 return i;
             }
@@ -6062,7 +6066,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Row values bind to the data parameters only; the engine supplies the CancellationToken.
         var methodParams = method.Parameters
-            .Where(p => p.Type.Name != "CancellationToken" || p.Type.ContainingNamespace?.ToString() != "System.Threading")
+            .Where(p => !p.Type.IsCancellationToken())
             .ToArray();
 
         // For each value in the params array

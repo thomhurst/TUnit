@@ -169,6 +169,16 @@ internal class GenericParamsArrayCompilationTests
             public void Overloaded_Generic_Optional_Array<T>() { }
 
             [Test]
+            [GenerateGenericTest(typeof(global::System.Threading.CancellationToken))]
+            [Arguments(null, 1, 2)]
+            public void TokenTypeArgument_Before_Params<T>(T first, params int[] values) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(global::System.Threading.CancellationToken))]
+            [Arguments(null, 1)]
+            public void TokenTypeArgument_Before_Params_With_Token<T>(T first, global::System.Threading.CancellationToken token, params int[] values) { }
+
+            [Test]
             [Arguments(1)]
             public void Inferred_After_Token<T>(global::System.Threading.CancellationToken token, T value) { }
 
