@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
@@ -8,6 +7,7 @@ using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Enums;
+using TUnit.Engine.Helpers;
 #if NET
 using System.Runtime.CompilerServices;
 #endif
@@ -65,16 +65,13 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
         );
     }
 
-    private EngineMode GetMode()
+    // Must agree with the mode TUnitServiceProvider actually selects, so share its decision
+    // (CLI flags, [ReflectionMode], TUNIT_EXECUTION_MODE, EnableTUnitSourceGeneration=false).
+    internal EngineMode GetMode()
     {
-        if (commandLineOptions.IsOptionSet(ReflectionModeCommandProvider.ReflectionMode)
-            || Assembly.GetEntryAssembly()?.GetCustomAttributes<AssemblyMetadataAttribute>()
-                .Any(x => x is { Key: "TUnitReflectionScanner", Value: "true" }) is true)
-        {
-            return EngineMode.Reflection;
-        }
-
-        return EngineMode.SourceGenerated;
+        return ExecutionModeHelper.IsSourceGenerationMode(commandLineOptions)
+            ? EngineMode.SourceGenerated
+            : EngineMode.Reflection;
     }
 
     private string GetRuntimeDetails()
