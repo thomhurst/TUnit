@@ -569,6 +569,34 @@ public class Issue7073Tests
         await Assert.That(new SourceDerived("x")).IsNotEqualTo(new Label("base:x"));
     }
 
+    // Two different operators taking the same most specific source type, one from each hierarchy, make
+    // the conversion ambiguous: C# rejects `(Tag)new AmbiguousDerived("x")`, so neither operator may decide
+    // the comparison.
+    [Test]
+    public async Task Ambiguous_Operators_Across_Hierarchies_Are_Not_Used()
+    {
+        foreach (var expected in new[] { new Tag("base:x"), new Tag("tag:x") })
+        {
+            var exception = await Assert.That(async () => await Assert.That(new AmbiguousDerived("x")).IsEqualTo(expected))
+                .Throws<AssertionException>();
+
+            await Assert.That(exception!.InnerException).IsTypeOf<InvalidOperationException>();
+        }
+    }
+
+    // C# 13+ converts the expected value at the call site of the same-type overload, so an operator that
+    // rejects it throws there, before the assertion is awaited. The cross-type overload does the same.
+    [Test]
+    public async Task Throwing_Expected_Conversion_Surfaces_At_The_Call_Site()
+    {
+        // Building the assertion without awaiting it is the point: the exception must come from the call itself.
+#pragma warning disable TUnitAssertions0002
+        await Assert.That(() => { _ = EqualsAssertionExtensions.IsEqualTo<string, OneWaySentinelWrapper>(Assert.That("x"), OneWaySentinelWrapper.None); })
+#pragma warning restore TUnitAssertions0002
+            .Throws<InvalidOperationException>()
+            .WithMessage("The sentinel has no string value.");
+    }
+
     // C# runs `implicit operator RoundTripSentinel(string?)` on a null actual value, giving the None
     // sentinel, so that is what the cross-type assertion returns rather than null.
     [Test]
@@ -599,6 +627,20 @@ public class Issue7073Tests
     public sealed record Label(string Text)
     {
         public static implicit operator Label(SourceDerived source) => new("derived:" + source.Value);
+    }
+
+    public class AmbiguousBase(string value)
+    {
+        public string Value { get; } = value;
+
+        public static implicit operator Tag(AmbiguousBase source) => new("base:" + source.Value);
+    }
+
+    public sealed class AmbiguousDerived(string value) : AmbiguousBase(value);
+
+    public sealed record Tag(string Text)
+    {
+        public static implicit operator Tag(AmbiguousBase source) => new("tag:" + source.Value);
     }
 
     public sealed record RoundTripSentinel(string Value)
