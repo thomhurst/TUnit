@@ -606,7 +606,8 @@ internal sealed class TestGenericTypeResolver
             var resolvedType = resolvedTypes[i];
 
             // Check value type constraint
-            if (constraint.HasValueTypeConstraint && !resolvedType.IsValueType)
+            // Nullable<T> is a value type but never satisfies 'struct'.
+            if (constraint.HasValueTypeConstraint && (!resolvedType.IsValueType || Nullable.GetUnderlyingType(resolvedType) != null))
             {
                 throw new GenericTypeResolutionException(
                     $"Type '{resolvedType.Name}' does not satisfy the 'struct' constraint for generic parameter '{constraint.ParameterName}'");
