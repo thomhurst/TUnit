@@ -12,41 +12,26 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  TESTINGPLATFORM_TELEMETRY_OPTOUT: 1
+
 jobs:
   smoke:
     name: ${{ matrix.platform }} smoke test
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         include:
           - platform: Browser
-            os: ubuntu-latest
             workload: wasm-tools
           - platform: Android
-            os: ubuntu-latest
             workload: android
-          # The .NET 11 Apple workloads (27.x) require Xcode 27, which only the xcode-27 image has.
-          - platform: iOS
-            os: xcode-27
-            workload: ios
-            device: iPhone 17
-            simulator: iOS-27-0
-          - platform: tvOS
-            os: xcode-27
-            workload: tvos
-            device: Apple TV 4K (3rd generation)
-            simulator: tvOS-27-0
-          - platform: MacCatalyst
-            os: xcode-27
-            workload: maccatalyst
           - platform: WASI
-            os: ubuntu-latest
             workload: wasi-experimental
     env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      TESTINGPLATFORM_TELEMETRY_OPTOUT: 1
       SmokePlatform: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v7.0.1
@@ -58,15 +43,6 @@ jobs:
           path: ~/.nuget/packages
           key: platform-smoke-${{ runner.os }}-${{ runner.arch }}-${{ matrix.platform }}-${{ hashFiles('global.json', 'Directory.Packages.props', 'tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj') }}
           restore-keys: platform-smoke-${{ runner.os }}-${{ runner.arch }}-${{ matrix.platform }}-
-      - name: Select the installed Xcode
-        if: runner.os == 'macOS'
-        run: sudo xcode-select --switch /Applications/Xcode_27.0.app
-      - name: Start the installed Apple simulator
-        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
-        run: |
-          device=$(xcrun simctl list devices available --json | jq -er '.devices["com.apple.CoreSimulator.SimRuntime.${{ matrix.simulator }}"] | map(select(.name == "${{ matrix.device }}")) | first | .udid // error("Required preinstalled simulator is missing")')
-          xcrun simctl boot "$device"
-          echo "Device=$device" >> "$GITHUB_ENV"
       - run: dotnet workload install ${{ matrix.workload }}
       - name: Install XHarness
         if: matrix.platform == 'Browser'
@@ -101,45 +77,6 @@ jobs:
           script: |
             mkdir -p artifacts/platform-smoke/Android
             bash -o pipefail -c 'dotnet test --project "$GITHUB_WORKSPACE/tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj" --no-build 2>&1 | tee artifacts/platform-smoke/Android/test.log'
-      - name: Wait for the Apple simulator
-        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
-        timeout-minutes: 10
-        run: |
-          xcrun simctl bootstatus "$Device" -b
-      - name: Execute the TUnit smoke test on Mac Catalyst
-        if: matrix.platform == 'MacCatalyst'
-        working-directory: tests/TUnit.PlatformSmoke
-        timeout-minutes: 10
-        shell: bash
-        run: |
-          mkdir -p "$GITHUB_WORKSPACE/artifacts/platform-smoke/${{ matrix.platform }}"
-          dotnet test --project "$GITHUB_WORKSPACE/tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj" --no-build --minimum-expected-tests 1 \
-            2>&1 | tee "$GITHUB_WORKSPACE/artifacts/platform-smoke/${{ matrix.platform }}/test.log"
-      - name: Execute the TUnit smoke test in the Apple simulator
-        if: matrix.platform == 'iOS' || matrix.platform == 'tvOS'
-        timeout-minutes: 5
-        shell: bash
-        run: |
-          mkdir -p "artifacts/platform-smoke/${{ matrix.platform }}"
-          platform=$(echo "$SmokePlatform" | tr '[:upper:]' '[:lower:]')
-          app="tests/TUnit.PlatformSmoke/bin/Debug/net11.0-$platform/${platform}simulator-arm64/TUnit.PlatformSmoke.app"
-          xcrun simctl install "$Device" "$app"
-          container=$(xcrun simctl get_app_container "$Device" net.dot.TUnitSmoke data)
-          xcrun simctl launch --console "$Device" net.dot.TUnitSmoke --connection-mode=none \
-            --app-arg=--minimum-expected-tests --app-arg=1 \
-            --app-arg=--report-trx --app-arg=--report-trx-filename --app-arg=smoke.trx \
-            --app-arg=--results-directory "--app-arg=$container/Documents/TestResults" \
-            2>&1 | tee "artifacts/platform-smoke/${{ matrix.platform }}/test.log"
-          test "$(xmllint --xpath 'boolean(/*[local-name()="TestRun"]/*[local-name()="ResultSummary"]/*[local-name()="Counters"][@total="1" and @passed="1" and @failed="0"])' "$container/Documents/TestResults/smoke.trx")" = true
-      - name: Collect Apple simulator test reports
-        if: always() && (matrix.platform == 'iOS' || matrix.platform == 'tvOS')
-        run: |
-          if container=$(xcrun simctl get_app_container "$Device" net.dot.TUnitSmoke data 2>/dev/null); then
-            if [[ -d "$container/Documents/TestResults" ]]; then
-              mkdir -p "artifacts/platform-smoke/${{ matrix.platform }}"
-              cp -R "$container/Documents/TestResults" "artifacts/platform-smoke/${{ matrix.platform }}/"
-            fi
-          fi
       - uses: bytecodealliance/actions/wasmtime/setup@v1.1.3
         if: matrix.platform == 'WASI'
         with:
@@ -156,5 +93,96 @@ jobs:
         if: always()
         with:
           name: platform-smoke-${{ matrix.platform }}
+          path: artifacts/platform-smoke
+          if-no-files-found: ignore
+
+  # The Apple platforms share one runner: macOS runners are the scarcest, and with a job per
+  # platform every push queued three of them on top of the .NET matrix's own. One runner also
+  # installs the workloads once and builds the referenced TUnit libraries once. Each platform
+  # still runs after an earlier one fails, so a single run reports all three.
+  apple-smoke:
+    name: Apple smoke tests
+    # The .NET 11 Apple workloads (27.x) require Xcode 27, which only the xcode-27 image has.
+    runs-on: xcode-27
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: 11.0.100-rc.2.26504.105
+      - uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: platform-smoke-${{ runner.os }}-${{ runner.arch }}-Apple-${{ hashFiles('global.json', 'Directory.Packages.props', 'tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj') }}
+          restore-keys: platform-smoke-${{ runner.os }}-${{ runner.arch }}-Apple-
+      - name: Select the installed Xcode
+        run: sudo xcode-select --switch /Applications/Xcode_27.0.app
+      # Boots in the background while the workloads install and the app builds.
+      - name: Start the iOS simulator
+        run: |
+          device=$(xcrun simctl list devices available --json | jq -er '.devices["com.apple.CoreSimulator.SimRuntime.iOS-27-0"] | map(select(.name == "iPhone 17")) | first | .udid // error("Required preinstalled simulator is missing")')
+          xcrun simctl boot "$device"
+          echo "IosDevice=$device" >> "$GITHUB_ENV"
+      - name: Install the Apple workloads
+        id: workloads
+        run: dotnet workload install ios tvos maccatalyst
+
+      - name: Build the iOS smoke test
+        id: ios-build
+        if: ${{ !cancelled() && steps.workloads.outcome == 'success' }}
+        env:
+          SmokePlatform: iOS
+        run: dotnet build tests/TUnit.PlatformSmoke -c Debug
+      - name: Execute the TUnit smoke test in the iOS simulator
+        if: ${{ !cancelled() && steps.ios-build.outcome == 'success' }}
+        timeout-minutes: 15
+        shell: bash
+        env:
+          SmokePlatform: iOS
+        run: scripts/Run-AppleSimulatorSmoke.sh "$IosDevice" ios
+      # One simulator at a time: the runner has 7 GB of memory.
+      - name: Swap the iOS simulator for the tvOS one
+        if: ${{ !cancelled() && steps.workloads.outcome == 'success' }}
+        run: |
+          xcrun simctl shutdown "$IosDevice" || true
+          device=$(xcrun simctl list devices available --json | jq -er '.devices["com.apple.CoreSimulator.SimRuntime.tvOS-27-0"] | map(select(.name == "Apple TV 4K (3rd generation)")) | first | .udid // error("Required preinstalled simulator is missing")')
+          xcrun simctl boot "$device"
+          echo "TvosDevice=$device" >> "$GITHUB_ENV"
+      - name: Build the tvOS smoke test
+        id: tvos-build
+        if: ${{ !cancelled() && steps.workloads.outcome == 'success' }}
+        env:
+          SmokePlatform: tvOS
+        run: dotnet build tests/TUnit.PlatformSmoke -c Debug
+      - name: Execute the TUnit smoke test in the tvOS simulator
+        if: ${{ !cancelled() && steps.tvos-build.outcome == 'success' }}
+        timeout-minutes: 15
+        shell: bash
+        env:
+          SmokePlatform: tvOS
+        run: scripts/Run-AppleSimulatorSmoke.sh "$TvosDevice" tvos
+
+      - name: Build the Mac Catalyst smoke test
+        id: maccatalyst-build
+        if: ${{ !cancelled() && steps.workloads.outcome == 'success' }}
+        env:
+          SmokePlatform: MacCatalyst
+        run: dotnet build tests/TUnit.PlatformSmoke -c Debug
+      - name: Execute the TUnit smoke test on Mac Catalyst
+        if: ${{ !cancelled() && steps.maccatalyst-build.outcome == 'success' }}
+        working-directory: tests/TUnit.PlatformSmoke
+        timeout-minutes: 10
+        shell: bash
+        env:
+          SmokePlatform: MacCatalyst
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/platform-smoke/MacCatalyst"
+          dotnet test --project "$GITHUB_WORKSPACE/tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj" --no-build --minimum-expected-tests 1 \
+            2>&1 | tee "$GITHUB_WORKSPACE/artifacts/platform-smoke/MacCatalyst/test.log"
+
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: platform-smoke-Apple
           path: artifacts/platform-smoke
           if-no-files-found: ignore
