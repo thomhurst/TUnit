@@ -31,6 +31,10 @@ public static partial class EscapingStringAssertions;
 [AssertionFrom<string>(nameof(string.EndsWith), CustomName = "EndsWithThird", ExpectationMessage = "end with {value} (third)")]
 public static partial class ThreeMessagesStringAssertions;
 
+/// <summary>
+/// Bool-returning methods for the [AssertionFrom] declarations above, so each has its own target method and parameter
+/// names that the messages refer to.
+/// </summary>
 public static class ExpectationMessageMethods
 {
     public static bool HasText(string value, string text) => value.Contains(text);

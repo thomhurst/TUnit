@@ -75,8 +75,11 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
         return false;
     }
 
-    // A public method that implicitly implements an interface member (e.g. ITestStartEventReceiver.OnTestStart)
-    // cannot be made private, so the diagnostic's advice would not apply.
+    /// <summary>
+    /// Whether <paramref name="method"/> implicitly implements an interface member of its containing type (e.g.
+    /// <c>ITestStartEventReceiver.OnTestStart</c>). Such a method cannot be made private, so the diagnostic's advice
+    /// would not apply.
+    /// </summary>
     private static bool ImplementsInterfaceMember(IMethodSymbol method)
     {
         var containingType = method.ContainingType;

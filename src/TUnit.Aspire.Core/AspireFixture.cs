@@ -1710,8 +1710,10 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         return DecodeExitCode(code) is { } meaning ? $"{number} ({meaning})" : number;
     }
 
-    // Invariant: exit codes are identifiers to search for, and cultures such as sv-SE would otherwise
-    // print negative Windows codes with U+2212 MINUS SIGN.
+    /// <summary>
+    /// Formats an exit code with the invariant culture: exit codes are identifiers to search for, and cultures such
+    /// as sv-SE would otherwise print negative Windows codes with U+2212 MINUS SIGN.
+    /// </summary>
     private static string FormatExitCodeNumber(int code) => code.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>One-line human description of a resource's failure state for the concise exception message.</summary>

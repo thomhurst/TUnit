@@ -19,8 +19,13 @@ namespace TUnit.Tests.Shared;
 /// </remarks>
 internal static class DotNetCli
 {
+    /// <summary>The <c>dotnet</c> executable to start child processes with: a full path, or <c>dotnet</c> to use <c>PATH</c>.</summary>
     public static string Path { get; } = Resolve();
 
+    /// <summary>
+    /// Prefers <c>DOTNET_HOST_PATH</c>, then the muxer of the installation running this process when it has an SDK,
+    /// and otherwise falls back to <c>dotnet</c> on <c>PATH</c>.
+    /// </summary>
     private static string Resolve()
     {
         // Set by the .NET CLI for processes it starts (e.g. under `dotnet test`).
@@ -38,6 +43,7 @@ internal static class DotNetCli
         return File.Exists(muxer) && HasSdk(root) ? muxer : "dotnet";
     }
 
+    /// <summary>Whether the installation at <paramref name="root"/> has at least one SDK under <c>sdk/</c>.</summary>
     private static bool HasSdk(string root)
     {
         var sdkDirectory = System.IO.Path.Combine(root, "sdk");

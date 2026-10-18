@@ -97,6 +97,10 @@ public partial class Tests
     }
 
 
+    /// <summary>
+    /// A rooted ".cs" string literal, possibly wrapped into "..." + "..." pieces, followed by the caller line number
+    /// argument. See <see cref="ScrubSourcePaths"/>.
+    /// </summary>
     private const string SourcePathPattern =
         @"""(?:/|[A-Za-z]:(?:\\\\|/))[^""\r\n]*(?:""[ \t]*\+[ \t]*\r?\n[ \t]*""[^""\r\n]*)*\.cs""(?=,[ \t]*\d+[,)])";
 

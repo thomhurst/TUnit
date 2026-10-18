@@ -337,6 +337,10 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         }
     }
 
+    /// <summary>
+    /// Replaces whole-word occurrences of <paramref name="className"/> in pre-rendered source. Generated code only
+    /// uses a condition class name as an identifier (declaration, constructor, <c>new</c>, return types, <c>cref</c>).
+    /// </summary>
     private static string RenameClass(string source, string className, string newName) =>
         className == newName
             ? source
@@ -1119,11 +1123,18 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         return result.ToString();
     }
 
-    // Any brace-free text between single braces is a placeholder candidate; it is only substituted when it names a
-    // parameter, so matching broadly keeps non-ASCII identifiers working without a hand-written identifier grammar
+    /// <summary>
+    /// Tokens of an <c>ExpectationMessage</c>: escaped brace pairs, <c>{...}</c> placeholders and stray braces. Any
+    /// brace-free text between single braces is a placeholder candidate; it is only substituted when it names a
+    /// parameter, so matching broadly keeps non-ASCII identifiers working without a hand-written identifier grammar.
+    /// </summary>
     private static readonly Regex MessageTokenRegex = new(@"\{\{|\}\}|\{(?<name>[^{}]*)\}|[{}]");
 
-    // With quote: false, FormatLiteral leaves double quotes unescaped, so quote and strip the outer pair instead
+    /// <summary>
+    /// Escapes <paramref name="text"/> for use inside a C# string literal. With <c>quote: false</c>,
+    /// <see cref="SymbolDisplay.FormatLiteral(string, bool)"/> leaves double quotes unescaped, so this quotes the text
+    /// and strips the outer pair instead.
+    /// </summary>
     private static string FormatLiteral(string text)
     {
         var literal = SymbolDisplay.FormatLiteral(text, quote: true);

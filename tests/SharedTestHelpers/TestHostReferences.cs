@@ -21,8 +21,12 @@ namespace TUnit.Tests.Shared;
 /// </remarks>
 internal static class TestHostReferences
 {
+    /// <summary>The assembly paths to reference, sorted by file name and then by path.</summary>
     public static IReadOnlyList<string> AssemblyPaths { get; } = Resolve();
 
+    /// <summary>
+    /// Reads <c>TRUSTED_PLATFORM_ASSEMBLIES</c> on .NET, or the loaded assemblies on .NET Framework, and sorts them.
+    /// </summary>
     private static string[] Resolve()
     {
         var paths = AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") is string trustedPlatformAssemblies
