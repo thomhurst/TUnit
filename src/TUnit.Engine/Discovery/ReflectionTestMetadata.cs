@@ -99,7 +99,17 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 throw new InvalidOperationException($"No test invoker for {_testMethod.Name}");
             }
 
-            if (hasCancellationToken)
+            if (hasCancellationToken && cancellationTokenIndex == MethodMetadata.Parameters.Length - 1 && args.Length > cancellationTokenIndex)
+            {
+                // More row values than data parameters: a trailing array before the token collects
+                // them (as in source-gen mode), so keep the values together and the token last.
+                var argsWithToken = new object?[args.Length + 1];
+                Array.Copy(args, argsWithToken, args.Length);
+                argsWithToken[args.Length] = cancellationToken;
+
+                await TestInvoker(instance, argsWithToken);
+            }
+            else if (hasCancellationToken)
             {
                 // Insert CancellationToken at the correct position. When the row omits optional
                 // parameters before the token, mark those slots Type.Missing so the invoker applies

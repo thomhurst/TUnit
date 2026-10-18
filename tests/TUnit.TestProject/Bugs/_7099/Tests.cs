@@ -120,6 +120,22 @@ public class InferredGenericParamsArrayTests
     }
 
     [Test]
+    [Arguments(new[] { 4, 5 })]
+    public async Task Inferred_FromPlainArrayArgument<T>(T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 4, 5 });
+    }
+
+    [Test]
+    [Arguments(new[] { 4, 5 })]
+    public async Task Inferred_FromPlainArrayArgument_With_Token<T>(T[] values, CancellationToken token)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 4, 5 });
+    }
+
+    [Test]
     [Arguments(new[] { 1 }, new[] { 2 })]
     public async Task Inferred_ArrayElements<T>(T first, params T[] rest)
     {
@@ -172,8 +188,8 @@ public class GenericParamsArrayEdgeCaseTests
     public async Task Optional_Omitted_Before_Array_With_Token<T>(int count = 42, T[]? values = null, CancellationToken token = default)
     {
         await Assert.That(count).IsEqualTo(42);
-        // Source-gen passes an empty array; reflection mode applies the declared default (null).
-        await Assert.That(values ?? []).IsEmpty();
+        // Both modes apply the declared default of the omitted optional array.
+        await Assert.That(values).IsNull();
     }
 
     [Test]
@@ -181,8 +197,8 @@ public class GenericParamsArrayEdgeCaseTests
     public async Task NonGeneric_Optional_Omitted_Before_Array_With_Token(int count = 42, int[]? values = null, CancellationToken token = default)
     {
         await Assert.That(count).IsEqualTo(42);
-        // Source-gen passes an empty array; reflection mode applies the declared default (null).
-        await Assert.That(values ?? []).IsEmpty();
+        // Both modes apply the declared default of the omitted optional array.
+        await Assert.That(values).IsNull();
     }
 
     [Test]
@@ -203,6 +219,41 @@ public class GenericParamsArrayEdgeCaseTests
     }
 
     public static IEnumerable<Func<int[,]>> Grids() => [() => new[,] { { 1, 2 }, { 3, 4 } }];
+
+    [Test]
+    [Arguments(1)]
+    public async Task Optional_Array_Omitted_After_Required_With_Token(int first, int[]? values = null, CancellationToken token = default)
+    {
+        await Assert.That(first).IsEqualTo(1);
+        await Assert.That(values).IsNull();
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [Arguments(1, 2)]
+    public async Task PlainArray_Before_Token<T>(T[] values, CancellationToken token)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values.Cast<object>().ToArray()).IsEquivalentTo(new object[] { 1, 2 });
+    }
+
+    [Test]
+    [Arguments(1, 2)]
+    public async Task NonGeneric_PlainArray_Before_Token(int[] values, CancellationToken token)
+    {
+        await Assert.That(values).IsEquivalentTo(new[] { 1, 2 });
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [MethodDataSource(nameof(GridRows))]
+    public async Task JaggedMultiDimensional<T>(params int[][,] values)
+    {
+        await Assert.That(values.Length).IsEqualTo(2);
+        await Assert.That(values[1][0, 0]).IsEqualTo(5);
+    }
+
+    public static IEnumerable<Func<int[][,]>> GridRows() => [() => [new[,] { { 1 } }, new[,] { { 5 } }]];
 }
 
 public abstract class GenericParamsArrayBase<T>

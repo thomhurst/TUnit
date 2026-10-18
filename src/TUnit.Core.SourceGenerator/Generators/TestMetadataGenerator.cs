@@ -3149,7 +3149,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     // When optional leading parameters are omitted, the trailing array is passed by
                     // name. A positional argument cannot follow it (CS8323), so name the token too.
-                    var cancellationTokenName = hasParams && argCount < lastIndex
+                    // When any parameter is left out (e.g. an omitted optional array), a positional
+                    // token would bind to the first omitted slot, so it needs the name as well.
+                    var cancellationTokenName = (hasParams && argCount < lastIndex) || argsToPass.Count < parametersFromArgs.Length
                         ? GetCancellationTokenParameterName(parametersFromArgs[lastIndex])
                         : null;
 
@@ -5986,19 +5988,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         var argumentValues = argAttr.ConstructorArguments[0].Values;
-        var methodParams = method.Parameters;
+
+        // Row values bind to the data parameters only; the engine supplies the CancellationToken.
+        var methodParams = method.Parameters
+            .Where(p => p.Type.Name != "CancellationToken" || p.Type.ContainingNamespace?.ToString() != "System.Threading")
+            .ToArray();
 
         // For each value in the params array
         for (var argIndex = 0; argIndex < argumentValues.Length && argIndex < methodParams.Length; argIndex++)
         {
             var methodParam = methodParams[argIndex];
             var argValue = argumentValues[argIndex];
-
-            // Skip if this is a CancellationToken parameter
-            if (methodParam.Type.Name == "CancellationToken")
-            {
-                continue;
-            }
 
             // Check if the method parameter type is a generic type parameter
             if (methodParam.Type is ITypeParameterSymbol typeParam)
@@ -6036,12 +6036,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     inferredTypes[typeParam.Name] = argType;
                 }
             }
-            // A lone array value for a trailing params T[] (e.g. [Arguments(new[] { 1, 2 })]) is the
-            // array itself, so T is its element type. Loose values are not used to infer T: reflection
-            // mode cannot bind them yet (https://github.com/thomhurst/TUnit/issues/7099).
+            // A lone array value for a trailing params T[] or plain T[] (e.g. [Arguments(new[] { 1, 2 })])
+            // is the array itself, so T is its element type. Loose values are not used to infer T:
+            // reflection mode cannot bind them yet (https://github.com/thomhurst/TUnit/issues/7099).
             else if (argIndex == methodParams.Length - 1
                      && argumentValues.Length == methodParams.Length
-                     && methodParam.IsParams
+                     && methodParam.CollectsTrailingArguments()
                      && methodParam.Type is IArrayTypeSymbol { IsSZArray: true, ElementType: ITypeParameterSymbol elementTypeParam }
                      && !inferredTypes.ContainsKey(elementTypeParam.Name)
                      && argValue is { Kind: TypedConstantKind.Array, Type: IArrayTypeSymbol { ElementType: var elementType } })

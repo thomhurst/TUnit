@@ -123,6 +123,37 @@ internal class GenericParamsArrayCompilationTests
             [Test]
             [Arguments(1, 2, 3)]
             public void Inferred_FromLeading_PlainArray<T>(T first, T[] rest) { }
+
+            [Test]
+            [Arguments(new[] { 4, 5 })]
+            public void Inferred_FromPlainArrayArgument<T>(T[] values) { }
+
+            [Test]
+            [Arguments(new[] { 4, 5 })]
+            public void Inferred_FromPlainArrayArgumentWithToken<T>(T[] values, global::System.Threading.CancellationToken token) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [Arguments(1, 2)]
+            public void PlainArray_Before_Token<T>(T[] values, global::System.Threading.CancellationToken token) { }
+
+            [Test]
+            [Arguments(1)]
+            public void Optional_Array_Omitted_After_Required_With_Token(int first, int[] values = null, global::System.Threading.CancellationToken token = default) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [Arguments]
+            public void JaggedMultiDim<U>(params int[][,] values) { }
+
+            [Test]
+            [GenerateGenericTest(typeof(int))]
+            [Arguments]
+            public void JaggedMultiDimGeneric<T>(params T[][,] values) { }
+
+            [Test]
+            [Arguments]
+            public void NonGeneric_JaggedMultiDim(params int[][,] values) { }
         }
 
         public abstract class InheritedBase<T>
@@ -179,5 +210,10 @@ internal class GenericParamsArrayCompilationTests
 
         // A lone array value for params T[] infers T in both engine modes.
         await Assert.That(generated).Contains("Inferred_FromArrayArgument<int>");
+        await Assert.That(generated).Contains("Inferred_FromPlainArrayArgument<int>");
+        await Assert.That(generated).Contains("Inferred_FromPlainArrayArgumentWithToken<int>");
+
+        // An omitted optional plain array keeps its declared default: the argument is left out.
+        await Assert.That(generated).Contains("instance.NonGeneric_Optional_Omitted_Before_Array_With_Token(@token: ");
     }
 }

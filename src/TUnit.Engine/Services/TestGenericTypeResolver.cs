@@ -399,11 +399,16 @@ internal sealed class TestGenericTypeResolver
         // They are left out of inference: the reflection invoker re-infers type arguments from the
         // declared parameter types, so inferring T from them here would not reach the invocation.
         // T must come from another argument, or from a lone array value passed as the array.
-        var hasGenericParamsArray = HasGenericParamsArray(methodMetadata, parameterTypes);
-        var lastIndex = parameterTypes.Length - 1;
+        // Row values bind to the data parameters only: a trailing CancellationToken is supplied by the
+        // engine, so an array just before it (T[] values, CancellationToken token) is the trailing array.
+        var dataParameterCount = parameterTypes.Length > 0 && parameterTypes[parameterTypes.Length - 1] == typeof(CancellationToken)
+            ? parameterTypes.Length - 1
+            : parameterTypes.Length;
+        var hasGenericParamsArray = HasGenericParamsArray(methodMetadata, parameterTypes, dataParameterCount);
+        var lastIndex = dataParameterCount - 1;
 
         // Map parameter types to argument types
-        for (var i = 0; i < Math.Min(parameterTypes.Length, methodArguments.Length); i++)
+        for (var i = 0; i < Math.Min(dataParameterCount, methodArguments.Length); i++)
         {
             var paramType = parameterTypes[i];
             var argValue = methodArguments[i];
@@ -413,7 +418,7 @@ internal sealed class TestGenericTypeResolver
                 // A lone array value may be the array itself (normal form) or one element of it
                 // (expanded form, e.g. T = int[] from a leading argument). Use it for inference only
                 // when the normal form agrees with what the other arguments inferred.
-                if (methodArguments.Length == parameterTypes.Length
+                if (methodArguments.Length == dataParameterCount
                     && argValue?.GetType() is { IsArray: true } lastArgType)
                 {
                     var normalFormMapping = new Dictionary<Type, Type>(typeMapping);
@@ -480,18 +485,18 @@ internal sealed class TestGenericTypeResolver
     /// parameter: a <c>params T[]</c>, or a plain single-dimensional <c>T[]</c>, which the
     /// reflection invoker also fills from loose values.
     /// </summary>
-    private static bool HasGenericParamsArray(MethodMetadata methodMetadata, Type[] parameterTypes)
+    private static bool HasGenericParamsArray(MethodMetadata methodMetadata, Type[] parameterTypes, int dataParameterCount)
     {
         var parameters = methodMetadata.Parameters;
-        if (parameterTypes.Length == 0 || parameters.Length != parameterTypes.Length)
+        if (dataParameterCount == 0 || parameters.Length != parameterTypes.Length)
         {
             return false;
         }
 
-        var lastType = parameterTypes[parameterTypes.Length - 1];
+        var lastType = parameterTypes[dataParameterCount - 1];
         return lastType.IsArray
             && lastType.ContainsGenericParameters
-            && (parameters[parameters.Length - 1].IsParams || lastType.GetArrayRank() == 1);
+            && (parameters[dataParameterCount - 1].IsParams || lastType.GetArrayRank() == 1);
     }
 
     #if NET8_0_OR_GREATER

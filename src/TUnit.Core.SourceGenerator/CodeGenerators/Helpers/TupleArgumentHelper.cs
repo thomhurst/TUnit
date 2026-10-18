@@ -132,7 +132,12 @@ public static class TupleArgumentHelper
                 {
                     var remainingArgCount = Math.Max(0, argCount - regularParamCount);
 
-                    if (remainingArgCount == 0)
+                    if (remainingArgCount == 0 && !paramsParam.IsParams && paramsParam.HasExplicitDefaultValue)
+                    {
+                        // An omitted optional plain array keeps its declared default (as C# and
+                        // reflection mode do), so leave the argument out rather than passing [].
+                    }
+                    else if (remainingArgCount == 0)
                     {
                         // No arguments for params array - pass empty array. Use Array.Empty<T>()
                         // rather than `new T[0]`: when T is itself an array (jagged param like
@@ -167,7 +172,13 @@ public static class TupleArgumentHelper
                         {
                             arrayElements.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])");
                         }
-                        argumentExpressions.Add($"new {elementType.GloballyQualified()}[] {{ {string.Join(", ", arrayElements)} }}");
+                        // Name the full array type rather than appending [] to the element type:
+                        // for a multidimensional element (params int[][,]) `new int[,][]` would
+                        // reverse the ranks and not compile. Collection interfaces still need T[].
+                        var arrayType = paramsParam.Type is IArrayTypeSymbol
+                            ? paramsParam.Type.GloballyQualified()
+                            : $"{elementType.GloballyQualified()}[]";
+                        argumentExpressions.Add($"new {arrayType} {{ {string.Join(", ", arrayElements)} }}");
                     }
                 }
             }
