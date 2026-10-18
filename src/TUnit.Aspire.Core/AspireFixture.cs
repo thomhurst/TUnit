@@ -1719,7 +1719,9 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     /// <summary>One-line human description of a resource's failure state for the concise exception message.</summary>
     internal static string DescribeState(in ResourceDiagnosis d) => d.Class switch
     {
-        ResourceFailureClass.OutOfMemory => $"{d.State}, exit code {d.ExitCode} (OOM / SIGKILL)",
+        ResourceFailureClass.OutOfMemory => d.ExitCode is int oomCode
+            ? $"{d.State}, exit code {FormatExitCodeNumber(oomCode)} (OOM / SIGKILL)"
+            : $"{d.State} (OOM / SIGKILL)",
         ResourceFailureClass.NonZeroExit => $"{d.State}, exit code {FormatExitCode(d.ExitCode)}",
         ResourceFailureClass.CrashedNoCode => $"{d.State} (no exit code)",
         ResourceFailureClass.HealthCheckFailing => d.Detail is { Length: > 0 } health
