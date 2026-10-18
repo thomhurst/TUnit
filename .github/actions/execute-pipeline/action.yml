@@ -34,7 +34,12 @@ runs:
   steps:
     - name: Run Pipeline
       shell: bash
-      run: dotnet run -c Release --no-build --categories ${{ inputs.categories }} --ignore-categories ${{ inputs.ignore-categories }}
+      run: |
+        args=(--categories ${{ inputs.categories }})
+        if [ -n "${{ inputs.ignore-categories }}" ]; then
+          args+=(--ignore-categories ${{ inputs.ignore-categories }})
+        fi
+        dotnet run -c Release --no-build "${args[@]}"
       working-directory: "tools/TUnit.Pipeline"
       env:
         ADMIN_TOKEN: ${{ inputs.admin-token }}
