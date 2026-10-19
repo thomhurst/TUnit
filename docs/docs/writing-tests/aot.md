@@ -93,7 +93,7 @@ public class DeclaredTypeTests
     [MethodDataSource(nameof(Streams))]
     public async Task InferredFromDeclaredType<T>(T stream, int id) where T : IDisposable
     {
-        await Assert.That(stream).IsNotNull();
+        await Assert.That(stream is MemoryStream).IsTrue();
     }
 
     [Test]
@@ -101,7 +101,7 @@ public class DeclaredTypeTests
     [MethodDataSource(nameof(UntypedStreams))]
     public async Task NamedByGenerateGenericTest<T>(T stream, int id) where T : IDisposable
     {
-        await Assert.That(stream).IsNotNull();
+        await Assert.That(stream is MemoryStream).IsTrue();
     }
 }
 ```
