@@ -198,6 +198,59 @@ internal class UnboundGenericAssertionFromTests : TestsBase
         await Assert.That(generated).Contains("public class ReproTwoBagIsEmptyAssertion : Assertion<Repro.Two.Bag>");
     }
 
+    [Test]
+    public async Task Renaming_A_Colliding_Class_Leaves_Other_Overloads_Alone()
+    {
+        // Two.Box.Check() collides with One.Box.Check() and is renamed, while Two.Box.Check<T>() does not collide
+        // and keeps its name. Renaming one overload must not rewrite references to the other, and the class name
+        // appearing in an expectation message must not be rewritten either.
+        var (generatedFiles, errors) = RunGeneratorAndCompile("""
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Attributes;
+            using TUnit.Assertions.Extensions;
+
+            namespace Repro.One
+            {
+                public class Box { public bool Check() => true; }
+
+                [AssertionFrom(typeof(Box), nameof(Box.Check))]
+                public static partial class OneAssertions;
+            }
+
+            namespace Repro.Two
+            {
+                public class Box
+                {
+                    public bool Check() => true;
+                    public bool Check<T>() => true;
+                }
+
+                [AssertionFrom(typeof(Box), nameof(Box.Check), ExpectationMessage = "to pass BoxCheckAssertion")]
+                public static partial class TwoAssertions;
+            }
+
+            public static class CallSites
+            {
+                public static async Task Use()
+                {
+                    await Assert.That(new Repro.One.Box()).Check();
+                    await Assert.That(new Repro.Two.Box()).Check();
+                    await Assert.That(new Repro.Two.Box()).Check<int>();
+                }
+            }
+            """);
+
+        await Assert.That(errors).IsEmpty();
+
+        var generated = string.Join("\n", generatedFiles);
+        await Assert.That(generated).Contains("public class BoxCheckAssertion : Assertion<Repro.One.Box>");
+        await Assert.That(generated).Contains("public class ReproTwoBoxCheckAssertion : Assertion<Repro.Two.Box>");
+        await Assert.That(generated).Contains("public class BoxCheckAssertion<T> : Assertion<Repro.Two.Box>");
+        await Assert.That(generated).Contains("to pass BoxCheckAssertion");
+        await Assert.That(generated).DoesNotContain("ReproTwoBoxCheckAssertion<T>");
+    }
+
     private static (string[] GeneratedFiles, string[] Errors) RunGeneratorAndCompile(string source)
     {
         var compilation = CSharpCompilation.Create(

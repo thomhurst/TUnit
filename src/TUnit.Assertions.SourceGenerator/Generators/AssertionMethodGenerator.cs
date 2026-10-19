@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Assertions.SourceGenerator.Models;
@@ -501,9 +500,9 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine();
         }
 
-        // Generate all assert condition classes first. A class name that is already used by a different
-        // member (Box<T>.IsEmpty in two namespaces) is renamed, and the entry's extension methods are
-        // rewritten to construct the renamed class.
+        // Generate all assert condition classes first. Each class was rendered with a placeholder in place of its
+        // name, so the final name is substituted here, both in the class and in the extension methods that use it.
+        // A name that is already used by a different member (Box<T>.IsEmpty in two namespaces) gets a prefix.
         var extensionSources = new string[entries.Length];
         for (var entryIndex = 0; entryIndex < entries.Length; entryIndex++)
         {
@@ -526,22 +525,16 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             foreach (var conditionClass in entry.ConditionClasses)
             {
                 var name = allGeneratedClasses.Claim(conditionClass, out var isNew);
-                var renamed = !string.Equals(name, conditionClass.Name, StringComparison.Ordinal);
 
-                if (renamed)
-                {
-                    extensionSource = RenameIdentifier(extensionSource, conditionClass.Name, name);
-                }
+                extensionSource = extensionSource.Replace(conditionClass.Placeholder, name);
 
                 if (isNew)
                 {
-                    sourceBuilder.Append(renamed
-                        ? RenameIdentifier(conditionClass.Source, conditionClass.Name, name)
-                        : conditionClass.Source);
+                    sourceBuilder.Append(conditionClass.Source.Replace(conditionClass.Placeholder, name));
                 }
             }
 
-            extensionSources[entryIndex] = extensionSource;
+            extensionSources[entryIndex] = ReplaceRemainingPlaceholders(extensionSource);
         }
 
         // Generate extension methods class
@@ -647,6 +640,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             var arity = GenerateAssertConditionClassForMethod(classBuilder, attributeData, method);
             conditionClasses.Add(new ConditionClassModel(
                 className,
+                GetClassNamePlaceholder(className, method),
                 arity,
                 GetConditionClassIdentity(attributeData, method, arity),
                 GetConditionClassDisambiguator(attributeData),
@@ -737,7 +731,9 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         int arity;
         var methodName = attributeData.MethodName;
 
-        var className = GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod);
+        var className = GetClassNamePlaceholder(
+            GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod),
+            staticMethod);
 
         // Determine which parameters to skip
         IParameterSymbol[] parameters;
@@ -1275,7 +1271,9 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         var methodName = attributeData.MethodName;
 
         var baseMethodName = attributeData.CustomName ?? methodName;
-        var className = GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod);
+        var className = GetClassNamePlaceholder(
+            GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod),
+            staticMethod);
 
         var actualMethodName = baseMethodName;
         if (staticMethod.Parameters.Length > 1)
@@ -1471,13 +1469,15 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         string ExtensionMethodsSource
     );
 
-    /// <param name="Name">The class name the source was rendered with.</param>
+    /// <param name="Name">The class's name before any collision is resolved.</param>
+    /// <param name="Placeholder">The text standing in for the class name in the rendered class and extension methods.</param>
     /// <param name="Arity">The class's generic arity. Classes with the same name and different arities can coexist.</param>
     /// <param name="Identity">The member the class asserts on: target type, containing type, member and arity. Attributes with the same identity share one class.</param>
     /// <param name="Disambiguator">A prefix used to rename the class when a different identity already took its name.</param>
     /// <param name="Source">The rendered class.</param>
     private sealed record ConditionClassModel(
         string Name,
+        string Placeholder,
         int Arity,
         string Identity,
         string Disambiguator,
@@ -1557,9 +1557,45 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         return builder.Length == 0 || char.IsDigit(builder[0]) ? "Global" + builder : builder.ToString();
     }
 
-    /// <summary>Replaces whole-identifier occurrences of <paramref name="oldName"/>.</summary>
-    private static string RenameIdentifier(string source, string oldName, string newName) =>
-        Regex.Replace(source, $@"(?<![\w@]){Regex.Escape(oldName)}(?!\w)", newName);
+    private const char PlaceholderStart = '\u0001';
+    private const char PlaceholderSeparator = '\u0002';
+    private const char PlaceholderEnd = '\u0003';
+
+    /// <summary>
+    /// The text rendered in place of a condition class name until its final name is known. It is keyed by the
+    /// member, so each overload is substituted separately, and it is made of control characters that never occur
+    /// in generated code, so substituting it cannot touch string literals or other identifiers.
+    /// </summary>
+    private static string GetClassNamePlaceholder(string className, IMethodSymbol method) =>
+        $"{PlaceholderStart}{className}{PlaceholderSeparator}{method.ToDisplayString()}{PlaceholderEnd}";
+
+    /// <summary>
+    /// Replaces placeholders that no condition class claimed with their original class name. That happens when an
+    /// extension method is rendered for a member that its attribute rendered no condition class for.
+    /// </summary>
+    private static string ReplaceRemainingPlaceholders(string source)
+    {
+        var start = source.IndexOf(PlaceholderStart);
+        if (start < 0)
+        {
+            return source;
+        }
+
+        var builder = new StringBuilder(source.Length);
+        var position = 0;
+        while (start >= 0)
+        {
+            var separator = source.IndexOf(PlaceholderSeparator, start);
+            var end = source.IndexOf(PlaceholderEnd, start);
+            builder.Append(source, position, start - position);
+            builder.Append(source, start + 1, separator - start - 1);
+            position = end + 1;
+            start = source.IndexOf(PlaceholderStart, position);
+        }
+
+        builder.Append(source, position, source.Length - position);
+        return builder.ToString();
+    }
 
     /// <summary>
     /// Symbol-based attribute data. Only used inside the transform; never flows through the pipeline.
