@@ -42,3 +42,44 @@ public class NullAndTypedRowsGenericMethod
         await Assert.That(typeof(T)).IsEqualTo(value is null ? typeof(object) : typeof(string));
     }
 }
+
+// A declared object parameter is not a placeholder for T: T still infers object from its own null value.
+[EngineTest(ExpectedResult.Pass)]
+public class ObjectParameterBeforeNullGenericMethod
+{
+    [Test]
+    [Arguments(null, null)]
+    public async Task Run<T>(object? context, T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(object));
+        await Assert.That(context).IsNull();
+        await Assert.That(value).IsNull();
+    }
+}
+
+// The declared object parameter's value does not infer T either.
+[EngineTest(ExpectedResult.Pass)]
+public class NullGenericBeforeObjectParameterMethod
+{
+    [Test]
+    [Arguments(null, 1)]
+    public async Task Run<T>(T value, object other)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(object));
+        await Assert.That(value).IsNull();
+        await Assert.That(other).IsEqualTo(1);
+    }
+}
+
+// A null and a non-null value for the same type parameter: the non-null value infers T, in either order.
+[EngineTest(ExpectedResult.Pass)]
+public class NullAndValueForSameTypeParameterMethod
+{
+    [Test]
+    [Arguments(null, "a")]
+    [Arguments("a", null)]
+    public async Task Run<T>(T first, T second)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+    }
+}

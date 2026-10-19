@@ -13,6 +13,9 @@ public class Issue7120Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("NullArgumentsGenericMethod", 1)]
     [Arguments("NullElementGenericMethod", 1)]
     [Arguments("NullAndTypedRowsGenericMethod", 2)]
+    [Arguments("ObjectParameterBeforeNullGenericMethod", 1)]
+    [Arguments("NullGenericBeforeObjectParameterMethod", 1)]
+    [Arguments("NullAndValueForSameTypeParameterMethod", 2)]
     public async Task Null_Row_Runs_As_Object(string className, int expectedTests)
     {
         await RunTestsWithFilter(

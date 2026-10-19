@@ -6276,6 +6276,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Check if the method parameter type is a generic type parameter
             if (methodParam.Type is ITypeParameterSymbol typeParam)
             {
+                // A null value (typed object) infers object only when no other value infers the type
+                // parameter, so Run<T>(T first, T second) with [Arguments("a", null)] runs as Run<string>,
+                // as with [Arguments(null, "a")] and in reflection mode
+                if (argValue.IsNull && inferredTypes.ContainsKey(typeParam.Name))
+                {
+                    continue;
+                }
+
                 // The argument value's type tells us what the generic type should be
                 // For literal values, we need to infer the type from the value itself
                 ITypeSymbol? argType = null;

@@ -137,7 +137,11 @@ internal sealed class TestGenericTypeResolver
     {
         // Handle the case where some parameter types are Object (placeholders for generic parameters)
         // This happens when data sources provide untyped data or when we have mixed generic/non-generic parameters
+        // When a parameter type contains a generic parameter, the types are the method's declared ones
+        // (reflection mode), so an object parameter is a real object parameter, not a placeholder for one:
+        // Run<T>(T value, object other) must infer T from its own argument, not from other's.
         var hasObjectParameter = false;
+        var hasGenericParameterType = false;
         if (methodArguments.Length > 0)
         {
             foreach (var parameterType in parameterTypes)
@@ -145,10 +149,16 @@ internal sealed class TestGenericTypeResolver
                 if (parameterType == typeof(object))
                 {
                     hasObjectParameter = true;
+                }
+                else if (parameterType.ContainsGenericParameters)
+                {
+                    hasGenericParameterType = true;
                     break;
                 }
             }
         }
+
+        hasObjectParameter &= !hasGenericParameterType;
         if (hasObjectParameter)
         {
             // Check if this is a simple generic method with one type parameter and mixed parameters
