@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._7122;
@@ -105,6 +106,25 @@ public class OmittedOptionalOverloadTests
 
     internal Task Declared_Defaults_Of_Every_Kind(params int[] values)
         => throw new InvalidOperationException("Bound to the wrong overload");
+
+    [Test]
+    [Arguments]
+    public async Task Object_String_Default([Optional, DefaultParameterValue("declared")] object value)
+    {
+        await Assert.That(value).IsEqualTo("declared");
+    }
+
+    internal Task Object_String_Default(string value)
+        => throw new InvalidOperationException("Bound to the wrong overload");
+
+    [Test]
+    [Arguments]
+    public async Task Object_Non_Finite_Defaults_Keep_Their_Type([Optional, DefaultParameterValue(float.NaN)] object floatNan, [Optional, DefaultParameterValue(float.NegativeInfinity)] object floatInfinity, [Optional, DefaultParameterValue(double.NaN)] object doubleNan)
+    {
+        await Assert.That(floatNan is float f && float.IsNaN(f)).IsTrue();
+        await Assert.That(floatInfinity is float g && float.IsNegativeInfinity(g)).IsTrue();
+        await Assert.That(doubleNan is double d && double.IsNaN(d)).IsTrue();
+    }
 
     [Test]
     [Arguments]

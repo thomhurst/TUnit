@@ -268,17 +268,23 @@ public static class TupleArgumentHelper
             return true;
         }
 
-        switch (value)
+        // Non-finite values have no literal form. Name the constant on the value's own type, so an
+        // `[DefaultParameterValue(float.NaN)] object x` default still boxes a float, as in reflection mode.
+        var nonFinite = value switch
         {
-            case double.NaN or float.NaN:
-                expression = $"({typeName})(double.NaN)";
-                return true;
-            case double d when double.IsInfinity(d):
-                expression = $"({typeName})(double.{(d > 0 ? "PositiveInfinity" : "NegativeInfinity")})";
-                return true;
-            case float f when float.IsInfinity(f):
-                expression = $"({typeName})(float.{(f > 0 ? "PositiveInfinity" : "NegativeInfinity")})";
-                return true;
+            double d when double.IsNaN(d) => "double.NaN",
+            double d when double.IsPositiveInfinity(d) => "double.PositiveInfinity",
+            double d when double.IsNegativeInfinity(d) => "double.NegativeInfinity",
+            float f when float.IsNaN(f) => "float.NaN",
+            float f when float.IsPositiveInfinity(f) => "float.PositiveInfinity",
+            float f when float.IsNegativeInfinity(f) => "float.NegativeInfinity",
+            _ => null
+        };
+
+        if (nonFinite is not null)
+        {
+            expression = $"({typeName})({nonFinite})";
+            return true;
         }
 
         var literal = SymbolDisplay.FormatPrimitive(value, quoteStrings: true, useHexadecimalNumbers: false);
@@ -295,8 +301,10 @@ public static class TupleArgumentHelper
             _ => literal
         };
 
-        // The cast restores enum and narrower numeric types (the stored value is the underlying constant).
-        expression = value is string ? literal : $"({typeName})({literal})";
+        // The cast restores enum and narrower numeric types (the stored value is the underlying constant),
+        // and keeps a broader declared type: `[DefaultParameterValue("s")] object x` must not pass a bare literal,
+        // which would let a sibling `M(string)` overload win resolution.
+        expression = $"({typeName})({literal})";
         return true;
     }
 

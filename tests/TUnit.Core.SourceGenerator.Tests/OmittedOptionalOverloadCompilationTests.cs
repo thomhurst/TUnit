@@ -72,6 +72,7 @@ internal class OmittedOptionalOverloadCompilationTests
                 int? nullableValue = 3,
                 int? nullableNull = null,
                 TimeSpan structDefault = default,
+                Guid newStruct = new Guid(),
                 Mode? nullableEnum = Mode.First,
                 params int[] values) { }
 
@@ -83,6 +84,19 @@ internal class OmittedOptionalOverloadCompilationTests
             public void Generic_Default<T>(int count = 42, T value = default!, params T[] values) { }
 
             internal void Generic_Default<T>(params T[] values) { }
+
+            // A string default for a broader declared type (only expressible through DefaultParameterValue)
+            // must keep that type, or the sibling wins.
+            [Test]
+            [Arguments]
+            public void Object_String_Default([global::System.Runtime.InteropServices.Optional, global::System.Runtime.InteropServices.DefaultParameterValue("declared")] object value) { }
+
+            internal void Object_String_Default(string value) { }
+
+            // Non-finite defaults keep their own type when boxed into a broader declared type.
+            [Test]
+            [Arguments]
+            public void Object_Non_Finite([global::System.Runtime.InteropServices.Optional, global::System.Runtime.InteropServices.DefaultParameterValue(float.NaN)] object floatNan, [global::System.Runtime.InteropServices.Optional, global::System.Runtime.InteropServices.DefaultParameterValue(float.NegativeInfinity)] object floatInfinity, [global::System.Runtime.InteropServices.Optional, global::System.Runtime.InteropServices.DefaultParameterValue(double.NaN)] object doubleNan) { }
 
             // A default that cannot be written as a C# literal falls back to omitting the parameter.
             [Test]
@@ -128,6 +142,8 @@ internal class OmittedOptionalOverloadCompilationTests
         await Assert.That(generated).Contains("instance.Trailing(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (int)(42))");
         await Assert.That(generated).Contains("instance.Every_Kind((global::MyTests.Mode)(2), ");
         await Assert.That(generated).Contains("instance.Generic_Default<int>((int)(42), default(int)!, global::System.Array.Empty<int>())");
+        await Assert.That(generated).Contains("instance.Object_String_Default((object)(\"declared\"))");
+        await Assert.That(generated).Contains("instance.Object_Non_Finite((object)(float.NaN), (object)(float.NegativeInfinity), (object)(double.NaN))");
         await Assert.That(generated).Contains("instance.Unwritable_Default(@values: global::System.Array.Empty<int>())");
     }
 }
