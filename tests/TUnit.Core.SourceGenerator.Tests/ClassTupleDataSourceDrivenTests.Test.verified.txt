@@ -127,9 +127,7 @@ internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests__TestSou
                 return
                 [
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-                    new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod"),
-                    new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
+                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 ];
             }
             default:

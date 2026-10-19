@@ -69,6 +69,25 @@ public class TestVariantTests
     // void and ValueTask<T> are covered by unit tests in ExpressionHelperTests.
 
     [Test]
+    [Arguments(1, DisplayName = "one")]
+    public async Task CreateTestVariant_DoesNotInheritParentRowSettings(int value)
+    {
+        if (!TestContext.Current!.Dependencies.IsVariant())
+        {
+            var variantInfo = await TestContext.Current.CreateTestVariant(
+                methodArguments: [2],
+                displayName: "variant");
+
+            if (variantInfo.DisplayName != "variant")
+            {
+                throw new InvalidOperationException($"Expected DisplayName 'variant' but got '{variantInfo.DisplayName}'");
+            }
+        }
+
+        await Assert.That(value).IsEqualTo(1).Or.IsEqualTo(2);
+    }
+
+    [Test]
     public async Task CreateTestVariant_FromTaskMethod()
     {
         if (!TestContext.Current!.Dependencies.IsVariant())

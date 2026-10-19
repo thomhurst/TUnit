@@ -73,8 +73,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "expected", n
                 return new global::System.Attribute[]
                 {
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData"),
-                    new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_String_TestData"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 };
             }
@@ -83,8 +81,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "expected", n
                 return new global::System.Attribute[]
                 {
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData"),
-                    new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_String_TestData"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 };
             }

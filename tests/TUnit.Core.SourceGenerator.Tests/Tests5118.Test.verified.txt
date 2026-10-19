@@ -57,8 +57,7 @@ internal static class TUnit_TestProject_Bugs__5118_AsyncClassMethodDataSourceTes
                 [
                     new global::TUnit.Core.TestAttribute(),
                     new global::TUnit.Core.TimeoutAttribute(5000),
-                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-                    new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.Bugs._5118.AsyncTestDataSources>("GetAsyncTestData")
+                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 ];
             }
             default:

@@ -60,9 +60,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
                 return
                 [
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-                    new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>(),
-                    new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>()
+                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 ];
             }
             default:

@@ -236,7 +236,9 @@ internal sealed class TestRegistry : ITestRegistry
         }
 
         var lambda = Expression.Lambda<Func<T, Task>>(body, parameter);
-        var attributes = new List<Attribute>(currentContext.Metadata.TestDetails.GetAllAttributes());
+        var attributes = currentContext.Metadata.TestDetails.GetAllAttributes()
+            .Where(static attribute => attribute is not IDataSourceAttribute)
+            .ToList();
 
         var discoveryResult = new DynamicDiscoveryResult
         {

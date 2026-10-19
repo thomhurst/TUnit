@@ -74,8 +74,7 @@ internal static class TUnit_TestProject_Bugs__1821_Tests__TestSource
                 return
                 [
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-                    new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>()
+                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 ];
             }
             default:

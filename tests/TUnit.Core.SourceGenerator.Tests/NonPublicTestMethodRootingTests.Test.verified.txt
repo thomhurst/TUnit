@@ -43,7 +43,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
         return new global::System.Attribute[]
         {
             new global::TUnit.Core.TestAttribute(),
-            new global::TUnit.Core.ArgumentsAttribute(2),
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         };
     }

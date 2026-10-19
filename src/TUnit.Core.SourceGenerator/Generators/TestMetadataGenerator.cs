@@ -1135,26 +1135,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// </summary>
     private static void EmitConcreteAttributeFactory(CodeWriter writer, TestMethodMetadata testMethod, ConcreteInstantiation entry)
     {
-        // Build filtered attributes
-        var filteredAttributes = new List<AttributeData>();
-
-        foreach (var attr in testMethod.MethodSymbol.GetAttributes())
-        {
-            if (attr.AttributeClass?.Name == "ArgumentsAttribute" && entry.SpecificArgumentsAttribute != null)
-            {
-                if (AreSameAttribute(attr, entry.SpecificArgumentsAttribute))
-                {
-                    filteredAttributes.Add(attr);
-                }
-            }
-            else
-            {
-                filteredAttributes.Add(attr);
-            }
-        }
-
-        filteredAttributes.AddRange(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes());
-        filteredAttributes.AddRange(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
+        // Data source attributes are emitted separately for the selected row by TestBuilder.
+        var filteredAttributes = GetTestAttributes(testMethod).ToList();
 
         writer.AppendLine("return new global::System.Attribute[]");
         writer.AppendLine("{");
@@ -2846,9 +2828,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static IEnumerable<AttributeData> GetTestAttributes(TestMethodMetadata testMethod)
     {
         return testMethod.MethodSymbol.GetAttributes()
-            .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
             .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
-            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
+            .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
     }
 
     private static (bool HasCancellationToken, IParameterSymbol[] ParametersFromArgs) ParseInvokerParameters(IMethodSymbol methodSymbol)

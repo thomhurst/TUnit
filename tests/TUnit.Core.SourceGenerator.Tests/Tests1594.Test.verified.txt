@@ -55,9 +55,7 @@ internal static class TUnit_TestProject_Bugs__1594_MyTests__TestSource
                 return
                 [
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-                    new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1594.MyFixture>()
-                {Shared = global::TUnit.Core.SharedType.None,}
+                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 ];
             }
             default:

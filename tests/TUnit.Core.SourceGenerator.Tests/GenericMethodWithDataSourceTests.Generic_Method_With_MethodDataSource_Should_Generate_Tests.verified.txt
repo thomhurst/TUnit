@@ -157,7 +157,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new gl
         {
             new global::TUnit.Core.TestAttribute(),
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-            new global::TUnit.Core.MethodDataSourceAttribute("GetNumbers"),
             new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeA)),
             new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeB))
         };
@@ -205,7 +204,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new gl
         {
             new global::TUnit.Core.TestAttribute(),
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-            new global::TUnit.Core.MethodDataSourceAttribute("GetNumbers"),
             new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeA)),
             new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeB))
         };
@@ -468,8 +466,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
                     new global::TUnit.Core.TestAttribute(),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
-                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double)),
-                    new global::TUnit.Core.MethodDataSourceAttribute("GetStrings")
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double))
                 };
             }
             case 1:
@@ -479,8 +476,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
                     new global::TUnit.Core.TestAttribute(),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
-                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double)),
-                    new global::TUnit.Core.MethodDataSourceAttribute("GetStrings")
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double))
                 };
             }
             default:
@@ -1303,7 +1299,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double)),
-                    new global::TUnit.Core.MethodDataSourceAttribute("GetBooleans"),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeA)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeB))
                 };
@@ -1316,7 +1311,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double)),
-                    new global::TUnit.Core.MethodDataSourceAttribute("GetBooleans"),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeA)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeB))
                 };
@@ -1412,7 +1406,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double)),
-                    new global::TUnit.Core.MethodDataSourceAttribute("GetBooleans"),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeA)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeB))
                 };
@@ -1425,7 +1418,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double)),
-                    new global::TUnit.Core.MethodDataSourceAttribute("GetBooleans"),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeA)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeB))
                 };

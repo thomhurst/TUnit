@@ -100,7 +100,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
                 return new global::System.Attribute[]
                 {
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.Core.ArgumentsAttribute(true, "True"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 };
             }
@@ -109,7 +108,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
                 return new global::System.Attribute[]
                 {
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.Core.ArgumentsAttribute(1, "1"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 };
             }
@@ -118,7 +116,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
                 return new global::System.Attribute[]
                 {
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.Core.ArgumentsAttribute(1.1, "1.1"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 };
             }
@@ -127,7 +124,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
                 return new global::System.Attribute[]
                 {
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.Core.ArgumentsAttribute("hello", "hello"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 };
             }
@@ -136,7 +132,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
                 return new global::System.Attribute[]
                 {
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 };
             }

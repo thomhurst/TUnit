@@ -265,8 +265,21 @@ internal static class ReflectionAttributeExtractor
                 }
             }
 
-            attributes.AddRange(key.Item1.GetCustomAttributes());
-            attributes.AddRange(key.Item1.Assembly.GetCustomAttributes());
+            foreach (var attribute in key.Item1.GetCustomAttributes())
+            {
+                if (attribute is not IDataSourceAttribute)
+                {
+                    attributes.Add(attribute);
+                }
+            }
+
+            foreach (var attribute in key.Item1.Assembly.GetCustomAttributes())
+            {
+                if (attribute is not IDataSourceAttribute)
+                {
+                    attributes.Add(attribute);
+                }
+            }
 
             return attributes.ToArray();
         });

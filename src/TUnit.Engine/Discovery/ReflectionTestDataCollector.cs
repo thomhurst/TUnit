@@ -1366,7 +1366,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             FilePath = ExtractFilePath(method) ?? "Unknown",
             LineNumber = ExtractLineNumber(method) ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
-            AttributeFactory = () => method.GetCustomAttributes().ToArray(),
+            AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(type, method),
             DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = []
@@ -1432,8 +1432,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             FilePath = ExtractFilePath(method) ?? "Unknown",
             LineNumber = ExtractLineNumber(method) ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
-            AttributeFactory = () => method.GetCustomAttributes()
-                .ToArray(),
+            AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(type, method),
             DataSources =
             [
             ],
@@ -2462,7 +2461,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             FilePath = ExtractFilePath(method) ?? "Unknown",
             LineNumber = ExtractLineNumber(method) ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
-            AttributeFactory = () => method.GetCustomAttributes().ToArray(),
+            AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(type, method),
             DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = []

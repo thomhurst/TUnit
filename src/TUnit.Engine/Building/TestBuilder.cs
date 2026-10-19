@@ -1220,6 +1220,11 @@ internal sealed class TestBuilder : ITestBuilder
             attributes = [..attributes, (Attribute)testBuilderContext.DataSourceAttribute];
         }
 
+        if (testBuilderContext.ClassDataSourceAttribute != null && testBuilderContext.ClassDataSourceAttribute is not NoDataSource)
+        {
+            attributes = [..attributes, (Attribute)testBuilderContext.ClassDataSourceAttribute];
+        }
+
         var testDetails = new TestDetails(attributes)
         {
             TestId = testId,

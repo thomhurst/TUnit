@@ -77,9 +77,7 @@ internal static class TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource
             {
                 return
                 [
-                    new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.Core.ArgumentsAttribute("1"),
-                    new global::TUnit.Core.ArgumentsAttribute("2")
+                    new global::TUnit.Core.TestAttribute()
                 ];
             }
             default:
