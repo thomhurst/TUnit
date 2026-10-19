@@ -71,8 +71,9 @@ public partial class Tests
     /// <summary>
     /// Scrubs source path literals (hook attributes' <c>[CallerFilePath]</c> argument) before the URL regex mangles
     /// them. CI builds embed deterministic "/_/..." paths; local builds embed the full checkout path, which the
-    /// generator wraps into "..." + "..." pieces once it exceeds 80 characters. Only a rooted ".cs" path followed by
-    /// the <c>[CallerLineNumber]</c> argument matches, so public string values such as "/v1" are left alone.
+    /// generator wraps into "..." + "..." pieces once it exceeds 80 characters. Only a rooted ".cs" path passed to a
+    /// hook attribute and followed by the <c>[CallerLineNumber]</c> argument matches, so public string values such as
+    /// "/v1" and other attributes' arguments are left alone.
     /// </summary>
     internal static string ScrubSourcePaths(string text) => SourcePathRegex().Replace(text, @"""PATH_SCRUBBED""");
 
@@ -98,11 +99,11 @@ public partial class Tests
 
 
     /// <summary>
-    /// A rooted ".cs" string literal, possibly wrapped into "..." + "..." pieces, followed by the caller line number
-    /// argument. See <see cref="ScrubSourcePaths"/>.
+    /// The first string argument of a Before/After(Every) hook attribute that is a rooted ".cs" literal, possibly
+    /// wrapped into "..." + "..." pieces, followed by the caller line number argument. See <see cref="ScrubSourcePaths"/>.
     /// </summary>
     private const string SourcePathPattern =
-        @"""(?:/|[A-Za-z]:(?:\\\\|/))[^""\r\n]*(?:""[ \t]*\+[ \t]*\r?\n[ \t]*""[^""\r\n]*)*\.cs""(?=,[ \t]*\d+[,)])";
+        @"(?<=\b(?:Before|After)(?:Every)?\([^""\r\n]*)""(?:/|[A-Za-z]:(?:\\\\|/))[^""\r\n]*(?:""[ \t]*\+[ \t]*\r?\n[ \t]*""[^""\r\n]*)*\.cs""(?=,[ \t]*\d+[,)])";
 
 #if NET
     [GeneratedRegex(SourcePathPattern)]
