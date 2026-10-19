@@ -15,15 +15,7 @@ public class RunAssertionsShouldSourceGeneratorTestsModule : TestBaseModule
     // <TargetFrameworks> in TUnit.Assertions.Should.SourceGenerator.Tests.csproj. net472 is
     // intentionally omitted there: the generator output is consumer-TFM-independent and the
     // .NET Framework BCL trips the in-memory compilation harness for user-declared generics.
-    protected override IEnumerable<string> TestableFrameworks
-    {
-        get
-        {
-            yield return "net10.0";
-            yield return "net9.0";
-            yield return "net8.0";
-        }
-    }
+    protected override IEnumerable<string> TestableFrameworks => ModernFrameworks;
 
     protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {

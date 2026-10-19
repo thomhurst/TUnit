@@ -52,7 +52,7 @@ public class ListTestsFilterTests
     {
         var testProject = Sourcy.DotNet.Projects.TUnit_TestProject;
         var projectName = Path.GetFileNameWithoutExtension(testProject.Name);
-        var binDir = new DirectoryInfo(Path.Combine(testProject.DirectoryName!, "bin", "Release", NetVersion));
+        var binDir = new DirectoryInfo(Path.Combine(testProject.DirectoryName!, "bin", EnvironmentVariables.BuildConfiguration, NetVersion));
 
         var executable = binDir.EnumerateFiles(projectName).FirstOrDefault()
                       ?? binDir.EnumerateFiles(projectName + ".exe").First();

@@ -14,6 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\SharedTestHelpers\TestHostReferences.cs" Link="Shared\TestHostReferences.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" />
     <ProjectReference Include="..\..\src\TUnit.Core\TUnit.Core.csproj" />
     <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
@@ -39,11 +43,6 @@
     </PackageReference>
     <PackageReference Include="Verify" />
     <PackageReference Include="Verify.TUnit" />
-    <PackageReference Include="xunit" />
-    <PackageReference Include="xunit.runner.visualstudio">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

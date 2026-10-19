@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Mocks.SourceGenerator.Tests;
 
@@ -16,7 +17,7 @@ public abstract class SnapshotTestBase
 
     /// <summary>
     /// Returns the shared, lazily-loaded set of metadata references used by the test compilations
-    /// (current AppDomain assemblies, with exactly one TUnit.Mocks reference). Derived test classes
+    /// (the test host's assemblies, with exactly one TUnit.Mocks reference). Derived test classes
     /// should reuse this instead of re-discovering references per test invocation.
     /// </summary>
     protected static IEnumerable<MetadataReference> GetCachedReferences() => _references.Value;
@@ -38,15 +39,10 @@ public abstract class SnapshotTestBase
                 "No TUnit.Mocks reference available to the test compilations — the generator would silently produce nothing.");
         }
 
-        var refs = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(a => !a.IsDynamic && !string.IsNullOrWhiteSpace(a.Location))
-            .Where(a => a != mocksAssembly)
-            .Select(a => MetadataReference.CreateFromFile(a.Location))
-            .ToList();
-
-        refs.Add(MetadataReference.CreateFromFile(mocksAssembly.Location));
-
-        return refs;
+        var mocksFileName = Path.GetFileName(mocksAssembly.Location);
+        return TestHostReferences.CreateReferences(
+            path => !string.Equals(Path.GetFileName(path), mocksFileName, StringComparison.OrdinalIgnoreCase),
+            mocksAssembly);
     }
 
     /// <summary>
