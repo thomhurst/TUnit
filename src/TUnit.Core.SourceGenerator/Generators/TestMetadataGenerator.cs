@@ -6463,64 +6463,50 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        // Get the method name from the attribute
-        if (mdsAttr.ConstructorArguments[0].Value is not string methodName)
+        // [MethodDataSource("Rows")], [MethodDataSource(typeof(Provider), "Rows")] or [MethodDataSource<Provider>("Rows")]
+        INamedTypeSymbol providerType;
+        string methodName;
+        if (mdsAttr.ConstructorArguments is [{ Value: INamedTypeSymbol typeArgument }, { Value: string typedMethodName }])
+        {
+            providerType = typeArgument;
+            methodName = typedMethodName;
+        }
+        else if (mdsAttr.ConstructorArguments[0].Value is string attributeMethodName)
+        {
+            providerType = mdsAttr.AttributeClass is { IsGenericType: true, TypeArguments: [INamedTypeSymbol genericProvider] }
+                ? genericProvider
+                : testMethod.TypeSymbol;
+            methodName = attributeMethodName;
+        }
+        else
         {
             return null;
         }
 
-        // Find the method in the test class, or in T for [MethodDataSource<T>("Rows")]
-        var providerType = mdsAttr.AttributeClass is { IsGenericType: true, TypeArguments: [INamedTypeSymbol genericProvider] }
-            ? genericProvider
-            : testMethod.TypeSymbol;
-        var dataMethod = providerType.GetMembers(methodName)
-            .OfType<IMethodSymbol>()
-            .FirstOrDefault(m => m.IsStatic && m.Parameters.Length == 0);
-
-        if (dataMethod == null)
+        var rowType = GetMethodDataSourceRowType(providerType, methodName, testMethod.CompilationContext.Compilation);
+        if (rowType == null)
         {
             return null;
         }
 
-        // Check if the method returns IEnumerable<Func<T>> where T is a tuple
-        var returnType = dataMethod.ReturnType;
-        if (returnType is not INamedTypeSymbol namedReturnType)
-        {
-            return null;
-        }
-
-        // Navigate through IEnumerable<Func<...>>
-        if (!namedReturnType.IsGenericType || namedReturnType.Name != "IEnumerable")
-        {
-            return null;
-        }
-
-        var funcType = namedReturnType.TypeArguments[0] as INamedTypeSymbol;
-        if (funcType == null || funcType.Name != "Func" || funcType.TypeArguments.Length != 1)
-        {
-            return null;
-        }
-
-        var tupleType = funcType.TypeArguments[0] as INamedTypeSymbol;
-        if (tupleType == null || !tupleType.IsTupleType)
-        {
-            return null;
-        }
-
-        // Extract the types from the tuple elements that correspond to the generic parameters
         var testMethodParams = testMethod.MethodSymbol.Parameters;
         var genericParams = testMethod.MethodSymbol.TypeParameters;
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
-        // Map tuple elements to method parameters to infer types
-        var tupleElements = tupleType.TupleElements;
-        for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
+        if (rowType is INamedTypeSymbol { IsTupleType: true } tupleType
+            && !(testMethodParams.Length == 1 && testMethodParams[0].Type.IsTupleType))
         {
-            var paramType = testMethodParams[i].Type;
-            var tupleElementType = tupleElements[i].Type;
-
-            // Process the parameter type to find generic references
-            ProcessTypeForGenerics(paramType, tupleElementType, genericParams, genericParamMap);
+            // A tuple row is spread across the test method's parameters
+            var tupleElements = tupleType.TupleElements;
+            for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
+            {
+                ProcessTypeForGenerics(testMethodParams[i].Type, tupleElements[i].Type, genericParams, genericParamMap);
+            }
+        }
+        else if (testMethodParams.Length > 0)
+        {
+            // Any other row is a single value for the first parameter
+            ProcessTypeForGenerics(testMethodParams[0].Type, rowType, genericParams, genericParamMap);
         }
 
         // Build the result array in the correct order
@@ -6535,6 +6521,104 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return inferredTypes;
+    }
+
+    /// <summary>
+    /// Returns the declared type of one data row produced by a [MethodDataSource] member, unwrapping the
+    /// shapes the runtime accepts: <c>Task&lt;T&gt;</c>/<c>ValueTask&lt;T&gt;</c>, then <c>IEnumerable&lt;T&gt;</c>,
+    /// <c>IAsyncEnumerable&lt;T&gt;</c> or arrays, then <c>Func&lt;T&gt;</c> and <c>TestDataRow&lt;T&gt;</c> in either order.
+    /// Returns <see langword="null"/> when the row type cannot say anything about the test's type
+    /// arguments (<c>object</c> or <c>object[]</c> rows), since those are only known at runtime.
+    /// </summary>
+    private static ITypeSymbol? GetMethodDataSourceRowType(INamedTypeSymbol providerType, string memberName, Compilation compilation)
+    {
+        ITypeSymbol? type = null;
+        foreach (var member in providerType.GetMembers(memberName))
+        {
+            // Prefer a parameterless method; a method with parameters is fed by the attribute's Arguments
+            if (member is IMethodSymbol { IsStatic: true } method)
+            {
+                if (type == null || method.Parameters.Length == 0)
+                {
+                    type = method.ReturnType;
+                }
+            }
+            else if (member is IPropertySymbol { IsStatic: true } property && type == null)
+            {
+                type = property.Type;
+            }
+        }
+
+        if (type == null)
+        {
+            return null;
+        }
+
+        if (type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } taskType
+            && taskType.OriginalDefinition.ToDisplayString() is "System.Threading.Tasks.Task<TResult>" or "System.Threading.Tasks.ValueTask<TResult>")
+        {
+            type = taskType.TypeArguments[0];
+        }
+
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            type = arrayType.ElementType;
+        }
+        else if (type.SpecialType != SpecialType.System_String && !type.IsTupleType)
+        {
+            if (GetAsyncEnumerableElementType(type) is { } asyncElementType)
+            {
+                type = asyncElementType;
+            }
+            else if (type.IsIEnumerable(compilation, out var elementType))
+            {
+                type = elementType;
+            }
+        }
+
+        var testDataRowType = compilation.GetTypeByMetadataName("TUnit.Core.TestDataRow`1");
+        bool unwrapped;
+        do
+        {
+            unwrapped = false;
+            if (type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } wrapper
+                && (wrapper.OriginalDefinition.ToDisplayString() == "System.Func<TResult>"
+                    || (testDataRowType != null && SymbolEqualityComparer.Default.Equals(wrapper.OriginalDefinition, testDataRowType))))
+            {
+                type = wrapper.TypeArguments[0];
+                unwrapped = true;
+            }
+        }
+        while (unwrapped);
+
+        if (type.SpecialType == SpecialType.System_Object
+            || type is IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_Object })
+        {
+            return null;
+        }
+
+        return type;
+    }
+
+    private static ITypeSymbol? GetAsyncEnumerableElementType(ITypeSymbol type)
+    {
+        const string asyncEnumerable = "System.Collections.Generic.IAsyncEnumerable<T>";
+
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType
+            && namedType.OriginalDefinition.ToDisplayString() == asyncEnumerable)
+        {
+            return namedType.TypeArguments[0];
+        }
+
+        foreach (var @interface in type.AllInterfaces)
+        {
+            if (@interface.IsGenericType && @interface.OriginalDefinition.ToDisplayString() == asyncEnumerable)
+            {
+                return @interface.TypeArguments[0];
+            }
+        }
+
+        return null;
     }
 
     private static ITypeSymbol[]? InferClassTypesFromMethodDataSource(TestMethodMetadata testMethod, AttributeData mdsAttr)
