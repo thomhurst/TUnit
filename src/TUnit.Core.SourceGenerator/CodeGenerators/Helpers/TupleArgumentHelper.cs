@@ -104,7 +104,9 @@ public static class TupleArgumentHelper
             // Handle regular parameters
             if (argCountExpression != null)
             {
-                // Dynamic count
+                // Dynamic count. Every regular parameter gets an argument, so no optional is left out and
+                // the call cannot bind to a sibling overload (#7122). This arm only runs for counts past
+                // the statically generated cases, which already supply every regular parameter.
                 for (var i = 0; i < regularParamCount; i++)
                 {
                     var param = parameters[i];
