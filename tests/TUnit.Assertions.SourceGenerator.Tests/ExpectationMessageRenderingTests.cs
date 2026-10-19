@@ -26,6 +26,8 @@ internal class ExpectationMessageRenderingTests
             public static bool GeneratedField(string value, string prefix) => true;
             public static bool Quoted(string value) => true;
             public static bool Default(string value, string text) => true;
+            public static bool NotWithoutNegateLogic(string value, string text) => true;
+            public static bool ToDo(string value) => true;
         }
 
         [AssertionFrom<string>(typeof(Methods), nameof(Methods.Canonical), ExpectationMessage = "be blank")]
@@ -38,6 +40,8 @@ internal class ExpectationMessageRenderingTests
         [AssertionFrom<string>(typeof(Methods), nameof(Methods.GeneratedField), ExpectationMessage = "start with {_prefix}")]
         [AssertionFrom<string>(typeof(Methods), nameof(Methods.Quoted), ExpectationMessage = "be \"quoted\" \\ here")]
         [AssertionFrom<string>(typeof(Methods), nameof(Methods.Default))]
+        [AssertionFrom<string>(typeof(Methods), nameof(Methods.NotWithoutNegateLogic), ExpectationMessage = "not end with {text}")]
+        [AssertionFrom<string>(typeof(Methods), nameof(Methods.ToDo), ExpectationMessage = "to-do list be empty")]
         public static partial class MessageAssertions;
         """;
 
@@ -55,6 +59,8 @@ internal class ExpectationMessageRenderingTests
     [Arguments("Generated field placeholder", @"$""to {(_negated ? ""not "" : """")}start with {_prefix}""")]
     [Arguments("Quotes and backslashes are escaped", @"$""to {(_negated ? ""not "" : """")}be \""quoted\"" \\ here""")]
     [Arguments("Default message", @"$""to {(_negated ? ""not "" : """")}satisfy Default({_text})""")]
+    [Arguments("Leading 'not' is literal without NegateLogic too", @"$""to not end with {_text}""")]
+    [Arguments("Only 'to' followed by a space is stripped", @"$""to {(_negated ? ""not "" : """")}to-do list be empty""")]
     public async Task Renders_Expectation(string form, string expected)
     {
         await Assert.That(RenderedExpectations.Value).Contains(expected);
@@ -94,5 +100,33 @@ internal class ExpectationMessageRenderingTests
         await Assert.That(source).Contains("new StringOverloadsMatchesWithStringAnd1MoreAssertion(source.Context, count, false)");
         await Assert.That(source).Contains("new StringOverloadsMatchesWithStringAnd1MoreAssertion2(source.Context, flag, false)");
         await Assert.That(source).Contains("Rendering.Overloads.Matches(actualValue, _flag)");
+    }
+
+    [Test]
+    public async Task Overloads_With_Unusual_Parameter_Types_Leave_No_Unresolved_Class_Names()
+    {
+        var (sources, _) = AssertionMethodGeneratorRunner.Run(
+            """
+            using System.Collections.Generic;
+            using TUnit.Assertions.Attributes;
+
+            namespace Rendering;
+
+            public static class Overloads
+            {
+                public static bool Matches(string value, int[] values) => true;
+                public static bool Matches(string value, int? count) => true;
+                public static bool Matches(string value, Dictionary<string, List<int>> map) => true;
+                public static bool Matches(string value, ref int counter) => true;
+                public static bool Matches<T>(string value, T item) => true;
+            }
+
+            [AssertionFrom<string>(typeof(Overloads), nameof(Overloads.Matches))]
+            public static partial class OverloadAssertions;
+            """);
+
+        // Every overload shares one class name, so all but the first are numbered
+        await Assert.That(string.Join(Environment.NewLine, sources)).Contains("class StringOverloadsMatchesWithStringAnd1MoreAssertion4");
+        await Assert.That(sources.Where(source => source.Contains('\u0001') || source.Contains('\u0002'))).IsEmpty();
     }
 }
