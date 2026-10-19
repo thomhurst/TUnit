@@ -872,6 +872,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
 
                 methodConstraintViolation = DescribeMethodConstraintViolation(testMethod.MethodSymbol, methodTypeArgs, testMethod.CompilationContext.Compilation, testMethod.TypeSymbol, classTypeArgs);
+
+                // Inferred from a [MethodDataSource] member's declared type, which a value of a more derived
+                // run-time type could satisfy: explain where the type argument came from (#7116).
+                if (violationSource is null
+                    && specificAttr is { AttributeClass.Name: "MethodDataSourceAttribute" }
+                    && TryFindConstraintViolation(testMethod.MethodSymbol.TypeParameters, methodTypeArgs, testMethod.CompilationContext.Compilation,
+                        out _, out var violatingIndex, testMethod.TypeSymbol, classTypeArgs)
+                    && violatingIndex >= 0
+                    && !IsExactType(methodTypeArgs[violatingIndex]))
+                {
+                    methodConstraintViolation += DescribeDeclaredTypeInference(testMethod.MethodSymbol.TypeParameters[violatingIndex], methodTypeArgs[violatingIndex]);
+                }
             }
 
             var typeKey = BuildTypeKey(typeArguments);
@@ -1140,13 +1152,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
+        // With a method-level [GenerateGenericTest], a data source whose declared type breaks the method's
+        // constraints is not reported: its rows run on the attribute's type arguments instead, which is how
+        // a data source declared with a broad type (object, an interface or int?) supplies more specific
+        // values. Reflection mode skips such sources the same way (InferMethodInstantiationsFromDataSources
+        // in TUnit.Engine), and TUnit0001 accepts them (#7116).
+        var reportDataSourceConstraintViolations = !(testMethod.IsGenericMethod && generateGenericTestBucket is { Count: > 0 });
+
         // Process typed data source attributes
         foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
         {
             var inferredTypes = InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr);
             if (inferredTypes is { Length: > 0 })
             {
-                TryAddInstantiation(inferredTypes, dataSourceAttr, reportMethodConstraintViolation: true);
+                TryAddInstantiation(inferredTypes, dataSourceAttr, reportMethodConstraintViolation: reportDataSourceConstraintViolations);
             }
         }
 
@@ -1188,7 +1207,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var inferredTypes = InferTypesFromMethodDataSource(testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
                 {
-                    TryAddInstantiation(inferredTypes, mdsAttr, reportMethodConstraintViolation: true);
+                    TryAddInstantiation(inferredTypes, mdsAttr, reportMethodConstraintViolation: reportDataSourceConstraintViolations);
                 }
             }
         }
@@ -6721,6 +6740,39 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         _ => type.MetadataName,
     };
 
+    /// <summary>
+    /// Explains a constraint failure for a type argument that was inferred from a data source's declared
+    /// type, which a value of a more derived run-time type could satisfy (#7116). Source-generated mode
+    /// emits a call for each type argument at compile time, so it cannot follow the values' run-time
+    /// types the way reflection mode does with <c>MakeGenericMethod</c>; that would not be Native AOT
+    /// compatible. TUnit0001 reports the same case at compile time.
+    /// </summary>
+    private static string DescribeDeclaredTypeInference(ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument)
+        => $". '{typeParameter.Name}' was inferred from the declared type '{typeArgument.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}' of the data source, not from the run-time type of its values: "
+            + "source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. "
+            + "Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].";
+
+    /// <summary>
+    /// Whether every value of <paramref name="type"/> has exactly that run-time type, so a constraint it
+    /// breaks cannot be met by a value of the data source. Keep in step with <c>IsExactType</c> in
+    /// TUnit.Analyzers' <c>CompilationExtensions</c>.
+    /// </summary>
+    private static bool IsExactType(ITypeSymbol type)
+    {
+        if (type is ITypeParameterSymbol or IErrorTypeSymbol || type.TypeKind == TypeKind.Dynamic)
+        {
+            return false;
+        }
+
+        if (type.IsValueType)
+        {
+            return type.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T;
+        }
+
+        // Arrays are covariant: an object[] value may be a string[].
+        return type is INamedTypeSymbol { TypeKind: TypeKind.Class or TypeKind.Delegate, IsSealed: true };
+    }
+
     private static bool HasConstraintViolation(ImmutableArray<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments, Compilation compilation)
         => TryFindConstraintViolation(typeParams, typeArguments, compilation, out _);
 
@@ -6737,7 +6789,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// </remarks>
     private static bool TryFindConstraintViolation(ImmutableArray<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments, Compilation compilation, out string? message,
         INamedTypeSymbol? outerType = null, ITypeSymbol[]? outerTypeArguments = null)
+        => TryFindConstraintViolation(typeParams, typeArguments, compilation, out message, out _, outerType, outerTypeArguments);
+
+    /// <inheritdoc cref="TryFindConstraintViolation(ImmutableArray{ITypeParameterSymbol}, ITypeSymbol[], Compilation, out string?, INamedTypeSymbol?, ITypeSymbol[])"/>
+    /// <param name="violatingIndex">The index of the type argument that breaks a constraint.</param>
+    private static bool TryFindConstraintViolation(ImmutableArray<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments, Compilation compilation, out string? message,
+        out int violatingIndex, INamedTypeSymbol? outerType = null, ITypeSymbol[]? outerTypeArguments = null)
     {
+        violatingIndex = -1;
         var substitutionParams = typeParams;
         var substitutionArguments = typeArguments;
         if (outerType is { TypeParameters.Length: > 0 } && outerTypeArguments is { } outerArguments
@@ -6757,12 +6816,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 && (!typeArg.IsValueType || typeArg.IsReferenceType || typeArg.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T))
             {
                 message = $"Type '{GetRuntimeTypeName(typeArg)}' does not satisfy the 'struct' constraint for generic parameter '{typeParam.Name}'";
+                violatingIndex = i;
                 return true;
             }
 
             if (typeParam.HasReferenceTypeConstraint && !typeArg.IsReferenceType)
             {
                 message = $"Type '{GetRuntimeTypeName(typeArg)}' does not satisfy the 'class' constraint for generic parameter '{typeParam.Name}'";
+                violatingIndex = i;
                 return true;
             }
 
@@ -6775,6 +6836,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     && !SatisfiesTypeConstraint(typeArg, substitutedConstraint, compilation))
                 {
                     message = $"Type '{GetRuntimeTypeName(typeArg)}' does not satisfy the base type constraint '{GetRuntimeTypeName(substitutedConstraint)}' for generic parameter '{typeParam.Name}'";
+                    violatingIndex = i;
                     return true;
                 }
             }
@@ -6786,6 +6848,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     && !SatisfiesTypeConstraint(typeArg, substitutedConstraint, compilation))
                 {
                     message = $"Type '{GetRuntimeTypeName(typeArg)}' does not implement interface '{GetRuntimeTypeName(substitutedConstraint)}' required for generic parameter '{typeParam.Name}'";
+                    violatingIndex = i;
                     return true;
                 }
             }
@@ -6796,6 +6859,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (typeParams[i].HasConstructorConstraint && !SatisfiesConstructorConstraint(typeArguments[i]))
             {
                 message = null;
+                violatingIndex = i;
                 return true;
             }
         }

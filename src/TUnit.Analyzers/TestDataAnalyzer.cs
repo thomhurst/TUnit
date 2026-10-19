@@ -15,6 +15,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(
             Rules.WrongArgumentTypeTestData,
+            Rules.GenericTypeArgumentInferredFromDeclaredType,
             Rules.NoTestDataProvided,
             Rules.MethodParameterBadNullability,
             Rules.MethodMustBeParameterless,
@@ -624,6 +625,23 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (!conversions.All(x => x))
             {
+                // A broad declared type (object, an interface, int?) that a run-time value could still satisfy:
+                // explain that source-generated mode infers the type argument from the declared type (#7116).
+                var declaredTypeMismatch = unwrappedTypes.ZipAll(testParameterTypes, (argument, parameter) => (argument, parameter))
+                    .FirstOrDefault(pair => CompilationExtensions.IsBroadDeclaredTypeArgument(pair.argument, pair.parameter)
+                        && !context.Compilation.CanBindToTestParameter(pair.argument, pair.parameter, inferredTypeArguments));
+
+                if (declaredTypeMismatch.parameter is not null)
+                {
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(
+                            Rules.GenericTypeArgumentInferredFromDeclaredType,
+                            attribute.GetLocation(),
+                            declaredTypeMismatch.parameter.Name,
+                            declaredTypeMismatch.argument!.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+                    return;
+                }
+
                 context.ReportDiagnostic(
                     Diagnostic.Create(
                         Rules.WrongArgumentTypeTestData,
