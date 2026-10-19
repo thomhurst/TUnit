@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using TUnit.Core;
+using TUnit.Core.Logging;
 using TUnit.Core.Settings;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -181,6 +182,16 @@ public sealed class TestRunner
                 acquiredLimiter?.Release();
             }
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The run was stopped (fail-fast, timeout or abort) while the test waited for a lock or
+            // slot, so it never started. That is not a test failure: the scheduler reports every
+            // test left unstarted once the run winds down (#7119).
+            if (_logger.IsDebugEnabled)
+            {
+                await _logger.LogDebugAsync($"Test {test.TestId} was not started because the test run was cancelled.").ConfigureAwait(false);
+            }
+        }
         catch (Exception ex)
         {
             // TestCoordinator already handles marking as failed and sending Failed message
@@ -205,4 +216,9 @@ public sealed class TestRunner
     /// Gets the first exception that triggered fail-fast cancellation.
     /// </summary>
     public Exception? GetFirstFailFastException() => _firstFailFastException;
+
+    /// <summary>
+    /// Whether a failure has triggered fail-fast cancellation in this session.
+    /// </summary>
+    internal bool IsFailFastTriggered => _failFastCancellationSource.IsCancellationRequested;
 }

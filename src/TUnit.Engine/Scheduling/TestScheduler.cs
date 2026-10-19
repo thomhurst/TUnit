@@ -29,6 +29,10 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly NotInParallelLock _notInParallelLock;
     private readonly MaxParallelismLimiter _maxParallelismLimiter;
 
+    // Dynamic tests the queue processor has scheduled, so a cancelled run can report the ones
+    // that never started. Null until the first dynamic test arrives.
+    private List<AbstractExecutableTest>? _dynamicTests;
+
     public TestScheduler(
         TUnitFrameworkLogger logger,
         ITestGroupingService groupingService,
@@ -123,6 +127,13 @@ internal sealed class TestScheduler : ITestScheduler
         }
         finally
         {
+            // Before the session hooks, so every selected test has a result by the time the
+            // session ends.
+            if (cancellationToken.IsCancellationRequested)
+            {
+                await ReportTestsNotStartedAsync(executableTests).ConfigureAwait(false);
+            }
+
             // Also on the fail-fast path, where cancelled tests make the phases throw: the
             // cancellation callback only starts the session hooks, so await them (and the
             // static property disposal that follows them) here, before the caller disposes
@@ -131,6 +142,72 @@ internal sealed class TestScheduler : ITestScheduler
         }
 
         return sessionHooksSucceeded;
+    }
+
+    // A cancelled run (fail-fast, timeout or abort) stops tests before they start: the scheduler
+    // stops handing out slots and the global [NotInParallel] phase never runs. Without a result
+    // those tests would vanish from the run's totals, so give each one a result now (#7119). Tests
+    // that started report their own result, so only those still waiting are reported here.
+    private async ValueTask ReportTestsNotStartedAsync(List<AbstractExecutableTest> executableTests)
+    {
+        // Fail-fast is the user's request to stop after a failure, so its unstarted tests are
+        // skipped; any other cancellation aborted the run, so those tests are cancelled.
+        var skipReason = _testRunner.IsFailFastTriggered
+            ? "Test was not run because --fail-fast stopped the test run after a failure"
+            : null;
+
+        try
+        {
+            foreach (var test in executableTests)
+            {
+                await ReportIfNotStartedAsync(test, skipReason).ConfigureAwait(false);
+            }
+
+            if (_dynamicTests is { } dynamicTests)
+            {
+                foreach (var test in dynamicTests)
+                {
+                    await ReportIfNotStartedAsync(test, skipReason).ConfigureAwait(false);
+                }
+            }
+
+            // Dynamic tests still queued when the processor stopped on the cancelled token.
+            while (_dynamicTestQueue.TryDequeue(out var test))
+            {
+                if (test != null)
+                {
+                    await ReportIfNotStartedAsync(test, skipReason).ConfigureAwait(false);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Best effort: the platform can stop accepting messages once its own token is
+            // cancelled, and that must not replace the run's outcome.
+            await _logger.LogDebugAsync($"Could not report tests that were not started: {ex}").ConfigureAwait(false);
+        }
+    }
+
+    private async ValueTask ReportIfNotStartedAsync(AbstractExecutableTest test, string? skipReason)
+    {
+        if (test.State is not (TestState.NotStarted or TestState.WaitingForDependencies or TestState.Queued))
+        {
+            return;
+        }
+
+        if (skipReason is not null)
+        {
+            _testStateManager.MarkSkipped(test, skipReason);
+            await _messageBus.Skipped(test.Context, skipReason).ConfigureAwait(false);
+            return;
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        test.StartTime ??= now;
+        test.EndTime = now;
+        test.SetResult(TestState.Cancelled);
+        TestSessionContext.Current?.MarkFailure();
+        await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
     }
 
     private async Task<bool> RunAfterTestSessionAsync(CancellationToken cancellationToken)
@@ -282,7 +359,7 @@ internal sealed class TestScheduler : ITestScheduler
             keyedPhase = _constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(groupedTests.KeyedNotInParallel, cancellationToken).AsTask();
         }
 
-        await RunPhasesConcurrentlyAsync(parallelPhase, keyedPhase, cancellationToken).ConfigureAwait(false);
+        await RunPhasesConcurrentlyAsync(parallelPhase, keyedPhase).ConfigureAwait(false);
 
         // Each ParallelGroup runs to completion before the next — tests are bucketed
         // into a group precisely because they must not overlap with tests in another group.
@@ -317,7 +394,7 @@ internal sealed class TestScheduler : ITestScheduler
             var groupKeyedPhase = constrainedTests.KeyedTests.Length > 0
                 ? _constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(constrainedTests.KeyedTests, cancellationToken).AsTask()
                 : null;
-            await RunPhasesConcurrentlyAsync(unconstrainedPhase, groupKeyedPhase, cancellationToken).ConfigureAwait(false);
+            await RunPhasesConcurrentlyAsync(unconstrainedPhase, groupKeyedPhase).ConfigureAwait(false);
         }
 
         if (groupedTests.NotInParallel.Length > 0)
@@ -350,6 +427,8 @@ internal sealed class TestScheduler : ITestScheduler
             // Execute the batch of dynamic tests if any were found
             if (dynamicTests.Count > 0)
             {
+                TrackDynamicTests(dynamicTests);
+
                 if (_logger.IsTraceEnabled)
                     await _logger.LogTraceAsync($"Executing {dynamicTests.Count} dynamic test(s)").ConfigureAwait(false);
 
@@ -376,11 +455,20 @@ internal sealed class TestScheduler : ITestScheduler
 
         if (dynamicTests.Count > 0)
         {
+            TrackDynamicTests(dynamicTests);
+
             if (_logger.IsTraceEnabled)
                 await _logger.LogTraceAsync($"Executing {dynamicTests.Count} remaining dynamic test(s)").ConfigureAwait(false);
 
             await ExecuteDynamicBatchAsync(dynamicTests, cancellationToken).ConfigureAwait(false);
         }
+    }
+
+    // Only the queue processor writes this, and the cancelled-run report reads it after the
+    // processor has finished, so it needs no locking.
+    private void TrackDynamicTests(List<AbstractExecutableTest> dynamicTests)
+    {
+        (_dynamicTests ??= []).AddRange(dynamicTests);
     }
 
     // Ends the wait loop instead of faulting when the token is cancelled. The phases can finish
@@ -500,6 +588,9 @@ internal sealed class TestScheduler : ITestScheduler
     {
         foreach (var test in tests)
         {
+            // Stop on a cancelled run instead of walking every remaining test into a cancelled
+            // lock wait. The tests left behind are reported once the run winds down.
+            cancellationToken.ThrowIfCancellationRequested();
             await ExecuteScheduledTestAsync(test, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -576,37 +667,15 @@ internal sealed class TestScheduler : ITestScheduler
         await test.ExecutionTask.ConfigureAwait(false);
     }
 
-    // The cancellation token is forwarded only so WaitForTasksWithFailFastHandling can
-    // distinguish a fail-fast cancellation from a normal task fault when both phases run.
-    // Tasks `a` and `b` are already started and carry their own token internally, so the
-    // single-phase short-circuits do not need to inspect it.
-    private Task RunPhasesConcurrentlyAsync(Task? a, Task? b, CancellationToken cancellationToken)
+    // The phases are already started and carry the token themselves. When fail-fast stops them,
+    // the cancellation propagates as-is: the failing test already has its own result, and
+    // re-throwing its exception here made the framework report it a second time as an
+    // "Unhandled exception" node (#7119).
+    private static Task RunPhasesConcurrentlyAsync(Task? a, Task? b)
     {
         if (a is null) return b ?? Task.CompletedTask;
         if (b is null) return a;
-        return WaitForTasksWithFailFastHandling([a, b], cancellationToken);
-    }
-
-    private async Task WaitForTasksWithFailFastHandling(IEnumerable<Task> tasks, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-        }
-        catch (Exception)
-        {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                var firstFailure = _testRunner.GetFirstFailFastException();
-
-                if (firstFailure != null)
-                {
-                    throw firstFailure;
-                }
-            }
-
-            throw;
-        }
+        return Task.WhenAll(a, b);
     }
 
     internal static int GetMaxParallelism(ILogger logger, ICommandLineOptions commandLineOptions)
