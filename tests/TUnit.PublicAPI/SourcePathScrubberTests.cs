@@ -38,6 +38,17 @@ public class SourcePathScrubberTests
     }
 
     [Test]
+    public async Task Scrubs_Wrapped_Windows_Caller_File_Path_With_Forward_Slashes()
+    {
+        var text = "[.After(., \"C:/Users/dev/source/repos/TUnit/TUnit.OpenTelemetry/\" +\r\n" +
+                   "            \"AutoStart/TUnitOpenTelemetryAutoStart.cs\", 61)]";
+
+        var scrubbed = Tests.ScrubSourcePaths(text);
+
+        await Assert.That(scrubbed).IsEqualTo("[.After(., \"PATH_SCRUBBED\", 61)]");
+    }
+
+    [Test]
     [Arguments("public const string Prefix = \"/v1\";")]
     [Arguments("[Route(\"/v1\", 2)]")]
     [Arguments("public const string Template = \"/api/File.cs\";")]
