@@ -54,6 +54,8 @@ internal static class TestHostReferences
                 .Where(assembly => !assembly.IsDynamic && !string.IsNullOrWhiteSpace(assembly.Location))
                 .Select(assembly => assembly.Location);
 
+        // Ordinal on purpose: reference order shows up in generator output, so a culture-aware sort, or no sort, would
+        // reorder snapshots between hosts. A snapshot that reorders after a change here is this sort, not the generator.
         return paths
             .OrderBy(Path.GetFileName, StringComparer.Ordinal)
             .ThenBy(path => path, StringComparer.Ordinal)
