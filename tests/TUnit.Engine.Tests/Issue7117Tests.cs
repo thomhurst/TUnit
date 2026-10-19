@@ -14,6 +14,8 @@ public class Issue7117Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("MethodGenerateGenericTestWithClassRows", new[] { "Run<bool>", "Run<bool>" })]
     [Arguments("ClassGenerateGenericTestWithMethodRow", new[] { "Run<int>(1)" })]
     [Arguments("MethodGenerateGenericTestTypeNotInferredByRow", new[] { "Run<int>(2)", "Run<long>(2)" })]
+    [Arguments("MethodDataSourceOnClassRow", new[] { "Run<string>(a, 1)" })]
+    [Arguments("MethodDataSourceOnClassGenerateGenericTest", new[] { "Run<string>(a, 1)" })]
     public async Task Generic_Method_Of_Generic_Class_Runs_Each_Instantiation(string className, string[] expectedTestNames)
     {
         await RunTestsWithFilter(

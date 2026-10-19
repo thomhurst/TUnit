@@ -1015,6 +1015,30 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 methodRow: methodAttr);
         }
 
+        // A class row paired with method type arguments that no single method data source inferred:
+        // a method [GenerateGenericTest] type (methodSource) or IInfersType<T> (null). The class row
+        // scopes the entry to itself, and every method data source runs on it, as on a non-generic
+        // class (#7117).
+        void TryAddClassRowInstantiationWithEveryMethodSource(ITypeSymbol[] classTypes, ITypeSymbol[] combinedTypes, AttributeData classAttr, AttributeData? methodSource, List<AttributeData>? methodDataSources)
+        {
+            var countBefore = results.Count;
+            TryAddInstantiation(combinedTypes, classAttr,
+                reportMethodConstraintViolation: true,
+                reportClassViolationAs: ClassViolationSource.ClassArguments,
+                violationSource: methodSource is not null && ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes, compilation) ? methodSource : classAttr,
+                isClassRow: true);
+
+            if (results.Count > countBefore
+                && results[results.Count - 1] is { MethodConstraintViolations: null } added
+                && methodDataSources is not null)
+            {
+                foreach (var dataSource in methodDataSources)
+                {
+                    added.AddRow(dataSource, isClassRow: false);
+                }
+            }
+        }
+
         // Single-pass classification of method attributes into named buckets, replacing the
         // repeated `.Where(...).ToArray()` scans that previously walked MethodAttributes 6-8 times.
         List<AttributeData>? methodArgumentsBucket = null;
@@ -1250,23 +1274,49 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (testMethod is { IsGenericType: true, IsGenericMethod: true })
             {
                 // A generic method of a generic class pairs every class source with every method
-                // source (#7117), as reflection mode closes the method on each concrete class. Class
-                // rows paired with method rows were added above. Rows come before [GenerateGenericTest]
-                // types, so a type that a row infers runs only that row, while any other type runs
-                // every method data source.
+                // source (#7117), as reflection mode closes the method on each concrete class. Method
+                // data sources come first, in reflection mode's order, so a type that one of them
+                // infers runs only that source. Any other [GenerateGenericTest] type runs every method
+                // data source. A null source (IInfersType<T>) also runs every method data source.
+                var methodSources = new List<(ITypeSymbol[] Types, AttributeData? Source)>();
+                foreach (var methodArgAttr in methodArgumentsAttributes)
+                {
+                    if (InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodArgAttr, compilation) is { } types && types.Length == methodTypeArgCount)
+                    {
+                        methodSources.Add((types, methodArgAttr));
+                    }
+                }
+
+                foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+                {
+                    if (InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr) is { } types && types.Length == methodTypeArgCount)
+                    {
+                        methodSources.Add((types, dataSourceAttr));
+                    }
+                }
+
+                if (InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol) is { } inferringTypes && inferringTypes.Length == methodTypeArgCount)
+                {
+                    methodSources.Add((inferringTypes, null));
+                }
+
+                foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+                {
+                    if (InferTypesFromMethodDataSource(testMethod, mdsAttr) is { } types && types.Length == methodTypeArgCount)
+                    {
+                        methodSources.Add((types, mdsAttr));
+                    }
+                }
+
                 foreach (var classGenericTest in classGenericTestAttrs)
                 {
                     var classIsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, classGenericTest.TypeArgs!, compilation);
-                    foreach (var methodArgAttr in methodArgumentsAttributes)
+                    foreach (var (methodTypes, source) in methodSources)
                     {
-                        var methodTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodArgAttr, compilation);
-                        if (methodTypes is { Length: > 0 })
-                        {
-                            TryAddInstantiation(classGenericTest.TypeArgs!.Concat(methodTypes).ToArray(), methodArgAttr,
-                                reportMethodConstraintViolation: true,
-                                reportClassViolationAs: ClassViolationSource.GenerateGenericTest,
-                                violationSource: classIsValid ? null : classGenericTest.Attribute);
-                        }
+                        TryAddInstantiation(classGenericTest.TypeArgs!.Concat(methodTypes).ToArray(), source,
+                            reportMethodConstraintViolation: true,
+                            reportClassViolationAs: ClassViolationSource.GenerateGenericTest,
+                            violationSource: classIsValid ? null : classGenericTest.Attribute);
                     }
                 }
 
@@ -1278,27 +1328,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         continue;
                     }
 
-                    var classIsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes, compilation);
+                    // Method rows were already paired with this class row above; they join their entries.
+                    foreach (var (methodTypes, source) in methodSources)
+                    {
+                        if (source is not null)
+                        {
+                            TryAddCombinedArgumentsInstantiation(classTypes, classTypes.Concat(methodTypes).ToArray(), classAttr, source);
+                        }
+                        else
+                        {
+                            TryAddClassRowInstantiationWithEveryMethodSource(classTypes, classTypes.Concat(methodTypes).ToArray(), classAttr, methodSource: null, typedDataSourceBucket);
+                        }
+                    }
+
                     foreach (var methodGenericTest in methodGenericTestAttrs)
                     {
-                        var countBefore = results.Count;
-                        TryAddInstantiation(classTypes.Concat(methodGenericTest.TypeArgs!).ToArray(), classAttr,
-                            reportMethodConstraintViolation: true,
-                            reportClassViolationAs: ClassViolationSource.ClassArguments,
-                            violationSource: classIsValid ? methodGenericTest.Attribute : classAttr,
-                            isClassRow: true);
-
-                        // The class row scopes the entry to itself; the [GenerateGenericTest] type runs
-                        // every method data source, as it does on a non-generic class.
-                        if (results.Count > countBefore
-                            && results[results.Count - 1] is { MethodConstraintViolations: null } added
-                            && typedDataSourceBucket is not null)
-                        {
-                            foreach (var dataSource in typedDataSourceBucket)
-                            {
-                                added.AddRow(dataSource, isClassRow: false);
-                            }
-                        }
+                        TryAddClassRowInstantiationWithEveryMethodSource(classTypes, classTypes.Concat(methodGenericTest.TypeArgs!).ToArray(), classAttr, methodGenericTest.Attribute, typedDataSourceBucket);
                     }
                 }
 

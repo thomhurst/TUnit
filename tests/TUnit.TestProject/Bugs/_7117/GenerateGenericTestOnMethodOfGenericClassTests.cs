@@ -70,3 +70,46 @@ public class MethodGenerateGenericTestTypeNotInferredByRow<T>(T value)
         await Assert.That(Convert.ToInt64(arg)).IsEqualTo(2L);
     }
 }
+
+// A method data source that infers the method's type argument runs on each class a class row closes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+public class MethodDataSourceOnClassRow<T>(T value)
+{
+    public static IEnumerable<Func<(string, int)>> Rows()
+    {
+        yield return () => ("a", 1);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task Run<TMethod>(TMethod arg, int count)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)1);
+        await Assert.That(count).IsEqualTo(1);
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(string));
+        await Assert.That(arg).IsEqualTo((TMethod)(object)"a");
+    }
+}
+
+// The same, on each class a class-level [GenerateGenericTest] closes.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(long))]
+public class MethodDataSourceOnClassGenerateGenericTest<T>
+{
+    public static IEnumerable<Func<(string, int)>> Rows()
+    {
+        yield return () => ("a", 1);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task Run<TMethod>(TMethod arg, int count)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(long));
+        await Assert.That(count).IsEqualTo(1);
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(string));
+        await Assert.That(arg).IsEqualTo((TMethod)(object)"a");
+    }
+}
