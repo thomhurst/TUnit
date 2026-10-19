@@ -43,7 +43,7 @@ public class TimeZoneInfoSupportsDaylightSavingTimeAssertion : Assertion<System.
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}support daylight saving time";
+        return $"{(_negated ? "not " : "")} support daylight saving time";
     }
 }
 

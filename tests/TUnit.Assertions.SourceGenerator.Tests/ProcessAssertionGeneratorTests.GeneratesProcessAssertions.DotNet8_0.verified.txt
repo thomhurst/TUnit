@@ -43,7 +43,7 @@ public class ProcessHasExitedAssertion : Assertion<System.Diagnostics.Process>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}have exited";
+        return $"{(_negated ? "not " : "")} have exited";
     }
 }
 
@@ -79,7 +79,7 @@ public class ProcessRespondingAssertion : Assertion<System.Diagnostics.Process>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be responding";
+        return $"{(_negated ? "not " : "")} be responding";
     }
 }
 
@@ -115,7 +115,7 @@ public class ProcessEnableRaisingEventsAssertion : Assertion<System.Diagnostics.
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}have event raising enabled";
+        return $"{(_negated ? "not " : "")} have event raising enabled";
     }
 }
 

@@ -43,7 +43,7 @@ public class ThreadIsAliveAssertion : Assertion<System.Threading.Thread>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be alive";
+        return $"{(_negated ? "not " : "")} be alive";
     }
 }
 
@@ -79,7 +79,7 @@ public class ThreadIsBackgroundAssertion : Assertion<System.Threading.Thread>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a background thread";
+        return $"{(_negated ? "not " : "")} be a background thread";
     }
 }
 
@@ -115,7 +115,7 @@ public class ThreadIsThreadPoolThreadAssertion : Assertion<System.Threading.Thre
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a thread pool thread";
+        return $"{(_negated ? "not " : "")} be a thread pool thread";
     }
 }
 

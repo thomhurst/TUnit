@@ -43,7 +43,7 @@ public class UriIsAbsoluteUriAssertion : Assertion<System.Uri>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be an absolute URI";
+        return $"{(_negated ? "not " : "")} be an absolute URI";
     }
 }
 
@@ -79,7 +79,7 @@ public class UriIsFileAssertion : Assertion<System.Uri>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a file URI";
+        return $"{(_negated ? "not " : "")} be a file URI";
     }
 }
 
@@ -115,7 +115,7 @@ public class UriIsUncAssertion : Assertion<System.Uri>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a UNC URI";
+        return $"{(_negated ? "not " : "")} be a UNC URI";
     }
 }
 
@@ -151,7 +151,7 @@ public class UriIsLoopbackAssertion : Assertion<System.Uri>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a loopback URI";
+        return $"{(_negated ? "not " : "")} be a loopback URI";
     }
 }
 
@@ -187,7 +187,7 @@ public class UriIsDefaultPortAssertion : Assertion<System.Uri>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}use the default port";
+        return $"{(_negated ? "not " : "")} use the default port";
     }
 }
 
@@ -223,7 +223,7 @@ public class UriUserEscapedAssertion : Assertion<System.Uri>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be user-escaped";
+        return $"{(_negated ? "not " : "")} be user-escaped";
     }
 }
 
