@@ -19,6 +19,14 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     public const string NonGenericAssertionFromStep = "NonGenericAssertionFrom";
     public const string GenericAssertionFromStep = "GenericAssertionFrom";
 
+    private static readonly DiagnosticDescriptor MethodNotFound = new(
+        "TU0001",
+        "Method not found",
+        "{0}",
+        "TUnit.Assertions",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Both transforms render the generated snippets eagerly and return string-only models,
@@ -50,6 +58,27 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             .Combine(genericAssertionFromData.Collect());
 
         context.RegisterSourceOutput(allAttributeData, static (ctx, data) => GenerateAssertionsForClass(ctx, data.Left, data.Right));
+
+        RegisterMissingMethodDiagnostics(context, nonGenericAssertionFromData);
+        RegisterMissingMethodDiagnostics(context, genericAssertionFromData);
+    }
+
+    /// <summary>
+    /// Reports each TU0001 in the current compilation's syntax tree so that #pragma and per-file .editorconfig
+    /// severities still apply; a path-only location has no SourceTree to read them from. Pairing each diagnostic
+    /// (not the collected array) with the compilation means this output only re-runs while there are diagnostics,
+    /// and the source output above stays independent of the compilation.
+    /// </summary>
+    private static void RegisterMissingMethodDiagnostics(
+        IncrementalGeneratorInitializationContext context,
+        IncrementalValuesProvider<AssertionClassModel> models)
+    {
+        var diagnostics = models.SelectMany(static (model, _) => model.Entries
+            .Where(static entry => entry.MissingMethodDiagnostic is not null)
+            .Select(static entry => entry.MissingMethodDiagnostic!));
+
+        context.RegisterSourceOutput(diagnostics.Combine(context.CompilationProvider), static (ctx, data) =>
+            ctx.ReportDiagnostic(data.Left.ToDiagnostic(data.Right)));
     }
 
     private static AssertionClassModel? GetCreateAssertionAttributeData(GeneratorAttributeSyntaxContext context)
@@ -446,19 +475,6 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         var extensionMethodSources = new List<string>(entries.Length);
         foreach (var entry in entries)
         {
-            if (entry.MissingMethodMessage is not null)
-            {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    new DiagnosticDescriptor(
-                        "TU0001",
-                        "Method not found",
-                        entry.MissingMethodMessage,
-                        "TUnit.Assertions",
-                        DiagnosticSeverity.Error,
-                        true),
-                    AttributeLocationModel.ToLocation(entry.AttributeLocation)));
-            }
-
             var extensionMethodsSource = entry.ExtensionMethodsSource;
             foreach (var conditionClass in entry.ConditionClasses)
             {
@@ -500,12 +516,19 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
         // Only keep the location when there is something to report: it changes with every edit above the attribute,
         // and would otherwise stop unrelated edits from being cached
-        var attributeLocation = missingMethodMessage is not null
-            ? AttributeLocationModel.From(attributeData.AttributeSyntax)
+        var missingMethodDiagnostic = missingMethodMessage is not null
+            ? DiagnosticInfo.Create(MethodNotFound, GetLocation(attributeData.AttributeSyntax), missingMethodMessage)
             : null;
 
-        return new AssertionEntryModel(conditionClasses, missingMethodMessage, extensionMethodsSource, attributeLocation);
+        return new AssertionEntryModel(conditionClasses, extensionMethodsSource, missingMethodDiagnostic);
     }
+
+    /// <remarks>
+    /// Takes the <see cref="SyntaxReference"/> rather than a <see cref="Location"/> so the location is only
+    /// computed for the attributes that report a diagnostic, not for every attribute on every pass.
+    /// </remarks>
+    private static Location GetLocation(SyntaxReference? syntax) =>
+        syntax is null ? Location.None : Location.Create(syntax.SyntaxTree, syntax.Span);
 
     private static ImmutableEquatableArray<ConditionClassModel> RenderConditionClasses(CreateAssertionAttributeData attributeData, out string? missingMethodMessage)
     {
@@ -1438,7 +1461,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
     /// <summary>
     /// Pre-rendered output for one [AssertionFrom] attribute: its assertion condition classes,
-    /// the "method not found" message when nothing matched, and its extension methods.
+    /// its extension methods, and the "method not found" diagnostic when nothing matched.
     /// </summary>
     /// <remarks>
     /// Rendering in the transform is deliberate: the emission code is bound to symbols, and
@@ -1447,37 +1470,9 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     /// </remarks>
     private sealed record AssertionEntryModel(
         ImmutableEquatableArray<ConditionClassModel> ConditionClasses,
-        string? MissingMethodMessage,
         string ExtensionMethodsSource,
-        AttributeLocationModel? AttributeLocation
+        DiagnosticInfo? MissingMethodDiagnostic
     );
-
-    /// <summary>
-    /// Equatable stand-in for the [AssertionFrom] attribute's <see cref="Location"/>, which references its
-    /// <see cref="SyntaxTree"/> and would keep old compilations alive in the incremental cache.
-    /// </summary>
-    private sealed record AttributeLocationModel(string FilePath, TextSpan Span, LinePositionSpan LineSpan)
-    {
-        /// <remarks>
-        /// Takes the <see cref="SyntaxReference"/> rather than a <see cref="Location"/> so the location is only
-        /// computed for the attributes that report a diagnostic, not for every attribute on every pass.
-        /// </remarks>
-        public static AttributeLocationModel? From(SyntaxReference? syntax)
-        {
-            if (syntax is null)
-            {
-                return null;
-            }
-
-            var location = Location.Create(syntax.SyntaxTree, syntax.Span);
-            return location.GetLineSpan() is { Path: { Length: > 0 } path } lineSpan
-                ? new AttributeLocationModel(path, location.SourceSpan, lineSpan.Span)
-                : null;
-        }
-
-        public static Location ToLocation(AttributeLocationModel? model) =>
-            model is null ? Location.None : Location.Create(model.FilePath, model.Span, model.LineSpan);
-    }
 
     /// <param name="ClassName">The name the class is generated under, unless it is taken by a different class.</param>
     /// <param name="Reference">How <paramref name="Source"/> and the extension methods refer to the class.</param>
@@ -1491,6 +1486,10 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     /// <summary>
     /// Symbol-based attribute data. Only used inside the transform; never flows through the pipeline.
     /// </summary>
+    /// <remarks>
+    /// <see cref="AttributeSyntax"/> roots its compilation's syntax tree, so this record must never cross an
+    /// incremental cache boundary; only the string models rendered from it may.
+    /// </remarks>
     private record CreateAssertionAttributeData(
         INamedTypeSymbol TargetType,
         INamedTypeSymbol ContainingType,
