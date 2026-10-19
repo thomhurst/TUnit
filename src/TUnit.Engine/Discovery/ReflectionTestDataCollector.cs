@@ -2085,23 +2085,23 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Infers generic type mappings from parameter and argument types
     /// </summary>
-    private static void InferGenericTypeMapping(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType, Dictionary<Type, Type> typeMapping)
+    private static void InferGenericTypeMapping(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType, Dictionary<Type, Type> typeMapping, bool isTopLevel = false)
     {
         // Direct generic parameter
         if (paramType.IsGenericParameter)
         {
-            // Check if we already have a mapping for this parameter
-            if (typeMapping.TryGetValue(paramType, out var existingType))
+            if (isTopLevel)
             {
-                // If the existing type is more specific (derived from current), keep it
-                if (existingType.IsAssignableFrom(argType))
-                {
-                    typeMapping[paramType] = argType;
-                }
-                // Otherwise keep the more general type
+                // A repeated type parameter takes the type of its last non-null declared argument,
+                // which is what TestGenericTypeResolver and source-generated mode infer. Keeping
+                // the first (or most specific) type here made the invoker use a different type
+                // argument from the one the test was named with.
+                typeMapping[paramType] = argType;
             }
-            else
+            else if (!typeMapping.TryGetValue(paramType, out var existingType) || existingType.IsAssignableFrom(argType))
             {
+                // Nested inference (e.g. the element type of a params T[]) must not replace a more
+                // specific type already inferred from a leading T argument.
                 typeMapping[paramType] = argType;
             }
             return;
@@ -2324,7 +2324,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         {
                             var paramType = methodParams[j].ParameterType;
                             var argType = arg.GetType();
-                            InferGenericTypeMapping(paramType, argType, typeMapping);
+                            InferGenericTypeMapping(paramType, argType, typeMapping, isTopLevel: true);
                         }
                     }
 
