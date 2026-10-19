@@ -417,6 +417,9 @@ internal sealed class TestGenericTypeResolver
 
         var hasGenericParamsArray = HasGenericParamsArray(methodMetadata, parameterTypes, lastDataParameterIndex);
 
+        // Method type parameters that only received null values, if any
+        List<Type>? nullArgumentParameters = null;
+
         // Map parameter types to argument types; parameterIndex skips CancellationToken parameters
         var parameterIndex = 0;
         for (var i = 0; i < Math.Min(dataParameterCount, methodArguments.Length); i++, parameterIndex++)
@@ -462,8 +465,26 @@ internal sealed class TestGenericTypeResolver
                     InferTypeMapping(paramType, argType, typeMapping, genericMethodInfo.ParameterPositions);
                 }
             }
+            else if (paramType is { IsGenericParameter: true, DeclaringMethod: not null })
+            {
+                (nullArgumentParameters ??= []).Add(paramType);
+            }
         }
-        
+
+        // A null value passed straight to a method type parameter infers object, as in the source
+        // generator and the reflection invoker ([Arguments(null)] runs as Test<object>(null), #7120).
+        // A non-null value for the same type parameter takes precedence, as the invoker's does.
+        if (nullArgumentParameters is not null)
+        {
+            foreach (var nullArgumentParameter in nullArgumentParameters)
+            {
+                if (!typeMapping.ContainsKey(nullArgumentParameter))
+                {
+                    typeMapping[nullArgumentParameter] = typeof(object);
+                }
+            }
+        }
+
         // Create resolved types array
         var resolvedTypesFromMapping = new Type[genericMethodInfo.ParameterNames.Length];
         for (var i = 0; i < genericMethodInfo.ParameterNames.Length; i++)
