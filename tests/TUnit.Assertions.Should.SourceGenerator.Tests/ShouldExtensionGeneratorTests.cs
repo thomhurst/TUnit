@@ -472,16 +472,10 @@ public class ShouldExtensionGeneratorTests
         return combined;
     }
 
-    private static IEnumerable<MetadataReference> GetReferences()
-    {
-        foreach (var path in TestHostReferences.AssemblyPaths)
-        {
-            yield return MetadataReference.CreateFromFile(path);
-        }
-
-        yield return MetadataReference.CreateFromFile(typeof(Assertion<>).Assembly.Location);
-        yield return MetadataReference.CreateFromFile(typeof(TUnit.Assertions.Should.Core.IShouldSource).Assembly.Location);
-    }
+    private static IEnumerable<MetadataReference> GetReferences() =>
+        TestHostReferences.CreateReferences(
+            typeof(Assertion<>).Assembly,
+            typeof(TUnit.Assertions.Should.Core.IShouldSource).Assembly);
 
     private static int CountOccurrences(string value, string search)
     {

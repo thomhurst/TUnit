@@ -79,6 +79,12 @@ public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute, ITestR
     public bool DeferEnumeration { get => false; set { } }
 
     /// <summary>
+    /// True for <c>[Arguments(null)]</c>, which passes a null <c>params</c> array rather than one null
+    /// element. Generic type inference treats it as inferring no type, as the source generator does.
+    /// </summary>
+    internal bool IsNullValuesArray { get; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ArgumentsAttribute"/> class with the specified test argument values.
     /// </summary>
     /// <param name="values">The argument values to pass to the test method. Pass <c>null</c> for a single null argument.</param>
@@ -87,6 +93,7 @@ public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute, ITestR
         if (values == null)
         {
             Values = [null];
+            IsNullValuesArray = true;
         }
         else if (values.Length == 0)
         {

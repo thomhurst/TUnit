@@ -40,14 +40,9 @@ public abstract class SnapshotTestBase
         }
 
         var mocksFileName = Path.GetFileName(mocksAssembly.Location);
-        var refs = TestHostReferences.AssemblyPaths
-            .Where(path => !string.Equals(Path.GetFileName(path), mocksFileName, StringComparison.OrdinalIgnoreCase))
-            .Select(path => MetadataReference.CreateFromFile(path))
-            .ToList();
-
-        refs.Add(MetadataReference.CreateFromFile(mocksAssembly.Location));
-
-        return refs;
+        return TestHostReferences.CreateReferences(
+            path => !string.Equals(Path.GetFileName(path), mocksFileName, StringComparison.OrdinalIgnoreCase),
+            mocksAssembly);
     }
 
     /// <summary>

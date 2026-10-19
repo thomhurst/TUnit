@@ -63,11 +63,12 @@ public class Issue7107Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     public async Task Method_Row_That_Infers_An_Invalid_Class_Type_Fails()
     {
-        // Only the failed row is asserted: reflection mode does not run method rows of generic
-        // classes yet (#7106), while source-generated mode also runs the valid row.
+        // The valid row runs and the invalid row fails, in both modes (#7106).
         await RunTestsWithFilter(
             $"{Namespace}/MethodRowInfersClassConstraintTests*/*",
             [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1),
                 result => result.Results.Single(x => x.Outcome == "Failed").TestName.ShouldBe("Run"),
                 result => result.Results.Single(x => x.Outcome == "Failed").Output?.ErrorInfo?.Message.ShouldContain(StructViolation)

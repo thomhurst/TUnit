@@ -85,7 +85,7 @@ namespace
         public string? Skip { get; set; }
         public bool SkipIfEmpty { get; set; }
         public object?[] Values { get; }
-        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__23))]
+        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__26))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }

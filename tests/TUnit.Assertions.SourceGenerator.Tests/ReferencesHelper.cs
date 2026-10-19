@@ -8,15 +8,10 @@ namespace TUnit.Assertions.SourceGenerator.Tests;
 internal class ReferencesHelper
 {
     public static readonly List<PortableExecutableReference> References =
-        TestHostReferences.AssemblyPaths
-            .Select(path => MetadataReference.CreateFromFile(path))
-            .Concat([
-                // add your app/lib specifics, e.g.:
-                MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Polyfill).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Uri).Assembly.Location),
-            ])
-            .ToList();
+        TestHostReferences.CreateReferences(
+            typeof(Attribute).Assembly,
+            typeof(Assert).Assembly,
+            typeof(Polyfill).Assembly,
+            typeof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute).Assembly,
+            typeof(Uri).Assembly);
 }
