@@ -187,8 +187,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 
         return new AssertionExtensionData(
             classSymbol.Name,
-            // The global namespace displays as "<global namespace>" and needs no using directive (#7133).
-            classSymbol.ContainingNamespace is { IsGlobalNamespace: false } ns ? ns.ToDisplayString() : null,
+            NamespaceHelper.GetNamespaceOrNull(classSymbol.ContainingNamespace),
             methodName!,
             negatedMethodName,
             overloadPriority,

@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.SourceGenerator.Generators;
+using TUnit.Assertions.SourceGenerator.Tests.Options;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
@@ -30,6 +31,42 @@ internal class GlobalNamespaceAssertionExtensionTests : TestsBase<AssertionExten
     public Task AssertionExtension_InGlobalNamespace_Compiles() => RunTest(
         GlobalNamespaceCompileCheck.TestDataPath("GlobalNamespaceAssertionExtension.cs"),
         generatedFiles => GlobalNamespaceCompileCheck.AssertCompiles("GlobalNamespaceAssertionExtension.cs", generatedFiles));
+}
+
+internal class GlobalNamespaceCollectionShapeAssertionTests : TestsBase<CollectionShapeAssertionGenerator>
+{
+    // The trigger attribute is internal to TUnit.Assertions, so declare the same stand-in that
+    // CollectionShapeAssertionSource.cs uses; the generator matches it by metadata name.
+    private const string AttributeStandIn = """
+        namespace TUnit.Assertions.Attributes
+        {
+            [System.AttributeUsage(System.AttributeTargets.Class)]
+            internal sealed class GenerateCollectionShapeAssertionsAttribute : System.Attribute;
+        }
+        """;
+
+    [Test]
+    public Task CollectionShapeWrapper_InGlobalNamespace_EmitsValidTypeName() => RunTest(
+        GlobalNamespaceCompileCheck.TestDataPath("GlobalNamespaceCollectionShapeAssertionSource.cs"),
+        new RunTestOptions { AdditionalSyntaxes = [AttributeStandIn] },
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
+
+            var generated = generatedFiles[0];
+            await Assert.That(generated).DoesNotContain("<global namespace>");
+            await Assert.That(generated).Contains("global::GlobalNamespaceCollectionShapeAssertionSource<");
+
+            // The emitted forwarders call internal TUnit.Assertions constructors, so the output only compiles
+            // inside TUnit.Assertions itself. A syntax check is what catches `global::<global namespace>.X`.
+            var syntaxErrors = CSharpSyntaxTree.ParseText(generated)
+                .GetDiagnostics()
+                .Where(d => d.Severity == DiagnosticSeverity.Error)
+                .Select(d => $"{d.Id}: {d.GetMessage()}")
+                .ToArray();
+
+            await Assert.That(syntaxErrors).IsEmpty();
+        });
 }
 
 internal static class GlobalNamespaceCompileCheck

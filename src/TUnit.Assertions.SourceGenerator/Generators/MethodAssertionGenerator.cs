@@ -355,8 +355,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             containingTypeData = new ContainingTypeData(
                 methodSymbol.ContainingType.Name,
                 methodSymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                // The global namespace displays as "<global namespace>" and needs no using directive (#7133).
-                methodSymbol.ContainingType.ContainingNamespace is { IsGlobalNamespace: false } ns ? ns.ToDisplayString() : null
+                NamespaceHelper.GetNamespaceOrNull(methodSymbol.ContainingType.ContainingNamespace)
             );
         }
 
