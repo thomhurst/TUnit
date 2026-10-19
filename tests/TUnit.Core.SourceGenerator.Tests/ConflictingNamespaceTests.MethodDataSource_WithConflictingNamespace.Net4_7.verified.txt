@@ -257,7 +257,11 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
         Arguments = new object[] { 5 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () =>
+        {
+            var arguments = new object[] { 5 };
+            return global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(((int)arguments[0]));
+        }),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method3", false, new global::TUnit.Core.ParameterMetadata[]
@@ -285,7 +289,11 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
         Arguments = new object[] { "Hello World!", 6, true },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () =>
+        {
+            var arguments = new object[] { "Hello World!", 6, true };
+            return global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(((string)arguments[0]), ((int)arguments[1]), ((bool)arguments[2]));
+        }),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
@@ -294,7 +302,11 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
         Arguments = new object[] { "Hello World!", 8, true },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () =>
+        {
+            var arguments = new object[] { "Hello World!", 8, true };
+            return global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(((string)arguments[0]), ((int)arguments[1]), ((bool)arguments[2]));
+        }),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method4", false, new global::TUnit.Core.ParameterMetadata[]

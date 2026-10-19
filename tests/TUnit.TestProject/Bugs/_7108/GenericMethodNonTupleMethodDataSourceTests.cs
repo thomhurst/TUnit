@@ -50,6 +50,24 @@ public class GenericMethodNonTupleMethodDataSourceTests
         yield return value;
     }
 
+    public static IEnumerable<int[]> IntArrayRows()
+    {
+        yield return [10, 11];
+    }
+
+    // Declared before the parameterless overload: Arguments must pick this one, as reflection mode does
+    public static IEnumerable<string> OverloadedRows(int value)
+    {
+        yield return value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    public static IEnumerable<int> OverloadedRows()
+    {
+        yield return -1;
+    }
+
+    public static Task<IAsyncEnumerable<int>> TaskOfAsyncRows() => Task.FromResult(AsyncRows());
+
     [Test]
     [MethodDataSource(nameof(FuncRows))]
     public async Task Func_Row<T>(T value)
@@ -117,10 +135,33 @@ public class GenericMethodNonTupleMethodDataSourceTests
     }
 
     [Test]
-    [MethodDataSource(nameof(RowsWithArgument), Arguments = [9])]
+    [MethodDataSource(nameof(RowsWithArgument), Arguments = new object[] { 9 })]
     public async Task Data_Method_With_Arguments<T>(T value)
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
         await Assert.That(value).IsEqualTo((T)(object)9);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(IntArrayRows))]
+    public async Task Array_Element_Row<T>(T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values.Length).IsEqualTo(2);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(OverloadedRows), Arguments = new object[] { 12 })]
+    public async Task Overload_Selected_By_Arguments<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(value).IsEqualTo((T)(object)"12");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(TaskOfAsyncRows))]
+    public async Task Task_Of_Async_Enumerable_Is_One_Row<T>(T value)
+    {
+        await Assert.That(value is IAsyncEnumerable<int>).IsTrue();
     }
 }
