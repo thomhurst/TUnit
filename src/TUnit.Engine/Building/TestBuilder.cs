@@ -255,7 +255,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                             if (!instanceResult.Success)
                             {
-                                var failedTest = CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!);
+                                var failedTest = CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!, classData);
                                 tests.Add(failedTest);
                                 continue;
                             }
@@ -310,7 +310,8 @@ internal sealed class TestBuilder : ITestBuilder
                                         // A source-generated row whose inferred type arguments break the method's
                                         // constraints: fail this row only, as reflection mode does when it resolves
                                         // the row's type arguments, and keep building the remaining rows.
-                                        tests.Add(CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i));
+                                        var (reportedException, rowData) = UnpackConstraintViolation(ex, metadata);
+                                        tests.Add(CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, classData, rowData));
                                         continue;
                                     }
 
@@ -394,7 +395,7 @@ internal sealed class TestBuilder : ITestBuilder
                                             catch (Exception innerEx)
                                             {
                                                 // If we still can't resolve, create a failed test
-                                                var failedTest = CreateFailedTestForDataRowError(metadata, innerEx, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i);
+                                                var failedTest = CreateFailedTestForDataRowError(metadata, innerEx, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, classData, methodData);
                                                 tests.Add(failedTest);
                                                 continue;
                                             }
@@ -402,7 +403,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         catch (Exception ex)
                                         {
                                             // If generic resolution fails, create a failed test
-                                            var failedTest = CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i);
+                                            var failedTest = CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, classData, methodData);
                                             tests.Add(failedTest);
                                             continue;
                                         }
@@ -505,7 +506,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 // If generic type inference failed, create a failed test instead of skipped
                                 if (genericResolutionException != null)
                                 {
-                                    var failedTest = CreateFailedTestForDataGenerationError(metadata, genericResolutionException);
+                                    var failedTest = CreateFailedTestForDataGenerationError(metadata, genericResolutionException, new TestDataCombination(), classData);
                                     tests.Add(failedTest);
                                 }
                                 else
@@ -1349,6 +1350,8 @@ internal sealed class TestBuilder : ITestBuilder
     /// Creates a failed test for one data row. The row's indexes go into the test id, so several failing
     /// rows of the same method (or repeats of one row) keep distinct ids, as passing rows do.
     /// </summary>
+    /// <param name="classData">The class row's objects, if the row produced them before it failed.</param>
+    /// <param name="methodData">The method row's objects, if the row produced them before it failed.</param>
     private AbstractExecutableTest CreateFailedTestForDataRowError(
         TestMetadata metadata,
         Exception exception,
@@ -1356,7 +1359,9 @@ internal sealed class TestBuilder : ITestBuilder
         int classDataLoopIndex,
         int methodDataAttributeIndex,
         int methodDataLoopIndex,
-        int repeatIndex)
+        int repeatIndex,
+        object?[]? classData = null,
+        object?[]? methodData = null)
     {
         return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination
         {
@@ -1365,14 +1370,30 @@ internal sealed class TestBuilder : ITestBuilder
             MethodDataSourceIndex = methodDataAttributeIndex,
             MethodLoopIndex = methodDataLoopIndex,
             RepeatIndex = repeatIndex
-        });
+        }, classData, methodData);
     }
 
-    private AbstractExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination)
+    /// <param name="metadata">The test's metadata.</param>
+    /// <param name="exception">The exception to report.</param>
+    /// <param name="combination">The row's indexes, which go into the test id.</param>
+    /// <param name="classData">The class row's objects, if the row produced them before it failed.</param>
+    /// <param name="methodData">The method row's objects, if the row produced them before it failed.</param>
+    /// <remarks>
+    /// The failed test never receives the row's objects, but it carries them in
+    /// <see cref="TestDetails.FailedDataRowObjects"/>, so the object tracker counts them when the test is
+    /// registered for execution and releases them when it completes. Releasing a reference disposes an
+    /// object only when no other test still holds it, so shared and keyed instances stay alive (#7123).
+    /// </remarks>
+    private AbstractExecutableTest CreateFailedTestForDataGenerationError(
+        TestMetadata metadata,
+        Exception exception,
+        TestDataCombination combination,
+        object?[]? classData = null,
+        object?[]? methodData = null)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
 
-        var testDetails = CreateFailedTestDetails(metadata, testId);
+        var testDetails = CreateFailedTestDetails(metadata, testId, CombineRowObjects(classData, methodData));
         var context = CreateFailedTestContext(metadata, testDetails);
         var now = DateTimeOffset.UtcNow;
 
@@ -1418,11 +1439,47 @@ internal sealed class TestBuilder : ITestBuilder
         return TypeNameFormatter.AppendGenericArguments(metadata.TestName, resolvedMethodGenericArguments);
     }
 
-    private TestDetails CreateFailedTestDetails(TestMetadata metadata, string testId)
+    private static object?[] CombineRowObjects(object?[]? classData, object?[]? methodData)
+    {
+        if (classData is not { Length: > 0 })
+        {
+            return methodData ?? [];
+        }
+
+        if (methodData is not { Length: > 0 })
+        {
+            return classData;
+        }
+
+        return [.. classData, .. methodData];
+    }
+
+    /// <summary>
+    /// A <see cref="GenericConstraintViolationDataSource"/> row raises a
+    /// <see cref="GenericConstraintViolationRowException"/> that carries the wrapped row's values. Returns
+    /// the exception to report, a plain <see cref="GenericTypeResolutionException"/> as in reflection mode,
+    /// and the row's unwrapped objects, so the failed test can track them for disposal (#7123).
+    /// </summary>
+    private static (Exception ReportedException, object?[]? RowData) UnpackConstraintViolation(Exception exception, TestMetadata metadata)
+    {
+        if (exception is not GenericConstraintViolationRowException rowException)
+        {
+            return (exception, null);
+        }
+
+        var rowData = rowException.Row is { } row
+            ? DataUnwrapper.UnwrapWithTypes(row, metadata.MethodMetadata.Parameters)
+            : null;
+
+        return (new GenericTypeResolutionException(rowException.Message), rowData);
+    }
+
+    private TestDetails CreateFailedTestDetails(TestMetadata metadata, string testId, object?[] failedDataRowObjects)
     {
         return new TestDetails([])
         {
             TestId = testId,
+            FailedDataRowObjects = failedDataRowObjects,
             TestName = metadata.TestName,
             ClassType = metadata.TestClassType,
             MethodName = metadata.TestMethodName,
@@ -1546,9 +1603,9 @@ internal sealed class TestBuilder : ITestBuilder
 
 
 
-    private AbstractExecutableTest CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
+    private AbstractExecutableTest CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception, object?[] classData)
     {
-        return CreateFailedTestForDataGenerationError(metadata, exception);
+        return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination(), classData);
     }
 
     private AbstractExecutableTest CreateFailedTestForClassDataSourceCircularDependency(TestMetadata metadata)
@@ -1954,7 +2011,7 @@ internal sealed class TestBuilder : ITestBuilder
                         if (!instanceResult.Success)
                         {
                             // Yield a failed test instead of silently skipping
-                            yield return CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!);
+                            yield return CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!, classData);
                             continue;
                         }
 
@@ -2133,10 +2190,15 @@ internal sealed class TestBuilder : ITestBuilder
         IDataSourceAttribute? methodDataSource = null,
         CancellationToken cancellationToken = default)
     {
+        // Declared outside the try so that a row which fails after its factories ran still hands its
+        // objects to the failed test, which tracks them for disposal (#7123).
+        object?[]? classData = null;
+        object?[]? methodData = null;
+
         try
         {
-            var (classData, classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
-            var (methodData, methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
+            (classData, var classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
+            (methodData, var methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
             // Extract and merge metadata from data source attributes and TestDataRow wrappers
             var classAttrMetadata = DataSourceMetadataExtractor.ExtractFromAttribute(classDataSource);
@@ -2192,12 +2254,12 @@ internal sealed class TestBuilder : ITestBuilder
                 }
                 catch (Exception ex)
                 {
-                    return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex);
+                    return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, classData, methodData);
                 }
             }
             catch (Exception ex)
             {
-                return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex);
+                return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, classData, methodData);
             }
 
             if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
@@ -2266,7 +2328,8 @@ internal sealed class TestBuilder : ITestBuilder
         {
             // Includes a GenericConstraintViolationDataSource row whose inferred type arguments break the
             // method's constraints. The row's indexes keep its id distinct from the method's other rows.
-            return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex);
+            var (reportedException, rowData) = UnpackConstraintViolation(ex, metadata);
+            return CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, classData, rowData ?? methodData);
         }
     }
 
