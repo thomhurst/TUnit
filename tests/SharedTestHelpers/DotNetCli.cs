@@ -18,8 +18,12 @@ namespace TUnit.Tests.Shared;
 /// </remarks>
 internal static class DotNetCli
 {
+    // Resolved on first use rather than in the type initializer, so an unexpected failure surfaces as itself
+    // instead of a TypeInitializationException that also breaks every later use of the type
+    private static readonly Lazy<string> ResolvedPath = new(Resolve);
+
     /// <summary>The <c>dotnet</c> executable to start child processes with: a full path, or <c>dotnet</c> to use <c>PATH</c>.</summary>
-    public static string Path { get; } = Resolve();
+    public static string Path => ResolvedPath.Value;
 
     /// <summary>
     /// Prefers <c>DOTNET_HOST_PATH</c>, then the muxer of the installation running this process when it resolves an
@@ -65,18 +69,18 @@ internal static class DotNetCli
                 return false;
             }
 
-            // Drain both streams so neither can fill up and block the process
-            var output = process.StandardOutput.ReadToEndAsync();
-            var error = process.StandardError.ReadToEndAsync();
+            // Drain and discard both streams so neither can fill up and block the process
+            process.OutputDataReceived += static (_, _) => { };
+            process.ErrorDataReceived += static (_, _) => { };
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
 
             if (!process.WaitForExit(30_000))
             {
-                process.Kill();
+                process.Kill(entireProcessTree: true);
                 return false;
             }
 
-            _ = output.Result;
-            _ = error.Result;
             return process.ExitCode == 0;
         }
         catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception or IOException)
