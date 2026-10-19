@@ -54,6 +54,8 @@ public class SourcePathScrubberTests
     [Arguments("public const string Template = \"/api/File.cs\";")]
     [Arguments("[Description(\"C:\\\\docs\\\\readme.md\")]")]
     [Arguments("[Description(\"File.cs\", 39)]")]
+    [Arguments("[Route(\"/api/File.cs\", 2)]")]
+    [Arguments("[Route(\"C:/api/File.cs\", 2)]")]
     public async Task Leaves_Unrelated_Strings_Alone(string line)
     {
         await Assert.That(Tests.ScrubSourcePaths(line)).IsEqualTo(line);
