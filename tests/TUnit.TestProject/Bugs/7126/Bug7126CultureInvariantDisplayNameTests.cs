@@ -16,6 +16,8 @@ public class Bug7126CultureInvariantDisplayNameTests
 {
     internal const string CultureEnvironmentVariable = "TUNIT_BUG_7126_CULTURE";
 
+    // Runs for the whole TestProject module, but does nothing unless TUnit.Engine.Tests sets the env var,
+    // so other tests in this project are unaffected.
     [ModuleInitializer]
     internal static void ApplyRequestedCulture()
     {

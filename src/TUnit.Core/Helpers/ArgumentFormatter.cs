@@ -160,9 +160,9 @@ public static class ArgumentFormatter
     {
         // bool and char are primitive but not IFormattable, and their text doesn't depend on culture.
         return (type.IsPrimitive && o is IFormattable)
-            || o is decimal or BigInteger
+            || o is decimal or BigInteger or Complex
 #if NET
-            || o is Half or Int128 or UInt128
+            || o is Half or Int128 or UInt128 or System.Runtime.InteropServices.NFloat
 #endif
             ;
     }

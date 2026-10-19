@@ -51,16 +51,29 @@ public class ArgumentFormatterCultureTests
         await Assert.That(result).IsEqualTo("-1.5");
     }
 
+    [Test]
+    [MethodDataSource(nameof(Cultures))]
+    public async Task Format_Formats_Complex_Invariantly(CultureInfo culture)
+    {
+        var value = new Complex(1.5, -2);
+
+        var result = WithCulture(culture, () => ArgumentFormatter.Format(value, []));
+
+        // Complex's own layout differs between runtimes ("(1.5, -2)" vs "<1.5; -2>"), so compare against
+        // its invariant text rather than a literal; a culture-dependent result would contain "1,5" or U+2212.
+        await Assert.That(result).IsEqualTo(value.ToString(null, CultureInfo.InvariantCulture));
+    }
+
 #if NET
     [Test]
     [MethodDataSource(nameof(Cultures))]
     public async Task FormatArguments_Formats_Modern_Numeric_Types_Invariantly(CultureInfo culture)
     {
-        object?[] args = [(Half)(-1.5), (Int128)(-3), (UInt128)4, (nint)(-5)];
+        object?[] args = [(Half)(-1.5), (Int128)(-3), (UInt128)4, (nint)(-5), new System.Runtime.InteropServices.NFloat(-2.5)];
 
         var result = WithCulture(culture, () => ArgumentFormatter.FormatArguments(args));
 
-        await Assert.That(result).IsEqualTo("-1.5, -3, 4, -5");
+        await Assert.That(result).IsEqualTo("-1.5, -3, 4, -5, -2.5");
     }
 #endif
 
