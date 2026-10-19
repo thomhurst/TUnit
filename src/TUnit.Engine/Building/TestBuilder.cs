@@ -1481,8 +1481,12 @@ internal sealed class TestBuilder : ITestBuilder
             catch (Exception)
             {
                 // Unwrapping invokes the inner Func of a TestDataRow<Func<T>>, which can throw. The row
-                // already fails with the constraint violation, so track its raw values instead.
-                rowData = row;
+                // already fails with the constraint violation, so track what the row holds without
+                // invoking anything. A TestDataRow wrapper is not itself disposable, so track its value
+                // instead; a Func that threw created no value, so there is nothing to track for it.
+                rowData = row is [ITestDataRow testDataRow]
+                    ? testDataRow.GetData() is { } data and not Delegate ? [data] : []
+                    : row;
             }
         }
 

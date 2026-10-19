@@ -24,8 +24,9 @@ public class ConstraintViolationUnpackingTests
     }
 
     [Test]
-    public async Task Throwing_Row_Func_Falls_Back_To_Raw_Row()
+    public async Task Throwing_Row_Func_Tracks_Nothing()
     {
+        // The Func threw, so it created no value. The TestDataRow wrapper itself is not worth tracking.
         object?[] row = [new TestDataRow<Func<object>>(() => throw new InvalidOperationException("factory"))];
         var exception = new GenericConstraintViolationRowException("violation", row);
 
@@ -33,7 +34,8 @@ public class ConstraintViolationUnpackingTests
 
         await Assert.That(reported.GetType()).IsEqualTo(typeof(GenericTypeResolutionException));
         await Assert.That(reported.Message).IsEqualTo("violation");
-        await Assert.That(rowData).IsSameReferenceAs(row);
+        await Assert.That(rowData).IsNotNull();
+        await Assert.That(rowData!).IsEmpty();
     }
 
     [Test]
