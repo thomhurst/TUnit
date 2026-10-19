@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
@@ -91,6 +92,8 @@ public static class TupleArgumentHelper
                     var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])";
                     argumentExpressions.Add(new InvocationArgument(castExpression));
                 }
+
+                TryAppendOmittedOptionalDefaults(parameters, argCount, parameters.Count, argumentExpressions);
             }
         }
         else
@@ -117,6 +120,8 @@ public static class TupleArgumentHelper
                     var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i.ToString(CultureInfo.InvariantCulture)}])";
                     argumentExpressions.Add(new InvocationArgument(castExpression));
                 }
+
+                TryAppendOmittedOptionalDefaults(parameters, argCount, regularParamCount, argumentExpressions);
             }
 
             // Handle params array parameter
@@ -143,9 +148,10 @@ public static class TupleArgumentHelper
                 {
                     var remainingArgCount = Math.Max(0, argCount - regularParamCount);
 
-                    // When optional regular parameters were omitted (argCount < regularParamCount),
-                    // a positional array would bind to the first omitted parameter, so name it.
-                    var arrayName = remainingArgCount == 0 && argCount < regularParamCount
+                    // When optional regular parameters were omitted (argCount < regularParamCount) and
+                    // their defaults could not be written out, a positional array would bind to the
+                    // first omitted parameter, so name it.
+                    var arrayName = argumentExpressions.Count < regularParamCount
                         ? paramsParam.Name
                         : null;
 
@@ -206,6 +212,92 @@ public static class TupleArgumentHelper
         }
 
         return argumentExpressions;
+    }
+
+    /// <summary>
+    /// Passes the declared default of each omitted optional parameter in
+    /// [<paramref name="start"/>, <paramref name="end"/>) explicitly. Leaving them out could bind the
+    /// generated call to another overload that lacks those parameters (issue #7122), whereas an
+    /// explicit argument for every parameter can only bind to the test method. This also matches
+    /// reflection mode, which invokes with <see cref="System.Type.Missing"/> and so receives the
+    /// declared defaults (including for caller-info parameters). All-or-nothing: if any default
+    /// cannot be written as code, nothing is appended and the caller falls back to omission.
+    /// </summary>
+    private static void TryAppendOmittedOptionalDefaults(IList<IParameterSymbol> parameters, int start, int end, List<InvocationArgument> argumentExpressions)
+    {
+        if (start >= end)
+        {
+            return;
+        }
+
+        var defaults = new string[end - start];
+        for (var i = start; i < end; i++)
+        {
+            if (!TryFormatDefaultValue(parameters[i], out var expression))
+            {
+                return;
+            }
+
+            defaults[i - start] = expression;
+        }
+
+        foreach (var expression in defaults)
+        {
+            argumentExpressions.Add(new InvocationArgument(expression));
+        }
+    }
+
+    private static bool TryFormatDefaultValue(IParameterSymbol parameter, out string expression)
+    {
+        expression = string.Empty;
+
+        if (!parameter.HasExplicitDefaultValue || parameter.RefKind != RefKind.None)
+        {
+            return false;
+        }
+
+        var type = parameter.Type;
+        var typeName = type.GloballyQualified();
+        var value = parameter.ExplicitDefaultValue;
+
+        if (value is null)
+        {
+            // `= null` / `= default` / `= new S()`. The null-forgiving operator keeps a `string s = null`
+            // style declaration from raising a nullable warning in the generated code.
+            expression = $"default({typeName})!";
+            return true;
+        }
+
+        switch (value)
+        {
+            case double.NaN or float.NaN:
+                expression = $"({typeName})(double.NaN)";
+                return true;
+            case double d when double.IsInfinity(d):
+                expression = $"({typeName})(double.{(d > 0 ? "PositiveInfinity" : "NegativeInfinity")})";
+                return true;
+            case float f when float.IsInfinity(f):
+                expression = $"({typeName})(float.{(f > 0 ? "PositiveInfinity" : "NegativeInfinity")})";
+                return true;
+        }
+
+        var literal = SymbolDisplay.FormatPrimitive(value, quoteStrings: true, useHexadecimalNumbers: false);
+        if (literal is null)
+        {
+            return false;
+        }
+
+        literal = value switch
+        {
+            float => literal + "F",
+            double => literal + "D",
+            decimal => literal + "M",
+            _ => literal
+        };
+
+        // The cast restores enum and narrower numeric types (the stored value is the underlying constant).
+        expression = value is string ? literal : $"({typeName})({literal})";
+        return true;
     }
 
     /// <summary>

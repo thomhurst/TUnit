@@ -272,7 +272,7 @@ internal class GenericParamsArrayCompilationTests
 
         // An omitted optional plain array keeps its declared default. It is passed as a typed null
         // rather than left out, so the call cannot bind to an overload without the array.
-        await Assert.That(generated).Contains("instance.NonGeneric_Optional_Omitted_Before_Array_With_Token(@values: default(int[]), @token: ");
+        await Assert.That(generated).Contains("instance.NonGeneric_Optional_Omitted_Before_Array_With_Token((int)(42), default(int[]), context?.Execution.CancellationToken");
         await Assert.That(generated).Contains("instance.Overloaded_Optional_Array(default(int[]))");
         await Assert.That(generated).Contains("instance.Overloaded_Generic_Optional_Array<int>(default(int[]))");
 
