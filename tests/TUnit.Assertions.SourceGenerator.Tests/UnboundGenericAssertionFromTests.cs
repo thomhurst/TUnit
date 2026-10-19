@@ -35,6 +35,14 @@ internal class UnboundGenericAssertionFromTests : TestsBase
 
                 var pair = new Pair<string, int> { Key = "key" };
                 await Assert.That(pair).HasKey();
+
+                var shadow = new Shadow<object> { Value = "text" };
+                await Assert.That(shadow).HoldsValueOfType<object, string>();
+                await Assert.That(shadow).IsDefaultOf<object, int>(0);
+
+                await Assert.That(new Outer<int>.Inner<string> { IsSet = true }).IsSet();
+
+                await Assert.That(new Box<int>()).IsEmptyIntBox();
             }
         }
         """;
@@ -52,6 +60,18 @@ internal class UnboundGenericAssertionFromTests : TestsBase
             await Assert.That(file).Contains("HoldsItem<T>(this IAssertionSource<TUnit.Assertions.Tests.TestData.Box<T>> source, T item");
             await Assert.That(file).Contains("public class PairHasKeyAssertion<TKey, TValue> : Assertion<TUnit.Assertions.Tests.TestData.Pair<TKey, TValue>>");
             await Assert.That(file).Contains("where TKey : notnull");
+
+            // A method type parameter that cannot be inferred is passed explicitly
+            await Assert.That(file).Contains("var result = actualValue.HoldsValueOfType<TOther>();");
+
+            // Reused type parameter names are made distinct, and every use refers to the right one
+            await Assert.That(file).Contains("public class ShadowIsDefaultOfWithTAssertion<T, T1> : Assertion<TUnit.Assertions.Tests.TestData.Shadow<T>>");
+            await Assert.That(file).Contains("IsDefaultOf<T, T1>(this IAssertionSource<TUnit.Assertions.Tests.TestData.Shadow<T>> source, T1 value");
+            await Assert.That(file).Contains("var result = actualValue.IsDefaultOf<T1>(_value);");
+            await Assert.That(file).Contains("public class InnerIsSetAssertion<T, T1> : Assertion<TUnit.Assertions.Tests.TestData.Outer<T>.Inner<T1>>");
+
+            // The generic and non-generic classes for Box<>.IsEmpty and Box<int>.IsEmpty are both emitted
+            await Assert.That(file).Contains("public class BoxIsEmptyAssertion : Assertion<TUnit.Assertions.Tests.TestData.Box<int>>");
 
             // The generated code, used from call sites on closed types, must compile
             var source = await ReadAllTextAsync(TestDataPath);

@@ -26,8 +26,37 @@ public class Pair<TKey, TValue> where TKey : notnull
     public bool HasKey() => Key is not null;
 }
 
+public class Shadow<T>
+{
+    public T? Value { get; set; }
+
+    // A method type parameter that cannot be inferred from the arguments, so the generated call must pass it
+    public bool HoldsValueOfType<TOther>() => Value is TOther;
+
+#pragma warning disable CS0693 // Type parameter has the same name as the type parameter from outer type
+    // A method type parameter that reuses the type's parameter name
+    public bool IsDefaultOf<T>(T value) => Equals(value, default(T));
+#pragma warning restore CS0693
+}
+
+public class Outer<T>
+{
+#pragma warning disable CS0693 // Type parameter has the same name as the type parameter from outer type
+    // A nested type parameter that reuses the containing type's parameter name
+    public class Inner<T>
+    {
+        public bool IsSet { get; set; }
+    }
+#pragma warning restore CS0693
+}
+
 [AssertionFrom(typeof(Box<>), nameof(Box<int>.IsEmpty), CustomName = "IsEmptyBox")]
 [AssertionFrom(typeof(Box<>), nameof(Box<int>.IsEmpty), CustomName = "IsNotEmptyBox", NegateLogic = true)]
 [AssertionFrom(typeof(Box<>), nameof(Box<int>.Holds), CustomName = "HoldsItem")]
 [AssertionFrom(typeof(Pair<,>), nameof(Pair<string, int>.HasKey))]
+[AssertionFrom(typeof(Shadow<>), nameof(Shadow<int>.HoldsValueOfType))]
+[AssertionFrom(typeof(Shadow<>), nameof(Shadow<int>.IsDefaultOf))]
+[AssertionFrom(typeof(Outer<>.Inner<>), nameof(Outer<int>.Inner<int>.IsSet))]
+// The same member on a closed type needs its own, non-generic, assertion class
+[AssertionFrom(typeof(Box<int>), nameof(Box<int>.IsEmpty), CustomName = "IsEmptyIntBox")]
 public static partial class UnboundGenericAssertions;

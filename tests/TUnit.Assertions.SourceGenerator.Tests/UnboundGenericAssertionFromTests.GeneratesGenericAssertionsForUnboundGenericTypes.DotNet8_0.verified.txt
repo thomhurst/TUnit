@@ -112,6 +112,147 @@ public class PairHasKeyAssertion<TKey, TValue> : Assertion<TUnit.Assertions.Test
     }
 }
 
+public class ShadowHoldsValueOfTypeAssertion<T, TOther> : Assertion<TUnit.Assertions.Tests.TestData.Shadow<T>>
+{
+    private readonly bool _negated;
+
+    public ShadowHoldsValueOfTypeAssertion(AssertionContext<TUnit.Assertions.Tests.TestData.Shadow<T>> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TUnit.Assertions.Tests.TestData.Shadow<T>> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.HoldsValueOfType<TOther>();
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy HoldsValueOfType"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy HoldsValueOfType";
+    }
+}
+
+public class ShadowIsDefaultOfWithTAssertion<T, T1> : Assertion<TUnit.Assertions.Tests.TestData.Shadow<T>>
+{
+    private readonly T1 _value;
+    private readonly bool _negated;
+
+    public ShadowIsDefaultOfWithTAssertion(AssertionContext<TUnit.Assertions.Tests.TestData.Shadow<T>> context, T1 value, bool negated = false)
+        : base(context)
+    {
+        _value = value;
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TUnit.Assertions.Tests.TestData.Shadow<T>> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsDefaultOf<T1>(_value);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsDefaultOf({_value})"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsDefaultOf({_value})";
+    }
+}
+
+public class InnerIsSetAssertion<T, T1> : Assertion<TUnit.Assertions.Tests.TestData.Outer<T>.Inner<T1>>
+{
+    private readonly bool _negated;
+
+    public InnerIsSetAssertion(AssertionContext<TUnit.Assertions.Tests.TestData.Outer<T>.Inner<T1>> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TUnit.Assertions.Tests.TestData.Outer<T>.Inner<T1>> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsSet;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsSet"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsSet";
+    }
+}
+
+public class BoxIsEmptyAssertion : Assertion<TUnit.Assertions.Tests.TestData.Box<int>>
+{
+    private readonly bool _negated;
+
+    public BoxIsEmptyAssertion(AssertionContext<TUnit.Assertions.Tests.TestData.Box<int>> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TUnit.Assertions.Tests.TestData.Box<int>> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = actualValue.IsEmpty;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsEmpty"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsEmpty";
+    }
+}
+
 public static partial class UnboundGenericAssertions
 {
     public static BoxIsEmptyAssertion<T> IsEmptyBox<T>(this IAssertionSource<TUnit.Assertions.Tests.TestData.Box<T>> source)
@@ -137,6 +278,30 @@ public static partial class UnboundGenericAssertions
     {
         source.Context.ExpressionBuilder.Append(".HasKey()");
         return new PairHasKeyAssertion<TKey, TValue>(source.Context, false);
+    }
+
+    public static ShadowHoldsValueOfTypeAssertion<T, TOther> HoldsValueOfType<T, TOther>(this IAssertionSource<TUnit.Assertions.Tests.TestData.Shadow<T>> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HoldsValueOfType()");
+        return new ShadowHoldsValueOfTypeAssertion<T, TOther>(source.Context, false);
+    }
+
+    public static ShadowIsDefaultOfWithTAssertion<T, T1> IsDefaultOf<T, T1>(this IAssertionSource<TUnit.Assertions.Tests.TestData.Shadow<T>> source, T1 value, [CallerArgumentExpression(nameof(value))] string? valueExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsDefaultOf({valueExpression})");
+        return new ShadowIsDefaultOfWithTAssertion<T, T1>(source.Context, value, false);
+    }
+
+    public static InnerIsSetAssertion<T, T1> IsSet<T, T1>(this IAssertionSource<TUnit.Assertions.Tests.TestData.Outer<T>.Inner<T1>> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsSet()");
+        return new InnerIsSetAssertion<T, T1>(source.Context, false);
+    }
+
+    public static BoxIsEmptyAssertion IsEmptyIntBox(this IAssertionSource<TUnit.Assertions.Tests.TestData.Box<int>> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsEmptyIntBox()");
+        return new BoxIsEmptyAssertion(source.Context, false);
     }
 
 }

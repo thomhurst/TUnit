@@ -281,7 +281,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     /// definition's own (e.g. <c>T</c> of <c>Memory&lt;T&gt;</c>), including those of any generic containing types,
     /// followed by the method's.
     /// </summary>
-    private static List<ITypeParameterSymbol> GetUnboundGenericTypeParameters(INamedTypeSymbol targetType, IMethodSymbol method)
+    private static GeneratedTypeParameters GetUnboundGenericTypeParameters(INamedTypeSymbol targetType, IMethodSymbol method)
     {
         var typeParameters = new List<ITypeParameterSymbol>();
         var outerTypes = new Stack<INamedTypeSymbol>();
@@ -296,7 +296,76 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         }
 
         typeParameters.AddRange(method.TypeParameters);
-        return typeParameters;
+        return new GeneratedTypeParameters(typeParameters);
+    }
+
+    /// <summary>
+    /// An unbound generic type or a member it declares is only supported when the member is declared on that same
+    /// generic type, because the generated assertion can only be made generic over the target's type parameters.
+    /// </summary>
+    private static bool IsUnsupportedUnboundGeneric(CreateAssertionAttributeData attributeData) =>
+        attributeData.IsUnboundGeneric &&
+        !SymbolEqualityComparer.Default.Equals(attributeData.ContainingType, attributeData.TargetType);
+
+    /// <summary>
+    /// The type parameters of a generated generic assertion, with a distinct name for each. They are collected from
+    /// several declarations (<c>Box&lt;T&gt;</c> and its method <c>Holds&lt;T&gt;</c>, or <c>Outer&lt;T&gt;.Inner&lt;T&gt;</c>),
+    /// which may reuse a name; a reused name gets a numeric suffix and every type rendered through
+    /// <see cref="Display"/> refers to it by that name.
+    /// </summary>
+    private sealed class GeneratedTypeParameters
+    {
+        private readonly Dictionary<ISymbol, string> _names = new(SymbolEqualityComparer.Default);
+
+        public GeneratedTypeParameters(List<ITypeParameterSymbol> typeParameters)
+        {
+            TypeParameters = typeParameters;
+
+            var declaredNames = new HashSet<string>(typeParameters.Select(tp => tp.Name), StringComparer.Ordinal);
+            var usedNames = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var typeParameter in typeParameters)
+            {
+                // A generated name never equals a declared one, so it cannot collide with a later parameter
+                var name = typeParameter.Name;
+                var suffix = 0;
+                while (usedNames.Contains(name))
+                {
+                    do
+                    {
+                        suffix++;
+                        name = typeParameter.Name + suffix.ToString(CultureInfo.InvariantCulture);
+                    }
+                    while (declaredNames.Contains(name));
+                }
+
+                usedNames.Add(name);
+                _names[typeParameter] = name;
+            }
+
+            TypeArgumentList = $"<{string.Join(", ", typeParameters.Select(NameOf))}>";
+        }
+
+        public List<ITypeParameterSymbol> TypeParameters { get; }
+
+        /// <summary>E.g. <c>&lt;T, T1&gt;</c>.</summary>
+        public string TypeArgumentList { get; }
+
+        public string NameOf(ITypeParameterSymbol typeParameter) =>
+            _names.TryGetValue(typeParameter, out var name) ? name : typeParameter.Name;
+
+        /// <summary>Renders <paramref name="type"/> like <c>ToDisplayString()</c>, using the distinct type parameter names.</summary>
+        public string Display(ITypeSymbol type)
+        {
+            var builder = new StringBuilder();
+            foreach (var part in type.ToDisplayParts())
+            {
+                builder.Append(part is { Kind: SymbolDisplayPartKind.TypeParameterName, Symbol: ITypeParameterSymbol typeParameter }
+                    ? NameOf(typeParameter)
+                    : part.ToString());
+            }
+
+            return builder.ToString();
+        }
     }
 
     private static bool IsValidReturnType(ITypeSymbol returnType, out ReturnTypeKind kind)
@@ -449,7 +518,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
             foreach (var conditionClass in entry.ConditionClasses)
             {
-                if (!allGeneratedClasses.Add(conditionClass.ClassName))
+                if (!allGeneratedClasses.Add(conditionClass.Key))
                 {
                     continue;
                 }
@@ -494,8 +563,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         // directly. The generated assertion can only be made generic over the target's type parameters, so the
         // member has to be declared on that same generic type; anything else is reported instead of silently
         // generating nothing.
-        if (attributeData.IsUnboundGeneric &&
-            !SymbolEqualityComparer.Default.Equals(attributeData.ContainingType, attributeData.TargetType))
+        if (IsUnsupportedUnboundGeneric(attributeData))
         {
             missingMethodMessage = GetUnsupportedUnboundGenericMessage(attributeData);
             return ImmutableEquatableArray<ConditionClassModel>.Empty;
@@ -556,9 +624,11 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
             // Duplicate class names are dropped at emit time, where the set of classes
             // already written across every extension class is known.
+            // The arity is part of the key: MemoryIsEmptyAssertion<T> (from typeof(Memory<>)) and
+            // MemoryIsEmptyAssertion (from typeof(Memory<int>)) are different classes and can both be needed.
             var classBuilder = new StringBuilder();
-            GenerateAssertConditionClassForMethod(classBuilder, attributeData, method);
-            conditionClasses.Add(new ConditionClassModel(className, classBuilder.ToString()));
+            var arity = GenerateAssertConditionClassForMethod(classBuilder, attributeData, method);
+            conditionClasses.Add(new ConditionClassModel($"{className}`{arity.ToString(CultureInfo.InvariantCulture)}", classBuilder.ToString()));
         }
 
         return conditionClasses.ToImmutableEquatableArray();
@@ -573,8 +643,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     {
         var sourceBuilder = new StringBuilder();
 
-        if (attributeData.IsUnboundGeneric &&
-            !SymbolEqualityComparer.Default.Equals(attributeData.ContainingType, attributeData.TargetType))
+        if (IsUnsupportedUnboundGeneric(attributeData))
         {
             // Reported by RenderConditionClasses
             return string.Empty;
@@ -632,10 +701,18 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine();
     }
 
-    private static void GenerateAssertConditionClassForMethod(StringBuilder sourceBuilder, CreateAssertionAttributeData attributeData, IMethodSymbol staticMethod)
+    /// <returns>The number of type parameters of the generated class.</returns>
+    private static int GenerateAssertConditionClassForMethod(StringBuilder sourceBuilder, CreateAssertionAttributeData attributeData, IMethodSymbol staticMethod)
     {
-        var targetTypeName = attributeData.TargetType.ToDisplayString();
-        var containingType = attributeData.ContainingType;
+        // For an unbound generic target, types are rendered with the class's distinct type parameter names
+        var unboundTypeParameters = attributeData.IsUnboundGeneric
+            ? GetUnboundGenericTypeParameters(attributeData.TargetType, staticMethod)
+            : null;
+        string DisplayType(ITypeSymbol type) => unboundTypeParameters?.Display(type) ?? type.ToDisplayString();
+
+        var targetTypeName = DisplayType(attributeData.TargetType);
+        var containingTypeName = DisplayType(attributeData.ContainingType);
+        int arity;
         var methodName = attributeData.MethodName;
 
         var className = GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod);
@@ -681,32 +758,46 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             genericTypeParams = $"<{string.Join(", ", staticMethod.TypeParameters.Select(tp => tp.Name))}>";
         }
 
+        // A generic method is called with explicit type arguments, since they cannot always be inferred from its
+        // arguments (bool Matches<U>()). Only the classes below that declare the method's type parameters do this.
+        var methodTypeArguments = "";
+
         // For Enum.IsDefined, we need to use a generic type parameter instead of the concrete Enum type
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
             // Generate: public class EnumIsDefinedAssertion<T> : Assertion<T> where T : Enum
             sourceBuilder.AppendLine($"public class {className}<T> : Assertion<T>");
             sourceBuilder.AppendLine($"    where T : Enum");
+            arity = 1;
         }
         else if (isTaskType)
         {
             // Generate: public class TaskIsCompletedAssertion<TTask> : Assertion<TTask> where TTask : System.Threading.Tasks.Task
             sourceBuilder.AppendLine($"public class {className}<TTask> : Assertion<TTask>");
             sourceBuilder.AppendLine($"    where TTask : {targetTypeName}");
+            arity = 1;
         }
-        else if (attributeData.IsUnboundGeneric)
+        else if (unboundTypeParameters != null)
         {
             // For unbound generic types like Memory<>, the target is the definition (Memory<T>), so the class is
             // generic over its type parameters: public class MemoryIsEmptyAssertion<T> : Assertion<System.Memory<T>>
-            var typeParameters = GetUnboundGenericTypeParameters(attributeData.TargetType, staticMethod);
-            sourceBuilder.AppendLine($"public class {className}<{string.Join(", ", typeParameters.Select(tp => tp.Name))}> : Assertion<{targetTypeName}>");
-            foreach (var constraint in CollectGenericConstraints(typeParameters))
+            sourceBuilder.AppendLine($"public class {className}{unboundTypeParameters.TypeArgumentList} : Assertion<{targetTypeName}>");
+            foreach (var constraint in CollectGenericConstraints(unboundTypeParameters.TypeParameters, unboundTypeParameters))
             {
                 sourceBuilder.AppendLine($"    {constraint}");
+            }
+
+            arity = unboundTypeParameters.TypeParameters.Count;
+            if (hasMethodTypeParameters)
+            {
+                methodTypeArguments = $"<{string.Join(", ", staticMethod.TypeParameters.Select(unboundTypeParameters.NameOf))}>";
             }
         }
         else if (hasMethodTypeParameters)
         {
+            arity = staticMethod.TypeParameters.Length;
+            methodTypeArguments = genericTypeParams!;
+
             // Generate generic assertion class with the method's type parameters
             sourceBuilder.AppendLine($"public class {className}{genericTypeParams} : Assertion<{targetTypeName}>");
             // Apply constraints to the assertion class
@@ -721,12 +812,13 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         else
         {
             sourceBuilder.AppendLine($"public class {className} : Assertion<{targetTypeName}>");
+            arity = 0;
         }
         sourceBuilder.AppendLine("{");
 
         foreach (var param in parameters)
         {
-            sourceBuilder.AppendLine($"    private readonly {param.Type.ToDisplayString()} _{param.Name};");
+            sourceBuilder.AppendLine($"    private readonly {DisplayType(param.Type)} _{param.Name};");
         }
         sourceBuilder.AppendLine("    private readonly bool _negated;");
         sourceBuilder.AppendLine();
@@ -757,7 +849,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         sourceBuilder.Append($"    public {constructorName}({contextType} context");
         foreach (var param in parameters)
         {
-            sourceBuilder.Append($", {param.Type.ToDisplayString()} {param.Name}");
+            sourceBuilder.Append($", {DisplayType(param.Type)} {param.Name}");
         }
         sourceBuilder.AppendLine(", bool negated = false)");
         sourceBuilder.AppendLine("        : base(context)");
@@ -872,7 +964,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             if (isExtensionMethod)
             {
                 // Extension method - call it like an instance method
-                sourceBuilder.Append($"        var result = actualValue.{methodName}(");
+                sourceBuilder.Append($"        var result = actualValue.{methodName}{methodTypeArguments}(");
                 var paramList = parameters.Select(p => $"_{p.Name}").ToArray();
                 sourceBuilder.AppendJoin(", ", paramList);
                 sourceBuilder.AppendLine(");");
@@ -880,7 +972,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             else if (attributeData.TreatAsInstance)
             {
                 // Static method treated as instance - call the static method with actualValue as first parameter
-                sourceBuilder.Append($"        var result = {containingType.ToDisplayString()}.{methodName}(actualValue");
+                sourceBuilder.Append($"        var result = {containingTypeName}.{methodName}{methodTypeArguments}(actualValue");
                 foreach (var param in parameters)
                 {
                     sourceBuilder.Append($", _{param.Name}");
@@ -889,7 +981,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             }
             else if (attributeData.RequiresGenericTypeParameter)
             {
-                sourceBuilder.Append($"        var result = {containingType.ToDisplayString()}.{methodName}(typeof(T), actualValue");
+                sourceBuilder.Append($"        var result = {containingTypeName}.{methodName}{methodTypeArguments}(typeof(T), actualValue");
                 foreach (var param in parameters)
                 {
                     sourceBuilder.Append($", _{param.Name}");
@@ -898,7 +990,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             }
             else
             {
-                sourceBuilder.Append($"        var result = {containingType.ToDisplayString()}.{methodName}(actualValue");
+                sourceBuilder.Append($"        var result = {containingTypeName}.{methodName}{methodTypeArguments}(actualValue");
                 foreach (var param in parameters)
                 {
                     sourceBuilder.Append($", _{param.Name}");
@@ -921,7 +1013,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 else
                 {
                     // Instance method on the target type itself
-                    sourceBuilder.Append($"        var result = actualValue.{methodName}(");
+                    sourceBuilder.Append($"        var result = actualValue.{methodName}{methodTypeArguments}(");
                     var paramList = parameters.Select(p => $"_{p.Name}").ToArray();
                     sourceBuilder.AppendJoin(", ", paramList);
                     sourceBuilder.AppendLine(");");
@@ -934,8 +1026,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     SymbolEqualityComparer.Default.Equals(staticMethod.Parameters[0].Type, attributeData.TargetType))
                 {
                     // The instance method takes the target type as first parameter
-                    sourceBuilder.AppendLine($"        var instance = new {containingType.ToDisplayString()}();");
-                    sourceBuilder.Append($"        var result = instance.{methodName}(actualValue");
+                    sourceBuilder.AppendLine($"        var instance = new {containingTypeName}();");
+                    sourceBuilder.Append($"        var result = instance.{methodName}{methodTypeArguments}(actualValue");
                     foreach (var param in parameters.Skip(1))
                     {
                         sourceBuilder.Append($", _{param.Name}");
@@ -945,8 +1037,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 else
                 {
                     // Instance method that doesn't take the target type - might be a validation method
-                    sourceBuilder.AppendLine($"        var instance = new {containingType.ToDisplayString()}();");
-                    sourceBuilder.Append($"        var result = instance.{methodName}(");
+                    sourceBuilder.AppendLine($"        var instance = new {containingTypeName}();");
+                    sourceBuilder.Append($"        var result = instance.{methodName}{methodTypeArguments}(");
                     var paramList = parameters.Select(p => $"_{p.Name}").ToArray();
                     sourceBuilder.AppendJoin(", ", paramList);
                     sourceBuilder.AppendLine(");");
@@ -955,7 +1047,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             else
             {
                 // Default instance method behavior
-                sourceBuilder.Append($"        var result = actualValue.{methodName}(");
+                sourceBuilder.Append($"        var result = actualValue.{methodName}{methodTypeArguments}(");
                 var paramList = parameters.Select(p => $"_{p.Name}").ToArray();
                 sourceBuilder.AppendJoin(", ", paramList);
                 sourceBuilder.AppendLine(");");
@@ -1035,6 +1127,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("    }");
         sourceBuilder.AppendLine("}");
         sourceBuilder.AppendLine();
+
+        return arity;
     }
 
     private static string GenerateAssertConditionClassNameForMethod(INamedTypeSymbol targetType, INamedTypeSymbol containingType, string methodName, IMethodSymbol method)
@@ -1109,7 +1203,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         return CollectGenericConstraints(method.TypeParameters);
     }
 
-    private static List<string> CollectGenericConstraints(IEnumerable<ITypeParameterSymbol> typeParameters)
+    /// <param name="names">When given, renders type parameters with these distinct names.</param>
+    private static List<string> CollectGenericConstraints(IEnumerable<ITypeParameterSymbol> typeParameters, GeneratedTypeParameters? names = null)
     {
         var constraints = new List<string>();
 
@@ -1136,7 +1231,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             }
             foreach (var constraintType in typeParameter.ConstraintTypes)
             {
-                typeConstraints.Add(constraintType.ToDisplayString());
+                typeConstraints.Add(names?.Display(constraintType) ?? constraintType.ToDisplayString());
             }
             if (typeParameter.HasConstructorConstraint)
             {
@@ -1145,7 +1240,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
             if (typeConstraints.Count > 0)
             {
-                constraints.Add($"where {typeParameter.Name} : {string.Join(", ", typeConstraints)}");
+                constraints.Add($"where {names?.NameOf(typeParameter) ?? typeParameter.Name} : {string.Join(", ", typeConstraints)}");
             }
         }
 
@@ -1210,12 +1305,15 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             methodGenericTypeParams = $"<{string.Join(", ", method.TypeParameters.Select(tp => tp.Name))}>";
         }
 
+        // For an unbound generic target, types are rendered with the assertion class's distinct type parameter names
         string? unboundGenericTypeParams = null;
+        GeneratedTypeParameters? unboundTypeParameters = null;
         if (attributeData.IsUnboundGeneric && !isTaskType)
         {
-            var typeParameters = GetUnboundGenericTypeParameters(attributeData.TargetType, method);
-            unboundGenericTypeParams = $"<{string.Join(", ", typeParameters.Select(tp => tp.Name))}>";
-            genericConstraints = CollectGenericConstraints(typeParameters);
+            unboundTypeParameters = GetUnboundGenericTypeParameters(attributeData.TargetType, method);
+            unboundGenericTypeParams = unboundTypeParameters.TypeArgumentList;
+            genericConstraints = CollectGenericConstraints(unboundTypeParameters.TypeParameters, unboundTypeParameters);
+            targetTypeName = unboundTypeParameters.Display(attributeData.TargetType);
         }
 
         // Generate the extension method using the modern IAssertionSource<T> pattern
@@ -1247,7 +1345,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
         foreach (var param in additionalParameters)
         {
-            sourceBuilder.Append($", {param.Type.ToDisplayString()} {param.Name}");
+            sourceBuilder.Append($", {unboundTypeParameters?.Display(param.Type) ?? param.Type.ToDisplayString()} {param.Name}");
         }
 
         // Add CallerArgumentExpression parameters for better error messages
@@ -1351,8 +1449,10 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         string ExtensionMethodsSource
     );
 
+    /// <param name="Key">The class name and its generic arity (<c>MemoryIsEmptyAssertion`1</c>), used to emit each class once.</param>
+    /// <param name="Source">The rendered class.</param>
     private sealed record ConditionClassModel(
-        string ClassName,
+        string Key,
         string Source
     );
 
