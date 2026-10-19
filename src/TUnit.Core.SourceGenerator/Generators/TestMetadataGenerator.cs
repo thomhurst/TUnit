@@ -1126,6 +1126,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
+        // Method-level [Arguments] rows of a non-generic method that infer the generic class's type arguments
+        List<AttributeData>? inferringRows = null;
+
         // Handle generic classes with non-generic methods that have method-level Arguments
         if (testMethod is { IsGenericType: true, IsGenericMethod: false } && methodArgumentsAttributes.Count > 0)
         {
@@ -1138,7 +1141,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 && (attributeClass.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute")
                     || DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)));
 
-            List<AttributeData>? inferringRows = null;
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
                 var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation);
@@ -1310,20 +1312,38 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // A method row runs only on the class instantiation its values infer. When the class has
-        // class-level [Arguments] rows and none of them infers that instantiation, no class row supplies
-        // its constructor arguments, so its tests fail rather than run with the method row's values as
-        // constructor arguments. Reflection mode reports the same failure (#7118).
+        // A method row runs only on the class instantiation its values infer, and reflection mode applies the
+        // same rules (#7118). When the class has class-level [Arguments] rows:
+        // - an instantiation that only method rows infer has no class row to supply its constructor
+        //   arguments, so its tests fail rather than run with the method row's values as constructor
+        //   arguments. A class-level [GenerateGenericTest] listing the same types still supplies them.
+        // - an instantiation that only class rows infer, of a method whose rows all infer other types,
+        //   has no method row to run, so it yields no test instead of one called without arguments.
         if (testMethod is { IsGenericType: true, IsGenericMethod: false }
             && classArgumentsAttributes.Length > 0
-            && rowInstantiations is not null
-            && !testMethod.TypeSymbol.GetAttributes().Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true))
+            && inferringRows is not null
+            && rowInstantiations is not null)
         {
+            List<ITypeSymbol[]>? generateGenericTestTypes = null;
+            foreach (var attribute in testMethod.TypeSymbol.GetAttributes())
+            {
+                if (attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true
+                    && ExtractTypeArgsFromGenerateGenericTestAttribute(attribute) is { Length: > 0 } typeArgs)
+                {
+                    (generateGenericTestTypes ??= []).Add(typeArgs);
+                }
+            }
+
             foreach (var instantiation in rowInstantiations.Values)
             {
                 if (instantiation.HasMethodRows && !instantiation.HasClassRows)
                 {
-                    instantiation.HasNoClassRow = true;
+                    instantiation.HasNoClassRow = generateGenericTestTypes is null
+                        || !generateGenericTestTypes.Any(types => InferredTypesMatch(types, instantiation.ClassTypeArgs));
+                }
+                else if (instantiation.HasClassRows && !instantiation.HasMethodRows)
+                {
+                    results.Remove(instantiation);
                 }
             }
         }

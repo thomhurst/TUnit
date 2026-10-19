@@ -90,3 +90,51 @@ public class MethodRowWithoutMatchingClassRow<T>(T value)
         await Assert.That(arg).IsEqualTo(value);
     }
 }
+
+// The class row "a" makes a string instantiation, but the method's only row infers int. No method row
+// runs on the string instantiation, so it yields no test rather than one called without arguments.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+[Arguments("a")]
+public class ClassRowWithoutMatchingMethodRow<T>(T value)
+{
+    [Test]
+    [Arguments(1)]
+    public async Task Test(T arg)
+    {
+        await Assert.That(arg).IsEqualTo(value);
+    }
+}
+
+// [GenerateGenericTest] lists the int the class row already infers, so that instantiation stands for
+// both and, with no int method row, yields no test. The string method row has no class row and fails.
+[EngineTest(ExpectedResult.Failure)]
+[Arguments(1)]
+[GenerateGenericTest(typeof(int))]
+public class GenerateGenericTestOfClassRowType<T>(T value)
+{
+    [Test]
+    [Arguments("a")]
+    public async Task Test(T arg)
+    {
+        await Assert.That(arg).IsEqualTo(value);
+    }
+}
+
+// [GenerateGenericTest] lists object, which no row infers, so every method row runs on that
+// instantiation with the class row. The int method row runs on the class row's int instantiation, and
+// the string method row, which no class row matches, fails.
+[EngineTest(ExpectedResult.Failure)]
+[Arguments(1)]
+[GenerateGenericTest(typeof(object))]
+public class GenerateGenericTestOfUninferredType<T>(T value)
+{
+    [Test]
+    [Arguments(1)]
+    [Arguments("a")]
+    public async Task Test(T arg)
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(arg is int or string).IsTrue();
+    }
+}
