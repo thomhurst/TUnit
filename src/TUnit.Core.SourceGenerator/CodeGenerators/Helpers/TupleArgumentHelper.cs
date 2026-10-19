@@ -257,7 +257,10 @@ public static class TupleArgumentHelper
         }
 
         var type = parameter.Type;
-        var typeName = type.GloballyQualified();
+        // A `dynamic` argument would make the whole call late-bound, so the runtime binder could pick a
+        // sibling overload (and the call would need Microsoft.CSharp, which is not AOT-safe). `object` is
+        // the same runtime type and keeps the call bound to the test method at compile time.
+        var typeName = type.TypeKind == TypeKind.Dynamic ? "object" : type.GloballyQualified();
         var value = parameter.ExplicitDefaultValue;
 
         if (value is null)

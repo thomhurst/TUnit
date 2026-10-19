@@ -105,32 +105,37 @@ internal class OmittedOptionalOverloadCompilationTests
         }
         """;
 
+    private const string DynamicSource =
+        """
+        #nullable enable
+        global using global::System;
+        global using global::System.Threading.Tasks;
+        global using global::TUnit.Core;
+
+        namespace MyTests;
+
+        public class DynamicTests
+        {
+            [Test]
+            [Arguments]
+            public void Dynamic_String_Default([global::System.Runtime.InteropServices.Optional, global::System.Runtime.InteropServices.DefaultParameterValue("declared")] dynamic value) { }
+
+            internal void Dynamic_String_Default(string value) { }
+
+            [Test]
+            [Arguments]
+            public void Dynamic_Null_Default(dynamic? value = null) { }
+
+            internal void Dynamic_Null_Default(string value) { }
+        }
+        """;
+
     [Test]
     public async Task Omitted_optionals_pass_declared_defaults_explicitly()
     {
-        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
-
-        var compilation = CSharpCompilation.Create(
-                "OmittedOptionalOverloads",
-                [CSharpSyntaxTree.ParseText(Source, parseOptions)],
-                ReferencesHelper.References,
-                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(
-            [new TestMetadataGenerator().AsSourceGenerator()],
-            parseOptions: parseOptions);
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out _);
-
-        var generatedTrees = output.SyntaxTrees.Skip(1).ToArray();
-        var generated = string.Join(
-            Environment.NewLine + "----" + Environment.NewLine,
-            generatedTrees.Select(t => t.GetText().ToString()));
+        var (generated, problems) = Generate(Source);
 
         // Before the fix, Before_Params_With_Token failed with CS0121 (ambiguous call).
-        var problems = output.GetDiagnostics()
-            .Where(d => d.Severity == DiagnosticSeverity.Error)
-            .ToArray();
-
         await Assert.That(problems)
             .IsEmpty()
             .Because($"generated code must compile. Errors:{Environment.NewLine}"
@@ -145,5 +150,52 @@ internal class OmittedOptionalOverloadCompilationTests
         await Assert.That(generated).Contains("instance.Object_String_Default((object)(\"declared\"))");
         await Assert.That(generated).Contains("instance.Object_Non_Finite((object)(float.NaN), (object)(float.NegativeInfinity), (object)(double.NaN))");
         await Assert.That(generated).Contains("instance.Unwritable_Default(@values: global::System.Array.Empty<int>())");
+    }
+
+    [Test]
+    public async Task Dynamic_defaults_are_passed_as_object()
+    {
+        // A `dynamic` argument would make the call late-bound, so the runtime binder could pick the
+        // sibling overload. The default is passed as `object` instead, keeping the call bound to the test.
+        var (generated, problems) = Generate(DynamicSource);
+
+        // dynamic test parameters do not compile yet for an unrelated reason: the parameter metadata
+        // uses typeof(dynamic) (https://github.com/thomhurst/TUnit/issues/7165). No other error is allowed.
+        var otherProblems = problems.Where(d => d.Id != "CS1962").ToArray();
+        await Assert.That(otherProblems)
+            .IsEmpty()
+            .Because(string.Join(Environment.NewLine, otherProblems.Select(e => e.ToString())));
+
+        await Assert.That(generated).Contains("instance.Dynamic_String_Default((object)(\"declared\"))");
+        await Assert.That(generated).Contains("instance.Dynamic_Null_Default(default(object)!)");
+        await Assert.That(generated).DoesNotContain("(dynamic)(");
+        await Assert.That(generated).DoesNotContain("default(dynamic)");
+    }
+
+    private static (string Generated, Diagnostic[] Problems) Generate(string source)
+    {
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+
+        var compilation = CSharpCompilation.Create(
+                "OmittedOptionalOverloads",
+                [CSharpSyntaxTree.ParseText(source, parseOptions)],
+                ReferencesHelper.References,
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new TestMetadataGenerator().AsSourceGenerator()],
+            parseOptions: parseOptions);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out _);
+
+        var generatedTrees = output.SyntaxTrees.Skip(1).ToArray();
+        var generated = string.Join(
+            Environment.NewLine + "----" + Environment.NewLine,
+            generatedTrees.Select(t => t.GetText().ToString()));
+
+        var problems = output.GetDiagnostics()
+            .Where(d => d.Severity == DiagnosticSeverity.Error)
+            .ToArray();
+
+        return (generated, problems);
     }
 }
