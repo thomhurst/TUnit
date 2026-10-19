@@ -842,6 +842,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             AttributeData? methodRow = null,
             bool fromGenerateGenericTest = false)
         {
+            // A generic method of a generic class needs both the class and the method type arguments.
+            // A source that supplies only one of them (a method row or [GenerateGenericTest] without a
+            // class source) would emit an entry that names the open type parameters, which does not
+            // compile (#7117). Those sources are paired with each class source further down instead.
+            if (classTypeArgCount > 0 && methodTypeArgCount > 0 && typeArguments.Length != classTypeArgCount + methodTypeArgCount)
+            {
+                return;
+            }
+
             var classTypeArgs = classTypeArgCount > 0 ? typeArguments.Take(classTypeArgCount).ToArray() : Array.Empty<ITypeSymbol>();
             var methodTypeArgs = methodTypeArgCount > 0 ? typeArguments.Skip(classTypeArgCount).ToArray() : Array.Empty<ITypeSymbol>();
 
@@ -1238,8 +1247,61 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     .ToList()
                 : [];
 
-            if (testMethod is { IsGenericType: true, IsGenericMethod: true } && classGenericTestAttrs.Count > 0 && methodGenericTestAttrs.Count > 0)
+            if (testMethod is { IsGenericType: true, IsGenericMethod: true })
             {
+                // A generic method of a generic class pairs every class source with every method
+                // source (#7117), as reflection mode closes the method on each concrete class. Class
+                // rows paired with method rows were added above. Rows come before [GenerateGenericTest]
+                // types, so a type that a row infers runs only that row, while any other type runs
+                // every method data source.
+                foreach (var classGenericTest in classGenericTestAttrs)
+                {
+                    var classIsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, classGenericTest.TypeArgs!, compilation);
+                    foreach (var methodArgAttr in methodArgumentsAttributes)
+                    {
+                        var methodTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodArgAttr, compilation);
+                        if (methodTypes is { Length: > 0 })
+                        {
+                            TryAddInstantiation(classGenericTest.TypeArgs!.Concat(methodTypes).ToArray(), methodArgAttr,
+                                reportMethodConstraintViolation: true,
+                                reportClassViolationAs: ClassViolationSource.GenerateGenericTest,
+                                violationSource: classIsValid ? null : classGenericTest.Attribute);
+                        }
+                    }
+                }
+
+                foreach (var classAttr in classArgumentsAttributes)
+                {
+                    var classTypes = InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, classAttr, compilation);
+                    if (classTypes is not { Length: > 0 })
+                    {
+                        continue;
+                    }
+
+                    var classIsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes, compilation);
+                    foreach (var methodGenericTest in methodGenericTestAttrs)
+                    {
+                        var countBefore = results.Count;
+                        TryAddInstantiation(classTypes.Concat(methodGenericTest.TypeArgs!).ToArray(), classAttr,
+                            reportMethodConstraintViolation: true,
+                            reportClassViolationAs: ClassViolationSource.ClassArguments,
+                            violationSource: classIsValid ? methodGenericTest.Attribute : classAttr,
+                            isClassRow: true);
+
+                        // The class row scopes the entry to itself; the [GenerateGenericTest] type runs
+                        // every method data source, as it does on a non-generic class.
+                        if (results.Count > countBefore
+                            && results[results.Count - 1] is { MethodConstraintViolations: null } added
+                            && typedDataSourceBucket is not null)
+                        {
+                            foreach (var dataSource in typedDataSourceBucket)
+                            {
+                                added.AddRow(dataSource, isClassRow: false);
+                            }
+                        }
+                    }
+                }
+
                 // Cartesian product of class and method type args
                 foreach (var classGenericTest in classGenericTestAttrs)
                 {
