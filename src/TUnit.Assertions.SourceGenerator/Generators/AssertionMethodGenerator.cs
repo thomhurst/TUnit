@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Assertions.SourceGenerator.Models;
@@ -436,7 +437,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         }
 
         // Track all generated classes globally to avoid duplicates across different extension classes
-        var allGeneratedClasses = new HashSet<string>();
+        var allGeneratedClasses = new GeneratedClassRegistry();
 
         // Group by class and generate one file per class. Non-generic attribute data comes first,
         // then generic, so a class using both keeps its existing member order.
@@ -470,7 +471,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         string className,
         string? originalNamespace,
         AssertionEntryModel[] entries,
-        HashSet<string> allGeneratedClasses)
+        GeneratedClassRegistry allGeneratedClasses)
     {
         var sourceBuilder = new StringBuilder();
         // Always generate extension methods in TUnit.Assertions.Extensions namespace
@@ -500,9 +501,15 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine();
         }
 
-        // Generate all assert condition classes first
-        foreach (var entry in entries)
+        // Generate all assert condition classes first. A class name that is already used by a different
+        // member (Box<T>.IsEmpty in two namespaces) is renamed, and the entry's extension methods are
+        // rewritten to construct the renamed class.
+        var extensionSources = new string[entries.Length];
+        for (var entryIndex = 0; entryIndex < entries.Length; entryIndex++)
         {
+            var entry = entries[entryIndex];
+            var extensionSource = entry.ExtensionMethodsSource;
+
             if (entry.MissingMethodMessage is not null)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
@@ -518,22 +525,32 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
             foreach (var conditionClass in entry.ConditionClasses)
             {
-                if (!allGeneratedClasses.Add(conditionClass.Key))
+                var name = allGeneratedClasses.Claim(conditionClass, out var isNew);
+                var renamed = !string.Equals(name, conditionClass.Name, StringComparison.Ordinal);
+
+                if (renamed)
                 {
-                    continue;
+                    extensionSource = RenameIdentifier(extensionSource, conditionClass.Name, name);
                 }
 
-                sourceBuilder.Append(conditionClass.Source);
+                if (isNew)
+                {
+                    sourceBuilder.Append(renamed
+                        ? RenameIdentifier(conditionClass.Source, conditionClass.Name, name)
+                        : conditionClass.Source);
+                }
             }
+
+            extensionSources[entryIndex] = extensionSource;
         }
 
         // Generate extension methods class
         sourceBuilder.AppendLine($"public static partial class {className}");
         sourceBuilder.AppendLine("{");
 
-        foreach (var entry in entries)
+        foreach (var extensionSource in extensionSources)
         {
-            sourceBuilder.Append(entry.ExtensionMethodsSource);
+            sourceBuilder.Append(extensionSource);
         }
 
         sourceBuilder.AppendLine("}");
@@ -628,7 +645,12 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             // MemoryIsEmptyAssertion (from typeof(Memory<int>)) are different classes and can both be needed.
             var classBuilder = new StringBuilder();
             var arity = GenerateAssertConditionClassForMethod(classBuilder, attributeData, method);
-            conditionClasses.Add(new ConditionClassModel($"{className}`{arity.ToString(CultureInfo.InvariantCulture)}", classBuilder.ToString()));
+            conditionClasses.Add(new ConditionClassModel(
+                className,
+                arity,
+                GetConditionClassIdentity(attributeData, method, arity),
+                GetConditionClassDisambiguator(attributeData),
+                classBuilder.ToString()));
         }
 
         return conditionClasses.ToImmutableEquatableArray();
@@ -1449,12 +1471,95 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         string ExtensionMethodsSource
     );
 
-    /// <param name="Key">The class name and its generic arity (<c>MemoryIsEmptyAssertion`1</c>), used to emit each class once.</param>
+    /// <param name="Name">The class name the source was rendered with.</param>
+    /// <param name="Arity">The class's generic arity. Classes with the same name and different arities can coexist.</param>
+    /// <param name="Identity">The member the class asserts on: target type, containing type, member and arity. Attributes with the same identity share one class.</param>
+    /// <param name="Disambiguator">A prefix used to rename the class when a different identity already took its name.</param>
     /// <param name="Source">The rendered class.</param>
     private sealed record ConditionClassModel(
-        string Key,
+        string Name,
+        int Arity,
+        string Identity,
+        string Disambiguator,
         string Source
     );
+
+    /// <summary>
+    /// Gives each generated condition class a unique name across every extension class in the compilation.
+    /// Attributes that assert on the same member share one class. A different member that would get the same
+    /// name, such as <c>Box&lt;T&gt;.IsEmpty</c> declared in two namespaces, gets a prefixed name. Dropping it
+    /// instead would leave its extension method constructing the other member's class.
+    /// </summary>
+    private sealed class GeneratedClassRegistry
+    {
+        private readonly HashSet<string> _takenKeys = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, string> _nameByIdentity = new(StringComparer.Ordinal);
+
+        /// <param name="conditionClass">The rendered class.</param>
+        /// <param name="isNew">Whether the class still has to be emitted.</param>
+        /// <returns>The name to use for the class.</returns>
+        public string Claim(ConditionClassModel conditionClass, out bool isNew)
+        {
+            if (_nameByIdentity.TryGetValue(conditionClass.Identity, out var existingName))
+            {
+                isNew = false;
+                return existingName;
+            }
+
+            var name = conditionClass.Name;
+            if (_takenKeys.Contains(Key(name, conditionClass.Arity)))
+            {
+                var prefixed = conditionClass.Disambiguator + conditionClass.Name;
+                name = prefixed;
+                for (var suffix = 2; _takenKeys.Contains(Key(name, conditionClass.Arity)); suffix++)
+                {
+                    name = prefixed + suffix.ToString(CultureInfo.InvariantCulture);
+                }
+            }
+
+            _takenKeys.Add(Key(name, conditionClass.Arity));
+            _nameByIdentity.Add(conditionClass.Identity, name);
+            isNew = true;
+            return name;
+        }
+
+        private static string Key(string name, int arity) => $"{name}`{arity.ToString(CultureInfo.InvariantCulture)}";
+    }
+
+    private static string GetConditionClassIdentity(CreateAssertionAttributeData attributeData, IMethodSymbol method, int arity) =>
+        string.Join("|",
+            attributeData.TargetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            attributeData.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            method.ToDisplayString(),
+            arity.ToString(CultureInfo.InvariantCulture));
+
+    /// <summary>
+    /// The namespace, and any containing types, of the type that declares the member, as an identifier prefix.
+    /// For example <c>Repro.Two</c> becomes <c>ReproTwo</c>.
+    /// </summary>
+    private static string GetConditionClassDisambiguator(CreateAssertionAttributeData attributeData)
+    {
+        var container = attributeData.ContainingType.ContainingSymbol;
+        if (container is null or INamespaceSymbol { IsGlobalNamespace: true })
+        {
+            return "Global";
+        }
+
+        var builder = new StringBuilder();
+        foreach (var character in container.ToDisplayString())
+        {
+            if (char.IsLetterOrDigit(character) || character == '_')
+            {
+                builder.Append(builder.Length == 0 ? char.ToUpperInvariant(character) : character);
+            }
+        }
+
+        return builder.Length == 0 || char.IsDigit(builder[0]) ? "Global" + builder : builder.ToString();
+    }
+
+    /// <summary>Replaces whole-identifier occurrences of <paramref name="oldName"/>.</summary>
+    private static string RenameIdentifier(string source, string oldName, string newName) =>
+        Regex.Replace(source, $@"(?<![\w@]){Regex.Escape(oldName)}(?!\w)", newName);
 
     /// <summary>
     /// Symbol-based attribute data. Only used inside the transform; never flows through the pipeline.
