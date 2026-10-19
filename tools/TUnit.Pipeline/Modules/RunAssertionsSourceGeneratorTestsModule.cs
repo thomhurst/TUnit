@@ -13,20 +13,7 @@ public class RunAssertionsSourceGeneratorTestsModule : TestBaseModule
 {
     // Generator output snapshots verify behaviour across consumer TFMs — keep aligned with
     // <TargetFrameworks> in TUnit.Assertions.SourceGenerator.Tests.csproj.
-    protected override IEnumerable<string> TestableFrameworks
-    {
-        get
-        {
-            yield return "net10.0";
-            yield return "net9.0";
-            yield return "net8.0";
-
-            if (IsWindows)
-            {
-                yield return "net472";
-            }
-        }
-    }
+    protected override IEnumerable<string> TestableFrameworks => ModernAndNetFrameworks;
 
     protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {
