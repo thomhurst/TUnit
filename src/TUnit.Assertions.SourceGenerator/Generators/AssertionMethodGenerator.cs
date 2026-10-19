@@ -139,7 +139,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     treatAsInstance,
                     expectationMessage,
                     isUnboundGeneric,
-                    attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                    attributeData.ApplicationSyntaxReference
                 );
 
                 attributeDataList.Add(createAssertionAttributeData);
@@ -248,7 +248,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     treatAsInstance,
                     expectationMessage,
                     isUnboundGeneric,
-                    attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                    attributeData.ApplicationSyntaxReference
                 );
 
                 attributeDataList.Add(createAssertionAttributeData);
@@ -524,7 +524,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         // Only keep the location when there is something to report: it changes with every edit above the attribute,
         // and would otherwise stop unrelated edits from being cached
         var attributeLocation = missingMethodMessage is not null || collidingClassNames.Count > 0
-            ? AttributeLocationModel.From(attributeData.AttributeLocation)
+            ? AttributeLocationModel.From(attributeData.AttributeSyntax)
             : null;
 
         return new AssertionEntryModel(conditionClasses, missingMethodMessage, extensionMethodsSource, collidingClassNames, attributeLocation);
@@ -1482,10 +1482,22 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     /// </summary>
     private sealed record AttributeLocationModel(string FilePath, TextSpan Span, LinePositionSpan LineSpan)
     {
-        public static AttributeLocationModel? From(Location? location) =>
-            location is { IsInSource: true } && location.GetLineSpan() is { Path: { Length: > 0 } path } lineSpan
+        /// <remarks>
+        /// Takes the <see cref="SyntaxReference"/> rather than a <see cref="Location"/> so the location is only
+        /// computed for the attributes that report a diagnostic, not for every attribute on every pass.
+        /// </remarks>
+        public static AttributeLocationModel? From(SyntaxReference? syntax)
+        {
+            if (syntax is null)
+            {
+                return null;
+            }
+
+            var location = Location.Create(syntax.SyntaxTree, syntax.Span);
+            return location.GetLineSpan() is { Path: { Length: > 0 } path } lineSpan
                 ? new AttributeLocationModel(path, location.SourceSpan, lineSpan.Span)
                 : null;
+        }
 
         public static Location ToLocation(AttributeLocationModel? model) =>
             model is null ? Location.None : Location.Create(model.FilePath, model.Span, model.LineSpan);
@@ -1509,6 +1521,6 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         bool TreatAsInstance,
         string? ExpectationMessage,
         bool IsUnboundGeneric,
-        Location? AttributeLocation
+        SyntaxReference? AttributeSyntax
     );
 }

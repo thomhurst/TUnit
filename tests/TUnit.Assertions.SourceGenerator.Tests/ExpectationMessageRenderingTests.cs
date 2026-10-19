@@ -19,6 +19,7 @@ internal class ExpectationMessageRenderingTests
             public static bool Canonical(string value) => true;
             public static bool SpelledOutTo(string value) => true;
             public static bool SpelledOutNot(string value, string text) => true;
+            public static bool LeadingNot(string value, string text) => true;
             public static bool EscapedBraces(string value, string text) => true;
             public static bool UnknownPlaceholder(string value, string ending) => true;
             public static bool NonAscii(string value, string önskad) => true;
@@ -30,6 +31,7 @@ internal class ExpectationMessageRenderingTests
         [AssertionFrom<string>(typeof(Methods), nameof(Methods.Canonical), ExpectationMessage = "be blank")]
         [AssertionFrom<string>(typeof(Methods), nameof(Methods.SpelledOutTo), ExpectationMessage = "to be spelled out")]
         [AssertionFrom<string>(typeof(Methods), nameof(Methods.SpelledOutNot), NegateLogic = true, ExpectationMessage = "to not contain {text}")]
+        [AssertionFrom<string>(typeof(Methods), nameof(Methods.LeadingNot), NegateLogic = true, ExpectationMessage = "not start with {text}")]
         [AssertionFrom<string>(typeof(Methods), nameof(Methods.EscapedBraces), ExpectationMessage = "contain {{text}} and {text}")]
         [AssertionFrom<string>(typeof(Methods), nameof(Methods.UnknownPlaceholder), ExpectationMessage = "end with {suffix}")]
         [AssertionFrom<string>(typeof(Methods), nameof(Methods.NonAscii), ExpectationMessage = "contain {önskad}")]
@@ -46,6 +48,7 @@ internal class ExpectationMessageRenderingTests
     [Arguments("Canonical form", @"$""to {(_negated ? ""not "" : """")}be blank""")]
     [Arguments("Leading 'to' is not repeated", @"$""to {(_negated ? ""not "" : """")}be spelled out""")]
     [Arguments("Spelled-out 'not' is not negated again", @"$""to not contain {_text}""")]
+    [Arguments("Leading 'not' without 'to' is not negated again", @"$""to not start with {_text}""")]
     [Arguments("Escaped braces stay literal", @"$""to {(_negated ? ""not "" : """")}contain {{text}} and {_text}""")]
     [Arguments("Unknown placeholder stays literal", @"$""to {(_negated ? ""not "" : """")}end with {{suffix}}""")]
     [Arguments("Non-ASCII placeholder", @"$""to {(_negated ? ""not "" : """")}contain {_önskad}""")]
