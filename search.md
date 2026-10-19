@@ -4,7 +4,7 @@
 
 [**TUnit**](/)[Docs](/docs/intro.md)[Issues](https://github.com/thomhurst/TUnit/issues)[Discussions](https://github.com/thomhurst/TUnit/discussions)
 
-[NuGet](https://www.nuget.org/packages/TUnit)[GitHub](https://github.com/thomhurst/TUnit)[❤️ Sponsor](https://github.com/sponsors/thomhurst)
+[More libraries](https://tomlonghurst.dev/)[NuGet](https://www.nuget.org/packages/TUnit)[GitHub](https://github.com/thomhurst/TUnit)[❤️ Sponsor](https://github.com/sponsors/thomhurst)
 
 Search
 
@@ -27,5 +27,14 @@ More
 
 * [GitHub](https://github.com/thomhurst/TUnit)
 * [NuGet](https://www.nuget.org/packages/TUnit)
+
+More libraries
+
+* [ModularPipelines](https://modularpipelines.tomlonghurst.dev/)
+* [Respire](https://respire.tomlonghurst.dev/)
+* [Kevlar](https://kevlar.tomlonghurst.dev/)
+* [Dekaf](https://dekaf.tomlonghurst.dev/)
+* [BDTest](https://bdtest.tomlonghurst.dev/)
+* [All projects](https://tomlonghurst.dev/)
 
 Copyright © 2026 Tom Longhurst. Built with Docusaurus.
