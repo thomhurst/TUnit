@@ -158,6 +158,9 @@ public static class ArgumentFormatter
 
     private static bool IsNumeric(object o, Type type)
     {
+        // An explicit allow-list rather than a plain `o is IFormattable` check: DateTime, DateTimeOffset,
+        // TimeSpan, Guid, enums and user types are IFormattable too, and their display text must not change.
+        // A new numeric type has to be added here.
         // bool and char are primitive but not IFormattable, and their text doesn't depend on culture.
         return (type.IsPrimitive && o is IFormattable)
             || o is decimal or BigInteger or Complex
