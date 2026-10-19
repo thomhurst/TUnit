@@ -4,7 +4,7 @@ namespace TUnit.Assertions.SourceGenerator.Tests;
 
 /// <summary>
 /// Pins the <c>GetExpectation()</c> code <see cref="AssertionMethodGenerator"/> renders for each documented form of
-/// [AssertionFrom] <c>ExpectationMessage</c>, and the diagnostic for overloads that share a condition class.
+/// [AssertionFrom] <c>ExpectationMessage</c>, and the classes for overloads that share a condition class name.
 /// </summary>
 internal class ExpectationMessageRenderingTests
 {
@@ -70,9 +70,9 @@ internal class ExpectationMessageRenderingTests
     }
 
     [Test]
-    public async Task Overloads_Sharing_A_Condition_Class_Are_Reported_At_The_Attribute()
+    public async Task Overloads_Sharing_A_Class_Name_Each_Bind_To_Their_Own_Class()
     {
-        var (_, diagnostics) = AssertionMethodGeneratorRunner.Run(
+        var (sources, diagnostics) = AssertionMethodGeneratorRunner.Run(
             """
             using TUnit.Assertions.Attributes;
 
@@ -88,19 +88,11 @@ internal class ExpectationMessageRenderingTests
             public static partial class OverloadAssertions;
             """);
 
-        var diagnostic = diagnostics.Single(x => x.Id == "TU0002");
-        var lineSpan = diagnostic.Location.GetLineSpan();
+        var source = string.Join(Environment.NewLine, sources);
 
-        await Assert.That(lineSpan.Path).IsEqualTo(AssertionMethodGeneratorRunner.InputPath);
-        // Line 10 (0-based): the [AssertionFrom] line
-        await Assert.That(lineSpan.StartLinePosition.Line).IsEqualTo(10);
-    }
-
-    [Test]
-    public async Task Distinct_Overloads_Are_Not_Reported()
-    {
-        var (_, diagnostics) = AssertionMethodGeneratorRunner.Run(MessagesSource);
-
-        await Assert.That(diagnostics.Select(x => x.Id)).DoesNotContain("TU0002");
+        await Assert.That(diagnostics).IsEmpty();
+        await Assert.That(source).Contains("new StringOverloadsMatchesWithStringAnd1MoreAssertion(source.Context, count, false)");
+        await Assert.That(source).Contains("new StringOverloadsMatchesWithStringAnd1MoreAssertion2(source.Context, flag, false)");
+        await Assert.That(source).Contains("Rendering.Overloads.Matches(actualValue, _flag)");
     }
 }

@@ -340,33 +340,30 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         }
     }
 
-    private static readonly DiagnosticDescriptor OverloadsShareConditionClass = new(
-        "TU0002",
-        "Overloads share a generated assertion class",
-        "More than one overload maps to the generated assertion class '{0}'; only the first one is generated, and the extension methods for the others use it",
-        "TUnit.Assertions",
-        DiagnosticSeverity.Warning,
-        true);
-
     private const char ClassNameMarker = '\u0001';
+    private const char OverloadSeparator = '\u0002';
 
     /// <summary>
-    /// How pre-rendered source refers to a condition class: its name between markers that cannot occur in C# source,
-    /// so the emit step, which alone knows the final name, can substitute it with a plain replace. A reference that is
-    /// never resolved leaves a marker behind, which fails the build loudly rather than binding to a wrong class.
+    /// How pre-rendered source refers to the condition class for <paramref name="method"/>: its name and the overload
+    /// it was generated for, between markers that cannot occur in C# source, so the emit step, which alone knows the
+    /// final name, can substitute it with a plain replace. Including the overload keeps overloads that map to the
+    /// same class name apart, so each binds to its own class. A reference that is never resolved leaves a marker
+    /// behind, which fails the build loudly rather than binding to a wrong class.
     /// </summary>
-    private static string ClassNameReference(string className) => $"{ClassNameMarker}{className}{ClassNameMarker}";
+    private static string ClassNameReference(string className, IMethodSymbol method) =>
+        $"{ClassNameMarker}{className}{OverloadSeparator}{method.OriginalDefinition.ToDisplayString()}{ClassNameMarker}";
 
-    /// <summary>Substitutes <paramref name="name"/> for every reference to the <paramref name="className"/> class.</summary>
-    private static string ResolveClassName(string source, string className, string name) =>
-        source.Replace(ClassNameReference(className), name);
+    /// <summary>Substitutes <paramref name="name"/> for every occurrence of <paramref name="reference"/>.</summary>
+    private static string ResolveClassName(string source, string reference, string name) =>
+        source.Replace(reference, name);
 
     /// <summary>
     /// The condition classes emitted so far, across every extension class. A condition class is named after its
     /// target method, so attributes on the same method share it, which is fine while their sources match (e.g.
     /// <c>IsNullOrEmpty</c> and its <c>NegateLogic</c> counterpart, which passes the negation to the constructor).
-    /// A class with the same name but a different source, such as a different <c>ExpectationMessage</c>, gets a
-    /// numbered name instead of being dropped, so its attribute keeps its own message.
+    /// A class with the same name but a different source, such as a different <c>ExpectationMessage</c> or another
+    /// overload of the same method that maps to the same name, gets a numbered name instead of being dropped, so its
+    /// attribute keeps its own message and each overload its own class.
     /// </summary>
     private sealed class GeneratedConditionClasses
     {
@@ -462,28 +459,15 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     AttributeLocationModel.ToLocation(entry.AttributeLocation)));
             }
 
-            foreach (var collidingClassName in entry.CollidingClassNames)
-            {
-                context.ReportDiagnostic(Diagnostic.Create(OverloadsShareConditionClass, AttributeLocationModel.ToLocation(entry.AttributeLocation), collidingClassName));
-            }
-
             var extensionMethodsSource = entry.ExtensionMethodsSource;
-            var namesInEntry = new HashSet<string>(StringComparer.Ordinal);
             foreach (var conditionClass in entry.ConditionClasses)
             {
-                // Overloads that map to the same class name can't be told apart in the extension methods, so the
-                // first one wins, as before (reported above when the others would have been different)
-                if (!namesInEntry.Add(conditionClass.ClassName))
-                {
-                    continue;
-                }
-
                 var (name, isNew) = allGeneratedClasses.Claim(conditionClass);
-                extensionMethodsSource = ResolveClassName(extensionMethodsSource, conditionClass.ClassName, name);
+                extensionMethodsSource = ResolveClassName(extensionMethodsSource, conditionClass.Reference, name);
 
                 if (isNew)
                 {
-                    sourceBuilder.Append(ResolveClassName(conditionClass.Source, conditionClass.ClassName, name));
+                    sourceBuilder.Append(ResolveClassName(conditionClass.Source, conditionClass.Reference, name));
                 }
             }
 
@@ -514,20 +498,13 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         var conditionClasses = RenderConditionClasses(attributeData, out var missingMethodMessage);
         var extensionMethodsSource = RenderExtensionMethods(attributeData);
 
-        // Overloads that map to the same class name but would generate different classes; only the first is emitted
-        var collidingClassNames = conditionClasses
-            .GroupBy(x => x.ClassName, StringComparer.Ordinal)
-            .Where(group => group.Select(x => x.Source).Distinct(StringComparer.Ordinal).Skip(1).Any())
-            .Select(group => group.Key)
-            .ToImmutableEquatableArray();
-
         // Only keep the location when there is something to report: it changes with every edit above the attribute,
         // and would otherwise stop unrelated edits from being cached
-        var attributeLocation = missingMethodMessage is not null || collidingClassNames.Count > 0
+        var attributeLocation = missingMethodMessage is not null
             ? AttributeLocationModel.From(attributeData.AttributeSyntax)
             : null;
 
-        return new AssertionEntryModel(conditionClasses, missingMethodMessage, extensionMethodsSource, collidingClassNames, attributeLocation);
+        return new AssertionEntryModel(conditionClasses, missingMethodMessage, extensionMethodsSource, attributeLocation);
     }
 
     private static ImmutableEquatableArray<ConditionClassModel> RenderConditionClasses(CreateAssertionAttributeData attributeData, out string? missingMethodMessage)
@@ -618,11 +595,11 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         {
             var className = GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, attributeData.MethodName, method);
 
-            // Duplicate class names are dropped at emit time, where the set of classes
+            // Duplicate class names are resolved at emit time, where the set of classes
             // already written across every extension class is known.
             var classBuilder = new StringBuilder();
             GenerateAssertConditionClassForMethod(classBuilder, attributeData, method);
-            conditionClasses.Add(new ConditionClassModel(className, classBuilder.ToString()));
+            conditionClasses.Add(new ConditionClassModel(className, ClassNameReference(className, method), classBuilder.ToString()));
         }
 
         return conditionClasses.ToImmutableEquatableArray();
@@ -690,7 +667,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         var containingType = attributeData.ContainingType;
         var methodName = attributeData.MethodName;
 
-        var className = ClassNameReference(GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod));
+        var className = ClassNameReference(GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod), staticMethod);
 
         // Determine which parameters to skip
         IParameterSymbol[] parameters;
@@ -1287,7 +1264,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         var methodName = attributeData.MethodName;
 
         var baseMethodName = attributeData.CustomName ?? methodName;
-        var className = ClassNameReference(GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod));
+        var className = ClassNameReference(GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod), staticMethod);
 
         var actualMethodName = baseMethodName;
         if (staticMethod.Parameters.Length > 1)
@@ -1472,7 +1449,6 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         ImmutableEquatableArray<ConditionClassModel> ConditionClasses,
         string? MissingMethodMessage,
         string ExtensionMethodsSource,
-        ImmutableEquatableArray<string> CollidingClassNames,
         AttributeLocationModel? AttributeLocation
     );
 
@@ -1503,8 +1479,12 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             model is null ? Location.None : Location.Create(model.FilePath, model.Span, model.LineSpan);
     }
 
+    /// <param name="ClassName">The name the class is generated under, unless it is taken by a different class.</param>
+    /// <param name="Reference">How <paramref name="Source"/> and the extension methods refer to the class.</param>
+    /// <param name="Source">The class's source, referring to itself through <paramref name="Reference"/>.</param>
     private sealed record ConditionClassModel(
         string ClassName,
+        string Reference,
         string Source
     );
 
