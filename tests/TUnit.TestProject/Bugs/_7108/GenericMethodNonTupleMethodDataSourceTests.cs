@@ -80,6 +80,16 @@ public class GenericMethodNonTupleMethodDataSourceTests
     }
 
     // Declared before the int overload: an exact argument type beats an implicit conversion
+    public static IEnumerable<double> FloatWideningRows(double value)
+    {
+        yield return value;
+    }
+
+    public static IEnumerable<long> LongRows(long value)
+    {
+        yield return value;
+    }
+
     public static IEnumerable<string> ExactTypeRows(long value)
     {
         yield return "long";
@@ -209,6 +219,22 @@ public class GenericMethodNonTupleMethodDataSourceTests
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(long));
         await Assert.That(value).IsEqualTo((T)(object)13L);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(FloatWideningRows), Arguments = new object[] { 1.5f })]
+    public async Task Float_Argument_Is_Widened_To_Double<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(double));
+        await Assert.That(value).IsEqualTo((T)(object)1.5d);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(LongRows), Arguments = new object[] { 16L })]
+    public async Task Long_Argument_Keeps_Its_Type<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(long));
+        await Assert.That(value).IsEqualTo((T)(object)16L);
     }
 
     [Test]

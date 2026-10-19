@@ -2616,82 +2616,35 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return InterfaceHelper.IsEnumerable(type);
     }
 
+    private static readonly TypedConstantFormatter TypedConstantLiteralFormatter = new();
+
+    /// <summary>
+    /// Writes an attribute argument as a C# expression of the same type, so a boxed value keeps its type:
+    /// <c>1.5f</c> stays a <c>float</c> and <c>16L</c> a <c>long</c>, as in the attribute reflection mode reads.
+    /// </summary>
     private static void WriteTypedConstant(CodeWriter writer, TypedConstant constant)
     {
-        if (constant.IsNull)
+        if (constant is { Kind: TypedConstantKind.Array, IsNull: false })
         {
-            writer.Append("null");
+            var elementType = constant.Type is IArrayTypeSymbol arrayType
+                ? arrayType.ElementType.GloballyQualified()
+                : "object";
+            writer.Append($"new {elementType}[] {{ ");
+            for (var i = 0; i < constant.Values.Length; i++)
+            {
+                WriteTypedConstant(writer, constant.Values[i]);
+                if (i < constant.Values.Length - 1)
+                {
+                    writer.Append(", ");
+                }
+            }
+            writer.Append(" }");
             return;
         }
 
-        switch (constant.Kind)
-        {
-            case TypedConstantKind.Primitive:
-                if (constant.Type?.SpecialType == SpecialType.System_String)
-                {
-                    var stringValue = constant.Value.ToInvariantString() ?? "";
-                    var escapedValue = stringValue
-                        .Replace("\\", "\\\\")
-                        .Replace("\"", "\\\"")
-                        .Replace("\r", "\\r")
-                        .Replace("\n", "\\n")
-                        .Replace("\t", "\\t");
-                    writer.Append($"\"{escapedValue}\"");
-                }
-                else if (constant.Type?.SpecialType == SpecialType.System_Char)
-                {
-                    var charValue = constant.Value.ToInvariantString() ?? "";
-                    var escapedChar = charValue
-                        .Replace("\\", "\\\\")
-                        .Replace("'", "\\'")
-                        .Replace("\r", "\\r")
-                        .Replace("\n", "\\n")
-                        .Replace("\t", "\\t");
-                    writer.Append($"'{escapedChar}'");
-                }
-                else if (constant.Type?.SpecialType == SpecialType.System_Boolean)
-                {
-                    writer.Append(constant.Value?.ToString()?.ToLowerInvariant() ?? "false");
-                }
-                else
-                {
-                    // Handle numeric types with InvariantCulture to ensure consistent formatting
-                    if (constant.Value is IFormattable formattable)
-                    {
-                        writer.Append(formattable.ToString(null, CultureInfo.InvariantCulture));
-                    }
-                    else
-                    {
-                        writer.Append(constant.Value.ToInvariantString() ?? "null");
-                    }
-                }
-                break;
-
-            case TypedConstantKind.Type:
-                var type = constant.Value as ITypeSymbol;
-                writer.Append($"typeof({type?.GloballyQualified()})");
-                break;
-
-            case TypedConstantKind.Array:
-                var elementType = constant.Type is IArrayTypeSymbol arrayType
-                    ? arrayType.ElementType.GloballyQualified()
-                    : "object";
-                writer.Append($"new {elementType}[] {{ ");
-                for (var i = 0; i < constant.Values.Length; i++)
-                {
-                    WriteTypedConstant(writer, constant.Values[i]);
-                    if (i < constant.Values.Length - 1)
-                    {
-                        writer.Append(", ");
-                    }
-                }
-                writer.Append(" }");
-                break;
-
-            default:
-                writer.Append("null");
-                break;
-        }
+        // No target type: each value is written as its own type, with a literal suffix or cast where needed,
+        // and enum values as enum members.
+        writer.Append(TypedConstantLiteralFormatter.FormatForCode(constant));
     }
 
     private static void GeneratePropertyInjections(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
