@@ -449,7 +449,7 @@ public class ShouldExtensionGeneratorTests
         var compilation = CSharpCompilation.Create(
             assemblyName: "GeneratorTest",
             syntaxTrees: inputTrees,
-            references: GetReferences(),
+            references: References,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         var driver = CSharpGeneratorDriver.Create(new ShouldExtensionGenerator());
@@ -472,7 +472,8 @@ public class ShouldExtensionGeneratorTests
         return combined;
     }
 
-    private static IEnumerable<MetadataReference> GetReferences() =>
+    // Built once: every test compiles against the same references, and each one reads its file from disk
+    private static readonly List<PortableExecutableReference> References =
         TestHostReferences.CreateReferences(
             typeof(Assertion<>).Assembly,
             typeof(TUnit.Assertions.Should.Core.IShouldSource).Assembly);
