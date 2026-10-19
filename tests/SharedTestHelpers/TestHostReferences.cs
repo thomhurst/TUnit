@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using Microsoft.CodeAnalysis;
 
 namespace TUnit.Tests.Shared;
 
@@ -23,6 +25,23 @@ internal static class TestHostReferences
 {
     /// <summary>The assembly paths to reference, sorted by file name and then by path.</summary>
     public static IReadOnlyList<string> AssemblyPaths { get; } = Resolve();
+
+    /// <summary>
+    /// Metadata references to <see cref="AssemblyPaths"/>, followed by <paramref name="additionalAssemblies"/>.
+    /// </summary>
+    public static List<PortableExecutableReference> CreateReferences(params Assembly[] additionalAssemblies) =>
+        CreateReferences(static _ => true, additionalAssemblies);
+
+    /// <summary>
+    /// Metadata references to the <see cref="AssemblyPaths"/> that <paramref name="includeHostAssembly"/> accepts,
+    /// followed by <paramref name="additionalAssemblies"/>.
+    /// </summary>
+    public static List<PortableExecutableReference> CreateReferences(Func<string, bool> includeHostAssembly, params Assembly[] additionalAssemblies) =>
+        AssemblyPaths
+            .Where(includeHostAssembly)
+            .Concat(additionalAssemblies.Select(assembly => assembly.Location))
+            .Select(path => MetadataReference.CreateFromFile(path))
+            .ToList();
 
     /// <summary>
     /// Reads <c>TRUSTED_PLATFORM_ASSEMBLIES</c> on .NET, or the loaded assemblies on .NET Framework, and sorts them.
