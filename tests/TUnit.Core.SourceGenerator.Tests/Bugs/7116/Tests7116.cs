@@ -33,5 +33,15 @@ internal class Tests7116 : TestsBase
                 await Assert.That(source).DoesNotContain(violation);
                 await Assert.That(source).Contains($"instance.{methodName}<global::System.IO.MemoryStream>(");
             }
+
+            // Both sources' rows run on the [GenerateGenericTest] type, including the object-declared one.
+            var exactAndObject = SourceFor("GenerateGenericTestWithExactAndObjectRows");
+            await Assert.That(exactAndObject).DoesNotContain(violation);
+            await Assert.That(exactAndObject).Contains("DeclaredTypeInferenceTests.ExactStreams()");
+            await Assert.That(exactAndObject).Contains("DeclaredTypeInferenceTests.Streams()");
+
+            // An empty [GenerateGenericTest] does not suppress the violation, so the rows are not lost.
+            await Assert.That(SourceFor("EmptyGenerateGenericTestWithObjectRows"))
+                .Contains("'T' was inferred from the declared type 'object' of the data source");
         });
 }

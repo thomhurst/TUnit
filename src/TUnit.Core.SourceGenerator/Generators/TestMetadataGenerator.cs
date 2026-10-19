@@ -819,6 +819,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // every instantiation a class row establishes, since reflection mode runs them there too.
         List<AttributeData>? uninferredMethodDataSources = null;
 
+        // Method data sources whose declared types break the method's constraints while a method-level
+        // [GenerateGenericTest] supplies the type arguments. Their rows run on the attribute's types, also
+        // when another data source already created that instantiation (#7116).
+        List<AttributeData>? deferredDataSources = null;
+
         var classTypeArgCount = testMethod.IsGenericType ? testMethod.TypeSymbol.TypeParameters.Length : 0;
         var methodTypeArgCount = testMethod.IsGenericMethod ? testMethod.MethodSymbol.TypeParameters.Length : 0;
 
@@ -840,7 +845,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             AttributeData? violationSource = null,
             bool isClassRow = false,
             AttributeData? methodRow = null,
-            bool fromGenerateGenericTest = false)
+            bool fromGenerateGenericTest = false,
+            bool deferToGenerateGenericTest = false)
         {
             var classTypeArgs = classTypeArgCount > 0 ? typeArguments.Take(classTypeArgCount).ToArray() : Array.Empty<ITypeSymbol>();
             var methodTypeArgs = methodTypeArgCount > 0 ? typeArguments.Skip(classTypeArgCount).ToArray() : Array.Empty<ITypeSymbol>();
@@ -868,6 +874,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 if (!reportMethodConstraintViolation || methodTypeArgs.Length != testMethod.MethodSymbol.TypeParameters.Length)
                 {
+                    if (deferToGenerateGenericTest && specificAttr is not null)
+                    {
+                        (deferredDataSources ??= []).Add(specificAttr);
+                    }
+
                     return;
                 }
 
@@ -1018,6 +1029,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 methodRow: methodAttr);
         }
 
+        // A [GenerateGenericTest] instantiation that another data source already created runs only that
+        // source's rows, so the deferred sources' rows join it rather than being dropped. Reflection mode
+        // does the same in InferMethodInstantiationsFromDataSources (#7116).
+        void JoinDeferredDataSources(ITypeSymbol[] typeArguments)
+        {
+            if (deferredDataSources is not null
+                && rowInstantiations is not null
+                && rowInstantiations.TryGetValue(BuildTypeKey(typeArguments), out var existing))
+            {
+                foreach (var deferred in deferredDataSources)
+                {
+                    existing.AddRow(deferred, isClassRow: false);
+                }
+            }
+        }
+
         // Single-pass classification of method attributes into named buckets, replacing the
         // repeated `.Where(...).ToArray()` scans that previously walked MethodAttributes 6-8 times.
         List<AttributeData>? methodArgumentsBucket = null;
@@ -1157,7 +1184,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // a data source declared with a broad type (object, an interface or int?) supplies more specific
         // values. Reflection mode skips such sources the same way (InferMethodInstantiationsFromDataSources
         // in TUnit.Engine), and TUnit0001 accepts them (#7116).
-        var reportDataSourceConstraintViolations = !(testMethod.IsGenericMethod && generateGenericTestBucket is { Count: > 0 });
+        // Only a [GenerateGenericTest] with a full set of type arguments can run those rows: an empty or
+        // wrongly sized one creates no instantiation, so the rows would silently disappear.
+        var reportDataSourceConstraintViolations = !(testMethod.IsGenericMethod
+            && generateGenericTestBucket is not null
+            && generateGenericTestBucket.Any(a => ExtractTypeArgsFromGenerateGenericTestAttribute(a)?.Length == methodTypeArgCount));
 
         // Process typed data source attributes
         foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
@@ -1165,7 +1196,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var inferredTypes = InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr);
             if (inferredTypes is { Length: > 0 })
             {
-                TryAddInstantiation(inferredTypes, dataSourceAttr, reportMethodConstraintViolation: reportDataSourceConstraintViolations);
+                TryAddInstantiation(inferredTypes, dataSourceAttr, reportMethodConstraintViolation: reportDataSourceConstraintViolations,
+                    deferToGenerateGenericTest: !reportDataSourceConstraintViolations);
             }
         }
 
@@ -1207,7 +1239,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var inferredTypes = InferTypesFromMethodDataSource(testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
                 {
-                    TryAddInstantiation(inferredTypes, mdsAttr, reportMethodConstraintViolation: reportDataSourceConstraintViolations);
+                    TryAddInstantiation(inferredTypes, mdsAttr, reportMethodConstraintViolation: reportDataSourceConstraintViolations,
+                        deferToGenerateGenericTest: !reportDataSourceConstraintViolations);
                 }
             }
         }
@@ -1265,6 +1298,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     foreach (var methodGenericTest in methodGenericTestAttrs)
                     {
                         var combined = classGenericTest.TypeArgs!.Concat(methodGenericTest.TypeArgs!).ToArray();
+                        JoinDeferredDataSources(combined);
                         TryAddInstantiation(combined,
                             reportMethodConstraintViolation: true,
                             reportClassViolationAs: ClassViolationSource.GenerateGenericTest,
@@ -1286,6 +1320,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
                 foreach (var methodGenericTest in methodGenericTestAttrs)
                 {
+                    JoinDeferredDataSources(methodGenericTest.TypeArgs!);
                     TryAddInstantiation(methodGenericTest.TypeArgs!,
                         reportMethodConstraintViolation: true,
                         violationSource: methodGenericTest.Attribute);
@@ -6769,7 +6804,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return type.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T;
         }
 
-        // Arrays are covariant: an object[] value may be a string[].
+        // Arrays of reference types are covariant: an object[] value may be a string[]. An array of a value
+        // type or of an exact type cannot hold another array type.
+        if (type is IArrayTypeSymbol array)
+        {
+            return array.ElementType is not ITypeParameterSymbol && (array.ElementType.IsValueType || IsExactType(array.ElementType));
+        }
+
         return type is INamedTypeSymbol { TypeKind: TypeKind.Class or TypeKind.Delegate, IsSealed: true };
     }
 

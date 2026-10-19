@@ -57,4 +57,27 @@ public class Issue7116Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
+
+    [Test]
+    public async Task GenerateGenericTest_Runs_Broad_Rows_Alongside_A_Source_That_Infers_Its_Type()
+    {
+        await RunTestsWithFilter(
+            $"{ClassFilter}/GenerateGenericTestWithExactAndObjectRows*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task Empty_GenerateGenericTest_Does_Not_Hide_Broad_Rows()
+    {
+        await RunTestsWithFilter(
+            $"{ClassFilter}/EmptyGenerateGenericTestWithObjectRows*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1)
+            ]);
+    }
 }

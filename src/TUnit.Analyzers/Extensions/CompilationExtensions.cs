@@ -202,6 +202,13 @@ public static class CompilationExtensions
             return type.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T;
         }
 
+        // Arrays of reference types are covariant: an object[] value may be a string[]. An array of a value
+        // type or of an exact type cannot hold another array type.
+        if (type is IArrayTypeSymbol array)
+        {
+            return array.ElementType.IsValueType || IsExactType(array.ElementType);
+        }
+
         return type is INamedTypeSymbol { TypeKind: TypeKind.Class or TypeKind.Delegate, IsSealed: true };
     }
 

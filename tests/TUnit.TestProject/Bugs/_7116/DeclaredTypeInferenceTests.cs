@@ -13,6 +13,8 @@ public class DeclaredTypeInferenceTests
 {
     public static IEnumerable<Func<(object, int)>> Streams() => [() => (new MemoryStream(), 1)];
 
+    public static IEnumerable<Func<(MemoryStream, int)>> ExactStreams() => [() => (new MemoryStream(), 2)];
+
     public static IEnumerable<Func<(int?, int)>> NullableNumbers() => [() => (1, 1)];
 
     public static IEnumerable<Func<object>> SingleStreams() => [() => new MemoryStream()];
@@ -44,4 +46,21 @@ public class DeclaredTypeInferenceTests
     [MethodDataSource(nameof(SingleStreams))]
     public async Task GenerateGenericTestWithSingleObjectRows<T>(T value) where T : IDisposable
         => await Assert.That(typeof(T)).IsEqualTo(typeof(MemoryStream));
+
+    // ExactStreams infers MemoryStream itself, so it creates the instantiation that [GenerateGenericTest]
+    // names. The object-declared Streams rows join it rather than being dropped: two tests in both modes.
+    [Test]
+    [GenerateGenericTest(typeof(MemoryStream))]
+    [MethodDataSource(nameof(ExactStreams))]
+    [MethodDataSource(nameof(Streams))]
+    public async Task GenerateGenericTestWithExactAndObjectRows<T>(T value, int marker) where T : IDisposable
+        => await Assert.That(typeof(T)).IsEqualTo(typeof(MemoryStream));
+
+    // An empty [GenerateGenericTest] supplies no type argument, so the rows cannot run on it. The test
+    // fails in both modes instead of silently disappearing.
+    [Test]
+    [GenerateGenericTest]
+    [MethodDataSource(nameof(Streams))]
+    public async Task EmptyGenerateGenericTestWithObjectRows<T>(T value, int marker) where T : IDisposable
+        => await Assert.That(value is MemoryStream).IsTrue();
 }

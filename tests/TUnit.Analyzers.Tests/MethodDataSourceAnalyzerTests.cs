@@ -1702,6 +1702,65 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("int[]", "new int[0]")]
+    [Arguments("string[]", "new string[0]")]
+    [Arguments("int?[]", "new int?[0]")]
+    public async Task Generic_Method_With_Exact_Array_Declared_Type_Keeps_Argument_Type_Message(string declaredType, string value)
+    {
+        // An array of a value type or a sealed type cannot hold another array type, so it is exact (#7116).
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value, int marker) where T : IDisposable => Task.CompletedTask;
+
+                    public static IEnumerable<Func<({{declaredType}}, int)>> Data() { yield return () => ({{value}}, 1); }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments($"{declaredType}, int", "T, int")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Covariant_Array_Declared_Type_Explains_Declared_Type_Inference()
+    {
+        // An object[] value may be an array of a more derived element type.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value, int marker) where T : IDisposable => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(object[], int)>> Data() { yield return () => (new object[0], 1); }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.GenericTypeArgumentInferredFromDeclaredType)
+                    .WithLocation(0)
+                    .WithArguments("T", "object[]")
+            );
+    }
+
+    [Test]
     public async Task Generic_Method_With_Exact_Declared_Type_Keeps_Argument_Type_Message()
     {
         // A sealed declared type cannot hold a value of another type, so the plain mismatch message applies.
