@@ -77,6 +77,57 @@ public class ArgumentFormatterCultureTests
     }
 #endif
 
+#if NET8_0_OR_GREATER
+    /// <summary>
+    /// ArgumentFormatter.IsNumeric is an explicit list of types. This fails when a .NET version adds a
+    /// numeric type (one implementing INumberBase&lt;T&gt;) that the list misses, so that the type's display
+    /// text does not quietly fall back to the current culture.
+    /// </summary>
+    [Test]
+    public async Task Every_Runtime_Numeric_Type_Is_Formatted_Invariantly()
+    {
+        var culture = WithDecimalCommaAndUnicodeMinus("sv-SE");
+        var assemblies = new[] { typeof(int).Assembly, typeof(BigInteger).Assembly, typeof(System.Runtime.InteropServices.NFloat).Assembly }.Distinct();
+        var createValue = typeof(ArgumentFormatterCultureTests).GetMethod(nameof(MinusOneAndAHalf), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
+
+        var checkedTypes = new List<Type>();
+        var cultureDependent = new List<string>();
+        foreach (var type in assemblies.SelectMany(a => a.GetExportedTypes()))
+        {
+            if (!type.IsValueType || type.IsGenericTypeDefinition
+                || !type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(INumberBase<>) && i.GetGenericArguments()[0] == type))
+            {
+                continue;
+            }
+
+            object value;
+            try
+            {
+                value = createValue.MakeGenericMethod(type).Invoke(null, null)!;
+            }
+            catch (System.Reflection.TargetInvocationException)
+            {
+                // The type can't be created from a double (for example char); its text has no culture-specific parts
+                continue;
+            }
+
+            checkedTypes.Add(type);
+            var expected = ((IFormattable)value).ToString(null, CultureInfo.InvariantCulture);
+            var actual = WithCulture(culture, () => ArgumentFormatter.Format(value, []));
+            if (actual != expected)
+            {
+                cultureDependent.Add($"{type.FullName}: '{actual}', expected '{expected}'");
+            }
+        }
+
+        await Assert.That(checkedTypes).Contains(typeof(double));
+        await Assert.That(checkedTypes).Contains(typeof(BigInteger));
+        await Assert.That(cultureDependent).IsEmpty();
+    }
+
+    private static object MinusOneAndAHalf<T>() where T : INumberBase<T> => T.CreateTruncating(-1.5);
+#endif
+
     [Test]
     [MethodDataSource(nameof(Cultures))]
     public async Task Custom_Formatters_Still_Take_Precedence(CultureInfo culture)

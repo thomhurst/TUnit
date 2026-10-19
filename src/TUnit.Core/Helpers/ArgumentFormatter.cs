@@ -162,6 +162,9 @@ public static class ArgumentFormatter
         // TimeSpan, Guid, enums and user types are IFormattable too, and their display text must not change.
         // A new numeric type has to be added here.
         // bool and char are primitive but not IFormattable, and their text doesn't depend on culture.
+        // IntPtr and UIntPtr are primitive too: IFormattable from .NET 5, so formatted invariantly there; on
+        // netstandard2.0 they are not IFormattable and keep ToString(), which formats with the invariant culture.
+        // ArgumentFormatterCultureTests checks every INumberBase<T> type of the runtime against this list.
         return (type.IsPrimitive && o is IFormattable)
             || o is decimal or BigInteger or Complex
 #if NET
