@@ -346,7 +346,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         return new AssertionClassModel(
             classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             classSymbol.Name,
-            classSymbol.ContainingNamespace?.ToDisplayString(),
+            // The global namespace displays as "<global namespace>" and needs no using directive (#7133).
+            classSymbol.ContainingNamespace is { IsGlobalNamespace: false } ns ? ns.ToDisplayString() : null,
             entries.ToImmutableEquatableArray());
     }
 

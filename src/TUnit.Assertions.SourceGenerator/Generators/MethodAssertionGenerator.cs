@@ -355,7 +355,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             containingTypeData = new ContainingTypeData(
                 methodSymbol.ContainingType.Name,
                 methodSymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                methodSymbol.ContainingType.ContainingNamespace.ToDisplayString()
+                // The global namespace displays as "<global namespace>" and needs no using directive (#7133).
+                methodSymbol.ContainingType.ContainingNamespace is { IsGlobalNamespace: false } ns ? ns.ToDisplayString() : null
             );
         }
 
@@ -1468,7 +1469,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
      private record ContainingTypeData(
         string Name,
         string FullContainingType,
-        string ContainingNamespace
+        string? ContainingNamespace
     );
 
     private record struct TargetTypeData(string TypeName, string SimpleTypeName, bool IsNullable, bool IsCovariantCandidate, string ConstraintTypeName);
