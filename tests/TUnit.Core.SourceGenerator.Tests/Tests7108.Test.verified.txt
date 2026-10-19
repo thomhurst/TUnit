@@ -54,7 +54,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Func_Row<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 105,
+            lineNumber: 116,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -135,7 +135,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Plain_Row<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 113,
+            lineNumber: 124,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -216,7 +216,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Array_Row<string>",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 121,
+            lineNumber: 132,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -297,7 +297,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Async_Enumerable_Row<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 129,
+            lineNumber: 140,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -378,7 +378,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Task_Row<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 137,
+            lineNumber: 148,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -459,7 +459,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Test_Data_Row<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 145,
+            lineNumber: 156,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -540,7 +540,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Nested_Generic_Row<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 153,
+            lineNumber: 164,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -622,7 +622,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "text", new g
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Plain_Tuple_Row<int, string>",
             methodTypeArgumentsIdentity: "<int, string>",
             filePath: "",
-            lineNumber: 161,
+            lineNumber: 172,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -704,7 +704,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Data_Method_With_Arguments<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 171,
+            lineNumber: 182,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -822,7 +822,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Array_Element_Row<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 179,
+            lineNumber: 190,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -904,7 +904,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Overload_Selected_By_Arguments<string>",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 187,
+            lineNumber: 198,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -991,7 +991,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Numeric_Argument_Is_Widened<long>",
             methodTypeArgumentsIdentity: "<long>",
             filePath: "",
-            lineNumber: 195,
+            lineNumber: 206,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1016,6 +1016,93 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_Bugs__7108_GenericMethodNonTupleMethodDataSourceTests_Numeric_Argume_3E0DC70E_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests>(static () => TUnit_TestProject_Bugs__7108_GenericMethodNonTupleMethodDataSourceTests_Numeric_Argume_3E0DC70E_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7108_GenericMethodNonTupleMethodDataSourceTests_Exact_Argument_6EF759A6_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests)),
+        Name = "GenericMethodNonTupleMethodDataSourceTests",
+        Namespace = "TUnit.TestProject.Bugs._7108",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Exact_Argument_Type_Beats_Conversion", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests), "Exact_Argument_Type_Beats_Conversion", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, true, "T"), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Exact_Argument_Type_Beats_Conversion<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("ExactTypeRows")
+{Arguments = new object[] { 15 },},
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests>(
+            methodName: "Exact_Argument_Type_Beats_Conversion<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Exact_Argument_Type_Beats_Conversion<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 214,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ExactTypeRows")
+    {
+        Arguments = new object[] { 15 },
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        {
+            var arguments = new object[] { 15 };
+            return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.ExactTypeRows(((int)arguments[0]));
+        }),
+    },
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7108_GenericMethodNonTupleMethodDataSourceTests_Exact_Argument_6EF759A6_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests>(static () => TUnit_TestProject_Bugs__7108_GenericMethodNonTupleMethodDataSourceTests_Exact_Argument_6EF759A6_TestSource.Entries_0);
 }
 
 
@@ -1078,7 +1165,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Exact_Parameter_Count_Overload_Wins<string>",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 203,
+            lineNumber: 222,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1165,7 +1252,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Missing_Optional_Parameter_Uses_Default<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 214,
+            lineNumber: 233,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1252,7 +1339,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Missing_Cancellation_Token_Is_None<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 222,
+            lineNumber: 241,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1338,7 +1425,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.Task_Of_Async_Enumerable_Is_One_Row<IAsyncEnumerable<int>>",
             methodTypeArgumentsIdentity: "<global::System.Collections.Generic.IAsyncEnumerable<int>>",
             filePath: "",
-            lineNumber: 231,
+            lineNumber: 250,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

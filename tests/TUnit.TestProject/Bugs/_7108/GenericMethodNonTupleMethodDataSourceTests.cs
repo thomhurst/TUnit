@@ -79,6 +79,17 @@ public class GenericMethodNonTupleMethodDataSourceTests
         yield return value;
     }
 
+    // Declared before the int overload: an exact argument type beats an implicit conversion
+    public static IEnumerable<string> ExactTypeRows(long value)
+    {
+        yield return "long";
+    }
+
+    public static IEnumerable<int> ExactTypeRows(int value)
+    {
+        yield return value;
+    }
+
     // Reflection only binds overloads with one parameter per argument, so two strings pick (object, object)
     public static IEnumerable<string> OptionalOverloadRows(object first, object second)
     {
@@ -198,6 +209,14 @@ public class GenericMethodNonTupleMethodDataSourceTests
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(long));
         await Assert.That(value).IsEqualTo((T)(object)13L);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ExactTypeRows), Arguments = new object[] { 15 })]
+    public async Task Exact_Argument_Type_Beats_Conversion<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)15);
     }
 
     [Test]
