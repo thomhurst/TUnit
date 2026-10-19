@@ -31,6 +31,12 @@ public class DeclaredTypeInferenceTests
     [MethodDataSource(nameof(NullableNumbers))]
     public async Task NullableDeclaredType<T>(T value, int marker) where T : IComparable
         => await Assert.That(value is int).IsTrue();
+
+    // A typed data source declared as DataSourceGeneratorAttribute<object> infers T = object the same way.
+    [Test]
+    [ObjectStreams]
+    public async Task TypedObjectDeclaredType<T>(T value) where T : IDisposable
+        => await Assert.That(value is MemoryStream).IsTrue();
 #pragma warning restore TUnit0001
 
     // The documented workaround: [GenerateGenericTest] names the type argument, and the broad values
@@ -56,6 +62,14 @@ public class DeclaredTypeInferenceTests
     public async Task GenerateGenericTestWithExactAndObjectRows<T>(T value, int marker) where T : IDisposable
         => await Assert.That(typeof(T)).IsEqualTo(typeof(MemoryStream));
 
+    // A [GenerateGenericTest] with the wrong number of type arguments cannot run the rows either, so the
+    // declared-type violation is still reported rather than the rows silently disappearing.
+    [Test]
+    [GenerateGenericTest(typeof(MemoryStream), typeof(int))]
+    [MethodDataSource(nameof(Streams))]
+    public async Task WrongArityGenerateGenericTestWithObjectRows<T>(T value, int marker) where T : IDisposable
+        => await Assert.That(value is MemoryStream).IsTrue();
+
     // An empty [GenerateGenericTest] supplies no type argument, so the rows cannot run on it. The test
     // fails in both modes instead of silently disappearing.
     [Test]
@@ -63,4 +77,12 @@ public class DeclaredTypeInferenceTests
     [MethodDataSource(nameof(Streams))]
     public async Task EmptyGenerateGenericTestWithObjectRows<T>(T value, int marker) where T : IDisposable
         => await Assert.That(value is MemoryStream).IsTrue();
+}
+
+public class ObjectStreamsAttribute : DataSourceGeneratorAttribute<object>
+{
+    protected override IEnumerable<Func<object>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return () => new MemoryStream();
+    }
 }

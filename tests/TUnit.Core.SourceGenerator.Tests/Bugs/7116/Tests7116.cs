@@ -27,6 +27,10 @@ internal class Tests7116 : TestsBase
             await Assert.That(SourceFor("NullableDeclaredType"))
                 .Contains("'T' was inferred from the declared type 'int?' of the data source");
 
+            // A typed data source (DataSourceGeneratorAttribute<object>) gets the same explanation.
+            await Assert.That(SourceFor("TypedObjectDeclaredType"))
+                .Contains("'T' was inferred from the declared type 'object' of the data source");
+
             foreach (var methodName in new[] { "GenerateGenericTestWithObjectRows", "GenerateGenericTestWithSingleObjectRows" })
             {
                 var source = SourceFor(methodName);
@@ -40,8 +44,11 @@ internal class Tests7116 : TestsBase
             await Assert.That(exactAndObject).Contains("DeclaredTypeInferenceTests.ExactStreams()");
             await Assert.That(exactAndObject).Contains("DeclaredTypeInferenceTests.Streams()");
 
-            // An empty [GenerateGenericTest] does not suppress the violation, so the rows are not lost.
-            await Assert.That(SourceFor("EmptyGenerateGenericTestWithObjectRows"))
-                .Contains("'T' was inferred from the declared type 'object' of the data source");
+            // An empty or wrongly sized [GenerateGenericTest] does not suppress the violation, so the rows are not lost.
+            foreach (var methodName in new[] { "EmptyGenerateGenericTestWithObjectRows", "WrongArityGenerateGenericTestWithObjectRows" })
+            {
+                await Assert.That(SourceFor(methodName))
+                    .Contains("'T' was inferred from the declared type 'object' of the data source");
+            }
         });
 }

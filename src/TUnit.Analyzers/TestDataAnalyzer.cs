@@ -627,19 +627,21 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 // A broad declared type (object, an interface, int?) that a run-time value could still satisfy:
                 // explain that source-generated mode infers the type argument from the declared type (#7116).
-                var declaredTypeMismatch = unwrappedTypes.ZipAll(testParameterTypes, (argument, parameter) => (argument, parameter))
-                    .FirstOrDefault(pair => CompilationExtensions.IsBroadDeclaredTypeArgument(pair.argument, pair.parameter)
-                        && !context.Compilation.CanBindToTestParameter(pair.argument, pair.parameter, inferredTypeArguments));
-
-                if (declaredTypeMismatch.parameter is not null)
+                for (var i = 0; i < unwrappedTypes.Length && i < testParameterTypes.Length; i++)
                 {
-                    context.ReportDiagnostic(
-                        Diagnostic.Create(
-                            Rules.GenericTypeArgumentInferredFromDeclaredType,
-                            attribute.GetLocation(),
-                            declaredTypeMismatch.parameter.Name,
-                            declaredTypeMismatch.argument!.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
-                    return;
+                    var argument = unwrappedTypes[i];
+                    var parameter = testParameterTypes[i];
+                    if (CompilationExtensions.IsBroadDeclaredTypeArgument(argument, parameter)
+                        && !context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments))
+                    {
+                        context.ReportDiagnostic(
+                            Diagnostic.Create(
+                                Rules.GenericTypeArgumentInferredFromDeclaredType,
+                                attribute.GetLocation(),
+                                parameter!.Name,
+                                argument!.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+                        return;
+                    }
                 }
 
                 context.ReportDiagnostic(

@@ -17,6 +17,7 @@ public class Issue7116Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     [Arguments("ObjectDeclaredType", "Type 'Object' does not implement interface 'IDisposable' required for generic parameter 'T'", "'object'")]
     [Arguments("NullableDeclaredType", "Type 'Nullable`1' does not implement interface 'IComparable' required for generic parameter 'T'", "'int?'")]
+    [Arguments("TypedObjectDeclaredType", "Type 'Object' does not implement interface 'IDisposable' required for generic parameter 'T'", "'object'")]
     public async Task Broad_Declared_Type_Fails_In_Source_Generated_Mode_With_Explanation(string methodName, string constraintMessage, string declaredType)
     {
         if (testMode == TestMode.Reflection)
@@ -71,10 +72,12 @@ public class Issue7116Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    public async Task Empty_GenerateGenericTest_Does_Not_Hide_Broad_Rows()
+    [Arguments("EmptyGenerateGenericTestWithObjectRows")]
+    [Arguments("WrongArityGenerateGenericTestWithObjectRows")]
+    public async Task Incomplete_GenerateGenericTest_Does_Not_Hide_Broad_Rows(string methodName)
     {
         await RunTestsWithFilter(
-            $"{ClassFilter}/EmptyGenerateGenericTestWithObjectRows*",
+            $"{ClassFilter}/{methodName}*",
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1)

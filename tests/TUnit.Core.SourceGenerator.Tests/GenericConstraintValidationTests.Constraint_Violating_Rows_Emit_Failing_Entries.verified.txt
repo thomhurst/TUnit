@@ -256,7 +256,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.GenericConstraintValidationTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("Type 'NonImplementingClass' does not implement interface 'ITestInterface' required for generic parameter 'T'")));
+        return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("Type 'NonImplementingClass' does not implement interface 'ITestInterface' required for generic parameter 'T'. 'T' was inferred from the declared type 'NonImplementingClass' of the data source, not from the run-time type of its values: source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].")));
     }
     private static global::System.Attribute[] __Attributes_0(int groupIndex)
     {
@@ -278,7 +278,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    global::TUnit.Core.GenericConstraintViolationDataSource.Create("Type 'NonImplementingClass' does not implement interface 'ITestInterface' required for generic parameter 'T'", new global::TUnit.TestProject.NonImplementingClassDataSource()),
+    global::TUnit.Core.GenericConstraintViolationDataSource.Create("Type 'NonImplementingClass' does not implement interface 'ITestInterface' required for generic parameter 'T'. 'T' was inferred from the declared type 'NonImplementingClass' of the data source, not from the run-time type of its values: source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].", new global::TUnit.TestProject.NonImplementingClassDataSource()),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -1844,7 +1844,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.GenericConstraintRowParityTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("Type 'MismatchedOuterPayload' does not implement interface 'IOut`1' required for generic parameter 'T'")));
+        return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("Type 'MismatchedOuterPayload' does not implement interface 'IOut`1' required for generic parameter 'T'. 'T' was inferred from the declared type 'MismatchedOuterPayload' of the data source, not from the run-time type of its values: source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].")));
     }
     private static global::System.Attribute[] __Attributes_0(int groupIndex)
     {
@@ -1866,7 +1866,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    global::TUnit.Core.GenericConstraintViolationDataSource.Create("Type 'MismatchedOuterPayload' does not implement interface 'IOut`1' required for generic parameter 'T'", new global::TUnit.TestProject.MismatchedOuterPayloadDataSource()),
+    global::TUnit.Core.GenericConstraintViolationDataSource.Create("Type 'MismatchedOuterPayload' does not implement interface 'IOut`1' required for generic parameter 'T'. 'T' was inferred from the declared type 'MismatchedOuterPayload' of the data source, not from the run-time type of its values: source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].", new global::TUnit.TestProject.MismatchedOuterPayloadDataSource()),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,

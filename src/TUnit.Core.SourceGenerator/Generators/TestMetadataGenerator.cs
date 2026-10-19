@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using TUnit.Analyzers.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
@@ -884,14 +885,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 methodConstraintViolation = DescribeMethodConstraintViolation(testMethod.MethodSymbol, methodTypeArgs, testMethod.CompilationContext.Compilation, testMethod.TypeSymbol, classTypeArgs);
 
-                // Inferred from a [MethodDataSource] member's declared type, which a value of a more derived
-                // run-time type could satisfy: explain where the type argument came from (#7116).
+                // Inferred from the declared type of a [MethodDataSource] member or a typed data source
+                // (DataSourceGeneratorAttribute<T> and similar), which a value of a more derived run-time
+                // type could satisfy: explain where the type argument came from (#7116).
                 if (violationSource is null
-                    && specificAttr is { AttributeClass.Name: "MethodDataSourceAttribute" }
+                    && specificAttr?.AttributeClass is { } dataSourceClass
+                    && (dataSourceClass.Name == "MethodDataSourceAttribute" || DataSourceAttributeHelper.IsTypedDataSourceAttribute(dataSourceClass))
                     && TryFindConstraintViolation(testMethod.MethodSymbol.TypeParameters, methodTypeArgs, testMethod.CompilationContext.Compilation,
                         out _, out var violatingIndex, testMethod.TypeSymbol, classTypeArgs)
                     && violatingIndex >= 0
-                    && !IsExactType(methodTypeArgs[violatingIndex]))
+                    && !ExactTypeExtensions.IsExactType(methodTypeArgs[violatingIndex]))
                 {
                     methodConstraintViolation += DescribeDeclaredTypeInference(testMethod.MethodSymbol.TypeParameters[violatingIndex], methodTypeArgs[violatingIndex]);
                 }
@@ -6786,33 +6789,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         => $". '{typeParameter.Name}' was inferred from the declared type '{typeArgument.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}' of the data source, not from the run-time type of its values: "
             + "source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. "
             + "Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].";
-
-    /// <summary>
-    /// Whether every value of <paramref name="type"/> has exactly that run-time type, so a constraint it
-    /// breaks cannot be met by a value of the data source. Keep in step with <c>IsExactType</c> in
-    /// TUnit.Analyzers' <c>CompilationExtensions</c>.
-    /// </summary>
-    private static bool IsExactType(ITypeSymbol type)
-    {
-        if (type is ITypeParameterSymbol or IErrorTypeSymbol || type.TypeKind == TypeKind.Dynamic)
-        {
-            return false;
-        }
-
-        if (type.IsValueType)
-        {
-            return type.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T;
-        }
-
-        // Arrays of reference types are covariant: an object[] value may be a string[]. An array of a value
-        // type or of an exact type cannot hold another array type.
-        if (type is IArrayTypeSymbol array)
-        {
-            return array.ElementType is not ITypeParameterSymbol && (array.ElementType.IsValueType || IsExactType(array.ElementType));
-        }
-
-        return type is INamedTypeSymbol { TypeKind: TypeKind.Class or TypeKind.Delegate, IsSealed: true };
-    }
 
     private static bool HasConstraintViolation(ImmutableArray<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments, Compilation compilation)
         => TryFindConstraintViolation(typeParams, typeArguments, compilation, out _);

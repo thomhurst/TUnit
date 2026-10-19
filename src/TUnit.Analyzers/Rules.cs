@@ -10,6 +10,8 @@ public static class Rules
         CreateDescriptor(DiagnosticIds.WrongArgumentTypeTestData, UsageCategory, DiagnosticSeverity.Error);
 
     // TUnit0001 with a message that explains why a broad declared type fails a generic constraint (#7116).
+    // It deliberately shares the ID, category and severity of WrongArgumentTypeTestData, so existing
+    // suppressions and the release tracking entry for TUnit0001 still apply; only the text differs.
     public static readonly DiagnosticDescriptor GenericTypeArgumentInferredFromDeclaredType =
         CreateDescriptor(DiagnosticIds.WrongArgumentTypeTestData, UsageCategory, DiagnosticSeverity.Error,
             resourcePrefix: DiagnosticIds.WrongArgumentTypeTestData + "DeclaredType");
