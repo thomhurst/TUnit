@@ -26,7 +26,7 @@ public class SigtermTests
         var afterMarker = Path.Combine(markerDirectory, "after.txt");
 
         var testProject = Sourcy.DotNet.Projects.TUnit_TestProject;
-        var executable = Path.Combine(testProject.DirectoryName!, "bin", "Release", NetVersion, "TUnit.TestProject");
+        var executable = Path.Combine(testProject.DirectoryName!, "bin", EnvironmentVariables.BuildConfiguration, NetVersion, "TUnit.TestProject");
 
         var environmentVariables = EnvironmentVariables.DisableHtmlReporterForChildProcess();
         environmentVariables["TUNIT_SIGTERM_MARKER_DIR"] = markerDirectory;

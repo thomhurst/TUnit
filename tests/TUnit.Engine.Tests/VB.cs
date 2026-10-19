@@ -2,6 +2,7 @@
 using CliWrap.Buffered;
 using Shouldly;
 using TUnit.Engine.Tests.Enums;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Engine.Tests;
 
@@ -15,13 +16,13 @@ public class VB
         var testProject = Sourcy.DotNet.Projects.TUnit_TestProject_VB_NET;
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
-        var command = Cli.Wrap("dotnet")
+        var command = Cli.Wrap(DotNetCli.Path)
             .WithArguments(
                 [
                     "run",
                     "--no-build",
                     "-f", "net10.0",
-                    "--configuration", "Release",
+                    "--configuration", EnvironmentVariables.BuildConfiguration,
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_",

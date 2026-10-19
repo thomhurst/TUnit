@@ -9,15 +9,6 @@ namespace TUnit.Pipeline.Modules;
 
 public class RunMockHttpTestsModule : TestBaseModule
 {
-    protected override IEnumerable<string> TestableFrameworks
-    {
-        get
-        {
-            yield return "net10.0";
-            yield return "net8.0";
-        }
-    }
-
     protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Mocks.Http.Tests.csproj").AssertExists();

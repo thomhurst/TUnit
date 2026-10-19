@@ -1,41 +1,34 @@
-using ModularPipelines.Attributes;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
-using ModularPipelines.Models;
-using ModularPipelines.Modules;
 using ModularPipelines.Options;
+using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
-public class RunAspNetCoreAnalyzersTestsModule : Module<CommandResult>
+public class RunAspNetCoreAnalyzersTestsModule : TestBaseModule
 {
-    protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
+    protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.AspNetCore.Analyzers.Tests.csproj").AssertExists();
 
-        return await context.DotNet().Test(new DotNetTestOptions
-        {
-            NoBuild = true,
-            Configuration = "Release",
-            Framework = "net9.0",
-            Arguments = ["--", "--hangdump", "--hangdump-filename", "hangdump.aspnetcore-analyzers-tests.dmp", "--hangdump-timeout", "5m"],
-        }, new CommandExecutionOptions
-        {
-            WorkingDirectory = project.Folder!.Path,
-            EnvironmentVariables = new Dictionary<string, string?>
+        return Task.FromResult<(DotNetRunOptions, CommandExecutionOptions?)>((
+            new DotNetRunOptions
             {
-                ["DISABLE_GITHUB_REPORTER"] = "true",
+                NoBuild = true,
+                Configuration = "Release",
+                Framework = framework,
+                Arguments = ["--hangdump", "--hangdump-filename", $"hangdump.aspnetcore-analyzers-tests-{framework}.dmp", "--hangdump-timeout", "5m"],
             },
-            LogSettings = new CommandLoggingOptions
+            new CommandExecutionOptions
             {
-                ShowCommandArguments = true,
-                ShowStandardError = true,
-                ShowExecutionTime = true,
-                ShowExitCode = true
+                WorkingDirectory = project.Folder!.Path,
+                EnvironmentVariables = new Dictionary<string, string?>
+                {
+                    ["DISABLE_GITHUB_REPORTER"] = "true",
+                }
             }
-        }, cancellationToken);
+        ));
     }
 }
