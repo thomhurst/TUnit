@@ -39,10 +39,6 @@ jobs:
       contents: read
       pull-requests: write
 
-    env:
-      # Cap the write-capable helper so an injected instruction cannot spam the PR.
-      CLAUDE_CODE_SCRIPT_CAPS: '{"pr-review-comment.sh":2}'
-
     steps:
       # Trusted base ref at the workspace root - this is what Claude runs in.
       - name: Checkout base repository
@@ -96,12 +92,9 @@ jobs:
             `pr-head/`. Use `gh pr diff` for the change set.
 
             Instructions:
-            - ALWAYS post a review, even if no issues are found. If the code is good, acknowledge it.
+            - Return the final review as Markdown, even if no issues are found. If the code is good, acknowledge it.
+              Do not post it yourself; a later workflow step posts your final response.
             - Compare the current state of the PR against any previous PR comments to make sure they have been addressed.
-            - You MUST post your review before finishing, by running:
-              `.github/scripts/pr-review-comment.sh "<your review in markdown>"`
-              This always posts to the triggering pull request; you cannot and must
-              not comment on any other pull request or issue.
             - When you find issues, ALWAYS suggest better approaches or architectural improvements, not just minor optimizations.
             - Focus on:
               * Design patterns that could be improved
@@ -113,4 +106,16 @@ jobs:
 
             Use the code review skill to run this review: /code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr_number }}
           claude_args: |
-            --add-dir pr-head --allowedTools "Read,Glob,Grep,Bash(.github/scripts/pr-review-comment.sh:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*)"
+            --add-dir pr-head --allowedTools "Read,Glob,Grep,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*)"
+
+      # Post Claude's final response from trusted base code, so publication does
+      # not depend on the model choosing to call the helper.
+      - name: Post review
+        env:
+          EXECUTION_FILE: ${{ steps.claude-review.outputs.execution_file }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          body=$(jq -r '[.[] | select(.type == "result")] | last | .result // empty' "$EXECUTION_FILE")
+          .github/scripts/pr-review-comment.sh "$body"
