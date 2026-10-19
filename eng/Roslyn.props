@@ -15,6 +15,7 @@
     <ItemGroup Condition="$(_BaseProjectName.EndsWith('.Analyzers'))">
         <EmbeddedResource Include="..\$(_BaseProjectName)\**\*.resx" />
         <Compile Include="..\TUnit.Core.SourceGenerator\Extensions\ParsableTypeExtensions.cs" />
+        <Compile Include="..\TUnit.Core.SourceGenerator\Extensions\ExactTypeExtensions.cs" />
     </ItemGroup>
 
     <!-- AspNetCore.Analyzers: include analyzer release tracking files -->
