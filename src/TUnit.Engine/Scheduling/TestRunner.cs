@@ -160,6 +160,7 @@ public sealed class TestRunner
                     acquiredLimiter = limiter;
                 }
 
+                test.HasStartedExecution = true;
                 test.State = TestState.Running;
                 test.StartTime = DateTimeOffset.UtcNow;
 

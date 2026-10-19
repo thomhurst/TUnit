@@ -188,13 +188,34 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
+    // Reads State and then writes the result without an atomic transition. That is safe because
+    // this runs only after every phase task and the dynamic queue processor have completed, on
+    // the success and the exception paths alike, so no test can still be moving between states.
     private async ValueTask ReportIfNotStartedAsync(AbstractExecutableTest test, string? skipReason)
     {
+        if (test.State == TestState.Failed && !test.HasStartedExecution)
+        {
+            // Failed before execution (data source, argument registration or dependency
+            // resolution error). TestCoordinator normally publishes that failure, but the test
+            // never reached it, so publish it here: it is a real failure, not a skip.
+            var exception = test.Result?.Exception
+                ?? new InvalidOperationException("Test failed before it could be executed");
+            var failedAt = DateTimeOffset.UtcNow;
+            test.StartTime ??= failedAt;
+            test.EndTime ??= failedAt;
+            TestSessionContext.Current?.MarkFailure();
+            await _messageBus.Failed(test.Context, exception, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+            return;
+        }
+
         if (test.State is not (TestState.NotStarted or TestState.WaitingForDependencies or TestState.Queued))
         {
             return;
         }
 
+        // Skipped tests do not fail the session, so this branch leaves the session outcome alone.
+        // The cancelled branch below marks a failure, matching how TestCoordinator reports a
+        // cancelled test.
         if (skipReason is not null)
         {
             _testStateManager.MarkSkipped(test, skipReason);

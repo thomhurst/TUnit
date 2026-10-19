@@ -9,7 +9,9 @@ namespace TUnit.TestProject.Bugs._7119;
 /// unconstrained phase) runs no later than second. Fail-fast then cancels the tests still
 /// waiting for the slot, and the global [NotInParallel] phase never starts. Each test must be
 /// reported exactly once: Fails as failed, every test fail-fast stopped as skipped, and no
-/// extra "Unhandled exception" node for the failure.
+/// extra "Unhandled exception" node for the failure. DataSourceFails fails while its data is
+/// generated, so it is already failed before it runs; fail-fast stops it before it reaches the
+/// coordinator, and it must still be reported as failed.
 /// </summary>
 [EngineTest(ExpectedResult.Failure)]
 public class FailFastReporting7119
@@ -25,4 +27,12 @@ public class FailFastReporting7119
 
     [Test, NotInParallel] public Task Global1() => Task.Delay(100);
     [Test, NotInParallel] public Task Global2() => Task.Delay(100);
+
+    public static IEnumerable<int> ThrowingData() =>
+        throw new InvalidOperationException("Intentional data source failure (#7119)");
+
+    [Test, MethodDataSource(nameof(ThrowingData))]
+    public void DataSourceFails(int value)
+    {
+    }
 }

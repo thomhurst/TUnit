@@ -7,12 +7,13 @@ namespace TUnit.Engine.Tests.Scheduling;
 /// #7119: on a --fail-fast run every selected test must get exactly one result node. Tests that
 /// fail-fast stops before they start are reported as skipped, and the failure that triggered
 /// fail-fast is not reported a second time as an "Unhandled exception" node when the
-/// unconstrained and keyed phases were running at the same time.
+/// unconstrained and keyed phases were running at the same time. A test that failed before it
+/// ran (data source error) and that fail-fast stopped is still reported as failed.
 /// </summary>
 public class FailFastReportingTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     private static readonly string[] TestNames =
-        ["Fails", "Parallel1", "Parallel2", "Keyed1", "Keyed2", "Global1", "Global2"];
+        ["Fails", "Parallel1", "Parallel2", "Keyed1", "Keyed2", "Global1", "Global2", "DataSourceFails"];
 
     [Test]
     public async Task FailFast_ReportsEveryTestOnce_AndCancelledTestsAsSkipped()
@@ -29,10 +30,13 @@ public class FailFastReportingTests(TestMode testMode) : InvokableTestBase(testM
                 "The fail-fast failure was reported a second time as an 'Unhandled exception' node"),
             result => result.Results.Select(x => x.TestName).OrderBy(x => x).ShouldBe(TestNames.OrderBy(x => x)),
             result => result.Results.Single(x => x.TestName == "Fails").Outcome.ShouldBe("Failed"),
-            result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+            // Its data source throws, so it is failed before it runs. Fail-fast stops it before it
+            // reaches the coordinator, so only the cancelled-run sweep can report it.
+            result => result.Results.Single(x => x.TestName == "DataSourceFails").Outcome.ShouldBe("Failed"),
+            result => result.ResultSummary.Counters.Failed.ShouldBe(2),
             // Fails runs no later than second, so fail-fast stops at least the two global
             // [NotInParallel] tests and the tests still waiting for the single slot.
-            result => result.Results.Where(x => x.TestName != "Fails")
+            result => result.Results.Where(x => x.TestName is not ("Fails" or "DataSourceFails"))
                 .ShouldAllBe(x => x.Outcome == "Passed" || x.Outcome == "NotExecuted"),
             result => result.Results.Count(x => x.Outcome == "NotExecuted").ShouldBeGreaterThanOrEqualTo(4),
             result => result.Results.Where(x => x.TestName!.StartsWith("Global", StringComparison.Ordinal))
