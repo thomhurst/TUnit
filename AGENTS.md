@@ -37,3 +37,11 @@ Read only as needed:
 Use `scripts/AgentLocks.ps1` from the shared checkout for work-item ownership (`pr-<N>` or `issue-<N>`). Set `$agentLocks` to its absolute path, acquire before creating the checkout, and use a stable `-OwnerId` outside Codex. Git and Docker are required locally.
 
 Immediately after checkout, run `pwsh $agentLocks renew -LockName $lockName -Worktree $worktree` once to register its path. Stop owned processes, archive needed evidence outside the worktree, then release from the shared checkout in `finally`. Release removes clean checkouts even for open PRs; branches and detached commits remain available for re-checkout. See [local worktree lifecycle](scripts/WorktreeLifecycle.md) for preservation rules and crash behavior.
+
+## Autonomous self-improvement
+
+Treat every problem you notice as work to act on, whether you find it while testing, developing, reading code, reviewing, or doing anything else. Examples include bugs, flaky or failing tests, incorrect docs, misleading comments, broken tooling, and gaps in these instructions.
+
+- If the fix is trivial and low-risk, fix it as part of the current work and mention it in the PR description.
+- If the fix is out of scope for the current work, raise a GitHub issue at the point you discover it so it can be fixed later. Include what you saw, where you saw it (file and line, command, or CI run), how to reproduce it, and the expected behavior. Search existing issues first, and add to a matching issue instead of opening a duplicate.
+- Do not ignore a problem because it existed before your change or is unrelated to it.
