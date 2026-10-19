@@ -310,7 +310,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         // A source-generated row whose inferred type arguments break the method's
                                         // constraints: fail this row only, as reflection mode does when it resolves
                                         // the row's type arguments, and keep building the remaining rows.
-                                        var (reportedException, rowData) = UnpackConstraintViolation(ex, metadata);
+                                        var (reportedException, rowData) = UnpackConstraintViolation(ex, metadata.MethodMetadata.Parameters);
                                         tests.Add(CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, classData, rowData));
                                         continue;
                                     }
@@ -1460,16 +1460,31 @@ internal sealed class TestBuilder : ITestBuilder
     /// the exception to report, a plain <see cref="GenericTypeResolutionException"/> as in reflection mode,
     /// and the row's unwrapped objects, so the failed test can track them for disposal (#7123).
     /// </summary>
-    private static (Exception ReportedException, object?[]? RowData) UnpackConstraintViolation(Exception exception, TestMetadata metadata)
+    /// <remarks>
+    /// Never throws: callers run it inside a row's catch block, so an exception here would abandon the
+    /// method's remaining rows.
+    /// </remarks>
+    internal static (Exception ReportedException, object?[]? RowData) UnpackConstraintViolation(Exception exception, ParameterMetadata[] parameters)
     {
         if (exception is not GenericConstraintViolationRowException rowException)
         {
             return (exception, null);
         }
 
-        var rowData = rowException.Row is { } row
-            ? DataUnwrapper.UnwrapWithTypes(row, metadata.MethodMetadata.Parameters)
-            : null;
+        object?[]? rowData = null;
+        if (rowException.Row is { } row)
+        {
+            try
+            {
+                rowData = DataUnwrapper.UnwrapWithTypes(row, parameters);
+            }
+            catch (Exception)
+            {
+                // Unwrapping invokes the inner Func of a TestDataRow<Func<T>>, which can throw. The row
+                // already fails with the constraint violation, so track its raw values instead.
+                rowData = row;
+            }
+        }
 
         return (new GenericTypeResolutionException(rowException.Message), rowData);
     }
@@ -2328,7 +2343,7 @@ internal sealed class TestBuilder : ITestBuilder
         {
             // Includes a GenericConstraintViolationDataSource row whose inferred type arguments break the
             // method's constraints. The row's indexes keep its id distinct from the method's other rows.
-            var (reportedException, rowData) = UnpackConstraintViolation(ex, metadata);
+            var (reportedException, rowData) = UnpackConstraintViolation(ex, metadata.MethodMetadata.Parameters);
             return CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, classData, rowData ?? methodData);
         }
     }
