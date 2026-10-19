@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Globalization;
 using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
@@ -1706,22 +1705,13 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             return "(unknown)";
         }
 
-        var number = FormatExitCodeNumber(code);
-        return DecodeExitCode(code) is { } meaning ? $"{number} ({meaning})" : number;
+        return DecodeExitCode(code) is { } meaning ? $"{code} ({meaning})" : code.ToString();
     }
-
-    /// <summary>
-    /// Formats an exit code with the invariant culture: exit codes are identifiers to search for, and cultures such
-    /// as sv-SE would otherwise print negative Windows codes with U+2212 MINUS SIGN.
-    /// </summary>
-    private static string FormatExitCodeNumber(int code) => code.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>One-line human description of a resource's failure state for the concise exception message.</summary>
     internal static string DescribeState(in ResourceDiagnosis d) => d.Class switch
     {
-        ResourceFailureClass.OutOfMemory => d.ExitCode is int oomCode
-            ? $"{d.State}, exit code {FormatExitCodeNumber(oomCode)} (OOM / SIGKILL)"
-            : $"{d.State} (OOM / SIGKILL)",
+        ResourceFailureClass.OutOfMemory => $"{d.State}, exit code {d.ExitCode} (OOM / SIGKILL)",
         ResourceFailureClass.NonZeroExit => $"{d.State}, exit code {FormatExitCode(d.ExitCode)}",
         ResourceFailureClass.CrashedNoCode => $"{d.State} (no exit code)",
         ResourceFailureClass.HealthCheckFailing => d.Detail is { Length: > 0 } health
@@ -1817,7 +1807,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
                 }
 
                 return dep.Snapshot.ExitCode is int code
-                    ? $"'{depName}' ({depState}, exit code {FormatExitCodeNumber(code)})"
+                    ? $"'{depName}' ({depState}, exit code {code})"
                     : $"'{depName}' ({depState})";
             }
 
@@ -1997,7 +1987,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         sb.AppendLine($"  State:      {diagnosis.State}");
         if (diagnosis.ExitCode is int code)
         {
-            sb.Append($"  Exit code:  {FormatExitCodeNumber(code)}");
+            sb.Append($"  Exit code:  {code}");
             if (DecodeExitCode(code) is { } meaning)
             {
                 sb.Append($" ({meaning})");
@@ -2088,7 +2078,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             if (notificationService.TryGetCurrentState(depName, out var dep) && dep is not null)
             {
                 var depState = dep.Snapshot.State?.Text ?? "unknown";
-                description = dep.Snapshot.ExitCode is int code ? $"{depState}, exit code {FormatExitCodeNumber(code)}" : depState;
+                description = dep.Snapshot.ExitCode is int code ? $"{depState}, exit code {code}" : depState;
             }
             else
             {
