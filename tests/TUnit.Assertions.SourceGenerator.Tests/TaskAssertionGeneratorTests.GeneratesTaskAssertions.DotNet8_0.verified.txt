@@ -39,7 +39,7 @@ public class TaskIsCompletedAssertion<TTask> : Assertion<TTask>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be completed";
+        return $"to {(_negated ? "not " : "")}be completed";
     }
 }
 
@@ -71,7 +71,7 @@ public class TaskIsCanceledAssertion<TTask> : Assertion<TTask>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be canceled";
+        return $"to {(_negated ? "not " : "")}be canceled";
     }
 }
 
@@ -103,7 +103,7 @@ public class TaskIsFaultedAssertion<TTask> : Assertion<TTask>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be faulted";
+        return $"to {(_negated ? "not " : "")}be faulted";
     }
 }
 
