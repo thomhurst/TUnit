@@ -82,6 +82,16 @@ internal class GenerateGenericTestOnMethodOfGenericClassTests
             public void FromMethodDataSource<TMethod>(TMethod arg, int count) { }
         }
 
+        [GenerateGenericTest(typeof(long))]
+        public class ClassTypedMethodDataSource<T>
+        {
+            public static IEnumerable<Func<(T, int)>> Rows() { yield return () => (default(T)!, 1); }
+
+            [Test]
+            [MethodDataSource(nameof(Rows))]
+            public void FromClassTypedSource<TMethod>(TMethod arg, int count) { }
+        }
+
         public class MethodRowInfersClass<T>
         {
             [Test]
@@ -126,6 +136,7 @@ internal class GenerateGenericTestOnMethodOfGenericClassTests
         await Assert.That(generated).Contains(".NoMethodRows<string>(");
         await Assert.That(generated).Contains(".UsesBoth<long>(");
         await Assert.That(generated).Contains(".FromMethodDataSource<string>(");
+        await Assert.That(generated).Contains(".FromClassTypedSource<long>(");
         await Assert.That(generated).DoesNotContain("<TMethod>");
     }
 }

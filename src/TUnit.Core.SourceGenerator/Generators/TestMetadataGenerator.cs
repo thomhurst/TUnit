@@ -840,7 +840,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             AttributeData? violationSource = null,
             bool isClassRow = false,
             AttributeData? methodRow = null,
-            bool fromGenerateGenericTest = false)
+            bool fromGenerateGenericTest = false,
+            AttributeData? methodViolationRowSource = null,
+            bool methodViolationAllMethodDataSources = false)
         {
             // A generic method of a generic class needs both the class and the method type arguments.
             // A source that supplies only one of them (a method row or [GenerateGenericTest] without a
@@ -937,8 +939,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 violation = new MethodConstraintViolation(
                     methodConstraintViolation,
                     // [GenerateGenericTest] (the violation source) has no rows: it reports one failure.
-                    RowSource: violationSource is null ? specificAttr : null,
-                    AllMethodDataSources: specificAttr is null && violationSource is null);
+                    // A method data source paired with a class row reports each of its own rows
+                    // (methodViolationRowSource), and IInfersType<T> each row of every method data source.
+                    RowSource: methodViolationRowSource ?? (violationSource is null ? specificAttr : null),
+                    AllMethodDataSources: methodViolationAllMethodDataSources || (specificAttr is null && violationSource is null));
 
                 // All violations of one concrete class share one entry, so that each failing row gets
                 // its own data source index, and so its own test id.
@@ -1005,6 +1009,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // A class row combined with a generic method row. A class violation is reported once per
         // class row; a method violation once per method row, as reflection mode reports it when
         // the row's inferred method type arguments fail to resolve.
+        // A method data source other than an [Arguments] row (such as [MethodDataSource]) may yield
+        // several rows, so a method violation is reported once per row it yields instead.
         void TryAddCombinedArgumentsInstantiation(ITypeSymbol[] classTypes, ITypeSymbol[] combinedTypes, AttributeData classAttr, AttributeData methodAttr)
         {
             TryAddInstantiation(combinedTypes, classAttr,
@@ -1012,7 +1018,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 reportClassViolationAs: ClassViolationSource.ClassArguments,
                 violationSource: ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes, compilation) ? methodAttr : classAttr,
                 isClassRow: true,
-                methodRow: methodAttr);
+                methodRow: methodAttr,
+                methodViolationRowSource: methodAttr.AttributeClass?.Name == "ArgumentsAttribute" ? null : methodAttr);
         }
 
         // A class row paired with method type arguments that no single method data source inferred:
@@ -1026,7 +1033,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 reportMethodConstraintViolation: true,
                 reportClassViolationAs: ClassViolationSource.ClassArguments,
                 violationSource: methodSource is not null && ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes, compilation) ? methodSource : classAttr,
-                isClassRow: true);
+                isClassRow: true,
+                methodViolationAllMethodDataSources: methodSource is null);
 
             if (results.Count > countBefore
                 && results[results.Count - 1] is { MethodConstraintViolations: null } added
@@ -1037,6 +1045,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     added.AddRow(dataSource, isClassRow: false);
                 }
             }
+        }
+
+        // The class and method type arguments of a generic method of a generic class. A method type
+        // argument inferred from a member of the open class (a [MethodDataSource] returning
+        // IEnumerable<Func<(T, int)>>) may name a class type parameter, which is replaced by this class
+        // type argument, as reflection mode reads the member on the closed class (#7117).
+        ITypeSymbol[] CloseOverClass(ITypeSymbol[] classTypes, ITypeSymbol[] methodTypes)
+        {
+            var combined = new ITypeSymbol[classTypes.Length + methodTypes.Length];
+            Array.Copy(classTypes, combined, classTypes.Length);
+            for (var i = 0; i < methodTypes.Length; i++)
+            {
+                combined[classTypes.Length + i] = SubstituteTypeParameters(methodTypes[i], testMethod.TypeSymbol.TypeParameters, classTypes, compilation);
+            }
+
+            return combined;
         }
 
         // Single-pass classification of method attributes into named buckets, replacing the
@@ -1287,14 +1311,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                 }
 
-                foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
-                {
-                    if (InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr) is { } types && types.Length == methodTypeArgCount)
-                    {
-                        methodSources.Add((types, dataSourceAttr));
-                    }
-                }
-
+                // A typed data source (DataSourceGeneratorAttribute<T>) infers no method type arguments
+                // on a generic class in either mode (InferTypesFromDataSourceAttribute here, and
+                // ReflectionTestDataCollector.InferMethodInstantiationsFromDataSources), so it is not a
+                // method source: it runs on every instantiation like any other method data source.
                 if (InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol) is { } inferringTypes && inferringTypes.Length == methodTypeArgCount)
                 {
                     methodSources.Add((inferringTypes, null));
@@ -1313,7 +1333,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var classIsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, classGenericTest.TypeArgs!, compilation);
                     foreach (var (methodTypes, source) in methodSources)
                     {
-                        TryAddInstantiation(classGenericTest.TypeArgs!.Concat(methodTypes).ToArray(), source,
+                        TryAddInstantiation(CloseOverClass(classGenericTest.TypeArgs!, methodTypes), source,
                             reportMethodConstraintViolation: true,
                             reportClassViolationAs: ClassViolationSource.GenerateGenericTest,
                             violationSource: classIsValid ? null : classGenericTest.Attribute);
@@ -1333,11 +1353,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     {
                         if (source is not null)
                         {
-                            TryAddCombinedArgumentsInstantiation(classTypes, classTypes.Concat(methodTypes).ToArray(), classAttr, source);
+                            TryAddCombinedArgumentsInstantiation(classTypes, CloseOverClass(classTypes, methodTypes), classAttr, source);
                         }
                         else
                         {
-                            TryAddClassRowInstantiationWithEveryMethodSource(classTypes, classTypes.Concat(methodTypes).ToArray(), classAttr, methodSource: null, typedDataSourceBucket);
+                            TryAddClassRowInstantiationWithEveryMethodSource(classTypes, CloseOverClass(classTypes, methodTypes), classAttr, methodSource: null, typedDataSourceBucket);
                         }
                     }
 
