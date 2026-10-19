@@ -54,6 +54,7 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
                      .Where(x => !IsDisposableDispose(x))
                      .Where(x => !IsAsyncDisposableDispose(x))
                      .Where(x => !IsInitializeAsync(x))
+                     .Where(x => !ImplementsInterfaceMember(x))
                      .Where(x => !IsTestDataSource(x, testMethods)))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.PublicMethodMissingTestAttribute, method.Locations.FirstOrDefault()));
@@ -69,6 +70,29 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
                                && x.ConstructorArguments.Any(a => a is { Kind: TypedConstantKind.Primitive, Value: string s } && s == methodSymbol.Name)))
         {
             return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Whether <paramref name="method"/> implicitly implements an interface member of its containing type (e.g.
+    /// <c>ITestStartEventReceiver.OnTestStart</c>). Such a method cannot be made private, so the diagnostic's advice
+    /// would not apply.
+    /// </summary>
+    private static bool ImplementsInterfaceMember(IMethodSymbol method)
+    {
+        var containingType = method.ContainingType;
+
+        foreach (var @interface in containingType.AllInterfaces)
+        {
+            foreach (var member in @interface.GetMembers(method.Name))
+            {
+                if (SymbolEqualityComparer.Default.Equals(containingType.FindImplementationForInterfaceMember(member), method))
+                {
+                    return true;
+                }
+            }
         }
 
         return false;

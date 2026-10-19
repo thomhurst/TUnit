@@ -1,24 +1,28 @@
-using TUnit.Assertions.Attributes;
-
-namespace TUnit.Assertions.Conditions;
-
 #if NET5_0_OR_GREATER
 using System;
 
-/// <summary>
-/// Source-generated assertions for Memory&lt;T&gt; and ReadOnlyMemory&lt;T&gt; types using [AssertionFrom] attributes.
-/// Note: Span types cannot be used due to ref struct constraints in the assertion framework.
-/// Available in .NET 5.0+
-/// </summary>
-
-// Memory<T> assertions
-[AssertionFrom(typeof(Memory<>), nameof(Memory<int>.IsEmpty), ExpectationMessage = "be empty")]
-[AssertionFrom(typeof(Memory<>), nameof(Memory<int>.IsEmpty), CustomName = "IsNotEmpty", NegateLogic = true, ExpectationMessage = "be empty")]
-
-// ReadOnlyMemory<T> assertions
-[AssertionFrom(typeof(ReadOnlyMemory<>), nameof(ReadOnlyMemory<int>.IsEmpty), ExpectationMessage = "be empty")]
-[AssertionFrom(typeof(ReadOnlyMemory<>), nameof(ReadOnlyMemory<int>.IsEmpty), CustomName = "IsNotEmpty", NegateLogic = true, ExpectationMessage = "be empty")]
-public static partial class SpanAssertionExtensions
+namespace TUnit.Assertions.Conditions
 {
+    /// <summary>
+    /// No longer holds any assertions. It only ever carried [AssertionFrom] declarations for Memory&lt;T&gt; and
+    /// ReadOnlyMemory&lt;T&gt; that generated nothing; IsEmpty() and IsNotEmpty() for those types are on the source
+    /// returned by Assert.That. Kept so that removing it is not a breaking change.
+    /// </summary>
+    [Obsolete("Has no members. Memory<T> and ReadOnlyMemory<T> assertions such as IsEmpty() are on MemoryAssertionBase.")]
+    public static class SpanAssertionExtensions
+    {
+    }
+}
+
+namespace TUnit.Assertions.Extensions
+{
+    /// <summary>
+    /// No longer holds any assertions; see <see cref="TUnit.Assertions.Conditions.SpanAssertionExtensions"/>.
+    /// Kept so that removing it is not a breaking change.
+    /// </summary>
+    [Obsolete("Has no members. Memory<T> and ReadOnlyMemory<T> assertions such as IsEmpty() are on MemoryAssertionBase.")]
+    public static class SpanAssertionExtensions
+    {
+    }
 }
 #endif

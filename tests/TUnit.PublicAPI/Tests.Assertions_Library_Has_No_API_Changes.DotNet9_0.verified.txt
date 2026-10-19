@@ -1994,10 +1994,8 @@ namespace .Conditions
     [.<float>("IsSubnormal", ExpectationMessage="be subnormal")]
     public static class SingleAssertionExtensions { }
     public sealed class SingleItemSource<TItem> : .<TItem> { }
-    [.(typeof(<!0>), "IsEmpty", CustomName="IsNotEmpty", ExpectationMessage="be empty", NegateLogic=true)]
-    [.(typeof(<!0>), "IsEmpty", ExpectationMessage="be empty")]
-    [.(typeof(<!0>), "IsEmpty", CustomName="IsNotEmpty", ExpectationMessage="be empty", NegateLogic=true)]
-    [.(typeof(<!0>), "IsEmpty", ExpectationMessage="be empty")]
+    [("Has no members. Memory<T> and ReadOnlyMemory<T> assertions such as IsEmpty() are " +
+        "on MemoryAssertionBase.")]
     public static class SpanAssertionExtensions { }
     [.("Contains")]
     public class StringContainsAssertion : .<string>
@@ -6101,6 +6099,8 @@ namespace .Extensions
         public static .<.<TItem>, TItem> SetEquals<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
         public static .<.<TItem>, TItem> SetEquals<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
     }
+    [("Has no members. Memory<T> and ReadOnlyMemory<T> assertions such as IsEmpty() are " +
+        "on MemoryAssertionBase.")]
     public static class SpanAssertionExtensions { }
     public static class StreamAssertionExtensions
     {

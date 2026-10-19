@@ -4,8 +4,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using TUnit.Assertions.SourceGenerator.Models;
 
 namespace TUnit.Assertions.SourceGenerator.Generators;
@@ -135,7 +138,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     requiresGenericTypeParameter,
                     treatAsInstance,
                     expectationMessage,
-                    isUnboundGeneric
+                    isUnboundGeneric,
+                    attributeData.ApplicationSyntaxReference
                 );
 
                 attributeDataList.Add(createAssertionAttributeData);
@@ -243,7 +247,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     requiresGenericTypeParameter,
                     treatAsInstance,
                     expectationMessage,
-                    isUnboundGeneric
+                    isUnboundGeneric,
+                    attributeData.ApplicationSyntaxReference
                 );
 
                 attributeDataList.Add(createAssertionAttributeData);
@@ -321,7 +326,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         }
 
         // Track all generated classes globally to avoid duplicates across different extension classes
-        var allGeneratedClasses = new HashSet<string>();
+        var allGeneratedClasses = new GeneratedConditionClasses();
 
         // Group by class and generate one file per class. Non-generic attribute data comes first,
         // then generic, so a class using both keeps its existing member order.
@@ -332,6 +337,58 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         {
             var first = classGroup.First().Model;
             GenerateAssertionsForSpecificClass(context, first.ClassName, first.OriginalNamespace, classGroup.Select(x => x.Entry).ToArray(), allGeneratedClasses);
+        }
+    }
+
+    private const char ClassNameMarker = '\u0001';
+    private const char OverloadSeparator = '\u0002';
+
+    /// <summary>
+    /// How pre-rendered source refers to the condition class for <paramref name="method"/>: its name and the overload
+    /// it was generated for, between markers that cannot occur in C# source, so the emit step, which alone knows the
+    /// final name, can substitute it with a plain replace. Including the overload keeps overloads that map to the
+    /// same class name apart, so each binds to its own class. A reference that is never resolved leaves a marker
+    /// behind, which fails the build loudly rather than binding to a wrong class.
+    /// </summary>
+    private static string ClassNameReference(string className, IMethodSymbol method) =>
+        $"{ClassNameMarker}{className}{OverloadSeparator}{method.OriginalDefinition.ToDisplayString()}{ClassNameMarker}";
+
+    /// <summary>Substitutes <paramref name="name"/> for every occurrence of <paramref name="reference"/>.</summary>
+    private static string ResolveClassName(string source, string reference, string name) =>
+        source.Replace(reference, name);
+
+    /// <summary>
+    /// The condition classes emitted so far, across every extension class. A condition class is named after its
+    /// target method, so attributes on the same method share it, which is fine while their sources match (e.g.
+    /// <c>IsNullOrEmpty</c> and its <c>NegateLogic</c> counterpart, which passes the negation to the constructor).
+    /// A class with the same name but a different source, such as a different <c>ExpectationMessage</c> or another
+    /// overload of the same method that maps to the same name, gets a numbered name instead of being dropped, so its
+    /// attribute keeps its own message and each overload its own class.
+    /// </summary>
+    private sealed class GeneratedConditionClasses
+    {
+        private readonly HashSet<string> _names = new(StringComparer.Ordinal);
+        private readonly Dictionary<(string ClassName, string Source), string> _emitted = new();
+
+        /// <summary>
+        /// Returns the name to use for <paramref name="conditionClass"/>, and whether it still has to be emitted.
+        /// </summary>
+        public (string Name, bool IsNew) Claim(ConditionClassModel conditionClass)
+        {
+            var key = (conditionClass.ClassName, conditionClass.Source);
+            if (_emitted.TryGetValue(key, out var existing))
+            {
+                return (existing, false);
+            }
+
+            var name = conditionClass.ClassName;
+            for (var suffix = 2; !_names.Add(name); suffix++)
+            {
+                name = conditionClass.ClassName + suffix.ToString(CultureInfo.InvariantCulture);
+            }
+
+            _emitted.Add(key, name);
+            return (name, true);
         }
     }
 
@@ -355,7 +412,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         string className,
         string? originalNamespace,
         AssertionEntryModel[] entries,
-        HashSet<string> allGeneratedClasses)
+        GeneratedConditionClasses allGeneratedClasses)
     {
         var sourceBuilder = new StringBuilder();
         // Always generate extension methods in TUnit.Assertions.Extensions namespace
@@ -386,6 +443,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         }
 
         // Generate all assert condition classes first
+        var extensionMethodSources = new List<string>(entries.Length);
         foreach (var entry in entries)
         {
             if (entry.MissingMethodMessage is not null)
@@ -398,27 +456,31 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                         "TUnit.Assertions",
                         DiagnosticSeverity.Error,
                         true),
-                    Location.None));
+                    AttributeLocationModel.ToLocation(entry.AttributeLocation)));
             }
 
+            var extensionMethodsSource = entry.ExtensionMethodsSource;
             foreach (var conditionClass in entry.ConditionClasses)
             {
-                if (!allGeneratedClasses.Add(conditionClass.ClassName))
-                {
-                    continue;
-                }
+                var (name, isNew) = allGeneratedClasses.Claim(conditionClass);
+                extensionMethodsSource = ResolveClassName(extensionMethodsSource, conditionClass.Reference, name);
 
-                sourceBuilder.Append(conditionClass.Source);
+                if (isNew)
+                {
+                    sourceBuilder.Append(ResolveClassName(conditionClass.Source, conditionClass.Reference, name));
+                }
             }
+
+            extensionMethodSources.Add(extensionMethodsSource);
         }
 
         // Generate extension methods class
         sourceBuilder.AppendLine($"public static partial class {className}");
         sourceBuilder.AppendLine("{");
 
-        foreach (var entry in entries)
+        foreach (var extensionMethodsSource in extensionMethodSources)
         {
-            sourceBuilder.Append(entry.ExtensionMethodsSource);
+            sourceBuilder.Append(extensionMethodsSource);
         }
 
         sourceBuilder.AppendLine("}");
@@ -436,7 +498,13 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         var conditionClasses = RenderConditionClasses(attributeData, out var missingMethodMessage);
         var extensionMethodsSource = RenderExtensionMethods(attributeData);
 
-        return new AssertionEntryModel(conditionClasses, missingMethodMessage, extensionMethodsSource);
+        // Only keep the location when there is something to report: it changes with every edit above the attribute,
+        // and would otherwise stop unrelated edits from being cached
+        var attributeLocation = missingMethodMessage is not null
+            ? AttributeLocationModel.From(attributeData.AttributeSyntax)
+            : null;
+
+        return new AssertionEntryModel(conditionClasses, missingMethodMessage, extensionMethodsSource, attributeLocation);
     }
 
     private static ImmutableEquatableArray<ConditionClassModel> RenderConditionClasses(CreateAssertionAttributeData attributeData, out string? missingMethodMessage)
@@ -527,11 +595,11 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         {
             var className = GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, attributeData.MethodName, method);
 
-            // Duplicate class names are dropped at emit time, where the set of classes
+            // Duplicate class names are resolved at emit time, where the set of classes
             // already written across every extension class is known.
             var classBuilder = new StringBuilder();
             GenerateAssertConditionClassForMethod(classBuilder, attributeData, method);
-            conditionClasses.Add(new ConditionClassModel(className, classBuilder.ToString()));
+            conditionClasses.Add(new ConditionClassModel(className, ClassNameReference(className, method), classBuilder.ToString()));
         }
 
         return conditionClasses.ToImmutableEquatableArray();
@@ -599,7 +667,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         var containingType = attributeData.ContainingType;
         var methodName = attributeData.MethodName;
 
-        var className = GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod);
+        var className = ClassNameReference(GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod), staticMethod);
 
         // Determine which parameters to skip
         IParameterSymbol[] parameters;
@@ -974,32 +1042,110 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         if (!string.IsNullOrEmpty(attributeData.ExpectationMessage))
         {
             // Use custom expectation message
-            var expectation = attributeData.ExpectationMessage;
-            if (parameters.Any())
-            {
-                // Use interpolated string for parameter substitution
-                sourceBuilder.AppendLine($"        return $\"{{(_negated ? \"not \" : \"\")}} {expectation}\";");
-            }
-            else
-            {
-                // No parameters, just return the literal string with negation support
-                sourceBuilder.AppendLine($"        return $\"{{(_negated ? \"not \" : \"\")}} {expectation}\";");
-            }
+            sourceBuilder.AppendLine($"        return $\"{RenderCustomExpectation(attributeData.ExpectationMessage!, parameters)}\";");
         }
         else
         {
             // Use default expectation message
-            sourceBuilder.Append($"        return $\"{{(_negated ? \"not \" : \"\")}}to satisfy {methodName}");
-            if (parameters.Any())
-            {
-                sourceBuilder.Append($"({string.Join(", ", parameters.Select(p => $"{{_{p.Name}}}"))})");
-            }
-            sourceBuilder.AppendLine("\";");
+            var arguments = parameters.Any()
+                ? $"({string.Join(", ", parameters.Select(p => $"{{_{p.Name}}}"))})"
+                : string.Empty;
+            sourceBuilder.AppendLine($"        return $\"{RenderNegatableExpectation($"satisfy {methodName}{arguments}")}\";");
         }
 
         sourceBuilder.AppendLine("    }");
         sourceBuilder.AppendLine("}");
         sourceBuilder.AppendLine();
+    }
+
+    /// <summary>
+    /// Renders the interpolated-string body of <c>GetExpectation()</c> for a custom <c>ExpectationMessage</c>.
+    /// </summary>
+    /// <remarks>
+    /// The canonical form is the positive phrase without the leading "to" ("be null or empty"); the generator adds
+    /// "to" and, with <c>NegateLogic</c>, "not". The documented style that spells these out ("to be null or empty",
+    /// or "to not contain '{value}'" with <c>NegateLogic</c>) is also accepted, so neither renders as "to to ..." or
+    /// "to not not ...".
+    /// </remarks>
+    private static string RenderCustomExpectation(string expectationMessage, IParameterSymbol[] parameters)
+    {
+        var expectation = expectationMessage.StartsWith("to ", StringComparison.Ordinal)
+            ? expectationMessage.Substring("to ".Length)
+            : expectationMessage;
+
+        var phrase = RenderMessageText(expectation, parameters);
+
+        return expectation.StartsWith("not ", StringComparison.Ordinal)
+            ? $"to {phrase}"
+            : RenderNegatableExpectation(phrase);
+    }
+
+    /// <summary>
+    /// The one place the expectation's "to"/"to not" wording is decided, for custom and default messages alike.
+    /// </summary>
+    private static string RenderNegatableExpectation(string phrase) => $"to {{(_negated ? \"not \" : \"\")}}{phrase}";
+
+    /// <summary>
+    /// Renders message text as the body of an interpolated string literal in a single pass: a <c>{name}</c>
+    /// placeholder for a method parameter (any valid identifier, not only ASCII) becomes the generated
+    /// <c>{_name}</c> field, as does <c>{_name}</c> itself, which messages could reference before placeholders were
+    /// parsed. Everything else stays literal text, including escaped braces (<c>{{name}}</c> prints
+    /// <c>{name}</c>), placeholders that name no parameter, stray braces, quotes and backslashes.
+    /// </summary>
+    private static string RenderMessageText(string message, IParameterSymbol[] parameters)
+    {
+        var parameterNames = new HashSet<string>(parameters.Select(p => p.Name), StringComparer.Ordinal);
+        var result = new StringBuilder(message.Length);
+        var literalStart = 0;
+
+        foreach (Match match in MessageTokenRegex.Matches(message))
+        {
+            result.Append(FormatLiteral(message.Substring(literalStart, match.Index - literalStart)));
+
+            var name = match.Groups["name"];
+            var parameterName = !name.Success ? null
+                : parameterNames.Contains(name.Value) ? name.Value
+                : name.Value.StartsWith("_", StringComparison.Ordinal) && parameterNames.Contains(name.Value.Substring(1)) ? name.Value.Substring(1)
+                : null;
+
+            if (parameterName is not null)
+            {
+                result.Append("{_").Append(parameterName).Append('}');
+            }
+            else if (name.Success)
+            {
+                // A placeholder that names no parameter: keep its text, braces included, literal
+                result.Append("{{").Append(FormatLiteral(name.Value)).Append("}}");
+            }
+            else
+            {
+                // An escaped brace pair or a stray brace: keep the brace literal
+                result.Append(match.Value[0] is '{' ? "{{" : "}}");
+            }
+
+            literalStart = match.Index + match.Length;
+        }
+
+        result.Append(FormatLiteral(message.Substring(literalStart)));
+        return result.ToString();
+    }
+
+    /// <summary>
+    /// Tokens of an <c>ExpectationMessage</c>: escaped brace pairs, <c>{...}</c> placeholders and stray braces. Any
+    /// brace-free text between single braces is a placeholder candidate; it is only substituted when it names a
+    /// parameter, so matching broadly keeps non-ASCII identifiers working without a hand-written identifier grammar.
+    /// </summary>
+    private static readonly Regex MessageTokenRegex = new(@"\{\{|\}\}|\{(?<name>[^{}]*)\}|[{}]");
+
+    /// <summary>
+    /// Escapes <paramref name="text"/> for use inside a C# string literal. With <c>quote: false</c>,
+    /// <see cref="SymbolDisplay.FormatLiteral(string, bool)"/> leaves double quotes unescaped, so this quotes the text
+    /// and strips the outer pair instead.
+    /// </summary>
+    private static string FormatLiteral(string text)
+    {
+        var literal = SymbolDisplay.FormatLiteral(text, quote: true);
+        return literal.Substring(1, literal.Length - 2);
     }
 
     private static string GenerateAssertConditionClassNameForMethod(INamedTypeSymbol targetType, INamedTypeSymbol containingType, string methodName, IMethodSymbol method)
@@ -1118,7 +1264,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         var methodName = attributeData.MethodName;
 
         var baseMethodName = attributeData.CustomName ?? methodName;
-        var className = GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod);
+        var className = ClassNameReference(GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, methodName, staticMethod), staticMethod);
 
         var actualMethodName = baseMethodName;
         if (staticMethod.Parameters.Length > 1)
@@ -1302,11 +1448,43 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     private sealed record AssertionEntryModel(
         ImmutableEquatableArray<ConditionClassModel> ConditionClasses,
         string? MissingMethodMessage,
-        string ExtensionMethodsSource
+        string ExtensionMethodsSource,
+        AttributeLocationModel? AttributeLocation
     );
 
+    /// <summary>
+    /// Equatable stand-in for the [AssertionFrom] attribute's <see cref="Location"/>, which references its
+    /// <see cref="SyntaxTree"/> and would keep old compilations alive in the incremental cache.
+    /// </summary>
+    private sealed record AttributeLocationModel(string FilePath, TextSpan Span, LinePositionSpan LineSpan)
+    {
+        /// <remarks>
+        /// Takes the <see cref="SyntaxReference"/> rather than a <see cref="Location"/> so the location is only
+        /// computed for the attributes that report a diagnostic, not for every attribute on every pass.
+        /// </remarks>
+        public static AttributeLocationModel? From(SyntaxReference? syntax)
+        {
+            if (syntax is null)
+            {
+                return null;
+            }
+
+            var location = Location.Create(syntax.SyntaxTree, syntax.Span);
+            return location.GetLineSpan() is { Path: { Length: > 0 } path } lineSpan
+                ? new AttributeLocationModel(path, location.SourceSpan, lineSpan.Span)
+                : null;
+        }
+
+        public static Location ToLocation(AttributeLocationModel? model) =>
+            model is null ? Location.None : Location.Create(model.FilePath, model.Span, model.LineSpan);
+    }
+
+    /// <param name="ClassName">The name the class is generated under, unless it is taken by a different class.</param>
+    /// <param name="Reference">How <paramref name="Source"/> and the extension methods refer to the class.</param>
+    /// <param name="Source">The class's source, referring to itself through <paramref name="Reference"/>.</param>
     private sealed record ConditionClassModel(
         string ClassName,
+        string Reference,
         string Source
     );
 
@@ -1322,6 +1500,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         bool RequiresGenericTypeParameter,
         bool TreatAsInstance,
         string? ExpectationMessage,
-        bool IsUnboundGeneric
+        bool IsUnboundGeneric,
+        SyntaxReference? AttributeSyntax
     );
 }

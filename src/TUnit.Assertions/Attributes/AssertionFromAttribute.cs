@@ -134,6 +134,17 @@ public class AssertionFromAttribute : Attribute
     /// Optional custom expectation message shown in assertion failures.
     /// If not specified, a default message based on the method name will be used.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Write the positive phrase without the leading "to", e.g. <c>"be null or empty"</c>: the generator adds "to",
+    /// and "not" when <c>NegateLogic</c> is set. A leading "to " is ignored, and a phrase that already starts with
+    /// "not " (after any "to ") is used as written instead of being negated again.
+    /// </para>
+    /// <para>
+    /// A placeholder such as <c>{value}</c> is replaced with that method parameter's value. Everything else is literal
+    /// text: write <c>{{</c> and <c>}}</c> for literal braces; a placeholder that names no parameter is printed as is.
+    /// </para>
+    /// </remarks>
     /// <example>
     /// <code>
     /// [AssertionFrom(typeof(double), "IsNaN", ExpectationMessage = "be NaN")]
