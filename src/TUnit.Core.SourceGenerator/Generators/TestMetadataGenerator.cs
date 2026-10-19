@@ -673,6 +673,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
+    /// The failure of a method-level [Arguments] row whose inferred class type arguments no class-level
+    /// [Arguments] row infers. Keep in step with <c>ReflectionTestDataCollector.NoClassRowForMethodRowMessage</c>
+    /// in TUnit.Engine, so both modes report the same message (#7118).
+    /// </summary>
+    private const string NoClassRowForMethodRowMessage =
+        "This method-level [Arguments] row infers class type arguments that none of the class-level data rows infer, " +
+        "so no class row supplies the constructor arguments for this instantiation. " +
+        "Add a class-level row with matching types, or change the method row to match an existing class row.";
+
+    /// <summary>
     /// Represents a single concrete instantiation of a generic test.
     /// </summary>
     private sealed class ConcreteInstantiation
@@ -715,6 +725,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         public List<MethodConstraintViolation>? MethodConstraintViolations { get; init; }
 
         public bool HasMergedRows => AdditionalArgumentsAttributes is not null || AdditionalClassArgumentsAttributes is not null;
+
+        /// <summary>
+        /// Set when only method-level [Arguments] rows inferred this instantiation's class type arguments,
+        /// although the class has class-level [Arguments] rows and none of them infers these types. No class
+        /// row supplies the constructor arguments, so the entry's tests fail with
+        /// <see cref="NoClassRowForMethodRowMessage"/> instead of running on an instance built from the
+        /// method row's values (#7118).
+        /// </summary>
+        public bool HasNoClassRow { get; set; }
 
         /// <summary>
         /// True when at least one method-level row is scoped to this instantiation.
@@ -1291,6 +1310,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
+        // A method row runs only on the class instantiation its values infer. When the class has
+        // class-level [Arguments] rows and none of them infers that instantiation, no class row supplies
+        // its constructor arguments, so its tests fail rather than run with the method row's values as
+        // constructor arguments. Reflection mode reports the same failure (#7118).
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false }
+            && classArgumentsAttributes.Length > 0
+            && rowInstantiations is not null
+            && !testMethod.TypeSymbol.GetAttributes().Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true))
+        {
+            foreach (var instantiation in rowInstantiations.Values)
+            {
+                if (instantiation.HasMethodRows && !instantiation.HasClassRows)
+                {
+                    instantiation.HasNoClassRow = true;
+                }
+            }
+        }
+
         // Reflection mode (ReflectionGenericConstraintViolations in TUnit.Engine) reports class-level
         // [GenerateGenericTest] types first, then class rows, then method rows; each group keeps
         // declaration order. Keep the two in step: the order decides the failed tests' ids.
@@ -1342,6 +1379,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (InstanceFactoryGenerator.HasClassConstructorAttribute(testMethod.TypeSymbol))
         {
             writer.AppendLine("throw new global::System.NotSupportedException(\"Instance creation for classes with ClassConstructor attribute is handled at runtime\");");
+        }
+        else if (entry.HasNoClassRow)
+        {
+            writer.AppendLine($"throw new global::System.InvalidOperationException(\"{EscapeString(NoClassRowForMethodRowMessage)}\");");
         }
         // Bake the row's values in only when it is the instantiation's only class row. When several
         // class rows share it, each test's row reaches the constructor through args instead.

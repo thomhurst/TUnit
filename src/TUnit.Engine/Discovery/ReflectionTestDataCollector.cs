@@ -748,9 +748,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return discoveredTests;
         }
 
+        // Method rows run only on the class instantiation their own values infer (#7118)
+        var methodRowClassTypeArguments = InferClassTypeArgumentsOfMethodRows(genericTypeDefinition, testMethods);
+        var classRowGroups = await GroupClassRowsByTypeArgumentsAsync(genericTypeDefinition, classDataSources, constraintViolations, CancellationToken.None).ConfigureAwait(false);
+
         // One concrete generic type per distinct set of inferred type arguments, carrying every class row
         // that inferred it, so rows sharing a type each still produce a test (#7106)
-        foreach (var (typeArguments, classRowSources, rowCount) in await GroupClassRowsByTypeArgumentsAsync(genericTypeDefinition, classDataSources, constraintViolations, CancellationToken.None).ConfigureAwait(false))
+        foreach (var (typeArguments, classRowSources, rowCount) in classRowGroups)
         {
             try
             {
@@ -758,8 +762,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 var concreteType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, typeArguments);
 
                 // Build tests for each method in the concrete type
-                foreach (var genericMethod in testMethods)
+                for (var methodIndex = 0; methodIndex < testMethods.Length; methodIndex++)
                 {
+                    var genericMethod = testMethods[methodIndex];
                     var concreteMethod = FindConcreteMethod(concreteType, genericMethod);
 
                     if (concreteMethod != null)
@@ -777,7 +782,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             // The concrete type already has its generic arguments resolved
                             // For generic types with primary constructors that were resolved from class-level data sources,
                             // we need to ensure the class data sources contain the specific data for this instantiation
-                            var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, classRowSources, methodArguments);
+                            var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, classRowSources,
+                                methodArguments ?? ScopeMethodRowsToClassTypeArguments(concreteType, resolvedMethod, methodRowClassTypeArguments[methodIndex], typeArguments));
 
                             discoveredTests.Add(testMetadata);
                         }
@@ -793,6 +799,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     $"Type arguments provided: {typeArguments.Length}, " +
                     $"Data rows: {rowCount}", ex)));
             }
+        }
+
+        if (generateGenericTestAttributes.Length == 0)
+        {
+            discoveredTests.AddRange(BuildTestsForMethodRowsWithoutClassRow(genericTypeDefinition, testMethods, methodRowClassTypeArguments, classRowGroups));
         }
 
         AddConstraintViolationTests(discoveredTests, constraintViolations);
@@ -963,9 +974,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             yield break;
         }
 
+        // Method rows run only on the class instantiation their own values infer (#7118)
+        var methodRowClassTypeArguments = InferClassTypeArgumentsOfMethodRows(genericTypeDefinition, testMethods);
+        var classRowGroups = await GroupClassRowsByTypeArgumentsAsync(genericTypeDefinition, classDataSources, constraintViolations, cancellationToken).ConfigureAwait(false);
+
         // One concrete generic type per distinct set of inferred type arguments, carrying every class row
         // that inferred it, so rows sharing a type each still produce a test (#7106)
-        foreach (var (typeArguments, classRowSources, _) in await GroupClassRowsByTypeArgumentsAsync(genericTypeDefinition, classDataSources, constraintViolations, cancellationToken).ConfigureAwait(false))
+        foreach (var (typeArguments, classRowSources, _) in classRowGroups)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -978,8 +993,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 var concreteType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, typeArguments);
 
                 // Build tests for each method in the concrete type
-                foreach (var genericMethod in testMethods)
+                for (var methodIndex = 0; methodIndex < testMethods.Length; methodIndex++)
                 {
+                    var genericMethod = testMethods[methodIndex];
                     var concreteMethod = FindConcreteMethod(concreteType, genericMethod);
 
                     if (concreteMethod != null)
@@ -998,7 +1014,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             // The concrete type already has its generic arguments resolved
                             // For generic types with primary constructors that were resolved from class-level data sources,
                             // we need to ensure the class data sources contain the specific data for this instantiation
-                            var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, classRowSources, methodArguments);
+                            var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, classRowSources,
+                                methodArguments ?? ScopeMethodRowsToClassTypeArguments(concreteType, resolvedMethod, methodRowClassTypeArguments[methodIndex], typeArguments));
 
                             successfulTests ??= [];
                             successfulTests.Add(testMetadata);
@@ -1043,6 +1060,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             if (failedMetadata != null)
             {
                 yield return failedMetadata;
+            }
+        }
+
+        if (generateGenericTestAttributes.Length == 0)
+        {
+            foreach (var test in BuildTestsForMethodRowsWithoutClassRow(genericTypeDefinition, testMethods, methodRowClassTypeArguments, classRowGroups))
+            {
+                yield return test;
             }
         }
 
@@ -1306,6 +1331,193 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
+    /// The failure of a method-level [Arguments] row whose inferred class type arguments no class-level data
+    /// row infers. Keep in step with <c>NoClassRowForMethodRowMessage</c> in the source generator's
+    /// <c>TestMetadataGenerator</c>, so both modes report the same message (#7118).
+    /// </summary>
+    private const string NoClassRowForMethodRowMessage =
+        "This method-level [Arguments] row infers class type arguments that none of the class-level data rows infer, " +
+        "so no class row supplies the constructor arguments for this instantiation. " +
+        "Add a class-level row with matching types, or change the method row to match an existing class row.";
+
+    /// <summary>
+    /// For each test method of a generic class with class-level data sources, the class type arguments each
+    /// of its method data sources' [Arguments] rows infers, indexed like the method's data sources (null for
+    /// a source that infers none). A method's entry is null when none of its rows infers any, for example
+    /// when it is a generic method or its parameters do not use the class's type parameters.
+    /// </summary>
+    private static Type[]?[]?[] InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods)
+    {
+        var result = new Type[]?[]?[testMethods.Length];
+        Type[]? classGenericParameters = null;
+
+        for (var methodIndex = 0; methodIndex < testMethods.Length; methodIndex++)
+        {
+            var testMethod = testMethods[methodIndex];
+            if (testMethod.IsGenericMethodDefinition)
+            {
+                continue;
+            }
+
+            var parameters = testMethod.GetParameters();
+            if (!Array.Exists(parameters, static p => p.ParameterType.ContainsGenericParameters))
+            {
+                continue;
+            }
+
+            classGenericParameters ??= genericTypeDefinition.GetGenericArguments();
+            var methodDataSources = ReflectionAttributeExtractor.ExtractDataSources(testMethod);
+            Type[]?[]? rowTypeArguments = null;
+
+            for (var i = 0; i < methodDataSources.Length; i++)
+            {
+                if (methodDataSources[i] is ArgumentsAttribute arguments
+                    && InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments) is { } typeArguments)
+                {
+                    (rowTypeArguments ??= new Type[]?[methodDataSources.Length])[i] = typeArguments;
+                }
+            }
+
+            result[methodIndex] = rowTypeArguments;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The method data sources that run on the class instantiation <paramref name="classTypeArguments"/>: the
+    /// [Arguments] rows that infer those type arguments and, unless <paramref name="onlyInferringRows"/>, every
+    /// source that infers none. Rows inferring other type arguments belong to another instantiation, as in the
+    /// source generator (#7118). Returns null, meaning every source, when none of the method's rows infers
+    /// class type arguments.
+    /// </summary>
+    private static IDataSourceAttribute[]? ScopeMethodRowsToClassTypeArguments(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type concreteType,
+        MethodInfo concreteMethod,
+        Type[]?[]? rowTypeArguments,
+        Type[] classTypeArguments,
+        bool onlyInferringRows = false)
+    {
+        if (rowTypeArguments == null)
+        {
+            return null;
+        }
+
+        // Same attribute order as the generic definition's method, so the indices line up
+        var dataSources = ReflectionAttributeExtractor.ExtractMethodDataSources(concreteMethod, concreteType);
+        var rows = new List<IDataSourceAttribute>(dataSources.Length);
+        for (var i = 0; i < dataSources.Length; i++)
+        {
+            if (rowTypeArguments[i] is { } inferred
+                    ? AreSameTypeArguments(inferred, classTypeArguments)
+                    : !onlyInferringRows)
+            {
+                rows.Add(dataSources[i]);
+            }
+        }
+
+        return rows.ToArray();
+    }
+
+    /// <summary>
+    /// For a generic class with class-level data sources, builds the tests of method-level [Arguments] rows
+    /// whose inferred class type arguments no class row infers. No class row supplies their constructor
+    /// arguments, so they run on the instantiation they infer and fail with
+    /// <see cref="NoClassRowForMethodRowMessage"/>, as in the source generator (#7118). Rows whose type
+    /// arguments break the class's constraints are skipped, as the source generator skips them.
+    /// </summary>
+    private static List<TestMetadata> BuildTestsForMethodRowsWithoutClassRow(
+        Type genericTypeDefinition,
+        MethodInfo[] testMethods,
+        Type[]?[]?[] methodRowClassTypeArguments,
+        List<(Type[] TypeArguments, IDataSourceAttribute[] ClassDataSources, int RowCount)> classRowGroups)
+    {
+        List<TestMetadata>? tests = null;
+
+        for (var methodIndex = 0; methodIndex < testMethods.Length; methodIndex++)
+        {
+            if (methodRowClassTypeArguments[methodIndex] is not { } rowTypeArguments)
+            {
+                continue;
+            }
+
+            // Distinct type arguments, in row order, that no class row infers
+            List<Type[]>? unmatchedGroups = null;
+            foreach (var typeArguments in rowTypeArguments)
+            {
+                if (typeArguments == null
+                    || IsInferredByClassRows(classRowGroups, typeArguments)
+                    || (unmatchedGroups != null && IndexOfTypeArguments(unmatchedGroups, typeArguments) >= 0))
+                {
+                    continue;
+                }
+
+                (unmatchedGroups ??= []).Add(typeArguments);
+            }
+
+            if (unmatchedGroups == null)
+            {
+                continue;
+            }
+
+            var genericMethod = testMethods[methodIndex];
+            foreach (var typeArguments in unmatchedGroups)
+            {
+                Type concreteType;
+                try
+                {
+                    concreteType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, typeArguments);
+                }
+                catch (ArgumentException)
+                {
+                    continue;
+                }
+                catch (Exception ex)
+                {
+                    (tests ??= []).Add(CreateFailedTestMetadata(genericTypeDefinition, genericMethod, ex));
+                    continue;
+                }
+
+                try
+                {
+                    var concreteMethod = FindConcreteMethod(concreteType, genericMethod);
+                    if (concreteMethod == null)
+                    {
+                        continue;
+                    }
+
+                    (tests ??= []).Add(BuildTestMetadata(
+                        concreteType,
+                        concreteMethod,
+                        classDataSources: [],
+                        methodDataSources: ScopeMethodRowsToClassTypeArguments(concreteType, concreteMethod, rowTypeArguments, typeArguments, onlyInferringRows: true),
+                        instanceFactory: static (_, _) => throw new InvalidOperationException(NoClassRowForMethodRowMessage)));
+                }
+                catch (Exception ex)
+                {
+                    (tests ??= []).Add(CreateFailedTestMetadata(genericTypeDefinition, genericMethod, ex));
+                }
+            }
+        }
+
+        return tests ?? [];
+    }
+
+    private static bool IsInferredByClassRows(List<(Type[] TypeArguments, IDataSourceAttribute[] ClassDataSources, int RowCount)> classRowGroups, Type[] typeArguments)
+    {
+        foreach (var group in classRowGroups)
+        {
+            if (AreSameTypeArguments(group.TypeArguments, typeArguments))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// True when a method's [Arguments] rows already infer the type arguments a [GenerateGenericTest]
     /// lists. The rows' instantiation, scoped to those rows, then stands for both, as in the source
     /// generator, which keeps the first instantiation of a type combination.
@@ -1454,7 +1666,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         Type testClass,
         MethodInfo testMethod,
         IDataSourceAttribute[]? classDataSources = null,
-        IDataSourceAttribute[]? methodDataSources = null)
+        IDataSourceAttribute[]? methodDataSources = null,
+        Func<Type[], object?[], object>? instanceFactory = null)
     {
         var testName = GenerateTestName(testClass, testMethod);
 
@@ -1492,7 +1705,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 DataSources = methodDataSources ?? ReflectionAttributeExtractor.ExtractMethodDataSources(testMethod, testClass),
                 ClassDataSources = classDataSources ?? ReflectionAttributeExtractor.ExtractDataSources(testClass),
                 PropertyDataSources = ReflectionAttributeExtractor.ExtractPropertyDataSources(testClass),
-                InstanceFactory = CreateInstanceFactory(testClass)!,
+                InstanceFactory = instanceFactory ?? CreateInstanceFactory(testClass)!,
                 TestInvoker = CreateTestInvoker(testClass, testMethod),
                 FilePath = ExtractFilePath(testMethod) ?? "Unknown",
                 LineNumber = ExtractLineNumber(testMethod) ?? 0,
