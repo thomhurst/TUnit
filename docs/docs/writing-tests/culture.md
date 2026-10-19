@@ -82,6 +82,7 @@ using TUnit.Core.Executors;
 
 - Only one culture can be specified per scope. To run the same test under multiple cultures, factor out the test logic into a private method and call it from separate test methods, each with its own `[Culture]` attribute.
 - The attribute sets both `CurrentCulture` and `CurrentUICulture` for the executing thread.
+- Test display names do not depend on culture: numeric arguments are always formatted with the invariant culture, so `[Arguments(1.5, -2)]` is displayed as `Test(1.5, -2)` on every machine. Use a custom [argument formatter](../extending/argument-formatters.md) if you want a different format.
 
 ## See Also
 

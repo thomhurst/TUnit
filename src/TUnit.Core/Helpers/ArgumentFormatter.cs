@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Globalization;
+using System.Numerics;
 using System.Text;
 
 namespace TUnit.Core.Helpers;
@@ -118,7 +120,11 @@ public static class ArgumentFormatter
         string toString;
         try
         {
-            toString = o.ToString()!;
+            // Numbers are formatted with the invariant culture so a display name is the same on every
+            // machine, and a decimal comma (sv-SE, de-DE, ...) can't be mistaken for the ", " separator.
+            toString = IsNumeric(o, type)
+                ? ((IFormattable)o).ToString(null, CultureInfo.InvariantCulture)
+                : o.ToString()!;
         }
         catch
         {
@@ -148,6 +154,17 @@ public static class ArgumentFormatter
         }
 
         return toString;
+    }
+
+    private static bool IsNumeric(object o, Type type)
+    {
+        // bool and char are primitive but not IFormattable, and their text doesn't depend on culture.
+        return (type.IsPrimitive && o is IFormattable)
+            || o is decimal or BigInteger
+#if NET
+            || o is Half or Int128 or UInt128
+#endif
+            ;
     }
 
     private static string FormatTuple(object tuple)
