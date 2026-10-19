@@ -43,7 +43,7 @@ public class FileInfoExistsAssertion : Assertion<System.IO.FileInfo>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}exist";
+        return $"{(_negated ? "not " : "")} exist";
     }
 }
 
@@ -79,7 +79,7 @@ public class FileInfoIsReadOnlyAssertion : Assertion<System.IO.FileInfo>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be read-only";
+        return $"{(_negated ? "not " : "")} be read-only";
     }
 }
 

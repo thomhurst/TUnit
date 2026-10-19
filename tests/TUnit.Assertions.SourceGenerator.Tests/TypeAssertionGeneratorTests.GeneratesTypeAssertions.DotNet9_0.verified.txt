@@ -43,7 +43,7 @@ public class TypeIsClassAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a class";
+        return $"{(_negated ? "not " : "")} be a class";
     }
 }
 
@@ -79,7 +79,7 @@ public class TypeIsInterfaceAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be an interface";
+        return $"{(_negated ? "not " : "")} be an interface";
     }
 }
 
@@ -115,7 +115,7 @@ public class TypeIsAbstractAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be abstract";
+        return $"{(_negated ? "not " : "")} be abstract";
     }
 }
 
@@ -151,7 +151,7 @@ public class TypeIsSealedAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be sealed";
+        return $"{(_negated ? "not " : "")} be sealed";
     }
 }
 
@@ -187,7 +187,7 @@ public class TypeIsValueTypeAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a value type";
+        return $"{(_negated ? "not " : "")} be a value type";
     }
 }
 
@@ -223,7 +223,7 @@ public class TypeIsEnumAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be an enum";
+        return $"{(_negated ? "not " : "")} be an enum";
     }
 }
 
@@ -259,7 +259,7 @@ public class TypeIsPrimitiveAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a primitive type";
+        return $"{(_negated ? "not " : "")} be a primitive type";
     }
 }
 
@@ -295,7 +295,7 @@ public class TypeIsPublicAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be public";
+        return $"{(_negated ? "not " : "")} be public";
     }
 }
 
@@ -331,7 +331,7 @@ public class TypeIsGenericTypeAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a generic type";
+        return $"{(_negated ? "not " : "")} be a generic type";
     }
 }
 
@@ -367,7 +367,7 @@ public class TypeIsGenericTypeDefinitionAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a generic type definition";
+        return $"{(_negated ? "not " : "")} be a generic type definition";
     }
 }
 
@@ -403,7 +403,7 @@ public class TypeIsArrayAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be an array";
+        return $"{(_negated ? "not " : "")} be an array";
     }
 }
 
@@ -439,7 +439,7 @@ public class TypeIsByRefAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a by-ref type";
+        return $"{(_negated ? "not " : "")} be a by-ref type";
     }
 }
 
@@ -475,7 +475,7 @@ public class TypeIsPointerAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a pointer type";
+        return $"{(_negated ? "not " : "")} be a pointer type";
     }
 }
 
@@ -511,7 +511,7 @@ public class TypeIsNestedAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a nested type";
+        return $"{(_negated ? "not " : "")} be a nested type";
     }
 }
 
@@ -547,7 +547,7 @@ public class TypeIsNestedPublicAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a nested public type";
+        return $"{(_negated ? "not " : "")} be a nested public type";
     }
 }
 
@@ -583,7 +583,7 @@ public class TypeIsNestedPrivateAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a nested private type";
+        return $"{(_negated ? "not " : "")} be a nested private type";
     }
 }
 
@@ -619,7 +619,7 @@ public class TypeIsNestedAssemblyAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a nested assembly type";
+        return $"{(_negated ? "not " : "")} be a nested assembly type";
     }
 }
 
@@ -655,7 +655,7 @@ public class TypeIsNestedFamilyAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a nested family type";
+        return $"{(_negated ? "not " : "")} be a nested family type";
     }
 }
 
@@ -691,7 +691,7 @@ public class TypeIsVisibleAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be visible";
+        return $"{(_negated ? "not " : "")} be visible";
     }
 }
 
@@ -727,7 +727,7 @@ public class TypeIsConstructedGenericTypeAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a constructed generic type";
+        return $"{(_negated ? "not " : "")} be a constructed generic type";
     }
 }
 
@@ -763,7 +763,7 @@ public class TypeContainsGenericParametersAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}contain generic parameters";
+        return $"{(_negated ? "not " : "")} contain generic parameters";
     }
 }
 
@@ -799,7 +799,7 @@ public class TypeIsSerializableAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be serializable";
+        return $"{(_negated ? "not " : "")} be serializable";
     }
 }
 
@@ -835,7 +835,7 @@ public class TypeIsCOMObjectAssertion : Assertion<System.Type>
 
     protected override string GetExpectation()
     {
-        return $"to {(_negated ? "not " : "")}be a COM object";
+        return $"{(_negated ? "not " : "")} be a COM object";
     }
 }
 
