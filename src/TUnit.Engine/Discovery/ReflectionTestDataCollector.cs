@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Frozen;
 #endif
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -1121,13 +1122,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
+    /// The class-level data rows that infer one set of class type arguments: one static data source per
+    /// original source, and the number of rows they hold.
+    /// </summary>
+    private readonly record struct ClassRowGroup(Type[] TypeArguments, IDataSourceAttribute[] ClassDataSources, int RowCount);
+
+    /// <summary>
     /// Evaluates the class-level data sources of a generic type definition and groups their rows by the
     /// type arguments each row infers. Each group keeps one static data source per original source, so
     /// every row runs as its own test on the shared concrete type, mirroring the source generator.
     /// Rows whose type arguments break the class's constraints go to <paramref name="constraintViolations"/>
     /// instead of a group (#7107).
     /// </summary>
-    private static async Task<List<(Type[] TypeArguments, IDataSourceAttribute[] ClassDataSources, int RowCount)>> GroupClassRowsByTypeArgumentsAsync(
+    private static async Task<List<ClassRowGroup>> GroupClassRowsByTypeArgumentsAsync(
         Type genericTypeDefinition,
         IDataSourceAttribute[] classDataSources,
         ReflectionGenericConstraintViolations constraintViolations,
@@ -1197,10 +1204,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
 
-        var result = new List<(Type[] TypeArguments, IDataSourceAttribute[] ClassDataSources, int RowCount)>(typeArgumentGroups.Count);
+        var result = new List<ClassRowGroup>(typeArgumentGroups.Count);
         for (var i = 0; i < typeArgumentGroups.Count; i++)
         {
-            result.Add((typeArgumentGroups[i], sourcesByGroup[i].ToArray(), rowCounts[i]));
+            result.Add(new ClassRowGroup(typeArgumentGroups[i], sourcesByGroup[i].ToArray(), rowCounts[i]));
         }
 
         return result;
@@ -1456,9 +1463,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return null;
         }
 
-        // Same attribute order as the generic definition's method, so the indices line up. Should the two
-        // ever differ, keep every source rather than pair rows with the wrong inferred types.
+        // Same attribute order as the generic definition's method, so the indices line up: both lists come
+        // from the same GetCustomAttributes call, and ExtractMethodDataSources only substitutes entries in
+        // place. Should the two ever differ, keep every source rather than pair rows with the wrong inferred
+        // types, and fail Debug builds so that the mismatch is noticed.
         var dataSources = ReflectionAttributeExtractor.ExtractMethodDataSources(concreteMethod, concreteType);
+        Debug.Assert(dataSources.Length == rowTypeArguments.Length,
+            "ExtractMethodDataSources and ExtractDataSources returned a different number of data sources, so method rows cannot be scoped to their class instantiation (#7118).");
         if (dataSources.Length != rowTypeArguments.Length)
         {
             return null;
@@ -1501,7 +1512,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         Type genericTypeDefinition,
         MethodInfo[] testMethods,
         Type[]?[]?[] methodRowClassTypeArguments,
-        List<(Type[] TypeArguments, IDataSourceAttribute[] ClassDataSources, int RowCount)> classRowGroups,
+        List<ClassRowGroup> classRowGroups,
         GenerateGenericTestAttribute[] generateGenericTestAttributes)
     {
         List<TestMetadata>? tests = null;
@@ -1609,7 +1620,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return false;
     }
 
-    private static bool IsInferredByClassRows(List<(Type[] TypeArguments, IDataSourceAttribute[] ClassDataSources, int RowCount)> classRowGroups, Type[] typeArguments)
+    private static bool IsInferredByClassRows(List<ClassRowGroup> classRowGroups, Type[] typeArguments)
     {
         foreach (var group in classRowGroups)
         {
