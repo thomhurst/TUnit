@@ -2471,7 +2471,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // a per-data-source compiler-generated state machine class (#6227). Only the per-test-unique
         // invocation is emitted, as a static lambda.
         writer.Append("Factory = static dataGeneratorMetadata => ");
-        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null);
+        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null, compilation);
         writer.AppendLine(",");
 
         writer.Unindent();
@@ -2484,7 +2484,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// member's declared return type (mirroring the previous inline-iterator branch order)
     /// and whether the member is static or instance-based.
     /// </summary>
-    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, bool usesTestClassInstance, TypedConstant? arguments)
+    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, bool usesTestClassInstance, TypedConstant? arguments, Compilation compilation)
     {
         var dataSourceMethod = dataSourceMember as IMethodSymbol;
         var dataSourceProperty = dataSourceMember as IPropertySymbol;
@@ -2525,7 +2525,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (dataSourceMethod != null)
         {
             memberAccess = hasArguments
-                ? $"{dataSourceMethod.Name}({string.Join(", ", dataSourceMethod.Parameters.Select((p, i) => $"(({p.Type.GloballyQualified()})arguments[{i.ToString(CultureInfo.InvariantCulture)}])"))})"
+                ? $"{dataSourceMethod.Name}({BuildDataSourceCallArguments(dataSourceMethod, arguments!.Value, compilation)})"
                 : $"{dataSourceMethod.Name}()";
         }
         else
@@ -6518,6 +6518,65 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
+    /// Builds the argument list for calling a [MethodDataSource] method with its <c>Arguments</c>, which the
+    /// generated factory holds in an <c>object[]</c> named <c>arguments</c>. It accepts what
+    /// <see cref="ScoreDataSourceOverload"/> accepts, as reflection mode's binder and <c>BuildInvokeArgs</c> do:
+    /// <list type="bullet">
+    /// <item>A value that needs a numeric or nullable conversion, such as an <c>int</c> passed to a <c>long</c>
+    /// parameter, is unboxed as its own type first. Casting the boxed value straight to the parameter type
+    /// would throw <see cref="InvalidCastException"/>.</item>
+    /// <item>A missing optional parameter is left out so its default applies, and a missing
+    /// <c>CancellationToken</c> gets <c>CancellationToken.None</c>. Later parameters are passed by name.</item>
+    /// </list>
+    /// A missing required parameter still reads past the end of <c>arguments</c>, so the mismatch is reported
+    /// when the data source runs, as before.
+    /// </summary>
+    private static string BuildDataSourceCallArguments(IMethodSymbol method, TypedConstant arguments, Compilation compilation)
+    {
+        var values = arguments is { Kind: TypedConstantKind.Array, IsNull: false }
+            ? arguments.Values
+            : ImmutableArray<TypedConstant>.Empty;
+
+        var callArguments = new List<string>(method.Parameters.Length);
+        var useNames = false;
+        for (var i = 0; i < method.Parameters.Length; i++)
+        {
+            var parameter = method.Parameters[i];
+            var parameterType = parameter.Type.GloballyQualified();
+            string value;
+
+            if (i < values.Length)
+            {
+                var argumentType = values[i] is { IsNull: false, Type: { } type } ? type : null;
+                var conversion = argumentType == null || SymbolEqualityComparer.Default.Equals(argumentType, parameter.Type)
+                    ? default
+                    : compilation.ClassifyCommonConversion(argumentType, parameter.Type);
+
+                value = conversion is { IsImplicit: true } && (conversion.IsNumeric || conversion.IsNullable)
+                    ? $"(({parameterType})({argumentType!.GloballyQualified()})arguments[{i.ToString(CultureInfo.InvariantCulture)}])"
+                    : $"(({parameterType})arguments[{i.ToString(CultureInfo.InvariantCulture)}])";
+            }
+            else if (parameter.HasExplicitDefaultValue)
+            {
+                useNames = true;
+                continue;
+            }
+            else if (parameter.Type.IsCancellationToken())
+            {
+                value = "global::System.Threading.CancellationToken.None";
+            }
+            else
+            {
+                value = $"(({parameterType})arguments[{i.ToString(CultureInfo.InvariantCulture)}])";
+            }
+
+            callArguments.Add(useNames ? $"@{parameter.Name}: {value}" : value);
+        }
+
+        return string.Join(", ", callArguments);
+    }
+
+    /// <summary>
     /// Picks the member a [MethodDataSource] reads, mirroring reflection mode's
     /// <c>MethodDataSourceAttribute.ResolveDataSourceMethod</c>: the first type in the hierarchy that
     /// declares the name is searched, and among its methods the overload that accepts the attribute's
@@ -6585,9 +6644,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// Scores how well <paramref name="method"/> accepts the [MethodDataSource] <c>Arguments</c>:
-    /// -1 when it cannot be called with them, otherwise higher for exact argument types and an exact
-    /// parameter count. Missing trailing parameters must be optional or a CancellationToken, which is
-    /// what reflection mode's <c>BuildInvokeArgs</c> fills in.
+    /// -1 when it cannot be called with them, otherwise higher for exact argument types.
+    /// An overload with exactly one parameter per argument always outranks one that needs missing
+    /// parameters filled in, because reflection mode's binder only considers exact-count overloads.
+    /// It falls back to the method's name alone, which works when there is a single overload.
+    /// Missing trailing parameters must be optional or a CancellationToken, which is what reflection
+    /// mode's <c>BuildInvokeArgs</c> fills in and <see cref="BuildDataSourceCallArguments"/> emits.
     /// </summary>
     private static int ScoreDataSourceOverload(IMethodSymbol method, ImmutableArray<TypedConstant> arguments, Compilation compilation)
     {
@@ -6597,7 +6659,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return -1;
         }
 
-        var score = arguments.Length == parameters.Length ? 1 : 0;
+        // Each argument adds at most 2, so this base puts every exact-count overload above every other one
+        var score = arguments.Length == parameters.Length ? 2 * arguments.Length + 1 : 0;
         for (var i = 0; i < parameters.Length; i++)
         {
             var parameterType = parameters[i].Type;
@@ -6626,8 +6689,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 score += 2;
             }
-            else if (compilation.ClassifyCommonConversion(argument.Type, parameterType).IsImplicit)
+            else if (compilation.ClassifyCommonConversion(argument.Type, parameterType) is { IsImplicit: true, IsUserDefined: false })
             {
+                // Reflection's binder applies built-in widening and reference conversions, never implicit operators
                 score += 1;
             }
             else

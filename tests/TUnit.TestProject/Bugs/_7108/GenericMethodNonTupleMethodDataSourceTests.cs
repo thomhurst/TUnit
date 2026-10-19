@@ -68,6 +68,40 @@ public class GenericMethodNonTupleMethodDataSourceTests
 
     public static Task<IAsyncEnumerable<int>> TaskOfAsyncRows() => Task.FromResult(AsyncRows());
 
+    // Arguments = { 13 } is an int: the long overload is picked, as reflection's binder widens int to long
+    public static IEnumerable<string> WideningRows()
+    {
+        yield return "parameterless";
+    }
+
+    public static IEnumerable<long> WideningRows(long value)
+    {
+        yield return value;
+    }
+
+    // Reflection only binds overloads with one parameter per argument, so two strings pick (object, object)
+    public static IEnumerable<string> OptionalOverloadRows(object first, object second)
+    {
+        yield return $"{first}{second}";
+    }
+
+    public static IEnumerable<int> OptionalOverloadRows(string first, string second, int count = 1)
+    {
+        yield return count;
+    }
+
+    // A single overload with a missing optional parameter gets its default
+    public static IEnumerable<int> OptionalParameterRows(string text, int count = 2)
+    {
+        yield return text.Length + count;
+    }
+
+    // A single overload with a missing CancellationToken gets CancellationToken.None
+    public static IEnumerable<int> CancellationTokenRows(int value, CancellationToken cancellationToken)
+    {
+        yield return cancellationToken.CanBeCanceled ? -value : value;
+    }
+
     [Test]
     [MethodDataSource(nameof(FuncRows))]
     public async Task Func_Row<T>(T value)
@@ -157,6 +191,42 @@ public class GenericMethodNonTupleMethodDataSourceTests
         await Assert.That(typeof(T)).IsEqualTo(typeof(string));
         await Assert.That(value).IsEqualTo((T)(object)"12");
     }
+
+    [Test]
+    [MethodDataSource(nameof(WideningRows), Arguments = new object[] { 13 })]
+    public async Task Numeric_Argument_Is_Widened<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(long));
+        await Assert.That(value).IsEqualTo((T)(object)13L);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(OptionalOverloadRows), Arguments = new object[] { "a", "b" })]
+    public async Task Exact_Parameter_Count_Overload_Wins<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(value).IsEqualTo((T)(object)"ab");
+    }
+
+    // TUnit0001 requires one argument per parameter. With it suppressed, a missing optional parameter or
+    // CancellationToken is filled in at runtime, in both modes.
+#pragma warning disable TUnit0001
+    [Test]
+    [MethodDataSource(nameof(OptionalParameterRows), Arguments = new object[] { "abc" })]
+    public async Task Missing_Optional_Parameter_Uses_Default<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)5);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(CancellationTokenRows), Arguments = new object[] { 14 })]
+    public async Task Missing_Cancellation_Token_Is_None<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)14);
+    }
+#pragma warning restore TUnit0001
 
     [Test]
     [MethodDataSource(nameof(TaskOfAsyncRows))]
