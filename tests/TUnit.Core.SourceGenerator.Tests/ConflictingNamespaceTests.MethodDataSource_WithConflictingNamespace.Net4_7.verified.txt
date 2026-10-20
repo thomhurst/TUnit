@@ -252,6 +252,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
+        Arguments = new object[] { 5 },
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
@@ -280,6 +281,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
+        Arguments = new object[] { "Hello World!", 5, true },
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
@@ -289,6 +291,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
     },
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
+        Arguments = new object[] { "Hello World!", 7, true },
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
