@@ -1392,9 +1392,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return;
         }
 
-        // A trailing params/array parameter collects the remaining row values, which the
-        // positional casts below cannot express. Bind it like a non-generic method instead,
-        // using the parameters of the closed method.
+        // A trailing params/array parameter collects the remaining row values, and a single tuple parameter
+        // receives the tuple's elements. The positional casts below cannot express either. Bind them like a
+        // non-generic method instead, using the parameters of the closed method.
         if ((entry.MethodTypeArgs.Length > 0 || entry.ClassTypeArgs.Length > 0)
             && TryGetClosedParametersWithTrailingArray(testMethod, entry) is { } closedParameters)
         {
@@ -1491,7 +1491,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Where(p => !p.Type.IsCancellationToken())
             .ToArray();
 
-        if (parameters.Length == 0 || !parameters[parameters.Length - 1].CollectsTrailingArguments())
+        // A single tuple parameter, such as (T, T), arrives as its unwrapped elements, so it also needs the
+        // closed parameters: GenerateConcreteTestInvokerBody rebuilds the tuple from them.
+        var isSingleTupleParameter = parameters is [{ Type: INamedTypeSymbol { IsTupleType: true } }];
+        if (parameters.Length == 0 || !(isSingleTupleParameter || parameters[parameters.Length - 1].CollectsTrailingArguments()))
         {
             return null;
         }
@@ -2381,7 +2384,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var dataSourceMember = ResolveMethodDataSourceMember(targetType, methodName!, attr, compilation);
         var dataSourceMethod = dataSourceMember as IMethodSymbol;
         var dataSourceProperty = dataSourceMember as IPropertySymbol;
-        var dataSourceField = dataSourceMember as IFieldSymbol;
+        // A field the generated class cannot read (a private field) keeps the reflection fallback, as before
+        var dataSourceField = dataSourceMember is IFieldSymbol field && compilation.IsSymbolAccessibleWithin(field, compilation.Assembly)
+            ? field
+            : null;
 
         if (dataSourceMember == null || (dataSourceMethod == null && dataSourceProperty == null && dataSourceField == null))
         {
@@ -6581,8 +6587,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 firstMethod ??= method;
                 var score = ScoreDataSourceOverload(method, arguments, compilation);
-                if (score > bestScore)
+                if (score > bestScore
+                    || (score == bestScore && score >= 0 && IsMoreSpecificDataSourceOverload(method, bestMethod!, arguments.Length, compilation)))
                 {
+                    // On a tie, the overload with the more specific parameter types wins, as with the reflection
+                    // binder: Rows(long) beats Rows(object) for an int argument.
                     bestScore = score;
                     bestMethod = method;
                 }
@@ -6607,6 +6616,34 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Whether every parameter of <paramref name="candidate"/> that receives an argument converts implicitly to the
+    /// matching parameter of <paramref name="other"/>, and they differ. Mirrors <c>IsMoreSpecific</c> in
+    /// <c>MethodDataSourceAttribute</c>.
+    /// </summary>
+    private static bool IsMoreSpecificDataSourceOverload(IMethodSymbol candidate, IMethodSymbol other, int argumentCount, Compilation compilation)
+    {
+        var anyDifferent = false;
+        for (var i = 0; i < argumentCount; i++)
+        {
+            var candidateType = candidate.Parameters[i].Type;
+            var otherType = other.Parameters[i].Type;
+            if (SymbolEqualityComparer.Default.Equals(candidateType, otherType))
+            {
+                continue;
+            }
+
+            if (compilation.ClassifyCommonConversion(candidateType, otherType) is not { IsImplicit: true, IsUserDefined: false })
+            {
+                return false;
+            }
+
+            anyDifferent = true;
+        }
+
+        return anyDifferent;
     }
 
     /// <summary>

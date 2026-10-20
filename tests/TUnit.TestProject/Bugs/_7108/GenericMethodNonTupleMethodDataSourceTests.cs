@@ -107,6 +107,44 @@ public class GenericMethodNonTupleMethodDataSourceTests
 
     public static readonly int[] FieldRows = [19];
 
+    private static readonly int[] PrivateFieldRows = [21];
+
+    public static IEnumerable<(int, int)> TupleParameterRows()
+    {
+        yield return (25, 26);
+    }
+
+    public static IEnumerable<int> LiteralRows(char character, string text, double notANumber, double large, float infinity, DayOfWeek day)
+    {
+        var allMatch = character == '\0'
+            && text == "a\u2028b\"\\"
+            && double.IsNaN(notANumber)
+            && large == 1E+20
+            && float.IsPositiveInfinity(infinity)
+            && day == DayOfWeek.Friday;
+        yield return allMatch ? 24 : -1;
+    }
+
+    public static IEnumerable<string> TieRows(string? text, object value)
+    {
+        yield return "object";
+    }
+
+    public static IEnumerable<long> TieRows(string? text, long value)
+    {
+        yield return value;
+    }
+
+    public static IEnumerable<string> NonNullTieRows(object value)
+    {
+        yield return "object";
+    }
+
+    public static IEnumerable<long> NonNullTieRows(long value)
+    {
+        yield return value;
+    }
+
     public static IEnumerable<int> CancellationTokenOnlyRows(CancellationToken cancellationToken)
     {
         yield return 18;
@@ -296,6 +334,46 @@ public class GenericMethodNonTupleMethodDataSourceTests
     }
 
     [Test]
+    [MethodDataSource(nameof(PrivateFieldRows))]
+    public async Task Private_Field_Data_Source<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)21);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(NonNullTieRows), Arguments = new object[] { 23 })]
+    public async Task More_Specific_Overload_Wins_A_Tie<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(long));
+        await Assert.That(value).IsEqualTo((T)(object)23L);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(LiteralRows), Arguments = new object[] { '\0', "a\u2028b\"\\", double.NaN, 1E+20, float.PositiveInfinity, DayOfWeek.Friday })]
+    public async Task Argument_Literals_Keep_Their_Values<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)24);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(TupleParameterRows))]
+    public async Task Single_Tuple_Parameter_Is_Not_Spread<T>((T, T) pair)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(pair.Item1).IsEqualTo((T)(object)25);
+        await Assert.That(pair.Item2).IsEqualTo((T)(object)26);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(TupleParameterRows))]
+    public async Task NonGeneric_Single_Tuple_Parameter_Is_Not_Spread((int, int) pair)
+    {
+        await Assert.That(pair.Item1).IsEqualTo(25);
+    }
+
+    [Test]
     [MethodDataSource(nameof(CancellationTokenOnlyRows))]
     public async Task Cancellation_Token_Is_Passed_Without_Arguments<T>(T value)
     {
@@ -361,6 +439,14 @@ public class GenericMethodNonTupleMethodDataSourceTests
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(long));
         await Assert.That(value).IsEqualTo((T)(object)20L);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(TieRows), Arguments = new object?[] { null, 22 })]
+    public async Task Null_Argument_More_Specific_Overload_Wins_A_Tie<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(long));
+        await Assert.That(value).IsEqualTo((T)(object)22L);
     }
 #pragma warning restore TUnit0001
 

@@ -411,9 +411,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
     private MethodInfo? ResolveDataSourceMethodWithNullArgument([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType, object?[] arguments)
     {
-        MethodInfo? match = null;
         var bestScore = -1;
-        var ambiguous = false;
+        var best = new List<MethodInfo>();
         foreach (var method in targetType.GetMethods(BindingFlags))
         {
             if (method.Name != MethodNameProvidingDataSource)
@@ -422,20 +421,68 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             }
 
             var score = ScoreArguments(method.GetParameters(), arguments);
+            if (score < 0 || score < bestScore)
+            {
+                continue;
+            }
+
             if (score > bestScore)
             {
-                match = method;
+                best.Clear();
                 bestScore = score;
-                ambiguous = false;
             }
-            else if (score == bestScore && score >= 0)
+
+            best.Add(method);
+        }
+
+        // On a tie, the overload with the more specific parameter types wins, as with the binder and the source
+        // generator: Rows(string?, long) beats Rows(string?, object) for { null, 20 }.
+        foreach (var candidate in best)
+        {
+            var mostSpecific = true;
+            foreach (var other in best)
             {
-                ambiguous = true;
+                if (!ReferenceEquals(candidate, other) && !IsMoreSpecific(candidate.GetParameters(), other.GetParameters(), arguments.Length))
+                {
+                    mostSpecific = false;
+                    break;
+                }
+            }
+
+            if (mostSpecific)
+            {
+                return candidate;
             }
         }
 
         // Still ambiguous, or nothing accepts the arguments: the caller's name-only lookup reports it
-        return ambiguous ? null : match;
+        return null;
+    }
+
+    private static bool IsMoreSpecific(ParameterInfo[] candidate, ParameterInfo[] other, int argumentCount)
+    {
+        var anyDifferent = false;
+        for (var i = 0; i < argumentCount; i++)
+        {
+            var candidateType = candidate[i].ParameterType;
+            var otherType = other[i].ParameterType;
+            if (candidateType == otherType)
+            {
+                continue;
+            }
+
+            var otherUnderlying = Nullable.GetUnderlyingType(otherType) ?? otherType;
+            if (!otherType.IsAssignableFrom(candidateType)
+                && candidateType != otherUnderlying
+                && !IsNumericWidening(candidateType, otherUnderlying))
+            {
+                return false;
+            }
+
+            anyDifferent = true;
+        }
+
+        return anyDifferent;
     }
 
     /// <summary>
