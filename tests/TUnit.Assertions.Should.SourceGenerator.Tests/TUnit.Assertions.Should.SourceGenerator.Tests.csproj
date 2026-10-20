@@ -18,6 +18,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\SharedTestHelpers\TestHostReferences.cs" Link="Shared\TestHostReferences.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\TUnit.Assertions.Should.SourceGenerator\TUnit.Assertions.Should.SourceGenerator.csproj" />
     <ProjectReference Include="..\..\src\TUnit.Assertions.Should\TUnit.Assertions.Should.csproj" />
     <ProjectReference Include="..\..\src\TUnit.Assertions\TUnit.Assertions.csproj" />

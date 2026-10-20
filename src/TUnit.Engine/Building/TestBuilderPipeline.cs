@@ -266,6 +266,7 @@ internal sealed class TestBuilderPipeline
 
     private AbstractExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
+        exception = TestBuilder.ToReportedException(exception);
         var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = $"{metadata.TestClassType.Name}.{metadata.TestName}";
 

@@ -13,20 +13,7 @@ public class RunPublicAPITestsModule : TestBaseModule
 {
     // Public API snapshots cover every supported consumer TFM — keep aligned with
     // <TargetFrameworks> in TUnit.PublicAPI.csproj.
-    protected override IEnumerable<string> TestableFrameworks
-    {
-        get
-        {
-            yield return "net10.0";
-            yield return "net9.0";
-            yield return "net8.0";
-
-            if (IsWindows)
-            {
-                yield return "net472";
-            }
-        }
-    }
+    protected override IEnumerable<string> TestableFrameworks => ModernAndNetFrameworks;
 
     protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {
