@@ -80,7 +80,9 @@ public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute, ITestR
 
     /// <summary>
     /// True for <c>[Arguments(null)]</c>, which passes a null <c>params</c> array rather than one null
-    /// element. Generic type inference treats it as inferring no type, as the source generator does.
+    /// element. On a generic class whose type arguments [GenerateGenericTest] or a class-level data source
+    /// supplies, it infers no class type argument; otherwise its one null value infers object, as the source
+    /// generator does.
     /// </summary>
     internal bool IsNullValuesArray { get; }
 

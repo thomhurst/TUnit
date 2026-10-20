@@ -1179,7 +1179,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             List<AttributeData>? inferringRows = null;
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
-                var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation);
+                var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation,
+                    nullArgumentsArrayInfersObject: !classTypeArgumentsSupplied);
                 if (inferredTypes is { Length: > 0 })
                 {
                     (inferringRows ??= []).Add(methodArgAttr);
@@ -5514,7 +5515,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
-                var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation);
+                var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation,
+                    nullArgumentsArrayInfersObject: false);
                 if (inferredTypes is { Length: > 0 })
                 {
                     var typeKey = BuildTypeKey(inferredTypes);
@@ -6095,7 +6097,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// </summary>
     private static bool IsNullArgumentsArray(AttributeData argAttr) => argAttr.ConstructorArguments[0].IsNull;
 
-    private static ITypeSymbol[]? InferClassTypesFromMethodArguments(INamedTypeSymbol classSymbol, IMethodSymbol methodSymbol, AttributeData argAttr, Compilation compilation)
+    /// <param name="nullArgumentsArrayInfersObject">
+    /// False when [GenerateGenericTest] or a class-level data source supplies the class type arguments: an
+    /// [Arguments(null)] row then infers no type and runs on those instantiations. True otherwise, so the
+    /// row's one null value infers object like any other null value instead of being dropped (#7141).
+    /// </param>
+    private static ITypeSymbol[]? InferClassTypesFromMethodArguments(INamedTypeSymbol classSymbol, IMethodSymbol methodSymbol, AttributeData argAttr, Compilation compilation, bool nullArgumentsArrayInfersObject)
     {
         if (argAttr.ConstructorArguments.Length == 0)
         {
@@ -6105,9 +6112,26 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var inferredTypes = new Dictionary<string, ITypeSymbol>();
         var classTypeParameters = classSymbol.TypeParameters;
 
-        // [Arguments(null)] passes one null value, from which no class type can be inferred (as in reflection mode)
-        if (!HasArgumentsArray(argAttr) || IsNullArgumentsArray(argAttr))
+        if (!HasArgumentsArray(argAttr))
         {
+            return null;
+        }
+
+        // [Arguments(null)] passes a null array, which ArgumentsAttribute stores as one null value (as in reflection mode)
+        if (IsNullArgumentsArray(argAttr))
+        {
+            if (nullArgumentsArrayInfersObject
+                && classTypeParameters.Length == 1
+                && methodSymbol.Parameters.Length > 0
+                // A by-reference parameter cannot be passed the row's value, and reflection mode infers
+                // nothing for it (its type is T&, not T), so the row stays without an instantiation.
+                && methodSymbol.Parameters[0].RefKind == RefKind.None
+                && methodSymbol.Parameters[0].Type is ITypeParameterSymbol { DeclaringMethod: null } nullTypeParam
+                && SymbolEqualityComparer.Default.Equals(nullTypeParam, classTypeParameters[0]))
+            {
+                return [compilation.GetSpecialType(SpecialType.System_Object)];
+            }
+
             return null;
         }
 
