@@ -14,6 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\SharedTestHelpers\TestHostReferences.cs" Link="Shared\TestHostReferences.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" />
     <ProjectReference Include="..\..\src\TUnit.Core\TUnit.Core.csproj" />
     <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
@@ -26,7 +30,13 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" />
+    <!-- Host the generator (built against Roslyn 4.7) on the Roslyn that a current SDK loads, the way
+         the Roslyn414 variant runs in a real build. Roslyn 4.7 cannot bind fixtures that use newer
+         syntax, such as collection expressions in attribute arguments, so it would snapshot what the
+         generator does with broken input. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" VersionOverride="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" VersionOverride="4.14.0" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
     <PackageReference Include="NuGet.Protocol" />
     <PackageReference Include="Sourcy.DotNet">
@@ -39,11 +49,6 @@
     </PackageReference>
     <PackageReference Include="Verify" />
     <PackageReference Include="Verify.TUnit" />
-    <PackageReference Include="xunit" />
-    <PackageReference Include="xunit.runner.visualstudio">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

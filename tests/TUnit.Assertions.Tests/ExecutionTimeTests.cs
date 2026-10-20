@@ -27,7 +27,9 @@ public class ExecutionTimeTests
 
         var duration = stopwatch.Elapsed;
 
-        await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(1));
+        // Well under the 10s action, so the 250ms limit must have cut it short, but loose enough
+        // for loaded CI runners where a sub-second budget is flaky (see #7169).
+        await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(5));
     }
 
     [Test]
@@ -52,6 +54,8 @@ public class ExecutionTimeTests
 
         var duration = stopwatch.Elapsed;
 
-        await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(1));
+        // Well under the 10s action, so the 250ms limit must have cut it short, but loose enough
+        // for loaded CI runners where a sub-second budget is flaky (see #7169).
+        await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(5));
     }
 }

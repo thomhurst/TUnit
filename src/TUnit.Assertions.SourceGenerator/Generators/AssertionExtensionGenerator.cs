@@ -187,7 +187,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 
         return new AssertionExtensionData(
             classSymbol.Name,
-            classSymbol.ContainingNamespace?.ToDisplayString(),
+            NamespaceHelper.GetNamespaceOrNull(classSymbol.ContainingNamespace),
             methodName!,
             negatedMethodName,
             overloadPriority,
