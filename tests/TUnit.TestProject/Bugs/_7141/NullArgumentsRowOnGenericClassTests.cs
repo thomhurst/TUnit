@@ -61,3 +61,14 @@ public class GenerateGenericTestWithNullRow<T>
         await Assert.That(value).IsNull();
     }
 }
+
+// A by-reference parameter cannot take the row's value, so the null row infers nothing for it in
+// either mode, and the generated code must still compile. No test is registered.
+public class NullRowOnGenericClassByRef<T>
+{
+    [Test]
+    [Arguments(null)]
+    public void Run(ref T value)
+    {
+    }
+}

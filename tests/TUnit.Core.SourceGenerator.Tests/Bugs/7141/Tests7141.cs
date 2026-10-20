@@ -13,5 +13,8 @@ internal class Tests7141 : TestsBase
         {
             // The null row's C<object> instantiation is emitted, not dropped
             await Assert.That(string.Join("\n", generatedFiles)).Contains("NullRowOnGenericClass<object>");
+
+            // A by-reference parameter cannot take the row's value, so no instantiation is emitted for it
+            await Assert.That(string.Join("\n", generatedFiles)).DoesNotContain("NullRowOnGenericClassByRef<object>");
         });
 }

@@ -5996,6 +5996,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (nullArgumentsArrayInfersObject
                 && classTypeParameters.Length == 1
                 && methodSymbol.Parameters.Length > 0
+                // A by-reference parameter cannot be passed the row's value, and reflection mode infers
+                // nothing for it (its type is T&, not T), so the row stays without an instantiation.
+                && methodSymbol.Parameters[0].RefKind == RefKind.None
                 && methodSymbol.Parameters[0].Type is ITypeParameterSymbol { DeclaringMethod: null } nullTypeParam
                 && SymbolEqualityComparer.Default.Equals(nullTypeParam, classTypeParameters[0]))
             {
