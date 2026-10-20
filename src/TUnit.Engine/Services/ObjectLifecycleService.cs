@@ -261,6 +261,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         // SortedList keeps keys in ascending order; iterate by index in reverse for descending depth.
         var trackedObjects = testContext.TrackedObjectsIfCreated;
         var values = trackedObjects is not { Count: > 0 } ? (IList<HashSet<object>>)Array.Empty<HashSet<object>>() : trackedObjects.Values;
+        // Objects reachable only from rows the test never receives are tracked for disposal only (#7157).
+        var disposalOnly = testContext.DisposalOnlyTrackedObjects;
 
         for (var i = values.Count - 1; i >= 0; i--)
         {
@@ -270,6 +272,11 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             var tasks = new List<Task>(objectsAtLevel.Count);
             foreach (var obj in objectsAtLevel)
             {
+                if (disposalOnly?.Contains(obj) == true)
+                {
+                    continue;
+                }
+
                 // Tracked objects were discovered before execution and are already
                 // ordered deepest-first, so nested graph traversal would be redundant.
                 tasks.Add(InitializeObjectWithSpanAsync(obj, testContext, cancellationToken, includeNestedObjects: false));
