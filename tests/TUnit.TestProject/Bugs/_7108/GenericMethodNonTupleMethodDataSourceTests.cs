@@ -105,6 +105,33 @@ public class GenericMethodNonTupleMethodDataSourceTests
         yield return value ?? -1;
     }
 
+    public static readonly int[] FieldRows = [19];
+
+    public static IEnumerable<int> CancellationTokenOnlyRows(CancellationToken cancellationToken)
+    {
+        yield return 18;
+    }
+
+    public static IEnumerable<int> NullOptionalRows(int count)
+    {
+        yield return count;
+    }
+
+    public static IEnumerable<string> NullOptionalRows(string? text, int count = 1)
+    {
+        yield return (text ?? "null") + count;
+    }
+
+    public static IEnumerable<string> NullWideningRows(int first, int second)
+    {
+        yield return "int";
+    }
+
+    public static IEnumerable<long> NullWideningRows(string? text, long number)
+    {
+        yield return number;
+    }
+
     public static IEnumerable<string> ExactTypeRows(long value)
     {
         yield return "long";
@@ -261,6 +288,22 @@ public class GenericMethodNonTupleMethodDataSourceTests
     }
 
     [Test]
+    [MethodDataSource(nameof(FieldRows))]
+    public async Task Field_Data_Source<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)19);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(CancellationTokenOnlyRows))]
+    public async Task Cancellation_Token_Is_Passed_Without_Arguments<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)18);
+    }
+
+    [Test]
     [MethodDataSource(nameof(ExactTypeRows), Arguments = new object[] { 15 })]
     public async Task Exact_Argument_Type_Beats_Conversion<T>(T value)
     {
@@ -302,6 +345,22 @@ public class GenericMethodNonTupleMethodDataSourceTests
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(string));
         await Assert.That(value).IsEqualTo((T)(object)"null");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(NullOptionalRows), Arguments = new object?[] { null })]
+    public async Task Null_Argument_With_Missing_Optional_Parameter<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(value).IsEqualTo((T)(object)"null1");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(NullWideningRows), Arguments = new object?[] { null, 20 })]
+    public async Task Null_Argument_With_Widened_Argument<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(long));
+        await Assert.That(value).IsEqualTo((T)(object)20L);
     }
 #pragma warning restore TUnit0001
 

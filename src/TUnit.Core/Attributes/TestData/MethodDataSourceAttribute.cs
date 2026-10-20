@@ -371,10 +371,11 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     // throw on SingleOrDefault.
     //
     // When any argument is null it has no runtime type, so it cannot be expressed in the binder's
-    // Type[]. The overloads with one parameter per argument are then scanned instead: a null needs a
-    // reference or Nullable<T> parameter, and any other argument must be an instance of its parameter
-    // type. A single such overload is used, matching the source generator, which skips value-type
-    // parameters for a null argument. Otherwise we fall back to the caller's name-only lookup.
+    // Type[]. The overloads are then scored the way the source generator scores them (ScoreArguments):
+    // a null needs a reference or Nullable<T> parameter, other arguments may use numeric widening,
+    // missing trailing parameters must be optional or a CancellationToken, and exact-count overloads and
+    // exact argument types rank higher. A single best overload is used. Otherwise we fall back to the
+    // caller's name-only lookup.
     //
     // With zero arguments the empty Type[] flows through the same binder path and selects the
     // parameterless overload directly — including when the name is shared with other-arity
@@ -411,46 +412,108 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     private MethodInfo? ResolveDataSourceMethodWithNullArgument([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType, object?[] arguments)
     {
         MethodInfo? match = null;
+        var bestScore = -1;
+        var ambiguous = false;
         foreach (var method in targetType.GetMethods(BindingFlags))
         {
-            if (method.Name != MethodNameProvidingDataSource || !AcceptsArguments(method.GetParameters(), arguments))
+            if (method.Name != MethodNameProvidingDataSource)
             {
                 continue;
             }
 
-            if (match is not null)
+            var score = ScoreArguments(method.GetParameters(), arguments);
+            if (score > bestScore)
             {
-                // Still ambiguous: the caller's name-only lookup reports it
-                return null;
+                match = method;
+                bestScore = score;
+                ambiguous = false;
             }
-
-            match = method;
+            else if (score == bestScore && score >= 0)
+            {
+                ambiguous = true;
+            }
         }
 
-        return match;
+        // Still ambiguous, or nothing accepts the arguments: the caller's name-only lookup reports it
+        return ambiguous ? null : match;
     }
 
-    private static bool AcceptsArguments(ParameterInfo[] parameters, object?[] arguments)
+    /// <summary>
+    /// Scores how well a method accepts <paramref name="arguments"/>, as the source generator's
+    /// <c>ScoreDataSourceOverload</c> does: -1 when it cannot be called with them, otherwise higher for exact
+    /// argument types. An overload with one parameter per argument outranks one that needs missing optional or
+    /// <see cref="CancellationToken"/> parameters filled in by <see cref="BuildInvokeArgs"/>.
+    /// </summary>
+    private static int ScoreArguments(ParameterInfo[] parameters, object?[] arguments)
     {
-        if (parameters.Length != arguments.Length)
+        if (arguments.Length > parameters.Length)
         {
-            return false;
+            return -1;
         }
 
+        // Each argument adds at most 2, so this base puts every exact-count overload above every other one
+        var score = arguments.Length == parameters.Length ? 2 * arguments.Length + 1 : 0;
         for (var i = 0; i < parameters.Length; i++)
         {
             var parameterType = parameters[i].ParameterType;
-            var accepted = arguments[i] is { } argument
-                ? parameterType.IsInstanceOfType(argument)
-                : !parameterType.IsValueType || Nullable.GetUnderlyingType(parameterType) is not null;
-
-            if (!accepted)
+            if (i >= arguments.Length)
             {
-                return false;
+                if (!parameters[i].HasDefaultValue && parameterType != typeof(CancellationToken))
+                {
+                    return -1;
+                }
+
+                continue;
+            }
+
+            if (arguments[i] is not { } argument)
+            {
+                if (parameterType.IsValueType && Nullable.GetUnderlyingType(parameterType) is null)
+                {
+                    return -1;
+                }
+
+                continue;
+            }
+
+            var argumentType = argument.GetType();
+            var underlyingParameterType = Nullable.GetUnderlyingType(parameterType) ?? parameterType;
+            if (argumentType == parameterType)
+            {
+                score += 2;
+            }
+            else if (parameterType.IsInstanceOfType(argument)
+                     || argumentType == underlyingParameterType
+                     || IsNumericWidening(argumentType, underlyingParameterType))
+            {
+                score += 1;
+            }
+            else
+            {
+                return -1;
             }
         }
 
-        return true;
+        return score;
+    }
+
+    // The implicit numeric conversions C# allows, except to decimal, which MethodInfo.Invoke cannot apply.
+    private static bool IsNumericWidening(Type from, Type to)
+    {
+        var target = Type.GetTypeCode(to);
+        return Type.GetTypeCode(from) switch
+        {
+            TypeCode.SByte => target is TypeCode.Int16 or TypeCode.Int32 or TypeCode.Int64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.Byte => target is TypeCode.Int16 or TypeCode.UInt16 or TypeCode.Int32 or TypeCode.UInt32 or TypeCode.Int64 or TypeCode.UInt64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.Int16 => target is TypeCode.Int32 or TypeCode.Int64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.UInt16 => target is TypeCode.Int32 or TypeCode.UInt32 or TypeCode.Int64 or TypeCode.UInt64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.Char => target is TypeCode.UInt16 or TypeCode.Int32 or TypeCode.UInt32 or TypeCode.Int64 or TypeCode.UInt64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.Int32 => target is TypeCode.Int64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.UInt32 => target is TypeCode.Int64 or TypeCode.UInt64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.Int64 or TypeCode.UInt64 => target is TypeCode.Single or TypeCode.Double,
+            TypeCode.Single => target is TypeCode.Double,
+            _ => false
+        } && !to.IsEnum && !from.IsEnum;
     }
 
     // MethodInfo.Invoke does not auto-fill optional parameters the way a C# call site does.

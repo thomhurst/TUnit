@@ -2381,8 +2381,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var dataSourceMember = ResolveMethodDataSourceMember(targetType, methodName!, attr, compilation);
         var dataSourceMethod = dataSourceMember as IMethodSymbol;
         var dataSourceProperty = dataSourceMember as IPropertySymbol;
+        var dataSourceField = dataSourceMember as IFieldSymbol;
 
-        if (dataSourceMember == null || (dataSourceMethod == null && dataSourceProperty == null))
+        if (dataSourceMember == null || (dataSourceMethod == null && dataSourceProperty == null && dataSourceField == null))
         {
             // Still generate the attribute even if method not found - it will fail at runtime with proper error
             // Use CodeGenerationHelpers to properly handle any generics on the attribute
@@ -2395,7 +2396,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // We need to manually construct this to properly add the Factory property
 
         // Determine if the data source is static or instance-based
-        var isStatic = dataSourceMethod?.IsStatic ?? dataSourceProperty?.GetMethod?.IsStatic ?? true;
+        var isStatic = dataSourceMethod?.IsStatic ?? dataSourceProperty?.GetMethod?.IsStatic ?? dataSourceField?.IsStatic ?? true;
 
         // InstanceMethodDataSourceAttribute means "use the test class instance". If the
         // attribute explicitly targets a separate provider type, create that provider in
@@ -2487,10 +2488,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, bool usesTestClassInstance, TypedConstant? arguments, Compilation compilation)
     {
         var dataSourceMethod = dataSourceMember as IMethodSymbol;
-        var dataSourceProperty = dataSourceMember as IPropertySymbol;
 
-        var returnType = dataSourceMethod?.ReturnType ?? dataSourceProperty!.Type;
-        var isStatic = dataSourceMethod?.IsStatic ?? dataSourceProperty!.IsStatic;
+        var returnType = dataSourceMember switch
+        {
+            IMethodSymbol method => method.ReturnType,
+            IPropertySymbol property => property.Type,
+            _ => ((IFieldSymbol)dataSourceMember).Type
+        };
+        var isStatic = dataSourceMember.IsStatic;
         var fullyQualifiedType = targetType.GloballyQualified();
 
         string kind;
@@ -2519,18 +2524,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? $"global::TUnit.Core.Helpers.DataSourceFactories.From{kind}"
             : $"global::TUnit.Core.Helpers.DataSourceFactories.FromInstance{kind}";
 
-        var hasArguments = arguments != null && dataSourceMethod is { Parameters.Length: > 0 };
+        // A method with parameters goes through BuildDataSourceCallArguments even without Arguments, so a
+        // CancellationToken or optional parameter is filled in as reflection mode's BuildInvokeArgs does.
+        var hasArguments = dataSourceMethod is { Parameters.Length: > 0 };
 
         string memberAccess;
         if (dataSourceMethod != null)
         {
             memberAccess = hasArguments
-                ? $"{dataSourceMethod.Name}({BuildDataSourceCallArguments(dataSourceMethod, arguments!.Value, compilation)})"
+                ? $"{dataSourceMethod.Name}({BuildDataSourceCallArguments(dataSourceMethod, arguments ?? default, compilation)})"
                 : $"{dataSourceMethod.Name}()";
         }
         else
         {
-            memberAccess = dataSourceProperty!.Name;
+            memberAccess = dataSourceMember.Name;
         }
 
         var receiver = isStatic
@@ -2547,7 +2554,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
             writer.Append("var arguments = ");
-            WriteTypedConstant(writer, arguments!.Value);
+            if (arguments is { } suppliedArguments)
+            {
+                WriteTypedConstant(writer, suppliedArguments);
+            }
+            else
+            {
+                writer.Append("global::System.Array.Empty<object?>()");
+            }
             writer.AppendLine(";");
             writer.AppendLine($"return {receiver}.{memberAccess};");
             writer.Unindent();
