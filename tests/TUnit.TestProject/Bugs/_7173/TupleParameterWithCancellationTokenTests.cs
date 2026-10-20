@@ -19,6 +19,11 @@ public class TupleParameterWithCancellationTokenTests
         yield return (1, "one");
     }
 
+    public static IEnumerable<((int, int), int[])> TupleAndArrayRows()
+    {
+        yield return ((25, 26), [1, 2]);
+    }
+
     [Test]
     [GenerateGenericTest(typeof(int))]
     [MethodDataSource(nameof(TupleParameterRows))]
@@ -133,5 +138,25 @@ public class TupleParameterWithCancellationTokenTests
         await Assert.That(pair).IsEqualTo(((T, T))(object)(25, 26));
         await Assert.That(first.CanBeCanceled).IsTrue();
         await Assert.That(second).IsEqualTo(first);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(SpreadRows))]
+    public async Task NonGeneric_Tokens_Interleaved_With_Spread_Row(CancellationToken first, int number, CancellationToken second, string name)
+    {
+        await Assert.That(number).IsEqualTo(1);
+        await Assert.That(name).IsEqualTo("one");
+        await Assert.That(first.CanBeCanceled).IsTrue();
+        await Assert.That(second).IsEqualTo(first);
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [MethodDataSource(nameof(TupleAndArrayRows))]
+    public async Task Generic_Tuple_Middle_Token_Params<T>((T, T) pair, CancellationToken token, params int[] values)
+    {
+        await Assert.That(pair).IsEqualTo(((T, T))(object)(25, 26));
+        await Assert.That(values).IsEquivalentTo([1, 2]);
+        await Assert.That(token.CanBeCanceled).IsTrue();
     }
 }
