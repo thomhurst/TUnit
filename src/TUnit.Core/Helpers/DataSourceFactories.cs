@@ -191,11 +191,13 @@ public static class DataSourceFactories
     /// Data member the generated code reads by reflection (a private or protected field or property) whose declared
     /// type does not say whether it holds one row or many, such as <c>object</c>. The value's runtime type decides,
     /// as it does when <see cref="MethodDataSourceAttribute"/> has no factory and reads the member itself.
+    /// A null value is one row holding null, as <see cref="FromValue"/> gives.
     /// </summary>
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromRuntimeValue(DataGeneratorMetadata dataGeneratorMetadata, Func<object?> invoke)
     {
         if (invoke() is not { } result)
         {
+            yield return NullValueRow;
             yield break;
         }
 
@@ -210,6 +212,7 @@ public static class DataSourceFactories
     {
         if (invoke(GetRequiredInstance(dataGeneratorMetadata)) is not { } result)
         {
+            yield return NullValueRow;
             yield break;
         }
 
@@ -218,6 +221,10 @@ public static class DataSourceFactories
             yield return row;
         }
     }
+
+    // A null value is one row holding null, as FromValue gives for a member whose declared type picks it. Yielding
+    // nothing instead would become an empty row, so the test would fail for a missing argument.
+    private static readonly Func<Task<object?[]?>> NullValueRow = static () => Task.FromResult<object?[]?>([null]);
 
     private static object GetRequiredInstance(DataGeneratorMetadata dataGeneratorMetadata)
     {

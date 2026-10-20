@@ -1396,7 +1396,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // receives the tuple's elements. The positional casts below cannot express either. Bind them like a
         // non-generic method instead, using the parameters of the closed method.
         if ((entry.MethodTypeArgs.Length > 0 || entry.ClassTypeArgs.Length > 0)
-            && TryGetClosedParametersWithTrailingArray(testMethod, entry) is { } closedParameters)
+            && TryGetClosedParametersNeedingRebind(testMethod, entry) is { } closedParameters)
         {
             var invokedName = entry.MethodTypeArgs.Length > 0
                 ? $"{methodName}<{string.Join(", ", entry.MethodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>"
@@ -1481,11 +1481,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Returns the data-bound (non-CancellationToken) parameters of the closed test method when the
-    /// last one collects trailing arguments (<c>params T[]</c> or a plain array). Returns null when
-    /// there is no such parameter, or the closed method cannot be built.
+    /// Returns the data-bound (non-CancellationToken) parameters of the closed test method when they cannot be
+    /// bound by position: the last one collects trailing arguments (<c>params T[]</c> or a plain array), or the
+    /// only one is a tuple that receives the row's elements. Returns null otherwise, or when the closed method
+    /// cannot be built.
     /// </summary>
-    private static IParameterSymbol[]? TryGetClosedParametersWithTrailingArray(TestMethodMetadata testMethod, ConcreteInstantiation entry)
+    private static IParameterSymbol[]? TryGetClosedParametersNeedingRebind(TestMethodMetadata testMethod, ConcreteInstantiation entry)
     {
         var parameters = testMethod.MethodSymbol.Parameters
             .Where(p => !p.Type.IsCancellationToken())

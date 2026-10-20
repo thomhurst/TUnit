@@ -198,6 +198,8 @@ public class DataSourceOverloadParityTests
     [MethodDataSource(nameof(Character), Arguments = new object[] { "Character(string, char)", 'a' })]
     [MethodDataSource(nameof(ExactCount), Arguments = new object[] { "ExactCount(string, object, object)", "a", "b" })]
     [MethodDataSource(nameof(GenericOverload), Arguments = new object[] { "GenericOverload(string, int)", 1 })]
+    // A static overload hidden with `new` on a derived provider: both modes call the derived one
+    [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.Hidden), Arguments = new object[] { "Derived.Hidden(string, int)", 1 })]
     // Loose values for a params parameter are rejected by TUnit0001, so the array is passed as one argument
     [MethodDataSource(nameof(Params), Arguments = new object[] { "Params(string, params int[])", new[] { 1, 2 } })]
     [MethodDataSource(nameof(Params), Arguments = new object[] { "Params(string, int)", 1 })]
@@ -221,4 +223,20 @@ public class DataSourceOverloadParityTests
         await Assert.That(chosen).IsEqualTo(expected);
     }
 #pragma warning restore TUnit0001
+}
+
+public class DataSourceOverloadParityBaseProvider
+{
+    public static IEnumerable<(string, string)> Hidden(string expected, int value)
+    {
+        yield return (expected, "Base.Hidden(string, int)");
+    }
+}
+
+public class DataSourceOverloadParityDerivedProvider : DataSourceOverloadParityBaseProvider
+{
+    public new static IEnumerable<(string, string)> Hidden(string expected, int value)
+    {
+        yield return (expected, "Derived.Hidden(string, int)");
+    }
 }
