@@ -39,6 +39,17 @@ internal sealed class TestArgumentRegistrationService
         return RegisterTestArgumentsCoreAsync(testContext, testDetails, cancellationToken);
     }
 
+    /// <summary>
+    /// Called instead of <see cref="RegisterTestArgumentsAsync"/> for a test that is skipped before it
+    /// executes. Tracks the argument objects the builder already created so they are disposed through
+    /// reference counting when the skipped test completes, without injecting properties or creating
+    /// shared fixtures for a test that never runs.
+    /// </summary>
+    public void TrackSkippedTestArguments(TestContext testContext)
+    {
+        _objectLifecycleService.TrackTestObjects(testContext);
+    }
+
     private static bool HasInjectableArgument(object?[] arguments)
     {
         foreach (var argument in arguments)

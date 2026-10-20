@@ -101,6 +101,12 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     }
 
     /// <summary>
+    /// Tracks the objects a test already holds for reference-counted disposal, without resolving
+    /// injected properties or initializing anything. Used for tests that are skipped before they run.
+    /// </summary>
+    public void TrackTestObjects(TestContext testContext) => _objectTracker.TrackObjects(testContext);
+
+    /// <summary>
     /// IObjectRegistry implementation - registers a single object.
     /// Injects properties but does NOT call IAsyncInitializer (deferred to execution).
     /// </summary>

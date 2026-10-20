@@ -123,6 +123,13 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         // for tests that will never execute.
         if (!string.IsNullOrEmpty(test.Context.SkipReason))
         {
+            // The builder has already created this row's argument objects, so track them (without
+            // resolving or initializing anything) to dispose them when the skipped test completes (#7156).
+            if (isForExecution)
+            {
+                testArgumentRegistrationService.TrackSkippedTestArguments(test.Context);
+            }
+
             test.Context.InvalidateDisplayNameCache();
             return;
         }
