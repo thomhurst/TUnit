@@ -7330,8 +7330,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool AreSameAttribute(AttributeData a1, AttributeData a2)
     {
-        // Compare attributes by their constructor arguments and attribute class
-        if (a1.AttributeClass?.Name != a2.AttributeClass?.Name)
+        // Compare attributes by their constructor arguments and attribute class. The class is compared
+        // as a constructed type, not by name: ClassDataSource<A> and ClassDataSource<B> share a name and
+        // take no constructor arguments, yet each scopes a different instantiation (#7158).
+        if (!SymbolEqualityComparer.Default.Equals(a1.AttributeClass, a2.AttributeClass))
         {
             return false;
         }
