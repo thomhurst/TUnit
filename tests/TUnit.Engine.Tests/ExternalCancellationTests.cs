@@ -46,7 +46,7 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
         using var forcefulCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(25));
 
         // Use cross-platform executable detection (Linux: no extension, Windows: .exe)
-        var binDir = new DirectoryInfo(Path.Combine(testProject.DirectoryName!, "bin", "Release", GetEnvironmentVariable));
+        var binDir = new DirectoryInfo(Path.Combine(testProject.DirectoryName!, "bin", EnvironmentVariables.BuildConfiguration, GetEnvironmentVariable));
         var file = binDir.GetFiles("TUnit.TestProject").FirstOrDefault()?.FullName
                    ?? binDir.GetFiles("TUnit.TestProject.exe").First().FullName;
 

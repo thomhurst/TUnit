@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\SharedTestHelpers\DotNetCli.cs" Link="Shared\DotNetCli.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <TUnitMocksInternalsAccess Include="TUnit.Mocks.InternalsAccess.TargetLib" />
   </ItemGroup>
 
@@ -29,6 +33,9 @@
     <!-- The task excludes MSBuild runtime assets (the MSBuild host provides them); the unit
          tests run the task in-process, so they need them for real. -->
     <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="18.9.6" />
+    <!-- The tests inspect publicized assemblies with Cecil directly; don't rely on it flowing
+         transitively from the task project. -->
+    <PackageReference Include="Mono.Cecil" />
   </ItemGroup>
 
   <!-- The internals-access pipeline itself is imported by TUnit.Mocks.targets. -->

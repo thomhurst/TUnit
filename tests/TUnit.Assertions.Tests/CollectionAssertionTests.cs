@@ -323,7 +323,8 @@ public class CollectionAssertionTests
             await Assert.That(items).All(x => x > 0)
         ).Throws<AssertionException>()
         .WithMessageContaining("index 2")
-        .And.WithMessageContaining("[-5]");
+        // Values are formatted with the current culture (e.g. U+2212 MINUS SIGN under sv-SE).
+        .And.WithMessageContaining($"[{-5}]");
     }
 
     [Test]
@@ -347,6 +348,6 @@ public class CollectionAssertionTests
             await Assert.That(items).All(x => x > 0)
         ).Throws<AssertionException>()
         .WithMessageContaining("index 3")
-        .And.WithMessageContaining("[-1]");
+        .And.WithMessageContaining($"[{-1}]");
     }
 }

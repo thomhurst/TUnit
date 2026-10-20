@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Globalization;
+using System.Numerics;
 using System.Text;
 
 namespace TUnit.Core.Helpers;
@@ -118,7 +120,11 @@ public static class ArgumentFormatter
         string toString;
         try
         {
-            toString = o.ToString()!;
+            // Numbers are formatted with the invariant culture so a display name is the same on every
+            // machine, and a decimal comma (sv-SE, de-DE, ...) can't be mistaken for the ", " separator.
+            toString = IsNumeric(o, type)
+                ? ((IFormattable)o).ToString(null, CultureInfo.InvariantCulture)
+                : o.ToString()!;
         }
         catch
         {
@@ -148,6 +154,23 @@ public static class ArgumentFormatter
         }
 
         return toString;
+    }
+
+    private static bool IsNumeric(object o, Type type)
+    {
+        // An explicit allow-list rather than a plain `o is IFormattable` check: DateTime, DateTimeOffset,
+        // TimeSpan, Guid, enums and user types are IFormattable too, and their display text must not change.
+        // A new numeric type has to be added here.
+        // bool and char are primitive but not IFormattable, and their text doesn't depend on culture.
+        // IntPtr and UIntPtr are primitive too: IFormattable from .NET 5, so formatted invariantly there; on
+        // netstandard2.0 they are not IFormattable and keep ToString(), which formats with the invariant culture.
+        // ArgumentFormatterCultureTests checks every INumberBase<T> type of the runtime against this list.
+        return (type.IsPrimitive && o is IFormattable)
+            || o is decimal or BigInteger or Complex
+#if NET
+            || o is Half or Int128 or UInt128 or System.Runtime.InteropServices.NFloat
+#endif
+            ;
     }
 
     private static string FormatTuple(object tuple)

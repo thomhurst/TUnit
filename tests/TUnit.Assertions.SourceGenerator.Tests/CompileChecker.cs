@@ -12,9 +12,54 @@ namespace TUnit.Assertions.SourceGenerator.Tests;
 /// </summary>
 internal static class CompileChecker
 {
+#if NETFRAMEWORK
+    // Generated code uses attributes that .NET Framework does not ship
+    // (CallerArgumentExpressionAttribute, UnconditionalSuppressMessageAttribute). A real
+    // .NET Framework consumer gets them from the Polyfill package, which declares them as
+    // source in the consumer's own compilation (the TUnit template adds that package for
+    // .NET Framework). The test's reference set cannot supply them: Polyfill embeds its
+    // copies in the test assembly as internal types, so they are invisible to this
+    // compilation. Declare them here the same way Polyfill does for a consumer.
+    private const string NetFrameworkPolyfills =
+        """
+        namespace System.Runtime.CompilerServices
+        {
+            [System.AttributeUsage(System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+            internal sealed class CallerArgumentExpressionAttribute : System.Attribute
+            {
+                public CallerArgumentExpressionAttribute(string parameterName) => ParameterName = parameterName;
+                public string ParameterName { get; }
+            }
+        }
+
+        namespace System.Diagnostics.CodeAnalysis
+        {
+            [System.AttributeUsage(System.AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+            internal sealed class UnconditionalSuppressMessageAttribute : System.Attribute
+            {
+                public UnconditionalSuppressMessageAttribute(string category, string checkId)
+                {
+                    Category = category;
+                    CheckId = checkId;
+                }
+
+                public string Category { get; }
+                public string CheckId { get; }
+                public string Scope { get; set; }
+                public string Target { get; set; }
+                public string MessageId { get; set; }
+                public string Justification { get; set; }
+            }
+        }
+        """;
+#endif
+
     public static async Task AssertNoErrors(IEnumerable<string> generatedFiles)
     {
         var trees = generatedFiles
+#if NETFRAMEWORK
+            .Append(NetFrameworkPolyfills)
+#endif
             .Select(source => CSharpSyntaxTree.ParseText(source))
             .ToArray();
 
@@ -24,17 +69,8 @@ internal static class CompileChecker
             ReferencesHelper.References,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-        // On the net472 leg of CI, the Polyfill assembly's CallerArgumentExpressionAttribute
-        // is declared internal, which produces a CS0122 ('inaccessible due to its protection
-        // level') false positive when Roslyn compiles the generator's output through the test
-        // project's reference set. Filter CS0122 only on net472; the emit shape is still
-        // pinned by the `.Net4_7` snapshot files. On modern TFMs the BCL attribute is public,
-        // so CS0122 (if it ever appears) would be a genuine signal and is not filtered.
         var errors = compilation.GetDiagnostics()
             .Where(d => d.Severity == DiagnosticSeverity.Error)
-#if NETFRAMEWORK
-            .Where(d => !string.Equals(d.Id, "CS0122", System.StringComparison.Ordinal))
-#endif
             .Select(d => $"{d.Id}: {d.GetMessage()}")
             .ToArray();
 

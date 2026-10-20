@@ -438,6 +438,7 @@ public class AsyncTests
         IAsyncService service = mock.Object;
 
         var ex = await Assert.ThrowsAsync<ArgumentException>(async () => await service.ComputeValueTaskAsync(-1));
-        await Assert.That(ex.Message).Contains("Invalid input: -1");
+        // Formatted the same way as the factory above, so it matches under any culture.
+        await Assert.That(ex.Message).Contains($"Invalid input: {-1}");
     }
 }

@@ -43,7 +43,7 @@ public class WrapMultiParam
         _count = count;
         _factor = factor;
     }
-    public virtual string Compute() => $"{_label}:{_count}:{_factor}";
+    public virtual string Compute() => FormattableString.Invariant($"{_label}:{_count}:{_factor}");
 }
 
 public class WrapParamsOnly
