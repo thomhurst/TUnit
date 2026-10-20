@@ -131,11 +131,15 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
                 {
                     testArgumentRegistrationService.TrackSkippedTestArguments(test.Context);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     // A property getter in the arguments' object graph threw. The test still never
                     // runs, so it stays skipped rather than failing the whole run: its objects are
                     // left untracked (and so not disposed), as they were before #7156.
+                    // Tracking is synchronous and takes no cancellation token, so an
+                    // OperationCanceledException here can only come from that user getter, never from
+                    // run cancellation; it is contained like any other getter failure.
+                    logger.LogDebug($"Could not track the objects of skipped test '{test.Context.Metadata.TestDetails.TestId}' for disposal: {ex.Message}");
                 }
             }
 
