@@ -6450,7 +6450,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var compilation = testMethod.CompilationContext.Compilation;
         var dataSourceMember = ResolveMethodDataSourceMember(providerType, methodName, mdsAttr, compilation);
-        var rowType = dataSourceMember == null ? null : GetMethodDataSourceRowType(dataSourceMember, compilation);
+        var rowType = dataSourceMember == null ? null : GetMethodDataSourceRowType(dataSourceMember, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
         if (rowType == null)
         {
             return null;
@@ -6616,7 +6616,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
 
             // No overload accepts the arguments: prefer a property or field, else keep the first
-            // method so the generated call reports the mismatch as before.
+            // method so the generated call reports the mismatch as before. Generic type inference may then
+            // read the row type of a method whose call fails. That is harmless: TUnit0001 reports Arguments
+            // that no overload accepts as a compile error, so this is reached only with it suppressed, and the
+            // data source then fails when it runs, as it does in reflection mode.
             foreach (var member in members)
             {
                 if (member is IPropertySymbol or IFieldSymbol)
@@ -6735,7 +6738,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// arguments (<c>object</c> or <c>object[]</c> rows, or a non-generic <c>IEnumerable</c>), since
     /// those are only known at runtime.
     /// </summary>
-    private static ITypeSymbol? GetMethodDataSourceRowType(ISymbol dataSourceMember, Compilation compilation)
+    private static ITypeSymbol? GetMethodDataSourceRowType(ISymbol dataSourceMember, MethodDataSourceRowTypes wellKnown, Compilation compilation)
     {
         var type = dataSourceMember switch
         {
@@ -6750,11 +6753,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        var taskType = compilation.GetTypeByMetadataName("System.Threading.Tasks.Task`1");
-        var valueTaskType = compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask`1");
-        var funcType = compilation.GetTypeByMetadataName("System.Func`1");
-        var asyncEnumerableType = compilation.GetTypeByMetadataName("System.Collections.Generic.IAsyncEnumerable`1");
-        var testDataRowType = compilation.GetTypeByMetadataName("TUnit.Core.TestDataRow`1");
+        // Looked up once per compilation, not per attribute
+        var taskType = wellKnown.TaskType;
+        var valueTaskType = wellKnown.ValueTaskType;
+        var funcType = wellKnown.FuncType;
+        var asyncEnumerableType = wellKnown.AsyncEnumerableType;
+        var testDataRowType = wellKnown.TestDataRowType;
 
         var isTaskWrapped = false;
         if (type is INamedTypeSymbol { IsGenericType: true } namedTask
@@ -6780,8 +6784,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 type = elementType;
             }
-            else if (type.SpecialType == SpecialType.System_Collections_IEnumerable
-                     || type.AllInterfaces.Any(i => i.SpecialType == SpecialType.System_Collections_IEnumerable))
+            else if (IsNonGenericEnumerable(type))
             {
                 // A non-generic IEnumerable is enumerated by the factory, but its items' types are unknown
                 return null;
@@ -6811,6 +6814,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         static bool IsDefinition(INamedTypeSymbol type, INamedTypeSymbol? definition)
             => definition != null && SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, definition);
+
+        static bool IsNonGenericEnumerable(ITypeSymbol type)
+        {
+            if (type.SpecialType == SpecialType.System_Collections_IEnumerable)
+            {
+                return true;
+            }
+
+            foreach (var @interface in type.AllInterfaces)
+            {
+                if (@interface.SpecialType == SpecialType.System_Collections_IEnumerable)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     private static ITypeSymbol? GetGenericInterfaceArgument(ITypeSymbol type, INamedTypeSymbol? interfaceDefinition)

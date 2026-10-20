@@ -149,6 +149,37 @@ public class DataSourceOverloadParityTests
         yield return (expected, "Optional(string, string, int)");
     }
 
+    public static IEnumerable<(string, string)> NullToNullable(string expected, int value)
+    {
+        yield return (expected, "NullToNullable(string, int)");
+    }
+
+    public static IEnumerable<(string, string)> NullToNullable(string expected, int? value)
+    {
+        yield return (expected, "NullToNullable(string, int?)");
+    }
+
+    // A generic overload is declared first: its T parameter cannot take an Arguments value in either mode
+    public static IEnumerable<(string, string)> GenericOverload<T>(string expected, T value)
+    {
+        yield return (expected, "GenericOverload<T>(string, T)");
+    }
+
+    public static IEnumerable<(string, string)> GenericOverload(string expected, int value)
+    {
+        yield return (expected, "GenericOverload(string, int)");
+    }
+
+    public static IEnumerable<(string, string)> Params(string expected, params int[] values)
+    {
+        yield return (expected, "Params(string, params int[])");
+    }
+
+    public static IEnumerable<(string, string)> Params(string expected, int value)
+    {
+        yield return (expected, "Params(string, int)");
+    }
+
     public static IEnumerable<(string, string)> Token(string expected, int value, CancellationToken cancellationToken)
     {
         yield return (expected, "Token(string, int, CancellationToken)");
@@ -166,6 +197,10 @@ public class DataSourceOverloadParityTests
     [MethodDataSource(nameof(EnumParameter), Arguments = new object[] { "EnumParameter(string, DayOfWeek)", DayOfWeek.Friday })]
     [MethodDataSource(nameof(Character), Arguments = new object[] { "Character(string, char)", 'a' })]
     [MethodDataSource(nameof(ExactCount), Arguments = new object[] { "ExactCount(string, object, object)", "a", "b" })]
+    [MethodDataSource(nameof(GenericOverload), Arguments = new object[] { "GenericOverload(string, int)", 1 })]
+    // Loose values for a params parameter are rejected by TUnit0001, so the array is passed as one argument
+    [MethodDataSource(nameof(Params), Arguments = new object[] { "Params(string, params int[])", new[] { 1, 2 } })]
+    [MethodDataSource(nameof(Params), Arguments = new object[] { "Params(string, int)", 1 })]
     public async Task Chosen_Overload(string expected, string chosen)
     {
         await Assert.That(chosen).IsEqualTo(expected);
@@ -176,6 +211,7 @@ public class DataSourceOverloadParityTests
 #pragma warning disable TUnit0001
     [Test]
     [MethodDataSource(nameof(Null), Arguments = new object?[] { "Null(string, string?)", null })]
+    [MethodDataSource(nameof(NullToNullable), Arguments = new object?[] { "NullToNullable(string, int?)", null })]
     [MethodDataSource(nameof(NullTie), Arguments = new object?[] { "NullTie(string, string?, long)", null, 1 })]
     [MethodDataSource(nameof(NullOptional), Arguments = new object?[] { "NullOptional(string, string?, int)", null })]
     [MethodDataSource(nameof(Optional), Arguments = new object[] { "Optional(string, string, int)", "a" })]
