@@ -253,7 +253,11 @@ public class TimeoutHelperTests
         Func<CancellationToken, Task> operation, bool executionCompletesFirst, TestContext? testContext = null)
     {
         using var timeoutCts = new CancellationTokenSource();
-        var releaseOperation = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        // Continuations run inline so that SetResult below completes the released operation on this
+        // thread. Queuing them would let a busy thread pool push the operation past the grace period,
+        // at which point TimeoutHelper stops waiting and the preserved exception is lost (#7172).
+        var releaseOperation = new TaskCompletionSource();
+        Task? releasedExecution = null;
 
         var timeoutTask = TimeoutHelper.ExecuteWithTimeoutAsync(
             cancellationToken =>
@@ -261,19 +265,28 @@ public class TimeoutHelperTests
                 testContext?.SetCancellationToken(cancellationToken);
                 // Cancel the caller-owned timeout source without depending on a timer or scheduler delay.
                 timeoutCts.Cancel();
-                return executionCompletesFirst ? operation(cancellationToken) : CompleteAfterReleaseAsync(cancellationToken);
+                return executionCompletesFirst
+                    ? operation(cancellationToken)
+                    : releasedExecution = CompleteAfterReleaseAsync(cancellationToken);
             }, Timeout.InfiniteTimeSpan, timeoutCts, CancellationToken.None, testContext: testContext);
 
         // When both tasks are already complete, WhenAny selects execution (the first argument).
         // Otherwise timeout detection wins before the operation is released into the grace period.
         releaseOperation.SetResult();
+
+        if (releasedExecution is { IsCompleted: false })
+        {
+            throw new InvalidOperationException(
+                "The released operation must complete synchronously so the grace period observes its outcome.");
+        }
+
         await timeoutTask;
         return;
 
         async Task CompleteAfterReleaseAsync(CancellationToken cancellationToken)
         {
-            await releaseOperation.Task;
-            await operation(cancellationToken);
+            await releaseOperation.Task.ConfigureAwait(false);
+            await operation(cancellationToken).ConfigureAwait(false);
         }
     }
 }
