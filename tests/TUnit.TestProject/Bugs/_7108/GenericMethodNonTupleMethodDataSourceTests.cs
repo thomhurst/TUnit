@@ -111,6 +111,11 @@ public class GenericMethodNonTupleMethodDataSourceTests
 
     private static IEnumerable<int> PrivatePropertyRows => [31];
 
+    // Declared as object, so only the runtime value says these are two rows
+    private static readonly object PrivateObjectFieldRows = new[] { 41, 42 };
+
+    private static object PrivateObjectPropertyRows => new[] { 43, 44 };
+
     public static IEnumerable<(int, int)> TupleParameterRows()
     {
         yield return (25, 26);
@@ -357,6 +362,20 @@ public class GenericMethodNonTupleMethodDataSourceTests
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
         await Assert.That(value).IsEqualTo((T)(object)31);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(PrivateObjectFieldRows))]
+    public async Task Private_Object_Field_Holding_An_Array_Yields_A_Row_Per_Element(int value)
+    {
+        await Assert.That(value).IsBetween(41, 42);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(PrivateObjectPropertyRows))]
+    public async Task Private_Object_Property_Holding_An_Array_Yields_A_Row_Per_Element(int value)
+    {
+        await Assert.That(value).IsBetween(43, 44);
     }
 
     [Test]

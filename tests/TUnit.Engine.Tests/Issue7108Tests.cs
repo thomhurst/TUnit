@@ -16,8 +16,8 @@ public class Issue7108Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7108/GenericMethodNonTupleMethodDataSourceTests/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(33),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(33),
+                result => result.ResultSummary.Counters.Total.ShouldBe(37),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(37),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }

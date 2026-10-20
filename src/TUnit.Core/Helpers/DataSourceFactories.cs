@@ -187,6 +187,38 @@ public static class DataSourceFactories
         }
     }
 
+    /// <summary>
+    /// Data member the generated code reads by reflection (a private or protected field or property) whose declared
+    /// type does not say whether it holds one row or many, such as <c>object</c>. The value's runtime type decides,
+    /// as it does when <see cref="MethodDataSourceAttribute"/> has no factory and reads the member itself.
+    /// </summary>
+    public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromRuntimeValue(DataGeneratorMetadata dataGeneratorMetadata, Func<object?> invoke)
+    {
+        if (invoke() is not { } result)
+        {
+            yield break;
+        }
+
+        await foreach (var row in MethodDataSourceAttribute.GetRowsFromRuntimeValueAsync(result, dataGeneratorMetadata))
+        {
+            yield return row;
+        }
+    }
+
+    /// <summary>Instance twin of <see cref="FromRuntimeValue"/>.</summary>
+    public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromInstanceRuntimeValue(DataGeneratorMetadata dataGeneratorMetadata, Func<object, object?> invoke)
+    {
+        if (invoke(GetRequiredInstance(dataGeneratorMetadata)) is not { } result)
+        {
+            yield break;
+        }
+
+        await foreach (var row in MethodDataSourceAttribute.GetRowsFromRuntimeValueAsync(result, dataGeneratorMetadata))
+        {
+            yield return row;
+        }
+    }
+
     private static object GetRequiredInstance(DataGeneratorMetadata dataGeneratorMetadata)
     {
         return dataGeneratorMetadata.TestClassInstance

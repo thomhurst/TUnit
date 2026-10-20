@@ -269,6 +269,33 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             yield break;
         }
 
+        var hasAnyItems = false;
+        await foreach (var row in GetRowsFromRuntimeValueAsync(methodResult, dataGeneratorMetadata))
+        {
+            hasAnyItems = true;
+            yield return row;
+        }
+
+        // If the source was empty, yield one empty result like NoDataSource does
+        // unless SkipIfEmpty is true, in which case we yield nothing (test will be skipped)
+        if (!hasAnyItems && !SkipIfEmpty)
+        {
+            yield return () => Task.FromResult<object?[]?>([]);
+        }
+    }
+
+    /// <summary>
+    /// Turns a data source's value into rows by its runtime type: an <see cref="IAsyncEnumerable{T}"/>, a
+    /// <see cref="Task{TResult}"/> or <see cref="ValueTask{TResult}"/> (awaited, then treated like its result), an
+    /// <see cref="System.Collections.IEnumerable"/> other than a string or tuple (one row per item), or a single row.
+    /// Used by the reflection fallback above and by the source-generated factory for a private member whose declared
+    /// type does not say which of these it holds, so both read such a member the same way.
+    /// An empty source yields nothing; the caller decides whether that becomes an empty row.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
+    internal static async IAsyncEnumerable<Func<Task<object?[]?>>> GetRowsFromRuntimeValueAsync(object methodResult, DataGeneratorMetadata dataGeneratorMetadata)
+    {
         // ValueTask<T> is neither a Task nor an IEnumerable, so normalise it to Task<T> and let
         // the Task branch below await it, as the source-generated Factory does.
         if (TryConvertValueTaskToTask(methodResult) is { } valueTaskAsTask)
@@ -284,21 +311,12 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // If it's IAsyncEnumerable, handle it specially
         if (IsAsyncEnumerable(methodResult.GetType()))
         {
-            var hasAnyItems = false;
             await foreach (var item in ConvertToAsyncEnumerable(methodResult))
             {
-                hasAnyItems = true;
                 yield return async () =>
                 {
                     return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
                 };
-            }
-
-            // If the async enumerable was empty, yield one empty result like NoDataSource does
-            // unless SkipIfEmpty is true, in which case we yield nothing (test will be skipped)
-            if (!hasAnyItems && !SkipIfEmpty)
-            {
-                yield return () => Task.FromResult<object?[]?>([]);
             }
         }
         // If it's Task<IEnumerable>
@@ -309,21 +327,12 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
             if (taskResult is System.Collections.IEnumerable enumerable and not string && !DataSourceHelpers.IsTuple(taskResult))
             {
-                var hasAnyItems = false;
                 foreach (var item in enumerable)
                 {
-                    hasAnyItems = true;
                     yield return async () =>
                     {
                         return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
                     };
-                }
-
-                // If the enumerable was empty, yield one empty result like NoDataSource does
-                // unless SkipIfEmpty is true, in which case we yield nothing (test will be skipped)
-                if (!hasAnyItems && !SkipIfEmpty)
-                {
-                    yield return () => Task.FromResult<object?[]?>([]);
                 }
             }
             else
@@ -338,18 +347,9 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // Tuples implement IEnumerable but should be treated as single values
         else if (methodResult is System.Collections.IEnumerable enumerable and not string && !DataSourceHelpers.IsTuple(methodResult))
         {
-            var hasAnyItems = false;
             foreach (var item in enumerable)
             {
-                hasAnyItems = true;
                 yield return () => Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
-            }
-
-            // If the enumerable was empty, yield one empty result like NoDataSource does
-            // unless SkipIfEmpty is true, in which case we yield nothing (test will be skipped)
-            if (!hasAnyItems && !SkipIfEmpty)
-            {
-                yield return () => Task.FromResult<object?[]?>([]);
             }
         }
         else

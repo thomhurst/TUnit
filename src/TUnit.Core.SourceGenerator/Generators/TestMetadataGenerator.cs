@@ -2553,6 +2553,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 + " | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly";
             var target = isStatic ? "null" : usesTestClassInstance ? "instance" : $"new {fullyQualifiedType}()";
             var cast = kind is "Value" or "Enumerable" ? "" : $"({returnType.GloballyQualified()})";
+            if (kind == "Value")
+            {
+                // A declared type such as object does not say whether the value is one row or many. The attribute's
+                // reflection fallback, which read these members before, decides from the runtime value, and reflection
+                // mode does the same, so this factory hands the value to that same logic instead of FromValue.
+                helper = isStatic || !usesTestClassInstance
+                    ? "global::TUnit.Core.Helpers.DataSourceFactories.FromRuntimeValue"
+                    : "global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue";
+                metadataArgument = "dataGeneratorMetadata, ";
+            }
             writer.Append($"{helper}({metadataArgument}{lambdaHeader} {cast}typeof({dataSourceMember.ContainingType.GloballyQualified()}).{lookup}(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target}))");
             return;
         }
@@ -6671,7 +6681,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // method so the generated call reports the mismatch as before. Generic type inference may then
             // read the row type of a method whose call fails. That is harmless: TUnit0001 reports Arguments
             // that no overload accepts as a compile error, so this is reached only with it suppressed, and the
-            // data source then fails when it runs, as it does in reflection mode.
+            // data source then fails when it runs, as it does in reflection mode. Returning null instead would
+            // leave a generic test with no inferred type arguments, so it would disappear without an error.
             foreach (var member in members)
             {
                 if (member is IPropertySymbol or IFieldSymbol)
