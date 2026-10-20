@@ -79,18 +79,31 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             return instance;
         }
 
-        // Create test invoker with CancellationToken support
-        // Determine if the test method has a CancellationToken parameter
-        var cancellationTokenIndex = -1;
-        for (var i = 0; i < MethodMetadata.Parameters.Length; i++)
+        // Create test invoker with CancellationToken support. The engine passes the test's token to
+        // every CancellationToken parameter, wherever it is declared; row values bind to the others.
+        var parameters = MethodMetadata.Parameters;
+        var isToken = new bool[parameters.Length];
+        var tokenCount = 0;
+        for (var i = 0; i < parameters.Length; i++)
         {
-            if (MethodMetadata.Parameters[i].Type == typeof(CancellationToken))
+            if (parameters[i].Type == typeof(CancellationToken))
             {
-                cancellationTokenIndex = i;
-                break;
+                isToken[i] = true;
+                tokenCount++;
             }
         }
-        var hasCancellationToken = cancellationTokenIndex != -1;
+
+        // Tokens declared after the last data parameter.
+        var trailingTokenCount = 0;
+        while (trailingTokenCount < parameters.Length && isToken[parameters.Length - 1 - trailingTokenCount])
+        {
+            trailingTokenCount++;
+        }
+
+        var dataParameterCount = parameters.Length - tokenCount;
+
+        // Index of the first trailing token; tokens before it sit among the data parameters.
+        var trailingTokensStart = parameters.Length - trailingTokenCount;
 
         Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
         {
@@ -99,27 +112,45 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 throw new InvalidOperationException($"No test invoker for {_testMethod.Name}");
             }
 
-            if (hasCancellationToken && cancellationTokenIndex == MethodMetadata.Parameters.Length - 1 && args.Length > cancellationTokenIndex)
+            if (tokenCount == 0)
             {
-                // More row values than data parameters: a trailing array before the token collects
-                // them (as in source-gen mode), so keep the values together and the token last.
-                var argsWithToken = new object?[args.Length + 1];
-                Array.Copy(args, argsWithToken, args.Length);
-                argsWithToken[args.Length] = cancellationToken;
-
-                await TestInvoker(instance, argsWithToken);
+                await TestInvoker(instance, args);
+                return;
             }
-            else if (hasCancellationToken)
+
+            object?[] argsWithToken;
+            if (trailingTokenCount > 0 && args.Length > dataParameterCount)
             {
-                // Insert CancellationToken at the correct position. When the row omits optional
-                // parameters before the token, mark those slots Type.Missing so the invoker applies
-                // their declared defaults, as the source-generated invoker does.
-                var argsWithToken = new object?[Math.Max(args.Length + 1, cancellationTokenIndex + 1)];
+                // More row values than data parameters: a trailing array before the tokens collects
+                // them (as in source-gen mode), so keep the values together and the trailing tokens last.
+                argsWithToken = new object?[args.Length + tokenCount];
+                var argIndex = 0;
+                var valuesEnd = argsWithToken.Length - trailingTokenCount;
+                for (var i = 0; i < valuesEnd; i++)
+                {
+                    // Past trailingTokensStart the trailing array's extra values continue, not parameters.
+                    argsWithToken[i] = i < trailingTokensStart && isToken[i]
+                        ? cancellationToken
+                        : args[argIndex++];
+                }
+
+                for (var i = valuesEnd; i < argsWithToken.Length; i++)
+                {
+                    argsWithToken[i] = cancellationToken;
+                }
+            }
+            else
+            {
+                // Insert the token at each declared position. When the row omits optional parameters
+                // before a token, mark those slots Type.Missing so the invoker applies their declared
+                // defaults, as the source-generated invoker does.
+                var lastTokenIndex = Array.LastIndexOf(isToken, true);
+                argsWithToken = new object?[Math.Max(args.Length + tokenCount, lastTokenIndex + 1)];
                 var argIndex = 0;
 
                 for (var i = 0; i < argsWithToken.Length; i++)
                 {
-                    if (i == cancellationTokenIndex)
+                    if (i < isToken.Length && isToken[i])
                     {
                         argsWithToken[i] = cancellationToken;
                     }
@@ -132,13 +163,9 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                         argsWithToken[i] = Type.Missing;
                     }
                 }
+            }
 
-                await TestInvoker(instance, argsWithToken);
-            }
-            else
-            {
-                await TestInvoker(instance, args);
-            }
+            await TestInvoker(instance, argsWithToken);
         };
 
         return new ExecutableTest(CreateInstance, invokeTest)
