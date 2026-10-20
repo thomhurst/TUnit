@@ -161,4 +161,115 @@ public class DataSourceGeneratorAnalyzerTests
                 """
             );
     }
+
+    private const string TypedStreamSources =
+        """
+        using System;
+        using System.Collections.Generic;
+        using System.IO;
+        using System.Threading.Tasks;
+        using TUnit.Core;
+
+        public class ObjectStreamsAttribute : DataSourceGeneratorAttribute<object>
+        {
+            protected override IEnumerable<Func<object>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+            {
+                yield return () => new MemoryStream();
+            }
+        }
+
+        public class StringsAttribute : DataSourceGeneratorAttribute<string>
+        {
+            protected override IEnumerable<Func<string>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+            {
+                yield return () => "a";
+            }
+        }
+
+        public class MemoryStreamsAttribute : DataSourceGeneratorAttribute<MemoryStream>
+        {
+            protected override IEnumerable<Func<MemoryStream>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+            {
+                yield return () => new MemoryStream();
+            }
+        }
+        """;
+
+    [Test]
+    public async Task Typed_Source_With_Broad_Declared_Type_On_Generic_Method_Explains_Declared_Type_Inference()
+    {
+        // Source-generated mode infers T from the typed source's declared type, not the run-time value (#7116).
+        await Verifier
+            .VerifyAnalyzerAsync(
+                TypedStreamSources +
+                """
+
+                public class MyClass
+                {
+                    [Test]
+                    [{|#0:ObjectStreams|}]
+                    public Task MyTest<T>(T value) where T : IDisposable => Task.CompletedTask;
+                }
+                """,
+                Verifier.Diagnostic(Rules.GenericTypeArgumentInferredFromDeclaredType)
+                    .WithLocation(0)
+                    .WithArguments("T", "object")
+            );
+    }
+
+    [Test]
+    public async Task Typed_Source_With_Exact_Declared_Type_Violating_Constraint_Is_Left_To_Run_Time()
+    {
+        // An exact declared type is not a declared-type inference problem; the run-time constraint failure explains it.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                TypedStreamSources +
+                """
+
+                public class MyClass
+                {
+                    [Test]
+                    [Strings]
+                    public Task MyTest<T>(T value) where T : IDisposable => Task.CompletedTask;
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Typed_Source_Satisfying_Constraint_On_Generic_Method_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                TypedStreamSources +
+                """
+
+                public class MyClass
+                {
+                    [Test]
+                    [MemoryStreams]
+                    public Task MyTest<T>(T value) where T : IDisposable => Task.CompletedTask;
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Typed_Source_With_Broad_Declared_Type_And_GenerateGenericTest_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                TypedStreamSources +
+                """
+
+                public class MyClass
+                {
+                    [Test]
+                    [ObjectStreams]
+                    [GenerateGenericTest(typeof(MemoryStream))]
+                    public Task MyTest<T>(T value) where T : IDisposable => Task.CompletedTask;
+                }
+                """
+            );
+    }
 }

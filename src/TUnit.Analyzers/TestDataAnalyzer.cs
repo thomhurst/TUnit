@@ -910,11 +910,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
         }
 
-        if (testDataTypes.Any(x => x.IsGenericDefinition()))
-        {
-            return;
-        }
-
         // Get type arguments from the attribute or its base types
         var typeArguments = ImmutableArray<ITypeSymbol>.Empty;
         
@@ -963,6 +958,18 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             // test parameter types (they could be used for other purposes in the implementation)
         }
 
+        if (testDataTypes.Any(x => x.IsGenericDefinition()))
+        {
+            // Open parameter types are not checked for conversions, but a bare method type parameter is inferred
+            // from the typed source's declared type, so its constraints can still be checked (#7116).
+            if (!typeArguments.IsEmpty && typeArguments.Length == testDataTypes.Length)
+            {
+                CheckInferredTypeArgumentConstraints(context, attribute, typeArguments, testDataTypes);
+            }
+
+            return;
+        }
+
         // If no type arguments found (like ArgumentsAttribute which returns object?[]?, or custom
         // generic data source attributes), skip compile-time type checking as it will be validated at runtime
         if (typeArguments.IsEmpty)
@@ -992,6 +999,38 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         context.ReportDiagnostic(Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                 attribute.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
                 string.Join(", ", typeArguments), string.Join(", ", testDataTypes)));
+    }
+
+    private static void CheckInferredTypeArgumentConstraints(SymbolAnalysisContext context,
+        AttributeData attribute,
+        ImmutableArray<ITypeSymbol> typeArguments,
+        ImmutableArray<ITypeSymbol> testDataTypes)
+    {
+        if (!testDataTypes.Any(t => t is ITypeParameterSymbol))
+        {
+            return;
+        }
+
+        var inferredTypeArguments = CompilationExtensions.InferTypeArguments(typeArguments, testDataTypes);
+
+        for (var i = 0; i < typeArguments.Length; i++)
+        {
+            var argument = typeArguments[i];
+            var parameter = testDataTypes[i];
+            // Only the broad declared-type case is reported. A typed source whose exact type breaks the
+            // constraints was never flagged here and still fails at run time with the constraint message.
+            if (!CompilationExtensions.IsBroadDeclaredTypeArgument(argument, parameter)
+                || context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments))
+            {
+                continue;
+            }
+
+            context.ReportDiagnostic(Diagnostic.Create(Rules.GenericTypeArgumentInferredFromDeclaredType,
+                attribute.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
+                parameter.Name,
+                argument.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+            return;
+        }
     }
 
     private static bool CanConvert(SymbolAnalysisContext context, TypedConstant argument, ITypeSymbol? methodParameterType)

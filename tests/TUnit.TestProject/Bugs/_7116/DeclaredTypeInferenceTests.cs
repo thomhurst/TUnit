@@ -19,7 +19,7 @@ public class DeclaredTypeInferenceTests
 
     public static IEnumerable<Func<object>> SingleStreams() => [() => new MemoryStream()];
 
-    // TUnit0001 reports both of these at compile time and explains the declared-type inference.
+    // TUnit0001 reports all three of these at compile time and explains the declared-type inference.
     // It is suppressed here so that the run-time behavior can be checked.
 #pragma warning disable TUnit0001
     [Test]
