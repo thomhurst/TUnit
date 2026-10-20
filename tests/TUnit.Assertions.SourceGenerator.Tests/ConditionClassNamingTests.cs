@@ -72,6 +72,38 @@ internal class ConditionClassNamingTests
     }
 
     [Test]
+    public async Task Overloads_And_Messages_Sharing_A_Name_Each_Get_Their_Own_Class()
+    {
+        // Hits both naming steps: overloads are told apart when the attribute is rendered, then the two attributes'
+        // classes for each overload, which differ only in their message, are told apart at emit time
+        var source =
+            """
+            using TUnit.Assertions.Attributes;
+
+            namespace Naming;
+
+            public static class Overloads
+            {
+                public static bool Matches(string value, int count) => true;
+                public static bool Matches(string value, bool flag) => true;
+            }
+
+            [AssertionFrom<string>(typeof(Overloads), nameof(Overloads.Matches), CustomName = "MatchesFirst", ExpectationMessage = "match first")]
+            public static partial class FirstAssertions { }
+
+            [AssertionFrom<string>(typeof(Overloads), nameof(Overloads.Matches), CustomName = "MatchesSecond", ExpectationMessage = "match second")]
+            public static partial class SecondAssertions { }
+            """;
+
+        var (sources, diagnostics) = AssertionMethodGeneratorRunner.Run(source);
+
+        await Assert.That(diagnostics).IsEmpty();
+        await Assert.That(ClassNames(sources).Distinct()).Count().IsEqualTo(4);
+        await Assert.That(ClassNames(sources)).Contains("StringOverloadsMatchesWithStringAnd1MoreAssertion");
+        await CompileChecker.AssertNoErrors(sources.Append(source));
+    }
+
+    [Test]
     public async Task Hashed_Names_Are_The_Same_On_Every_Host()
     {
         // Pinned values: generated source uses the host's line endings, which must not leak into public type names

@@ -380,6 +380,11 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     /// one whose source sorts first keeps the plain name, and the others get a hash of their source. That makes every
     /// name a function of the declarations alone, never of the order attributes are declared or emitted in.
     /// </summary>
+    /// <remarks>
+    /// This is the second of two naming steps. <see cref="GetConditionClassName"/> already told apart overloads that
+    /// share a name, using only the method's own overloads. Telling apart attributes needs every attribute's class, so
+    /// it can only happen here.
+    /// </remarks>
     private static Dictionary<ConditionClassModel, string> AssignConditionClassNames(IEnumerable<ConditionClassModel> conditionClasses)
     {
         var distinct = conditionClasses.Distinct().ToArray();
@@ -1195,6 +1200,10 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     /// then signature, which keeps the plain name. That depends only on the method's own overloads, so neither other
     /// attributes nor the order the overloads are declared in can change it.
     /// </summary>
+    /// <remarks>
+    /// The first of two naming steps; <see cref="AssignConditionClassNames"/> then tells apart attributes that generate
+    /// different classes for the same overload.
+    /// </remarks>
     private static string GetConditionClassName(CreateAssertionAttributeData attributeData, IMethodSymbol method)
     {
         var name = GenerateAssertConditionClassNameForMethod(attributeData.TargetType, attributeData.ContainingType, attributeData.MethodName, method);
