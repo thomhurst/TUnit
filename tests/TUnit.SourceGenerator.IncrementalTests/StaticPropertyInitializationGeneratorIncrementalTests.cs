@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Models;
 
-namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
+namespace TUnit.SourceGenerator.IncrementalTests;
 
 public class StaticPropertyInitializationGeneratorIncrementalTests
 {
@@ -28,29 +28,29 @@ public class StaticPropertyInitializationGeneratorIncrementalTests
         }
         """;
 
-    [Fact]
-    public void AddUnrelatedMethodShouldNotRegenerate()
+    [Test]
+    public async Task AddUnrelatedMethodShouldNotRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultProperties, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<StaticPropertyInitializationGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunParseLength(driver2,2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached);
+        await AssertRunParseLength(driver2,2);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached);
     }
 
-    [Fact]
-    public void AddUnrelatedClassWithBaseListShouldNotRerunParse()
+    [Test]
+    public async Task AddUnrelatedClassWithBaseListShouldNotRerunParse()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultProperties, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<StaticPropertyInitializationGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
 
         // A class with a base list is a syntactic candidate, but its chain has no static
         // data-source property, so it must not reach the collected input of the parse step.
@@ -62,18 +62,18 @@ public class StaticPropertyInitializationGeneratorIncrementalTests
             }
             """));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunParseLength(driver2, 2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached);
+        await AssertRunParseLength(driver2, 2);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached);
     }
 
-    [Fact]
-    public void AddClassWithValidPropertyShouldRegenerate()
+    [Test]
+    public async Task AddClassWithValidPropertyShouldRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultProperties, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<StaticPropertyInitializationGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
             """
@@ -88,18 +88,18 @@ public class StaticPropertyInitializationGeneratorIncrementalTests
             }
             """));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunParseLength(driver2,3);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.ModifiedSource);
+        await AssertRunParseLength(driver2,3);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.ModifiedSource);
     }
 
-    [Fact]
-    public void ModifyPropertyAttributeShouldRegenerate()
+    [Test]
+    public async Task ModifyPropertyAttributeShouldRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultProperties, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<StaticPropertyInitializationGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
             """
@@ -114,13 +114,13 @@ public class StaticPropertyInitializationGeneratorIncrementalTests
             }
             """));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified);
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void HiddenBaseStaticPropertyIsInitializedRegardlessOfDeclarationOrder(bool derivedFirst)
+    [Test]
+    [Arguments(true)]
+    [Arguments(false)]
+    public async Task HiddenBaseStaticPropertyIsInitializedRegardlessOfDeclarationOrder(bool derivedFirst)
     {
         const string baseClass =
             """
@@ -153,20 +153,20 @@ public class StaticPropertyInitializationGeneratorIncrementalTests
         var driver = TestHelper.GenerateTracked<StaticPropertyInitializationGenerator>(compilation);
 
         // Both HidingDerived.Value and the hidden HidingBase.Value need initializing
-        AssertRunParseLength(driver, 2);
+        await AssertRunParseLength(driver, 2);
     }
 
-    private static void AssertRunReasons(
+    private static async Task AssertRunReasons(
         GeneratorDriver driver,
         IncrementalGeneratorRunReasons reasons,
         int outputIndex = 0
     )
     {
         var runResult = driver.GetRunResult().Results[0];
-        TestHelper.AssertRunReason(runResult, StaticPropertyInitializationGenerator.ParseStaticProperties, reasons.BuildStep, outputIndex);
+        await TestHelper.AssertRunReason(runResult, StaticPropertyInitializationGenerator.ParseStaticProperties, reasons.BuildStep, outputIndex);
     }
 
-    private static void AssertRunParseLength(
+    private static async Task AssertRunParseLength(
         GeneratorDriver driver,
         int staticPropertyModelCount
     )
@@ -174,6 +174,6 @@ public class StaticPropertyInitializationGeneratorIncrementalTests
         var runResult = driver.GetRunResult().Results[0];
         var runValue = runResult.TrackedSteps[StaticPropertyInitializationGenerator.ParseStaticProperties][0].Outputs[0].Value;
         var runState = (EquatableArray<PropertyWithDataSourceModel>)runValue;
-        Xunit.Assert.Equal(staticPropertyModelCount, runState.Length);
+        await Assert.That(runState.Length).IsEqualTo(staticPropertyModelCount);
     }
 }

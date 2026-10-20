@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.Core;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Assertions.Should.SourceGenerator.Tests;
 
@@ -448,7 +449,7 @@ public class ShouldExtensionGeneratorTests
         var compilation = CSharpCompilation.Create(
             assemblyName: "GeneratorTest",
             syntaxTrees: inputTrees,
-            references: GetReferences(),
+            references: References,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         var driver = CSharpGeneratorDriver.Create(new ShouldExtensionGenerator());
@@ -471,25 +472,11 @@ public class ShouldExtensionGeneratorTests
         return combined;
     }
 
-    private static IEnumerable<MetadataReference> GetReferences()
-    {
-        // Mirror the loaded assemblies of the test process. Works on both .NET Core
-        // (where TRUSTED_PLATFORM_ASSEMBLIES populates this set) and .NET Framework,
-        // unlike <c>AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")</c> which returns
-        // null on .NET Framework and would leave the in-memory compilation without BCL
-        // references — making symbol resolution silently fail in the generator.
-        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            if (asm.IsDynamic || string.IsNullOrWhiteSpace(asm.Location))
-            {
-                continue;
-            }
-            yield return MetadataReference.CreateFromFile(asm.Location);
-        }
-
-        yield return MetadataReference.CreateFromFile(typeof(Assertion<>).Assembly.Location);
-        yield return MetadataReference.CreateFromFile(typeof(TUnit.Assertions.Should.Core.IShouldSource).Assembly.Location);
-    }
+    // Built once: every test compiles against the same references, and each one reads its file from disk
+    private static readonly List<PortableExecutableReference> References =
+        TestHostReferences.CreateReferences(
+            typeof(Assertion<>).Assembly,
+            typeof(TUnit.Assertions.Should.Core.IShouldSource).Assembly);
 
     private static int CountOccurrences(string value, string search)
     {

@@ -14,7 +14,8 @@ public class Tests
     public async Task GenericArgumentsTest<T>(T value, string expected)
     {
         // Assert
-        await Assert.That(value?.ToString()).IsEqualTo(expected);
+        // Invariant: the expected strings use invariant formatting (e.g. "1.1"), whatever the machine culture.
+        await Assert.That(Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture)).IsEqualTo(expected);
     }
 }
 
