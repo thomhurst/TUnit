@@ -34,9 +34,9 @@ Read only as needed:
 
 ## Local worktree lifecycle
 
-Use `scripts/AgentLocks.ps1` from the shared checkout for work-item ownership (`pr-<N>` or `issue-<N>`). Set `$agentLocks` to its absolute path, acquire before creating the checkout, and use a stable `-OwnerId` outside Codex. Git and Docker are required locally.
+Use `scripts/AgentLocks.ps1` from the shared checkout for work-item ownership (`pr-<N>` or `issue-<N>`). Set `$agentLocks` to its absolute path, acquire before creating the checkout, and pass the same stable `-OwnerId` to every verb (`acquire`, `renew`, `release`) outside Codex, or set `TUNIT_AGENT_LOCK_OWNER_ID`. Git and Docker are required locally.
 
-Immediately after checkout, run `pwsh $agentLocks renew -LockName $lockName -Worktree $worktree` once to register its path. Stop owned processes, archive needed evidence outside the worktree, then release from the shared checkout in `finally`. Release removes clean checkouts even for open PRs; branches and detached commits remain available for re-checkout. See [local worktree lifecycle](scripts/WorktreeLifecycle.md) for preservation rules and crash behavior.
+Immediately after checkout, run `pwsh $agentLocks renew -LockName $lockName -Worktree $worktree -OwnerId $ownerId` once to register its path. Stop owned processes, archive needed evidence outside the worktree, then release from the shared checkout in `finally`. Release removes clean checkouts even for open PRs; branches and detached commits remain available for re-checkout. See [local worktree lifecycle](scripts/WorktreeLifecycle.md) for preservation rules and crash behavior.
 
 ## Autonomous self-improvement
 
