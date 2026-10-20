@@ -2104,6 +2104,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static Type[]? InferMethodTypeArguments(object?[] values, ParameterInfo[] parameters, int genericParameterCount)
     {
+        // Row values bind to the data parameters only; the engine supplies any CancellationToken, wherever it is
+        // declared. The source generator skips tokens the same way when it infers from [Arguments] rows.
+        if (Array.Exists(parameters, static parameter => parameter.ParameterType == typeof(CancellationToken)))
+        {
+            parameters = Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
+        }
+
         var typeArguments = new Type[genericParameterCount];
         var count = Math.Min(values.Length, parameters.Length);
 
@@ -2693,8 +2700,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         if (typeMapping.TryGetValue(genericParams[i], out var inferredType))
                         {
                             // A value type cannot hold a null passed to the same type parameter, so it
-                            // infers object, as in TestGenericTypeResolver and the source generator (#7155)
+                            // infers object, as in TestGenericTypeResolver and the source generator (#7155).
+                            // A Nullable<T> inferred from a nested type, such as List<int?>, holds the null.
                             typeArguments[i] = inferredType.IsValueType
+                                && Nullable.GetUnderlyingType(inferredType) is null
                                 && ReceivesNullArgument(genericParams[i], methodParams, args)
                                 ? typeof(object)
                                 : inferredType;
