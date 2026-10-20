@@ -249,6 +249,10 @@ internal sealed class TestBuilder : ITestBuilder
                     {
                         if (needsInstanceForMethodDataSources)
                         {
+                            // The temporary instance is built from the first fetch and disposed below, so it
+                            // owns those objects. A test that took them could find them disposed by it.
+                            unclaimedClassRow.Clear();
+
                             var instanceResult = await CreateInitializedInstanceForMethodDataSources(
                                 metadata,
                                 classDataAttributeIndex,
@@ -2093,6 +2097,10 @@ internal sealed class TestBuilder : ITestBuilder
                 {
                     if (needsInstanceForMethodDataSources)
                     {
+                        // The temporary instance is built from the first fetch and disposed below, so it
+                        // owns those objects. A test that took them could find them disposed by it.
+                        unclaimedClassRow.Clear();
+
                         var instanceResult = await CreateInitializedInstanceForMethodDataSources(
                             metadata,
                             classDataAttributeIndex,

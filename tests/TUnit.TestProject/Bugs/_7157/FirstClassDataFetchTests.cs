@@ -52,6 +52,29 @@ public class NonSharedClassDataWithMethodRowsTests(MethodRowsClassRowDisposable 
     public async Task Run(int value) => await Assert.That(data.IsDisposed).IsFalse();
 }
 
+public sealed class InstanceSourceFixture : IDisposable
+{
+    public bool IsDisposed { get; private set; }
+
+    public void Dispose() => IsDisposed = true;
+}
+
+// An instance method data source needs a temporary instance of the class, built from the class row's
+// first fetch and disposed once the method rows are read. That instance owns the first fetch, so no
+// test may take it: a class that disposes its injected fixture would otherwise close the first test's.
+[EngineTest(ExpectedResult.Pass)]
+[ClassDataSource<InstanceSourceFixture>(Shared = SharedType.None)]
+public class InstanceMethodDataSourceDisposingFixtureTests(InstanceSourceFixture fixture) : IDisposable
+{
+    public IEnumerable<int> Rows() => [1, 2];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(Rows))]
+    public async Task Run(int value) => await Assert.That(fixture.IsDisposed).IsFalse();
+
+    public void Dispose() => fixture.Dispose();
+}
+
 [EngineTest(ExpectedResult.Pass)]
 public class FirstClassDataFetchObserverTests
 {
