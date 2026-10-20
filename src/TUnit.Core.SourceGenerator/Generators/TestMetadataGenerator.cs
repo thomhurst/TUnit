@@ -6785,6 +6785,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// types the way reflection mode does with <c>MakeGenericMethod</c>; that would not be Native AOT
     /// compatible. TUnit0001 reports the same case at compile time.
     /// </summary>
+    // Keep this wording in step with the analyzer's TUnit0001DeclaredType* strings in
+    // src/TUnit.Analyzers/Resources.resx, which explain the same case at compile time.
     private static string DescribeDeclaredTypeInference(ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument)
         => $". '{typeParameter.Name}' was inferred from the declared type '{typeArgument.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}' of the data source, not from the run-time type of its values: "
             + "source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. "
