@@ -225,8 +225,12 @@ internal sealed class TestBuilder : ITestBuilder
                     hasAnyClassData = true;
                     classDataLoopIndex++;
 
-                    var classDataResult = await classDataFactory() ?? [];
-                    var classData = DataUnwrapper.Unwrap(classDataResult);
+                    var (classData, firstClassRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
+
+                    // No test holds this first fetch yet. The first test built from this class row takes it
+                    // instead of calling the factory again, so a non-shared source does not create an extra
+                    // instance that nothing tracks or disposes (#7157).
+                    var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata);
 
 #if NET
                     // Register scope for class data objects from the simple path.
@@ -297,7 +301,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                                     testBuilderContext.CopyStateBagTo(contextAccessor.Current);
 
-                                    var (classDataUnwrapped, classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
+                                    var (classDataUnwrapped, classRowMetadata) = await unclaimedClassRow.TakeOrFetchAsync(classDataFactory);
                                     classData = classDataUnwrapped;
 
                                     object?[] methodRow;
@@ -318,8 +322,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     var (methodData, methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(methodRow, metadata.MethodMetadata.Parameters);
 
 #if NET
-                                // Re-register: classDataFactory() was called again above and may return
-                                // a different instance for non-shared objects. First-registration-wins
+                                // Re-register: classDataFactory() may have been called again above and
+                                // returned a different instance for non-shared objects. First-registration-wins
                                 // semantics make this a no-op for the same instance.
                                 TraceScopeRegistry.RegisterFromDataSource(classDataSource, classData);
                                 TraceScopeRegistry.RegisterFromDataSource(methodDataSource, methodData);
@@ -341,7 +345,9 @@ internal sealed class TestBuilder : ITestBuilder
 
                                         if (!IsDataCompatibleWithExpectedTypes(metadata, methodData))
                                         {
-                                            // Skip this data source as it's not compatible with the expected types
+                                            // Skip this data source as it's not compatible with the expected types.
+                                            // No test holds the class row's objects, so the next test takes them.
+                                            unclaimedClassRow.Return(classData, classRowMetadata);
                                             continue;
                                         }
                                     }
@@ -488,6 +494,9 @@ internal sealed class TestBuilder : ITestBuilder
                             if (!hasAnyMethodData && methodDataSource.SkipIfEmpty)
                             {
                                 const string skipReason = "Data source returned no data";
+
+                                // The test built below holds classData, which may be the unclaimed first fetch.
+                                unclaimedClassRow.Clear();
 
                                 Type[] resolvedClassGenericArgs;
                                 Exception? genericResolutionException = null;
@@ -1002,6 +1011,55 @@ internal sealed class TestBuilder : ITestBuilder
             }
 
             public ValueTask DisposeAsync() => default;
+        }
+    }
+
+    /// <summary>
+    /// The objects of a class data row that were fetched but that no test holds yet. The builder fetches a
+    /// class row once before it evaluates the method data sources, and its tests used to fetch it again,
+    /// so a non-shared source created an extra instance per class row that nothing tracked or disposed.
+    /// The next test built from the row takes the unclaimed objects instead of calling the factory (#7157).
+    /// </summary>
+    private sealed class UnclaimedClassRow(object?[] data, TestDataRowMetadata? metadata)
+    {
+        private object?[]? _data = data;
+        private TestDataRowMetadata? _metadata = metadata;
+
+        /// <summary>
+        /// Takes the unclaimed objects, or fetches a new row from <paramref name="classDataFactory"/> when a
+        /// test already holds them.
+        /// </summary>
+        public ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> TakeOrFetchAsync(Func<Task<object?[]?>> classDataFactory)
+        {
+            if (_data is { } data)
+            {
+                var row = (data, _metadata);
+                Clear();
+                return new ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)>(row);
+            }
+
+            return FetchAsync(classDataFactory);
+
+            static async ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> FetchAsync(Func<Task<object?[]?>> factory)
+                => DataUnwrapper.UnwrapWithMetadata(await factory() ?? []);
+        }
+
+        /// <summary>
+        /// Hands back objects that were taken but that no test ended up holding, so the next test takes them.
+        /// </summary>
+        public void Return(object?[] data, TestDataRowMetadata? metadata)
+        {
+            _data = data;
+            _metadata = metadata;
+        }
+
+        /// <summary>
+        /// Marks the unclaimed objects as held by a test that did not take them through <see cref="TakeOrFetchAsync"/>.
+        /// </summary>
+        public void Clear()
+        {
+            _data = null;
+            _metadata = null;
         }
     }
 
@@ -2018,7 +2076,11 @@ internal sealed class TestBuilder : ITestBuilder
                 cancellationToken.ThrowIfCancellationRequested();
                 classDataLoopIndex++;
 
-                var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+                var (classData, firstClassRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
+
+                // The first test built from this class row takes this fetch instead of calling the factory
+                // again, so a non-shared source does not create an extra, untracked instance (#7157).
+                var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata);
 
                 // Initialize objects before method data sources are evaluated (ObjectInitializer is phase-aware)
                 await InitializeClassDataAsync(classData);
@@ -2075,7 +2137,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                                 // Build and yield single test
                                 var test = await BuildSingleTestAsync(
-                                    metadata, classDataFactory, methodDataFactory,
+                                    metadata, classDataFactory, unclaimedClassRow, methodDataFactory,
                                     classDataAttributeIndex, classDataLoopIndex,
                                     methodDataAttributeIndex, methodDataLoopIndex,
                                     i, contextAccessor,
@@ -2210,6 +2272,7 @@ internal sealed class TestBuilder : ITestBuilder
     private async Task<AbstractExecutableTest?> BuildSingleTestAsync(
         TestMetadata metadata,
         Func<Task<object?[]?>> classDataFactory,
+        UnclaimedClassRow unclaimedClassRow,
         Func<Task<object?[]?>> methodDataFactory,
         int classDataAttributeIndex,
         int classDataLoopIndex,
@@ -2228,7 +2291,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         try
         {
-            (classData, var classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
+            (classData, var classRowMetadata) = await unclaimedClassRow.TakeOrFetchAsync(classDataFactory);
             (methodData, var methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
             // Extract and merge metadata from data source attributes and TestDataRow wrappers
@@ -2246,7 +2309,9 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 if (!IsDataCompatibleWithExpectedTypes(metadata, methodData))
                 {
-                    return null; // Skip incompatible data
+                    // Skip incompatible data. No test holds the class row's objects, so the next test takes them.
+                    unclaimedClassRow.Return(classData, classRowMetadata);
+                    return null;
                 }
             }
 
