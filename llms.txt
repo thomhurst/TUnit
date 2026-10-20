@@ -102,6 +102,7 @@
 - [Programmatic Configuration](/docs/reference/programmatic-configuration.md): Overview
 - [Test Configuration](/docs/reference/test-configuration.md): TUnit supports having a testconfig.json file within your test project.
 - [TUnit0075: Use the hook cancellation token for setup](/docs/reference/tunit0075.md): Severity: Warning
+- [TUnit0076: Data source Arguments fit more than one overload equally well](/docs/reference/tunit0076.md): Severity: Error
 - [Troubleshooting & FAQ](/docs/troubleshooting.md): FAQ
 - [AOT Compatibility and Generic Tests](/docs/writing-tests/aot.md): TUnit's source generation mode provides compile-time safety and performance benefits, but requires specific patterns for advanced scenarios like generic tests and complex data sources.
 - [Data Driven Tests](/docs/writing-tests/arguments.md): Inject compile-time known data via [Arguments(...)] attributes. The attribute takes an array of arguments that must match the test method's parameter count and types. Multiple [Arguments] attributes repeat the test once per attribute:
