@@ -2112,4 +2112,159 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task Private_Base_Overloads_Are_Not_Flagged()
+    {
+        // Reflection never returns private members inherited from a base type.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class BaseClass
+                {
+                    private static IEnumerable<int> Data(IConvertible value) => [1];
+                }
+
+                public class MyClass : BaseClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1 })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(IComparable value) => [2];
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Protected_Base_Overloads_Are_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class BaseClass
+                {
+                    protected static IEnumerable<int> Data(IConvertible value) => [1];
+                }
+
+                public class MyClass : BaseClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data), Arguments = new object[] { 1 })|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(IComparable value) => [2];
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.AmbiguousMethodDataSourceOverload)
+                    .WithLocation(0)
+                    .WithArguments("Data", "MyClass.Data(IComparable), BaseClass.Data(IConvertible)")
+            );
+    }
+
+    [Test]
+    public async Task By_Ref_Overloads_Are_Not_Flagged()
+    {
+        // A by-ref parameter's runtime type (T&) never matches the argument's type.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1 })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(IComparable value) => [1];
+                    public static IEnumerable<int> Data(ref IConvertible value) => [2];
+                    public static IEnumerable<int> Data(in IFormattable value) => [3];
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Numeric_Conversions_The_Runtime_Does_Not_Widen_Are_Not_Flagged()
+    {
+        // The runtime binder does not widen int to decimal, so Data(double) is the only candidate.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1 })]
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1L })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(decimal value) => [1];
+                    public static IEnumerable<int> Data(double value) => [2];
+                    public static IEnumerable<int> Data(nint value) => [3];
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Runtime_Only_Conversions_That_Tie_Are_Flagged()
+    {
+        // The runtime widens byte to char, and accepts an int for an int? parameter.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Chars), Arguments = new object[] { (byte)1 })|}]
+                    [{|#1:MethodDataSource(nameof(Nullables), Arguments = new object[] { 1 })|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Chars(char value) => [1];
+                    public static IEnumerable<int> Chars(short value) => [2];
+
+                    public static IEnumerable<int> Nullables(int? value) => [1];
+                    public static IEnumerable<int> Nullables(long value) => [2];
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.AmbiguousMethodDataSourceOverload)
+                    .WithLocation(0)
+                    .WithArguments("Chars", "MyClass.Chars(char), MyClass.Chars(short)"),
+                Verifier.Diagnostic(Rules.AmbiguousMethodDataSourceOverload)
+                    .WithLocation(1)
+                    .WithArguments("Nullables", "MyClass.Nullables(int?), MyClass.Nullables(long)")
+            );
+    }
 }

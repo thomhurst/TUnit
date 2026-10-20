@@ -463,7 +463,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            var ambiguousOverloads = FindAmbiguousOverloads(context.Compilation, methodSymbols, methodName!, argumentsNamedArgument);
+            var ambiguousOverloads = FindAmbiguousOverloads(context.Compilation, type, methodSymbols, methodName!, argumentsNamedArgument);
             if (ambiguousOverloads is not null)
             {
                 context.ReportDiagnostic(
@@ -1098,6 +1098,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     // Source-gen mode would silently pick one of them instead, so report the ambiguity at compile time.
     // Returns the tied overloads, or null when the Arguments select a single overload (or cannot be checked).
     private static List<IMethodSymbol>? FindAmbiguousOverloads(Compilation compilation,
+        ITypeSymbol targetType,
         IMethodSymbol[] methodSymbols,
         string methodName,
         TypedConstant argumentsNamedArgument)
@@ -1125,6 +1126,19 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             if (method.Name != methodName
                 || method.Parameters.Length != argumentTypes.Length
                 || method.IsOverride)
+            {
+                continue;
+            }
+
+            // Reflection never returns private members inherited from a base type, even with FlattenHierarchy.
+            if (method.DeclaredAccessibility == Accessibility.Private
+                && !SymbolEqualityComparer.Default.Equals(method.ContainingType.OriginalDefinition, targetType.OriginalDefinition))
+            {
+                continue;
+            }
+
+            // A ref, in or out parameter has a by-ref runtime type (T&), which never matches the argument's type.
+            if (method.Parameters.Any(p => p.RefKind != RefKind.None))
             {
                 continue;
             }
@@ -1223,12 +1237,74 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         return firstFromSecond ? 2 : 1;
     }
 
-    // The conversions the default binder accepts: identity, reference and boxing (Type.IsAssignableFrom), and
-    // primitive widening. User-defined and nullable conversions exist only in C#.
+    // Mirrors the default binder's applicability check (and Type.IsAssignableFrom in its specificity check):
+    // - a primitive parameter accepts only the CLR's primitive widening table, which is narrower than C#'s
+    //   implicit numeric conversions (no int -> decimal, no conversions to nint/nuint) and also allows byte -> char;
+    // - Nullable<T> is assignable from T, and Nullable<T> itself is assignable only to object and ValueType;
+    // - everything else uses reference and boxing conversions. User-defined conversions exist only in C#.
+    // An enum argument for a primitive parameter is accepted by the runtime (through its underlying type) but not
+    // here, so those overloads are skipped: that can miss an ambiguity but never reports a false one for them.
     private static bool IsBinderConversion(Compilation compilation, ITypeSymbol from, ITypeSymbol to)
     {
+        if (SymbolEqualityComparer.Default.Equals(from, to))
+        {
+            return true;
+        }
+
+        if (IsClrPrimitive(to.SpecialType))
+        {
+            return CanWidenPrimitive(from.SpecialType, to.SpecialType);
+        }
+
+        if (to.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
+        {
+            return to is INamedTypeSymbol { TypeArguments.Length: 1 } nullable
+                && SymbolEqualityComparer.Default.Equals(nullable.TypeArguments[0], from);
+        }
+
+        if (from.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
+        {
+            return to.SpecialType is SpecialType.System_Object or SpecialType.System_ValueType;
+        }
+
         var conversion = compilation.ClassifyConversion(from, to);
-        return conversion.IsImplicit
-            && (conversion.IsIdentity || conversion.IsReference || conversion.IsBoxing || conversion.IsNumeric);
+        return conversion.IsImplicit && (conversion.IsReference || conversion.IsBoxing);
     }
+
+    private static bool IsClrPrimitive(SpecialType type) => type is SpecialType.System_Boolean
+        or SpecialType.System_Char
+        or SpecialType.System_SByte
+        or SpecialType.System_Byte
+        or SpecialType.System_Int16
+        or SpecialType.System_UInt16
+        or SpecialType.System_Int32
+        or SpecialType.System_UInt32
+        or SpecialType.System_Int64
+        or SpecialType.System_UInt64
+        or SpecialType.System_Single
+        or SpecialType.System_Double
+        or SpecialType.System_IntPtr
+        or SpecialType.System_UIntPtr;
+
+    // The runtime's primitive widening table (DefaultBinder.CanChangePrimitive), excluding identity.
+    private static bool CanWidenPrimitive(SpecialType from, SpecialType to) => from switch
+    {
+        SpecialType.System_Char => to is SpecialType.System_UInt16 or SpecialType.System_UInt32 or SpecialType.System_Int32
+            or SpecialType.System_UInt64 or SpecialType.System_Int64 or SpecialType.System_Single or SpecialType.System_Double,
+        SpecialType.System_SByte => to is SpecialType.System_Int16 or SpecialType.System_Int32 or SpecialType.System_Int64
+            or SpecialType.System_Single or SpecialType.System_Double,
+        SpecialType.System_Byte => to is SpecialType.System_Char or SpecialType.System_UInt16 or SpecialType.System_Int16
+            or SpecialType.System_UInt32 or SpecialType.System_Int32 or SpecialType.System_UInt64 or SpecialType.System_Int64
+            or SpecialType.System_Single or SpecialType.System_Double,
+        SpecialType.System_Int16 => to is SpecialType.System_Int32 or SpecialType.System_Int64 or SpecialType.System_Single
+            or SpecialType.System_Double,
+        SpecialType.System_UInt16 => to is SpecialType.System_UInt32 or SpecialType.System_Int32 or SpecialType.System_UInt64
+            or SpecialType.System_Int64 or SpecialType.System_Single or SpecialType.System_Double,
+        SpecialType.System_Int32 => to is SpecialType.System_Int64 or SpecialType.System_Single or SpecialType.System_Double,
+        SpecialType.System_UInt32 => to is SpecialType.System_UInt64 or SpecialType.System_Int64 or SpecialType.System_Single
+            or SpecialType.System_Double,
+        SpecialType.System_Int64 or SpecialType.System_UInt64 => to is SpecialType.System_Single or SpecialType.System_Double,
+        SpecialType.System_Single => to is SpecialType.System_Double,
+        _ => false,
+    };
 }

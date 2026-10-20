@@ -2,7 +2,7 @@
 
 **Severity:** Error
 
-The `Arguments` of a `[MethodDataSource]` select which overload of the data source method is called. TUnit0076 reports `Arguments` that fit two or more overloads equally well, where no overload is more specific than the others. A C# call with the same arguments would fail with CS0121 for the same reason.
+The `Arguments` of a `[MethodDataSource]` select which overload of the data source method is called. TUnit0076 reports `Arguments` that fit two or more overloads equally well, where no overload is more specific than the others. A C# call with the same arguments usually fails with CS0121 for the same reason.
 
 For example, with the overloads `Tie(string expected, IComparable value)` and `Tie(string expected, IConvertible value)`, the attribute `[MethodDataSource(nameof(Tie), Arguments = new object[] { "a", 1 })]` is ambiguous: `int` implements both interfaces, and neither interface converts to the other.
 
@@ -20,4 +20,8 @@ Make one overload the best match for the `Arguments`:
 
 ## Scope
 
-The rule follows the runtime binder's rules. It compares only overloads with one parameter per argument, and it accepts identity, reference, boxing and numeric widening conversions. It does not check `Arguments` that contain `null` or overloads that are generic methods.
+The rule follows the runtime binder's rules, which differ from C# overload resolution in a few places:
+
+- It compares only overloads with one parameter per argument, and skips overloads with `ref`, `in` or `out` parameters and private methods declared on a base class, because the runtime lookup never selects them.
+- It accepts identity, reference and boxing conversions, `T` to `Nullable<T>`, and the runtime's primitive widening conversions. These are narrower than C#'s implicit numeric conversions: `int` does not widen to `decimal`, `nint` or `nuint`. They also allow `byte` to `char`, which C# does not.
+- It does not check `Arguments` that contain `null`, overloads that are generic methods, or enum arguments passed to primitive parameters.
