@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.a95f87d4.css">
-<script src="/assets/js/runtime~main.53c7b880.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.34a52c1d.js" defer="defer"></script>
 <script src="/assets/js/main.16fba911.js" defer="defer"></script>
 </head>
 <body>
@@ -36,6 +36,7 @@
 <ul>
 <li class="">Only one culture can be specified per scope. To run the same test under multiple cultures, factor out the test logic into a private method and call it from separate test methods, each with its own <code>[Culture]</code> attribute.</li>
 <li class="">The attribute sets both <code>CurrentCulture</code> and <code>CurrentUICulture</code> for the executing thread.</li>
+<li class="">Numeric arguments in test display names do not depend on culture: they are always formatted with the invariant culture, so <code>[Arguments(1.5, -2)]</code> is displayed as <code>Test(1.5, -2)</code> on every machine. Other values, such as <code>DateTime</code>, still use their own <code>ToString()</code>, which may depend on the current culture. Use a custom <a class="" href="/docs/extending/argument-formatters">argument formatter</a> if you want a different or culture-independent format.</li>
 </ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="see-also">See Also<a href="#see-also" class="hash-link" aria-label="Direct link to See Also" title="Direct link to See Also" translate="no">​</a></h2>
 <ul>
