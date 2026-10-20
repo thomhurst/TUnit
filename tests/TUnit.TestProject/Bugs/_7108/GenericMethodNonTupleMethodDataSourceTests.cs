@@ -35,6 +35,16 @@ public class GenericMethodNonTupleMethodDataSourceTests
         yield return new TestDataRow<int>(6);
     }
 
+    public static IEnumerable<Func<Func<int>>> NestedFuncRows()
+    {
+        yield return () => () => 45;
+    }
+
+    public static IEnumerable<Func<TestDataRow<Func<int>>>> FuncOfTestDataRowOfFuncRows()
+    {
+        yield return () => new TestDataRow<Func<int>>(() => 46);
+    }
+
     public static IEnumerable<List<int>> ListRows()
     {
         yield return [7];
@@ -256,6 +266,23 @@ public class GenericMethodNonTupleMethodDataSourceTests
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
         await Assert.That(value).IsEqualTo((T)(object)1);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(NestedFuncRows))]
+    public async Task Nested_Func_Row_Passes_The_Inner_Func<T>(T value)
+    {
+        // Only the outer Func is invoked, so the row value is the inner Func<int>
+        await Assert.That(typeof(T)).IsEqualTo(typeof(Func<int>));
+        await Assert.That(((Func<int>)(object)value!)()).IsEqualTo(45);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(FuncOfTestDataRowOfFuncRows))]
+    public async Task Func_Of_Test_Data_Row_Of_Func_Row<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)46);
     }
 
     [Test]

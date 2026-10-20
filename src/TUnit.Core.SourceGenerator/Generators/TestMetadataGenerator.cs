@@ -7509,7 +7509,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// Returns the declared type of one data row produced by a [MethodDataSource] member, unwrapping the
     /// shapes the generated factory enumerates: <c>Task&lt;T&gt;</c>/<c>ValueTask&lt;T&gt;</c>, then
     /// <c>IEnumerable&lt;T&gt;</c> or arrays (or <c>IAsyncEnumerable&lt;T&gt;</c> when not task-wrapped),
-    /// then <c>Func&lt;T&gt;</c> and <c>TestDataRow&lt;T&gt;</c> in either order.
+    /// then one <c>Func&lt;T&gt;</c>, one <c>TestDataRow&lt;T&gt;</c> and one <c>Func&lt;T&gt;</c> inside it,
+    /// matching what the runtime row reader invokes and unwraps.
     /// Returns <see langword="null"/> when the row type cannot say anything about the test's type
     /// arguments (<c>object</c> or <c>object[]</c> rows, or a non-generic <c>IEnumerable</c>), since
     /// those are only known at runtime.
@@ -7567,18 +7568,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        bool unwrapped;
-        do
+        // Peel only the layers the row reader removes: DataSourceHelpers.ToObjectArray invokes one
+        // outer Func, then TestDataRowUnwrapper.UnwrapArray strips one TestDataRow and invokes one
+        // Func inside it. Anything nested deeper reaches the test as a value (e.g. a Func<int> row
+        // from Func<Func<int>>), so inference must see that value's type too.
+        type = Unwrap(type, funcType);
+        if (TryUnwrap(type, testDataRowType, out var rowData))
         {
-            unwrapped = false;
-            if (type is INamedTypeSymbol { IsGenericType: true } wrapper
-                && (IsDefinition(wrapper, funcType) || IsDefinition(wrapper, testDataRowType)))
-            {
-                type = wrapper.TypeArguments[0];
-                unwrapped = true;
-            }
+            type = Unwrap(rowData, funcType);
         }
-        while (unwrapped);
 
         if (type.SpecialType == SpecialType.System_Object
             || type is IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_Object })
@@ -7590,6 +7588,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         static bool IsDefinition(INamedTypeSymbol type, INamedTypeSymbol? definition)
             => definition != null && SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, definition);
+
+        static ITypeSymbol Unwrap(ITypeSymbol type, INamedTypeSymbol? definition)
+            => TryUnwrap(type, definition, out var inner) ? inner : type;
+
+        static bool TryUnwrap(ITypeSymbol type, INamedTypeSymbol? definition, out ITypeSymbol inner)
+        {
+            if (type is INamedTypeSymbol { IsGenericType: true } wrapper && IsDefinition(wrapper, definition))
+            {
+                inner = wrapper.TypeArguments[0];
+                return true;
+            }
+
+            inner = type;
+            return false;
+        }
 
         static bool IsNonGenericEnumerable(ITypeSymbol type)
         {
