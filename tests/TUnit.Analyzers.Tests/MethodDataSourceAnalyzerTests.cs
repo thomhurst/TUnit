@@ -598,6 +598,115 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    public async Task Null_Argument_Is_Not_Flagged_For_Reference_Type_Parameter()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                #nullable enable
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object?[] { null })]
+                    [Test]
+                    public void MyTest(string value)
+                    {
+                    }
+
+                    public static IEnumerable<string> Data(string? value)
+                    {
+                        yield return value ?? "null";
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Null_Argument_Is_Not_Flagged_For_Nullable_Value_Type_Parameter()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                #nullable enable
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object?[] { null })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(int? value)
+                    {
+                        yield return value ?? 0;
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Null_Argument_Selects_Overload_That_Accepts_Null()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                #nullable enable
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    public static IEnumerable<int> NullRows(int value) { yield return value; }
+                    public static IEnumerable<string> NullRows(string? value) { yield return value ?? "null"; }
+
+                    [Test]
+                    [MethodDataSource(nameof(NullRows), Arguments = new object?[] { null })]
+                    public Task Null_Argument<T>(T value) => Task.CompletedTask;
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Null_Argument_Is_Flagged_For_Non_Nullable_Value_Type_Parameter()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                #nullable enable
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data), Arguments = new object?[] { null })|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(int value)
+                    {
+                        yield return value;
+                    }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("null", "int")
+            );
+    }
+
+    [Test]
     public async Task Arguments_Are_Not_Flagged_When_Argument_Is_Convertible()
     {
         await Verifier

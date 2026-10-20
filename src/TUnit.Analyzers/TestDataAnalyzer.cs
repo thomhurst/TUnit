@@ -417,14 +417,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 .FirstOrDefault(x => x.Key == "Arguments")
                 .Value;
 
-            var argumentForMethodCallTypes =
+            // Kept as TypedConstants (not just their types) so a null element can be told apart: its Type is the
+            // array's element type (object), which would otherwise fail to convert to every parameter type.
+            var argumentsForMethodCall =
                 argumentsNamedArgument.Kind == TypedConstantKind.Array
-                    ? argumentsNamedArgument
-                        .Values
-                        .Select(x => x.Type)
-                        .OfType<ITypeSymbol>()
-                        .ToArray()
-                    : Array.Empty<ITypeSymbol>();
+                    ? argumentsNamedArgument.Values.ToArray()
+                    : Array.Empty<TypedConstant>();
 
             // Look for methods first
             var methodSymbols = (type as INamedTypeSymbol)?.GetSelfAndBaseTypes()
@@ -435,7 +433,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             var dataSourceMethod = methodSymbols
                                                .FirstOrDefault(methodSymbol =>
                                                    methodSymbol.Name == methodName &&
-                                                   MatchesParameters(context, argumentForMethodCallTypes, methodSymbol))
+                                                   MatchesParameters(context, argumentsForMethodCall, methodSymbol))
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
 
             // If no method found, check for properties or fields
@@ -634,16 +632,13 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            var argumentsToParamsConversions = argumentForMethodCallTypes.ZipAll(dataSourceMethodParameterTypes,
-                (argument, parameterType) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameterType));
-
-            if (!argumentsToParamsConversions.All(x => x))
+            if (!ArgumentsMatchParameterTypes(context, argumentsForMethodCall, dataSourceMethodParameterTypes))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(
                         Rules.WrongArgumentTypeTestData,
                         attribute.GetLocation(),
-                        string.Join<ITypeSymbol>(", ", argumentForMethodCallTypes),
+                        string.Join(", ", argumentsForMethodCall.Select(x => x.IsNull ? "null" : x.Type?.ToString())),
                         string.Join<ITypeSymbol>(", ", dataSourceMethodParameterTypes),
                         "for the `Arguments` array")
                 );
@@ -713,11 +708,33 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private static bool MatchesParameters(SymbolAnalysisContext context, ITypeSymbol[] argumentForMethodCallTypes, IMethodSymbol methodSymbol)
+    private static bool MatchesParameters(SymbolAnalysisContext context, TypedConstant[] argumentsForMethodCall, IMethodSymbol methodSymbol)
     {
-        return argumentForMethodCallTypes.ZipAll(methodSymbol.Parameters.Select(p => p.Type),
-                (argument, parameter) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter))
+        return ArgumentsMatchParameterTypes(context, argumentsForMethodCall,
+            methodSymbol.Parameters.WithoutCancellationTokenParameter().Select(p => p.Type));
+    }
+
+    private static bool ArgumentsMatchParameterTypes(SymbolAnalysisContext context, TypedConstant[] argumentsForMethodCall,
+        IEnumerable<ITypeSymbol> parameterTypes)
+    {
+        return argumentsForMethodCall.ZipAll(parameterTypes,
+                (argument, parameterType) => argument.IsNull
+                    ? parameterType is not null && CanAcceptNull(parameterType)
+                    : context.Compilation.HasImplicitConversionOrGenericParameter(argument.Type, parameterType))
             .All(x => x);
+    }
+
+    // Mirrors reflection mode's binder and the source generator's overload scoring: a null argument binds to any
+    // parameter that can hold null, i.e. anything other than a non-nullable value type.
+    private static bool CanAcceptNull(ITypeSymbol parameterType)
+    {
+        if (parameterType is ITypeParameterSymbol typeParameter)
+        {
+            return !typeParameter.HasValueTypeConstraint && !typeParameter.HasUnmanagedTypeConstraint;
+        }
+
+        return !parameterType.IsValueType
+               || parameterType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
     }
 
     private ImmutableArray<ITypeSymbol> UnwrapTypes(SymbolAnalysisContext context,
