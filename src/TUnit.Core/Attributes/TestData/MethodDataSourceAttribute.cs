@@ -288,8 +288,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// Turns a data source's value into rows by its runtime type: an <see cref="IAsyncEnumerable{T}"/>, a
     /// <see cref="Task{TResult}"/> or <see cref="ValueTask{TResult}"/> (awaited, then treated like its result), an
     /// <see cref="System.Collections.IEnumerable"/> other than a string or tuple (one row per item), or a single row.
-    /// Used by the reflection fallback above and by the source-generated factory for a private member whose declared
-    /// type does not say which of these it holds, so both read such a member the same way.
+    /// Used by the reflection fallback above and by the source-generated factory for a field, or a private or protected
+    /// property, whose declared type does not say which of these it holds, so both read such a member the same way.
     /// An empty source yields nothing; the caller decides whether that becomes an empty row.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]

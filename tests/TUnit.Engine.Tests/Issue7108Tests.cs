@@ -56,6 +56,49 @@ public class Issue7108Tests(TestMode testMode) : InvokableTestBase(testMode)
             ]);
     }
 
+    /// <summary>
+    /// A public field declared as <c>object</c> that holds an array gives one row per element in both modes. Before
+    /// this PR every field went through the attribute's reflection fallback, which decides from the runtime value; the
+    /// generated factory for a field must keep doing so rather than pass the whole array as one argument.
+    /// </summary>
+    [Test]
+    public async Task Public_Object_Field_Holding_An_Array_Yields_A_Row_Per_Element()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7108/PublicObjectFieldDataSourceTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(4),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    /// <summary>
+    /// Rows of a private nested type would close the generic test over a type that generated code cannot name.
+    /// Reflection mode runs them. Source-generated mode must still compile, and reports each test as a failure
+    /// that names the type and the fix.
+    /// </summary>
+    [Test]
+    public async Task Private_Row_Type_Compiles_And_Is_Reported_In_Source_Generated_Mode()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7108/PrivateRowTypeDataSourceTests/*",
+            testMode == TestMode.Reflection
+                ?
+                [
+                    result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                    result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                ]
+                :
+                [
+                    result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                    result => result.ResultSummary.Counters.Failed.ShouldBe(2),
+                    result => result.Results.ShouldAllBe(x => x.Output!.ErrorInfo!.Message!.Contains(
+                        "Its rows give the type argument 'TUnit.TestProject.Bugs._7108.PrivateRowTypeDataSourceTests.Row', which source-generated code cannot name")),
+                ]);
+    }
+
     [Test]
     public async Task Single_Tuple_Parameter_Keeps_The_CancellationToken_At_Its_Declared_Position()
     {

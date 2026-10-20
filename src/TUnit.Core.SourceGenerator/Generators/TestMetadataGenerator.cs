@@ -1518,6 +1518,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             foreach (var attribute in uncovered)
             {
+                if (attribute.AttributeClass?.Name == "MethodDataSourceAttribute"
+                    && InferTypesFromMethodDataSourceRowType(testMethod, attribute) is { } rowTypes
+                    && FindInaccessibleType(rowTypes, testMethod.CompilationContext.Compilation) is { } inaccessibleType)
+                {
+                    violations.Add(new MethodConstraintViolation(
+                        $"Could not infer the type arguments of generic test method '{methodName}' from data source [{DescribeDataSource(attribute)}]. "
+                        + $"Its rows give the type argument '{inaccessibleType.ToDisplayString()}', which source-generated code cannot name because it is private or protected. "
+                        + "Make that type internal or public, or list accessible type arguments with [GenerateGenericTest].",
+                        RowSource: attribute,
+                        AllMethodDataSources: false));
+                    continue;
+                }
+
                 violations.Add(new MethodConstraintViolation(
                     $"Could not infer the type arguments of generic test method '{methodName}' from data source [{DescribeDataSource(attribute)}]. "
                     + "Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. "
@@ -2846,7 +2859,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var lambdaHeader = usesTestClassInstance ? "static instance =>" : "static () =>";
         var metadataArgument = usesTestClassInstance ? "dataGeneratorMetadata, " : "";
 
-        if (dataSourceMethod == null && !IsAccessibleDataSourceMember(dataSourceMember, compilation))
+        // A declared type such as object does not say whether the value is one row or many. Reflection mode, and the
+        // attribute's reflection fallback that read every field and every private or protected property before the
+        // generator could, decide from the runtime value, so these factories hand the value to that same logic
+        // instead of FromValue. Accessible properties and methods keep FromValue, as their generated code always has
+        // (https://github.com/thomhurst/TUnit/issues/7178).
+        var isAccessibleMember = dataSourceMethod != null || IsAccessibleDataSourceMember(dataSourceMember, compilation);
+        if (kind == "Value" && (dataSourceMember is IFieldSymbol || !isAccessibleMember))
+        {
+            helper = isStatic || !usesTestClassInstance
+                ? "global::TUnit.Core.Helpers.DataSourceFactories.FromRuntimeValue"
+                : "global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue";
+            metadataArgument = "dataGeneratorMetadata, ";
+        }
+
+        if (!isAccessibleMember)
         {
             // The generated class cannot name a private or protected field or property, so the factory reads it by
             // reflection. GetField/GetProperty on a typeof() with a constant name and binding flags is understood
@@ -2858,16 +2885,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 + " | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly";
             var target = isStatic ? "null" : usesTestClassInstance ? "instance" : $"new {fullyQualifiedType}()";
             var cast = kind is "Value" or "Enumerable" ? "" : $"({returnType.GloballyQualified()})";
-            if (kind == "Value")
-            {
-                // A declared type such as object does not say whether the value is one row or many. The attribute's
-                // reflection fallback, which read these members before, decides from the runtime value, and reflection
-                // mode does the same, so this factory hands the value to that same logic instead of FromValue.
-                helper = isStatic || !usesTestClassInstance
-                    ? "global::TUnit.Core.Helpers.DataSourceFactories.FromRuntimeValue"
-                    : "global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue";
-                metadataArgument = "dataGeneratorMetadata, ";
-            }
             writer.Append($"{helper}({metadataArgument}{lambdaHeader} {cast}typeof({dataSourceMember.ContainingType.GloballyQualified()}).{lookup}(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target}))");
             return;
         }
@@ -6915,7 +6932,38 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return null;
     }
 
+    /// <summary>
+    /// Infers a generic test method's type arguments from a [MethodDataSource] member's declared row type. Returns
+    /// null when the row type does not determine them, or when one of them is a type the generated code cannot name,
+    /// such as a private nested row class read through a private property: closing the method over it would not
+    /// compile. <see cref="AddUninferredTypeArgumentFailures"/> then reports the rows as failed tests.
+    /// </summary>
     private static ITypeSymbol[]? InferTypesFromMethodDataSource(TestMethodMetadata testMethod, AttributeData mdsAttr)
+    {
+        var inferredTypes = InferTypesFromMethodDataSourceRowType(testMethod, mdsAttr);
+        return inferredTypes != null && FindInaccessibleType(inferredTypes, testMethod.CompilationContext.Compilation) == null
+            ? inferredTypes
+            : null;
+    }
+
+    /// <summary>
+    /// The first of <paramref name="types"/> that generated code in the test assembly cannot name, or null.
+    /// Accessibility of a constructed or array type includes its type arguments and element type.
+    /// </summary>
+    private static ITypeSymbol? FindInaccessibleType(ITypeSymbol[] types, Compilation compilation)
+    {
+        foreach (var type in types)
+        {
+            if (type is not ITypeParameterSymbol && !compilation.IsSymbolAccessibleWithin(type, compilation.Assembly))
+            {
+                return type;
+            }
+        }
+
+        return null;
+    }
+
+    private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
         if (mdsAttr.ConstructorArguments.Length == 0)
         {

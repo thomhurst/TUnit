@@ -188,8 +188,8 @@ public static class DataSourceFactories
     }
 
     /// <summary>
-    /// Data member the generated code reads by reflection (a private or protected field or property) whose declared
-    /// type does not say whether it holds one row or many, such as <c>object</c>. The value's runtime type decides,
+    /// A data source field, or a private or protected property that the generated code reads by reflection, whose
+    /// declared type does not say whether it holds one row or many, such as <c>object</c>. The value's runtime type decides,
     /// as it does when <see cref="MethodDataSourceAttribute"/> has no factory and reads the member itself.
     /// A null value is one row holding null, as <see cref="FromValue"/> gives.
     /// </summary>
