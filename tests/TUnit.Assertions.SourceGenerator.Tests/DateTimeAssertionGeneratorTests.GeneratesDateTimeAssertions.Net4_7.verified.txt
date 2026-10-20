@@ -38,7 +38,7 @@ public class DateTimeIsDaylightSavingTimeAssertion : Assertion<System.DateTime>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be during daylight saving time";
+        return $"to {(_negated ? "not " : "")}be during daylight saving time";
     }
 }
 

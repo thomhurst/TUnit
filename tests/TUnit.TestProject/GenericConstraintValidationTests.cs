@@ -86,6 +86,8 @@ public class GenericConstraintValidationTests
         await Task.CompletedTask;
     }
 
+    // TUnit0001 reports the broad declared type at compile time; it is suppressed to check the run-time failure.
+#pragma warning disable TUnit0001
     [Test]
     [NonImplementingClassDataSource]
     [EngineTest(ExpectedResult.Failure)]
@@ -94,6 +96,7 @@ public class GenericConstraintValidationTests
         // Never runs: test building fails with a GenericTypeResolutionException in both engine modes (#7097) - NonImplementingClass doesn't implement ITestInterface
         await Task.CompletedTask;
     }
+#pragma warning restore TUnit0001
 
     [Test]
     [Arguments(5)]
@@ -380,6 +383,8 @@ public class GenericConstraintRowParityTests
     }
 
     // ...but a different containing type argument (int, not string) breaks the constraint whatever IOut's own argument is
+    // TUnit0001 reports the broad declared type at compile time; it is suppressed to check the run-time failure.
+#pragma warning disable TUnit0001
     [Test]
     [MismatchedOuterPayloadDataSource]
     [EngineTest(ExpectedResult.Failure)]
@@ -387,6 +392,7 @@ public class GenericConstraintRowParityTests
     {
         await Task.CompletedTask;
     }
+#pragma warning restore TUnit0001
 
     // An instance data source needs the test class instance to yield its rows, even when those rows
     // break the method's constraints: two failed tests with the constraint message

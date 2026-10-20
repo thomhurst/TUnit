@@ -43,7 +43,7 @@ public class AssemblyIsDynamicAssertion : Assertion<System.Reflection.Assembly>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be dynamic";
+        return $"to {(_negated ? "not " : "")}be dynamic";
     }
 }
 
@@ -79,7 +79,7 @@ public class AssemblyIsFullyTrustedAssertion : Assertion<System.Reflection.Assem
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be fully trusted";
+        return $"to {(_negated ? "not " : "")}be fully trusted";
     }
 }
 

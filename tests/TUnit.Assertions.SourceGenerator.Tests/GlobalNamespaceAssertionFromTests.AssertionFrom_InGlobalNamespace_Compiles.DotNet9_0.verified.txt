@@ -37,7 +37,7 @@ public class StringIsNullOrEmptyWithStringAssertion : Assertion<string>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be null or empty";
+        return $"to {(_negated ? "not " : "")}be null or empty";
     }
 }
 

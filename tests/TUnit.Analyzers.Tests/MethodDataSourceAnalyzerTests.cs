@@ -1840,9 +1840,9 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 }
                 """,
 
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                Verifier.Diagnostic(Rules.GenericTypeArgumentInferredFromDeclaredType)
                     .WithLocation(0)
-                    .WithArguments("object, int", "T, int")
+                    .WithArguments("T", "object")
             );
     }
 
@@ -1867,9 +1867,152 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 }
                 """,
 
+                Verifier.Diagnostic(Rules.GenericTypeArgumentInferredFromDeclaredType)
+                    .WithLocation(0)
+                    .WithArguments("T", "int?")
+            );
+    }
+
+    [Test]
+    [Arguments("object", "new System.IO.MemoryStream()")]
+    [Arguments("System.EventArgs", "System.EventArgs.Empty")]
+    [Arguments("System.Collections.IEnumerable", "new System.IO.MemoryStream[0]")]
+    public async Task Generic_Method_With_Broad_Declared_Type_Explains_Declared_Type_Inference(string declaredType, string value)
+    {
+        // Source-generated mode infers T from the declared type, so a run-time MemoryStream does not help (#7116).
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : IDisposable => Task.CompletedTask;
+
+                    public static IEnumerable<Func<{{declaredType}}>> Data() { yield return () => {{value}}; }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.GenericTypeArgumentInferredFromDeclaredType)
+                    .WithLocation(0)
+                    .WithArguments("T", declaredType.Replace("System.Collections.", "").Replace("System.", ""))
+            );
+    }
+
+    [Test]
+    [Arguments("int[]", "new int[0]")]
+    [Arguments("string[]", "new string[0]")]
+    [Arguments("int?[]", "new int?[0]")]
+    public async Task Generic_Method_With_Exact_Array_Declared_Type_Keeps_Argument_Type_Message(string declaredType, string value)
+    {
+        // An array of a value type or a sealed type cannot hold another array type, so it is exact (#7116).
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value, int marker) where T : IDisposable => Task.CompletedTask;
+
+                    public static IEnumerable<Func<({{declaredType}}, int)>> Data() { yield return () => ({{value}}, 1); }
+                }
+                """,
+
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
-                    .WithArguments("int?", "T")
+                    .WithArguments($"{declaredType}, int", "T, int")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Covariant_Array_Declared_Type_Explains_Declared_Type_Inference()
+    {
+        // An object[] value may be an array of a more derived element type.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value, int marker) where T : IDisposable => Task.CompletedTask;
+
+                    public static IEnumerable<Func<(object[], int)>> Data() { yield return () => (new object[0], 1); }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.GenericTypeArgumentInferredFromDeclaredType)
+                    .WithLocation(0)
+                    .WithArguments("T", "object[]")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Exact_Declared_Type_Keeps_Argument_Type_Message()
+    {
+        // A sealed declared type cannot hold a value of another type, so the plain mismatch message applies.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : IDisposable => Task.CompletedTask;
+
+                    public static IEnumerable<Func<string>> Data() { yield return () => "a"; }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("string", "T")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Method_With_Broad_Declared_Type_And_GenerateGenericTest_Is_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [GenerateGenericTest(typeof(MemoryStream))]
+                    [Test]
+                    public Task MyTest<T>(T value) where T : IDisposable => Task.CompletedTask;
+
+                    public static IEnumerable<Func<object>> Data() { yield return () => new MemoryStream(); }
+                }
+                """
             );
     }
 
