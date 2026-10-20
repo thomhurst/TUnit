@@ -22,6 +22,6 @@ Make one overload the best match for the `Arguments`:
 
 The rule follows the runtime binder's rules, which differ from C# overload resolution in a few places:
 
-- It compares only overloads with one parameter per argument, and skips overloads with `ref`, `in` or `out` parameters and private methods declared on a base class, because the runtime lookup never selects them.
+- It compares only overloads with one parameter per argument, and skips overloads with `ref`, `in` or `out` parameters, parameters typed by a generic method's type parameter, and private methods declared on a base class, because the runtime lookup never selects them.
 - It accepts identity, reference and boxing conversions, `T` to `Nullable<T>`, and the runtime's primitive widening conversions. These are narrower than C#'s implicit numeric conversions: `int` does not widen to `decimal`, `nint` or `nuint`. They also allow `byte` to `char`, which C# does not.
-- It does not check `Arguments` that contain `null`, overloads that are generic methods, or enum arguments passed to primitive parameters.
+- It does not check `Arguments` that contain `null`, or enum arguments passed to primitive parameters.

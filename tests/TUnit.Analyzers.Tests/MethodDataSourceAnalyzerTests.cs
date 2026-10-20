@@ -2267,4 +2267,62 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     .WithArguments("Nullables", "MyClass.Nullables(int?), MyClass.Nullables(long)")
             );
     }
+
+    [Test]
+    public async Task Generic_Overloads_Do_Not_Hide_A_Tie()
+    {
+        // A parameter typed by a method type parameter never matches at runtime, so the generic overload is ignored.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data), Arguments = new object[] { 1 })|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data<T>(T value) => [1];
+                    public static IEnumerable<int> Data(IComparable value) => [2];
+                    public static IEnumerable<int> Data(IConvertible value) => [3];
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.AmbiguousMethodDataSourceOverload)
+                    .WithLocation(0)
+                    .WithArguments("Data", "MyClass.Data(IComparable), MyClass.Data(IConvertible)")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Overload_With_Concrete_Parameters_Can_Break_A_Tie()
+    {
+        // The runtime selects Data<T>(int) for an int argument, because its parameter is an exact match.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1 })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data<T>(int value) => [1];
+                    public static IEnumerable<int> Data(IComparable value) => [2];
+                    public static IEnumerable<int> Data(IConvertible value) => [3];
+                }
+                """
+            );
+    }
 }

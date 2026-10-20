@@ -1143,10 +1143,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 continue;
             }
 
-            // Inferring type arguments is outside what the binder does, so leave generic overloads alone.
-            if (method.IsGenericMethod)
+            // The binder does not infer type arguments: a parameter typed by a method type parameter never matches,
+            // while a generic method whose parameters do not use its type parameters competes like any other overload.
+            if (method.IsGenericMethod && method.Parameters.Any(p => ReferencesMethodTypeParameter(p.Type)))
             {
-                return null;
+                continue;
             }
 
             var applicable = true;
@@ -1236,6 +1237,15 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         return firstFromSecond ? 2 : 1;
     }
+
+    private static bool ReferencesMethodTypeParameter(ITypeSymbol type) => type switch
+    {
+        ITypeParameterSymbol typeParameter => typeParameter.TypeParameterKind == TypeParameterKind.Method,
+        IArrayTypeSymbol array => ReferencesMethodTypeParameter(array.ElementType),
+        IPointerTypeSymbol pointer => ReferencesMethodTypeParameter(pointer.PointedAtType),
+        INamedTypeSymbol named => named.TypeArguments.Any(ReferencesMethodTypeParameter),
+        _ => false,
+    };
 
     // Mirrors the default binder's applicability check (and Type.IsAssignableFrom in its specificity check):
     // - a primitive parameter accepts only the CLR's primitive widening table, which is narrower than C#'s
