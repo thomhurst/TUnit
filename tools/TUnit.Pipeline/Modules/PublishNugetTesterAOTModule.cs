@@ -11,15 +11,13 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
-[ModuleCategory(PipelineCategories.NuGetPackageTests)]
-[DependsOn<TestNugetPackageModule>]
+// Runs in aot.yml with the Packaging modules, so its native AOT publishes don't compete with the
+// test matrix for CPUs. The test module shares the NugetTester project's bin and obj folders, so a
+// local run that registers both still runs them in turn; aot.yml doesn't register it.
+[ModuleCategory(PipelineCategories.Aot)]
+[DependsOn<TestNugetPackageModule>(Optional = true)]
 [DependsOn<GenerateVersionModule>]
 [DependsOn<CopyToLocalNuGetModule>]
-// Waits so that its native AOT publishes don't compete with the AOT test-app publish, which is on
-// the critical path. The dependency is optional: the Windows NuGet job runs only the Packaging and
-// NuGetPackageTests categories, so that module isn't registered there and a required dependency
-// would fail the pipeline.
-[DependsOn<PublishTestProjectAOTModule>(Optional = true)]
 public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
 {
     protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()

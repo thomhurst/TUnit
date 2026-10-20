@@ -1,3 +1,4 @@
+using ModularPipelines.Attributes;
 using ModularPipelines.Configuration;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
@@ -10,17 +11,19 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
-// Publishes the TESTPROJECT_AOT app that the engine tests' AOT mode runs. As a module it overlaps
-// the first test modules instead of delaying the whole pipeline.
+// Publishes the TESTPROJECT_AOT app that the engine tests' AOT mode runs. It runs in aot.yml, on
+// runners of its own: inside the test matrix it competed with the test modules for CPUs and was
+// the critical path on every OS.
 // The publish builds into its own artifacts tree. The global Aot property flows to every
 // referenced project, so publishing into the shared bin/obj folders recompiled the TUnit.*
 // libraries in place (packing had to wait for it, issue #5622) and rewrote
 // TUnit.TestProject/obj/project.assets.json under the RPC tests (NETSDK1047). Isolated, neither
 // has to wait for this module.
+[ModuleCategory(PipelineCategories.Aot)]
 public class PublishTestProjectAOTModule : Module<CommandResult>
 {
-    // Overlapping the test modules on a 3-core macOS runner stretches the publish to 24-27 minutes,
-    // so the default 30-minute module timeout killed it on healthy runs.
+    // The publish once took 24-27 minutes on a 3-core macOS runner, past the default 30-minute
+    // module timeout on healthy runs.
     protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
         .WithTimeout(TimeSpan.FromMinutes(60))
         .Build();

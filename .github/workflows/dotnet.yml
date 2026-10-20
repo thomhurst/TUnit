@@ -27,6 +27,8 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     permissions:
+      # UploadToNuGetModule reads the aot.yml runs for the commit before it publishes.
+      actions: read
       contents: write
       id-token: write
 
@@ -145,9 +147,11 @@ jobs:
           environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
           nuget-apikey: ${{ steps.login.outputs.NUGET_API_KEY }}
           publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
+          # The native AOT publishes (the test app with its engine tests, and the NugetTester) run
+          # in aot.yml.
           # Windows tests the packages in the nuget-package-tests-windows job instead: with every
           # .NET Framework TFM they competed with the engine tests for this runner's CPUs.
-          ignore-categories: ${{ matrix.os == 'windows-latest' && 'NuGetPackageTests' || '' }}
+          ignore-categories: ${{ matrix.os == 'windows-latest' && 'Aot NuGetPackageTests' || 'Aot' }}
 
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v7.0.2
