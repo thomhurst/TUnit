@@ -1,10 +1,11 @@
 name: AOT
 
-# Publishes the native AOT test app and runs the AOT-mode engine tests against it. Inside the .NET
-# matrix the publish competed with the test modules for CPUs and was the critical path on every OS
-# (12-25 minutes, with the Reflection-mode engine tests held back until it finished). On a runner
-# of its own it needs no full solution build: building TUnit.Engine.Tests builds the test projects
-# it launches, and the publish compiles into its own artifacts tree.
+# The native AOT publishes: the test app with the AOT-mode engine tests that run against it, and the
+# NugetTester against freshly packed packages. Inside the .NET matrix they competed with the test
+# modules for CPUs, and the test-app publish was the critical path on every OS (12-25 minutes, with
+# the Reflection-mode engine tests held back until it finished). Here they need no full solution
+# build: TUnit.Engine.Tests builds the test projects it launches, packing needs only the libraries,
+# and the test-app publish compiles into its own artifacts tree.
 
 on:
   pull_request:
@@ -28,14 +29,12 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
-    env:
-      # Under GitHub Actions Directory.Build.props leaves Version unset, and TUnit.Assertions.Should's
-      # "$(Version)-beta" would then be invalid. MSBuild binds this to the Version property.
-      Version: 1.0.0
 
     steps:
       - uses: actions/checkout@v7.0.1
         with:
+          fetch-depth: 0
+          # Versioning reads the fetched history only; nothing in this job pushes.
           persist-credentials: false
 
       - name: Setup Dev Drive (Windows)
@@ -49,6 +48,10 @@ jobs:
             TEMP,{{ DEV_DRIVE }}/tmp
             TMP,{{ DEV_DRIVE }}/tmp
 
+      - name: Setup .NET Framework
+        if: matrix.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v3
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.0.0
 
@@ -58,16 +61,46 @@ jobs:
           New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
         shell: pwsh
 
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4
+        with:
+          versionSpec: '6.7.x'
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4
+
+      # See the matching step in dotnet.yml's modularpipeline job (issue #5622).
+      - name: Export version env vars
+        shell: bash
+        run: |
+          {
+            echo "Version=${{ steps.gitversion.outputs.semVer }}"
+            echo "AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
+            echo "FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
+            echo "InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
+            echo "PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
+          } >> "$GITHUB_ENV"
+
+      # Every library project (packing reads the Roslyn variants from their own bin folders), the
+      # engine tests with the test projects they launch, and the pipeline itself.
       - name: Build
         shell: bash
         run: |
+          grep -oE 'src/[^"]+\.(cs|fs|vb)proj' TUnit.CI.slnx | grep -v '/content/' \
+            | jq -R . | jq -s '{solution: {path: "TUnit.CI.slnx", projects: .}}' > libraries.slnf
+          if [ "$(jq '.solution.projects | length' libraries.slnf)" -eq 0 ]; then
+            echo "::error::No library projects found in TUnit.CI.slnx; update the filter in this step."
+            exit 1
+          fi
+          dotnet build libraries.slnf -c Release
           dotnet build tests/TUnit.Engine.Tests/TUnit.Engine.Tests.csproj -c Release
           dotnet build tools/TUnit.Pipeline/TUnit.Pipeline.csproj -c Release
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
         with:
-          categories: Aot
+          categories: Aot Packaging
           admin-token: ${{ github.token }}
 
       - name: Upload Diagnostic Logs
