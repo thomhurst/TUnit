@@ -29,7 +29,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.MatrixDataSourceAttributeRequired,
             Rules.TooManyArguments,
             Rules.InstanceMethodSource,
-            Rules.PotentialEmptyDataSource
+            Rules.PotentialEmptyDataSource,
+            Rules.AmbiguousMethodDataSourceOverload
         );
 
     protected override void InitializeInternal(AnalysisContext context)
@@ -459,6 +460,19 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 }
 
                 // Properties are valid data sources, no need to check return type for void
+                return;
+            }
+
+            var ambiguousOverloads = FindAmbiguousOverloads(context.Compilation, methodSymbols, methodName!, argumentsNamedArgument);
+            if (ambiguousOverloads is not null)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.AmbiguousMethodDataSourceOverload,
+                        attribute.GetLocation(),
+                        methodName,
+                        string.Join(", ", ambiguousOverloads.Select(m => m.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat))))
+                );
                 return;
             }
 
@@ -1076,5 +1090,145 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         return false;
+    }
+
+    // Reflection mode picks the data source overload with Type.GetMethod(name, flags, binder: null, argumentTypes, modifiers: null),
+    // so this mirrors the default binder: only overloads with exactly one parameter per argument are candidates, and
+    // when none of them is at least as specific as all the others, the binder throws AmbiguousMatchException.
+    // Source-gen mode would silently pick one of them instead, so report the ambiguity at compile time.
+    // Returns the tied overloads, or null when the Arguments select a single overload (or cannot be checked).
+    private static List<IMethodSymbol>? FindAmbiguousOverloads(Compilation compilation,
+        IMethodSymbol[] methodSymbols,
+        string methodName,
+        TypedConstant argumentsNamedArgument)
+    {
+        ITypeSymbol[] argumentTypes;
+        if (argumentsNamedArgument.Kind == TypedConstantKind.Array)
+        {
+            // A null argument has no runtime type, so reflection mode falls back to a name-only lookup.
+            if (argumentsNamedArgument.Values.Any(x => x.IsNull || x.Type is null))
+            {
+                return null;
+            }
+
+            argumentTypes = argumentsNamedArgument.Values.Select(x => x.Type!).ToArray();
+        }
+        else
+        {
+            argumentTypes = Array.Empty<ITypeSymbol>();
+        }
+
+        var candidates = new List<IMethodSymbol>();
+        foreach (var method in methodSymbols)
+        {
+            // An override is the same runtime method as the member it overrides, which is also in the list.
+            if (method.Name != methodName
+                || method.Parameters.Length != argumentTypes.Length
+                || method.IsOverride)
+            {
+                continue;
+            }
+
+            // Inferring type arguments is outside what the binder does, so leave generic overloads alone.
+            if (method.IsGenericMethod)
+            {
+                return null;
+            }
+
+            var applicable = true;
+            for (var i = 0; i < argumentTypes.Length; i++)
+            {
+                if (!IsBinderConversion(compilation, argumentTypes[i], method.Parameters[i].Type))
+                {
+                    applicable = false;
+                    break;
+                }
+            }
+
+            if (applicable)
+            {
+                candidates.Add(method);
+            }
+        }
+
+        if (candidates.Count < 2)
+        {
+            return null;
+        }
+
+        foreach (var candidate in candidates)
+        {
+            if (candidates.All(other => ReferenceEquals(candidate, other) || IsAtLeastAsSpecific(compilation, candidate, other, argumentTypes)))
+            {
+                return null;
+            }
+        }
+
+        return candidates;
+    }
+
+    // Mirrors DefaultBinder.FindMostSpecificMethod: an overload wins when it is more specific for at least one
+    // parameter and less specific for none. Overloads with the same parameter types (a member hidden with `new`)
+    // are resolved by the binder in favour of the most derived declaration, so they never tie.
+    private static bool IsAtLeastAsSpecific(Compilation compilation, IMethodSymbol candidate, IMethodSymbol other, ITypeSymbol[] argumentTypes)
+    {
+        var otherWins = false;
+
+        for (var i = 0; i < argumentTypes.Length; i++)
+        {
+            var candidateType = candidate.Parameters[i].Type;
+            var otherType = other.Parameters[i].Type;
+
+            if (SymbolEqualityComparer.Default.Equals(candidateType, otherType))
+            {
+                continue;
+            }
+
+            switch (FindMostSpecificType(compilation, candidateType, otherType, argumentTypes[i]))
+            {
+                case 1:
+                    break;
+                case 2:
+                    otherWins = true;
+                    break;
+                default:
+                    return false;
+            }
+        }
+
+        return !otherWins;
+    }
+
+    // Mirrors DefaultBinder.FindMostSpecificType: 1 when the first type is more specific, 2 when the second is, 0 for a tie.
+    private static int FindMostSpecificType(Compilation compilation, ITypeSymbol first, ITypeSymbol second, ITypeSymbol argumentType)
+    {
+        if (SymbolEqualityComparer.Default.Equals(first, argumentType))
+        {
+            return 1;
+        }
+
+        if (SymbolEqualityComparer.Default.Equals(second, argumentType))
+        {
+            return 2;
+        }
+
+        var firstFromSecond = IsBinderConversion(compilation, second, first);
+        var secondFromFirst = IsBinderConversion(compilation, first, second);
+
+        if (firstFromSecond == secondFromFirst)
+        {
+            return 0;
+        }
+
+        return firstFromSecond ? 2 : 1;
+    }
+
+    // The conversions the default binder accepts: identity, reference and boxing (Type.IsAssignableFrom), and
+    // primitive widening. User-defined and nullable conversions exist only in C#.
+    private static bool IsBinderConversion(Compilation compilation, ITypeSymbol from, ITypeSymbol to)
+    {
+        var conversion = compilation.ClassifyConversion(from, to);
+        return conversion.IsImplicit
+            && (conversion.IsIdentity || conversion.IsReference || conversion.IsBoxing || conversion.IsNumeric);
     }
 }
