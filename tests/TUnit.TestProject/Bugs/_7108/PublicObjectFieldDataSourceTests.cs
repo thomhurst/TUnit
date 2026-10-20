@@ -21,7 +21,7 @@ public class PublicObjectFieldDataSourceTests
     }
 
     [Test]
-    [InstanceMethodDataSource(nameof(InstanceObjectFieldRows))]
+    [MethodDataSource(nameof(InstanceObjectFieldRows))]
     public async Task Instance_Object_Field_Holding_An_Array_Yields_A_Row_Per_Element(int value)
     {
         await Assert.That(value).IsBetween(53, 54);

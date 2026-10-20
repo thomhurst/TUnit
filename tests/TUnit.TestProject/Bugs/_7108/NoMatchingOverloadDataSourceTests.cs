@@ -17,7 +17,7 @@ public class NoMatchingOverloadDataSourceTests
     [MethodDataSource(nameof(Rows), Arguments = new object[] { "not an int" })]
     public async Task Generic<T>(T value)
     {
-        await Assert.That(value).IsNotEqualTo(default(T));
+        await Assert.That((object?)value).IsNotNull();
     }
 #pragma warning restore TUnit0001
 }

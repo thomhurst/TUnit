@@ -115,7 +115,10 @@ internal static class TUnit_TestProject_Bugs__7108_PublicObjectFieldDataSourceTe
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.InstanceMethodDataSourceAttribute("InstanceObjectFieldRows"),
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("InstanceObjectFieldRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => ((global::TUnit.TestProject.Bugs._7108.PublicObjectFieldDataSourceTests)instance).InstanceObjectFieldRows),
+    },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7108.PublicObjectFieldDataSourceTests), "Instance_Object_Field_Holding_An_Array_Yields_A_Row_Per_Element", false, new global::TUnit.Core.ParameterMetadata[]
