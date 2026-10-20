@@ -23,6 +23,16 @@ public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
             : SkipDecision.DoNotSkip)
         .Build();
 
+    // On the 3-core macOS runner, running these native AOT publishes at the same time as the AOT
+    // test-app publish slowed both. There they run after it. Elsewhere they still overlap.
+    protected override void DeclareDependencies(IDependencyDeclaration deps)
+    {
+        if (OperatingSystem.IsMacOS())
+        {
+            deps.DependsOnOptional<PublishTestProjectAOTModule>();
+        }
+    }
+
     protected override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var results = new List<CommandResult>();
