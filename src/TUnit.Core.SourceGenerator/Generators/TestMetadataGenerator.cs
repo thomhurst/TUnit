@@ -499,9 +499,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (concreteInstantiations.Count == 0 && classConstraintViolations.Count == 0)
             {
-                // No concrete types could be resolved — skip this method.
-                // The test won't be discovered, which matches the behavior of
-                // not having any data to resolve type arguments.
+                // No concrete types could be resolved for a generic class — skip this method. A
+                // generic method on a non-generic class always gets an entry: rows whose type
+                // arguments cannot be inferred fail instead (#7163).
                 return;
             }
         }
@@ -1300,7 +1300,157 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Select(v => v.Message)
             .ToList();
 
+        if (testMethod is { IsGenericMethod: true, IsGenericType: false })
+        {
+            AddUninferredTypeArgumentFailures(testMethod, className, results);
+        }
+
         return results;
+    }
+
+    /// <summary>
+    /// Reports the data sources of a generic test method whose rows no instantiation runs, because
+    /// their declared type does not determine the method's type arguments (an <c>object</c> or
+    /// <c>object[]</c> row, say). Reflection mode infers the type arguments from each row's run-time
+    /// values, which source-generated mode cannot do. Rather than dropping the rows silently, each of
+    /// them fails with a message that says how to fix it. A method with no data source at all fails
+    /// once, as it does in reflection mode (#7163).
+    /// </summary>
+    private static void AddUninferredTypeArgumentFailures(TestMethodMetadata testMethod, string className, List<ConcreteInstantiation> results)
+    {
+        List<AttributeData>? uncovered = null;
+        var hasDataSource = false;
+
+        foreach (var attribute in testMethod.MethodAttributes)
+        {
+            // [GenerateGenericTest] lists the type arguments, so its types run every data source
+            // (or fail their constraints) and no data source has to infer them.
+            if (attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
+            {
+                return;
+            }
+        }
+
+        foreach (var attribute in testMethod.MethodAttributes)
+        {
+            if (!DataSourceAttributeHelper.IsDataSourceAttribute(attribute.AttributeClass))
+            {
+                continue;
+            }
+
+            hasDataSource = true;
+            if (!IsRunByAnyInstantiation(testMethod, results, attribute))
+            {
+                (uncovered ??= []).Add(attribute);
+            }
+        }
+
+        if (hasDataSource && uncovered is null)
+        {
+            return;
+        }
+
+        if (!hasDataSource && results.Count > 0)
+        {
+            return;
+        }
+
+        var methodName = testMethod.MethodSymbol.Name;
+        var violations = new List<MethodConstraintViolation>();
+        if (uncovered is null)
+        {
+            violations.Add(new MethodConstraintViolation(
+                $"Could not infer the type arguments of generic test method '{methodName}': it has no data source to infer them from. List the type arguments with [GenerateGenericTest].",
+                RowSource: null,
+                AllMethodDataSources: false));
+        }
+        else
+        {
+            foreach (var attribute in uncovered)
+            {
+                violations.Add(new MethodConstraintViolation(
+                    $"Could not infer the type arguments of generic test method '{methodName}' from data source [{DescribeDataSource(attribute)}]. "
+                    + "Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. "
+                    + "Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].",
+                    RowSource: attribute,
+                    AllMethodDataSources: false));
+            }
+        }
+
+        // All failures of one concrete class share one entry, as constraint violations do, so each
+        // failing row gets its own data source index and so its own test id.
+        var existing = results.FirstOrDefault(r => r.MethodConstraintViolations != null && r.ConcreteClassName == className);
+        if (existing != null)
+        {
+            existing.MethodConstraintViolations!.AddRange(violations);
+            return;
+        }
+
+        results.Add(new ConcreteInstantiation
+        {
+            ConcreteClassName = className,
+            TypeArguments = [],
+            ClassTypeArgs = [],
+            MethodTypeArgs = [],
+            TestName = methodName,
+            MethodName = methodName,
+            MethodConstraintViolations = violations,
+        });
+
+        static string DescribeDataSource(AttributeData attribute)
+        {
+            if (attribute.ApplicationSyntaxReference?.GetSyntax() is { } syntax)
+            {
+                return syntax.ToString();
+            }
+
+            var name = attribute.AttributeClass?.Name ?? "DataSource";
+            return name.EndsWith("Attribute", StringComparison.Ordinal) ? name.Substring(0, name.Length - "Attribute".Length) : name;
+        }
+    }
+
+    /// <summary>
+    /// Whether the rows of <paramref name="dataSource"/> run, or are reported, on at least one of the
+    /// instantiations of a generic method on a non-generic class. This mirrors the data source
+    /// selection in <see cref="EmitConcreteDataSources"/>.
+    /// </summary>
+    private static bool IsRunByAnyInstantiation(TestMethodMetadata testMethod, List<ConcreteInstantiation> results, AttributeData dataSource)
+    {
+        if (results.Count == 0)
+        {
+            return false;
+        }
+
+        // When the parameters do not use the type arguments, every instantiation runs every data source.
+        if (!MethodParametersReferenceTypeParameters(testMethod))
+        {
+            return true;
+        }
+
+        foreach (var instantiation in results)
+        {
+            if (instantiation.MethodConstraintViolations is { } violations)
+            {
+                foreach (var violation in violations)
+                {
+                    if (violation.AllMethodDataSources
+                        || (violation.RowSource is { } rowSource && AreSameAttribute(rowSource, dataSource)))
+                    {
+                        return true;
+                    }
+                }
+
+                continue;
+            }
+
+            // [GenerateGenericTest] and IInfersType<T> instantiations run every method data source.
+            if (instantiation.SpecificArgumentsAttribute is null || instantiation.IsSpecificMethodDataSource(dataSource))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
