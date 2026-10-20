@@ -41,8 +41,8 @@ public class ArgumentFormatterTests
 
         var result = ArgumentFormatter.FormatArguments(args);
 
-        // Primitives are formatted with ToString(), i.e. the current culture (3,14 under sv-SE).
-        await Assert.That(result).IsEqualTo($"(1, a), 42, (True, {3.14})");
+        // Numbers are formatted with the invariant culture, so this holds under sv-SE as well (#7126).
+        await Assert.That(result).IsEqualTo("(1, a), 42, (True, 3.14)");
     }
 
     [Test]
