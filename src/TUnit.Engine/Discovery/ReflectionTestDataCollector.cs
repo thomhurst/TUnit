@@ -1240,7 +1240,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// no data source inferred runs with every data source.
     /// <c>MethodArguments</c> restricts the data sources for that instantiation; null means all of them.
     /// </summary>
-    private static IEnumerable<(MethodInfo Method, TestMetadata? FailedMetadata, IDataSourceAttribute[]? MethodArguments)> ResolveMethodInstantiations(
+    internal static IEnumerable<(MethodInfo Method, TestMetadata? FailedMetadata, IDataSourceAttribute[]? MethodArguments)> ResolveMethodInstantiations(
         Type concreteClassType,
         MethodInfo method)
     {
@@ -1265,15 +1265,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var methodGenericParams = method.GetGenericArguments();
         var processedTypeArguments = new HashSet<Type[]>(TypeArrayComparer.Instance);
 
-        foreach (var (inferredMethod, typeArguments, rows) in InferMethodInstantiationsFromDataSources(concreteClassType, method, methodGenericParams.Length))
+        // [Arguments] rows and [GenerateGenericTest] types that break the method's constraints. They are
+        // reported together as one failed test per row or type, with the same message and in the same order
+        // as source-generated mode (#7107, #7153).
+        var (inferredInstantiations, constraintViolations) = InferMethodInstantiationsFromDataSources(concreteClassType, method, methodGenericParams.Length);
+
+        foreach (var (inferredMethod, typeArguments, rows) in inferredInstantiations)
         {
             processedTypeArguments.Add(typeArguments);
             yield return (inferredMethod, null, rows);
         }
-
-        // [GenerateGenericTest] types that break the method's constraints. They are reported together
-        // as one failed test per type, with the same message as source-generated mode (#7107).
-        List<string>? constraintViolations = null;
 
         // Process each [GenerateGenericTest] attribute
         foreach (var genAttr in generateGenericTestAttributes)
@@ -1311,7 +1312,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             if (ReflectionGenericTypeResolver.FindConstraintViolation(method, typeArguments) is { } constraintViolation)
             {
-                (constraintViolations ??= []).Add(constraintViolation);
+                (constraintViolations ??= []).Add(GenericConstraintViolationDataSource.Create(constraintViolation));
                 continue;
             }
 
@@ -1361,7 +1362,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 ReflectionMetadataBuilder.CreateMethodMetadata(concreteClassType, method),
                 testAttribute?.File ?? "Unknown",
                 testAttribute?.Line ?? 0,
-                constraintViolations), null);
+                constraintViolations.ToArray()), null);
         }
     }
 
@@ -1381,17 +1382,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <item>[MethodDataSource] members of the test class returning <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>
     /// (<c>InferTypesFromMethodDataSource</c>). The instantiation runs only that source.</item>
     /// </list>
-    /// Sources whose types violate the constraints are skipped. Sources inferring types that are already
-    /// instantiated are dropped, except further [Arguments] rows, which join the instantiation an earlier
-    /// [Arguments] row created.
+    /// Sources whose types violate the constraints are skipped, except [Arguments] rows: a literal row cannot
+    /// run on the [GenerateGenericTest] types instead, so each one is returned in <c>RowViolations</c>
+    /// and fails with the constraint message, as in the source generator (#7153). Sources inferring types that
+    /// are already instantiated are dropped, except further [Arguments] rows, which join the instantiation an
+    /// earlier [Arguments] row created.
     /// </summary>
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT; MakeGenericMethod over types inferred from attribute values")]
-    private static List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[]? Rows)> InferMethodInstantiationsFromDataSources(
+    private static (List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[]? Rows)> Instantiations, List<IDataSourceAttribute>? RowViolations) InferMethodInstantiationsFromDataSources(
         Type testClass,
         MethodInfo method,
         int genericParameterCount)
     {
         var instantiations = new List<(MethodInfo Method, Type[] TypeArguments, List<IDataSourceAttribute>? Rows)>();
+        List<IDataSourceAttribute>? rowViolations = null;
         var parameters = method.GetParameters();
         var dataSources = ReflectionAttributeExtractor.ExtractDataSources(method);
 
@@ -1400,11 +1404,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // generic class because an instantiation built from class and method rows runs every method [Arguments]
         // row. Any other source inferring types that are already instantiated is dropped, as the generator's
         // processedTypeCombinations does.
+        // Row values bind to the data parameters only; the engine supplies any CancellationToken, wherever it
+        // is declared. The source generator skips tokens the same way when it infers from [Arguments] rows.
+        ParameterInfo[]? dataParameters = null;
         foreach (var dataSource in dataSources)
         {
             if (dataSource is ArgumentsAttribute arguments)
             {
-                AddInstantiation(InferMethodTypeArguments(arguments.Values, parameters, genericParameterCount), arguments, isMethodArgumentsRow: true);
+                dataParameters ??= Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
+                AddInstantiation(InferMethodTypeArguments(arguments.Values, dataParameters, genericParameterCount), arguments, isMethodArgumentsRow: true);
             }
         }
 
@@ -1436,7 +1444,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             result.Add((closedMethod, typeArguments, rows?.ToArray()));
         }
 
-        return result;
+        return (result, rowViolations);
 
         void AddInstantiation(Type[]? typeArguments, IDataSourceAttribute? row, bool isMethodArgumentsRow = false)
         {
@@ -1465,9 +1473,21 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 closedMethod = method.MakeGenericMethod(typeArguments);
             }
-            catch (ArgumentException)
+            catch (ArgumentException ex)
             {
-                // Constraint violation: the source generator skips the source as well
+                // Constraint violation. A literal [Arguments] row cannot run on the [GenerateGenericTest] types,
+                // so it fails with the constraint message, wrapped so that its own values are still produced
+                // first (#7153). Any other source is skipped and runs on those types instead.
+                if (isMethodArgumentsRow && row is not null)
+                {
+                    // FindConstraintViolation produces the generator's message. It returns null only for a type-argument
+                    // count mismatch or when MakeGenericMethod succeeds, and neither can happen once MakeGenericMethod
+                    // has thrown. The runtime message is an intentional defensive fallback, so the row is still
+                    // reported rather than dropped, even if its wording would then differ from source-gen.
+                    var message = ReflectionGenericTypeResolver.FindConstraintViolation(method, typeArguments) ?? ex.Message;
+                    (rowViolations ??= []).Add(GenericConstraintViolationDataSource.Create(message, row));
+                }
+
                 return;
             }
 
