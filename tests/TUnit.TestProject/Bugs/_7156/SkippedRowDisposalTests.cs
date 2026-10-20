@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._7156;
@@ -35,9 +36,40 @@ public sealed class SkippedSharedDisposable : SkippedRowDisposable
     public SkippedSharedDisposable() => Created.Add(this);
 }
 
+// Tracking a skipped test's arguments reads its IAsyncInitializer-typed properties. A getter that
+// throws must leave the test skipped, not abort the run.
+public sealed class SkippedThrowingGetterHolder
+{
+    public IAsyncInitializer Inner => throw new InvalidOperationException("getter throws");
+}
+
+// The getter runs while the skipped test's arguments are tracked, so it must see that test as the
+// current one, as getters do while a running test's arguments are registered.
+public sealed class SkippedContextRecordingHolder
+{
+    public static ConcurrentBag<string?> SeenTestNames { get; } = [];
+
+    public IAsyncInitializer? Inner
+    {
+        get
+        {
+            SeenTestNames.Add(TestContext.Current?.Metadata.TestName);
+            return null;
+        }
+    }
+}
+
 [EngineTest(ExpectedResult.Pass)]
 public class SkippedRowTests
 {
+    [Test, Skip("skipped")]
+    [ClassDataSource<SkippedContextRecordingHolder>(Shared = SharedType.None)]
+    public void SkippedWithContextReadingGetter(SkippedContextRecordingHolder value) => throw new Exception("test ran");
+
+    [Test, Skip("skipped")]
+    [ClassDataSource<SkippedThrowingGetterHolder>(Shared = SharedType.None)]
+    public void SkippedWithThrowingGetter(SkippedThrowingGetterHolder value) => throw new Exception("test ran");
+
     [Test, Skip("skipped")]
     [ClassDataSource<SkippedMethodDisposable>(Shared = SharedType.None)]
     public void SkippedWithClassDataSource(SkippedMethodDisposable value) => throw new Exception("test ran");
@@ -73,6 +105,9 @@ public class SkippedRowDisposalObserverTests
 
         await Assert.That(SkippedDataRowDisposable.Created.Count).IsEqualTo(1);
         await Assert.That(SkippedDataRowDisposable.Created.All(x => x.IsDisposed)).IsTrue();
+
+        await Assert.That(SkippedContextRecordingHolder.SeenTestNames).IsNotEmpty();
+        await Assert.That(SkippedContextRecordingHolder.SeenTestNames.All(x => x == nameof(SkippedRowTests.SkippedWithContextReadingGetter))).IsTrue();
 
         await Assert.That(SkippedSharedDisposable.Created.Count).IsEqualTo(1);
         await Assert.That(Shared.IsDisposed).IsFalse();

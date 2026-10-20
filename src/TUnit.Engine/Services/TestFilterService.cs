@@ -127,7 +127,16 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             // resolving or initializing anything) to dispose them when the skipped test completes (#7156).
             if (isForExecution)
             {
-                testArgumentRegistrationService.TrackSkippedTestArguments(test.Context);
+                try
+                {
+                    testArgumentRegistrationService.TrackSkippedTestArguments(test.Context);
+                }
+                catch (Exception)
+                {
+                    // A property getter in the arguments' object graph threw. The test still never
+                    // runs, so it stays skipped rather than failing the whole run: its objects are
+                    // left untracked (and so not disposed), as they were before #7156.
+                }
             }
 
             test.Context.InvalidateDisplayNameCache();

@@ -47,6 +47,20 @@ internal sealed class TestArgumentRegistrationService
     /// </summary>
     public void TrackSkippedTestArguments(TestContext testContext)
     {
+        var testDetails = testContext.Metadata.TestDetails;
+        if (testDetails.TestClassArguments.Length == 0 &&
+            testDetails.TestMethodArguments.Length == 0 &&
+            testDetails.TestClassInjectedPropertyArguments.Count == 0 &&
+            testDetails.FailedDataRowObjects.Length == 0)
+        {
+            // Nothing to track, so no user code runs here — skip the AsyncLocal write.
+            return;
+        }
+
+        // Tracking reads property getters (user code), so they see this test as the current one,
+        // as they do during RegisterTestArgumentsAsync.
+        TestContext.Current = testContext;
+
         _objectLifecycleService.TrackTestObjects(testContext);
     }
 

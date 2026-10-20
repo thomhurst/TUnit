@@ -15,9 +15,9 @@ public class Issue7156Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter(
             "/*/TUnit.TestProject.Bugs._7156/*/*",
             [
-                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Total.ShouldBe(6),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(1),
-                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(3),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(5),
                 result => result.Results.Single(x => x.Outcome == "Passed").TestName
                     .ShouldBe("Objects_Of_Skipped_Rows_Are_Disposed_But_Shared_Ones_Stay_Alive")
             ]);
