@@ -101,6 +101,11 @@ internal class OmittedOptionalOverloadCompilationTests
             [Arguments]
             public void Object_Non_Finite([global::System.Runtime.InteropServices.Optional, global::System.Runtime.InteropServices.DefaultParameterValue(float.NaN)] object floatNan, [global::System.Runtime.InteropServices.Optional, global::System.Runtime.InteropServices.DefaultParameterValue(float.NegativeInfinity)] object floatInfinity, [global::System.Runtime.InteropServices.Optional, global::System.Runtime.InteropServices.DefaultParameterValue(double.NaN)] object doubleNan) { }
 
+            // Integer defaults of a type other than int keep that type when boxed into a broader declared type.
+            [Test]
+            [Arguments]
+            public void Object_Integral_Defaults([global::System.Runtime.InteropServices.Optional, global::System.Runtime.InteropServices.DefaultParameterValue((byte)7)] object b, [global::System.Runtime.InteropServices.Optional, global::System.Runtime.InteropServices.DefaultParameterValue((short)-3)] object s, [global::System.Runtime.InteropServices.Optional, global::System.Runtime.InteropServices.DefaultParameterValue(5L)] object l, [global::System.Runtime.InteropServices.Optional, global::System.Runtime.InteropServices.DefaultParameterValue(9UL)] object ul) { }
+
             // A default that cannot be written as a C# literal falls back to omitting the parameter.
             [Test]
             [Arguments]
@@ -152,6 +157,7 @@ internal class OmittedOptionalOverloadCompilationTests
         await Assert.That(generated).Contains("instance.Generic_Default<int>((int)(42), default(int)!, global::System.Array.Empty<int>())");
         await Assert.That(generated).Contains("instance.Object_String_Default((object)(\"declared\"))");
         await Assert.That(generated).Contains("instance.Object_Non_Finite((object)(float.NaN), (object)(float.NegativeInfinity), (object)(double.NaN))");
+        await Assert.That(generated).Contains("instance.Object_Integral_Defaults((object)((byte)(7)), (object)((short)(-3)), (object)((long)(5)), (object)((ulong)(9)))");
         await Assert.That(generated).Contains("instance.Unwritable_Default(@values: global::System.Array.Empty<int>())");
     }
 

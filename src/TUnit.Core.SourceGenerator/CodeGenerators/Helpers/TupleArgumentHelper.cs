@@ -306,6 +306,30 @@ public static class TupleArgumentHelper
             _ => literal
         };
 
+        // An integer literal is an int (or the smallest of uint/long/ulong that holds it), not the
+        // stored constant's own type. A value type parameter converts it back, but a broader one does
+        // not: `[DefaultParameterValue((byte)7)] object x` would box an int. Name the constant's type
+        // for those, so the boxed value has the same type as in reflection mode.
+        if (!type.IsValueType && type.TypeKind != TypeKind.Enum)
+        {
+            var valueTypeName = value switch
+            {
+                byte => "byte",
+                sbyte => "sbyte",
+                short => "short",
+                ushort => "ushort",
+                uint => "uint",
+                long => "long",
+                ulong => "ulong",
+                _ => null
+            };
+
+            if (valueTypeName is not null)
+            {
+                literal = $"({valueTypeName})({literal})";
+            }
+        }
+
         // The cast restores enum and narrower numeric types (the stored value is the underlying constant),
         // and keeps a broader declared type: `[DefaultParameterValue("s")] object x` must not pass a bare literal,
         // which would let a sibling `M(string)` overload win resolution.

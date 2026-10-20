@@ -128,6 +128,16 @@ public class OmittedOptionalOverloadTests
 
     [Test]
     [Arguments]
+    public async Task Object_Integral_Defaults_Keep_Their_Type([Optional, DefaultParameterValue((byte)7)] object b, [Optional, DefaultParameterValue((short)-3)] object s, [Optional, DefaultParameterValue(5L)] object l, [Optional, DefaultParameterValue(9UL)] object ul)
+    {
+        await Assert.That(b is byte bv && bv == 7).IsTrue();
+        await Assert.That(s is short sv && sv == -3).IsTrue();
+        await Assert.That(l is long lv && lv == 5).IsTrue();
+        await Assert.That(ul is ulong ulv && ulv == 9).IsTrue();
+    }
+
+    [Test]
+    [Arguments]
     public async Task Caller_Info_Receives_Declared_Default([CallerMemberName] string caller = "declared")
     {
         // Reflection mode invokes with Type.Missing, which supplies the declared default.
