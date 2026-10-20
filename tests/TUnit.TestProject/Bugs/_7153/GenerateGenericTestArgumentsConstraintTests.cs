@@ -38,4 +38,15 @@ public class GenerateGenericTestArgumentsConstraintTests
     {
         await Task.CompletedTask;
     }
+
+    // An injected CancellationToken before the data parameter is not matched with a row value, so the
+    // rows infer from the data parameter alone, as in the source generator
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [Arguments("x")]
+    [Arguments(5)]
+    public async Task TokenBeforeValue<T>(CancellationToken token, T value) where T : struct
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+    }
 }

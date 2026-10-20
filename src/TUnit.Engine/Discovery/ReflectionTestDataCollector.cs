@@ -1821,11 +1821,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // generic class because an instantiation built from class and method rows runs every method [Arguments]
         // row. Any other source inferring types that are already instantiated is dropped, as the generator's
         // processedTypeCombinations does.
+        // Row values bind to the data parameters only; the engine supplies any CancellationToken, wherever it
+        // is declared. The source generator skips tokens the same way when it infers from [Arguments] rows.
+        ParameterInfo[]? dataParameters = null;
         foreach (var dataSource in dataSources)
         {
             if (dataSource is ArgumentsAttribute arguments)
             {
-                AddInstantiation(InferMethodTypeArguments(arguments.Values, parameters, genericParameterCount), arguments, isMethodArgumentsRow: true);
+                dataParameters ??= Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
+                AddInstantiation(InferMethodTypeArguments(arguments.Values, dataParameters, genericParameterCount), arguments, isMethodArgumentsRow: true);
             }
         }
 

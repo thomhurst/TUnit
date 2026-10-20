@@ -56,4 +56,18 @@ public class Issue7153Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.Results.Select(x => x.TestId).Distinct().Count().ShouldBe(2)
             ]);
     }
+
+    [Test]
+    public async Task Injected_Token_Before_The_Data_Parameter_Is_Not_Matched_With_A_Row_Value()
+    {
+        await RunTestsWithFilter(
+            $"{ClassFilter}/TokenBeforeValue*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.Results.Single(x => x.Outcome == "Failed").TestName.ShouldBe("TokenBeforeValue"),
+                result => result.Results.Single(x => x.Outcome == "Failed").Output?.ErrorInfo?.Message.ShouldContain(StructViolation)
+            ]);
+    }
 }
