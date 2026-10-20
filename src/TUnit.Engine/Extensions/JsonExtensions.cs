@@ -45,7 +45,7 @@ internal static class JsonExtensions
 
         return new TestClassJson
         {
-            Type = context.ClassType.FullName,
+            Type = TestExtensions.GetReportedClassFullName(context.ClassType),
             Tests = tests
         };
     }
