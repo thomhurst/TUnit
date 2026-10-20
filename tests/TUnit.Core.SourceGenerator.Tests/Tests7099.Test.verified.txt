@@ -815,7 +815,40 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
     {
         try
         {
-            return new global::System.Threading.Tasks.ValueTask(instance.Explicit_Array_Before_Two_Tokens<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int[]>(args[0]), cancellationToken, cancellationToken));
+            var context = global::TUnit.Core.TestContext.Current;
+            switch (args.Length)
+            {
+                case 0:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Explicit_Array_Before_Two_Tokens<int>(global::System.Array.Empty<int>(), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                    }
+                case 1:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Explicit_Array_Before_Two_Tokens<int>((args[0] is null ? null : args[0] is int[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(args[0])), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                    }
+                case 2:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Explicit_Array_Before_Two_Tokens<int>(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]) }, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                    }
+                case 3:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Explicit_Array_Before_Two_Tokens<int>(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]) }, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                    }
+                case 4:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Explicit_Array_Before_Two_Tokens<int>(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]) }, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                    }
+                case 5:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Explicit_Array_Before_Two_Tokens<int>(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]) }, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                    }
+                case 6:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Explicit_Array_Before_Two_Tokens<int>(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]) }, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                    }
+                default:
+                    return new global::System.Threading.Tasks.ValueTask(instance.Explicit_Array_Before_Two_Tokens<int>((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>()), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+            }
         }
         catch (global::System.Exception ex)
         {

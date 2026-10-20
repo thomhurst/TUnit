@@ -234,6 +234,113 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_CancellationToken_Is_Not_Trailing()
+    {
+        // The engine passes the test's token wherever it is declared (#7173).
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Collections.Generic;
+                using System.Threading;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    public static IEnumerable<(int, int)> TupleRows()
+                    {
+                        yield return (1, 2);
+                    }
+
+                    public static IEnumerable<(int, string)> SpreadRows()
+                    {
+                        yield return (1, "one");
+                    }
+
+                    [MethodDataSource(nameof(TupleRows))]
+                    [Test]
+                    public void Leading(CancellationToken token, (int, int) pair)
+                    {
+                    }
+
+                    [MethodDataSource(nameof(SpreadRows))]
+                    [Test]
+                    public void Middle(int number, CancellationToken token, string name)
+                    {
+                    }
+
+                    [Arguments(1, "one")]
+                    [Test]
+                    public void LeadingWithArguments(CancellationToken token, int number, string name)
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Test_Has_Several_CancellationTokens()
+    {
+        // Every CancellationToken parameter of a test method receives the test's token.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Collections.Generic;
+                using System.Threading;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    public static IEnumerable<(int, int)> TupleRows()
+                    {
+                        yield return (1, 2);
+                    }
+
+                    [MethodDataSource(nameof(TupleRows))]
+                    [Test]
+                    public void TokensAroundTuple(CancellationToken first, (int, int) pair, CancellationToken second)
+                    {
+                    }
+
+                    [Arguments(1)]
+                    [Test]
+                    public void TokensAroundValue(CancellationToken first, int number, CancellationToken second)
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Class_Data_Source_Binds_A_Leading_Constructor_CancellationToken()
+    {
+        // The engine only supplies tokens to test methods: a constructor's token takes a row value.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Collections.Generic;
+                using System.Threading;
+                using TUnit.Core;
+
+                [MethodDataSource(nameof(Rows))]
+                public class MyClass(CancellationToken token, int value)
+                {
+                    public static IEnumerable<(CancellationToken, int)> Rows()
+                    {
+                        yield return (CancellationToken.None, 1);
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
     public async Task Method_Data_Source_Is_Not_Flagged_When_Timeout_CancellationToken()
     {
         await Verifier

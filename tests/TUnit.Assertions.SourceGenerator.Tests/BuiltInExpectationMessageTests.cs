@@ -34,12 +34,14 @@ internal class BuiltInExpectationMessageTests
     [Test]
     public async Task Built_In_Declarations_Render_Expectations()
     {
-        // Guards the test above against passing vacuously, e.g. if the source files stop resolving.
+        // Guards the test above against passing vacuously, e.g. if the source files stop resolving. The bound
+        // stays well below the real count: on .NET Framework the runner defines no NET symbols, so declarations
+        // under #if NET are not generated and fewer than 100 expectations render.
         var expectations = AssertionFromFiles()
             .SelectMany(file => GenerateExpectations(Path.Combine(Git.SourceDirectory.FullName, file)))
             .ToArray();
 
-        await Assert.That(expectations.Length).IsGreaterThan(100);
+        await Assert.That(expectations.Length).IsGreaterThan(50);
     }
 
     /// <summary>

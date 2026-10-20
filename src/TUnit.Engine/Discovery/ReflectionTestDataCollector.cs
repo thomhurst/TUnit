@@ -1342,9 +1342,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var typeMapping = new Dictionary<Type, Type>();
         Dictionary<Type, Type>? parameterMapping = null;
 
-        for (var i = 0; i < parameters.Length && i < values.Length; i++)
+        // The engine supplies CancellationToken parameters, so the row's values bind to the others.
+        var valueIndex = 0;
+        for (var i = 0; i < parameters.Length && valueIndex < values.Length; i++)
         {
             var parameterType = parameters[i].ParameterType;
+            if (parameterType == typeof(CancellationToken))
+            {
+                continue;
+            }
+
+            var rowValue = values[valueIndex++];
             if (!parameterType.ContainsGenericParameters)
             {
                 continue;
@@ -1352,7 +1360,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             // Match the source generator: Roslyn types a null element of the params object?[]
             // argument as object
-            var argumentType = values[i] is { } value ? GetArgumentInferenceType(value) : typeof(object);
+            var argumentType = rowValue is { } value ? GetArgumentInferenceType(value) : typeof(object);
 
             // Also match its first-wins rule across parameters: the first parameter that uses a type
             // parameter fixes it, so Run(T first, T second) with [Arguments(null, 1)] infers T = object
@@ -1827,7 +1835,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // row. Any other source inferring types that are already instantiated is dropped, as the generator's
         // processedTypeCombinations does.
         // Row values bind to the data parameters only; the engine supplies any CancellationToken, wherever it
-        // is declared. The source generator skips tokens the same way when it infers from [Arguments] rows.
+        // is declared. The source generator skips tokens the same way when it infers from [Arguments] rows
+        // and from [MethodDataSource] tuple elements.
         ParameterInfo[]? dataParameters = null;
         foreach (var dataSource in dataSources)
         {
@@ -1856,7 +1865,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             if (dataSource is MethodDataSourceAttribute methodDataSource)
             {
-                AddInstantiation(InferTypesFromMethodDataSource(testClass, methodDataSource, parameters, genericParameterCount), methodDataSource);
+                dataParameters ??= Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
+                AddInstantiation(InferTypesFromMethodDataSource(testClass, methodDataSource, dataParameters, genericParameterCount), methodDataSource);
             }
         }
 
@@ -2018,8 +2028,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// constructor argument is the member name (<c>[MethodDataSource("Rows")]</c> and
     /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), looks for a static parameterless method of that name
     /// declared on the test class (or on <c>T</c>), and requires its declared return type to be
-    /// <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>. Each tuple element is matched against the test parameter
-    /// at the same position, including type arguments nested in generic parameter types.
+    /// <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>. Each tuple element is matched against the data parameter
+    /// at the same position, including type arguments nested in generic parameter types. The caller passes
+    /// the parameters without any CancellationToken, as the generator's <c>GetDataParameters</c> does.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source methods")]
     private static Type[]? InferTypesFromMethodDataSource(
@@ -2820,15 +2831,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // parameter (e.g. `string[] names`). Both collect remaining loose arguments
                 // into the array, letting `[Arguments(["a", "b"])]` map onto a single array
                 // parameter (issue #6120).
-                // The engine passes a trailing CancellationToken as the last argument. Exclude it so
-                // an array just before it (T[] values, CancellationToken token) collects the row
+                // The engine passes trailing CancellationTokens as the last arguments. Exclude them so
+                // an array just before them (T[] values, CancellationToken token) collects the row
                 // values, as source-gen mode does.
                 var dataParameterCount = parameters.Length;
                 var dataArgumentCount = args.Length;
-                if (parameters.Length > 1
-                    && parameters[^1].ParameterType == typeof(CancellationToken)
-                    && args.Length > 0
-                    && args[^1] is CancellationToken)
+                while (dataParameterCount > 1
+                    && parameters[dataParameterCount - 1].ParameterType == typeof(CancellationToken)
+                    && dataArgumentCount > 0
+                    && args[dataArgumentCount - 1] is CancellationToken)
                 {
                     dataParameterCount--;
                     dataArgumentCount--;
@@ -2850,7 +2861,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     if (dataParameterCount < parameters.Length)
                     {
-                        castedArgs[^1] = args[^1];
+                        for (var i = dataParameterCount; i < parameters.Length; i++)
+                        {
+                            castedArgs[i] = args[dataArgumentCount + i - dataParameterCount];
+                        }
 
                         // Slots padded with Type.Missing for omitted optional parameters are not row values.
                         while (dataArgumentCount > 0 && args[dataArgumentCount - 1] == Type.Missing)

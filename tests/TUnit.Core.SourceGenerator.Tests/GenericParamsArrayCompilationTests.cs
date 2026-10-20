@@ -282,7 +282,8 @@ internal class GenericParamsArrayCompilationTests
         // A CancellationToken before a trailing array keeps its declared position.
         await Assert.That(generated).Contains("instance.Token_Before_Params<int>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, new int[] {");
         await Assert.That(generated).Contains("instance.Token_Between_Leading_And_Params<int>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, new int[] {");
-        // Every declared token receives the test's token, not just the first.
-        await Assert.That(generated).Contains("instance.Array_Before_Two_Tokens<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int[]>(args[0]), cancellationToken, cancellationToken)");
+        // Every declared token receives the test's token, not just the first, and the trailing array
+        // still collects loose row values.
+        await Assert.That(generated).Contains("instance.Array_Before_Two_Tokens<int>(new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]) }, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None)");
     }
 }

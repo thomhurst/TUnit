@@ -75,6 +75,22 @@ public class Issue7108Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     /// <summary>
+    /// Fields, properties and methods named after C# keywords (e.g. <c>@event</c>) must be escaped in generated code.
+    /// </summary>
+    [Test]
+    public async Task Keyword_Named_Data_Source_Members_Compile_And_Run()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7108/KeywordNamedDataSourceTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(6),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(6),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    /// <summary>
     /// Rows of a private nested type would close the generic test over a type that generated code cannot name.
     /// Reflection mode runs them. Source-generated mode must still compile, and reports each test as a failure
     /// that names the type and the fix.
