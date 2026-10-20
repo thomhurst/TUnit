@@ -54,7 +54,7 @@ internal class DynamicParameterCompilationTests
         public class DynamicConstructorTests(dynamic value)
         {
             [MethodDataSource(nameof(PropertyData))]
-            public required dynamic Property { get; init; }
+            public dynamic Property { get; set; } = null!;
 
             [MethodDataSource(nameof(PropertyData))]
             public static dynamic StaticProperty { get; set; } = null!;
@@ -83,7 +83,26 @@ internal class DynamicParameterCompilationTests
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
             [new TestMetadataGenerator().AsSourceGenerator(), new PropertyInjectionSourceGenerator().AsSourceGenerator(), new StaticPropertyInitializationGenerator().AsSourceGenerator()],
             parseOptions: parseOptions);
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out _);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var generatorDiagnostics);
+
+        // A generator that throws reports a "failed to generate source" warning and emits nothing, and the input
+        // alone still compiles. Fail on generator diagnostics and require every generator to produce output, so
+        // the compilation check below cannot pass vacuously.
+        var generatorFailures = generatorDiagnostics
+            .Where(d => d.Severity == DiagnosticSeverity.Error
+                || (d.Severity == DiagnosticSeverity.Warning && d.GetMessage().Contains("failed to generate source")))
+            .ToArray();
+
+        await Assert.That(generatorFailures)
+            .IsEmpty()
+            .Because(string.Join(Environment.NewLine, generatorFailures.Select(d => d.ToString())));
+
+        foreach (var result in driver.GetRunResult().Results)
+        {
+            var generatorName = result.Generator.GetGeneratorType().Name;
+            await Assert.That(result.Exception).IsNull().Because($"{generatorName} threw");
+            await Assert.That(result.GeneratedSources).IsNotEmpty().Because($"{generatorName} must emit source for the dynamic members");
+        }
 
         var errors = output.GetDiagnostics()
             .Where(d => d.Severity == DiagnosticSeverity.Error)
