@@ -457,3 +457,41 @@ public class GenericMethodNonTupleMethodDataSourceTests
         await Assert.That(value is IAsyncEnumerable<int>).IsTrue();
     }
 }
+
+/// <summary>
+/// A generic test method with a single tuple parameter and a CancellationToken. Source-gen mode passes the
+/// token at its declared position, before or after the tuple. Reflection mode does not bind these rows yet
+/// (https://github.com/thomhurst/TUnit/issues/7173), so they live outside <see cref="GenericMethodNonTupleMethodDataSourceTests"/>
+/// and carry no [EngineTest]; Issue7108Tests runs them in source-generated mode only.
+/// </summary>
+public class GenericSingleTupleWithCancellationTokenTests
+{
+    public static IEnumerable<(int, int)> TupleParameterRows()
+    {
+        yield return (25, 26);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(TupleParameterRows))]
+    public async Task Trailing_Token<T>((T, T) pair, CancellationToken token)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(token.CanBeCanceled).IsTrue();
+        await Assert.That(pair.Item1).IsEqualTo((T)(object)25);
+        await Assert.That(pair.Item2).IsEqualTo((T)(object)26);
+    }
+
+    // TUnit0001 only ignores a trailing CancellationToken (#7173). The generated call must still compile
+    // and pass the token before the tuple.
+#pragma warning disable TUnit0001
+    [Test]
+    [MethodDataSource(nameof(TupleParameterRows))]
+    public async Task Leading_Token<T>(CancellationToken token, (T, T) pair)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(token.CanBeCanceled).IsTrue();
+        await Assert.That(pair.Item1).IsEqualTo((T)(object)25);
+        await Assert.That(pair.Item2).IsEqualTo((T)(object)26);
+    }
+#pragma warning restore TUnit0001
+}

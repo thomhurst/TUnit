@@ -3243,9 +3243,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 $"global::TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
             var tupleConstruction = $"({string.Join(", ", tupleElements)})";
 
-            var methodCallReconstructed = hasCancellationToken
-                ? $"instance.{methodName}({tupleConstruction}, cancellationToken)"
-                : $"instance.{methodName}({tupleConstruction})";
+            // A token declared before the tuple (reachable for generic methods) stays at its declared position.
+            var tokenFirst = hasCancellationToken && GetLeadingCancellationTokenIndex(parametersFromArgs) >= 0;
+            string TupleMethodCall(string tupleArgument) => !hasCancellationToken
+                ? $"instance.{methodName}({tupleArgument})"
+                : tokenFirst
+                    ? $"instance.{methodName}(cancellationToken, {tupleArgument})"
+                    : $"instance.{methodName}({tupleArgument}, cancellationToken)";
+
+            var methodCallReconstructed = TupleMethodCall(tupleConstruction);
             GenerateReturnHandling(writer, methodCallReconstructed, returnPattern);
             writer.Unindent();
             writer.AppendLine("}");
@@ -3253,9 +3259,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("// Rare case: tuple is wrapped as a single argument");
-            var methodCallDirect = hasCancellationToken
-                ? $"instance.{methodName}(global::TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]), cancellationToken)"
-                : $"instance.{methodName}(global::TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]))";
+            var methodCallDirect = TupleMethodCall($"global::TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0])");
             GenerateReturnHandling(writer, methodCallDirect, returnPattern);
             writer.Unindent();
             writer.AppendLine("}");

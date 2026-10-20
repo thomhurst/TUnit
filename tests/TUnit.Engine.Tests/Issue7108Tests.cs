@@ -21,4 +21,19 @@ public class Issue7108Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
+
+    [Test]
+    public async Task Single_Tuple_Parameter_Keeps_The_CancellationToken_At_Its_Declared_Position()
+    {
+        Skip.When(testMode == TestMode.Reflection, "Reflection mode does not bind a single tuple parameter next to a CancellationToken yet: https://github.com/thomhurst/TUnit/issues/7173");
+
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7108/GenericSingleTupleWithCancellationTokenTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
 }
