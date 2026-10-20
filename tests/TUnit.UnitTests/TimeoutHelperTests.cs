@@ -274,10 +274,10 @@ public class TimeoutHelperTests
         // Otherwise timeout detection wins before the operation is released into the grace period.
         releaseOperation.SetResult();
 
-        if (releasedExecution is { IsCompleted: false })
+        if (!executionCompletesFirst && releasedExecution is not { IsCompleted: true })
         {
             throw new InvalidOperationException(
-                "The released operation must complete synchronously so the grace period observes its outcome.");
+                "The released operation must be created synchronously by TimeoutHelper and complete synchronously on release so the grace period observes its outcome.");
         }
 
         await timeoutTask;
