@@ -3,7 +3,7 @@ using TUnit.TestProject.Attributes;
 namespace TUnit.TestProject.Bugs._7106;
 
 // A null element of a method row's params array infers object for the class type argument, as Roslyn
-// types it, in both modes. [Arguments(null)] passes a null params array instead, which infers no type.
+// types it, in both modes. [Arguments(null)], a null params array, does the same: see Bugs/_7141.
 
 [EngineTest(ExpectedResult.Pass)]
 public class TypedNullMethodRowInfersObject<T>
@@ -58,19 +58,6 @@ public class NullFirstOfSharedTypeParameterWithGenerateGenericTest<T>
         await Assert.That(typeof(T)).IsEqualTo(typeof(object));
         await Assert.That(first).IsNull();
         await Assert.That((object?)second).IsEqualTo(1);
-    }
-}
-
-// The null row infers no type, so it neither runs nor is reported as breaking the struct constraint.
-[EngineTest(ExpectedResult.Pass)]
-public class NullArrayMethodRowOnConstrainedClass<T> where T : struct
-{
-    [Test]
-    [Arguments(1)]
-    [Arguments(null)]
-    public async Task Run(T value)
-    {
-        await Assert.That(value).IsEqualTo((T)(object)1);
     }
 }
 

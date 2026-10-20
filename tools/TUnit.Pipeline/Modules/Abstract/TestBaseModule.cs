@@ -11,10 +11,21 @@ namespace TUnit.Pipeline.Modules.Abstract;
 
 public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 {
-    protected virtual IEnumerable<string> TestableFrameworks
-    {
-        get { yield return "net10.0"; }
-    }
+    /// <summary>Every modern TFM the repo targets.</summary>
+    protected static IReadOnlyList<string> ModernFrameworks { get; } = ["net10.0", "net9.0", "net8.0"];
+
+    /// <summary>
+    /// <see cref="ModernFrameworks"/>, plus net472 on Windows, the only OS that can run .NET Framework tests.
+    /// </summary>
+    protected static IReadOnlyList<string> ModernAndNetFrameworks { get; } =
+        IsWindows ? [.. ModernFrameworks, "net472"] : ModernFrameworks;
+
+    /// <summary>
+    /// Frameworks to run. Defaults to <see cref="ModernFrameworks"/>; frameworks the project did not
+    /// build are skipped (see <see cref="HasFrameworkOutput"/>), so net10.0-only projects run once.
+    /// Override with <see cref="ModernAndNetFrameworks"/> to add net472 on Windows, or to deliberately narrow the set.
+    /// </summary>
+    protected virtual IEnumerable<string> TestableFrameworks => ModernFrameworks;
 
     /// <summary>True on Windows, where legacy .NET Framework TFMs (net4xx) can be tested.</summary>
     protected static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);

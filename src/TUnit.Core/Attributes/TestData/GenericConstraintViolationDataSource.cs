@@ -102,14 +102,30 @@ public class GenericConstraintViolationDataSource : Attribute, IDataSourceAttrib
         {
             // Run the row's own factory first, as reflection mode does before it resolves the row's type
             // arguments, so the factory's side effects happen and its own exceptions take precedence.
+            // The exception carries the row so the engine can track its objects for disposal (#7123).
             yield return async () =>
             {
-                await rowFactory();
-                throw new GenericTypeResolutionException(message);
+                var row = await rowFactory();
+                throw new GenericConstraintViolationRowException(message, row);
             };
         }
     }
 
     private sealed class InstanceDataAccessing(string message, IDataSourceAttribute innerDataSource)
         : GenericConstraintViolationDataSource(message, innerDataSource), IAccessesInstanceData;
+}
+
+/// <summary>
+/// Raised for a row of a <see cref="GenericConstraintViolationDataSource"/> that wraps another data source.
+/// It carries the objects that the wrapped row's factory created, which the failed test never receives,
+/// so the engine can track them for disposal. The engine reports a plain
+/// <see cref="GenericTypeResolutionException"/> with the same message, as reflection mode does.
+/// </summary>
+internal sealed class GenericConstraintViolationRowException(string message, object?[]? row)
+    : GenericTypeResolutionException(message)
+{
+    /// <summary>
+    /// Gets the values that the wrapped row's factory returned, before unwrapping.
+    /// </summary>
+    public object?[]? Row { get; } = row;
 }

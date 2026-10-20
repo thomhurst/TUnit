@@ -35,6 +35,12 @@ public abstract class AbstractExecutableTest
     // dependency recursion, so TestRunner must keep using its execution dedup ledger.
     internal bool RequiresExecutionDedup { get; set; }
 
+    // Set by TestRunner once the test has every lock and slot it needs and is handed to
+    // TestCoordinator, which always publishes its result. A cancelled run uses this to find
+    // tests that failed before execution (data source or registration errors) and were never
+    // published, because their State is already Failed (#7119).
+    internal bool HasStartedExecution { get; set; }
+
     public required TestContext Context
     {
         get;

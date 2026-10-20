@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.Generators;
 using TUnit.Core.SourceGenerator.Models;
 
-namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
+namespace TUnit.SourceGenerator.IncrementalTests;
 
 public class AotConverterGeneratorIncrementalTests
 {
@@ -51,42 +51,42 @@ public class AotConverterGeneratorIncrementalTests
         }
         """;
 
-    [Fact]
-    public void AddUnrelatedType_MethodShouldNotRegenerate()
+    [Test]
+    public async Task AddUnrelatedType_MethodShouldNotRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultConverter, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<AotConverterGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 1);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 1);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached, 1);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached, 1);
     }
 
-    [Fact]
-    public void AddNewConverterShouldRegenerate()
+    [Test]
+    public async Task AddNewConverterShouldRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultConverter, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<AotConverterGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 1);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 1);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText(SecondConverter));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified, 2);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified, 2);
     }
 
-    [Fact]
-    public void ModifyOperatorShouldRegenerate()
+    [Test]
+    public async Task ModifyOperatorShouldRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultConverter, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<AotConverterGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 1);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 1);
 
         var compilation2 = TestHelper.ReplaceTypeDeclaration(compilation1, "Foo",
             """
@@ -98,32 +98,32 @@ public class AotConverterGeneratorIncrementalTests
             );
 
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified, 1);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified, 1);
     }
 
-    [Fact]
-    public void EditNonTestMethodShouldNotRegenerate()
+    [Test]
+    public async Task EditNonTestMethodShouldNotRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultConverter, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<AotConverterGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 1);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 1);
 
         var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "Data",
             "public static IEnumerable<Foo> Data() => [new(), new()];");
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached, 1);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached, 1);
     }
 
-    [Fact]
-    public void ChangeTestParameterShouldRegenerate()
+    [Test]
+    public async Task ChangeTestParameterShouldRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultConverter, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<AotConverterGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 1);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 1);
 
         var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "Test1",
             """
@@ -133,10 +133,10 @@ public class AotConverterGeneratorIncrementalTests
             }
             """);
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified, 0);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified, 0);
     }
 
-    private static void AssertRunReasons(
+    private static async Task AssertRunReasons(
         GeneratorDriver driver,
         IncrementalGeneratorRunReasons reasons,
         int conversionMetadataLength,
@@ -146,8 +146,8 @@ public class AotConverterGeneratorIncrementalTests
         var runResult = driver.GetRunResult().Results[0];
         var runValue = runResult.TrackedSteps[AotConverterGenerator.ParseAotConverter][0].Outputs[0].Value;
         var runState = (ValueTuple<EquatableArray<AotConverterGenerator.ConversionMetadata>, bool>)runValue;
-        Xunit.Assert.Equal(conversionMetadataLength, runState.Item1.Length);
+        await Assert.That(runState.Item1.Length).IsEqualTo(conversionMetadataLength);
 
-        TestHelper.AssertRunReason(runResult, AotConverterGenerator.ParseAotConverter, reasons.BuildStep, outputIndex);
+        await TestHelper.AssertRunReason(runResult, AotConverterGenerator.ParseAotConverter, reasons.BuildStep, outputIndex);
     }
 }

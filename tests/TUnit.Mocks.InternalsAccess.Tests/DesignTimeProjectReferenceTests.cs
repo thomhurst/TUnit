@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Security;
 using System.Text;
 using System.Text.Json;
+using TUnit.Tests.Shared;
 using Task = System.Threading.Tasks.Task;
 
 namespace TUnit.Mocks.InternalsAccess.Tests;
@@ -230,7 +231,7 @@ public class DesignTimeProjectReferenceTests
 
         private static async Task<string> RunAsync(string verb, string project, params string[] arguments)
         {
-            var startInfo = new ProcessStartInfo("dotnet")
+            var startInfo = new ProcessStartInfo(DotNetCli.Path)
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

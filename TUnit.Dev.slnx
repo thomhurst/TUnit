@@ -7,6 +7,7 @@
 
   <!-- Core framework packages -->
   <Folder Name="/Core/">
+    <Project Path="src/TUnit.Assertions.Should/TUnit.Assertions.Should.csproj" />
     <Project Path="src/TUnit/TUnit.csproj" />
     <Project Path="src/TUnit.Core/TUnit.Core.csproj" />
     <Project Path="src/TUnit.Engine/TUnit.Engine.csproj" />
@@ -18,6 +19,7 @@
   <Folder Name="/Libraries/">
     <Project Path="src/TUnit.Aspire/TUnit.Aspire.csproj" />
     <Project Path="src/TUnit.Aspire.Core/TUnit.Aspire.Core.csproj" />
+    <Project Path="src/TUnit.Mocks.InternalsAccess.Tasks/TUnit.Mocks.InternalsAccess.Tasks.csproj" />
     <Project Path="src/TUnit.OpenTelemetry/TUnit.OpenTelemetry.csproj" />
     <Project Path="src/TUnit.AspNetCore/TUnit.AspNetCore.csproj" />
     <Project Path="src/TUnit.AspNetCore.Core/TUnit.AspNetCore.Core.csproj" />
@@ -28,6 +30,7 @@
     <Project Path="src/TUnit.Mocks.Http/TUnit.Mocks.Http.csproj" />
     <Project Path="src/TUnit.Mocks.Logging/TUnit.Mocks.Logging.csproj" />
     <Project Path="src/TUnit.Playwright/TUnit.Playwright.csproj" />
+    <Project Path="src/TUnit.Templates/TUnit.Templates.csproj" />
   </Folder>
 
   <!-- Roslyn analyzers and code fixers (base projects only, no Roslyn version variants) -->
@@ -44,6 +47,7 @@
 
   <!-- Source generators (base projects only, no Roslyn version variants) -->
   <Folder Name="/SourceGenerators/">
+    <Project Path="src/TUnit.Assertions.Should.SourceGenerator/TUnit.Assertions.Should.SourceGenerator.csproj" />
     <Project Path="src/TUnit.Assertions.SourceGenerator/TUnit.Assertions.SourceGenerator.csproj" />
     <Project Path="src/TUnit.Core.SourceGenerator/TUnit.Core.SourceGenerator.csproj" />
     <Project Path="src/TUnit.Mocks.SourceGenerator/TUnit.Mocks.SourceGenerator.csproj" />
@@ -54,8 +58,13 @@
     <Project Path="tests/TUnit.Analyzers.Internal.Tests/TUnit.Analyzers.Internal.Tests.csproj" />
     <Project Path="tests/TUnit.Analyzers.Tests/TUnit.Analyzers.Tests.csproj" />
     <Project Path="tests/TUnit.AspNetCore.Analyzers.Tests/TUnit.AspNetCore.Analyzers.Tests.csproj" />
+    <Project Path="tests/TUnit.AspNetCore.Tests.MinimalApi/TUnit.AspNetCore.Tests.MinimalApi.csproj" />
+    <Project Path="tests/TUnit.AspNetCore.Tests.WebApp/TUnit.AspNetCore.Tests.WebApp.csproj" />
+    <Project Path="tests/TUnit.AspNetCore.Tests/TUnit.AspNetCore.Tests.csproj" />
     <Project Path="tests/TUnit.Assertions.Analyzers.CodeFixers.Tests/TUnit.Assertions.Analyzers.CodeFixers.Tests.csproj" />
     <Project Path="tests/TUnit.Assertions.Analyzers.Tests/TUnit.Assertions.Analyzers.Tests.csproj" />
+    <Project Path="tests/TUnit.Assertions.Should.SourceGenerator.Tests/TUnit.Assertions.Should.SourceGenerator.Tests.csproj" />
+    <Project Path="tests/TUnit.Assertions.Should.Tests/TUnit.Assertions.Should.Tests.csproj" />
     <Project Path="tests/TUnit.Assertions.SourceGenerator.Tests/TUnit.Assertions.SourceGenerator.Tests.csproj" />
     <Project Path="tests/TUnit.Assertions.Tests/TUnit.Assertions.Tests.csproj" />
     <Project Path="tests/TUnit.Core.SourceGenerator.Tests/TUnit.Core.SourceGenerator.Tests.csproj" />
@@ -63,12 +72,16 @@
     <Project Path="tests/TUnit.Mocks.Analyzers.Tests/TUnit.Mocks.Analyzers.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.Aot.Tests/TUnit.Mocks.Aot.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.Http.Tests/TUnit.Mocks.Http.Tests.csproj" />
+    <Project Path="tests/TUnit.Mocks.InternalsAccess.TargetLib/TUnit.Mocks.InternalsAccess.TargetLib.csproj" />
+    <Project Path="tests/TUnit.Mocks.InternalsAccess.Tests/TUnit.Mocks.InternalsAccess.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.Logging.Tests/TUnit.Mocks.Logging.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.SourceGenerator.Tests/TUnit.Mocks.SourceGenerator.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.Tests/TUnit.Mocks.Tests.csproj" />
     <Project Path="tests/TUnit.OpenTelemetry.Tests/TUnit.OpenTelemetry.Tests.csproj" />
     <Project Path="tests/TUnit.PublicAPI/TUnit.PublicAPI.csproj" />
     <Project Path="tests/TUnit.RpcTests/TUnit.RpcTests.csproj" />
+    <Project Path="tests/TUnit.SourceGenerator.IncrementalTests/TUnit.SourceGenerator.IncrementalTests.csproj" />
+    <Project Path="tests/TUnit.Templates.Tests/TUnit.Templates.Tests.csproj" />
     <Project Path="tests/TUnit.TestProject.HtmlReportDefaults/TUnit.TestProject.HtmlReportDefaults.csproj" />
     <Project Path="tests/TUnit.TestProject.Library/TUnit.TestProject.Library.csproj" />
     <Project Path="tests/TUnit.UnitTests/TUnit.UnitTests.csproj" />
