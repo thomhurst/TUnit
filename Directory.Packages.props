@@ -30,7 +30,7 @@
     <PackageVersion Include="MassTransit" Version="9.2.3" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.1.0" />
-    <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.18" />
+    <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.19" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.6.1" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.1" />
     <PackageVersion Include="Azure.Data.Tables" Version="12.13.0" />
@@ -122,7 +122,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="StreamJsonRpc" Version="2.25.29" />
+    <PackageVersion Include="StreamJsonRpc" Version="2.26.150" />
     <PackageVersion Include="System.Collections.Immutable" Version="9.0.0" />
     <PackageVersion Include="System.Memory" Version="4.6.3" />
     <PackageVersion Include="System.CommandLine" Version="2.0.13" />

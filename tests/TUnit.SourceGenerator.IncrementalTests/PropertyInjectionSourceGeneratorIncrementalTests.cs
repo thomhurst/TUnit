@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.Generators;
 
-namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
+namespace TUnit.SourceGenerator.IncrementalTests;
 
 public class PropertyInjectionSourceGeneratorIncrementalTests
 {
@@ -52,13 +52,13 @@ public class PropertyInjectionSourceGeneratorIncrementalTests
         PropertyInjectionSourceGenerator.ConcreteGenericTypesStep,
     ];
 
-    [Fact]
-    public void AddUnrelatedTypeShouldNotRegenerate()
+    [Test]
+    public async Task AddUnrelatedTypeShouldNotRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
         var driver1 = TestHelper.GenerateTracked<PropertyInjectionSourceGenerator>(compilation1);
-        AssertAllOutputs(driver1, IncrementalStepRunReason.New);
+        await AssertAllOutputs(driver1, IncrementalStepRunReason.New);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
             """
@@ -72,24 +72,24 @@ public class PropertyInjectionSourceGeneratorIncrementalTests
             }
             """));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertAllOutputs(driver2, IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
+        await AssertAllOutputs(driver2, IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
     }
 
-    [Fact]
-    public void EditUnrelatedMemberShouldNotRegenerate()
+    [Test]
+    public async Task EditUnrelatedMemberShouldNotRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
         var driver1 = TestHelper.GenerateTracked<PropertyInjectionSourceGenerator>(compilation1);
-        AssertAllOutputs(driver1, IncrementalStepRunReason.New);
+        await AssertAllOutputs(driver1, IncrementalStepRunReason.New);
 
         var compilation2 = TestHelper.ReplacePropertyDeclaration(compilation1, "Plain", "public long Plain { get; set; }");
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertAllOutputs(driver2, IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
+        await AssertAllOutputs(driver2, IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
     }
 
-    [Fact]
-    public void EditUnrelatedMemberShouldNotRerunConcreteGenericTypes()
+    [Test]
+    public async Task EditUnrelatedMemberShouldNotRerunConcreteGenericTypes()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
@@ -99,12 +99,12 @@ public class PropertyInjectionSourceGeneratorIncrementalTests
         // flattened step from re-running rather than merely re-producing equal values.
         var compilation2 = TestHelper.ReplacePropertyDeclaration(compilation1, "Plain", "public long Plain { get; set; }");
         var driver2 = driver1.RunGenerators(compilation2);
-        TestHelper.AssertAllRunReasons(driver2.GetRunResult().Results[0],
+        await TestHelper.AssertAllRunReasons(driver2.GetRunResult().Results[0],
             PropertyInjectionSourceGenerator.ConcreteGenericTypesStep, IncrementalStepRunReason.Cached);
     }
 
-    [Fact]
-    public void ModifyDataSourcePropertyShouldRegenerate()
+    [Test]
+    public async Task ModifyDataSourcePropertyShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
@@ -116,11 +116,11 @@ public class PropertyInjectionSourceGeneratorIncrementalTests
             public Fixture? Injected { get; set; }
             """);
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertAnyOutput(driver2, PropertyInjectionSourceGenerator.PropertyDataSourcesStep, IncrementalStepRunReason.Modified);
+        await AssertAnyOutput(driver2, PropertyInjectionSourceGenerator.PropertyDataSourcesStep, IncrementalStepRunReason.Modified);
     }
 
-    [Fact]
-    public void AddInitializerPropertyShouldRegenerate()
+    [Test]
+    public async Task AddInitializerPropertyShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
@@ -137,11 +137,11 @@ public class PropertyInjectionSourceGeneratorIncrementalTests
             }
             """);
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertAnyOutput(driver2, PropertyInjectionSourceGenerator.AsyncInitializersStep, IncrementalStepRunReason.Modified);
+        await AssertAnyOutput(driver2, PropertyInjectionSourceGenerator.AsyncInitializersStep, IncrementalStepRunReason.Modified);
     }
 
-    [Fact]
-    public void AddConcreteGenericInstantiationShouldRegenerate()
+    [Test]
+    public async Task AddConcreteGenericInstantiationShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
@@ -163,37 +163,37 @@ public class PropertyInjectionSourceGeneratorIncrementalTests
             }
             """));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertAnyOutput(driver2, PropertyInjectionSourceGenerator.ConcreteGenericTypesStep, IncrementalStepRunReason.New);
+        await AssertAnyOutput(driver2, PropertyInjectionSourceGenerator.ConcreteGenericTypesStep, IncrementalStepRunReason.New);
 
         var concreteTypes2 = driver2.GetRunResult().Results[0].TrackedSteps[PropertyInjectionSourceGenerator.ConcreteGenericTypesStep]
             .SelectMany(x => x.Outputs)
             .Count();
-        Xunit.Assert.Equal(concreteTypes1 + 1, concreteTypes2);
+        await Assert.That(concreteTypes2).IsEqualTo(concreteTypes1 + 1);
     }
 
-    private static void AssertAllOutputs(GeneratorDriver driver, params IncrementalStepRunReason[] allowedReasons)
+    private static async Task AssertAllOutputs(GeneratorDriver driver, params IncrementalStepRunReason[] allowedReasons)
     {
         var runResult = driver.GetRunResult().Results[0];
 
         foreach (var step in Steps)
         {
             var outputs = runResult.TrackedSteps[step].SelectMany(x => x.Outputs).ToArray();
-            Xunit.Assert.NotEmpty(outputs);
+            await Assert.That(outputs).IsNotEmpty();
 
             foreach (var output in outputs)
             {
-                Xunit.Assert.True(allowedReasons.Contains(output.Reason),
-                    $"Step {step} produced an output with reason {output.Reason}; expected one of {string.Join(", ", allowedReasons)}.");
+                await Assert.That(allowedReasons).Contains(output.Reason)
+                    .Because($"step {step} produced an output with reason {output.Reason}");
             }
         }
     }
 
-    private static void AssertAnyOutput(GeneratorDriver driver, string step, IncrementalStepRunReason expectedReason)
+    private static async Task AssertAnyOutput(GeneratorDriver driver, string step, IncrementalStepRunReason expectedReason)
     {
         var runResult = driver.GetRunResult().Results[0];
         var reasons = runResult.TrackedSteps[step].SelectMany(x => x.Outputs).Select(x => x.Reason).ToArray();
 
-        Xunit.Assert.True(reasons.Contains(expectedReason),
-            $"Step {step} had no output with reason {expectedReason}; actual reasons: {string.Join(", ", reasons)}.");
+        await Assert.That(reasons).Contains(expectedReason)
+            .Because($"step {step} should have an output with reason {expectedReason}");
     }
 }

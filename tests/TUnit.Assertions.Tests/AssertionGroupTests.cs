@@ -32,26 +32,26 @@ public class AssertionGroupTests
             .IsEqualTo("Foo");
     }
 
-    // IsNullOrEmpty is not available in current API
-    // These tests are commented out as they test deprecated functionality
+    [Test]
+    public async Task Complex_Or_With_Delegates()
+    {
+        // Test: "Foo" should match (IsNullOrEmpty AND EqualTo("Foo")) OR (IsNullOrEmpty OR EqualTo("Foo"))
+        // Second condition passes because EqualTo("Foo") is true
+        var value = "Foo";
 
-    //[Test]
-    //public async Task Complex_Or_With_Delegates()
-    //{
-    //    // Test: "Foo" should match (IsNullOrEmpty AND EqualTo("Foo")) OR (IsNullOrEmpty OR EqualTo("Foo"))
-    //    // Second condition passes because EqualTo("Foo") is true
-    //    var value = "Foo";
+        // Try first assertion, if it fails try second
+        try
+        {
+            await Assert.That(value).IsNullOrEmpty().And.IsEqualTo("Foo");
+        }
+        catch (AssertionException)
+        {
+            await Assert.That(value).IsNullOrEmpty().Or.IsEqualTo("Foo");
+        }
+    }
 
-    //    // Try first assertion, if it fails try second
-    //    try
-    //    {
-    //        await Assert.That(value).IsNullOrEmpty().And.IsEqualTo("Foo");
-    //    }
-    //    catch (AssertionException)
-    //    {
-    //        await Assert.That(value).IsNullOrEmpty().Or.IsEqualTo("Foo");
-    //    }
-    //}
+    // Disabled until [AssertionFrom] custom expectation messages get their leading "to", which this message
+    // relies on
 
     //[Test]
     //public async Task And_Condition_Throws_As_Expected()

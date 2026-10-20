@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 
-namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
+namespace TUnit.SourceGenerator.IncrementalTests;
 
 public class DynamicTestsGeneratorIncrementalTests
 {
@@ -25,28 +25,28 @@ public class DynamicTestsGeneratorIncrementalTests
         }
         """;
 
-    [Fact]
-    public void AddUnrelatedType_MethodShouldNotRegenerate()
+    [Test]
+    public async Task AddUnrelatedType_MethodShouldNotRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultConverter, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<DynamicTestsGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached);
     }
 
-    [Fact]
-    public void ModifyDynamicMethodShouldRegenerate()
+    [Test]
+    public async Task ModifyDynamicMethodShouldRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultConverter, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<DynamicTestsGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 0);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New, 0);
 
         var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "BuildDynamicTests",
             """
@@ -58,17 +58,17 @@ public class DynamicTestsGeneratorIncrementalTests
         );
 
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified);
     }
 
-    [Fact]
-    public void AddDynamicMethodShouldRegenerate()
+    [Test]
+    public async Task AddDynamicMethodShouldRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultConverter, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<DynamicTestsGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
 
         var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "SecondBuildDynamicTests",
             """
@@ -80,18 +80,18 @@ public class DynamicTestsGeneratorIncrementalTests
             );
 
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached, 0);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.New, 1);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached, 0);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.New, 1);
     }
 
-    [Fact]
-    public void MoveDynamicMethodToDifferentLine_ShouldRegenerate()
+    [Test]
+    public async Task MoveDynamicMethodToDifferentLine_ShouldRegenerate()
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(DefaultConverter, CSharpParseOptions.Default);
         var compilation1 = Fixture.CreateLibrary(syntaxTree);
 
         var driver1 = TestHelper.GenerateTracked<DynamicTestsGenerator>(compilation1);
-        AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
 
         // The [CallerLineNumber] captured by DynamicTestBuilder feeds the hint name and the
         // generated DynamicTestBuilderContext, so shifting the method must regenerate.
@@ -100,10 +100,10 @@ public class DynamicTestsGeneratorIncrementalTests
             CSharpSyntaxTree.ParseText(DefaultConverter.Replace("public class DynamicTestArgumentsTests", "\n\npublic class DynamicTestArgumentsTests"), CSharpParseOptions.Default));
 
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified);
     }
 
-    private static void AssertRunReasons(
+    private static async Task AssertRunReasons(
         GeneratorDriver driver,
         IncrementalGeneratorRunReasons reasons,
         int outputIndex = 0
@@ -111,6 +111,6 @@ public class DynamicTestsGeneratorIncrementalTests
     {
         var runResult = driver.GetRunResult().Results[0];
 
-        TestHelper.AssertRunReason(runResult, DynamicTestsGenerator.ParseDynamicTests, reasons.BuildStep, outputIndex);
+        await TestHelper.AssertRunReason(runResult, DynamicTestsGenerator.ParseDynamicTests, reasons.BuildStep, outputIndex);
     }
 }
