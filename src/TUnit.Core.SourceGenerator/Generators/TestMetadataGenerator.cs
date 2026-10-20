@@ -2384,12 +2384,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var dataSourceMember = ResolveMethodDataSourceMember(targetType, methodName!, attr, compilation);
         var dataSourceMethod = dataSourceMember as IMethodSymbol;
         var dataSourceProperty = dataSourceMember as IPropertySymbol;
-        // A field the generated class cannot read (a private field) keeps the reflection fallback, as before
-        var dataSourceField = dataSourceMember is IFieldSymbol field && compilation.IsSymbolAccessibleWithin(field, compilation.Assembly)
-            ? field
-            : null;
+        var dataSourceField = dataSourceMember as IFieldSymbol;
 
-        if (dataSourceMember == null || (dataSourceMethod == null && dataSourceProperty == null && dataSourceField == null))
+        if (dataSourceMember == null
+            || (dataSourceMethod == null && dataSourceProperty == null && dataSourceField == null)
+            || (dataSourceMethod == null && !CanReadDataSourceMember(dataSourceMember, compilation)))
         {
             // Still generate the attribute even if method not found - it will fail at runtime with proper error
             // Use CodeGenerationHelpers to properly handle any generics on the attribute
@@ -2534,6 +2533,30 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // CancellationToken or optional parameter is filled in as reflection mode's BuildInvokeArgs does.
         var hasArguments = dataSourceMethod is { Parameters.Length: > 0 };
 
+        var receiver = isStatic
+            ? fullyQualifiedType
+            : usesTestClassInstance
+                ? $"(({fullyQualifiedType})instance)"
+                : $"new {fullyQualifiedType}()";
+        var lambdaHeader = usesTestClassInstance ? "static instance =>" : "static () =>";
+        var metadataArgument = usesTestClassInstance ? "dataGeneratorMetadata, " : "";
+
+        if (dataSourceMethod == null && !IsAccessibleDataSourceMember(dataSourceMember, compilation))
+        {
+            // The generated class cannot name a private or protected field or property, so the factory reads it by
+            // reflection. GetField/GetProperty on a typeof() with a constant name and binding flags is understood
+            // by the trimmer and the AOT compiler, which keep that member, so this works under native AOT
+            // without any trimming warning. The attribute's own reflection fallback finds the member from the
+            // test class type at run time, which neither of them can see.
+            var lookup = dataSourceMember is IFieldSymbol ? "GetField" : "GetProperty";
+            var bindingFlags = (isStatic ? "global::System.Reflection.BindingFlags.Static" : "global::System.Reflection.BindingFlags.Instance")
+                + " | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly";
+            var target = isStatic ? "null" : usesTestClassInstance ? "instance" : $"new {fullyQualifiedType}()";
+            var cast = kind is "Value" or "Enumerable" ? "" : $"({returnType.GloballyQualified()})";
+            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {cast}typeof({dataSourceMember.ContainingType.GloballyQualified()}).{lookup}(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target}))");
+            return;
+        }
+
         string memberAccess;
         if (dataSourceMethod != null)
         {
@@ -2545,14 +2568,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             memberAccess = dataSourceMember.Name;
         }
-
-        var receiver = isStatic
-            ? fullyQualifiedType
-            : usesTestClassInstance
-                ? $"(({fullyQualifiedType})instance)"
-                : $"new {fullyQualifiedType}()";
-        var lambdaHeader = usesTestClassInstance ? "static instance =>" : "static () =>";
-        var metadataArgument = usesTestClassInstance ? "dataGeneratorMetadata, " : "";
 
         if (hasArguments)
         {
@@ -2577,6 +2592,43 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             writer.Append($"{helper}({metadataArgument}{lambdaHeader} {receiver}.{memberAccess})");
         }
+    }
+
+    /// <summary>
+    /// Whether the generated class can read the data source field or property directly: the member and its getter
+    /// are accessible from the test assembly, so not private or protected.
+    /// </summary>
+    private static bool IsAccessibleDataSourceMember(ISymbol member, Compilation compilation)
+    {
+        return compilation.IsSymbolAccessibleWithin(member, compilation.Assembly)
+            && (member is not IPropertySymbol property
+                || (property.GetMethod is { } getter && compilation.IsSymbolAccessibleWithin(getter, compilation.Assembly)));
+    }
+
+    /// <summary>
+    /// Whether a generated factory can read the data source field or property, directly or, for a private or
+    /// protected member, by reflection on its declaring type. That needs a declaring type that the generated class
+    /// can name without type parameters, a getter for a property, and a member type it can name when the factory
+    /// casts the value. Otherwise the attribute keeps its reflection fallback.
+    /// </summary>
+    private static bool CanReadDataSourceMember(ISymbol member, Compilation compilation)
+    {
+        if (member is IPropertySymbol { GetMethod: null } or IPropertySymbol { IsIndexer: true })
+        {
+            return false;
+        }
+
+        if (IsAccessibleDataSourceMember(member, compilation))
+        {
+            return true;
+        }
+
+        // EmitDataSourceFactoryInvocation casts the value for the async helpers, which take a typed delegate
+        var memberType = member is IPropertySymbol property ? property.Type : ((IFieldSymbol)member).Type;
+        var castsValue = IsAsyncEnumerable(memberType) || IsValueTask(memberType) || IsTask(memberType);
+        return compilation.IsSymbolAccessibleWithin(member.ContainingType, compilation.Assembly)
+            && !CodeGenerationHelpers.ContainsTypeParameter(member.ContainingType)
+            && (!castsValue || compilation.IsSymbolAccessibleWithin(memberType, compilation.Assembly));
     }
 
     private static bool IsAsyncEnumerable(ITypeSymbol type)

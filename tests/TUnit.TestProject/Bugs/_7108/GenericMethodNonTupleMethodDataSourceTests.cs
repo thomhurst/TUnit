@@ -109,6 +109,8 @@ public class GenericMethodNonTupleMethodDataSourceTests
 
     private static readonly int[] PrivateFieldRows = [21];
 
+    private static IEnumerable<int> PrivatePropertyRows => [31];
+
     public static IEnumerable<(int, int)> TupleParameterRows()
     {
         yield return (25, 26);
@@ -347,6 +349,14 @@ public class GenericMethodNonTupleMethodDataSourceTests
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
         await Assert.That(value).IsEqualTo((T)(object)21);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(PrivatePropertyRows))]
+    public async Task Private_Property_Data_Source<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)31);
     }
 
     [Test]
