@@ -15,6 +15,10 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<TestNugetPackageModule>]
 [DependsOn<GenerateVersionModule>]
 [DependsOn<CopyToLocalNuGetModule>]
+// Waits so that its native AOT publishes don't compete with the AOT test-app publish, which is on
+// the critical path. Where that module doesn't run (the Windows NuGet job), it is skipped, so this
+// doesn't wait.
+[DependsOn<PublishTestProjectAOTModule>]
 public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
 {
     protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
@@ -22,16 +26,6 @@ public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
             ? SkipDecision.Skip("Running on .NET Framework")
             : SkipDecision.DoNotSkip)
         .Build();
-
-    // On the 3-core macOS runner, running these native AOT publishes at the same time as the AOT
-    // test-app publish slowed both. There they run after it. Elsewhere they still overlap.
-    protected override void DeclareDependencies(IDependencyDeclaration deps)
-    {
-        if (OperatingSystem.IsMacOS())
-        {
-            deps.DependsOnOptional<PublishTestProjectAOTModule>();
-        }
-    }
 
     protected override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {

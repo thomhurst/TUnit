@@ -1,11 +1,12 @@
 ﻿using ModularPipelines.Attributes;
-using ModularPipelines.Modules;
 using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
 // The Reflection-mode engine tests, plus the tests that don't run per mode. They need no AOT app,
-// so they start as soon as the other test modules have freed the CPUs.
+// but they still wait for its publish: the publish is the critical path (RunEngineAotTestsModule
+// waits for it), and these tests start many TestProject processes. Running them alongside it
+// slowed the publish 2-5x on every runner OS.
 [NotInParallel("NetworkTests")]
 [DependsOn<RunAnalyzersTestsModule>]
 [DependsOn<RunUnitTestsModule>]
@@ -18,18 +19,8 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<RunPublicAPITestsModule>]
 [DependsOn<RunSourceGeneratorTestsModule>]
 [DependsOn<RunAssertionsCodeFixersTestsModule>]
+[DependsOn<PublishTestProjectAOTModule>]
 public class RunEngineTestsModule : EngineTestsModuleBase
 {
     protected override string TestMode => "Reflection";
-
-    // On the 3-core macOS runner, these tests overlapping the AOT test-app publish slowed both,
-    // and the publish took about 25 minutes instead of 7. There they wait for it, as they did before
-    // #7131. On Linux and Windows the overlap is cheap, so they still start early.
-    protected override void DeclareDependencies(IDependencyDeclaration deps)
-    {
-        if (OperatingSystem.IsMacOS())
-        {
-            deps.DependsOnOptional<PublishTestProjectAOTModule>();
-        }
-    }
 }
