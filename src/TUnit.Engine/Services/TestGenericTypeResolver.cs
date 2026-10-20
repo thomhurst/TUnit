@@ -483,12 +483,14 @@ internal sealed class TestGenericTypeResolver
 
         // A null value passed straight to a method type parameter infers object, as in the source
         // generator and the reflection invoker ([Arguments(null)] runs as Test<object>(null), #7120).
-        // A non-null value for the same type parameter takes precedence, as the invoker's does.
+        // A non-null value for the same type parameter takes precedence, as the invoker's does, unless it
+        // infers a value type, which cannot hold the null: [Arguments(1, null)] runs as Run<object>(1, null),
+        // not Run<int>(1, 0) (#7155). A boxed value's run-time type is never Nullable<T>.
         if (nullArgumentParameters is not null)
         {
             foreach (var nullArgumentParameter in nullArgumentParameters)
             {
-                if (!typeMapping.ContainsKey(nullArgumentParameter))
+                if (!typeMapping.TryGetValue(nullArgumentParameter, out var inferredType) || inferredType.IsValueType)
                 {
                     typeMapping[nullArgumentParameter] = typeof(object);
                 }
