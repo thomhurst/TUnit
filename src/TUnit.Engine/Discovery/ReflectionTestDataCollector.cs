@@ -1414,7 +1414,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // row. Any other source inferring types that are already instantiated is dropped, as the generator's
         // processedTypeCombinations does.
         // Row values bind to the data parameters only; the engine supplies any CancellationToken, wherever it
-        // is declared. The source generator skips tokens the same way when it infers from [Arguments] rows.
+        // is declared. The source generator skips tokens the same way when it infers from [Arguments] rows
+        // and from [MethodDataSource] tuple elements.
         ParameterInfo[]? dataParameters = null;
         foreach (var dataSource in dataSources)
         {
@@ -1443,7 +1444,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             if (dataSource is MethodDataSourceAttribute methodDataSource)
             {
-                AddInstantiation(InferTypesFromMethodDataSource(testClass, methodDataSource, parameters, genericParameterCount), methodDataSource);
+                dataParameters ??= Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
+                AddInstantiation(InferTypesFromMethodDataSource(testClass, methodDataSource, dataParameters, genericParameterCount), methodDataSource);
             }
         }
 
@@ -1564,8 +1566,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// constructor argument is the member name (<c>[MethodDataSource("Rows")]</c> and
     /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), looks for a static parameterless method of that name
     /// declared on the test class (or on <c>T</c>), and requires its declared return type to be
-    /// <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>. Each tuple element is matched against the test parameter
-    /// at the same position, including type arguments nested in generic parameter types.
+    /// <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>. Each tuple element is matched against the data parameter
+    /// at the same position, including type arguments nested in generic parameter types. The caller passes
+    /// the parameters without any CancellationToken, as the generator's <c>GetDataParameters</c> does.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source methods")]
     private static Type[]? InferTypesFromMethodDataSource(

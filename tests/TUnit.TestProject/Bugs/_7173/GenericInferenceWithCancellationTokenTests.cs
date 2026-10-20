@@ -43,4 +43,17 @@ public class GenericMethodInferenceWithCancellationTokenTests
         await Assert.That(name).IsEqualTo("one");
         await Assert.That(token.CanBeCanceled).IsTrue();
     }
+
+    // [GenerateGenericTest] sends the method through reflection mode's generic-method inference, which
+    // must also skip the token: inferring T = string here would add a Test<string> whose rows fail to cast.
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [MethodDataSource(nameof(FuncTupleRows))]
+    public async Task Func_Tuple_Row_Leading_Token_With_Generic_Test<T>(CancellationToken token, T value, string name)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)1);
+        await Assert.That(name).IsEqualTo("one");
+        await Assert.That(token.CanBeCanceled).IsTrue();
+    }
 }

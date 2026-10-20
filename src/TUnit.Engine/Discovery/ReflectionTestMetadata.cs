@@ -102,6 +102,9 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
         var dataParameterCount = parameters.Length - tokenCount;
 
+        // Index of the first trailing token; tokens before it sit among the data parameters.
+        var trailingTokensStart = parameters.Length - trailingTokenCount;
+
         Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
         {
             if (TestInvoker == null)
@@ -125,7 +128,8 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 var valuesEnd = argsWithToken.Length - trailingTokenCount;
                 for (var i = 0; i < valuesEnd; i++)
                 {
-                    argsWithToken[i] = i < isToken.Length && isToken[i] && i < parameters.Length - trailingTokenCount
+                    // Past trailingTokensStart the trailing array's extra values continue, not parameters.
+                    argsWithToken[i] = i < trailingTokensStart && isToken[i]
                         ? cancellationToken
                         : args[argIndex++];
                 }
