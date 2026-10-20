@@ -38,7 +38,7 @@ public class BoxIsEmptyAssertion<T> : Assertion<TUnit.Assertions.Tests.TestData.
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")}to satisfy IsEmpty";
+        return $"to {(_negated ? "not " : "")}satisfy IsEmpty";
     }
 }
 
@@ -71,7 +71,7 @@ public class BoxHoldsWithTAssertion<T> : Assertion<TUnit.Assertions.Tests.TestDa
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")}to satisfy Holds({_item})";
+        return $"to {(_negated ? "not " : "")}satisfy Holds({_item})";
     }
 }
 
@@ -108,7 +108,7 @@ public class PairHasKeyAssertion<TKey, TValue> : Assertion<TUnit.Assertions.Test
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")}to satisfy HasKey";
+        return $"to {(_negated ? "not " : "")}satisfy HasKey";
     }
 }
 
@@ -144,7 +144,7 @@ public class ShadowHoldsValueOfTypeAssertion<T, TOther> : Assertion<TUnit.Assert
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")}to satisfy HoldsValueOfType";
+        return $"to {(_negated ? "not " : "")}satisfy HoldsValueOfType";
     }
 }
 
@@ -182,7 +182,7 @@ public class ShadowIsDefaultOfWithTAssertion<T, T1> : Assertion<TUnit.Assertions
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")}to satisfy IsDefaultOf({_value})";
+        return $"to {(_negated ? "not " : "")}satisfy IsDefaultOf({_value})";
     }
 }
 
@@ -218,7 +218,7 @@ public class InnerIsSetAssertion<T, T1> : Assertion<TUnit.Assertions.Tests.TestD
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")}to satisfy IsSet";
+        return $"to {(_negated ? "not " : "")}satisfy IsSet";
     }
 }
 
@@ -249,7 +249,7 @@ public class BoxIsEmptyAssertion : Assertion<TUnit.Assertions.Tests.TestData.Box
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")}to satisfy IsEmpty";
+        return $"to {(_negated ? "not " : "")}satisfy IsEmpty";
     }
 }
 

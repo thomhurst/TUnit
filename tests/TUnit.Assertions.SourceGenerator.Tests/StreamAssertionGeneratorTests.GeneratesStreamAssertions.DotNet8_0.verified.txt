@@ -43,7 +43,7 @@ public class StreamCanReadAssertion : Assertion<System.IO.Stream>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be readable";
+        return $"to {(_negated ? "not " : "")}be readable";
     }
 }
 
@@ -79,7 +79,7 @@ public class StreamCanWriteAssertion : Assertion<System.IO.Stream>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be writable";
+        return $"to {(_negated ? "not " : "")}be writable";
     }
 }
 
@@ -115,7 +115,7 @@ public class StreamCanSeekAssertion : Assertion<System.IO.Stream>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be seekable";
+        return $"to {(_negated ? "not " : "")}be seekable";
     }
 }
 
@@ -151,7 +151,7 @@ public class StreamCanTimeoutAssertion : Assertion<System.IO.Stream>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} support timeout";
+        return $"to {(_negated ? "not " : "")}support timeout";
     }
 }
 

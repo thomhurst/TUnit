@@ -65,6 +65,47 @@ public class AssertionMethodGeneratorIncrementalTests
     }
 
     [Test]
+    public async Task EditAboveAttributesShouldNotRegenerate()
+    {
+        var tree = CSharpSyntaxTree.ParseText(DefaultSource);
+        var compilation1 = Fixture.CreateLibrary(tree);
+        var driver1 = TestHelper.GenerateTracked<AssertionMethodGenerator>(compilation1);
+
+        // Shifts every attribute's location without changing what it generates
+        var compilation2 = compilation1.ReplaceSyntaxTree(tree, CSharpSyntaxTree.ParseText("// A comment\n" + DefaultSource));
+        var driver2 = driver1.RunGenerators(compilation2);
+
+        await AssertUnchanged(driver2.GetRunResult().Results[0]);
+    }
+
+    [Test]
+    public async Task MissingMethodDiagnosticFollowsItsAttributeAfterAnEditAboveIt()
+    {
+        const string source =
+            """
+            using TUnit.Assertions.Attributes;
+
+            namespace MyTests;
+
+            [AssertionFrom(typeof(string), "DoesNotExist")]
+            public static partial class MissingAssertionExtensions
+            {
+            }
+            """;
+
+        var tree = CSharpSyntaxTree.ParseText(source);
+        var compilation1 = Fixture.CreateLibrary(tree);
+        var driver1 = TestHelper.GenerateTracked<AssertionMethodGenerator>(compilation1);
+
+        var tree2 = CSharpSyntaxTree.ParseText("// A comment\n" + source);
+        var driver2 = driver1.RunGenerators(compilation1.ReplaceSyntaxTree(tree, tree2));
+
+        var diagnostic = driver2.GetRunResult().Results[0].Diagnostics.Single(x => x.Id == "TU0001");
+        await Assert.That(diagnostic.Location.SourceTree).IsSameReferenceAs(tree2);
+        await Assert.That(diagnostic.Location.GetLineSpan().StartLinePosition.Line).IsEqualTo(5);
+    }
+
+    [Test]
     public async Task ModifyGenericAttributeShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));

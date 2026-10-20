@@ -38,7 +38,7 @@ public class CancellationTokenCanBeCanceledAssertion : Assertion<System.Threadin
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be cancellable";
+        return $"to {(_negated ? "not " : "")}be cancellable";
     }
 }
 
@@ -69,7 +69,7 @@ public class CancellationTokenIsCancellationRequestedAssertion : Assertion<Syste
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} have cancellation requested";
+        return $"to {(_negated ? "not " : "")}have cancellation requested";
     }
 }
 
