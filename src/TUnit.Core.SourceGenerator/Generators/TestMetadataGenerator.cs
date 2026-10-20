@@ -7191,10 +7191,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static bool IsMoreSpecificDataSourceOverload(IMethodSymbol candidate, IMethodSymbol other, int argumentCount, Compilation compilation)
     {
         // Only called for two overloads that both scored >= 0, and ScoreDataSourceOverload returns -1 when
-        // there are more arguments than parameters, so both have at least argumentCount parameters.
-        System.Diagnostics.Debug.Assert(
-            argumentCount <= candidate.Parameters.Length && argumentCount <= other.Parameters.Length,
-            "IsMoreSpecificDataSourceOverload needs overloads that accept every argument (score >= 0).");
+        // there are more arguments than parameters, so both have at least argumentCount parameters. Check it anyway:
+        // an exception here would surface as an opaque generator failure, and "not more specific" is a safe answer.
+        if (argumentCount > candidate.Parameters.Length || argumentCount > other.Parameters.Length)
+        {
+            return false;
+        }
 
         var anyDifferent = false;
         for (var i = 0; i < argumentCount; i++)
