@@ -74,20 +74,26 @@ jobs:
       - name: Export version env vars
         shell: bash
         # Passed through env, not expanded into the script: InformationalVersion carries the branch
-        # name, which a workflow_dispatch run takes from whatever branch was selected.
+        # name, which a workflow_dispatch run takes from whatever branch was selected. The GV_ prefix
+        # matters: Windows environment names are case-insensitive, so GITVERSION_SEMVER would merge
+        # with the action's own GitVersion_SemVer and bash would see only that spelling.
         env:
-          GITVERSION_SEMVER: ${{ steps.gitversion.outputs.semVer }}
-          GITVERSION_ASSEMBLYSEMVER: ${{ steps.gitversion.outputs.assemblySemVer }}
-          GITVERSION_ASSEMBLYSEMFILEVER: ${{ steps.gitversion.outputs.assemblySemFileVer }}
-          GITVERSION_INFORMATIONALVERSION: ${{ steps.gitversion.outputs.informationalVersion }}
-          GITVERSION_FULLSEMVER: ${{ steps.gitversion.outputs.fullSemVer }}
+          GV_SEMVER: ${{ steps.gitversion.outputs.semVer }}
+          GV_ASSEMBLYSEMVER: ${{ steps.gitversion.outputs.assemblySemVer }}
+          GV_ASSEMBLYSEMFILEVER: ${{ steps.gitversion.outputs.assemblySemFileVer }}
+          GV_INFORMATIONALVERSION: ${{ steps.gitversion.outputs.informationalVersion }}
+          GV_FULLSEMVER: ${{ steps.gitversion.outputs.fullSemVer }}
         run: |
+          if [ -z "$GV_SEMVER" ]; then
+            echo "::error::GitVersion produced no semVer; Version would be empty."
+            exit 1
+          fi
           {
-            echo "Version=$GITVERSION_SEMVER"
-            echo "AssemblyVersion=$GITVERSION_ASSEMBLYSEMVER"
-            echo "FileVersion=$GITVERSION_ASSEMBLYSEMFILEVER"
-            echo "InformationalVersion=$GITVERSION_INFORMATIONALVERSION"
-            echo "PackageVersion=$GITVERSION_FULLSEMVER"
+            echo "Version=$GV_SEMVER"
+            echo "AssemblyVersion=$GV_ASSEMBLYSEMVER"
+            echo "FileVersion=$GV_ASSEMBLYSEMFILEVER"
+            echo "InformationalVersion=$GV_INFORMATIONALVERSION"
+            echo "PackageVersion=$GV_FULLSEMVER"
           } >> "$GITHUB_ENV"
 
       # Every library project (packing reads the Roslyn variants from their own bin folders), the
