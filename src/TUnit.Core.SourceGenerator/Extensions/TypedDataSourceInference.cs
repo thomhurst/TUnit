@@ -59,5 +59,5 @@ internal static class TypedDataSourceInference
     public static bool IsTypedDataSourceBase(INamedTypeSymbol baseType)
         => baseType.IsGenericType
             && baseType.OriginalDefinition.Name is "DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute"
-            && baseType.OriginalDefinition.ContainingNamespace?.ToDisplayString().Contains("TUnit.Core") == true;
+            && baseType.OriginalDefinition.ContainingNamespace?.ToDisplayString() == "TUnit.Core";
 }
