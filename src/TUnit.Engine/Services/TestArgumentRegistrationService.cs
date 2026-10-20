@@ -27,7 +27,7 @@ internal sealed class TestArgumentRegistrationService
         var testDetails = testContext.Metadata.TestDetails;
         if (testDetails.TestClassArguments.Length == 0 &&
             testDetails.TestMethodArguments.Length == 0 &&
-            testDetails.FailedDataRowObjects.Length == 0 &&
+            testDetails.UnreceivedDataRowObjects.Length == 0 &&
             !PropertyInjectionCache.GetOrCreatePlan(testDetails.ClassType).HasProperties)
         {
             // Nothing to register, so no user code runs here — skip the AsyncLocal write.

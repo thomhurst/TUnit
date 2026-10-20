@@ -75,12 +75,37 @@ public class InstanceMethodDataSourceDisposingFixtureTests(InstanceSourceFixture
     public void Dispose() => fixture.Dispose();
 }
 
+public sealed class LentClassRowDisposable : IDisposable
+{
+    public static ConcurrentBag<LentClassRowDisposable> Created { get; } = [];
+
+    public LentClassRowDisposable() => Created.Add(this);
+
+    public bool IsDisposed { get; private set; }
+
+    public void Dispose() => IsDisposed = true;
+}
+
+// The same, but the class does not dispose its fixture. The temporary instance's fixture must still be
+// disposed: the first test built from the class row tracks it without receiving it.
+[EngineTest(ExpectedResult.Pass)]
+[ClassDataSource<LentClassRowDisposable>(Shared = SharedType.None)]
+public class InstanceMethodDataSourceNonDisposingClassTests(LentClassRowDisposable fixture)
+{
+    public IEnumerable<int> Rows() => [1, 2];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(Rows))]
+    public async Task Run(int value) => await Assert.That(fixture.IsDisposed).IsFalse();
+}
+
 [EngineTest(ExpectedResult.Pass)]
 public class FirstClassDataFetchObserverTests
 {
     [Test]
     [DependsOn(typeof(NonSharedClassDataTests))]
     [DependsOn(typeof(NonSharedClassDataWithMethodRowsTests))]
+    [DependsOn(typeof(InstanceMethodDataSourceNonDisposingClassTests))]
     public async Task Every_Non_Shared_Class_Data_Instance_Belongs_To_A_Test_And_Is_Disposed()
     {
         // One instance per test: two tests, then two method rows run twice each.
@@ -89,5 +114,9 @@ public class FirstClassDataFetchObserverTests
 
         await Assert.That(MethodRowsClassRowDisposable.Created.Count).IsEqualTo(4);
         await Assert.That(MethodRowsClassRowDisposable.Created.All(x => x.IsDisposed)).IsTrue();
+
+        // One instance for the temporary instance that reads the method rows, then one per test.
+        await Assert.That(LentClassRowDisposable.Created.Count).IsEqualTo(3);
+        await Assert.That(LentClassRowDisposable.Created.All(x => x.IsDisposed)).IsTrue();
     }
 }
