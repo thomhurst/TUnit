@@ -2331,12 +2331,16 @@ namespace .Helpers
         public static .<<.<object?[]?>>> FromInstanceAsyncEnumerable<T>(.DataGeneratorMetadata dataGeneratorMetadata, <object, .<T>> invoke) { }
         [.(typeof(..<FromInstanceEnumerable>d__6))]
         public static .<<.<object?[]?>>> FromInstanceEnumerable(.DataGeneratorMetadata dataGeneratorMetadata, <object, object?> invoke) { }
+        [.(typeof(..<FromInstanceRuntimeValue>d__11))]
+        public static .<<.<object?[]?>>> FromInstanceRuntimeValue(.DataGeneratorMetadata dataGeneratorMetadata, <object, object?> invoke) { }
         [.(typeof(..<FromInstanceTask>d__7<T>))]
         public static .<<.<object?[]?>>> FromInstanceTask<T>(.DataGeneratorMetadata dataGeneratorMetadata, <object, .<T>> invoke) { }
         [.(typeof(..<FromInstanceValue>d__5))]
         public static .<<.<object?[]?>>> FromInstanceValue(.DataGeneratorMetadata dataGeneratorMetadata, <object, object?> invoke) { }
         [.(typeof(..<FromInstanceValueTask>d__8<T>))]
         public static .<<.<object?[]?>>> FromInstanceValueTask<T>(.DataGeneratorMetadata dataGeneratorMetadata, <object, .<T>> invoke) { }
+        [.(typeof(..<FromRuntimeValue>d__10))]
+        public static .<<.<object?[]?>>> FromRuntimeValue(.DataGeneratorMetadata dataGeneratorMetadata, <object?> invoke) { }
         [.(typeof(..<FromTask>d__2<T>))]
         public static .<<.<object?[]?>>> FromTask<T>(<.<T>> invoke) { }
         [.(typeof(..<FromValue>d__0))]

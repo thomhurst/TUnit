@@ -269,6 +269,33 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             yield break;
         }
 
+        var hasAnyItems = false;
+        await foreach (var row in GetRowsFromRuntimeValueAsync(methodResult, dataGeneratorMetadata))
+        {
+            hasAnyItems = true;
+            yield return row;
+        }
+
+        // If the source was empty, yield one empty result like NoDataSource does
+        // unless SkipIfEmpty is true, in which case we yield nothing (test will be skipped)
+        if (!hasAnyItems && !SkipIfEmpty)
+        {
+            yield return () => Task.FromResult<object?[]?>([]);
+        }
+    }
+
+    /// <summary>
+    /// Turns a data source's value into rows by its runtime type: an <see cref="IAsyncEnumerable{T}"/>, a
+    /// <see cref="Task{TResult}"/> or <see cref="ValueTask{TResult}"/> (awaited, then treated like its result), an
+    /// <see cref="System.Collections.IEnumerable"/> other than a string or tuple (one row per item), or a single row.
+    /// Used by the reflection fallback above and by the source-generated factory for a field, or a private or protected
+    /// property, whose declared type does not say which of these it holds, so both read such a member the same way.
+    /// An empty source yields nothing; the caller decides whether that becomes an empty row.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
+    internal static async IAsyncEnumerable<Func<Task<object?[]?>>> GetRowsFromRuntimeValueAsync(object methodResult, DataGeneratorMetadata dataGeneratorMetadata)
+    {
         // ValueTask<T> is neither a Task nor an IEnumerable, so normalise it to Task<T> and let
         // the Task branch below await it, as the source-generated Factory does.
         if (TryConvertValueTaskToTask(methodResult) is { } valueTaskAsTask)
@@ -284,21 +311,12 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // If it's IAsyncEnumerable, handle it specially
         if (IsAsyncEnumerable(methodResult.GetType()))
         {
-            var hasAnyItems = false;
             await foreach (var item in ConvertToAsyncEnumerable(methodResult))
             {
-                hasAnyItems = true;
                 yield return async () =>
                 {
                     return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
                 };
-            }
-
-            // If the async enumerable was empty, yield one empty result like NoDataSource does
-            // unless SkipIfEmpty is true, in which case we yield nothing (test will be skipped)
-            if (!hasAnyItems && !SkipIfEmpty)
-            {
-                yield return () => Task.FromResult<object?[]?>([]);
             }
         }
         // If it's Task<IEnumerable>
@@ -309,21 +327,12 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
             if (taskResult is System.Collections.IEnumerable enumerable and not string && !DataSourceHelpers.IsTuple(taskResult))
             {
-                var hasAnyItems = false;
                 foreach (var item in enumerable)
                 {
-                    hasAnyItems = true;
                     yield return async () =>
                     {
                         return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
                     };
-                }
-
-                // If the enumerable was empty, yield one empty result like NoDataSource does
-                // unless SkipIfEmpty is true, in which case we yield nothing (test will be skipped)
-                if (!hasAnyItems && !SkipIfEmpty)
-                {
-                    yield return () => Task.FromResult<object?[]?>([]);
                 }
             }
             else
@@ -338,18 +347,9 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // Tuples implement IEnumerable but should be treated as single values
         else if (methodResult is System.Collections.IEnumerable enumerable and not string && !DataSourceHelpers.IsTuple(methodResult))
         {
-            var hasAnyItems = false;
             foreach (var item in enumerable)
             {
-                hasAnyItems = true;
                 yield return () => Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
-            }
-
-            // If the enumerable was empty, yield one empty result like NoDataSource does
-            // unless SkipIfEmpty is true, in which case we yield nothing (test will be skipped)
-            if (!hasAnyItems && !SkipIfEmpty)
-            {
-                yield return () => Task.FromResult<object?[]?>([]);
             }
         }
         else
@@ -371,12 +371,16 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     // throw on SingleOrDefault.
     //
     // When any argument is null it has no runtime type, so it cannot be expressed in the binder's
-    // Type[]; we fall back to a name-only single-overload lookup (handled by the caller).
+    // Type[]. The overloads are then scored the way the source generator scores them (ScoreArguments):
+    // a null needs a reference or Nullable<T> parameter, other arguments may use numeric widening,
+    // missing trailing parameters must be optional or a CancellationToken, and exact-count overloads and
+    // exact argument types rank higher. A single best overload is used. Otherwise we fall back to the
+    // caller's name-only lookup.
     //
     // With zero arguments the empty Type[] flows through the same binder path and selects the
     // parameterless overload directly — including when the name is shared with other-arity
-    // overloads, which the caller's name-only GetMethod(name, flags) would treat as ambiguous
-    // and silently return null for.
+    // overloads, which the caller's name-only GetMethod(name, flags) would reject as ambiguous
+    // with an AmbiguousMatchException.
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
     private MethodInfo? ResolveDataSourceMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType)
     {
@@ -392,8 +396,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             if (argumentType is null)
             {
                 // A null argument has no runtime type the binder can match on.
-                // Fall back to the name-only lookup performed by the caller.
-                return null;
+                return ResolveDataSourceMethodWithNullArgument(targetType, arguments);
             }
 
             argumentTypes[i] = argumentType;
@@ -402,7 +405,190 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // Let the runtime binder pick the best overload for these exact argument types.
         // Ambiguous matches surface as AmbiguousMatchException (genuinely ambiguous code),
         // never as the spurious SingleOrDefault throw the old scan produced.
-        return targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags, binder: null, argumentTypes, modifiers: null);
+        // Generic method definitions are skipped: the Arguments cannot supply their type arguments, so
+        // IEnumerable<int> Rows() is used rather than an ambiguous match with IEnumerable<T> Rows<T>(),
+        // as the source generator does.
+#if NET
+        return targetType.GetMethod(MethodNameProvidingDataSource, genericParameterCount: 0, BindingFlags, binder: null, argumentTypes, modifiers: null);
+#else
+        List<MethodBase>? candidates = null;
+        foreach (var method in targetType.GetMethods(BindingFlags))
+        {
+            if (method.Name == MethodNameProvidingDataSource && !method.IsGenericMethodDefinition)
+            {
+                (candidates ??= []).Add(method);
+            }
+        }
+
+        return candidates is null
+            ? null
+            : (MethodInfo?)Type.DefaultBinder.SelectMethod(BindingFlags, candidates.ToArray(), argumentTypes, modifiers: null);
+#endif
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
+    private MethodInfo? ResolveDataSourceMethodWithNullArgument([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType, object?[] arguments)
+    {
+        var bestScore = -1;
+        var best = new List<MethodInfo>();
+        foreach (var method in targetType.GetMethods(BindingFlags))
+        {
+            if (method.Name != MethodNameProvidingDataSource || method.IsGenericMethodDefinition)
+            {
+                continue;
+            }
+
+            var score = ScoreArguments(method.GetParameters(), arguments);
+            if (score < 0 || score < bestScore)
+            {
+                continue;
+            }
+
+            if (score > bestScore)
+            {
+                best.Clear();
+                bestScore = score;
+            }
+
+            best.Add(method);
+        }
+
+        // On a tie, the overload with the more specific parameter types wins, as with the binder and the source
+        // generator: Rows(string?, long) beats Rows(string?, object) for { null, 20 }.
+        foreach (var candidate in best)
+        {
+            var mostSpecific = true;
+            foreach (var other in best)
+            {
+                if (!ReferenceEquals(candidate, other) && !IsMoreSpecific(candidate.GetParameters(), other.GetParameters(), arguments.Length))
+                {
+                    mostSpecific = false;
+                    break;
+                }
+            }
+
+            if (mostSpecific)
+            {
+                return candidate;
+            }
+        }
+
+        // Still ambiguous, or nothing accepts the arguments: the caller's name-only lookup reports it
+        return null;
+    }
+
+    private static bool IsMoreSpecific(ParameterInfo[] candidate, ParameterInfo[] other, int argumentCount)
+    {
+        // Only called for overloads that ScoreArguments accepted, and it rejects any overload with fewer
+        // parameters than arguments, so both have at least argumentCount parameters. Check it anyway, as the
+        // generator's IsMoreSpecificDataSourceOverload does, so a broken invariant cannot index past the end.
+        if (argumentCount > candidate.Length || argumentCount > other.Length)
+        {
+            return false;
+        }
+
+        var anyDifferent = false;
+        for (var i = 0; i < argumentCount; i++)
+        {
+            var candidateType = candidate[i].ParameterType;
+            var otherType = other[i].ParameterType;
+            if (candidateType == otherType)
+            {
+                continue;
+            }
+
+            var otherUnderlying = Nullable.GetUnderlyingType(otherType) ?? otherType;
+            if (!otherType.IsAssignableFrom(candidateType)
+                && candidateType != otherUnderlying
+                && !IsNumericWidening(candidateType, otherUnderlying))
+            {
+                return false;
+            }
+
+            anyDifferent = true;
+        }
+
+        return anyDifferent;
+    }
+
+    /// <summary>
+    /// Scores how well a method accepts <paramref name="arguments"/>, as the source generator's
+    /// <c>ScoreDataSourceOverload</c> does: -1 when it cannot be called with them, otherwise higher for exact
+    /// argument types. An overload with one parameter per argument outranks one that needs missing optional or
+    /// <see cref="CancellationToken"/> parameters filled in by <see cref="BuildInvokeArgs"/>.
+    /// </summary>
+    private static int ScoreArguments(ParameterInfo[] parameters, object?[] arguments)
+    {
+        if (arguments.Length > parameters.Length)
+        {
+            return -1;
+        }
+
+        // Each argument adds at most 2, so this base puts every exact-count overload above every other one
+        var score = arguments.Length == parameters.Length ? 2 * arguments.Length + 1 : 0;
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            var parameterType = parameters[i].ParameterType;
+            if (i >= arguments.Length)
+            {
+                if (!parameters[i].HasDefaultValue && parameterType != typeof(CancellationToken))
+                {
+                    return -1;
+                }
+
+                continue;
+            }
+
+            if (arguments[i] is not { } argument)
+            {
+                if (parameterType.IsValueType && Nullable.GetUnderlyingType(parameterType) is null)
+                {
+                    return -1;
+                }
+
+                continue;
+            }
+
+            var argumentType = argument.GetType();
+            var underlyingParameterType = Nullable.GetUnderlyingType(parameterType) ?? parameterType;
+            if (argumentType == parameterType)
+            {
+                score += 2;
+            }
+            else if (parameterType.IsInstanceOfType(argument)
+                     || argumentType == underlyingParameterType
+                     || IsNumericWidening(argumentType, parameterType))
+            {
+                score += 1;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
+        return score;
+    }
+
+    // The implicit numeric conversions C# allows, except to decimal, which MethodInfo.Invoke cannot apply.
+    // Invoke cannot widen into Nullable<T> either (an int argument for a long? parameter throws), so callers
+    // pass the parameter type itself, not its underlying type.
+    private static bool IsNumericWidening(Type from, Type to)
+    {
+        var target = Type.GetTypeCode(to);
+        return Type.GetTypeCode(from) switch
+        {
+            TypeCode.SByte => target is TypeCode.Int16 or TypeCode.Int32 or TypeCode.Int64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.Byte => target is TypeCode.Int16 or TypeCode.UInt16 or TypeCode.Int32 or TypeCode.UInt32 or TypeCode.Int64 or TypeCode.UInt64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.Int16 => target is TypeCode.Int32 or TypeCode.Int64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.UInt16 => target is TypeCode.Int32 or TypeCode.UInt32 or TypeCode.Int64 or TypeCode.UInt64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.Char => target is TypeCode.UInt16 or TypeCode.Int32 or TypeCode.UInt32 or TypeCode.Int64 or TypeCode.UInt64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.Int32 => target is TypeCode.Int64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.UInt32 => target is TypeCode.Int64 or TypeCode.UInt64 or TypeCode.Single or TypeCode.Double,
+            TypeCode.Int64 or TypeCode.UInt64 => target is TypeCode.Single or TypeCode.Double,
+            TypeCode.Single => target is TypeCode.Double,
+            _ => false
+        } && !to.IsEnum && !from.IsEnum;
     }
 
     // MethodInfo.Invoke does not auto-fill optional parameters the way a C# call site does.

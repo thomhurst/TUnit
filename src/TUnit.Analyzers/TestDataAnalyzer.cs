@@ -434,14 +434,19 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             // An overload that takes exactly the Arguments wins over one that also takes an injected trailing
             // CancellationToken, as it does at runtime, whatever order the overloads are declared in.
+            // A generic data method is skipped while a non-generic one exists: neither mode can call it without
+            // type arguments, so IEnumerable<int> Rows() is used over IEnumerable<T> Rows<T>().
             var dataSourceMethod = methodSymbols
                                                .FirstOrDefault(methodSymbol =>
                                                    methodSymbol.Name == methodName &&
+                                                   !methodSymbol.IsGenericMethod &&
                                                    ArgumentsMatchParameterTypes(context, argumentsForMethodCall, methodSymbol.Parameters.Select(p => p.Type)))
                                            ?? methodSymbols
                                                .FirstOrDefault(methodSymbol =>
                                                    methodSymbol.Name == methodName &&
+                                                   !methodSymbol.IsGenericMethod &&
                                                    ArgumentsMatchParameterTypes(context, argumentsForMethodCall, methodSymbol.Parameters.WithoutCancellationTokenParameter().Select(p => p.Type)))
+                                           ?? methodSymbols.FirstOrDefault(x => x.Name == methodName && !x.IsGenericMethod)
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
 
             // If no method found, check for properties or fields
