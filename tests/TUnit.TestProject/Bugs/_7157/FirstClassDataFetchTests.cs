@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._7157;
@@ -99,6 +100,49 @@ public class InstanceMethodDataSourceNonDisposingClassTests(LentClassRowDisposab
     public async Task Run(int value) => await Assert.That(fixture.IsDisposed).IsFalse();
 }
 
+public sealed class InitializingLentClassRowFixture : IAsyncInitializer, IDisposable
+{
+    public static ConcurrentBag<InitializingLentClassRowFixture> Created { get; } = [];
+
+    public InitializingLentClassRowFixture() => Created.Add(this);
+
+    public bool IsInitialized { get; private set; }
+
+    public bool IsDisposed { get; private set; }
+
+    public Task InitializeAsync()
+    {
+        if (IsDisposed)
+        {
+            throw new ObjectDisposedException(nameof(InitializingLentClassRowFixture));
+        }
+
+        IsInitialized = true;
+        return Task.CompletedTask;
+    }
+
+    public void Dispose() => IsDisposed = true;
+}
+
+// The temporary instance's fixture is tracked by the first test for disposal only. Execution must not
+// initialize it: the temporary instance has already disposed it, and no test uses it.
+[EngineTest(ExpectedResult.Pass)]
+[ClassDataSource<InitializingLentClassRowFixture>(Shared = SharedType.None)]
+public class InstanceMethodDataSourceInitializingFixtureTests(InitializingLentClassRowFixture fixture) : IDisposable
+{
+    public IEnumerable<int> Rows() => [1, 2];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(Rows))]
+    public async Task Run(int value)
+    {
+        await Assert.That(fixture.IsInitialized).IsTrue();
+        await Assert.That(fixture.IsDisposed).IsFalse();
+    }
+
+    public void Dispose() => fixture.Dispose();
+}
+
 [EngineTest(ExpectedResult.Pass)]
 public class FirstClassDataFetchObserverTests
 {
@@ -106,6 +150,7 @@ public class FirstClassDataFetchObserverTests
     [DependsOn(typeof(NonSharedClassDataTests))]
     [DependsOn(typeof(NonSharedClassDataWithMethodRowsTests))]
     [DependsOn(typeof(InstanceMethodDataSourceNonDisposingClassTests))]
+    [DependsOn(typeof(InstanceMethodDataSourceInitializingFixtureTests))]
     public async Task Every_Non_Shared_Class_Data_Instance_Belongs_To_A_Test_And_Is_Disposed()
     {
         // One instance per test: two tests, then two method rows run twice each.
@@ -118,5 +163,10 @@ public class FirstClassDataFetchObserverTests
         // One instance for the temporary instance that reads the method rows, then one per test.
         await Assert.That(LentClassRowDisposable.Created.Count).IsEqualTo(3);
         await Assert.That(LentClassRowDisposable.Created.All(x => x.IsDisposed)).IsTrue();
+
+        // The temporary instance's fixture is disposed but never initialized; each test's is both.
+        await Assert.That(InitializingLentClassRowFixture.Created.Count).IsEqualTo(3);
+        await Assert.That(InitializingLentClassRowFixture.Created.Count(x => x.IsInitialized)).IsEqualTo(2);
+        await Assert.That(InitializingLentClassRowFixture.Created.All(x => x.IsDisposed)).IsTrue();
     }
 }
