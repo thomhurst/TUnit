@@ -2671,4 +2671,56 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task Non_Generic_Data_Method_Is_Used_Over_A_Generic_One_Declared_First()
+    {
+        // Neither mode can call Data<T>() without type arguments, so the rows come from Data().
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
+                    public void MyTest(string value)
+                    {
+                    }
+
+                    public static IEnumerable<T> Data<T>() => [];
+                    public static IEnumerable<int> Data() => [1];
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("int", "string")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Data_Method_Without_A_Non_Generic_Sibling_Is_Still_Found()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data<T>() => [1];
+                }
+                """
+            );
+    }
 }
