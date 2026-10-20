@@ -3485,11 +3485,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     const string cancellationTokenArgument = "context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None";
 
-                    // When optional leading parameters are omitted, the trailing array is passed by
-                    // name. A positional argument cannot follow it (CS8323), so name the token too.
-                    // When any parameter is left out (e.g. an omitted trailing optional), a positional
-                    // token would bind to the first omitted slot, so it needs the name as well.
-                    var cancellationTokenName = (hasParams && argCount < lastIndex) || argsToPass.Count < parametersFromArgs.Length
+                    // Omitted optionals normally get their defaults passed explicitly. When a default
+                    // cannot be written out, the parameter is left out: a positional token would then
+                    // bind to the first omitted slot, and a positional argument cannot follow the
+                    // trailing array passed by name (CS8323), so the token needs its name as well.
+                    var cancellationTokenName = argsToPass.Count < parametersFromArgs.Length
                         ? GetCancellationTokenParameterName(parametersFromArgs[lastIndex])
                         : null;
 
