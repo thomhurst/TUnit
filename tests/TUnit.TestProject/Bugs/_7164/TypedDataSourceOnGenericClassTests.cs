@@ -103,6 +103,51 @@ public class TwoTypeArgumentTypedSourceOnGenericClass<T>
     }
 }
 
+// A source inferring types that an earlier source instantiated is dropped, as on a non-generic class
+// (#7092), in both modes.
+
+// Two typed sources inferring int, with a method [GenerateGenericTest(typeof(int))]: the first source keeps
+// Run<int>, so Run<int>(42) only.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(string))]
+public class DuplicateTypedSourcesOnGenericClass<T>
+{
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [IntSource7164]
+    [OtherIntSource7164]
+    public async Task Run<TMethod>(TMethod arg)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(arg).IsEqualTo((TMethod)(object)42);
+    }
+}
+
+// A class row with a method row and a typed source inferring the same method type: the [Arguments] row comes
+// first and keeps Run<int>, so Run<int>(2) only.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+public class DuplicateArgumentsAndTypedSourceOnClassRow<T>(T value)
+{
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [Arguments(2)]
+    [IntSource7164]
+    public async Task Run<TMethod>(TMethod arg)
+    {
+        await Assert.That(value).IsEqualTo((T)(object)1);
+        await Assert.That(arg).IsEqualTo((TMethod)(object)2);
+    }
+}
+
+public class OtherIntSource7164 : DataSourceGeneratorAttribute<int>
+{
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata metadata)
+    {
+        yield return () => 43;
+    }
+}
+
 public class IntSource7164 : DataSourceGeneratorAttribute<int>
 {
     protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata metadata)

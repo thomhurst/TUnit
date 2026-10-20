@@ -16,6 +16,8 @@ public class Issue7164Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypedSourceOnClassRow", new[] { "Run<int>(42)" })]
     [Arguments("ClassRowTypedSourceAndMethodGenerateGenericTest", new[] { "Run<int>(42)", "Run<long>(42)" })]
     [Arguments("TwoTypeArgumentTypedSourceOnGenericClass", new[] { "Run<int, string>(42, x)" })]
+    [Arguments("DuplicateTypedSourcesOnGenericClass", new[] { "Run<int>(42)" })]
+    [Arguments("DuplicateArgumentsAndTypedSourceOnClassRow", new[] { "Run<int>(2)" })]
     public async Task Typed_Source_Infers_Method_Type_Arguments_On_Generic_Class(string className, string[] expectedTestNames)
     {
         await RunTestsWithFilter(

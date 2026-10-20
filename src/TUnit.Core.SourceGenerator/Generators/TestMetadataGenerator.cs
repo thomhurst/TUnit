@@ -912,7 +912,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         existing.AddRow(specificAttr, isClassRow);
                     }
 
-                    if (methodRow is not null)
+                    // Only a method [Arguments] row joins. Any other method source (a typed source or
+                    // [MethodDataSource]) inferring types an earlier source instantiated is dropped, as on a
+                    // non-generic class and in reflection mode's AddInstantiation.
+                    if (methodRow?.AttributeClass?.Name == "ArgumentsAttribute")
                     {
                         existing.AddRow(methodRow, isClassRow: false);
                     }
