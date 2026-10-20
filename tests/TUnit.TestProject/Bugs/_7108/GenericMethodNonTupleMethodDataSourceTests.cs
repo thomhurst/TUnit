@@ -210,6 +210,46 @@ public class GenericMethodNonTupleMethodDataSourceTests
         yield return cancellationToken.CanBeCanceled ? -value : value;
     }
 
+    // A generic data method declared first cannot be called without type arguments, so both modes use the
+    // non-generic overload. Inferring T from the generic one's open T emitted code that did not compile.
+    public static IEnumerable<T> GenericProviderRows<T>()
+    {
+        yield break;
+    }
+
+    public static IEnumerable<int> GenericProviderRows()
+    {
+        yield return 27;
+    }
+
+    // Reflection cannot pass an int to a decimal parameter, so both modes call the object overload for 28,
+    // although C# would convert it
+    public static IEnumerable<string> ObjectOrDecimalRows(object value)
+    {
+        yield return value.ToString()!;
+    }
+
+    public static IEnumerable<decimal> ObjectOrDecimalRows(decimal value)
+    {
+        yield return value;
+    }
+
+    [Test]
+    [MethodDataSource(nameof(GenericProviderRows))]
+    public async Task Generic_Data_Method_Overload_Is_Skipped<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)27);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ObjectOrDecimalRows), Arguments = new object[] { 28 })]
+    public async Task Decimal_Overload_Is_Not_Chosen_For_An_Int_Argument<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(value).IsEqualTo((T)(object)"28");
+    }
+
     [Test]
     [MethodDataSource(nameof(FuncRows))]
     public async Task Func_Row<T>(T value)

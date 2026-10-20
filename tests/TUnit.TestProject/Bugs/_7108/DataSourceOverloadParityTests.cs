@@ -185,6 +185,50 @@ public class DataSourceOverloadParityTests
         yield return (expected, "Token(string, int, CancellationToken)");
     }
 
+    // C# converts an int to decimal or long?, but reflection's binder and MethodInfo.Invoke cannot, so the object
+    // overload declared first wins in both modes
+    public static IEnumerable<(string, string)> ObjectOrDecimal(string expected, object value)
+    {
+        yield return (expected, "ObjectOrDecimal(string, object)");
+    }
+
+    public static IEnumerable<(string, string)> ObjectOrDecimal(string expected, decimal value)
+    {
+        yield return (expected, "ObjectOrDecimal(string, decimal)");
+    }
+
+    public static IEnumerable<(string, string)> ObjectOrNullableLong(string expected, object value)
+    {
+        yield return (expected, "ObjectOrNullableLong(string, object)");
+    }
+
+    public static IEnumerable<(string, string)> ObjectOrNullableLong(string expected, long? value)
+    {
+        yield return (expected, "ObjectOrNullableLong(string, long?)");
+    }
+
+    public static IEnumerable<(string, string)> NullObjectOrNullableLong(string expected, string? text, object value)
+    {
+        yield return (expected, "NullObjectOrNullableLong(string, string?, object)");
+    }
+
+    public static IEnumerable<(string, string)> NullObjectOrNullableLong(string expected, string? text, long? value)
+    {
+        yield return (expected, "NullObjectOrNullableLong(string, string?, long?)");
+    }
+
+    // A generic method definition declared first takes the same parameters, but reflection cannot invoke it
+    // without type arguments, so both modes call the non-generic overload
+    public static IEnumerable<(string, string)> GenericFirst<T>(string expected)
+    {
+        yield return (expected, "GenericFirst<T>(string)");
+    }
+
+    public static IEnumerable<(string, string)> GenericFirst(string expected)
+    {
+        yield return (expected, "GenericFirst(string)");
+    }
+
     [Test]
     [MethodDataSource(nameof(Count), Arguments = new object[] { "Count(string)" })]
     [MethodDataSource(nameof(Count), Arguments = new object[] { "Count(string, int)", 1 })]
@@ -203,6 +247,9 @@ public class DataSourceOverloadParityTests
     // Loose values for a params parameter are rejected by TUnit0001, so the array is passed as one argument
     [MethodDataSource(nameof(Params), Arguments = new object[] { "Params(string, params int[])", new[] { 1, 2 } })]
     [MethodDataSource(nameof(Params), Arguments = new object[] { "Params(string, int)", 1 })]
+    [MethodDataSource(nameof(ObjectOrDecimal), Arguments = new object[] { "ObjectOrDecimal(string, object)", 1 })]
+    [MethodDataSource(nameof(ObjectOrNullableLong), Arguments = new object[] { "ObjectOrNullableLong(string, object)", 1 })]
+    [MethodDataSource(nameof(GenericFirst), Arguments = new object[] { "GenericFirst(string)" })]
     public async Task Chosen_Overload(string expected, string chosen)
     {
         await Assert.That(chosen).IsEqualTo(expected);
@@ -215,6 +262,7 @@ public class DataSourceOverloadParityTests
     [MethodDataSource(nameof(Null), Arguments = new object?[] { "Null(string, string?)", null })]
     [MethodDataSource(nameof(NullToNullable), Arguments = new object?[] { "NullToNullable(string, int?)", null })]
     [MethodDataSource(nameof(NullTie), Arguments = new object?[] { "NullTie(string, string?, long)", null, 1 })]
+    [MethodDataSource(nameof(NullObjectOrNullableLong), Arguments = new object?[] { "NullObjectOrNullableLong(string, string?, object)", null, 1 })]
     [MethodDataSource(nameof(NullOptional), Arguments = new object?[] { "NullOptional(string, string?, int)", null })]
     [MethodDataSource(nameof(Optional), Arguments = new object[] { "Optional(string, string, int)", "a" })]
     [MethodDataSource(nameof(Token), Arguments = new object[] { "Token(string, int, CancellationToken)", 1 })]

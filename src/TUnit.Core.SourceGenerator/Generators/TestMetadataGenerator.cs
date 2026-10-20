@@ -7028,7 +7028,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     ? default
                     : compilation.ClassifyCommonConversion(argumentType, parameter.Type);
 
-                value = conversion is { IsImplicit: true } && (conversion.IsNumeric || conversion.IsNullable)
+                value = IsInvokeConversion(conversion, argumentType, parameter.Type) && (conversion.IsNumeric || conversion.IsNullable)
                     ? $"(({parameterType})({argumentType!.GloballyQualified()})arguments[{i.ToString(CultureInfo.InvariantCulture)}])"
                     : $"(({parameterType})arguments[{i.ToString(CultureInfo.InvariantCulture)}])";
             }
@@ -7092,7 +7092,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                firstMethod ??= method;
+                // A generic data method is never a fallback while a non-generic one exists: its type arguments
+                // cannot be inferred from the Arguments, and inference would close the test over its open T
+                if (firstMethod == null || (firstMethod.IsGenericMethod && !method.IsGenericMethod))
+                {
+                    firstMethod = method;
+                }
+
                 var score = ScoreDataSourceOverload(method, arguments, compilation);
                 if (score > bestScore
                     || (score == bestScore && score >= 0 && IsMoreSpecificDataSourceOverload(method, bestMethod!, arguments.Length, compilation)))
@@ -7175,7 +7181,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static int ScoreDataSourceOverload(IMethodSymbol method, ImmutableArray<TypedConstant> arguments, Compilation compilation)
     {
         var parameters = method.Parameters;
-        if (arguments.Length > parameters.Length)
+
+        // A generic data method needs type arguments the Arguments cannot supply. Reflection mode's binder skips it
+        // too, so IEnumerable<int> Rows() wins over IEnumerable<T> Rows<T>() whichever is declared first.
+        if (method.IsGenericMethod || arguments.Length > parameters.Length)
         {
             return -1;
         }
@@ -7210,9 +7219,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 score += 2;
             }
-            else if (compilation.ClassifyCommonConversion(argument.Type, parameterType) is { IsImplicit: true, IsUserDefined: false })
+            else if (IsInvokeConversion(compilation.ClassifyCommonConversion(argument.Type, parameterType), argument.Type, parameterType))
             {
-                // Reflection's binder applies built-in widening and reference conversions, never implicit operators
                 score += 1;
             }
             else
@@ -7222,6 +7230,31 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return score;
+    }
+
+    /// <summary>
+    /// Whether <paramref name="conversion"/> from a boxed <paramref name="argumentType"/> argument to
+    /// <paramref name="parameterType"/> is one that reflection mode's binder and <c>MethodInfo.Invoke</c> also make:
+    /// implicit reference and boxing conversions, built-in numeric widening other than to <c>decimal</c>, and
+    /// <c>T</c> to <c>Nullable&lt;T&gt;</c>. C# also converts <c>int</c> to <c>decimal</c> or <c>long?</c>, but
+    /// reflection cannot, so accepting them would make the two modes call different overloads: for <c>1</c>,
+    /// <c>Rows(object)</c> in reflection mode and <c>Rows(decimal)</c> here. User-defined operators never apply.
+    /// Mirrors <c>ScoreArguments</c> in <c>MethodDataSourceAttribute</c>.
+    /// </summary>
+    private static bool IsInvokeConversion(Microsoft.CodeAnalysis.Operations.CommonConversion conversion, ITypeSymbol? argumentType, ITypeSymbol parameterType)
+    {
+        if (conversion is not { IsImplicit: true, IsUserDefined: false })
+        {
+            return false;
+        }
+
+        if (conversion.IsNullable)
+        {
+            return parameterType is INamedTypeSymbol { TypeArguments: [var underlying] }
+                && SymbolEqualityComparer.Default.Equals(underlying, argumentType);
+        }
+
+        return !conversion.IsNumeric || parameterType.SpecialType != SpecialType.System_Decimal;
     }
 
     /// <summary>

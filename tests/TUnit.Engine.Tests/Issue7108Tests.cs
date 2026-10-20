@@ -16,8 +16,8 @@ public class Issue7108Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7108/GenericMethodNonTupleMethodDataSourceTests/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(37),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(37),
+                result => result.ResultSummary.Counters.Total.ShouldBe(39),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(39),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
@@ -33,8 +33,8 @@ public class Issue7108Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7108/DataSourceOverloadParityTests/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(21),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(21),
+                result => result.ResultSummary.Counters.Total.ShouldBe(25),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(25),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }

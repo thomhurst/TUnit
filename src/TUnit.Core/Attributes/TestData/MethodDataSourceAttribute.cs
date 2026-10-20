@@ -405,7 +405,25 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // Let the runtime binder pick the best overload for these exact argument types.
         // Ambiguous matches surface as AmbiguousMatchException (genuinely ambiguous code),
         // never as the spurious SingleOrDefault throw the old scan produced.
-        return targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags, binder: null, argumentTypes, modifiers: null);
+        // Generic method definitions are skipped: the Arguments cannot supply their type arguments, so
+        // IEnumerable<int> Rows() is used rather than an ambiguous match with IEnumerable<T> Rows<T>(),
+        // as the source generator does.
+#if NET
+        return targetType.GetMethod(MethodNameProvidingDataSource, genericParameterCount: 0, BindingFlags, binder: null, argumentTypes, modifiers: null);
+#else
+        List<MethodBase>? candidates = null;
+        foreach (var method in targetType.GetMethods(BindingFlags))
+        {
+            if (method.Name == MethodNameProvidingDataSource && !method.IsGenericMethodDefinition)
+            {
+                (candidates ??= []).Add(method);
+            }
+        }
+
+        return candidates is null
+            ? null
+            : (MethodInfo?)Type.DefaultBinder.SelectMethod(BindingFlags, candidates.ToArray(), argumentTypes, modifiers: null);
+#endif
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
@@ -415,7 +433,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         var best = new List<MethodInfo>();
         foreach (var method in targetType.GetMethods(BindingFlags))
         {
-            if (method.Name != MethodNameProvidingDataSource)
+            if (method.Name != MethodNameProvidingDataSource || method.IsGenericMethodDefinition)
             {
                 continue;
             }
@@ -537,7 +555,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             }
             else if (parameterType.IsInstanceOfType(argument)
                      || argumentType == underlyingParameterType
-                     || IsNumericWidening(argumentType, underlyingParameterType))
+                     || IsNumericWidening(argumentType, parameterType))
             {
                 score += 1;
             }
@@ -551,6 +569,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     }
 
     // The implicit numeric conversions C# allows, except to decimal, which MethodInfo.Invoke cannot apply.
+    // Invoke cannot widen into Nullable<T> either (an int argument for a long? parameter throws), so callers
+    // pass the parameter type itself, not its underlying type.
     private static bool IsNumericWidening(Type from, Type to)
     {
         var target = Type.GetTypeCode(to);
