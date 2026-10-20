@@ -6418,6 +6418,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var argumentValues = argAttr.ConstructorArguments[0].Values;
 
+        // Method type parameters that received a null value, if any
+        HashSet<string>? nullTypeParameters = null;
+
         // For each value in the params array
         for (var argIndex = 0; argIndex < argumentValues.Length && argIndex < methodParams.Length; argIndex++)
         {
@@ -6430,9 +6433,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // A null value (typed object) infers object only when no other value infers the type
                 // parameter, so Run<T>(T first, T second) with [Arguments("a", null)] runs as Run<string>,
                 // as with [Arguments(null, "a")] and in reflection mode
-                if (argValue.IsNull && inferredTypes.ContainsKey(typeParam.Name))
+                if (argValue.IsNull)
                 {
-                    continue;
+                    (nullTypeParameters ??= []).Add(typeParam.Name);
+
+                    if (inferredTypes.ContainsKey(typeParam.Name))
+                    {
+                        continue;
+                    }
                 }
 
                 // The argument value's type tells us what the generic type should be
@@ -6479,6 +6487,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                      && argValue is { Kind: TypedConstantKind.Array, Type: IArrayTypeSymbol { ElementType: var elementType } })
             {
                 inferredTypes[elementTypeParam.Name] = elementType;
+            }
+        }
+
+        // A null value cannot be passed as a non-nullable value type, so a type parameter that received both
+        // null and, say, 1 infers object: [Arguments(1, null)] runs as Run<object>(1, null), in either order
+        // and in reflection mode, instead of Run<int> with the null turned into 0 (#7155)
+        if (nullTypeParameters is not null)
+        {
+            foreach (var nullTypeParameter in nullTypeParameters)
+            {
+                if (inferredTypes.TryGetValue(nullTypeParameter, out var inferredType)
+                    && inferredType.IsValueType
+                    && inferredType.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T)
+                {
+                    inferredTypes[nullTypeParameter] = compilation.GetSpecialType(SpecialType.System_Object);
+                }
             }
         }
 

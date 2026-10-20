@@ -14,6 +14,7 @@ using TUnit.Core.Helpers;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Discovery;
 
@@ -1709,9 +1710,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static Type[]? InferMethodTypeArguments(object?[] values, ParameterInfo[] parameters, int genericParameterCount)
     {
+        // Row values bind to the data parameters only; the engine supplies any CancellationToken, wherever it is
+        // declared. The source generator skips tokens the same way when it infers from [Arguments] rows.
+        if (Array.Exists(parameters, static parameter => parameter.ParameterType == typeof(CancellationToken)))
+        {
+            parameters = Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
+        }
+
         var typeArguments = new Type[genericParameterCount];
         var count = Math.Min(values.Length, parameters.Length);
 
+        var hasNullValue = false;
         for (var i = 0; i < count; i++)
         {
             var parameterType = parameters[i].ParameterType;
@@ -1720,11 +1729,33 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 continue;
             }
 
-            // A null value, typed or not, is an element of the params object?[] argument, which Roslyn types
-            // as object, so the generator infers object for it ([Arguments((string?)null)] runs as Test<object>(null)).
-            typeArguments[parameterType.GenericParameterPosition] = values[i] is { } value
-                ? GetArgumentInferenceType(value)
-                : typeof(object);
+            if (values[i] is { } value)
+            {
+                typeArguments[parameterType.GenericParameterPosition] = GetArgumentInferenceType(value);
+            }
+            else
+            {
+                hasNullValue = true;
+            }
+        }
+
+        // A null value, typed or not, is an element of the params object?[] argument, which Roslyn types
+        // as object, so the generator infers object for it ([Arguments((string?)null)] runs as Test<object>(null)).
+        // As in the generator, a non-null value for the same type parameter wins ([Arguments("a", null)] runs as
+        // Test<string>), unless it infers a value type, which cannot hold the null (#7155).
+        if (hasNullValue)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var parameterType = parameters[i].ParameterType;
+                if (values[i] is null
+                    && parameterType is { IsGenericParameter: true, DeclaringMethod: not null }
+                    && (typeArguments[parameterType.GenericParameterPosition] is not { } inferredType
+                        || TestGenericTypeResolver.CannotHoldNull(inferredType)))
+                {
+                    typeArguments[parameterType.GenericParameterPosition] = typeof(object);
+                }
+            }
         }
 
         foreach (var typeArgument in typeArguments)
@@ -2211,6 +2242,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return false;
     }
 
+    private static bool ReceivesNullArgument(Type genericParameter, ParameterInfo[] methodParams, object?[] args)
+    {
+        for (var j = 0; j < methodParams.Length && j < args.Length; j++)
+        {
+            if (args[j] is null && methodParams[j].ParameterType == genericParameter)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Creates a reflection-based test invoker with proper AOT attribution
     /// </summary>
@@ -2262,7 +2306,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     {
                         if (typeMapping.TryGetValue(genericParams[i], out var inferredType))
                         {
-                            typeArguments[i] = inferredType;
+                            // A value type cannot hold a null passed to the same type parameter, so it
+                            // infers object, as in TestGenericTypeResolver and the source generator (#7155).
+                            // A Nullable<T> inferred from a nested type, such as List<int?>, holds the null.
+                            typeArguments[i] = TestGenericTypeResolver.CannotHoldNull(inferredType)
+                                && ReceivesNullArgument(genericParams[i], methodParams, args)
+                                ? typeof(object)
+                                : inferredType;
                         }
                         else
                         {
