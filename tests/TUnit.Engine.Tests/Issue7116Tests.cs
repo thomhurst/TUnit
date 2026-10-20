@@ -1,4 +1,4 @@
-using Shouldly;
+﻿using Shouldly;
 using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
@@ -13,6 +13,16 @@ namespace TUnit.Engine.Tests;
 public class Issue7116Tests(TestMode testMode) : InvokableTestBase(testMode)
 {
     private const string ClassFilter = "/*/TUnit.TestProject.Bugs._7116/DeclaredTypeInferenceTests";
+
+    // The generator's run-time explanation and analyzer TUnit0001's message must say the same thing.
+    // Keep this list in step with DeclaredTypeMessage_Shares_Wording_With_Generator in TUnit.Analyzers.Tests.
+    private static readonly string[] SharedExplanationPhrases =
+    [
+        "declared type",
+        "not from the run-time type of",
+        "Declare the data source with a type that satisfies the constraint",
+        "list the type argument with [GenerateGenericTest]"
+    ];
 
     [Test]
     [Arguments("ObjectDeclaredType", "Type 'Object' does not implement interface 'IDisposable' required for generic parameter 'T'", "'object'")]
@@ -39,7 +49,14 @@ public class Issue7116Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1),
                 result => result.Results.Single().Output?.ErrorInfo?.Message.ShouldContain(constraintMessage),
                 result => result.Results.Single().Output?.ErrorInfo?.Message.ShouldContain($"'T' was inferred from the declared type {declaredType} of the data source"),
-                result => result.Results.Single().Output?.ErrorInfo?.Message.ShouldContain("[GenerateGenericTest]")
+                result =>
+                {
+                    var message = result.Results.Single().Output?.ErrorInfo?.Message;
+                    foreach (var phrase in SharedExplanationPhrases)
+                    {
+                        message.ShouldContain(phrase);
+                    }
+                }
             ]);
     }
 

@@ -4,6 +4,21 @@ namespace TUnit.Analyzers.Tests;
 
 public class DataSourceGeneratorAnalyzerTests
 {
+    // The generator explains the same case at run time (DescribeDeclaredTypeInference). Keep this list in step
+    // with SharedExplanationPhrases in TUnit.Engine.Tests' Issue7116Tests, which checks the generator's message.
+    [Test]
+    [Arguments("declared type")]
+    [Arguments("not from the run-time type of")]
+    [Arguments("Declare the data source with a type that satisfies the constraint")]
+    [Arguments("list the type argument with [GenerateGenericTest]")]
+    public async Task DeclaredTypeMessage_Shares_Wording_With_Generator(string phrase)
+    {
+        var rule = Rules.GenericTypeArgumentInferredFromDeclaredType;
+        var messageFormat = rule.MessageFormat.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+        await TUnit.Assertions.Assert.That(messageFormat).Contains(phrase);
+    }
+
     [Test]
     public async Task Constructor_Derived_No_Error_Generic()
     {
