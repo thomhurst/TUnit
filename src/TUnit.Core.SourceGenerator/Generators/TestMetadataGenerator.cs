@@ -1520,11 +1520,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return;
         }
 
-        // A trailing params/array parameter collects the remaining row values, which the
-        // positional casts below cannot express. Bind it like a non-generic method instead,
-        // using the parameters of the closed method.
+        // A trailing params/array parameter collects the remaining row values, and a row may leave
+        // out optional parameters (#7146), which the positional casts below cannot express. Bind
+        // them like a non-generic method instead, using the parameters of the closed method.
         if ((entry.MethodTypeArgs.Length > 0 || entry.ClassTypeArgs.Length > 0)
-            && TryGetClosedParametersWithTrailingArray(testMethod, entry) is { } closedParameters)
+            && TryGetClosedParametersForSharedBinder(testMethod, entry) is { } closedParameters)
         {
             var invokedName = entry.MethodTypeArgs.Length > 0
                 ? $"{methodName}<{string.Join(", ", entry.MethodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>"
@@ -1610,16 +1610,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// Returns the data-bound (non-CancellationToken) parameters of the closed test method when the
-    /// last one collects trailing arguments (<c>params T[]</c> or a plain array). Returns null when
+    /// last one collects trailing arguments (<c>params T[]</c> or a plain array), or when any of them
+    /// is optional, so a row may supply fewer values than there are parameters. Returns null when
     /// there is no such parameter, or the closed method cannot be built.
     /// </summary>
-    private static IParameterSymbol[]? TryGetClosedParametersWithTrailingArray(TestMethodMetadata testMethod, ConcreteInstantiation entry)
+    private static IParameterSymbol[]? TryGetClosedParametersForSharedBinder(TestMethodMetadata testMethod, ConcreteInstantiation entry)
     {
         var parameters = testMethod.MethodSymbol.Parameters
             .Where(p => !p.Type.IsCancellationToken())
             .ToArray();
 
-        if (parameters.Length == 0 || !parameters[parameters.Length - 1].CollectsTrailingArguments())
+        if (parameters.Length == 0
+            || (!parameters[parameters.Length - 1].CollectsTrailingArguments()
+                && !parameters.Any(p => p.HasExplicitDefaultValue || p.IsOptional)))
         {
             return null;
         }
