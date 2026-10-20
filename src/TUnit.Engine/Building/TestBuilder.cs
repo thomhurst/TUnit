@@ -1391,6 +1391,7 @@ internal sealed class TestBuilder : ITestBuilder
         object?[]? classData = null,
         object?[]? methodData = null)
     {
+        exception = ToReportedException(exception);
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
 
         var testDetails = CreateFailedTestDetails(metadata, testId, CombineRowObjects(classData, methodData));
@@ -1490,8 +1491,19 @@ internal sealed class TestBuilder : ITestBuilder
             }
         }
 
-        return (new GenericTypeResolutionException(rowException.Message), rowData);
+        return (ToReportedException(rowException), rowData);
     }
+
+    /// <summary>
+    /// Replaces the internal <see cref="GenericConstraintViolationRowException"/> with the plain
+    /// <see cref="GenericTypeResolutionException"/> that reflection mode reports. Every failed-test factory
+    /// calls this, so a catch site that does not use <see cref="UnpackConstraintViolation"/> cannot leak
+    /// the internal type to users.
+    /// </summary>
+    internal static Exception ToReportedException(Exception exception)
+        => exception is GenericConstraintViolationRowException rowException
+            ? new GenericTypeResolutionException(rowException.Message)
+            : exception;
 
     private TestDetails CreateFailedTestDetails(TestMetadata metadata, string testId, object?[] failedDataRowObjects)
     {

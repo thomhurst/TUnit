@@ -48,4 +48,17 @@ public class ConstraintViolationUnpackingTests
         await Assert.That(reported).IsSameReferenceAs(exception);
         await Assert.That(rowData).IsNull();
     }
+
+    [Test]
+    public async Task Failed_Test_Factories_Never_Report_The_Internal_Row_Exception()
+    {
+        // Every failed-test factory passes its exception through this, including catch sites that do not unpack.
+        var reported = TestBuilder.ToReportedException(new GenericConstraintViolationRowException("violation", null));
+
+        await Assert.That(reported.GetType()).IsEqualTo(typeof(GenericTypeResolutionException));
+        await Assert.That(reported.Message).IsEqualTo("violation");
+
+        var other = new InvalidOperationException("other");
+        await Assert.That(TestBuilder.ToReportedException(other)).IsSameReferenceAs(other);
+    }
 }
