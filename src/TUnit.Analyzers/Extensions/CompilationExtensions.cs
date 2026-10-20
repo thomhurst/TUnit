@@ -176,20 +176,17 @@ public static class CompilationExtensions
         }
     }
 
-    private static bool IsExactType(ITypeSymbol type)
+    /// <summary>
+    /// Whether <paramref name="argumentType"/> is a data source's declared type for a method type parameter that a
+    /// value of another run-time type could have, such as <c>object</c>, an interface, a non-sealed class or a
+    /// nullable value type. Source-generated mode infers the type argument from the declared type itself (#7116).
+    /// </summary>
+    public static bool IsBroadDeclaredTypeArgument(ITypeSymbol? argumentType, ITypeSymbol? parameterType)
     {
-        if (type is ITypeParameterSymbol or IErrorTypeSymbol || type.TypeKind == TypeKind.Dynamic
-            || ContainsTypeParameter(type))
-        {
-            return false;
-        }
-
-        if (type.IsValueType)
-        {
-            return type.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T;
-        }
-
-        return type is INamedTypeSymbol { TypeKind: TypeKind.Class or TypeKind.Delegate, IsSealed: true };
+        return parameterType is ITypeParameterSymbol { DeclaringMethod: not null }
+            && argumentType is not null and not ITypeParameterSymbol and not IErrorTypeSymbol
+            && argumentType.TypeKind != TypeKind.Dynamic
+            && !ExactTypeExtensions.IsExactType(argumentType);
     }
 
     /// <summary>
@@ -303,7 +300,7 @@ public static class CompilationExtensions
                 // differ from it.
                 return otherReplacements is not null
                     && otherReplacements.TryGetValue(otherTypeParameter, out var otherReplacement)
-                    && IsExactType(otherReplacement)
+                    && ExactTypeExtensions.IsExactType(otherReplacement)
                         ? otherReplacement
                         : type;
             case IArrayTypeSymbol arrayType:

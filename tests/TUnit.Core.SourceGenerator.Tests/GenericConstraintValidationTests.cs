@@ -25,8 +25,12 @@ internal class GenericConstraintValidationTests : TestsBase
             await Assert.That(SourceFor("GenericMethodWithClassConstraint_InvalidType"))
                 .Contains(violation + "\"Type 'Int32' does not satisfy the 'class' constraint for generic parameter 'T'\", new global::TUnit.TestProject.IntDataSourceForConstraint())");
 
-            await Assert.That(SourceFor("GenericMethodWithInterfaceConstraint_InvalidType"))
-                .Contains(violation + "\"Type 'NonImplementingClass' does not implement interface 'ITestInterface' required for generic parameter 'T'\", new global::TUnit.TestProject.NonImplementingClassDataSource())");
+            // NonImplementingClass is not sealed, so a derived value could implement the interface: the message
+            // also explains that the type argument came from the typed data source's declared type (#7116).
+            var interfaceViolation = SourceFor("GenericMethodWithInterfaceConstraint_InvalidType");
+            await Assert.That(interfaceViolation)
+                .Contains(violation + "\"Type 'NonImplementingClass' does not implement interface 'ITestInterface' required for generic parameter 'T'. 'T' was inferred from the declared type 'NonImplementingClass' of the data source");
+            await Assert.That(interfaceViolation).Contains("[GenerateGenericTest].\", new global::TUnit.TestProject.NonImplementingClassDataSource())");
 
             await Assert.That(SourceFor("GenericMethodWithStructConstraint_InvalidType"))
                 .Contains(violation + "\"Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'\", new global::TUnit.Core.ArgumentsAttribute(\"invalid\"))");
@@ -57,7 +61,7 @@ internal class GenericConstraintValidationTests : TestsBase
 
             // A nested interface's containing type arguments must match too: this row is reported, not emitted as a call.
             var nestedMismatch = SourceFor("NestedInterfaceWithOtherContainingTypeArgument");
-            await Assert.That(nestedMismatch).Contains(violation + "\"Type 'MismatchedOuterPayload' does not implement interface 'IOut`1' required for generic parameter 'T'\"");
+            await Assert.That(nestedMismatch).Contains(violation + "\"Type 'MismatchedOuterPayload' does not implement interface 'IOut`1' required for generic parameter 'T'. 'T' was inferred from the declared type 'MismatchedOuterPayload' of the data source");
             await Assert.That(nestedMismatch).DoesNotContain("instance.NestedInterfaceWithOtherContainingTypeArgument<");
 
             // Generic class + generic method [Arguments]: the invalid method row gets a failing entry.

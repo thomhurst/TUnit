@@ -1269,7 +1269,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // [Arguments] rows and [GenerateGenericTest] types that break the method's constraints. They are
         // reported together as one failed test per row or type, with the same message and in the same order
         // as source-generated mode (#7107, #7153).
-        var (inferredInstantiations, constraintViolations) = InferMethodInstantiationsFromDataSources(concreteClassType, method, methodGenericParams.Length);
+        var (inferredInstantiations, constraintViolations) = InferMethodInstantiationsFromDataSources(concreteClassType, method, methodGenericParams.Length, generateGenericTestAttributes);
 
         foreach (var (inferredMethod, typeArguments, rows) in inferredInstantiations)
         {
@@ -1387,15 +1387,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// run on the [GenerateGenericTest] types instead, so each one is returned in <c>RowViolations</c>
     /// and fails with the constraint message, as in the source generator (#7153). Sources inferring types that
     /// are already instantiated are dropped, except further [Arguments] rows, which join the instantiation an
-    /// earlier [Arguments] row created.
+    /// earlier [Arguments] row created. A skipped source other than an [Arguments] row runs on the
+    /// [GenerateGenericTest] types instead; when a data source already instantiated those types, the skipped
+    /// source joins that instantiation, as the generator's <c>JoinDeferredDataSources</c> does (#7116).
     /// </summary>
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT; MakeGenericMethod over types inferred from attribute values")]
     private static (List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[]? Rows)> Instantiations, List<IDataSourceAttribute>? RowViolations) InferMethodInstantiationsFromDataSources(
         Type testClass,
         MethodInfo method,
-        int genericParameterCount)
+        int genericParameterCount,
+        GenerateGenericTestAttribute[] generateGenericTestAttributes)
     {
         var instantiations = new List<(MethodInfo Method, Type[] TypeArguments, List<IDataSourceAttribute>? Rows)>();
+        List<IDataSourceAttribute>? skippedSources = null;
         List<IDataSourceAttribute>? rowViolations = null;
         var parameters = method.GetParameters();
         var dataSources = ReflectionAttributeExtractor.ExtractDataSources(method);
@@ -1439,6 +1443,29 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
 
+        if (skippedSources is not null)
+        {
+            foreach (var generateGenericTest in generateGenericTestAttributes)
+            {
+                var index = instantiations.FindIndex(x => TypeArrayComparer.Instance.Equals(x.TypeArguments, generateGenericTest.TypeArguments));
+                if (index < 0 || instantiations[index].Rows is not { } rows)
+                {
+                    continue;
+                }
+
+                foreach (var skipped in skippedSources)
+                {
+                    if (!rows.Exists(row => ReferenceEquals(row, skipped)))
+                    {
+                        rows.Add(skipped);
+                    }
+                }
+
+                // Declaration order, as the generator emits the rows, so both modes number them alike
+                rows.Sort((x, y) => DeclarationIndex(x).CompareTo(DeclarationIndex(y)));
+            }
+        }
+
         var result = new List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[]? Rows)>(instantiations.Count);
         foreach (var (closedMethod, typeArguments, rows) in instantiations)
         {
@@ -1446,6 +1473,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return (result, rowViolations);
+
+        int DeclarationIndex(IDataSourceAttribute row)
+        {
+            for (var i = 0; i < dataSources.Length; i++)
+            {
+                if (ReferenceEquals(dataSources[i], row))
+                {
+                    return i;
+                }
+            }
+
+            return dataSources.Length;
+        }
 
         void AddInstantiation(Type[]? typeArguments, IDataSourceAttribute? row, bool isMethodArgumentsRow = false)
         {
@@ -1478,7 +1518,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 // Constraint violation. A literal [Arguments] row cannot run on the [GenerateGenericTest] types,
                 // so it fails with the constraint message, wrapped so that its own values are still produced
-                // first (#7153). Any other source is skipped and runs on those types instead.
+                // first (#7153). Any other source is skipped and runs on those types instead (#7116), as the
+                // source generator skips it.
                 if (isMethodArgumentsRow && row is not null)
                 {
                     // FindConstraintViolation produces the generator's message. It returns null only for a type-argument
@@ -1487,6 +1528,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     // reported rather than dropped, even if its wording would then differ from source-gen.
                     var message = ReflectionGenericTypeResolver.FindConstraintViolation(method, typeArguments) ?? ex.Message;
                     (rowViolations ??= []).Add(GenericConstraintViolationDataSource.Create(message, row));
+                }
+                else if (row is not null and not ArgumentsAttribute)
+                {
+                    (skippedSources ??= []).Add(row);
                 }
 
                 return;

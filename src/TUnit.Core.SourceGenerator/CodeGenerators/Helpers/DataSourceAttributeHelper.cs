@@ -49,7 +49,7 @@ internal static class DataSourceAttributeHelper
         }
 
         // Check if the attribute implements ITypedDataSourceAttribute<T>
-        return InterfaceHelper.ImplementsGenericInterface(attributeClass, "global::TUnit.Core.ITypedDataSourceAttribute`1");
+        return InterfaceHelper.ImplementsGenericInterface(attributeClass, "global::TUnit.Core.ITypedDataSourceAttribute<>");
     }
 
     public static ITypeSymbol? GetTypedDataSourceType(INamedTypeSymbol? attributeClass)
@@ -59,7 +59,7 @@ internal static class DataSourceAttributeHelper
             return null;
         }
 
-        var typedInterface = InterfaceHelper.GetGenericInterface(attributeClass, "global::TUnit.Core.ITypedDataSourceAttribute`1");
+        var typedInterface = InterfaceHelper.GetGenericInterface(attributeClass, "global::TUnit.Core.ITypedDataSourceAttribute<>");
 
         return typedInterface?.TypeArguments.FirstOrDefault();
     }
