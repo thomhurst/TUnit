@@ -18,6 +18,7 @@ public class Issue7118Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("MethodRowMatchedByTypedClassSource", 2)]
     [Arguments("UninferredMethodRowWithTypedClassSource", 4)]
     [Arguments("NullTypedClassRow", 1)]
+    [Arguments("ArrayParameterNullTypedClassRow", 1)]
     [Arguments("ClassRowWithUninferredMethodSource", 3)]
     public async Task Each_Method_Row_Runs_On_Its_Own_Instantiation(string className, int expectedTests)
     {

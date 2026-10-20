@@ -6691,6 +6691,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var constructorParams = primaryConstructor.Parameters;
 
+        if (declaredNullValueType != null)
+        {
+            // The null value binds to the constructor's first parameter, so its declared type is mapped through
+            // that parameter's type: [Arguments<string[]>(null)] on C<T>(T[] values) infers T as string, as
+            // reflection mode infers it. A class with more than one type parameter cannot be inferred from one value.
+            if (typeParameters.Length != 1 || constructorParams.Length == 0)
+            {
+                return null;
+            }
+
+            var nullValueTypeArgument = MatchTypeParameter(constructorParams[0].Type, declaredNullValueType, typeParameters[0]);
+            return nullValueTypeArgument == null ? null : [nullValueTypeArgument];
+        }
+
         // For each value in the params array
         for (var argIndex = 0; argIndex < argumentValues.Length && argIndex < constructorParams.Length; argIndex++)
         {
@@ -6703,11 +6717,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // The argument value's type tells us what the generic type should be
                 ITypeSymbol? argType = null;
 
-                if (declaredNullValueType != null)
-                {
-                    argType = declaredNullValueType;
-                }
-                else if (argValue.Type != null)
+                if (argValue.Type != null)
                 {
                     argType = argValue.Type;
                 }
@@ -6754,6 +6764,45 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
             return result;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The type that <paramref name="typeParameter"/> takes when a value of <paramref name="declaredType"/> binds to a
+    /// parameter of <paramref name="parameterType"/>: the declared type itself for a parameter of type T, its element
+    /// type for T[], and the matching type argument for a constructed generic such as List&lt;T&gt;. Null when the
+    /// parameter type does not mention the type parameter or the declared type does not have its shape. Reflection
+    /// mode maps the declared type of an [Arguments&lt;T&gt;(null)] class row the same way.
+    /// </summary>
+    private static ITypeSymbol? MatchTypeParameter(ITypeSymbol parameterType, ITypeSymbol declaredType, ITypeParameterSymbol typeParameter)
+    {
+        if (parameterType is ITypeParameterSymbol parameterTypeParameter)
+        {
+            return SymbolEqualityComparer.Default.Equals(parameterTypeParameter, typeParameter) ? declaredType : null;
+        }
+
+        if (parameterType is IArrayTypeSymbol parameterArray)
+        {
+            return declaredType is IArrayTypeSymbol declaredArray && declaredArray.Rank == parameterArray.Rank
+                ? MatchTypeParameter(parameterArray.ElementType, declaredArray.ElementType, typeParameter)
+                : null;
+        }
+
+        if (parameterType is INamedTypeSymbol { IsGenericType: true } parameterNamed
+            && declaredType is INamedTypeSymbol { IsGenericType: true } declaredNamed
+            && SymbolEqualityComparer.Default.Equals(parameterNamed.OriginalDefinition, declaredNamed.OriginalDefinition))
+        {
+            var parameterTypeArguments = parameterNamed.TypeArguments;
+            var declaredTypeArguments = declaredNamed.TypeArguments;
+            for (var i = 0; i < parameterTypeArguments.Length; i++)
+            {
+                if (MatchTypeParameter(parameterTypeArguments[i], declaredTypeArguments[i], typeParameter) is { } match)
+                {
+                    return match;
+                }
+            }
         }
 
         return null;

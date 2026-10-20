@@ -791,20 +791,66 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
-    /// The class type argument that an <see cref="ArgumentsAttribute{T}"/> row with a null value infers: its declared
-    /// T, for a class with one type parameter, as the source generator infers it. Null for any other row.
+    /// The class type argument that an <see cref="ArgumentsAttribute{T}"/> row with a null value infers, for a class
+    /// with one type parameter, as the source generator infers it. The null value binds to the first parameter of the
+    /// class's first public constructor, so the declared T is mapped through that parameter's type:
+    /// <c>[Arguments&lt;string[]&gt;(null)]</c> on <c>C&lt;T&gt;(T[] values)</c> infers <c>string</c>, not
+    /// <c>string[]</c>. Null for any other row, or when the parameter type does not match the declared type.
     /// </summary>
     private static Type[]? InferTypeArgumentsFromNullTypedArgumentsRow(Type genericTypeDefinition, IDataSourceAttribute dataSource, object?[] dataRow)
     {
         if (dataRow is not [null]
             || dataSource.GetType() is not { IsGenericType: true } sourceType
             || sourceType.GetGenericTypeDefinition() != typeof(ArgumentsAttribute<>)
-            || genericTypeDefinition.GetGenericArguments().Length != 1)
+            || genericTypeDefinition.GetGenericArguments() is not [var typeParameter]
+            || genericTypeDefinition.GetConstructors() is not [var constructor, ..]
+            || constructor.GetParameters() is not [var parameter, ..])
         {
             return null;
         }
 
-        return [sourceType.GetGenericArguments()[0]];
+        return MatchTypeParameter(parameter.ParameterType, sourceType.GetGenericArguments()[0], typeParameter) is { } typeArgument
+            ? [typeArgument]
+            : null;
+    }
+
+    /// <summary>
+    /// The type that <paramref name="typeParameter"/> takes when a value of <paramref name="declaredType"/> binds to a
+    /// parameter of <paramref name="parameterType"/>: the declared type itself for a parameter of type T, its element
+    /// type for T[], and the matching type argument for a constructed generic such as List&lt;T&gt;. Null when the
+    /// parameter type does not mention the type parameter or the declared type does not have its shape. Mirrors
+    /// <c>TestMetadataGenerator.MatchTypeParameter</c>.
+    /// </summary>
+    private static Type? MatchTypeParameter(Type parameterType, Type declaredType, Type typeParameter)
+    {
+        if (parameterType.IsGenericParameter)
+        {
+            return parameterType == typeParameter ? declaredType : null;
+        }
+
+        if (parameterType.IsArray)
+        {
+            return declaredType.IsArray && declaredType.GetArrayRank() == parameterType.GetArrayRank()
+                ? MatchTypeParameter(parameterType.GetElementType()!, declaredType.GetElementType()!, typeParameter)
+                : null;
+        }
+
+        if (parameterType.IsGenericType
+            && declaredType.IsGenericType
+            && parameterType.GetGenericTypeDefinition() == declaredType.GetGenericTypeDefinition())
+        {
+            var parameterTypeArguments = parameterType.GetGenericArguments();
+            var declaredTypeArguments = declaredType.GetGenericArguments();
+            for (var i = 0; i < parameterTypeArguments.Length; i++)
+            {
+                if (MatchTypeParameter(parameterTypeArguments[i], declaredTypeArguments[i], typeParameter) is { } match)
+                {
+                    return match;
+                }
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
