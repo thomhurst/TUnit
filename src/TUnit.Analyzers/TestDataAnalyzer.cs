@@ -1061,6 +1061,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         // Use the type arguments both execution modes actually infer from the typed source, not the
         // positional match against the test parameters: a single type parameter takes the source's first
         // type argument wherever it appears in the signature.
+        // Null means the source's type arguments do not map onto the method's, so neither mode infers an instantiation from
+        // it and there is no inferred type argument whose constraints could fail: nothing to report here.
         var engineTypeArguments = TypedDataSourceInference.InferMethodTypeArguments(attribute.AttributeClass, method);
         if (engineTypeArguments is null)
         {

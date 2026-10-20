@@ -91,6 +91,36 @@ public class Issue7116Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task GenerateGenericTest_With_Full_Arity_Runs_Broad_Rows_Beside_A_Wrongly_Sized_One()
+    {
+        // The full [GenerateGenericTest] runs the object-declared rows in both modes. Reflection mode also
+        // fails the wrongly sized one, which source-generated mode ignores (#7222).
+        var expectedTotal = testMode == TestMode.Reflection ? 2 : 1;
+        await RunTestsWithFilter(
+            $"{ClassFilter}/MixedArityGenerateGenericTestWithObjectRows*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(expectedTotal),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(expectedTotal - 1)
+            ]);
+    }
+
+    [Test]
+    public async Task GenerateGenericTest_Fails_A_Row_That_Cannot_Convert_To_Its_Type()
+    {
+        // [GenerateGenericTest] turns off the constraint check on the declared type, so a value of the wrong
+        // run-time type fails its test at run time, naming both types.
+        await RunTestsWithFilter(
+            $"{ClassFilter}/GenerateGenericTestWithUnconvertibleRows*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.Results.Single().Output?.ErrorInfo?.Message.ShouldContain("System.IO.StringReader"),
+                result => result.Results.Single().Output?.ErrorInfo?.Message.ShouldContain("System.IO.MemoryStream")
+            ]);
+    }
+
+    [Test]
     [Arguments("EmptyGenerateGenericTestWithObjectRows")]
     [Arguments("WrongArityGenerateGenericTestWithObjectRows")]
     public async Task Incomplete_GenerateGenericTest_Does_Not_Hide_Broad_Rows(string methodName)

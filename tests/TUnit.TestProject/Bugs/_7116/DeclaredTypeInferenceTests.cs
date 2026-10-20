@@ -19,6 +19,8 @@ public class DeclaredTypeInferenceTests
 
     public static IEnumerable<Func<object>> SingleStreams() => [() => new MemoryStream()];
 
+    public static IEnumerable<Func<object>> Readers() => [() => new StringReader("not a stream")];
+
     // TUnit0001 reports all three of these at compile time and explains the declared-type inference.
     // It is suppressed here so that the run-time behavior can be checked.
 #pragma warning disable TUnit0001
@@ -69,6 +71,24 @@ public class DeclaredTypeInferenceTests
     [MethodDataSource(nameof(Streams))]
     [MethodDataSource(nameof(ExactStreams))]
     public async Task GenerateGenericTestWithObjectAndExactRows<T>(T value, int marker) where T : IDisposable
+        => await Assert.That(typeof(T)).IsEqualTo(typeof(MemoryStream));
+
+    // One [GenerateGenericTest] with a full set of type arguments runs the object-declared rows in both modes,
+    // whatever the other [GenerateGenericTest] attributes list. Reflection mode also fails the wrongly sized
+    // one on its own, which source-generated mode ignores (#7222).
+    [Test]
+    [GenerateGenericTest(typeof(MemoryStream))]
+    [GenerateGenericTest(typeof(MemoryStream), typeof(int))]
+    [MethodDataSource(nameof(Streams))]
+    public async Task MixedArityGenerateGenericTestWithObjectRows<T>(T value, int marker) where T : IDisposable
+        => await Assert.That(typeof(T)).IsEqualTo(typeof(MemoryStream));
+
+    // A value that cannot be converted to the [GenerateGenericTest] type fails that test at run time, in both
+    // modes, with a message that names both types.
+    [Test]
+    [GenerateGenericTest(typeof(MemoryStream))]
+    [MethodDataSource(nameof(Readers))]
+    public async Task GenerateGenericTestWithUnconvertibleRows<T>(T value) where T : IDisposable
         => await Assert.That(typeof(T)).IsEqualTo(typeof(MemoryStream));
 
     // A [GenerateGenericTest] with the wrong number of type arguments cannot run the rows either, so the
