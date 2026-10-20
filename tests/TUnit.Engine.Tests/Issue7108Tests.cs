@@ -99,6 +99,38 @@ public class Issue7108Tests(TestMode testMode) : InvokableTestBase(testMode)
                 ]);
     }
 
+    /// <summary>
+    /// Protected data source members declared on a base class, read through the generated factory's reflection on
+    /// the declaring type, supply their rows in both modes, including an object-typed field split by its value.
+    /// </summary>
+    [Test]
+    public async Task Inherited_Protected_Members_Supply_Rows()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7108/InheritedProtectedMemberDataSourceTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(4),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    /// <summary>
+    /// With TUnit0001 suppressed and no overload accepting the Arguments, the generic test is still discovered and
+    /// fails when its data method is called, in both modes, instead of disappearing.
+    /// </summary>
+    [Test]
+    public async Task Generic_Test_Without_A_Matching_Overload_Fails_Instead_Of_Vanishing()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7108/NoMatchingOverloadDataSourceTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+            ]);
+    }
+
     [Test]
     public async Task Single_Tuple_Parameter_Keeps_The_CancellationToken_At_Its_Declared_Position()
     {

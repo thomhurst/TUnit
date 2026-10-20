@@ -28,4 +28,13 @@ internal class Tests7108 : TestsBase
         "_7108",
         "PrivateRowTypeDataSourceTests.cs"),
         _ => Task.CompletedTask);
+
+    [Test]
+    public Task Inherited_Protected_Member() => RunTest(Path.Combine(
+        Git.TestsDirectory.FullName,
+        "TUnit.TestProject",
+        "Bugs",
+        "_7108",
+        "InheritedProtectedMemberDataSourceTests.cs"),
+        _ => Task.CompletedTask);
 }
