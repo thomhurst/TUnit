@@ -135,8 +135,8 @@ public class ClassTypedMethodDataSourceOnClassGenerateGenericTest<T>
     }
 }
 
-// A typed data source infers no method type argument on a generic class, in either mode: it runs on the
-// method [GenerateGenericTest] type, Run<long>(42), and adds no Run<int>.
+// A typed data source infers the method type argument on a generic class, as on a non-generic class
+// (#7164): Run<int>(42) from the source and Run<long>(42) from the method [GenerateGenericTest] type.
 [EngineTest(ExpectedResult.Pass)]
 [GenerateGenericTest(typeof(string))]
 public class TypedDataSourceOnClassGenerateGenericTest<T>
@@ -147,7 +147,7 @@ public class TypedDataSourceOnClassGenerateGenericTest<T>
     public async Task Run<TMethod>(TMethod arg)
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(string));
-        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(long));
+        await Assert.That(typeof(TMethod) == typeof(int) || typeof(TMethod) == typeof(long)).IsTrue();
         await Assert.That(Convert.ToInt64(arg)).IsEqualTo(42L);
     }
 }

@@ -17,7 +17,7 @@ public class Issue7117Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("MethodDataSourceOnClassRow", new[] { "Run<string>(a, 1)" })]
     [Arguments("MethodDataSourceOnClassGenerateGenericTest", new[] { "Run<string>(a, 1)" })]
     [Arguments("ClassTypedMethodDataSourceOnClassGenerateGenericTest", new[] { "Run<long>(0, 1)" })]
-    [Arguments("TypedDataSourceOnClassGenerateGenericTest", new[] { "Run<long>(42)" })]
+    [Arguments("TypedDataSourceOnClassGenerateGenericTest", new[] { "Run<int>(42)", "Run<long>(42)" })]
     public async Task Generic_Method_Of_Generic_Class_Runs_Each_Instantiation(string className, string[] expectedTestNames)
     {
         await RunTestsWithFilter(

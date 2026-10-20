@@ -2036,7 +2036,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             {
                 case 0:
                     {
-                        return new global::System.Threading.Tasks.ValueTask(instance.Optional_Before_Params<int>(@values: global::System.Array.Empty<int>()));
+                        return new global::System.Threading.Tasks.ValueTask(instance.Optional_Before_Params<int>((int)(0), global::System.Array.Empty<int>()));
                     }
                 case 1:
                     {
@@ -2152,7 +2152,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             {
                 case 0:
                     {
-                        return new global::System.Threading.Tasks.ValueTask(instance.Optional_Omitted_Before_Params<int>(@values: global::System.Array.Empty<int>()));
+                        return new global::System.Threading.Tasks.ValueTask(instance.Optional_Omitted_Before_Params<int>((int)(42), global::System.Array.Empty<int>()));
                     }
                 case 1:
                     {
@@ -2270,7 +2270,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             {
                 case 0:
                     {
-                        return new global::System.Threading.Tasks.ValueTask(instance.Optional_Omitted_Before_Array_With_Token<int>(@values: default(int[]), @token: context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                        return new global::System.Threading.Tasks.ValueTask(instance.Optional_Omitted_Before_Array_With_Token<int>((int)(42), default(int[]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
                     }
                 case 1:
                     {
@@ -3036,7 +3036,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
                     {
                         case 0:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Omitted_Before_Params(@values: global::System.Array.Empty<int>()));
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Omitted_Before_Params((int)(42), global::System.Array.Empty<int>()));
                             }
                         case 1:
                             {
@@ -3077,7 +3077,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
                     {
                         case 0:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Omitted_Before_Array_With_Token(@values: default(int[]), @token: context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                                return new global::System.Threading.Tasks.ValueTask(instance.NonGeneric_Optional_Omitted_Before_Array_With_Token((int)(42), default(int[]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
                             }
                         case 1:
                             {
@@ -3117,7 +3117,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.Optional_Omitted_Without_Params(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.Optional_Omitted_Without_Params(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (int)(42)));
                             }
                         case 2:
                             {
