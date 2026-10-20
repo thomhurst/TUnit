@@ -45,7 +45,7 @@ internal static class JsonExtensions
 
         return new TestClassJson
         {
-            Type = context.ClassType.FullName,
+            Type = TestExtensions.GetReportedClassFullName(context.ClassType),
             Tests = tests
         };
     }
@@ -83,7 +83,7 @@ internal static class JsonExtensions
         return new TestJson
         {
             Categories = testDetails.Categories,
-            ClassType = testDetails.MethodMetadata.Class.Type.FullName ?? testDetails.ClassType.FullName ?? "Unknown",
+            ClassType = TestExtensions.GetReportedClassFullName(testDetails.MethodMetadata.Class.Type) ?? TestExtensions.GetReportedClassFullName(testDetails.ClassType) ?? "Unknown",
             Result = context.Execution.Result?.ToJsonModel(),
             Timeout = testDetails.Timeout,
             CustomProperties = testDetails.CustomProperties.ToDictionary(

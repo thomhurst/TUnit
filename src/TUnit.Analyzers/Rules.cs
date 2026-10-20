@@ -183,6 +183,9 @@ public static class Rules
     public static readonly DiagnosticDescriptor UseHookCancellationToken =
         CreateDescriptor(DiagnosticIds.UseHookCancellationToken, UsageCategory, DiagnosticSeverity.Warning);
 
+    public static readonly DiagnosticDescriptor AmbiguousMethodDataSourceOverload =
+        CreateDescriptor(DiagnosticIds.AmbiguousMethodDataSourceOverload, UsageCategory, DiagnosticSeverity.Error);
+
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity,
         string[]? customTags = null, string? helpLinkUri = null, string? resourcePrefix = null)
     {

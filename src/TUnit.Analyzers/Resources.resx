@@ -543,4 +543,13 @@
     <data name="TUnit0075Title" xml:space="preserve">
         <value>Use the hook cancellation token for setup</value>
     </data>
+    <data name="TUnit0076Description" xml:space="preserve">
+        <value>The `Arguments` of a data source must select a single overload of the data source method. When they fit two or more overloads equally well, the overload to call is ambiguous, as a C# call with the same arguments would be (CS0121).</value>
+    </data>
+    <data name="TUnit0076MessageFormat" xml:space="preserve">
+        <value>The `Arguments` fit more than one overload of '{0}' equally well: {1}</value>
+    </data>
+    <data name="TUnit0076Title" xml:space="preserve">
+        <value>Data source Arguments fit more than one overload equally well</value>
+    </data>
 </root>

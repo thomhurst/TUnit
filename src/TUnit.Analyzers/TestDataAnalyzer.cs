@@ -30,7 +30,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.MatrixDataSourceAttributeRequired,
             Rules.TooManyArguments,
             Rules.InstanceMethodSource,
-            Rules.PotentialEmptyDataSource
+            Rules.PotentialEmptyDataSource,
+            Rules.AmbiguousMethodDataSourceOverload
         );
 
     protected override void InitializeInternal(AnalysisContext context)
@@ -418,14 +419,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 .FirstOrDefault(x => x.Key == "Arguments")
                 .Value;
 
-            var argumentForMethodCallTypes =
+            // Kept as TypedConstants (not just their types) so a null element can be told apart: its Type is the
+            // array's element type (object), which would otherwise fail to convert to every parameter type.
+            var argumentsForMethodCall =
                 argumentsNamedArgument.Kind == TypedConstantKind.Array
-                    ? argumentsNamedArgument
-                        .Values
-                        .Select(x => x.Type)
-                        .OfType<ITypeSymbol>()
-                        .ToArray()
-                    : Array.Empty<ITypeSymbol>();
+                    ? argumentsNamedArgument.Values.ToArray()
+                    : Array.Empty<TypedConstant>();
 
             // Look for methods first
             var methodSymbols = (type as INamedTypeSymbol)?.GetSelfAndBaseTypes()
@@ -433,10 +432,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 .OfType<IMethodSymbol>()
                 .ToArray() ?? Array.Empty<IMethodSymbol>();
 
+            // An overload that takes exactly the Arguments wins over one that also takes an injected trailing
+            // CancellationToken, as it does at runtime, whatever order the overloads are declared in.
             var dataSourceMethod = methodSymbols
                                                .FirstOrDefault(methodSymbol =>
                                                    methodSymbol.Name == methodName &&
-                                                   MatchesParameters(context, argumentForMethodCallTypes, methodSymbol))
+                                                   ArgumentsMatchParameterTypes(context, argumentsForMethodCall, methodSymbol.Parameters.Select(p => p.Type)))
+                                           ?? methodSymbols
+                                               .FirstOrDefault(methodSymbol =>
+                                                   methodSymbol.Name == methodName &&
+                                                   ArgumentsMatchParameterTypes(context, argumentsForMethodCall, methodSymbol.Parameters.WithoutCancellationTokenParameter().Select(p => p.Type)))
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
 
             // If no method found, check for properties or fields
@@ -460,6 +465,19 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 }
 
                 // Properties are valid data sources, no need to check return type for void
+                return;
+            }
+
+            var ambiguousOverloads = FindAmbiguousOverloads(context.Compilation, type, methodSymbols, methodName!, argumentsNamedArgument);
+            if (ambiguousOverloads is not null)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.AmbiguousMethodDataSourceOverload,
+                        attribute.GetLocation(),
+                        methodName,
+                        string.Join(", ", ambiguousOverloads.Select(m => m.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat))))
+                );
                 return;
             }
 
@@ -646,16 +664,13 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            var argumentsToParamsConversions = argumentForMethodCallTypes.ZipAll(dataSourceMethodParameterTypes,
-                (argument, parameterType) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameterType));
-
-            if (!argumentsToParamsConversions.All(x => x))
+            if (!ArgumentsMatchParameterTypes(context, argumentsForMethodCall, dataSourceMethodParameterTypes))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(
                         Rules.WrongArgumentTypeTestData,
                         attribute.GetLocation(),
-                        string.Join<ITypeSymbol>(", ", argumentForMethodCallTypes),
+                        string.Join(", ", argumentsForMethodCall.Select(x => x.IsNull ? "null" : x.Type?.ToString())),
                         string.Join<ITypeSymbol>(", ", dataSourceMethodParameterTypes),
                         "for the `Arguments` array")
                 );
@@ -725,11 +740,48 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private static bool MatchesParameters(SymbolAnalysisContext context, ITypeSymbol[] argumentForMethodCallTypes, IMethodSymbol methodSymbol)
+    private static bool ArgumentsMatchParameterTypes(SymbolAnalysisContext context, TypedConstant[] argumentsForMethodCall,
+        IEnumerable<ITypeSymbol> parameterTypes)
     {
-        return argumentForMethodCallTypes.ZipAll(methodSymbol.Parameters.Select(p => p.Type),
-                (argument, parameter) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter))
-            .All(x => x);
+        var parameterTypeArray = parameterTypes as ITypeSymbol[] ?? parameterTypes.ToArray();
+
+        // Checked up front: a missing argument would otherwise reach the comparison below as default(TypedConstant),
+        // whose IsNull is true, and pass for any parameter that accepts null.
+        if (argumentsForMethodCall.Length != parameterTypeArray.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < argumentsForMethodCall.Length; i++)
+        {
+            var argument = argumentsForMethodCall[i];
+            var matches = argument.IsNull
+                ? CanAcceptNull(parameterTypeArray[i])
+                : context.Compilation.HasImplicitConversionOrGenericParameter(argument.Type, parameterTypeArray[i]);
+
+            if (!matches)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Mirrors the null-argument overload selection in both execution modes (added in #7143): a null argument binds to
+    // any parameter that can hold null, i.e. anything other than a non-nullable value type.
+    private static bool CanAcceptNull(ITypeSymbol parameterType)
+    {
+        if (parameterType is ITypeParameterSymbol typeParameter)
+        {
+            // Neither mode infers a generic data source method's type arguments from a null argument.
+            return typeParameter.TypeParameterKind != TypeParameterKind.Method
+                   && !typeParameter.HasValueTypeConstraint
+                   && !typeParameter.HasUnmanagedTypeConstraint;
+        }
+
+        return !parameterType.IsValueType
+               || parameterType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
     }
 
     private ImmutableArray<ITypeSymbol> UnwrapTypes(SymbolAnalysisContext context,
@@ -1162,4 +1214,230 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         return false;
     }
+
+    // Reflection mode picks the data source overload with Type.GetMethod(name, flags, binder: null, argumentTypes, modifiers: null),
+    // so this mirrors the default binder: only overloads with exactly one parameter per argument are candidates, and
+    // when none of them is at least as specific as all the others, the binder throws AmbiguousMatchException.
+    // Source-gen mode would silently pick one of them instead, so report the ambiguity at compile time.
+    // Returns the tied overloads, or null when the Arguments select a single overload (or cannot be checked).
+    private static List<IMethodSymbol>? FindAmbiguousOverloads(Compilation compilation,
+        ITypeSymbol targetType,
+        IMethodSymbol[] methodSymbols,
+        string methodName,
+        TypedConstant argumentsNamedArgument)
+    {
+        ITypeSymbol[] argumentTypes;
+        if (argumentsNamedArgument.Kind == TypedConstantKind.Array)
+        {
+            // A null argument has no runtime type, so reflection mode falls back to a name-only lookup.
+            if (argumentsNamedArgument.Values.Any(x => x.IsNull || x.Type is null))
+            {
+                return null;
+            }
+
+            argumentTypes = argumentsNamedArgument.Values.Select(x => x.Type!).ToArray();
+        }
+        else
+        {
+            argumentTypes = Array.Empty<ITypeSymbol>();
+        }
+
+        var candidates = new List<IMethodSymbol>();
+        foreach (var method in methodSymbols)
+        {
+            // An override is the same runtime method as the member it overrides, which is also in the list.
+            if (method.Name != methodName
+                || method.Parameters.Length != argumentTypes.Length
+                || method.IsOverride)
+            {
+                continue;
+            }
+
+            // Reflection never returns private members inherited from a base type, even with FlattenHierarchy.
+            if (method.DeclaredAccessibility == Accessibility.Private
+                && !SymbolEqualityComparer.Default.Equals(method.ContainingType.OriginalDefinition, targetType.OriginalDefinition))
+            {
+                continue;
+            }
+
+            // A ref, in or out parameter has a by-ref runtime type (T&), which never matches the argument's type.
+            if (method.Parameters.Any(p => p.RefKind != RefKind.None))
+            {
+                continue;
+            }
+
+            // The binder does not infer type arguments: a parameter typed by a method type parameter never matches,
+            // while a generic method whose parameters do not use its type parameters competes like any other overload.
+            if (method.IsGenericMethod && method.Parameters.Any(p => ReferencesMethodTypeParameter(p.Type)))
+            {
+                continue;
+            }
+
+            var applicable = true;
+            for (var i = 0; i < argumentTypes.Length; i++)
+            {
+                if (!IsBinderConversion(compilation, argumentTypes[i], method.Parameters[i].Type))
+                {
+                    applicable = false;
+                    break;
+                }
+            }
+
+            if (applicable)
+            {
+                candidates.Add(method);
+            }
+        }
+
+        if (candidates.Count < 2)
+        {
+            return null;
+        }
+
+        foreach (var candidate in candidates)
+        {
+            if (candidates.All(other => ReferenceEquals(candidate, other) || IsAtLeastAsSpecific(compilation, candidate, other, argumentTypes)))
+            {
+                return null;
+            }
+        }
+
+        return candidates;
+    }
+
+    // Mirrors DefaultBinder.FindMostSpecificMethod: an overload wins when it is more specific for at least one
+    // parameter and less specific for none. Overloads with the same parameter types (a member hidden with `new`)
+    // are resolved by the binder in favour of the most derived declaration, so they never tie.
+    private static bool IsAtLeastAsSpecific(Compilation compilation, IMethodSymbol candidate, IMethodSymbol other, ITypeSymbol[] argumentTypes)
+    {
+        var otherWins = false;
+
+        for (var i = 0; i < argumentTypes.Length; i++)
+        {
+            var candidateType = candidate.Parameters[i].Type;
+            var otherType = other.Parameters[i].Type;
+
+            if (SymbolEqualityComparer.Default.Equals(candidateType, otherType))
+            {
+                continue;
+            }
+
+            switch (FindMostSpecificType(compilation, candidateType, otherType, argumentTypes[i]))
+            {
+                case 1:
+                    break;
+                case 2:
+                    otherWins = true;
+                    break;
+                default:
+                    return false;
+            }
+        }
+
+        return !otherWins;
+    }
+
+    // Mirrors DefaultBinder.FindMostSpecificType: 1 when the first type is more specific, 2 when the second is, 0 for a tie.
+    private static int FindMostSpecificType(Compilation compilation, ITypeSymbol first, ITypeSymbol second, ITypeSymbol argumentType)
+    {
+        if (SymbolEqualityComparer.Default.Equals(first, argumentType))
+        {
+            return 1;
+        }
+
+        if (SymbolEqualityComparer.Default.Equals(second, argumentType))
+        {
+            return 2;
+        }
+
+        var firstFromSecond = IsBinderConversion(compilation, second, first);
+        var secondFromFirst = IsBinderConversion(compilation, first, second);
+
+        if (firstFromSecond == secondFromFirst)
+        {
+            return 0;
+        }
+
+        return firstFromSecond ? 2 : 1;
+    }
+
+    private static bool ReferencesMethodTypeParameter(ITypeSymbol type) => type switch
+    {
+        ITypeParameterSymbol typeParameter => typeParameter.TypeParameterKind == TypeParameterKind.Method,
+        IArrayTypeSymbol array => ReferencesMethodTypeParameter(array.ElementType),
+        IPointerTypeSymbol pointer => ReferencesMethodTypeParameter(pointer.PointedAtType),
+        INamedTypeSymbol named => named.TypeArguments.Any(ReferencesMethodTypeParameter),
+        _ => false,
+    };
+
+    // Mirrors the default binder's applicability check (and Type.IsAssignableFrom in its specificity check):
+    // - a primitive parameter accepts only the CLR's primitive widening table, which is narrower than C#'s
+    //   implicit numeric conversions (no int -> decimal, no conversions to nint/nuint) and also allows byte -> char;
+    // - Nullable<T> is assignable from T, and Nullable<T> itself is assignable only to object and ValueType;
+    // - everything else uses reference and boxing conversions. User-defined conversions exist only in C#.
+    // An enum argument for a primitive parameter is accepted by the runtime (through its underlying type) but not
+    // here, so those overloads are skipped: that can miss an ambiguity but never reports a false one for them.
+    private static bool IsBinderConversion(Compilation compilation, ITypeSymbol from, ITypeSymbol to)
+    {
+        if (SymbolEqualityComparer.Default.Equals(from, to))
+        {
+            return true;
+        }
+
+        if (IsClrPrimitive(to.SpecialType))
+        {
+            return CanWidenPrimitive(from.SpecialType, to.SpecialType);
+        }
+
+        if (to.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
+        {
+            return to is INamedTypeSymbol { TypeArguments.Length: 1 } nullable
+                && SymbolEqualityComparer.Default.Equals(nullable.TypeArguments[0], from);
+        }
+
+        if (from.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
+        {
+            return to.SpecialType is SpecialType.System_Object or SpecialType.System_ValueType;
+        }
+
+        var conversion = compilation.ClassifyConversion(from, to);
+        return conversion.IsImplicit && (conversion.IsReference || conversion.IsBoxing);
+    }
+
+    private static bool IsClrPrimitive(SpecialType type) => type is SpecialType.System_Boolean
+        or SpecialType.System_Char
+        or SpecialType.System_SByte
+        or SpecialType.System_Byte
+        or SpecialType.System_Int16
+        or SpecialType.System_UInt16
+        or SpecialType.System_Int32
+        or SpecialType.System_UInt32
+        or SpecialType.System_Int64
+        or SpecialType.System_UInt64
+        or SpecialType.System_Single
+        or SpecialType.System_Double
+        or SpecialType.System_IntPtr
+        or SpecialType.System_UIntPtr;
+
+    // The runtime's primitive widening table (DefaultBinder.CanChangePrimitive), excluding identity.
+    private static bool CanWidenPrimitive(SpecialType from, SpecialType to) => from switch
+    {
+        SpecialType.System_Char => to is SpecialType.System_UInt16 or SpecialType.System_UInt32 or SpecialType.System_Int32
+            or SpecialType.System_UInt64 or SpecialType.System_Int64 or SpecialType.System_Single or SpecialType.System_Double,
+        SpecialType.System_SByte => to is SpecialType.System_Int16 or SpecialType.System_Int32 or SpecialType.System_Int64
+            or SpecialType.System_Single or SpecialType.System_Double,
+        SpecialType.System_Byte => to is SpecialType.System_Char or SpecialType.System_UInt16 or SpecialType.System_Int16
+            or SpecialType.System_UInt32 or SpecialType.System_Int32 or SpecialType.System_UInt64 or SpecialType.System_Int64
+            or SpecialType.System_Single or SpecialType.System_Double,
+        SpecialType.System_Int16 => to is SpecialType.System_Int32 or SpecialType.System_Int64 or SpecialType.System_Single
+            or SpecialType.System_Double,
+        SpecialType.System_UInt16 => to is SpecialType.System_UInt32 or SpecialType.System_Int32 or SpecialType.System_UInt64
+            or SpecialType.System_Int64 or SpecialType.System_Single or SpecialType.System_Double,
+        SpecialType.System_Int32 => to is SpecialType.System_Int64 or SpecialType.System_Single or SpecialType.System_Double,
+        SpecialType.System_UInt32 => to is SpecialType.System_UInt64 or SpecialType.System_Int64 or SpecialType.System_Single
+            or SpecialType.System_Double,
+        SpecialType.System_Int64 or SpecialType.System_UInt64 => to is SpecialType.System_Single or SpecialType.System_Double,
+        SpecialType.System_Single => to is SpecialType.System_Double,
+        _ => false,
+    };
 }
