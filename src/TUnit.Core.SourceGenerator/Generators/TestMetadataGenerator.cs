@@ -4030,6 +4030,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (returnType is INamedTypeSymbol { IsGenericType: true } namedType)
         {
+            // Roslyn displays Nullable<T> as `T?`, which has no open form to append `<>` to.
+            if (namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
+            {
+                return "global::System.Nullable<>";
+            }
+
             return $"{namedType.GloballyQualifiedNonGeneric()}<{new string(',', namedType.TypeArguments.Length - 1)}>";
         }
 

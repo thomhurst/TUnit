@@ -57,10 +57,12 @@ public class Issue7163Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    public async Task GenerateGenericTest_Runs_Uninferable_Rows_In_Both_Modes()
+    [Arguments("GenerateGenericTestWithObjectRowsTests")]
+    [Arguments("NullableGenericReturnTypeTests")]
+    public async Task GenerateGenericTest_Runs_In_Both_Modes(string className)
     {
         await RunTestsWithFilter(
-            $"{Namespace}/GenerateGenericTestWithObjectRowsTests/*",
+            $"{Namespace}/{className}/*",
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(1),

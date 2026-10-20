@@ -54,5 +54,9 @@ internal class Tests7163 : TestsBase
             var nestedReturnType = SourceFor("NestedGenericReturnTypeTests");
             await Assert.That(nestedReturnType).Contains("typeof(global::System.Threading.Tasks.Task<>)");
             await Assert.That(nestedReturnType).DoesNotContain("Task<T[]>");
+
+            var nullableReturnType = SourceFor("NullableGenericReturnTypeTests");
+            await Assert.That(nullableReturnType).Contains("typeof(global::System.Nullable<>)");
+            await Assert.That(nullableReturnType).DoesNotContain("T?<>");
         });
 }

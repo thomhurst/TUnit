@@ -124,3 +124,11 @@ public class NestedGenericReturnTypeTests
     [Test]
     public Task<T[]> Generic<T>() => Task.FromResult(Array.Empty<T>());
 }
+
+// Roslyn displays a Nullable<T> return type as `T?`, so it needs its own open form in the metadata.
+public class NullableGenericReturnTypeTests
+{
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    public T? Generic<T>() where T : struct => default;
+}
