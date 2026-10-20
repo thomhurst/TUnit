@@ -819,6 +819,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // every instantiation a class row establishes, since reflection mode runs them there too.
         List<AttributeData>? uninferredMethodDataSources = null;
 
+        // A generic method on a non-generic class without [GenerateGenericTest]: every method data source
+        // that infers an existing instantiation's types joins it (#7163). With [GenerateGenericTest], a later
+        // non-[Arguments] source inferring the same types is dropped, as reflection mode does (#7092).
+        var joinsDuplicateMethodSources = testMethod is { IsGenericMethod: true, IsGenericType: false }
+            && !testMethod.MethodAttributes.Any(static a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
+
         var classTypeArgCount = testMethod.IsGenericType ? testMethod.TypeSymbol.TypeParameters.Length : 0;
         var methodTypeArgCount = testMethod.IsGenericMethod ? testMethod.MethodSymbol.TypeParameters.Length : 0;
 
@@ -899,9 +905,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // A generic method on a non-generic class runs only the sources scoped to its
                     // instantiation, so any method data source that infers the same types as an earlier
                     // one (a second [MethodDataSource] declared like the first, say) joins it too.
-                    // Otherwise its rows would be dropped, or reported as uninferable (#7163).
+                    // Otherwise its rows would be reported as uninferable (#7163). Reflection mode drops
+                    // such a source when the method has [GenerateGenericTest], so it is dropped here too.
                     if (specificAttr?.AttributeClass?.Name == "ArgumentsAttribute"
-                        || (specificAttr is not null && !isClassRow && testMethod is { IsGenericMethod: true, IsGenericType: false }))
+                        || (specificAttr is not null && !isClassRow && joinsDuplicateMethodSources))
                     {
                         existing.AddRow(specificAttr, isClassRow);
                     }
