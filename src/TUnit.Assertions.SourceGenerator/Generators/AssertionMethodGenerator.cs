@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Assertions.SourceGenerator.Models;
 
@@ -339,7 +340,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 }
 
                 usedNames.Add(name);
-                _names[typeParameter] = name;
+                _names[typeParameter] = EscapeIdentifier(name);
             }
 
             TypeArgumentList = $"<{string.Join(", ", typeParameters.Select(NameOf))}>";
@@ -351,7 +352,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         public string TypeArgumentList { get; }
 
         public string NameOf(ITypeParameterSymbol typeParameter) =>
-            _names.TryGetValue(typeParameter, out var name) ? name : typeParameter.Name;
+            _names.TryGetValue(typeParameter, out var name) ? name : EscapeIdentifier(typeParameter.Name);
 
         /// <summary>Renders <paramref name="type"/> like <c>ToDisplayString()</c>, using the distinct type parameter names.</summary>
         public string Display(ITypeSymbol type)
@@ -367,6 +368,12 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             return builder.ToString();
         }
     }
+
+    /// <summary>
+    /// A name as it must be written in C# source: a keyword declared as <c>@class</c> is written <c>@class</c>.
+    /// </summary>
+    private static string EscapeIdentifier(string name) =>
+        SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
 
     private static bool IsValidReturnType(ITypeSymbol returnType, out ReturnTypeKind kind)
     {
@@ -773,7 +780,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         string? genericTypeParams = null;
         if (hasMethodTypeParameters)
         {
-            genericTypeParams = $"<{string.Join(", ", staticMethod.TypeParameters.Select(tp => tp.Name))}>";
+            genericTypeParams = $"<{string.Join(", ", staticMethod.TypeParameters.Select(tp => EscapeIdentifier(tp.Name)))}>";
         }
 
         // A generic method is called with explicit type arguments, since they cannot always be inferred from its
@@ -1258,7 +1265,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
             if (typeConstraints.Count > 0)
             {
-                constraints.Add($"where {names?.NameOf(typeParameter) ?? typeParameter.Name} : {string.Join(", ", typeConstraints)}");
+                constraints.Add($"where {names?.NameOf(typeParameter) ?? EscapeIdentifier(typeParameter.Name)} : {string.Join(", ", typeConstraints)}");
             }
         }
 
@@ -1322,7 +1329,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         string? methodGenericTypeParams = null;
         if (hasMethodTypeParameters)
         {
-            methodGenericTypeParams = $"<{string.Join(", ", method.TypeParameters.Select(tp => tp.Name))}>";
+            methodGenericTypeParams = $"<{string.Join(", ", method.TypeParameters.Select(tp => EscapeIdentifier(tp.Name)))}>";
         }
 
         // For an unbound generic target, types are rendered with the assertion class's distinct type parameter names

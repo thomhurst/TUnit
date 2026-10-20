@@ -302,6 +302,47 @@ internal class UnboundGenericAssertionFromTests : TestsBase
         await Assert.That(generated).Contains("where T : notnull");
     }
 
+    [Test]
+    public async Task Keyword_Type_Parameter_Names_Are_Escaped()
+    {
+        var (generatedFiles, errors) = RunGeneratorAndCompile("""
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Attributes;
+            using TUnit.Assertions.Extensions;
+
+            namespace Repro
+            {
+                public class Crate<@class> where @class : notnull
+                {
+                    public bool IsEmpty { get; set; }
+
+                    public bool Holds<@struct>(@struct item) where @struct : @class => item is not null;
+                }
+
+                [AssertionFrom(typeof(Crate<>), nameof(Crate<string>.IsEmpty))]
+                [AssertionFrom(typeof(Crate<>), nameof(Crate<string>.Holds))]
+                public static partial class KeywordAssertions;
+            }
+
+            public static class CallSites
+            {
+                public static async Task Use()
+                {
+                    await Assert.That(new Repro.Crate<object> { IsEmpty = true }).IsEmpty();
+                    await Assert.That(new Repro.Crate<object>()).Holds<object, string>("item");
+                }
+            }
+            """);
+
+        await Assert.That(errors).IsEmpty();
+
+        var generated = string.Join("\n", generatedFiles);
+        await Assert.That(generated).Contains("Assertion<@class> : Assertion<Repro.Crate<@class>>");
+        await Assert.That(generated).Contains("where @class : notnull");
+        await Assert.That(generated).Contains("where @struct : @class");
+    }
+
     private static (string[] GeneratedFiles, string[] Errors) RunGeneratorAndCompile(string source)
     {
         var compilation = CSharpCompilation.Create(
