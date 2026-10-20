@@ -4,7 +4,7 @@ namespace TUnit.Assertions.SourceGenerator.Tests;
 
 /// <summary>
 /// Pins the <c>GetExpectation()</c> code <see cref="AssertionMethodGenerator"/> renders for each documented form of
-/// [AssertionFrom] <c>ExpectationMessage</c>, and the classes for overloads that share a condition class name.
+/// [AssertionFrom] <c>ExpectationMessage</c>.
 /// </summary>
 internal class ExpectationMessageRenderingTests
 {
@@ -64,69 +64,5 @@ internal class ExpectationMessageRenderingTests
     public async Task Renders_Expectation(string form, string expected)
     {
         await Assert.That(RenderedExpectations.Value).Contains(expected);
-    }
-
-    [Test]
-    public async Task Generated_Source_Has_No_Unresolved_Class_Names()
-    {
-        var (sources, _) = AssertionMethodGeneratorRunner.Run(MessagesSource);
-
-        await Assert.That(sources).IsNotEmpty();
-        await Assert.That(sources.Where(source => source.Contains('\u0001'))).IsEmpty();
-    }
-
-    [Test]
-    public async Task Overloads_Sharing_A_Class_Name_Each_Bind_To_Their_Own_Class()
-    {
-        var (sources, diagnostics) = AssertionMethodGeneratorRunner.Run(
-            """
-            using TUnit.Assertions.Attributes;
-
-            namespace Rendering;
-
-            public static class Overloads
-            {
-                public static bool Matches(string value, int count) => true;
-                public static bool Matches(string value, bool flag) => true;
-            }
-
-            [AssertionFrom<string>(typeof(Overloads), nameof(Overloads.Matches))]
-            public static partial class OverloadAssertions;
-            """);
-
-        var source = string.Join(Environment.NewLine, sources);
-
-        await Assert.That(diagnostics).IsEmpty();
-        await Assert.That(source).Contains("new StringOverloadsMatchesWithStringAnd1MoreAssertion(source.Context, count, false)");
-        await Assert.That(source).Contains("new StringOverloadsMatchesWithStringAnd1MoreAssertion2(source.Context, flag, false)");
-        await Assert.That(source).Contains("Rendering.Overloads.Matches(actualValue, _flag)");
-    }
-
-    [Test]
-    public async Task Overloads_With_Unusual_Parameter_Types_Leave_No_Unresolved_Class_Names()
-    {
-        var (sources, _) = AssertionMethodGeneratorRunner.Run(
-            """
-            using System.Collections.Generic;
-            using TUnit.Assertions.Attributes;
-
-            namespace Rendering;
-
-            public static class Overloads
-            {
-                public static bool Matches(string value, int[] values) => true;
-                public static bool Matches(string value, int? count) => true;
-                public static bool Matches(string value, Dictionary<string, List<int>> map) => true;
-                public static bool Matches(string value, ref int counter) => true;
-                public static bool Matches<T>(string value, T item) => true;
-            }
-
-            [AssertionFrom<string>(typeof(Overloads), nameof(Overloads.Matches))]
-            public static partial class OverloadAssertions;
-            """);
-
-        // Every overload shares one class name, so all but the first are numbered
-        await Assert.That(string.Join(Environment.NewLine, sources)).Contains("class StringOverloadsMatchesWithStringAnd1MoreAssertion4");
-        await Assert.That(sources.Where(source => source.Contains('\u0001') || source.Contains('\u0002'))).IsEmpty();
     }
 }

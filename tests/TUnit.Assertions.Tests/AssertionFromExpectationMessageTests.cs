@@ -25,7 +25,7 @@ public static partial class SharedMethodStringAssertions;
 [AssertionFrom<string>(typeof(ExpectationMessageMethods), nameof(ExpectationMessageMethods.HasPrefix), ExpectationMessage = "start with {_prefix}")]
 public static partial class EscapingStringAssertions;
 
-// Three attributes on one method, each with its own message: the condition classes get numbered names.
+// Three attributes on one method, each with its own message: each gets its own condition class.
 [AssertionFrom<string>(nameof(string.EndsWith), CustomName = "EndsWithFirst", ExpectationMessage = "end with {value} (first)")]
 [AssertionFrom<string>(nameof(string.EndsWith), CustomName = "EndsWithSecond", ExpectationMessage = "end with {value} (second)")]
 [AssertionFrom<string>(nameof(string.EndsWith), CustomName = "EndsWithThird", ExpectationMessage = "end with {value} (third)")]
@@ -171,12 +171,16 @@ public class AssertionFromExpectationMessageTests
     }
 
     [Test]
-    public async Task Classes_Sharing_A_Method_Get_Numbered_Names()
+    public async Task Classes_Sharing_A_Method_Each_Get_Their_Own_Class()
     {
-        var assembly = typeof(AssertionFromExpectationMessageTests).Assembly;
+        var names = typeof(AssertionFromExpectationMessageTests).Assembly.GetTypes()
+            .Where(type => type.Namespace == "TUnit.Assertions.Extensions"
+                && System.Text.RegularExpressions.Regex.IsMatch(type.Name, "^StringEndsWithWithString([0-9A-F]{8})?Assertion$"))
+            .Select(type => type.Name)
+            .ToArray();
 
-        await Assert.That(assembly.GetType("TUnit.Assertions.Extensions.StringEndsWithWithStringAssertion")).IsNotNull();
-        await Assert.That(assembly.GetType("TUnit.Assertions.Extensions.StringEndsWithWithStringAssertion2")).IsNotNull();
-        await Assert.That(assembly.GetType("TUnit.Assertions.Extensions.StringEndsWithWithStringAssertion3")).IsNotNull();
+        // One keeps the plain name; the others are named with a hash of their source
+        await Assert.That(names).Count().IsEqualTo(3);
+        await Assert.That(names).Contains("StringEndsWithWithStringAssertion");
     }
 }

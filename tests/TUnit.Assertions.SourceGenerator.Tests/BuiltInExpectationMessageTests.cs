@@ -32,15 +32,6 @@ internal class BuiltInExpectationMessageTests
     }
 
     [Test]
-    [MethodDataSource(nameof(AssertionFromFiles))]
-    public async Task Generated_Source_Has_No_Unresolved_Class_Names(string file)
-    {
-        var (sources, _) = AssertionMethodGeneratorRunner.Run(File.ReadAllText(Path.Combine(Git.SourceDirectory.FullName, file)));
-
-        await Assert.That(sources.Where(source => source.Contains('\u0001'))).IsEmpty();
-    }
-
-    [Test]
     public async Task Built_In_Declarations_Render_Expectations()
     {
         // Guards the test above against passing vacuously, e.g. if the source files stop resolving.
