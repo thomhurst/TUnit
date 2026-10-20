@@ -492,7 +492,7 @@ internal sealed class TestGenericTypeResolver
             foreach (var nullArgumentParameter in nullArgumentParameters)
             {
                 if (!typeMapping.TryGetValue(nullArgumentParameter, out var inferredType)
-                    || (inferredType.IsValueType && Nullable.GetUnderlyingType(inferredType) is null))
+                    || CannotHoldNull(inferredType))
                 {
                     typeMapping[nullArgumentParameter] = typeof(object);
                 }
@@ -536,6 +536,15 @@ internal sealed class TestGenericTypeResolver
     /// parameter: a <c>params T[]</c>, or a plain single-dimensional <c>T[]</c>, which the
     /// reflection invoker also fills from loose values.
     /// </summary>
+    /// <summary>
+    /// Whether a type inferred for a method type parameter cannot hold a null passed to the same type parameter:
+    /// a value type other than <see cref="Nullable{T}"/>. Such a type parameter infers object instead (#7155).
+    /// Shared by every reflection-mode inference path, so they cannot drift apart; the source generator applies
+    /// the same rule to symbols in TestMetadataGenerator.InferTypesFromArgumentsAttribute.
+    /// </summary>
+    internal static bool CannotHoldNull(Type inferredType)
+        => inferredType.IsValueType && Nullable.GetUnderlyingType(inferredType) is null;
+
     private static bool HasGenericParamsArray(MethodMetadata methodMetadata, Type[] parameterTypes, int lastDataParameterIndex)
     {
         var parameters = methodMetadata.Parameters;

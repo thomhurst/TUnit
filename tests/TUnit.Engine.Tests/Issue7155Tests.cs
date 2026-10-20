@@ -25,4 +25,21 @@ public class Issue7155Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
+
+    /// <summary>
+    /// With a 'struct' constraint, the object inferred for a null row breaks the constraint, so each row fails
+    /// with the constraint message rather than running with the null turned into 0.
+    /// </summary>
+    [Test]
+    public async Task Null_And_Value_Type_Row_With_Struct_Constraint_Fails_With_The_Constraint_Message()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7155/NullAndValueTypeStructConstraintMethod/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(2),
+                result => result.Results.ShouldAllBe(x => x.Output!.ErrorInfo!.Message!.Contains(
+                    "Type 'Object' does not satisfy the 'struct' constraint for generic parameter 'T'"))
+            ]);
+    }
 }

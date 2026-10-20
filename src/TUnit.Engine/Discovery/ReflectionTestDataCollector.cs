@@ -14,6 +14,7 @@ using TUnit.Core.Helpers;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Discovery;
 
@@ -2144,7 +2145,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 var parameterType = parameters[i].ParameterType;
                 if (values[i] is null
                     && parameterType is { IsGenericParameter: true, DeclaringMethod: not null }
-                    && typeArguments[parameterType.GenericParameterPosition] is not { IsValueType: false })
+                    && (typeArguments[parameterType.GenericParameterPosition] is not { } inferredType
+                        || TestGenericTypeResolver.CannotHoldNull(inferredType)))
                 {
                     typeArguments[parameterType.GenericParameterPosition] = typeof(object);
                 }
@@ -2702,8 +2704,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             // A value type cannot hold a null passed to the same type parameter, so it
                             // infers object, as in TestGenericTypeResolver and the source generator (#7155).
                             // A Nullable<T> inferred from a nested type, such as List<int?>, holds the null.
-                            typeArguments[i] = inferredType.IsValueType
-                                && Nullable.GetUnderlyingType(inferredType) is null
+                            typeArguments[i] = TestGenericTypeResolver.CannotHoldNull(inferredType)
                                 && ReceivesNullArgument(genericParams[i], methodParams, args)
                                 ? typeof(object)
                                 : inferredType;
