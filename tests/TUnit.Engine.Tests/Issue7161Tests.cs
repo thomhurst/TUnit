@@ -13,6 +13,7 @@ public class Issue7161Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     [Arguments("ClassMethodDataSourceWithMethodRows", 2)]
     [Arguments("GenerateGenericTestTypeOnlyMethodRowsInfer", 2)]
+    [Arguments("GenericArgumentsArrayClassRow", 1)]
     public async Task Instance_Is_Built_From_Class_Data(string className, int expectedTests)
     {
         await RunTestsWithFilter(

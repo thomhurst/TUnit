@@ -61,3 +61,17 @@ public class GenericArgumentsClassRowWithUnmatchedMethodRow<T>(T value)
         await Assert.That(arg).IsEqualTo(value);
     }
 }
+
+// A class-level [Arguments<int[]>] row is one value, an array, so the class is built from that array
+// rather than from its elements.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments<int[]>(new[] { 1, 2 })]
+public class GenericArgumentsArrayClassRow<T>(T value)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int[]>();
+        await Assert.That((int[])(object)value!).IsEquivalentTo(new[] { 1, 2 });
+    }
+}

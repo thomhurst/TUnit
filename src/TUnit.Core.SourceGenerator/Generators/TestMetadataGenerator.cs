@@ -1407,9 +1407,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Bake the row's values in only when it is the instantiation's only class row. When several
         // class rows share it, each test's row reaches the constructor through args instead. A method
         // row's values are never constructor arguments: an instantiation that only method rows infer
-        // takes them from the class-level data sources, as reflection mode does (#7161).
+        // takes them from the class-level data sources, as reflection mode does (#7161). Only the
+        // non-generic [Arguments(params object?[])] holds its values in an array: the array of an
+        // [Arguments<int[]>] row is the row's one value, so that row reaches the constructor through args.
         else if (entry.HasParameterizedConstructor && entry.SpecificIsClassRow && entry.AdditionalClassArgumentsAttributes is null &&
-                 entry.SpecificArgumentsAttribute is { ConstructorArguments.Length: > 0 } specificAttr &&
+                 entry.SpecificArgumentsAttribute is { AttributeClass.IsGenericType: false, ConstructorArguments.Length: > 0 } specificAttr &&
                  specificAttr.ConstructorArguments[0].Kind == TypedConstantKind.Array)
         {
             var argumentValues = specificAttr.ConstructorArguments[0].Values;
