@@ -15,6 +15,7 @@ public class Issue7118Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("MixedRowsSeveralRowsPerType", 5)]
     [Arguments("MixedRowsWithUninferredMethodRow", 4)]
     [Arguments("ClassRowWithoutMatchingMethodRow", 1)]
+    [Arguments("MethodRowMatchedByTypedClassSource", 2)]
     public async Task Each_Method_Row_Runs_On_Its_Own_Instantiation(string className, int expectedTests)
     {
         await RunTestsWithFilter(

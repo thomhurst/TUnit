@@ -1334,12 +1334,38 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
 
+            // Class-level data sources other than [Arguments] rows. Reflection mode groups their rows by the
+            // types of their values, so one whose rows have this instantiation's class type arguments supplies
+            // its constructor arguments. The generator reads those types from a typed source's declared type
+            // arguments. It cannot see the row types of any other source, so such a source is kept as well.
+            List<(AttributeData Attribute, ITypeSymbol[]? ClassTypes)>? otherClassDataSources = null;
+            foreach (var attribute in testMethod.TypeSymbol.GetAttributes())
+            {
+                if (attribute.AttributeClass is { } attributeClass
+                    && attributeClass.Name != "ArgumentsAttribute"
+                    && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass))
+                {
+                    (otherClassDataSources ??= []).Add((attribute, InferClassTypesFromTypedClassDataSource(testMethod.TypeSymbol, attributeClass)));
+                }
+            }
+
             foreach (var instantiation in rowInstantiations.Values)
             {
                 if (instantiation.HasMethodRows && !instantiation.HasClassRows)
                 {
-                    instantiation.HasNoClassRow = generateGenericTestTypes is null
-                        || !generateGenericTestTypes.Any(types => InferredTypesMatch(types, instantiation.ClassTypeArgs));
+                    var hasClassDataSource = false;
+                    foreach (var (attribute, classTypes) in otherClassDataSources ?? [])
+                    {
+                        if (classTypes is null || InferredTypesMatch(classTypes, instantiation.ClassTypeArgs))
+                        {
+                            instantiation.AddRow(attribute, isClassRow: true);
+                            hasClassDataSource = true;
+                        }
+                    }
+
+                    instantiation.HasNoClassRow = !hasClassDataSource
+                        && (generateGenericTestTypes is null
+                            || !generateGenericTestTypes.Any(types => InferredTypesMatch(types, instantiation.ClassTypeArgs)));
                 }
                 else if (instantiation.HasClassRows && !instantiation.HasMethodRows)
                 {
@@ -7399,6 +7425,60 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 return null;
             }
             result[i] = inferredType;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The class type arguments that a class-level typed data source (<c>DataSourceGeneratorAttribute&lt;T...&gt;</c>)
+    /// infers through the constructor: its type arguments, or the elements of a single tuple type argument, are
+    /// the constructor parameters' types. Returns null for any other source, or when the types do not line up.
+    /// </summary>
+    private static ITypeSymbol[]? InferClassTypesFromTypedClassDataSource(INamedTypeSymbol classSymbol, INamedTypeSymbol attributeClass)
+    {
+        if (GetTypedDataSourceBase(attributeClass) is not { } typedBase)
+        {
+            return null;
+        }
+
+        var constructor = classSymbol.Constructors
+            .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
+            .OrderByDescending(c => c.Parameters.Length)
+            .FirstOrDefault();
+        if (constructor is not { Parameters.Length: > 0 })
+        {
+            return null;
+        }
+
+        var valueTypes = typedBase.TypeArguments;
+        if (valueTypes.Length != constructor.Parameters.Length
+            && valueTypes is [INamedTypeSymbol { IsTupleType: true } tupleType]
+            && tupleType.TupleElements.Length == constructor.Parameters.Length)
+        {
+            valueTypes = tupleType.TupleElements.Select(e => e.Type).ToImmutableArray();
+        }
+
+        if (valueTypes.Length != constructor.Parameters.Length)
+        {
+            return null;
+        }
+
+        var inferredTypes = new Dictionary<string, ITypeSymbol>();
+        for (var i = 0; i < valueTypes.Length; i++)
+        {
+            MapGenericTypeArguments(constructor.Parameters[i].Type, valueTypes[i], inferredTypes);
+        }
+
+        var result = new ITypeSymbol[classSymbol.TypeParameters.Length];
+        for (var i = 0; i < result.Length; i++)
+        {
+            if (!inferredTypes.TryGetValue(classSymbol.TypeParameters[i].Name, out var type))
+            {
+                return null;
+            }
+
+            result[i] = type;
         }
 
         return result;

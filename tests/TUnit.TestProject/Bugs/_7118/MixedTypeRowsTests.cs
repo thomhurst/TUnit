@@ -138,3 +138,37 @@ public class GenerateGenericTestOfUninferredType<T>(T value)
         await Assert.That(arg is int or string).IsTrue();
     }
 }
+
+// A class-level typed source supplies the constructor arguments of the instantiation its declared type
+// matches, so the method row inferring string runs on it: Test(2) on <int> with the class row, and Test("a")
+// on <string> with the typed source's row. A typed source of another type (int here) does not count.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+[StringClassSource7118]
+public class MethodRowMatchedByTypedClassSource<T>(T value)
+{
+    [Test]
+    [Arguments(2)]
+    [Arguments("a")]
+    public async Task Test(T arg)
+    {
+        if (typeof(T) == typeof(string))
+        {
+            await Assert.That(value).IsEqualTo((T)(object)"s");
+            await Assert.That(arg).IsEqualTo((T)(object)"a");
+        }
+        else
+        {
+            await Assert.That(value).IsEqualTo((T)(object)1);
+            await Assert.That(arg).IsEqualTo((T)(object)2);
+        }
+    }
+}
+
+public class StringClassSource7118 : DataSourceGeneratorAttribute<string>
+{
+    protected override IEnumerable<Func<string>> GenerateDataSources(DataGeneratorMetadata metadata)
+    {
+        yield return () => "s";
+    }
+}
