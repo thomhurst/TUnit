@@ -1431,14 +1431,25 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"throw new global::System.InvalidOperationException(\"{EscapeString(NoClassRowForMethodRowMessage)}\");");
         }
         // Bake the row's values in only when it is the instantiation's only class row. When several
-        // class rows share it, each test's row reaches the constructor through args instead.
-        else if (entry.HasParameterizedConstructor && entry.AdditionalClassArgumentsAttributes is null &&
-                 entry.SpecificArgumentsAttribute is { ConstructorArguments.Length: > 0 } specificAttr &&
+        // class rows share it, each test's row reaches the constructor through args instead. A method
+        // row's values are never constructor arguments: an instantiation that only method rows infer
+        // takes them from the class-level data sources, as reflection mode does (#7161). Only the
+        // non-generic [Arguments(params object?[])] holds its values in an array: the array of an
+        // [Arguments<int[]>] row is the row's one value, so that row reaches the constructor through args.
+        else if (entry.HasParameterizedConstructor && entry.SpecificIsClassRow && entry.AdditionalClassArgumentsAttributes is null &&
+                 entry.SpecificArgumentsAttribute is { AttributeClass.IsGenericType: false, ConstructorArguments.Length: > 0 } specificAttr &&
                  specificAttr.ConstructorArguments[0].Kind == TypedConstantKind.Array)
         {
             var argumentValues = specificAttr.ConstructorArguments[0].Values;
             var constructorArgs = string.Join(", ", argumentValues.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg)));
             writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), new object[] {{ {constructorArgs} }})!;");
+        }
+        else if (entry.HasParameterizedConstructor && !entry.HasClassRows && entry.ClassTypeArgs.Length > 0)
+        {
+            // No class row infers these types, so the constructor arguments come from class-level data
+            // sources of any type, such as a [MethodDataSource] or a class row of another type under a
+            // [GenerateGenericTest]. Convert them to the parameter types, as reflection mode does (#7161).
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol.Construct(entry.ClassTypeArgs)));
         }
         else if (entry.HasParameterizedConstructor)
         {
@@ -1824,9 +1835,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
 
-            classDataSources = typeSymbol.GetAttributesIncludingBaseTypes()
-                .Where(entry.IsSpecificClassDataSource)
-                .ToArray();
+            classDataSources = entry.HasClassRows || entry.HasNoClassRow
+                ? typeSymbol.GetAttributesIncludingBaseTypes()
+                    .Where(entry.IsSpecificClassDataSource)
+                    .ToArray()
+                // Only method rows inferred this instantiation, so no class row is scoped to it. Its
+                // constructor arguments come from every class-level data source, as for a
+                // [GenerateGenericTest] instantiation, and as reflection mode builds it (#7161).
+                : typeSymbol.GetAttributesIncludingBaseTypes()
+                    .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+                    .ToArray();
         }
         else
         {
@@ -6231,13 +6249,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var inferredTypes = new Dictionary<string, ITypeSymbol>();
         var typeParameters = classSymbol.TypeParameters;
 
+        ImmutableArray<TypedConstant> argumentValues;
+        if (argAttr.AttributeClass is { IsGenericType: true, TypeArguments.Length: 1 })
+        {
+            // [Arguments<T>(value)] is a class row of one value, as reflection mode reads it. A null value
+            // infers no class type.
+            if (argAttr.ConstructorArguments[0].IsNull)
+            {
+                return null;
+            }
+
+            argumentValues = ImmutableArray.Create(argAttr.ConstructorArguments[0]);
+        }
         // [Arguments(null)] passes one null value, from which no class type can be inferred (as in reflection mode)
-        if (!HasArgumentsArray(argAttr) || IsNullArgumentsArray(argAttr))
+        else if (!HasArgumentsArray(argAttr) || IsNullArgumentsArray(argAttr))
         {
             return null;
         }
-
-        var argumentValues = argAttr.ConstructorArguments[0].Values;
+        else
+        {
+            argumentValues = argAttr.ConstructorArguments[0].Values;
+        }
 
         // Find the primary constructor
         var primaryConstructor = classSymbol.Constructors
