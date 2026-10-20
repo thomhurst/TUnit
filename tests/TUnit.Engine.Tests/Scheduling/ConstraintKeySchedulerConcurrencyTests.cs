@@ -21,8 +21,11 @@ public class ConstraintKeySchedulerConcurrencyTests(TestMode testMode) : Invokab
         // It runs tests with overlapping constraint keys to verify the scheduler
         // can handle high contention without deadlocking
 
-        // Timeout proves no deadlock occurred - if tests complete before timeout, scheduler is working correctly
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        // Backstop against a wedged child process. A deadlocked test fails on its own 30 s [Timeout]
+        // inside ConstraintKeyStressTests, so this budget must also cover process start-up and
+        // reflection discovery of the whole TUnit.TestProject assembly, which alone can exceed
+        // 30 s on a loaded Windows runner (#7166).
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(3));
 
         await RunTestsWithFilter("/*/*/ConstraintKeyStressTests/*",
         [
