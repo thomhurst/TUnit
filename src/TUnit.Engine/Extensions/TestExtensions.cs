@@ -118,7 +118,7 @@ internal static class TestExtensions
                 }
             }
 
-            var trxTypeName = testDetails.MethodMetadata.Class.Type.FullName ?? testDetails.ClassType.FullName ?? "UnknownType";
+            var trxTypeName = GetReportedClassFullName(testDetails.MethodMetadata.Class.Type) ?? GetReportedClassFullName(testDetails.ClassType) ?? "UnknownType";
 
             TrxCategoriesProperty? trxCategories = null;
             if (categories is { Count: > 0 })
@@ -381,6 +381,18 @@ internal static class TestExtensions
         if (hasError) result[i++] = new StandardErrorTrxMessage(standardError!);
         if (hasSkip) result[i++] = new DebugOrTraceTrxMessage($"Skipped: {testContext.SkipReason}");
         return result;
+    }
+
+    /// <summary>
+    /// The class name reported to TRX and JSON output. A constructed generic class is reported by its
+    /// generic type definition (<c>Ns.Class`1</c>), as source-generated mode already does, so every
+    /// instantiation shares one name and reflection mode does not leak assembly-qualified type arguments.
+    /// </summary>
+    internal static string? GetReportedClassFullName(Type type)
+    {
+        return type.IsConstructedGenericType
+            ? type.GetGenericTypeDefinition().FullName
+            : type.FullName;
     }
 
     private static string[] CreateParameterTypeArray(ParameterMetadata[] parameters)
