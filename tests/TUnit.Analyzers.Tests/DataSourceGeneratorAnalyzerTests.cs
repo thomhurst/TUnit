@@ -217,6 +217,130 @@ public class DataSourceGeneratorAnalyzerTests
             );
     }
 
+    private const string MixedStreamSources =
+        """
+
+        public class StreamThenObjectAttribute : DataSourceGeneratorAttribute<MemoryStream, object>
+        {
+            protected override IEnumerable<Func<(MemoryStream, object)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+            {
+                yield return () => (new MemoryStream(), new MemoryStream());
+            }
+        }
+
+        public class ObjectThenStreamAttribute : DataSourceGeneratorAttribute<object, MemoryStream>
+        {
+            protected override IEnumerable<Func<(object, MemoryStream)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+            {
+                yield return () => (new MemoryStream(), new MemoryStream());
+            }
+        }
+        """;
+
+    [Test]
+    public async Task Typed_Source_Single_Type_Parameter_Uses_First_Type_Argument_Not_Position()
+    {
+        // Both execution modes infer a single type parameter from the source's first type argument (MemoryStream),
+        // wherever T appears in the signature, so the declared object of the second argument is not T's type.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                TypedStreamSources + MixedStreamSources +
+                """
+
+                public class MyClass
+                {
+                    [Test]
+                    [StreamThenObject]
+                    public Task MyTest<T>(MemoryStream first, T second) where T : IDisposable => Task.CompletedTask;
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Typed_Source_Single_Type_Parameter_Broad_First_Type_Argument_Explains_Declared_Type_Inference()
+    {
+        // T is inferred as object (the first type argument) even though its position receives a MemoryStream.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                TypedStreamSources + MixedStreamSources +
+                """
+
+                public class MyClass
+                {
+                    [Test]
+                    [{|#0:ObjectThenStream|}]
+                    public Task MyTest<T>(object first, T second) where T : IDisposable => Task.CompletedTask;
+                }
+                """,
+                Verifier.Diagnostic(Rules.GenericTypeArgumentInferredFromDeclaredType)
+                    .WithLocation(0)
+                    .WithArguments("T", "object")
+            );
+    }
+
+    private const string ArraySources =
+        """
+
+        public class ObjectArraysAttribute : DataSourceGeneratorAttribute<object[]>
+        {
+            protected override IEnumerable<Func<object[]>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+            {
+                yield return () => new[] { "a" };
+            }
+        }
+
+        public class StringArraysAttribute : DataSourceGeneratorAttribute<string[]>
+        {
+            protected override IEnumerable<Func<string[]>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+            {
+                yield return () => new[] { "a" };
+            }
+        }
+        """;
+
+    [Test]
+    public async Task Typed_Source_With_Covariant_Array_Declared_Type_Explains_Declared_Type_Inference()
+    {
+        // object[] is not an exact type: arrays of reference types are covariant, so the value may be a string[].
+        await Verifier
+            .VerifyAnalyzerAsync(
+                TypedStreamSources + ArraySources +
+                """
+
+                public class MyClass
+                {
+                    [Test]
+                    [{|#0:ObjectArrays|}]
+                    public Task MyTest<T>(T value) where T : IEnumerable<string> => Task.CompletedTask;
+                }
+                """,
+                Verifier.Diagnostic(Rules.GenericTypeArgumentInferredFromDeclaredType)
+                    .WithLocation(0)
+                    .WithArguments("T", "object[]")
+            );
+    }
+
+    [Test]
+    public async Task Typed_Source_With_Array_Of_Sealed_Type_Is_Exact()
+    {
+        // string is sealed, so a string[] value is always a string[]. Its constraint failure is not a declared-type
+        // inference problem and is left to the run-time constraint message.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                TypedStreamSources + ArraySources +
+                """
+
+                public class MyClass
+                {
+                    [Test]
+                    [StringArrays]
+                    public Task MyTest<T>(T value) where T : IDisposable => Task.CompletedTask;
+                }
+                """
+            );
+    }
+
     [Test]
     public async Task Typed_Source_With_Exact_Declared_Type_Violating_Constraint_Is_Left_To_Run_Time()
     {

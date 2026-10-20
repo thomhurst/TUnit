@@ -1006,17 +1006,33 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         ImmutableArray<ITypeSymbol> typeArguments,
         ImmutableArray<ITypeSymbol> testDataTypes)
     {
-        if (!testDataTypes.Any(t => t is ITypeParameterSymbol))
+        var method = testDataTypes.OfType<ITypeParameterSymbol>()
+            .Select(t => t.DeclaringMethod)
+            .FirstOrDefault(m => m is not null);
+        if (method is null)
         {
             return;
         }
 
-        var inferredTypeArguments = CompilationExtensions.InferTypeArguments(typeArguments, testDataTypes);
-
-        for (var i = 0; i < typeArguments.Length; i++)
+        // Use the type arguments both execution modes actually infer from the typed source, not the
+        // positional match against the test parameters: a single type parameter takes the source's first
+        // type argument wherever it appears in the signature.
+        var engineTypeArguments = InferMethodTypeArgumentsFromTypedSource(attribute.AttributeClass, method);
+        if (engineTypeArguments is null)
         {
-            var argument = typeArguments[i];
-            var parameter = testDataTypes[i];
+            return;
+        }
+
+        var inferredTypeArguments = new Dictionary<ITypeParameterSymbol, ITypeSymbol>(SymbolEqualityComparer.Default);
+        for (var i = 0; i < method.TypeParameters.Length; i++)
+        {
+            inferredTypeArguments[method.TypeParameters[i]] = engineTypeArguments[i];
+        }
+
+        for (var i = 0; i < method.TypeParameters.Length; i++)
+        {
+            var parameter = method.TypeParameters[i];
+            var argument = engineTypeArguments[i];
             // Only the broad declared-type case is reported. A typed source whose exact type breaks the
             // constraints was never flagged here and still fails at run time with the constraint message.
             if (!CompilationExtensions.IsBroadDeclaredTypeArgument(argument, parameter)
@@ -1031,6 +1047,49 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 argument.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
             return;
         }
+    }
+
+    /// <summary>
+    /// Mirrors the generator's <c>InferTypesFromDataSourceAttribute</c> and reflection mode's
+    /// <c>InferTypesFromTypedDataSource</c> for a generic test method on a non-generic class. The type arguments
+    /// come from the <c>DataSourceGeneratorAttribute</c> / <c>AsyncDataSourceGeneratorAttribute</c> base: one type
+    /// parameter takes the first type argument; otherwise a single tuple argument with one element per type
+    /// parameter, or one type argument per type parameter. Returns <see langword="null"/> when neither mode infers
+    /// the method's type arguments from this source.
+    /// </summary>
+    private static ITypeSymbol[]? InferMethodTypeArgumentsFromTypedSource(INamedTypeSymbol? attributeClass, IMethodSymbol method)
+    {
+        if (method.ContainingType.IsGenericType)
+        {
+            return null;
+        }
+
+        var typeParameterCount = method.TypeParameters.Length;
+        for (var baseType = attributeClass?.BaseType; baseType is not null; baseType = baseType.BaseType)
+        {
+            if (!baseType.IsGenericType
+                || baseType.Name is not ("DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute")
+                || baseType.ContainingNamespace?.ToDisplayString() != "TUnit.Core")
+            {
+                continue;
+            }
+
+            var typeArguments = baseType.TypeArguments;
+            if (typeParameterCount == 1 && typeArguments.Length >= 1)
+            {
+                return [typeArguments[0]];
+            }
+
+            if (typeArguments is [INamedTypeSymbol { IsTupleType: true } tupleType]
+                && tupleType.TupleElements.Length == typeParameterCount)
+            {
+                return tupleType.TupleElements.Select(e => e.Type).ToArray();
+            }
+
+            return typeArguments.Length == typeParameterCount ? typeArguments.ToArray() : null;
+        }
+
+        return null;
     }
 
     private static bool CanConvert(SymbolAnalysisContext context, TypedConstant argument, ITypeSymbol? methodParameterType)
