@@ -294,6 +294,14 @@ public class GenericMethodNonTupleMethodDataSourceTests
     }
 
     [Test]
+    [MethodDataSource(nameof(OverloadedRows))]
+    public async Task Parameterless_Overload_Selected_Without_Arguments<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)(-1));
+    }
+
+    [Test]
     [MethodDataSource(nameof(WideningRows), Arguments = new object[] { 13 })]
     public async Task Numeric_Argument_Is_Widened<T>(T value)
     {
