@@ -629,17 +629,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 // explain that source-generated mode infers the type argument from the declared type (#7116).
                 for (var i = 0; i < unwrappedTypes.Length && i < testParameterTypes.Length; i++)
                 {
-                    var argument = unwrappedTypes[i];
-                    var parameter = testParameterTypes[i];
-                    if (CompilationExtensions.IsBroadDeclaredTypeArgument(argument, parameter)
-                        && !context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments))
+                    if (TryReportDeclaredTypeInference(context, attribute.GetLocation(),
+                            unwrappedTypes[i], testParameterTypes[i], inferredTypeArguments))
                     {
-                        context.ReportDiagnostic(
-                            Diagnostic.Create(
-                                Rules.GenericTypeArgumentInferredFromDeclaredType,
-                                attribute.GetLocation(),
-                                parameter!.Name,
-                                argument!.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
                         return;
                     }
                 }
@@ -1031,22 +1023,40 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         for (var i = 0; i < method.TypeParameters.Length; i++)
         {
-            var parameter = method.TypeParameters[i];
-            var argument = engineTypeArguments[i];
             // Only the broad declared-type case is reported. A typed source whose exact type breaks the
             // constraints was never flagged here and still fails at run time with the constraint message.
-            if (!CompilationExtensions.IsBroadDeclaredTypeArgument(argument, parameter)
-                || context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments))
+            if (TryReportDeclaredTypeInference(context,
+                    attribute.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
+                    engineTypeArguments[i], method.TypeParameters[i], inferredTypeArguments))
             {
-                continue;
+                return;
             }
-
-            context.ReportDiagnostic(Diagnostic.Create(Rules.GenericTypeArgumentInferredFromDeclaredType,
-                attribute.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
-                parameter.Name,
-                argument.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
-            return;
         }
+    }
+
+    /// <summary>
+    /// Reports the declared-type TUnit0001 descriptor when <paramref name="argument"/> is a broad declared type
+    /// (inferred for a method type parameter) that cannot bind to <paramref name="parameter"/> (#7116).
+    /// Shared by the <c>[MethodDataSource]</c> and typed data source checks so both report the same case.
+    /// </summary>
+    /// <returns><see langword="true"/> when the diagnostic was reported.</returns>
+    private static bool TryReportDeclaredTypeInference(SymbolAnalysisContext context,
+        Location? location,
+        ITypeSymbol? argument,
+        ITypeSymbol? parameter,
+        IReadOnlyDictionary<ITypeParameterSymbol, ITypeSymbol>? inferredTypeArguments)
+    {
+        if (!CompilationExtensions.IsBroadDeclaredTypeArgument(argument, parameter)
+            || context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments))
+        {
+            return false;
+        }
+
+        context.ReportDiagnostic(Diagnostic.Create(Rules.GenericTypeArgumentInferredFromDeclaredType,
+            location,
+            parameter!.Name,
+            argument!.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+        return true;
     }
 
     private static bool CanConvert(SymbolAnalysisContext context, TypedConstant argument, ITypeSymbol? methodParameterType)
