@@ -70,6 +70,22 @@ internal sealed class GenericConstraintViolationTestMetadata : TestMetadata
             dataSources[i] = GenericConstraintViolationDataSource.Create(messages[i]);
         }
 
+        return Create(testClassType, methodName, methodMetadata, filePath, lineNumber, dataSources);
+    }
+
+    /// <summary>
+    /// Creates the metadata over <paramref name="dataSources"/>, which are
+    /// <see cref="GenericConstraintViolationDataSource"/> instances, some of them wrapping the row
+    /// whose inferred type arguments break the constraints.
+    /// </summary>
+    public static GenericConstraintViolationTestMetadata Create(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)] Type testClassType,
+        string methodName,
+        MethodMetadata methodMetadata,
+        string filePath,
+        int lineNumber,
+        IDataSourceAttribute[] dataSources)
+    {
         return new GenericConstraintViolationTestMetadata
         {
             TestName = methodName,

@@ -483,12 +483,16 @@ internal sealed class TestGenericTypeResolver
 
         // A null value passed straight to a method type parameter infers object, as in the source
         // generator and the reflection invoker ([Arguments(null)] runs as Test<object>(null), #7120).
-        // A non-null value for the same type parameter takes precedence, as the invoker's does.
+        // A non-null value for the same type parameter takes precedence, as the invoker's does, unless it
+        // infers a value type, which cannot hold the null: [Arguments(1, null)] runs as Run<object>(1, null),
+        // not Run<int>(1, 0) (#7155). A Nullable<T> inferred from a nested type, such as List<int?>, holds the
+        // null, so it stays, as in the source generator.
         if (nullArgumentParameters is not null)
         {
             foreach (var nullArgumentParameter in nullArgumentParameters)
             {
-                if (!typeMapping.ContainsKey(nullArgumentParameter))
+                if (!typeMapping.TryGetValue(nullArgumentParameter, out var inferredType)
+                    || CannotHoldNull(inferredType))
                 {
                     typeMapping[nullArgumentParameter] = typeof(object);
                 }
@@ -532,6 +536,15 @@ internal sealed class TestGenericTypeResolver
     /// parameter: a <c>params T[]</c>, or a plain single-dimensional <c>T[]</c>, which the
     /// reflection invoker also fills from loose values.
     /// </summary>
+    /// <summary>
+    /// Whether a type inferred for a method type parameter cannot hold a null passed to the same type parameter:
+    /// a value type other than <see cref="Nullable{T}"/>. Such a type parameter infers object instead (#7155).
+    /// Shared by every reflection-mode inference path, so they cannot drift apart; the source generator applies
+    /// the same rule to symbols in TestMetadataGenerator.InferTypesFromArgumentsAttribute.
+    /// </summary>
+    internal static bool CannotHoldNull(Type inferredType)
+        => inferredType.IsValueType && Nullable.GetUnderlyingType(inferredType) is null;
+
     private static bool HasGenericParamsArray(MethodMetadata methodMetadata, Type[] parameterTypes, int lastDataParameterIndex)
     {
         var parameters = methodMetadata.Parameters;
