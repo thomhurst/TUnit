@@ -3760,10 +3760,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         // The engine passes the test's token to every CancellationToken parameter wherever it is
         // declared, so they take no row value (as in reflection mode).
-        var parameters = methodSymbol.Parameters;
-        var parametersFromArgs = parameters.Where(p => !p.Type.IsCancellationToken()).ToArray();
-        return (parameters.Length - parametersFromArgs.Length, parametersFromArgs);
+        var parametersFromArgs = GetDataParameters(methodSymbol);
+        return (methodSymbol.Parameters.Length - parametersFromArgs.Length, parametersFromArgs);
     }
+
+    /// <summary>
+    /// The parameters a data row binds to: every parameter except CancellationTokens, which the
+    /// engine supplies wherever they are declared.
+    /// </summary>
+    private static IParameterSymbol[] GetDataParameters(IMethodSymbol methodSymbol)
+        => methodSymbol.Parameters.Where(p => !p.Type.IsCancellationToken()).ToArray();
 
     private static HashSet<string> ExtractCategories(TestMethodMetadata testMethod)
     {
@@ -6340,11 +6346,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             if (nullArgumentsArrayInfersObject
                 && classTypeParameters.Length == 1
-                && methodSymbol.Parameters.Length > 0
+                && GetDataParameters(methodSymbol) is [var firstDataParameter, ..]
                 // A by-reference parameter cannot be passed the row's value, and reflection mode infers
                 // nothing for it (its type is T&, not T), so the row stays without an instantiation.
-                && methodSymbol.Parameters[0].RefKind == RefKind.None
-                && methodSymbol.Parameters[0].Type is ITypeParameterSymbol { DeclaringMethod: null } nullTypeParam
+                && firstDataParameter.RefKind == RefKind.None
+                && firstDataParameter.Type is ITypeParameterSymbol { DeclaringMethod: null } nullTypeParam
                 && SymbolEqualityComparer.Default.Equals(nullTypeParam, classTypeParameters[0]))
             {
                 return [compilation.GetSpecialType(SpecialType.System_Object)];
@@ -6354,19 +6360,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         var argumentValues = argAttr.ConstructorArguments[0].Values;
-        var methodParams = methodSymbol.Parameters;
+        // The engine supplies CancellationToken parameters, so the row's values bind to the others.
+        var methodParams = GetDataParameters(methodSymbol);
 
         // For each value in the params array
         for (var argIndex = 0; argIndex < argumentValues.Length && argIndex < methodParams.Length; argIndex++)
         {
             var methodParam = methodParams[argIndex];
             var argValue = argumentValues[argIndex];
-
-            // Skip if this is a CancellationToken parameter
-            if (methodParam.Type.Name == "CancellationToken")
-            {
-                continue;
-            }
 
             // Check if the method parameter type is a class generic type parameter
             if (methodParam.Type is ITypeParameterSymbol { DeclaringMethod: null } typeParam)
@@ -6924,8 +6925,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        // Extract the types from the tuple elements that correspond to the generic parameters
-        var testMethodParams = testMethod.MethodSymbol.Parameters;
+        // Extract the types from the tuple elements that correspond to the generic parameters.
+        // CancellationToken parameters are supplied by the engine, not by the row.
+        var testMethodParams = GetDataParameters(testMethod.MethodSymbol);
         var genericParams = testMethod.MethodSymbol.TypeParameters;
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
@@ -7013,12 +7015,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Get class type parameters
         var classTypeParams = testMethod.TypeSymbol.TypeParameters;
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
+        // CancellationToken parameters are supplied by the engine, not by the row.
+        var testMethodParams = GetDataParameters(testMethod.MethodSymbol);
 
         // If it's a tuple, map tuple elements to method parameters
         if (dataType.IsTupleType)
         {
             var tupleElements = dataType.TupleElements;
-            var testMethodParams = testMethod.MethodSymbol.Parameters;
 
             for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
             {
@@ -7030,9 +7033,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
         // If it's a single type that matches a class type parameter
-        else if (testMethod.MethodSymbol.Parameters.Length == 1)
+        else if (testMethodParams.Length == 1)
         {
-            var paramType = testMethod.MethodSymbol.Parameters[0].Type;
+            var paramType = testMethodParams[0].Type;
             ProcessTypeForGenerics(paramType, dataType, classTypeParams, genericParamMap);
         }
 

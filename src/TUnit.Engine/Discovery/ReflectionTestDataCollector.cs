@@ -926,9 +926,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var typeMapping = new Dictionary<Type, Type>();
         Dictionary<Type, Type>? parameterMapping = null;
 
-        for (var i = 0; i < parameters.Length && i < values.Length; i++)
+        // The engine supplies CancellationToken parameters, so the row's values bind to the others.
+        var valueIndex = 0;
+        for (var i = 0; i < parameters.Length && valueIndex < values.Length; i++)
         {
             var parameterType = parameters[i].ParameterType;
+            if (parameterType == typeof(CancellationToken))
+            {
+                continue;
+            }
+
+            var rowValue = values[valueIndex++];
             if (!parameterType.ContainsGenericParameters)
             {
                 continue;
@@ -936,7 +944,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             // Match the source generator: Roslyn types a null element of the params object?[]
             // argument as object
-            var argumentType = values[i] is { } value ? GetArgumentInferenceType(value) : typeof(object);
+            var argumentType = rowValue is { } value ? GetArgumentInferenceType(value) : typeof(object);
 
             // Also match its first-wins rule across parameters: the first parameter that uses a type
             // parameter fixes it, so Run(T first, T second) with [Arguments(null, 1)] infers T = object

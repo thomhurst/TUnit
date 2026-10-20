@@ -159,4 +159,41 @@ public class TupleParameterWithCancellationTokenTests
         await Assert.That(values).IsEquivalentTo([1, 2]);
         await Assert.That(token.CanBeCanceled).IsTrue();
     }
+
+    // A wrapped tuple row spreads across the data parameters; a trailing array collects every
+    // remaining element, however many CancellationToken parameters the method declares.
+
+    [Test]
+    [WrappedTupleRow]
+    public async Task Wrapped_Tuple_Middle_Token_Params(int first, CancellationToken token, params int[] rest)
+    {
+        await Assert.That(first).IsEqualTo(1);
+        await Assert.That(rest).IsEquivalentTo([2, 3]);
+        await Assert.That(token.CanBeCanceled).IsTrue();
+    }
+
+    [Test]
+    [WrappedTupleRow]
+    public async Task Wrapped_Tuple_Params_Trailing_Token(int first, int[] rest, CancellationToken token)
+    {
+        await Assert.That(first).IsEqualTo(1);
+        await Assert.That(rest).IsEquivalentTo([2, 3]);
+        await Assert.That(token.CanBeCanceled).IsTrue();
+    }
+
+    [Test]
+    [WrappedTupleRow]
+    public async Task Wrapped_Tuple_Params_No_Token(int first, params int[] rest)
+    {
+        await Assert.That(first).IsEqualTo(1);
+        await Assert.That(rest).IsEquivalentTo([2, 3]);
+    }
+
+    public sealed class WrappedTupleRowAttribute : UntypedDataSourceGeneratorAttribute
+    {
+        protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+        {
+            yield return () => [(1, 2, 3)];
+        }
+    }
 }
