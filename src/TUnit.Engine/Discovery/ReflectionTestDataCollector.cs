@@ -1823,15 +1823,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
 
-        // The generator only infers method type arguments from typed sources when the class is not generic
-        if (method.DeclaringType is { IsGenericType: false })
+        // On a generic class too (#7164), as the generator does
+        var classGenericParameterCount = method.DeclaringType is { IsGenericType: true } declaringType
+            ? declaringType.GetGenericArguments().Length
+            : 0;
+        foreach (var dataSource in dataSources)
         {
-            foreach (var dataSource in dataSources)
+            if (dataSource is not ArgumentsAttribute)
             {
-                if (dataSource is not ArgumentsAttribute)
-                {
-                    AddInstantiation(InferTypesFromTypedDataSource(dataSource, genericParameterCount), dataSource);
-                }
+                AddInstantiation(InferTypesFromTypedDataSource(dataSource, genericParameterCount, classGenericParameterCount), dataSource);
             }
         }
 
@@ -1894,9 +1894,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// Mirrors the generator's <c>InferTypesFromDataSourceAttribute</c> for generic methods: reads the type
     /// arguments of the <c>DataSourceGeneratorAttribute</c> / <c>AsyncDataSourceGeneratorAttribute</c> base.
     /// One type parameter takes the first type argument; otherwise a single tuple argument with one element
-    /// per type parameter, or one type argument per type parameter.
+    /// per type parameter, or one type argument per type parameter. On a generic class, a source whose type
+    /// arguments cover the class type parameters as well infers none: the generator closes the class and the
+    /// method over them together, so the class was already closed over them here.
     /// </summary>
-    private static Type[]? InferTypesFromTypedDataSource(IDataSourceAttribute dataSource, int genericParameterCount)
+    private static Type[]? InferTypesFromTypedDataSource(IDataSourceAttribute dataSource, int genericParameterCount, int classGenericParameterCount)
     {
         for (var baseType = dataSource.GetType().BaseType; baseType is not null; baseType = baseType.BaseType)
         {
@@ -1914,6 +1916,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
 
             var typeArguments = baseType.GetGenericArguments();
+
+            if (classGenericParameterCount > 0)
+            {
+                var combinedCount = classGenericParameterCount + genericParameterCount;
+                if (typeArguments.Length == combinedCount
+                    || (typeArguments is [{ } combinedTuple] && GetValueTupleElementTypes(combinedTuple)?.Length == combinedCount))
+                {
+                    return null;
+                }
+            }
 
             if (genericParameterCount == 1 && typeArguments.Length >= 1)
             {

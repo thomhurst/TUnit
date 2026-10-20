@@ -1311,10 +1311,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                 }
 
-                // A typed data source (DataSourceGeneratorAttribute<T>) infers no method type arguments
-                // on a generic class in either mode (InferTypesFromDataSourceAttribute here, and
-                // ReflectionTestDataCollector.InferMethodInstantiationsFromDataSources), so it is not a
-                // method source: it runs on every instantiation like any other method data source.
+                // A typed data source (DataSourceGeneratorAttribute<T>) infers the method type arguments
+                // as on a non-generic class (#7164). One whose type arguments cover the class type
+                // parameters as well is not a method source: it closes the class and the method itself.
+                foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+                {
+                    if (InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr) is { } types && types.Length == methodTypeArgCount)
+                    {
+                        methodSources.Add((types, dataSourceAttr));
+                    }
+                }
+
                 if (InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol) is { } inferringTypes && inferringTypes.Length == methodTypeArgCount)
                 {
                     methodSources.Add((inferringTypes, null));
@@ -6499,29 +6506,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // For generic method inference
                     if (method.IsGenericMethod && !method.ContainingType.IsGenericType)
                     {
-                        // Single type parameter method
-                        if (method.TypeParameters.Length == 1 && typeArgs.Length >= 1)
-                        {
-                            return new[] { typeArgs[0] };
-                        }
-
-                        // Multiple type parameters - check for tuple
-                        if (typeArgs is
-                            [
-                                INamedTypeSymbol { IsTupleType: true } tupleType
-                            ])
-                        {
-                            if (tupleType.TupleElements.Length == method.TypeParameters.Length)
-                            {
-                                return tupleType.TupleElements.Select(e => e.Type).ToArray();
-                            }
-                        }
-
-                        // Direct match for multiple type args
-                        if (typeArgs.Length == method.TypeParameters.Length)
-                        {
-                            return typeArgs.ToArray();
-                        }
+                        return InferMethodTypesFromTypedDataSourceArguments(method, typeArgs);
                     }
                     // For generic class inference (non-generic method)
                     else if (!method.IsGenericMethod && method.ContainingType.IsGenericType)
@@ -6574,10 +6559,48 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         {
                             return typeArgs.ToArray();
                         }
+
+                        // Otherwise the method type arguments alone, as on a non-generic class (#7164).
+                        // Reflection mode's InferTypesFromTypedDataSource applies the same rules.
+                        return InferMethodTypesFromTypedDataSourceArguments(method, typeArgs);
                     }
                 }
             }
             baseType = baseType.BaseType;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The type arguments of a generic test method inferred from those of a typed data source: one type
+    /// parameter takes the first type argument; otherwise a single tuple argument with one element per type
+    /// parameter, or one type argument per type parameter.
+    /// </summary>
+    private static ITypeSymbol[]? InferMethodTypesFromTypedDataSourceArguments(IMethodSymbol method, ImmutableArray<ITypeSymbol> typeArgs)
+    {
+        // Single type parameter method
+        if (method.TypeParameters.Length == 1 && typeArgs.Length >= 1)
+        {
+            return new[] { typeArgs[0] };
+        }
+
+        // Multiple type parameters - check for tuple
+        if (typeArgs is
+            [
+                INamedTypeSymbol { IsTupleType: true } tupleType
+            ])
+        {
+            if (tupleType.TupleElements.Length == method.TypeParameters.Length)
+            {
+                return tupleType.TupleElements.Select(e => e.Type).ToArray();
+            }
+        }
+
+        // Direct match for multiple type args
+        if (typeArgs.Length == method.TypeParameters.Length)
+        {
+            return typeArgs.ToArray();
         }
 
         return null;
