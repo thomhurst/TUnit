@@ -252,6 +252,58 @@ internal class UnboundGenericAssertionFromTests : TestsBase
     }
 
     [Test]
+    public async Task Renaming_A_Colliding_Generic_Class_Leaves_Overloads_Of_Another_Arity_Alone()
+    {
+        // Two.Box.Check<T>() collides with One.Box.Check<T>() and is renamed, while Two.Box.Check<T, U>() does not
+        // collide and keeps its name. Both are generic, so telling their references apart needs the type argument
+        // count, not just whether there are type arguments.
+        var (generatedFiles, errors) = RunGeneratorAndCompile("""
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Attributes;
+            using TUnit.Assertions.Extensions;
+
+            namespace Repro.One
+            {
+                public class Box { public bool Check<T>() => true; }
+
+                [AssertionFrom(typeof(Box), nameof(Box.Check))]
+                public static partial class OneAssertions;
+            }
+
+            namespace Repro.Two
+            {
+                public class Box
+                {
+                    public bool Check<T>() => true;
+                    public bool Check<T, U>() => true;
+                }
+
+                [AssertionFrom(typeof(Box), nameof(Box.Check))]
+                public static partial class TwoAssertions;
+            }
+
+            public static class CallSites
+            {
+                public static async Task Use()
+                {
+                    await Assert.That(new Repro.One.Box()).Check<int>();
+                    await Assert.That(new Repro.Two.Box()).Check<int>();
+                    await Assert.That(new Repro.Two.Box()).Check<int, string>();
+                }
+            }
+            """);
+
+        await Assert.That(errors).IsEmpty();
+
+        var generated = string.Join("\n", generatedFiles);
+        await Assert.That(generated).Contains("public class BoxCheckAssertion<T> : Assertion<Repro.One.Box>");
+        await Assert.That(generated).Contains("public class ReproTwoBoxCheckAssertion<T> : Assertion<Repro.Two.Box>");
+        await Assert.That(generated).Contains("public class BoxCheckAssertion<T, U> : Assertion<Repro.Two.Box>");
+        await Assert.That(generated).DoesNotContain("ReproTwoBoxCheckAssertion<T, U>");
+    }
+
+    [Test]
     public async Task Renamed_Type_Parameters_Keep_Their_Constraints()
     {
         var (generatedFiles, errors) = RunGeneratorAndCompile("""

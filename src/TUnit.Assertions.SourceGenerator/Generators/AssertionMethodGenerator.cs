@@ -572,9 +572,9 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     /// <summary>
     /// Renames the identifier <paramref name="from"/> to <paramref name="to"/> in <paramref name="source"/>, token by
     /// token, so a name inside a longer identifier or a string literal is left alone. With an
-    /// <paramref name="arity"/>, only references with that many type arguments (none, or some) are renamed, so a
-    /// same-named class of another arity keeps its name. Only runs for the rare class that has to be renamed because
-    /// another class would be emitted under the same name.
+    /// <paramref name="arity"/>, only references with exactly that many type arguments are renamed, so a same-named
+    /// class of another arity keeps its name. Only runs for the rare class that has to be renamed because another
+    /// class would be emitted under the same name.
     /// </summary>
     private static string RenameIdentifier(string source, string from, string to, int? arity = null)
     {
@@ -583,8 +583,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         for (var i = 0; i < tokens.Length; i++)
         {
             var token = tokens[i];
-            var isGeneric = i + 1 < tokens.Length && tokens[i + 1].IsKind(SyntaxKind.LessThanToken);
-            if (token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == from && (arity is null || isGeneric == arity > 0))
+            if (token.IsKind(SyntaxKind.IdentifierToken) && token.ValueText == from && (arity is null || TypeArgumentCount(tokens, i + 1) == arity))
             {
                 builder.Append(token.LeadingTrivia.ToFullString()).Append(to).Append(token.TrailingTrivia.ToFullString());
             }
@@ -595,6 +594,46 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         }
 
         return builder.ToString();
+    }
+
+    /// <summary>
+    /// The number of type arguments in the type argument list starting at <paramref name="start"/>, or 0 when there is
+    /// none. Only commas at the list's own depth count, so <c>&lt;Dictionary&lt;int, string&gt;, T&gt;</c> has two.
+    /// </summary>
+    private static int TypeArgumentCount(SyntaxToken[] tokens, int start)
+    {
+        if (start >= tokens.Length || !tokens[start].IsKind(SyntaxKind.LessThanToken))
+        {
+            return 0;
+        }
+
+        var count = 1;
+        var depth = 0;
+        for (var i = start; i < tokens.Length; i++)
+        {
+            switch (tokens[i].Kind())
+            {
+                case SyntaxKind.LessThanToken:
+                    depth++;
+                    break;
+                case SyntaxKind.GreaterThanToken:
+                    depth--;
+                    break;
+                case SyntaxKind.GreaterThanGreaterThanToken:
+                    depth -= 2;
+                    break;
+                case SyntaxKind.CommaToken when depth == 1:
+                    count++;
+                    break;
+            }
+
+            if (depth <= 0)
+            {
+                return count;
+            }
+        }
+
+        return count;
     }
 
     private static AssertionClassModel BuildClassModel(INamedTypeSymbol classSymbol, List<CreateAssertionAttributeData> attributeDataList)
