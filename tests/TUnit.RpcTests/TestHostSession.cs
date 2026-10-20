@@ -4,6 +4,7 @@ using CliWrap;
 using StreamJsonRpc;
 using TUnit.RpcTests.Clients;
 using TUnit.RpcTests.Models;
+using TUnit.Tests.Shared;
 
 namespace TUnit.RpcTests;
 
@@ -46,7 +47,7 @@ internal sealed class TestHostSession : IAsyncDisposable
         listener.Start();
         var port = ((IPEndPoint)listener.LocalEndpoint).Port;
 
-        var cliProcess = Cli.Wrap("dotnet")
+        var cliProcess = Cli.Wrap(DotNetCli.Path)
             .WithWorkingDirectory(TestProjectBuilds.WorkingDirectory)
             .WithArguments([
                 "run",

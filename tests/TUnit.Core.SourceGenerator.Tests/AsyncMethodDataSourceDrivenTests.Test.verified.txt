@@ -250,10 +250,11 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncDataMethodWithArgs")
     {
+        Arguments = new object[] { 5 },
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
         {
-            var arguments = global::System.Array.Empty<object?>();
-            return global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithArgs(((int)(arguments.Length > 0 ? arguments[0] : throw new global::System.InvalidOperationException("[MethodDataSource] AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithArgs needs a value for parameter 'baseValue', but its Arguments supply 0. Pass a value for every required parameter of the data method."))));
+            var arguments = new object[] { 5 };
+            return global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithArgs(((int)arguments[0]));
         }),
     },
 },

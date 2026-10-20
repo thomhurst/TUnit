@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.Generators;
 
-namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
+namespace TUnit.SourceGenerator.IncrementalTests;
 
 public class HookMetadataGeneratorIncrementalTests
 {
@@ -20,22 +20,22 @@ public class HookMetadataGeneratorIncrementalTests
         }
         """;
 
-    [Fact]
-    public void AddUnrelatedType_ShouldNotRegenerate()
+    [Test]
+    public async Task AddUnrelatedType_ShouldNotRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
         var driver1 = TestHelper.GenerateTracked<HookMetadataGenerator>(compilation1);
-        AssertRunReason(driver1, IncrementalStepRunReason.New);
+        await AssertRunReason(driver1, IncrementalStepRunReason.New);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReason(driver2, IncrementalStepRunReason.Cached);
-        TestHelper.AssertRunReason(driver2.GetRunResult().Results[0], HookMetadataGenerator.HookClassGroups, IncrementalStepRunReason.Cached, 0);
+        await AssertRunReason(driver2, IncrementalStepRunReason.Cached);
+        await TestHelper.AssertRunReason(driver2.GetRunResult().Results[0], HookMetadataGenerator.HookClassGroups, IncrementalStepRunReason.Cached, 0);
     }
 
-    [Fact]
-    public void TypesWithSameSanitizedName_ShouldGenerateDistinctFilesAndMembers()
+    [Test]
+    public async Task TypesWithSameSanitizedName_ShouldGenerateDistinctFilesAndMembers()
     {
         // A_B.C and A.B_C both sanitize to A_B_C. Hint names and the members emitted into the shared
         // TUnit_HookRegistration partial class must still be unique.
@@ -71,18 +71,18 @@ public class HookMetadataGeneratorIncrementalTests
         var driver = TestHelper.GenerateTracked<HookMetadataGenerator>(compilation);
         var runResult = driver.GetRunResult();
 
-        Xunit.Assert.Empty(runResult.Diagnostics);
-        var generatorResult = Xunit.Assert.Single(runResult.Results);
-        Xunit.Assert.Null(generatorResult.Exception);
-        Xunit.Assert.Equal(2, generatorResult.GeneratedSources.Length);
-        Xunit.Assert.Equal(2, generatorResult.GeneratedSources.Select(static s => s.HintName).Distinct().Count());
+        await Assert.That(runResult.Diagnostics).IsEmpty();
+        var generatorResult = await Assert.That(runResult.Results).HasSingleItem();
+        await Assert.That(generatorResult.Exception).IsNull();
+        await Assert.That(generatorResult.GeneratedSources.Length).IsEqualTo(2);
+        await Assert.That(generatorResult.GeneratedSources.Select(static s => s.HintName).Distinct().Count()).IsEqualTo(2);
 
         var outputCompilation = compilation.AddSyntaxTrees(generatorResult.GeneratedSources.Select(static s => s.SyntaxTree));
-        Xunit.Assert.Empty(outputCompilation.GetDiagnostics().Where(static d => d.Severity == DiagnosticSeverity.Error));
+        await Assert.That(outputCompilation.GetDiagnostics().Where(static d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
     }
 
-    [Fact]
-    public void ChangeHookInOneClass_ShouldOnlyModifyThatClassGroup()
+    [Test]
+    public async Task ChangeHookInOneClass_ShouldOnlyModifyThatClassGroup()
     {
         const string source =
             """
@@ -122,17 +122,17 @@ public class HookMetadataGeneratorIncrementalTests
         var driver2 = driver1.RunGenerators(compilation2);
         var runResult = driver2.GetRunResult().Results[0];
 
-        TestHelper.AssertRunReason(runResult, HookMetadataGenerator.HookClassGroups, IncrementalStepRunReason.Unchanged, 0);
-        TestHelper.AssertRunReason(runResult, HookMetadataGenerator.HookClassGroups, IncrementalStepRunReason.Modified, 1);
+        await TestHelper.AssertRunReason(runResult, HookMetadataGenerator.HookClassGroups, IncrementalStepRunReason.Unchanged, 0);
+        await TestHelper.AssertRunReason(runResult, HookMetadataGenerator.HookClassGroups, IncrementalStepRunReason.Modified, 1);
     }
 
-    [Fact]
-    public void MoveHookToDifferentLine_ShouldRegenerate()
+    [Test]
+    public async Task MoveHookToDifferentLine_ShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
         var driver1 = TestHelper.GenerateTracked<HookMetadataGenerator>(compilation1);
-        AssertRunReason(driver1, IncrementalStepRunReason.New);
+        await AssertRunReason(driver1, IncrementalStepRunReason.New);
 
         // Same hook shifted down two lines: the emitted LineNumber must follow it.
         var compilation2 = compilation1.ReplaceSyntaxTree(
@@ -140,16 +140,16 @@ public class HookMetadataGeneratorIncrementalTests
             CSharpSyntaxTree.ParseText(DefaultSource.Replace("public class HookTests", "\n\npublic class HookTests"), CSharpParseOptions.Default));
 
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReason(driver2, IncrementalStepRunReason.Modified);
+        await AssertRunReason(driver2, IncrementalStepRunReason.Modified);
     }
 
-    [Fact]
-    public void MakeHookAsync_ShouldRegenerate()
+    [Test]
+    public async Task MakeHookAsync_ShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default));
 
         var driver1 = TestHelper.GenerateTracked<HookMetadataGenerator>(compilation1);
-        AssertRunReason(driver1, IncrementalStepRunReason.New);
+        await AssertRunReason(driver1, IncrementalStepRunReason.New);
 
         var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "Setup",
             """
@@ -161,11 +161,11 @@ public class HookMetadataGeneratorIncrementalTests
             """);
 
         var driver2 = driver1.RunGenerators(compilation2);
-        AssertRunReason(driver2, IncrementalStepRunReason.Modified);
+        await AssertRunReason(driver2, IncrementalStepRunReason.Modified);
     }
 
-    [Fact]
-    public void ClassGroups_AcrossFilesWithDisjointHookKinds_AreEmittedInCompilationOrder()
+    [Test]
+    public async Task ClassGroups_AcrossFilesWithDisjointHookKinds_AreEmittedInCompilationOrder()
     {
         // The first file's class has only a Before hook besides the shared BeforeEvery hook, and the second
         // file's class has only an After hook. No single hook kind orders the two files except BeforeEvery,
@@ -202,18 +202,18 @@ public class HookMetadataGeneratorIncrementalTests
             CSharpSyntaxTree.ParseText(first, CSharpParseOptions.Default, path: "First.cs"),
             CSharpSyntaxTree.ParseText(second, CSharpParseOptions.Default, path: "Second.cs"));
 
-        AssertGeneratedOrder(compilation, "FirstFileHooks", "SecondFileHooks");
+        await AssertGeneratedOrder(compilation, "FirstFileHooks", "SecondFileHooks");
 
         // Reversing the files in the compilation reverses the emitted order.
         var reversed = Fixture.CreateLibrary(
             CSharpSyntaxTree.ParseText(second, CSharpParseOptions.Default, path: "Second.cs"),
             CSharpSyntaxTree.ParseText(first, CSharpParseOptions.Default, path: "First.cs"));
 
-        AssertGeneratedOrder(reversed, "SecondFileHooks", "FirstFileHooks");
+        await AssertGeneratedOrder(reversed, "SecondFileHooks", "FirstFileHooks");
     }
 
-    [Fact]
-    public void ClassGroups_DeclaredOnOneLine_AreEmittedInDeclarationOrder()
+    [Test]
+    public async Task ClassGroups_DeclaredOnOneLine_AreEmittedInDeclarationOrder()
     {
         const string source =
             """
@@ -224,11 +224,11 @@ public class HookMetadataGeneratorIncrementalTests
 
         var compilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(source, CSharpParseOptions.Default));
 
-        AssertGeneratedOrder(compilation, "ZHooks", "AHooks");
+        await AssertGeneratedOrder(compilation, "ZHooks", "AHooks");
     }
 
-    [Fact]
-    public void AddUnrelatedFile_ShouldNotChangeHookFileOrder()
+    [Test]
+    public async Task AddUnrelatedFile_ShouldNotChangeHookFileOrder()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource, CSharpParseOptions.Default, path: "Hooks.cs"));
 
@@ -238,29 +238,29 @@ public class HookMetadataGeneratorIncrementalTests
         var driver2 = driver1.RunGenerators(compilation2);
         var runResult = driver2.GetRunResult().Results[0];
 
-        TestHelper.AssertRunReason(runResult, HookMetadataGenerator.HookFileOrder, IncrementalStepRunReason.Unchanged, 0);
-        TestHelper.AssertRunReason(runResult, HookMetadataGenerator.HookClassGroups, IncrementalStepRunReason.Cached, 0);
+        await TestHelper.AssertRunReason(runResult, HookMetadataGenerator.HookFileOrder, IncrementalStepRunReason.Unchanged, 0);
+        await TestHelper.AssertRunReason(runResult, HookMetadataGenerator.HookClassGroups, IncrementalStepRunReason.Cached, 0);
     }
 
-    private static void AssertGeneratedOrder(Compilation compilation, params string[] typeNames)
+    private static async Task AssertGeneratedOrder(Compilation compilation, params string[] typeNames)
     {
         var driver = TestHelper.GenerateTracked<HookMetadataGenerator>(compilation);
-        var generatorResult = Xunit.Assert.Single(driver.GetRunResult().Results);
-        Xunit.Assert.Null(generatorResult.Exception);
+        var generatorResult = await Assert.That(driver.GetRunResult().Results).HasSingleItem();
+        await Assert.That(generatorResult.Exception).IsNull();
 
         var hintNames = generatorResult.GeneratedSources.Select(static s => s.HintName).ToArray();
         var indices = typeNames
             .Select(typeName => Array.FindIndex(hintNames, hintName => hintName.Contains(typeName)))
             .ToArray();
 
-        Xunit.Assert.DoesNotContain(-1, indices);
-        Xunit.Assert.Equal(indices.OrderBy(static i => i), indices);
+        await Assert.That(indices).DoesNotContain(-1);
+        await Assert.That(indices).IsInOrder();
     }
 
-    private static void AssertRunReason(GeneratorDriver driver, IncrementalStepRunReason reason)
+    private static async Task AssertRunReason(GeneratorDriver driver, IncrementalStepRunReason reason)
     {
         var runResult = driver.GetRunResult().Results[0];
 
-        TestHelper.AssertRunReason(runResult, HookMetadataGenerator.ExtractBeforeHooks, reason, 0);
+        await TestHelper.AssertRunReason(runResult, HookMetadataGenerator.ExtractBeforeHooks, reason, 0);
     }
 }

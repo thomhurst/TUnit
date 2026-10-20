@@ -85,7 +85,8 @@ public sealed class CollectionShapeAssertionGenerator : IIncrementalGenerator
         }
 
         var compilation = context.SemanticModel.Compilation;
-        var wrapperOpen = $"global::{target.ContainingNamespace.ToDisplayString()}.{target.Name}";
+        var wrapperNamespace = NamespaceHelper.GetNamespaceOrNull(target.ContainingNamespace);
+        var wrapperOpen = wrapperNamespace is null ? $"global::{target.Name}" : $"global::{wrapperNamespace}.{target.Name}";
 
         var shapes = new List<ShapeModel>();
         foreach (var row in Rows)

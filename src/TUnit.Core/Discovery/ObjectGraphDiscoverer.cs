@@ -182,18 +182,24 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         var testDetails = testContext.Metadata.TestDetails;
         if (testDetails.TestClassArguments.Length == 0
             && testDetails.TestMethodArguments.Length == 0
-            && testDetails.TestClassInjectedPropertyArguments.Count == 0)
+            && testDetails.TestClassInjectedPropertyArguments.Count == 0
+            && testDetails.FailedDataRowObjects.Length == 0)
         {
             // No root objects, so nothing to discover — skip the traversal closures.
             return visitedObjects;
         }
 
+        TryAddObjectFunc tryAdd = (obj, depth) => TryAddToHashSet(visitedObjects, depth, obj);
+        RootObjectCallback onRootObjectAdded = obj => DiscoverNestedObjectsForTracking(obj, visitedObjects, 1, cancellationToken);
+
         // Collect root-level objects and discover nested objects for tracking
-        CollectRootObjects(
-            testContext.Metadata.TestDetails,
-            (obj, depth) => TryAddToHashSet(visitedObjects, depth, obj),
-            obj => DiscoverNestedObjectsForTracking(obj, visitedObjects, 1, cancellationToken),
-            cancellationToken);
+        CollectRootObjects(testDetails, tryAdd, onRootObjectAdded, cancellationToken);
+
+        // A test that failed while it was being built never receives its row's objects, so they are
+        // tracked here only, never initialized: tracking them gives them the same reference-counted
+        // disposal as arguments, so they are disposed when the failed test completes unless another
+        // test still holds a shared instance (#7123).
+        ProcessRootCollection(testDetails.FailedDataRowObjects, tryAdd, onRootObjectAdded, cancellationToken);
 
         return visitedObjects;
     }

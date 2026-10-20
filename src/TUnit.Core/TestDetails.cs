@@ -31,6 +31,14 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     public required object ClassInstance { get; set; }
     public required object?[] TestMethodArguments { get; set; }
     public required object?[] TestClassArguments { get; set; }
+
+    /// <summary>
+    /// Objects that data sources produced for a test that failed while it was being built, for example
+    /// a row whose inferred generic type arguments break a constraint. The test never receives them,
+    /// but they are tracked like its arguments, so they are disposed when the test completes unless
+    /// another test still references a shared instance (#7123).
+    /// </summary>
+    internal object?[] FailedDataRowObjects { get; init; } = [];
     public TimeSpan? Timeout { get; set; }
     public int RetryLimit { get; set; }
 
