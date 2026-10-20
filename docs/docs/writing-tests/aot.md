@@ -106,6 +106,8 @@ public class DeclaredTypeTests
 }
 ```
 
+When a method has a `[GenerateGenericTest]` that lists one type for each type parameter, neither `TUnit0001` nor source generation mode reports a constraint that a data source's declared type breaks. Those rows run on the types that `[GenerateGenericTest]` lists, in both modes. If a value cannot be converted to the listed type, that test fails at run time, so check that the listed types fit every data source on the method.
+
 ## AOT-Compatible Data Sources
 
 ### Static Data Sources
