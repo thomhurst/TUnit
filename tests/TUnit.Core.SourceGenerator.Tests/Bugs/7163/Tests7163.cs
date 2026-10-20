@@ -41,5 +41,18 @@ internal class Tests7163 : TestsBase
             // No data source: a single failing row.
             var noDataSource = SourceFor("NoDataSourceTests");
             await Assert.That(noDataSource).Contains("global::TUnit.Core.GenericConstraintViolationDataSource.Create(\"Could not infer the type arguments of generic test method 'Generic': it has no data source to infer them from.");
+
+            // Data sources that infer the same type arguments as an earlier one join its instantiation.
+            foreach (var className in new[] { "ArgumentsAndDataSourceWithSameTypesTests", "TwoDataSourcesWithSameTypesTests" })
+            {
+                var source = SourceFor(className);
+                await Assert.That(source).Contains("instance.Generic<int>(");
+                await Assert.That(source).DoesNotContain("GenericConstraintViolationDataSource");
+            }
+
+            // A return type that nests T is named by its open generic type, since T does not exist there.
+            var nestedReturnType = SourceFor("NestedGenericReturnTypeTests");
+            await Assert.That(nestedReturnType).Contains("typeof(global::System.Threading.Tasks.Task<>)");
+            await Assert.That(nestedReturnType).DoesNotContain("Task<T[]>");
         });
 }

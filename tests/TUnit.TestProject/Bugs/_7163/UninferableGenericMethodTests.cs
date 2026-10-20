@@ -74,3 +74,53 @@ public class NoDataSourceTests
     [Test]
     public async Task Generic<T>() => await Assert.That(typeof(T)).IsNotNull();
 }
+
+// An [Arguments] row and a method data source that infer the same type arguments share one
+// instantiation, so both run instead of the data source being reported as uninferable.
+public class ArgumentsAndDataSourceWithSameTypesTests
+{
+    public static IEnumerable<Func<(int, string)>> Rows()
+    {
+        yield return () => (2, "b");
+    }
+
+    [Test]
+    [Arguments(1, "a")]
+    [MethodDataSource(nameof(Rows))]
+    public async Task Generic<T>(T value, string label)
+    {
+        await Assert.That((object?)value).IsNotNull();
+        await Assert.That(label).IsNotNull();
+    }
+}
+
+// Two method data sources declared with the same type infer the same type arguments; both run.
+public class TwoDataSourcesWithSameTypesTests
+{
+    public static IEnumerable<Func<(int, string)>> First()
+    {
+        yield return () => (1, "a");
+    }
+
+    public static IEnumerable<Func<(int, string)>> Second()
+    {
+        yield return () => (2, "b");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(First))]
+    [MethodDataSource(nameof(Second))]
+    public async Task Generic<T>(T value, string label)
+    {
+        await Assert.That((object?)value).IsNotNull();
+        await Assert.That(label).IsNotNull();
+    }
+}
+
+// The failing entry's metadata names the return type outside the method, where T does not exist,
+// so a return type that nests T must still compile.
+public class NestedGenericReturnTypeTests
+{
+    [Test]
+    public Task<T[]> Generic<T>() => Task.FromResult(Array.Empty<T>());
+}

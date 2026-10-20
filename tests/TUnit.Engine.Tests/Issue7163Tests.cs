@@ -68,10 +68,25 @@ public class Issue7163Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    public async Task Method_Without_Data_Source_Fails_In_Both_Modes()
+    [Arguments("ArgumentsAndDataSourceWithSameTypesTests")]
+    [Arguments("TwoDataSourcesWithSameTypesTests")]
+    public async Task Sources_Inferring_The_Same_Types_All_Run_In_Both_Modes(string className)
     {
         await RunTestsWithFilter(
-            $"{Namespace}/NoDataSourceTests/*",
+            $"{Namespace}/{className}/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+            ]);
+    }
+
+    [Test]
+    [Arguments("NoDataSourceTests")]
+    [Arguments("NestedGenericReturnTypeTests")]
+    public async Task Method_Without_Data_Source_Fails_In_Both_Modes(string className)
+    {
+        await RunTestsWithFilter(
+            $"{Namespace}/{className}/*",
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1),

@@ -896,7 +896,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         }
                     }
 
-                    if (specificAttr?.AttributeClass?.Name == "ArgumentsAttribute")
+                    // A generic method on a non-generic class runs only the sources scoped to its
+                    // instantiation, so any method data source that infers the same types as an earlier
+                    // one (a second [MethodDataSource] declared like the first, say) joins it too.
+                    // Otherwise its rows would be dropped, or reported as uninferable (#7163).
+                    if (specificAttr?.AttributeClass?.Name == "ArgumentsAttribute"
+                        || (specificAttr is not null && !isClassRow && testMethod is { IsGenericMethod: true, IsGenericType: false }))
                     {
                         existing.AddRow(specificAttr, isClassRow);
                     }
@@ -3988,7 +3993,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (!methodSymbol.ReturnsVoid)
         {
-            writer.AppendLine($"returnType: typeof({methodSymbol.ReturnType.GloballyQualified()}),");
+            writer.AppendLine($"returnType: typeof({ReturnTypeForTypeOf(methodSymbol.ReturnType)}),");
         }
 
         if (methodSymbol.TypeParameters.Length > 0)
@@ -4009,11 +4014,34 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
+    /// The type to name in <c>typeof(...)</c> for a test method's return type. The metadata is emitted
+    /// outside the method and its class, so a return type that uses a type parameter cannot name it.
+    /// <see cref="TypeExtensions.GloballyQualified"/> opens a generic type whose arguments are type
+    /// parameters (<c>Task&lt;T&gt;</c> becomes <c>Task&lt;&gt;</c>), but not one that nests them
+    /// (<c>Task&lt;T[]&gt;</c>), and a bare <c>T</c> or <c>T[]</c> has no open form. Those become the
+    /// open generic type and <c>object</c>, as parameter metadata does.
+    /// </summary>
+    private static string ReturnTypeForTypeOf(ITypeSymbol returnType)
+    {
+        if (!CodeGenerationHelpers.ContainsTypeParameter(returnType))
+        {
+            return returnType.GloballyQualified();
+        }
+
+        if (returnType is INamedTypeSymbol { IsGenericType: true } namedType)
+        {
+            return $"{namedType.GloballyQualifiedNonGeneric()}<{new string(',', namedType.TypeArguments.Length - 1)}>";
+        }
+
+        return "object";
+    }
+
+    /// <summary>
     /// Generates a MethodMetadataFactory.Create(...) call expression referencing __classType and __classMetadata.
     /// </summary>
     private static string GenerateMethodMetadataFactoryCall(IMethodSymbol methodSymbol)
     {
-        var returnType = methodSymbol.ReturnType.GloballyQualified();
+        var returnType = ReturnTypeForTypeOf(methodSymbol.ReturnType);
         var sb = new System.Text.StringBuilder();
         sb.Append($"global::TUnit.Core.MethodMetadataFactory.Create(\"{methodSymbol.Name}\", __classType, typeof({returnType}), __classMetadata");
 
