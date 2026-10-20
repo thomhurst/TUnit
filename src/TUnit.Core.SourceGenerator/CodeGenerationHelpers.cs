@@ -184,7 +184,10 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static string GetTypeOfExpression(ITypeSymbol typeSymbol)
     {
-        var fullyQualifiedName = typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        // typeof(dynamic) does not compile (CS1962); dynamic is object at runtime.
+        var fullyQualifiedName = typeSymbol.TypeKind == TypeKind.Dynamic
+            ? "object"
+            : typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         return $"typeof({fullyQualifiedName})";
     }
 

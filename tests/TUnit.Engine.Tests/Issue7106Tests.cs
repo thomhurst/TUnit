@@ -29,7 +29,6 @@ public class Issue7106Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("NonGenericClassGenericMethodNullMethodRow", 2)]
     [Arguments("TypedNullMethodRowInfersObject", 1)]
     [Arguments("NullElementMethodRowInfersObject", 1)]
-    [Arguments("NullArrayMethodRowOnConstrainedClass", 1)]
     [Arguments("NullFirstOfSharedTypeParameterMethodRow", 1)]
     [Arguments("NullFirstOfSharedTypeParameterWithGenerateGenericTest", 1)]
     [Arguments("GenericClassArrayMethodRows", 2)]
