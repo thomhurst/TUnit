@@ -1,3 +1,4 @@
+using ModularPipelines.Configuration;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
@@ -18,6 +19,12 @@ namespace TUnit.Pipeline.Modules;
 // has to wait for this module.
 public class PublishTestProjectAOTModule : Module<CommandResult>
 {
+    // Overlapping the test modules on a 3-core macOS runner stretches the publish to 24-27 minutes,
+    // so the default 30-minute module timeout killed it on healthy runs.
+    protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
+        .WithTimeout(TimeSpan.FromMinutes(60))
+        .Build();
+
     protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var rootDir = context.Git().RootDirectory.AssertExists();

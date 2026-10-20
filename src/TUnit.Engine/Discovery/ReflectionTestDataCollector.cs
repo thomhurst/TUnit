@@ -14,6 +14,7 @@ using TUnit.Core.Helpers;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Discovery;
 
@@ -1240,7 +1241,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// no data source inferred runs with every data source.
     /// <c>MethodArguments</c> restricts the data sources for that instantiation; null means all of them.
     /// </summary>
-    private static IEnumerable<(MethodInfo Method, TestMetadata? FailedMetadata, IDataSourceAttribute[]? MethodArguments)> ResolveMethodInstantiations(
+    internal static IEnumerable<(MethodInfo Method, TestMetadata? FailedMetadata, IDataSourceAttribute[]? MethodArguments)> ResolveMethodInstantiations(
         Type concreteClassType,
         MethodInfo method)
     {
@@ -1265,15 +1266,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var methodGenericParams = method.GetGenericArguments();
         var processedTypeArguments = new HashSet<Type[]>(TypeArrayComparer.Instance);
 
-        foreach (var (inferredMethod, typeArguments, rows) in InferMethodInstantiationsFromDataSources(concreteClassType, method, methodGenericParams.Length, generateGenericTestAttributes))
+        // [Arguments] rows and [GenerateGenericTest] types that break the method's constraints. They are
+        // reported together as one failed test per row or type, with the same message and in the same order
+        // as source-generated mode (#7107, #7153).
+        var (inferredInstantiations, constraintViolations) = InferMethodInstantiationsFromDataSources(concreteClassType, method, methodGenericParams.Length, generateGenericTestAttributes);
+
+        foreach (var (inferredMethod, typeArguments, rows) in inferredInstantiations)
         {
             processedTypeArguments.Add(typeArguments);
             yield return (inferredMethod, null, rows);
         }
-
-        // [GenerateGenericTest] types that break the method's constraints. They are reported together
-        // as one failed test per type, with the same message as source-generated mode (#7107).
-        List<string>? constraintViolations = null;
 
         // Process each [GenerateGenericTest] attribute
         foreach (var genAttr in generateGenericTestAttributes)
@@ -1311,7 +1313,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             if (ReflectionGenericTypeResolver.FindConstraintViolation(method, typeArguments) is { } constraintViolation)
             {
-                (constraintViolations ??= []).Add(constraintViolation);
+                (constraintViolations ??= []).Add(GenericConstraintViolationDataSource.Create(constraintViolation));
                 continue;
             }
 
@@ -1361,7 +1363,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 ReflectionMetadataBuilder.CreateMethodMetadata(concreteClassType, method),
                 testAttribute?.File ?? "Unknown",
                 testAttribute?.Line ?? 0,
-                constraintViolations), null);
+                constraintViolations.ToArray()), null);
         }
     }
 
@@ -1381,14 +1383,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <item>[MethodDataSource] members of the test class returning <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>
     /// (<c>InferTypesFromMethodDataSource</c>). The instantiation runs only that source.</item>
     /// </list>
-    /// Sources whose types violate the constraints are skipped. Sources inferring types that are already
-    /// instantiated are dropped, except further [Arguments] rows, which join the instantiation an earlier
-    /// [Arguments] row created. A skipped source other than an [Arguments] row runs on the
+    /// Sources whose types violate the constraints are skipped, except [Arguments] rows: a literal row cannot
+    /// run on the [GenerateGenericTest] types instead, so each one is returned in <c>RowViolations</c>
+    /// and fails with the constraint message, as in the source generator (#7153). Sources inferring types that
+    /// are already instantiated are dropped, except further [Arguments] rows, which join the instantiation an
+    /// earlier [Arguments] row created. A skipped source other than an [Arguments] row runs on the
     /// [GenerateGenericTest] types instead; when a data source already instantiated those types, the skipped
     /// source joins that instantiation, as the generator's <c>JoinDeferredDataSources</c> does (#7116).
     /// </summary>
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT; MakeGenericMethod over types inferred from attribute values")]
-    private static List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[]? Rows)> InferMethodInstantiationsFromDataSources(
+    private static (List<(MethodInfo Method, Type[] TypeArguments, IDataSourceAttribute[]? Rows)> Instantiations, List<IDataSourceAttribute>? RowViolations) InferMethodInstantiationsFromDataSources(
         Type testClass,
         MethodInfo method,
         int genericParameterCount,
@@ -1396,6 +1400,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var instantiations = new List<(MethodInfo Method, Type[] TypeArguments, List<IDataSourceAttribute>? Rows)>();
         List<IDataSourceAttribute>? skippedSources = null;
+        List<IDataSourceAttribute>? rowViolations = null;
         var parameters = method.GetParameters();
         var dataSources = ReflectionAttributeExtractor.ExtractDataSources(method);
 
@@ -1404,23 +1409,27 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // generic class because an instantiation built from class and method rows runs every method [Arguments]
         // row. Any other source inferring types that are already instantiated is dropped, as the generator's
         // processedTypeCombinations does.
+        // Row values bind to the data parameters only; the engine supplies any CancellationToken, wherever it
+        // is declared. The source generator skips tokens the same way when it infers from [Arguments] rows.
+        ParameterInfo[]? dataParameters = null;
         foreach (var dataSource in dataSources)
         {
             if (dataSource is ArgumentsAttribute arguments)
             {
-                AddInstantiation(InferMethodTypeArguments(arguments.Values, parameters, genericParameterCount), arguments, isMethodArgumentsRow: true);
+                dataParameters ??= Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
+                AddInstantiation(InferMethodTypeArguments(arguments.Values, dataParameters, genericParameterCount), arguments, isMethodArgumentsRow: true);
             }
         }
 
-        // The generator only infers method type arguments from typed sources when the class is not generic
-        if (method.DeclaringType is { IsGenericType: false })
+        // On a generic class too (#7164), as the generator does
+        var classGenericParameterCount = method.DeclaringType is { IsGenericType: true } declaringType
+            ? declaringType.GetGenericArguments().Length
+            : 0;
+        foreach (var dataSource in dataSources)
         {
-            foreach (var dataSource in dataSources)
+            if (dataSource is not ArgumentsAttribute)
             {
-                if (dataSource is not ArgumentsAttribute)
-                {
-                    AddInstantiation(InferTypesFromTypedDataSource(dataSource, genericParameterCount), dataSource);
-                }
+                AddInstantiation(InferTypesFromTypedDataSource(dataSource, genericParameterCount, classGenericParameterCount), dataSource);
             }
         }
 
@@ -1463,7 +1472,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             result.Add((closedMethod, typeArguments, rows?.ToArray()));
         }
 
-        return result;
+        return (result, rowViolations);
 
         int DeclarationIndex(IDataSourceAttribute row)
         {
@@ -1505,10 +1514,22 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 closedMethod = method.MakeGenericMethod(typeArguments);
             }
-            catch (ArgumentException)
+            catch (ArgumentException ex)
             {
-                // Constraint violation: the source generator skips the source as well
-                if (row is not null and not ArgumentsAttribute)
+                // Constraint violation. A literal [Arguments] row cannot run on the [GenerateGenericTest] types,
+                // so it fails with the constraint message, wrapped so that its own values are still produced
+                // first (#7153). Any other source is skipped and runs on those types instead (#7116), as the
+                // source generator skips it.
+                if (isMethodArgumentsRow && row is not null)
+                {
+                    // FindConstraintViolation produces the generator's message. It returns null only for a type-argument
+                    // count mismatch or when MakeGenericMethod succeeds, and neither can happen once MakeGenericMethod
+                    // has thrown. The runtime message is an intentional defensive fallback, so the row is still
+                    // reported rather than dropped, even if its wording would then differ from source-gen.
+                    var message = ReflectionGenericTypeResolver.FindConstraintViolation(method, typeArguments) ?? ex.Message;
+                    (rowViolations ??= []).Add(GenericConstraintViolationDataSource.Create(message, row));
+                }
+                else if (row is not null and not ArgumentsAttribute)
                 {
                     (skippedSources ??= []).Add(row);
                 }
@@ -1524,9 +1545,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// Mirrors the generator's <c>InferTypesFromDataSourceAttribute</c> for generic methods: reads the type
     /// arguments of the <c>DataSourceGeneratorAttribute</c> / <c>AsyncDataSourceGeneratorAttribute</c> base.
     /// One type parameter takes the first type argument; otherwise a single tuple argument with one element
-    /// per type parameter, or one type argument per type parameter.
+    /// per type parameter, or one type argument per type parameter. On a generic class, a source whose type
+    /// arguments cover the class type parameters as well infers none: the generator closes the class and the
+    /// method over them together, so the class was already closed over them here.
     /// </summary>
-    private static Type[]? InferTypesFromTypedDataSource(IDataSourceAttribute dataSource, int genericParameterCount)
+    private static Type[]? InferTypesFromTypedDataSource(IDataSourceAttribute dataSource, int genericParameterCount, int classGenericParameterCount)
     {
         for (var baseType = dataSource.GetType().BaseType; baseType is not null; baseType = baseType.BaseType)
         {
@@ -1544,6 +1567,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
 
             var typeArguments = baseType.GetGenericArguments();
+
+            if (classGenericParameterCount > 0)
+            {
+                var combinedCount = classGenericParameterCount + genericParameterCount;
+                if (typeArguments.Length == combinedCount
+                    || (typeArguments is [{ } combinedTuple] && GetValueTupleElementTypes(combinedTuple)?.Length == combinedCount))
+                {
+                    return null;
+                }
+            }
 
             if (genericParameterCount == 1 && typeArguments.Length >= 1)
             {
@@ -1734,9 +1767,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static Type[]? InferMethodTypeArguments(object?[] values, ParameterInfo[] parameters, int genericParameterCount)
     {
+        // Row values bind to the data parameters only; the engine supplies any CancellationToken, wherever it is
+        // declared. The source generator skips tokens the same way when it infers from [Arguments] rows.
+        if (Array.Exists(parameters, static parameter => parameter.ParameterType == typeof(CancellationToken)))
+        {
+            parameters = Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
+        }
+
         var typeArguments = new Type[genericParameterCount];
         var count = Math.Min(values.Length, parameters.Length);
 
+        var hasNullValue = false;
         for (var i = 0; i < count; i++)
         {
             var parameterType = parameters[i].ParameterType;
@@ -1745,11 +1786,33 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 continue;
             }
 
-            // A null value, typed or not, is an element of the params object?[] argument, which Roslyn types
-            // as object, so the generator infers object for it ([Arguments((string?)null)] runs as Test<object>(null)).
-            typeArguments[parameterType.GenericParameterPosition] = values[i] is { } value
-                ? GetArgumentInferenceType(value)
-                : typeof(object);
+            if (values[i] is { } value)
+            {
+                typeArguments[parameterType.GenericParameterPosition] = GetArgumentInferenceType(value);
+            }
+            else
+            {
+                hasNullValue = true;
+            }
+        }
+
+        // A null value, typed or not, is an element of the params object?[] argument, which Roslyn types
+        // as object, so the generator infers object for it ([Arguments((string?)null)] runs as Test<object>(null)).
+        // As in the generator, a non-null value for the same type parameter wins ([Arguments("a", null)] runs as
+        // Test<string>), unless it infers a value type, which cannot hold the null (#7155).
+        if (hasNullValue)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var parameterType = parameters[i].ParameterType;
+                if (values[i] is null
+                    && parameterType is { IsGenericParameter: true, DeclaringMethod: not null }
+                    && (typeArguments[parameterType.GenericParameterPosition] is not { } inferredType
+                        || TestGenericTypeResolver.CannotHoldNull(inferredType)))
+                {
+                    typeArguments[parameterType.GenericParameterPosition] = typeof(object);
+                }
+            }
         }
 
         foreach (var typeArgument in typeArguments)
@@ -2236,6 +2299,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return false;
     }
 
+    private static bool ReceivesNullArgument(Type genericParameter, ParameterInfo[] methodParams, object?[] args)
+    {
+        for (var j = 0; j < methodParams.Length && j < args.Length; j++)
+        {
+            if (args[j] is null && methodParams[j].ParameterType == genericParameter)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Creates a reflection-based test invoker with proper AOT attribution
     /// </summary>
@@ -2287,7 +2363,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     {
                         if (typeMapping.TryGetValue(genericParams[i], out var inferredType))
                         {
-                            typeArguments[i] = inferredType;
+                            // A value type cannot hold a null passed to the same type parameter, so it
+                            // infers object, as in TestGenericTypeResolver and the source generator (#7155).
+                            // A Nullable<T> inferred from a nested type, such as List<int?>, holds the null.
+                            typeArguments[i] = TestGenericTypeResolver.CannotHoldNull(inferredType)
+                                && ReceivesNullArgument(genericParams[i], methodParams, args)
+                                ? typeof(object)
+                                : inferredType;
                         }
                         else
                         {

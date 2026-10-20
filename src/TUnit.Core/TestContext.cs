@@ -496,6 +496,13 @@ public partial class TestContext : Context,
     internal SortedList<int, HashSet<object>>? TrackedObjectsIfCreated => Volatile.Read(ref _trackedObjects);
 
     /// <summary>
+    /// Tracked objects that are reachable only from data rows the test never receives
+    /// (<see cref="TestDetails.UnreceivedDataRowObjects"/>). They are tracked for reference-counted
+    /// disposal but are not initialized for execution. Null when there are none.
+    /// </summary>
+    internal HashSet<object>? DisposalOnlyTrackedObjects { get; set; }
+
+    /// <summary>
     /// Sets the output captured during test building phase.
     /// This output is prepended to the test's execution output.
     /// </summary>

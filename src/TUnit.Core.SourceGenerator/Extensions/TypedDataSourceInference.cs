@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
@@ -23,30 +24,41 @@ internal static class TypedDataSourceInference
             return null;
         }
 
-        var typeParameterCount = method.TypeParameters.Length;
         for (var baseType = attributeClass?.BaseType; baseType is not null; baseType = baseType.BaseType)
         {
-            if (!IsTypedDataSourceBase(baseType))
+            if (IsTypedDataSourceBase(baseType)
+                && InferMethodTypeArguments(method, baseType.TypeArguments) is { } inferred)
             {
-                continue;
+                return inferred;
             }
+        }
 
-            var typeArguments = baseType.TypeArguments;
-            if (typeParameterCount == 1 && typeArguments.Length >= 1)
-            {
-                return [typeArguments[0]];
-            }
+        return null;
+    }
 
-            if (typeArguments is [INamedTypeSymbol { IsTupleType: true } tupleType]
-                && tupleType.TupleElements.Length == typeParameterCount)
-            {
-                return tupleType.TupleElements.Select(e => e.Type).ToArray();
-            }
+    /// <summary>
+    /// The type arguments of generic test method <paramref name="method"/> inferred from the type arguments of a
+    /// typed data source base: one type parameter takes the first type argument; otherwise a single tuple argument
+    /// with one element per type parameter, or one type argument per type parameter. Returns
+    /// <see langword="null"/> when nothing is inferred.
+    /// </summary>
+    public static ITypeSymbol[]? InferMethodTypeArguments(IMethodSymbol method, ImmutableArray<ITypeSymbol> typeArguments)
+    {
+        var typeParameterCount = method.TypeParameters.Length;
+        if (typeParameterCount == 1 && typeArguments.Length >= 1)
+        {
+            return [typeArguments[0]];
+        }
 
-            if (typeArguments.Length == typeParameterCount)
-            {
-                return typeArguments.ToArray();
-            }
+        if (typeArguments is [INamedTypeSymbol { IsTupleType: true } tupleType]
+            && tupleType.TupleElements.Length == typeParameterCount)
+        {
+            return tupleType.TupleElements.Select(e => e.Type).ToArray();
+        }
+
+        if (typeArguments.Length == typeParameterCount)
+        {
+            return typeArguments.ToArray();
         }
 
         return null;
