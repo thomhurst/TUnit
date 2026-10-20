@@ -4018,28 +4018,55 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// outside the method and its class, so a return type that uses a type parameter cannot name it.
     /// <see cref="TypeExtensions.GloballyQualified"/> opens a generic type whose arguments are type
     /// parameters (<c>Task&lt;T&gt;</c> becomes <c>Task&lt;&gt;</c>), but not one that nests them
-    /// (<c>Task&lt;T[]&gt;</c>), and a bare <c>T</c> or <c>T[]</c> has no open form. Those become the
-    /// open generic type and <c>object</c>, as parameter metadata does.
+    /// (<c>Task&lt;T[]&gt;</c>) or takes them from a containing type (<c>Outer&lt;T&gt;.Inner</c>), and a
+    /// bare <c>T</c> or <c>T[]</c> has no open form. Those become the open generic type and
+    /// <c>object</c>, as parameter metadata does.
     /// </summary>
     private static string ReturnTypeForTypeOf(ITypeSymbol returnType)
     {
-        if (!CodeGenerationHelpers.ContainsTypeParameter(returnType))
+        if (!ReferencesTypeParameter(returnType))
         {
             return returnType.GloballyQualified();
         }
 
-        if (returnType is INamedTypeSymbol { IsGenericType: true } namedType)
+        if (returnType is INamedTypeSymbol namedType)
         {
-            // Roslyn displays Nullable<T> as `T?`, which has no open form to append `<>` to.
-            if (namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
-            {
-                return "global::System.Nullable<>";
-            }
-
-            return $"{namedType.GloballyQualifiedNonGeneric()}<{new string(',', namedType.TypeArguments.Length - 1)}>";
+            return OpenGenericTypeOf(namedType);
         }
 
         return "object";
+
+        // Unlike CodeGenerationHelpers.ContainsTypeParameter, this also looks at containing types:
+        // Outer<T>.Inner has no type arguments of its own, but still mentions T.
+        static bool ReferencesTypeParameter(ITypeSymbol type) => type switch
+        {
+            ITypeParameterSymbol => true,
+            IArrayTypeSymbol arrayType => ReferencesTypeParameter(arrayType.ElementType),
+            INamedTypeSymbol named => named.TypeArguments.Any(ReferencesTypeParameter)
+                || (named.ContainingType is { } containingType && ReferencesTypeParameter(containingType)),
+            _ => false,
+        };
+
+        // The unbound form of the type and every type that contains it, such as
+        // global::Outer<>.Inner<,>. C# only accepts an unbound generic name in typeof when every
+        // generic level is unbound. Roslyn displays Nullable<T> as `T?`, so the name is built from
+        // the definition's parts rather than from its display string.
+        static string OpenGenericTypeOf(INamedTypeSymbol type)
+        {
+            var definition = type.OriginalDefinition;
+            var name = definition.Arity > 0
+                ? $"{definition.Name}<{new string(',', definition.Arity - 1)}>"
+                : definition.Name;
+
+            if (definition.ContainingType is { } containingType)
+            {
+                return $"{OpenGenericTypeOf(containingType)}.{name}";
+            }
+
+            return definition.ContainingNamespace is { IsGlobalNamespace: false } containingNamespace
+                ? $"{containingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{name}"
+                : $"global::{name}";
+        }
     }
 
     /// <summary>

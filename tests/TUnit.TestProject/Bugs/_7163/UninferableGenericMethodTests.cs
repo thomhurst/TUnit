@@ -132,3 +132,16 @@ public class NullableGenericReturnTypeTests
     [GenerateGenericTest(typeof(int))]
     public T? Generic<T>() where T : struct => default;
 }
+
+// A nested type of a generic type takes its type parameters from its containing type, so
+// Outer<T>.Inner mentions T without having type arguments of its own.
+public class ContainingGenericReturnTypeTests
+{
+    public class Outer<T>
+    {
+        public class Inner;
+    }
+
+    [Test]
+    public Outer<T>.Inner Generic<T>() => new();
+}

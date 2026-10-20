@@ -58,5 +58,8 @@ internal class Tests7163 : TestsBase
             var nullableReturnType = SourceFor("NullableGenericReturnTypeTests");
             await Assert.That(nullableReturnType).Contains("typeof(global::System.Nullable<>)");
             await Assert.That(nullableReturnType).DoesNotContain("T?<>");
+
+            var containingReturnType = SourceFor("ContainingGenericReturnTypeTests");
+            await Assert.That(containingReturnType).Contains("typeof(global::TUnit.TestProject.Bugs._7163.ContainingGenericReturnTypeTests.Outer<>.Inner)");
         });
 }

@@ -85,6 +85,7 @@ public class Issue7163Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     [Arguments("NoDataSourceTests")]
     [Arguments("NestedGenericReturnTypeTests")]
+    [Arguments("ContainingGenericReturnTypeTests")]
     public async Task Method_Without_Data_Source_Fails_In_Both_Modes(string className)
     {
         await RunTestsWithFilter(
