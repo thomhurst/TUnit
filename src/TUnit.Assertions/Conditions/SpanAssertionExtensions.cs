@@ -1,15 +1,12 @@
 #if NET5_0_OR_GREATER
-using System;
-
 namespace TUnit.Assertions.Conditions
 {
     /// <summary>
-    /// No longer holds any assertions. It only ever carried [AssertionFrom] declarations for Memory&lt;T&gt; and
-    /// ReadOnlyMemory&lt;T&gt; that generated nothing; IsEmpty() and IsNotEmpty() for those types are on the source
-    /// returned by Assert.That. Kept so that removing it is not a breaking change.
+    /// Holds no assertions. Its [AssertionFrom] declarations for Memory&lt;T&gt; and ReadOnlyMemory&lt;T&gt; never generated
+    /// anything (#7132), and IsEmpty() and IsNotEmpty() for those types are already on the source returned by
+    /// Assert.That (MemoryAssertionBase), so they were removed rather than turned into duplicate public assertions.
     /// </summary>
-    [Obsolete("Has no members. Memory<T> and ReadOnlyMemory<T> assertions such as IsEmpty() are on MemoryAssertionBase.")]
-    public static class SpanAssertionExtensions
+    public static partial class SpanAssertionExtensions
     {
     }
 }
@@ -17,11 +14,11 @@ namespace TUnit.Assertions.Conditions
 namespace TUnit.Assertions.Extensions
 {
     /// <summary>
-    /// No longer holds any assertions; see <see cref="TUnit.Assertions.Conditions.SpanAssertionExtensions"/>.
-    /// Kept so that removing it is not a breaking change.
+    /// The (empty) extension class that the [AssertionFrom] declarations on
+    /// <see cref="TUnit.Assertions.Conditions.SpanAssertionExtensions"/> used to generate. Kept so that removing
+    /// those declarations is not a breaking change.
     /// </summary>
-    [Obsolete("Has no members. Memory<T> and ReadOnlyMemory<T> assertions such as IsEmpty() are on MemoryAssertionBase.")]
-    public static class SpanAssertionExtensions
+    public static partial class SpanAssertionExtensions
     {
     }
 }

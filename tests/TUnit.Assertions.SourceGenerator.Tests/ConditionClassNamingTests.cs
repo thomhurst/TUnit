@@ -54,7 +54,9 @@ internal class ConditionClassNamingTests
 
         var (sources, _) = AssertionMethodGeneratorRunner.Run(source);
 
-        await Assert.That(ClassNames(sources).Distinct()).Count().IsEqualTo(4);
+        // The generic overload's class has a different arity, so it can keep the plain name
+        await Assert.That(ClassNames(sources)).Count().IsEqualTo(4);
+        await Assert.That(ClassNames(sources).Distinct()).Count().IsEqualTo(3);
         await CompileChecker.AssertNoErrors(sources.Append(source));
     }
 

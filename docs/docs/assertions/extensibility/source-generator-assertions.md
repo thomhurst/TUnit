@@ -314,6 +314,28 @@ await Assert.That("user@example.com").IsValidEmail();  // ✅ Passes
 await Assert.That("invalid-email").IsValidEmail();     // ❌ Fails: "Expected to be a valid email but found 'invalid-email'"
 ```
 
+### Open Generic Types
+
+Pass an unbound generic type, such as `typeof(Container<>)`, to generate one assertion that works for every closed type. The generated assertion is generic over the type's parameters.
+
+```csharp
+[AssertionFrom(typeof(Container<>), nameof(Container<int>.IsVacant), ExpectationMessage = "to be vacant")]
+public static partial class ContainerAssertionExtensions
+{
+}
+
+public class Container<T>
+{
+    public bool IsVacant => true;
+}
+
+// Usage:
+await Assert.That(new Container<int>()).IsVacant();
+await Assert.That(new Container<string>()).IsVacant();
+```
+
+The method or property must be declared on the generic type itself. If it is declared on another type, the generator reports error `TU0001`.
+
 ---
 
 ## Method Body Inlining (Advanced)

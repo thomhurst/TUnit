@@ -123,7 +123,20 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     {
         var alreadyTrackedSnapshot = SnapshotTrackedObjects(testContext.TrackedObjectsIfCreated);
 
-        var trackableDict = trackableObjectGraphProvider.GetTrackableObjects(testContext);
+        SortedList<int, HashSet<object>> trackableDict;
+        try
+        {
+            trackableDict = trackableObjectGraphProvider.GetTrackableObjects(testContext);
+        }
+        catch
+        {
+            // Discovery adds objects to the test's tracked set as it goes, but references are only
+            // counted below, once it has finished. Drop what this call added, so that completing the
+            // test does not release references it never took (which could dispose a shared instance
+            // that another test still holds).
+            RemoveObjectsNotIn(testContext.TrackedObjectsIfCreated, alreadyTrackedSnapshot);
+            throw;
+        }
         if (trackableDict.Count == 0 && alreadyTrackedSnapshot is null)
         {
             return;
@@ -139,6 +152,32 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
                 {
                     TrackObject(obj);
                 }
+            }
+        }
+    }
+
+    private static void RemoveObjectsNotIn(SortedList<int, HashSet<object>>? trackedObjects, HashSet<object>? keep)
+    {
+        if (trackedObjects is null)
+        {
+            return;
+        }
+
+        for (var i = trackedObjects.Count - 1; i >= 0; i--)
+        {
+            var bucket = trackedObjects.Values[i];
+            if (keep is null)
+            {
+                bucket.Clear();
+            }
+            else
+            {
+                bucket.RemoveWhere(obj => !keep.Contains(obj));
+            }
+
+            if (bucket.Count == 0)
+            {
+                trackedObjects.RemoveAt(i);
             }
         }
     }

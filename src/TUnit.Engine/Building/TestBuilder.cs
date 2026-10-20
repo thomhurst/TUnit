@@ -225,8 +225,12 @@ internal sealed class TestBuilder : ITestBuilder
                     hasAnyClassData = true;
                     classDataLoopIndex++;
 
-                    var classDataResult = await classDataFactory() ?? [];
-                    var classData = DataUnwrapper.Unwrap(classDataResult);
+                    var (classData, firstClassRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
+
+                    // No test holds this first fetch yet. The first test built from this class row takes it
+                    // instead of calling the factory again, so a non-shared source does not create an extra
+                    // instance that nothing tracks or disposes (#7157).
+                    var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata);
 
 #if NET
                     // Register scope for class data objects from the simple path.
@@ -245,6 +249,11 @@ internal sealed class TestBuilder : ITestBuilder
                     {
                         if (needsInstanceForMethodDataSources)
                         {
+                            // The temporary instance is built from the first fetch and disposed below, so no
+                            // test may receive those objects: it could find them disposed. The next test
+                            // tracks them instead, so they are still disposed.
+                            unclaimedClassRow.LendToTemporaryInstance();
+
                             var instanceResult = await CreateInitializedInstanceForMethodDataSources(
                                 metadata,
                                 classDataAttributeIndex,
@@ -297,7 +306,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                                     testBuilderContext.CopyStateBagTo(contextAccessor.Current);
 
-                                    var (classDataUnwrapped, classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
+                                    var (classDataUnwrapped, classRowMetadata) = await unclaimedClassRow.TakeOrFetchAsync(classDataFactory);
                                     classData = classDataUnwrapped;
 
                                     object?[] methodRow;
@@ -311,15 +320,15 @@ internal sealed class TestBuilder : ITestBuilder
                                         // constraints: fail this row only, as reflection mode does when it resolves
                                         // the row's type arguments, and keep building the remaining rows.
                                         var (reportedException, rowData) = UnpackConstraintViolation(ex, metadata.MethodMetadata.Parameters);
-                                        tests.Add(CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, classData, rowData));
+                                        tests.Add(CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, unclaimedClassRow.WithLentObjects(classData), rowData));
                                         continue;
                                     }
 
                                     var (methodData, methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(methodRow, metadata.MethodMetadata.Parameters);
 
 #if NET
-                                // Re-register: classDataFactory() was called again above and may return
-                                // a different instance for non-shared objects. First-registration-wins
+                                // Re-register: classDataFactory() may have been called again above and
+                                // returned a different instance for non-shared objects. First-registration-wins
                                 // semantics make this a no-op for the same instance.
                                 TraceScopeRegistry.RegisterFromDataSource(classDataSource, classData);
                                 TraceScopeRegistry.RegisterFromDataSource(methodDataSource, methodData);
@@ -341,7 +350,9 @@ internal sealed class TestBuilder : ITestBuilder
 
                                         if (!IsDataCompatibleWithExpectedTypes(metadata, methodData))
                                         {
-                                            // Skip this data source as it's not compatible with the expected types
+                                            // Skip this data source as it's not compatible with the expected types.
+                                            // No test holds the class row's objects, so the next test takes them.
+                                            unclaimedClassRow.Return(classData, classRowMetadata);
                                             continue;
                                         }
                                     }
@@ -395,7 +406,7 @@ internal sealed class TestBuilder : ITestBuilder
                                             catch (Exception innerEx)
                                             {
                                                 // If we still can't resolve, create a failed test
-                                                var failedTest = CreateFailedTestForDataRowError(metadata, innerEx, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, classData, methodData);
+                                                var failedTest = CreateFailedTestForDataRowError(metadata, innerEx, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, unclaimedClassRow.WithLentObjects(classData), methodData);
                                                 tests.Add(failedTest);
                                                 continue;
                                             }
@@ -403,7 +414,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         catch (Exception ex)
                                         {
                                             // If generic resolution fails, create a failed test
-                                            var failedTest = CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, classData, methodData);
+                                            var failedTest = CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, unclaimedClassRow.WithLentObjects(classData), methodData);
                                             tests.Add(failedTest);
                                             continue;
                                         }
@@ -444,7 +455,8 @@ internal sealed class TestBuilder : ITestBuilder
                                         InheritanceDepth = metadata.InheritanceDepth,
                                         ResolvedClassGenericArguments = resolvedClassGenericArgs,
                                         ResolvedMethodGenericArguments = resolvedMethodGenericArgs,
-                                        Metadata = finalMetadata
+                                        Metadata = finalMetadata,
+                                        UnreceivedClassRowObjects = unclaimedClassRow.TakeLentObjects()
                                     };
 
                                     TestBuilderContext testSpecificContext;
@@ -489,6 +501,11 @@ internal sealed class TestBuilder : ITestBuilder
                             {
                                 const string skipReason = "Data source returned no data";
 
+                                // The test built below holds classData, which may be the unclaimed first fetch,
+                                // and tracks any objects that a temporary instance used.
+                                var lentClassRowObjects = unclaimedClassRow.TakeLentObjects();
+                                unclaimedClassRow.Clear();
+
                                 Type[] resolvedClassGenericArgs;
                                 Exception? genericResolutionException = null;
                                 try
@@ -506,7 +523,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 // If generic type inference failed, create a failed test instead of skipped
                                 if (genericResolutionException != null)
                                 {
-                                    var failedTest = CreateFailedTestForDataGenerationError(metadata, genericResolutionException, new TestDataCombination(), classData);
+                                    var failedTest = CreateFailedTestForDataGenerationError(metadata, genericResolutionException, new TestDataCombination(), classData, lentClassRowObjects);
                                     tests.Add(failedTest);
                                 }
                                 else
@@ -523,7 +540,8 @@ internal sealed class TestBuilder : ITestBuilder
                                         RepeatIndex = 0,
                                         InheritanceDepth = metadata.InheritanceDepth,
                                         ResolvedClassGenericArguments = resolvedClassGenericArgs,
-                                        ResolvedMethodGenericArguments = Type.EmptyTypes
+                                        ResolvedMethodGenericArguments = Type.EmptyTypes,
+                                        UnreceivedClassRowObjects = lentClassRowObjects
                                     };
 
                                     var testSpecificContext = new TestBuilderContext
@@ -1005,6 +1023,107 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
+    /// <summary>
+    /// The objects of a class data row that were fetched but that no test holds yet. The builder fetches a
+    /// class row once before it evaluates the method data sources, and its tests used to fetch it again,
+    /// so a non-shared source created an extra instance per class row that nothing tracked or disposed.
+    /// The next test built from the row takes the unclaimed objects instead of calling the factory (#7157).
+    /// </summary>
+    /// <remarks>
+    /// When the row needs a temporary instance for an instance method data source, that instance is built
+    /// from these objects and disposed once the method rows are read, so no test may receive them. They
+    /// are lent to the instance instead, and the next test built from the row tracks them without
+    /// receiving them, so they are still disposed.
+    /// </remarks>
+    private sealed class UnclaimedClassRow(object?[] data, TestDataRowMetadata? metadata)
+    {
+        private object?[]? _data = data;
+        private TestDataRowMetadata? _metadata = metadata;
+        private object?[]? _lent;
+
+        /// <summary>
+        /// Takes the unclaimed objects, or fetches a new row from <paramref name="classDataFactory"/> when a
+        /// test already holds them.
+        /// </summary>
+        public ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> TakeOrFetchAsync(Func<Task<object?[]?>> classDataFactory)
+        {
+            if (_data is { } data)
+            {
+                var row = (data, _metadata);
+                Clear();
+                return new ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)>(row);
+            }
+
+            return FetchAsync(classDataFactory);
+
+            static async ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> FetchAsync(Func<Task<object?[]?>> factory)
+                => DataUnwrapper.UnwrapWithMetadata(await factory() ?? []);
+        }
+
+        /// <summary>
+        /// Hands back objects that were taken but that no test ended up holding, so the next test takes them.
+        /// </summary>
+        public void Return(object?[] data, TestDataRowMetadata? metadata)
+        {
+            _data = data;
+            _metadata = metadata;
+        }
+
+        /// <summary>
+        /// Marks the unclaimed objects as held by a test that did not take them through <see cref="TakeOrFetchAsync"/>.
+        /// </summary>
+        public void Clear()
+        {
+            _data = null;
+            _metadata = null;
+            _lent = null;
+        }
+
+        /// <summary>
+        /// Marks the unclaimed objects as used by a temporary instance, so no test receives them, but the
+        /// next test tracks them through <see cref="TakeLentObjects"/> or <see cref="WithLentObjects"/>.
+        /// </summary>
+        public void LendToTemporaryInstance()
+        {
+            _lent = _data;
+            _data = null;
+            _metadata = null;
+        }
+
+        /// <summary>
+        /// Takes the objects lent to a temporary instance, for a test to track without receiving them.
+        /// </summary>
+        public object?[] TakeLentObjects()
+        {
+            var lent = _lent ?? [];
+            _lent = null;
+            return lent;
+        }
+
+        /// <summary>
+        /// Adds the objects lent to a temporary instance to a failed test's class row objects, which the
+        /// failed test tracks without receiving.
+        /// </summary>
+        public object?[]? WithLentObjects(object?[]? classData)
+        {
+            var lent = TakeLentObjects();
+            if (lent.Length == 0)
+            {
+                return classData;
+            }
+
+            if (classData is not { Length: > 0 })
+            {
+                return lent;
+            }
+
+            var combined = new object?[lent.Length + classData.Length];
+            lent.CopyTo(combined, 0);
+            classData.CopyTo(combined, lent.Length);
+            return combined;
+        }
+    }
+
     private static async ValueTask DisposeInstanceForMethodDataSourcesAsync(object? instance)
     {
         if (instance is null or PlaceholderInstance or SkippedTestInstance)
@@ -1258,6 +1377,7 @@ internal sealed class TestBuilder : ITestBuilder
             ClassInstance = PlaceholderInstance.Instance,
             TestMethodArguments = testData.MethodData,
             TestClassArguments = testData.ClassData,
+            UnreceivedDataRowObjects = testData.UnreceivedClassRowObjects,
             TestFilePath = metadata.FilePath,
             TestLineNumber = metadata.LineNumber,
             TestStartColumnNumber = metadata.StartColumnNumber,
@@ -1380,7 +1500,7 @@ internal sealed class TestBuilder : ITestBuilder
     /// <param name="methodData">The method row's objects, if the row produced them before it failed.</param>
     /// <remarks>
     /// The failed test never receives the row's objects, but it carries them in
-    /// <see cref="TestDetails.FailedDataRowObjects"/>, so the object tracker counts them when the test is
+    /// <see cref="TestDetails.UnreceivedDataRowObjects"/>, so the object tracker counts them when the test is
     /// registered for execution and releases them when it completes. Releasing a reference disposes an
     /// object only when no other test still holds it, so shared and keyed instances stay alive (#7123).
     /// </remarks>
@@ -1510,7 +1630,7 @@ internal sealed class TestBuilder : ITestBuilder
         return new TestDetails([])
         {
             TestId = testId,
-            FailedDataRowObjects = failedDataRowObjects,
+            UnreceivedDataRowObjects = failedDataRowObjects,
             TestName = metadata.TestName,
             ClassType = metadata.TestClassType,
             MethodName = metadata.TestMethodName,
@@ -1919,6 +2039,12 @@ internal sealed class TestBuilder : ITestBuilder
         /// Contains custom DisplayName, Skip reason, and Categories.
         /// </summary>
         public TestDataRowMetadata? Metadata { get; set; }
+
+        /// <summary>
+        /// Class row objects that only a temporary instance for an instance method data source used. The
+        /// test does not receive them but tracks them, so they are disposed with it (#7157).
+        /// </summary>
+        public object?[] UnreceivedClassRowObjects { get; init; } = [];
     }
 
     /// <summary>
@@ -2018,7 +2144,11 @@ internal sealed class TestBuilder : ITestBuilder
                 cancellationToken.ThrowIfCancellationRequested();
                 classDataLoopIndex++;
 
-                var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+                var (classData, firstClassRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
+
+                // The first test built from this class row takes this fetch instead of calling the factory
+                // again, so a non-shared source does not create an extra, untracked instance (#7157).
+                var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata);
 
                 // Initialize objects before method data sources are evaluated (ObjectInitializer is phase-aware)
                 await InitializeClassDataAsync(classData);
@@ -2031,6 +2161,11 @@ internal sealed class TestBuilder : ITestBuilder
                 {
                     if (needsInstanceForMethodDataSources)
                     {
+                        // The temporary instance is built from the first fetch and disposed below, so no
+                        // test may receive those objects: it could find them disposed. The next test
+                        // tracks them instead, so they are still disposed.
+                        unclaimedClassRow.LendToTemporaryInstance();
+
                         var instanceResult = await CreateInitializedInstanceForMethodDataSources(
                             metadata,
                             classDataAttributeIndex,
@@ -2075,7 +2210,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                                 // Build and yield single test
                                 var test = await BuildSingleTestAsync(
-                                    metadata, classDataFactory, methodDataFactory,
+                                    metadata, classDataFactory, unclaimedClassRow, methodDataFactory,
                                     classDataAttributeIndex, classDataLoopIndex,
                                     methodDataAttributeIndex, methodDataLoopIndex,
                                     i, contextAccessor,
@@ -2210,6 +2345,7 @@ internal sealed class TestBuilder : ITestBuilder
     private async Task<AbstractExecutableTest?> BuildSingleTestAsync(
         TestMetadata metadata,
         Func<Task<object?[]?>> classDataFactory,
+        UnclaimedClassRow unclaimedClassRow,
         Func<Task<object?[]?>> methodDataFactory,
         int classDataAttributeIndex,
         int classDataLoopIndex,
@@ -2228,7 +2364,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         try
         {
-            (classData, var classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
+            (classData, var classRowMetadata) = await unclaimedClassRow.TakeOrFetchAsync(classDataFactory);
             (methodData, var methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
             // Extract and merge metadata from data source attributes and TestDataRow wrappers
@@ -2246,7 +2382,9 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 if (!IsDataCompatibleWithExpectedTypes(metadata, methodData))
                 {
-                    return null; // Skip incompatible data
+                    // Skip incompatible data. No test holds the class row's objects, so the next test takes them.
+                    unclaimedClassRow.Return(classData, classRowMetadata);
+                    return null;
                 }
             }
 
@@ -2285,12 +2423,12 @@ internal sealed class TestBuilder : ITestBuilder
                 }
                 catch (Exception ex)
                 {
-                    return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, classData, methodData);
+                    return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, unclaimedClassRow.WithLentObjects(classData), methodData);
                 }
             }
             catch (Exception ex)
             {
-                return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, classData, methodData);
+                return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, unclaimedClassRow.WithLentObjects(classData), methodData);
             }
 
             if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
@@ -2330,7 +2468,8 @@ internal sealed class TestBuilder : ITestBuilder
                 InheritanceDepth = metadata.InheritanceDepth,
                 ResolvedClassGenericArguments = resolvedClassGenericArgs,
                 ResolvedMethodGenericArguments = resolvedMethodGenericArgs,
-                Metadata = finalMetadata
+                Metadata = finalMetadata,
+                UnreceivedClassRowObjects = unclaimedClassRow.TakeLentObjects()
             };
 
             // Events is lazy-initialized; explicitly share StateBag from per-iteration context
@@ -2360,7 +2499,7 @@ internal sealed class TestBuilder : ITestBuilder
             // Includes a GenericConstraintViolationDataSource row whose inferred type arguments break the
             // method's constraints. The row's indexes keep its id distinct from the method's other rows.
             var (reportedException, rowData) = UnpackConstraintViolation(ex, metadata.MethodMetadata.Parameters);
-            return CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, classData, rowData ?? methodData);
+            return CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, unclaimedClassRow.WithLentObjects(classData), rowData ?? methodData);
         }
     }
 
