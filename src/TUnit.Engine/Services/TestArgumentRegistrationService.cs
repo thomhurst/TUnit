@@ -51,7 +51,7 @@ internal sealed class TestArgumentRegistrationService
         if (testDetails.TestClassArguments.Length == 0 &&
             testDetails.TestMethodArguments.Length == 0 &&
             testDetails.TestClassInjectedPropertyArguments.Count == 0 &&
-            testDetails.FailedDataRowObjects.Length == 0)
+            testDetails.UnreceivedDataRowObjects.Length == 0)
         {
             // Nothing to track, so no user code runs here — skip the AsyncLocal write.
             return;
