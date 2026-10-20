@@ -6,37 +6,35 @@ namespace TUnit.Analyzers.Extensions;
 
 public static class ParameterExtensions
 {
+    /// <summary>
+    /// Removes CancellationToken parameters, which take no data: the engine passes the test's token
+    /// to them wherever they are declared.
+    /// </summary>
     public static ImmutableArray<IParameterSymbol> WithoutCancellationTokenParameter(this ImmutableArray<IParameterSymbol> parameterSymbols)
     {
-        if (parameterSymbols.IsDefaultOrEmpty)
+        if (parameterSymbols.IsDefaultOrEmpty
+            || !parameterSymbols.Any(static p => IsCancellationToken(p.Type)))
         {
             return parameterSymbols;
         }
 
-        if (parameterSymbols.Last().Type.IsGloballyQualifiedNonGeneric(
-            WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix))
-        {
-            return ImmutableArray.Create(parameterSymbols, 0, parameterSymbols.Length - 1);
-        }
-
-        return parameterSymbols;
+        return parameterSymbols.RemoveAll(static p => IsCancellationToken(p.Type));
     }
 
+    /// <inheritdoc cref="WithoutCancellationTokenParameter(ImmutableArray{IParameterSymbol})"/>
     public static ImmutableArray<ITypeSymbol> WithoutCancellationTokenParameter(this ImmutableArray<ITypeSymbol> typeSymbols)
     {
-        if (typeSymbols.IsDefaultOrEmpty)
+        if (typeSymbols.IsDefaultOrEmpty
+            || !typeSymbols.Any(static t => IsCancellationToken(t)))
         {
             return typeSymbols;
         }
 
-        if (typeSymbols.Last().IsGloballyQualified(
-            WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix))
-        {
-            return ImmutableArray.Create(typeSymbols, 0, typeSymbols.Length - 1);
-        }
-
-        return typeSymbols;
+        return typeSymbols.RemoveAll(static t => IsCancellationToken(t));
     }
+
+    private static bool IsCancellationToken(ITypeSymbol type)
+        => type.IsGloballyQualifiedNonGeneric(WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix);
 
     public static bool HasMatrixAttribute(this IParameterSymbol parameterSymbol, Compilation compilation)
     {

@@ -75,12 +75,25 @@ internal class DataUnwrapper
             return values;
         }
 
-        // Special case: If we have a single value that's a tuple, and a single parameter that expects a tuple,
-        // don't unwrap it
+        // The engine supplies CancellationToken parameters wherever they are declared, so the row
+        // binds to the data parameters only.
+        var dataParameterCount = 0;
+        var singleDataParameterIndex = -1;
+        for (var i = 0; i < expectedParameters.Length; i++)
+        {
+            if (expectedParameters[i].Type != typeof(CancellationToken))
+            {
+                dataParameterCount++;
+                singleDataParameterIndex = i;
+            }
+        }
+
+        // Special case: If we have a single value that's a tuple, and a single data parameter that
+        // expects a tuple, don't unwrap it
         if (values.Length == 1 &&
-            expectedParameters.Length == 1 &&
+            dataParameterCount == 1 &&
             DataSourceHelpers.IsTuple(values[0]) &&
-            TupleHelper.IsTupleType(expectedParameters[0].Type))
+            TupleHelper.IsTupleType(expectedParameters[singleDataParameterIndex].Type))
         {
             return values;
         }
@@ -88,10 +101,14 @@ internal class DataUnwrapper
         // Otherwise use the default unwrapping
         if (values.Length == 1 && DataSourceHelpers.IsTuple(values[0]))
         {
-            var paramTypes = new Type[expectedParameters.Length];
+            var paramTypes = new Type[dataParameterCount];
+            var typeIndex = 0;
             for (var i = 0; i < expectedParameters.Length; i++)
             {
-                paramTypes[i] = expectedParameters[i].Type;
+                if (expectedParameters[i].Type != typeof(CancellationToken))
+                {
+                    paramTypes[typeIndex++] = expectedParameters[i].Type;
+                }
             }
 
             return values[0].ToObjectArrayWithTypes(paramTypes);
