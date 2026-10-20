@@ -17,9 +17,10 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<GenerateVersionModule>]
 [DependsOn<PackTUnitFilesModule>]
 [DependsOn<TestNugetPackageModule>]
+// The AOT-mode engine tests run in aot.yml, not in this pipeline: check that workflow passed for
+// the commit before publishing.
 [DependsOn<RunEngineTestsModule>]
 // The engine modules no longer wait for these, so a release has to.
-[DependsOn<RunEngineAotTestsModule>]
 [DependsOn<RunRpcTestsModule>(Optional = true)]
 [DependsOn<RunPlaywrightTestsModule>(Optional = true)]
 [DependsOn<TestFSharpNugetPackageModule>]

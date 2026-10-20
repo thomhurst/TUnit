@@ -145,9 +145,10 @@ jobs:
           environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
           nuget-apikey: ${{ steps.login.outputs.NUGET_API_KEY }}
           publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
+          # The AOT test-app publish and the AOT-mode engine tests run in aot.yml.
           # Windows tests the packages in the nuget-package-tests-windows job instead: with every
           # .NET Framework TFM they competed with the engine tests for this runner's CPUs.
-          ignore-categories: ${{ matrix.os == 'windows-latest' && 'NuGetPackageTests' || '' }}
+          ignore-categories: ${{ matrix.os == 'windows-latest' && 'Aot NuGetPackageTests' || 'Aot' }}
 
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v7.0.2

@@ -1,0 +1,85 @@
+name: AOT
+
+# Publishes the native AOT test app and runs the AOT-mode engine tests against it. Inside the .NET
+# matrix the publish competed with the test modules for CPUs and was the critical path on every OS
+# (12-25 minutes, with the Reflection-mode engine tests held back until it finished). On a runner
+# of its own it needs no full solution build: building TUnit.Engine.Tests builds the test projects
+# it launches, and the publish compiles into its own artifacts tree.
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  aot:
+    name: AOT (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    env:
+      # Under GitHub Actions Directory.Build.props leaves Version unset, and TUnit.Assertions.Should's
+      # "$(Version)-beta" would then be invalid. MSBuild binds this to the Version property.
+      Version: 1.0.0
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Dev Drive (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: samypr100/setup-dev-drive@v4
+        with:
+          drive-size: 10GB
+          trusted-dev-drive: true
+          env-mapping: |
+            NUGET_PACKAGES,{{ DEV_DRIVE }}/.nuget/packages
+            TEMP,{{ DEV_DRIVE }}/tmp
+            TMP,{{ DEV_DRIVE }}/tmp
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+
+      - name: Enable Long Paths on Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+        shell: pwsh
+
+      - name: Build
+        shell: bash
+        run: |
+          dotnet build tests/TUnit.Engine.Tests/TUnit.Engine.Tests.csproj -c Release
+          dotnet build tools/TUnit.Pipeline/TUnit.Pipeline.csproj -c Release
+
+      - name: Run Pipeline
+        uses: ./.github/actions/execute-pipeline
+        with:
+          categories: Aot
+          admin-token: ${{ github.token }}
+
+      - name: Upload Diagnostic Logs
+        uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: TestingPlatformDiagnosticLogs-aot-${{ matrix.os }}
+          path: '**/log_*.diag'
+
+      - name: Upload Hang Dumps
+        uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: HangDump-aot-${{ matrix.os }}
+          path: '**/hangdump*'

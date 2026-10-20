@@ -3,10 +3,8 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
-// The Reflection-mode engine tests, plus the tests that don't run per mode. They need no AOT app,
-// but they still wait for its publish: the publish is the critical path (RunEngineAotTestsModule
-// waits for it), and these tests start many TestProject processes. Running them alongside it
-// slowed the publish 2-5x on every runner OS.
+// The Reflection-mode engine tests, plus the tests that don't run per mode. They need no AOT app:
+// the AOT publish and the AOT-mode engine tests run in aot.yml instead.
 [NotInParallel("NetworkTests")]
 [DependsOn<RunAnalyzersTestsModule>]
 [DependsOn<RunUnitTestsModule>]
@@ -19,7 +17,6 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<RunPublicAPITestsModule>]
 [DependsOn<RunSourceGeneratorTestsModule>]
 [DependsOn<RunAssertionsCodeFixersTestsModule>]
-[DependsOn<PublishTestProjectAOTModule>]
 public class RunEngineTestsModule : EngineTestsModuleBase
 {
     protected override string TestMode => "Reflection";

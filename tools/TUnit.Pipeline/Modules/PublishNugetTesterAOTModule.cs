@@ -15,11 +15,6 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<TestNugetPackageModule>]
 [DependsOn<GenerateVersionModule>]
 [DependsOn<CopyToLocalNuGetModule>]
-// Waits so that its native AOT publishes don't compete with the AOT test-app publish, which is on
-// the critical path. The dependency is optional: the Windows NuGet job runs only the Packaging and
-// NuGetPackageTests categories, so that module isn't registered there and a required dependency
-// would fail the pipeline.
-[DependsOn<PublishTestProjectAOTModule>(Optional = true)]
 public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
 {
     protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()

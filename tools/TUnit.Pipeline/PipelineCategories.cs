@@ -10,4 +10,7 @@ public static class PipelineCategories
 
     /// <summary>Consumes the packed packages. Windows runs these in their own job (see dotnet.yml).</summary>
     public const string NuGetPackageTests = "NuGetPackageTests";
+
+    /// <summary>Publishes the native AOT test app and runs the AOT-mode engine tests (see aot.yml).</summary>
+    public const string Aot = "Aot";
 }
