@@ -736,8 +736,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     continue;
                 }
 
-                // Determine generic type arguments from the data
-                var typeArguments = ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
+                // Determine generic type arguments from the data. The null value of an [Arguments<T>(null)] row
+                // infers its declared T instead, as in the source generator.
+                var typeArguments = ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow)
+                    ?? InferTypeArgumentsFromNullTypedArgumentsRow(genericTypeDefinition, dataSource, dataRow);
                 if (typeArguments == null || typeArguments.Length == 0 || constraintViolations.TryAddClassViolation(typeArguments))
                 {
                     continue;
@@ -785,6 +787,23 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// The class type argument that an <see cref="ArgumentsAttribute{T}"/> row with a null value infers: its declared
+    /// T, for a class with one type parameter, as the source generator infers it. Null for any other row.
+    /// </summary>
+    private static Type[]? InferTypeArgumentsFromNullTypedArgumentsRow(Type genericTypeDefinition, IDataSourceAttribute dataSource, object?[] dataRow)
+    {
+        if (dataRow is not [null]
+            || dataSource.GetType() is not { IsGenericType: true } sourceType
+            || sourceType.GetGenericTypeDefinition() != typeof(ArgumentsAttribute<>)
+            || genericTypeDefinition.GetGenericArguments().Length != 1)
+        {
+            return null;
+        }
+
+        return [sourceType.GetGenericArguments()[0]];
     }
 
     /// <summary>

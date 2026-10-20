@@ -1477,6 +1477,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
 
+            var addUninferredMethodDataSources = uninferredMethodDataSources is not null && MethodParametersReferenceTypeParameters(testMethod);
+
             foreach (var instantiation in rowInstantiations.Values)
             {
                 if (instantiation.HasMethodRows && !instantiation.HasClassRows)
@@ -1491,6 +1493,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         }
                     }
 
+                    // The class data source makes this a class row instantiation after the pass above gave
+                    // those the method rows that infer no type, so they join it here, as in reflection mode
+                    if (hasClassDataSource && addUninferredMethodDataSources)
+                    {
+                        foreach (var uninferred in uninferredMethodDataSources!)
+                        {
+                            instantiation.AddRow(uninferred, isClassRow: false);
+                        }
+                    }
+
                     instantiation.HasNoClassRow = !hasClassDataSource
                         && (generateGenericTestTypes is null
                             || !generateGenericTestTypes.Any(types => InferredTypesMatch(types, instantiation.ClassTypeArgs)));
@@ -1500,6 +1512,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     results.Remove(instantiation);
                 }
             }
+
+            // An instantiation that no row made, inferred from the declared type of a method data source
+            // (a [MethodDataSource] returning IEnumerable<object>), has no class row either. Reflection mode
+            // infers class type arguments only from class data sources and method [Arguments] rows, so it
+            // has no such instantiation. A [GenerateGenericTest] or a class data source of those types still
+            // supplies one.
+            results.RemoveAll(instantiation =>
+                instantiation is { SpecificArgumentsAttribute: null, MethodConstraintViolations: null, ClassTypeArgs.Length: > 0 }
+                && (generateGenericTestTypes is null || !generateGenericTestTypes.Any(types => InferredTypesMatch(types, instantiation.ClassTypeArgs)))
+                && (otherClassDataSources is null || !otherClassDataSources.Any(source => source.ClassTypes is null || InferredTypesMatch(source.ClassTypes, instantiation.ClassTypeArgs))));
         }
 
         // Reflection mode (ReflectionGenericConstraintViolations in TUnit.Engine) reports class-level
@@ -6401,13 +6423,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var typeParameters = classSymbol.TypeParameters;
 
         ImmutableArray<TypedConstant> argumentValues;
-        if (argAttr.AttributeClass is { IsGenericType: true, TypeArguments.Length: 1 })
+        // The declared type of an [Arguments<T>(null)] row, which its null value infers
+        ITypeSymbol? declaredNullValueType = null;
+        if (argAttr.AttributeClass is { IsGenericType: true, TypeArguments.Length: 1 } genericArgumentsAttribute)
         {
             // [Arguments<T>(value)] is a class row of one value, as reflection mode reads it. A null value
-            // infers no class type.
+            // infers the declared T, as reflection mode does.
             if (argAttr.ConstructorArguments[0].IsNull)
             {
-                return null;
+                declaredNullValueType = genericArgumentsAttribute.TypeArguments[0];
             }
 
             argumentValues = ImmutableArray.Create(argAttr.ConstructorArguments[0]);
@@ -6448,7 +6472,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // The argument value's type tells us what the generic type should be
                 ITypeSymbol? argType = null;
 
-                if (argValue.Type != null)
+                if (declaredNullValueType != null)
+                {
+                    argType = declaredNullValueType;
+                }
+                else if (argValue.Type != null)
                 {
                     argType = argValue.Type;
                 }

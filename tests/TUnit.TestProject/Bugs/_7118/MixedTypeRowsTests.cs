@@ -172,3 +172,68 @@ public class StringClassSource7118 : DataSourceGeneratorAttribute<string>
         yield return () => "s";
     }
 }
+
+// The class row "a" makes a string instantiation that the method's only [Arguments] row does not infer.
+// The method's [MethodDataSource] infers no type, so its rows still run on that instantiation, as on the
+// int one: Test(1) and Test(null) on <int>, Test(null) on <string>. Its declared IEnumerable<object?> made
+// source-generated mode add an object instantiation that no class row infers, with four more tests.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+[Arguments("a")]
+public class ClassRowWithUninferredMethodSource<T>(T value)
+{
+    public static IEnumerable<object?> Rows() => [null];
+
+    [Test]
+    [Arguments(1)]
+    [MethodDataSource(nameof(Rows))]
+    public async Task Test(T? arg)
+    {
+        await Assert.That((object?)value).IsNotNull();
+        await Assert.That(arg is null || (object)arg is 0 or 1).IsTrue();
+    }
+}
+
+// As MethodRowMatchedByTypedClassSource, with a method row that infers no type. The typed source joins the
+// string instantiation, so [Arguments(null)] runs there as on the int one: Test(2) and Test(null) on <int>,
+// Test("a") and Test(null) on <string>. Source-generated mode used to drop Test(null) on <string>.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+[StringClassSource7118]
+public class UninferredMethodRowWithTypedClassSource<T>(T value)
+{
+    [Test]
+    [Arguments(2)]
+    [Arguments("a")]
+    [Arguments(null)]
+    public async Task Test(T? arg)
+    {
+        if (typeof(T) == typeof(string))
+        {
+            await Assert.That((object?)value).IsEqualTo("s");
+            await Assert.That(arg is null || (object)arg is "a").IsTrue();
+        }
+        else
+        {
+            // T? of an unconstrained T is T itself, so the null row reaches an int parameter as 0
+            await Assert.That((object?)value).IsEqualTo(1);
+            await Assert.That((object?)arg is 0 or 2).IsTrue();
+        }
+    }
+}
+
+// A class row [Arguments<string>(null)] declares string, so its null value makes a string instantiation, and
+// the method row "a" runs on it: Test("a") on <string> with a null constructor value.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments<string>(null)]
+public class NullTypedClassRow<T>(T? value)
+{
+    [Test]
+    [Arguments("a")]
+    public async Task Test(T arg)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That((object?)value).IsNull();
+        await Assert.That((object?)arg).IsEqualTo("a");
+    }
+}
