@@ -22,6 +22,23 @@ public class Issue7108Tests(TestMode testMode) : InvokableTestBase(testMode)
             ]);
     }
 
+    /// <summary>
+    /// Runs one table of [MethodDataSource] overload scenarios in this mode. Each row names the overload
+    /// both modes must choose, so a drift between the generator's scorer and the reflection binder fails here.
+    /// </summary>
+    [Test]
+    public async Task Both_Modes_Choose_The_Same_Data_Source_Overload()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7108/DataSourceOverloadParityTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(16),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(16),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
     [Test]
     public async Task Single_Tuple_Parameter_Keeps_The_CancellationToken_At_Its_Declared_Position()
     {

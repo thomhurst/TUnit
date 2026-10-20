@@ -6505,8 +6505,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <item>A missing optional parameter is left out so its default applies, and a missing
     /// <c>CancellationToken</c> gets <c>CancellationToken.None</c>. Later parameters are passed by name.</item>
     /// </list>
-    /// A missing required parameter still reads past the end of <c>arguments</c>, so the mismatch is reported
-    /// when the data source runs, as before.
+    /// A missing required parameter is only reached when no overload accepts the <c>Arguments</c>
+    /// (<see cref="ScoreDataSourceOverload"/> rejects such overloads, and TUnit0001 reports the mismatch at
+    /// compile time). The generated call then throws a descriptive <see cref="InvalidOperationException"/>
+    /// when the data source runs, instead of an <see cref="IndexOutOfRangeException"/>.
+    /// A required parameter can follow a skipped optional one only in that same case: C# requires every
+    /// parameter after an optional one to be optional or <c>params</c>, so a parameter after a skipped one
+    /// is itself missing.
     /// </summary>
     private static string BuildDataSourceCallArguments(IMethodSymbol method, TypedConstant arguments, Compilation compilation)
     {
@@ -6544,7 +6549,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             else
             {
-                value = $"(({parameterType})arguments[{i.ToString(CultureInfo.InvariantCulture)}])";
+                var message = $"[MethodDataSource] {method.ContainingType.Name}.{method.Name} needs a value for parameter '{parameter.Name}', "
+                    + $"but its Arguments supply {values.Length.ToString(CultureInfo.InvariantCulture)}. "
+                    + "Pass a value for every required parameter of the data method.";
+                value = $"(({parameterType})(arguments.Length > {i.ToString(CultureInfo.InvariantCulture)} ? arguments[{i.ToString(CultureInfo.InvariantCulture)}] "
+                    + $": throw new global::System.InvalidOperationException({SymbolDisplay.FormatLiteral(message, quote: true)})))";
             }
 
             callArguments.Add(useNames ? $"@{parameter.Name}: {value}" : value);
@@ -6629,6 +6638,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// </summary>
     private static bool IsMoreSpecificDataSourceOverload(IMethodSymbol candidate, IMethodSymbol other, int argumentCount, Compilation compilation)
     {
+        // Only called for two overloads that both scored >= 0, and ScoreDataSourceOverload returns -1 when
+        // there are more arguments than parameters, so both have at least argumentCount parameters.
+        System.Diagnostics.Debug.Assert(
+            argumentCount <= candidate.Parameters.Length && argumentCount <= other.Parameters.Length,
+            "IsMoreSpecificDataSourceOverload needs overloads that accept every argument (score >= 0).");
+
         var anyDifferent = false;
         for (var i = 0; i < argumentCount; i++)
         {

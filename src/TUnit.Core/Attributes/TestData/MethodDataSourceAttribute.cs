@@ -461,6 +461,12 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
     private static bool IsMoreSpecific(ParameterInfo[] candidate, ParameterInfo[] other, int argumentCount)
     {
+        // Only called for overloads that ScoreArguments accepted, and it rejects any overload with fewer
+        // parameters than arguments, so both have at least argumentCount parameters.
+        System.Diagnostics.Debug.Assert(
+            argumentCount <= candidate.Length && argumentCount <= other.Length,
+            "IsMoreSpecific needs overloads that accept every argument (ScoreArguments >= 0).");
+
         var anyDifferent = false;
         for (var i = 0; i < argumentCount; i++)
         {
