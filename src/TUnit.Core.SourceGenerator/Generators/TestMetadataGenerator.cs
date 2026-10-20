@@ -6221,13 +6221,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var inferredTypes = new Dictionary<string, ITypeSymbol>();
         var typeParameters = classSymbol.TypeParameters;
 
+        ImmutableArray<TypedConstant> argumentValues;
+        if (argAttr.AttributeClass is { IsGenericType: true, TypeArguments.Length: 1 })
+        {
+            // [Arguments<T>(value)] is a class row of one value, as reflection mode reads it. A null value
+            // infers no class type.
+            if (argAttr.ConstructorArguments[0].IsNull)
+            {
+                return null;
+            }
+
+            argumentValues = ImmutableArray.Create(argAttr.ConstructorArguments[0]);
+        }
         // [Arguments(null)] passes one null value, from which no class type can be inferred (as in reflection mode)
-        if (!HasArgumentsArray(argAttr) || IsNullArgumentsArray(argAttr))
+        else if (!HasArgumentsArray(argAttr) || IsNullArgumentsArray(argAttr))
         {
             return null;
         }
-
-        var argumentValues = argAttr.ConstructorArguments[0].Values;
+        else
+        {
+            argumentValues = argAttr.ConstructorArguments[0].Values;
+        }
 
         // Find the primary constructor
         var primaryConstructor = classSymbol.Constructors

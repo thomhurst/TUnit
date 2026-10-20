@@ -46,3 +46,18 @@ public class GenerateGenericTestTypeOnlyMethodRowsInfer<T>(T value)
         await Assert.That(value!.ToString()).IsEqualTo("5");
     }
 }
+
+// The generic [Arguments<int>] form is a class-level [Arguments] row too, so the method row "a", whose
+// string instantiation no class row infers, fails with an explanation in both modes, as with [Arguments].
+[EngineTest(ExpectedResult.Failure)]
+[Arguments<int>(1)]
+public class GenericArgumentsClassRowWithUnmatchedMethodRow<T>(T value)
+{
+    [Test]
+    [Arguments(1)]
+    [Arguments("a")]
+    public async Task Test(T arg)
+    {
+        await Assert.That(arg).IsEqualTo(value);
+    }
+}

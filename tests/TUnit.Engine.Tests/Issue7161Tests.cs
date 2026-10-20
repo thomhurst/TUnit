@@ -24,4 +24,21 @@ public class Issue7161Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
+
+    [Test]
+    public async Task Generic_Arguments_Class_Row_Leaves_Unmatched_Method_Row_Without_Class_Row()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7161/GenericArgumentsClassRowWithUnmatchedMethodRow*/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.Results
+                    .Single(x => x.Outcome == "Failed")
+                    .Output?.ErrorInfo?.Message
+                    .ShouldContain("none of the class-level data rows infer")
+            ]);
+    }
 }
