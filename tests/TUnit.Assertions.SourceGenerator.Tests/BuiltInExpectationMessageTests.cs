@@ -34,9 +34,8 @@ internal class BuiltInExpectationMessageTests
     [Test]
     public async Task Built_In_Declarations_Render_Expectations()
     {
-        // Guards the test above against passing vacuously, e.g. if the source files stop resolving. The bound
-        // stays well below the real count: on .NET Framework the runner defines no NET symbols, so declarations
-        // under #if NET are not generated and fewer than 100 expectations render.
+        // Guards the test above against passing vacuously, e.g. if the source files stop resolving. The count depends
+        // on the target framework: net472 compiles without the NET symbols and newer BCL types, so it renders fewer.
         var expectations = AssertionFromFiles()
             .SelectMany(file => GenerateExpectations(Path.Combine(Git.SourceDirectory.FullName, file)))
             .ToArray();
