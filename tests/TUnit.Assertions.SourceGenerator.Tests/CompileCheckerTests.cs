@@ -28,9 +28,15 @@ internal class CompileCheckerTests
     [Test]
     public async Task Reports_Genuine_Errors()
     {
-        var exception = await Assert.That(() => CompileChecker.AssertNoErrors(["public class Broken { public void M() { int x = \"text\"; } }"]))
+        var exception = await Assert.That(() => CompileChecker.AssertNoErrors(
+            [
+                "public class Broken { public void M() { int x = \"text\"; } }",
+                // CS0122 used to be filtered out on .NET Framework, so check it is reported again.
+                "public class Hidden { private static void M() { } } public class Caller { public void M() { Hidden.M(); } }",
+            ]))
             .Throws<Exception>();
 
         await Assert.That(exception!.Message).Contains("CS0029");
+        await Assert.That(exception.Message).Contains("CS0122");
     }
 }
