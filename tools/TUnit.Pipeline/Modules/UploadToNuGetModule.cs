@@ -133,11 +133,24 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
 
         while (true)
         {
-            var runs = await gitHub.Client.Actions.Workflows.Runs.ListByWorkflow(
-                owner,
-                name,
-                AotWorkflowFileName,
-                new WorkflowRunsRequest { HeadSha = sha });
+            WorkflowRunsResponse runs;
+
+            try
+            {
+                runs = await gitHub.Client.Actions.Workflows.Runs.ListByWorkflow(
+                    owner,
+                    name,
+                    AotWorkflowFileName,
+                    new WorkflowRunsRequest { HeadSha = sha });
+            }
+            catch (ApiException e) when (DateTimeOffset.UtcNow < deadline)
+            {
+                // A transient API failure or rate limit should not abort a release mid-wait. The
+                // deadline still bounds the retries.
+                context.Logger.LogWarning(e, "Listing {Workflow} runs failed; retrying", AotWorkflowFileName);
+                await Task.Delay(AotWorkflowPollInterval, cancellationToken);
+                continue;
+            }
 
             if (runs.WorkflowRuns.Any(run => run.Status == WorkflowRunStatus.Completed && run.Conclusion == WorkflowRunConclusion.Success))
             {
