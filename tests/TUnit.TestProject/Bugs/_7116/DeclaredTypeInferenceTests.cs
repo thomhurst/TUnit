@@ -62,6 +62,15 @@ public class DeclaredTypeInferenceTests
     public async Task GenerateGenericTestWithExactAndObjectRows<T>(T value, int marker) where T : IDisposable
         => await Assert.That(typeof(T)).IsEqualTo(typeof(MemoryStream));
 
+    // The same with the object-declared source listed first: it is skipped, then joins the instantiation that
+    // ExactStreams creates later, and both modes put its row back in declaration order.
+    [Test]
+    [GenerateGenericTest(typeof(MemoryStream))]
+    [MethodDataSource(nameof(Streams))]
+    [MethodDataSource(nameof(ExactStreams))]
+    public async Task GenerateGenericTestWithObjectAndExactRows<T>(T value, int marker) where T : IDisposable
+        => await Assert.That(typeof(T)).IsEqualTo(typeof(MemoryStream));
+
     // A [GenerateGenericTest] with the wrong number of type arguments cannot run the rows either, so the
     // declared-type violation is still reported rather than the rows silently disappearing.
     [Test]

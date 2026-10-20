@@ -473,6 +473,93 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7116_DeclaredTypeInferenceTests_GenerateGenericTestWithObjectA_8A53A25C_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests)),
+        Name = "DeclaredTypeInferenceTests",
+        Namespace = "TUnit.TestProject.Bugs._7116",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("GenerateGenericTestWithObjectAndExactRows", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests), "GenerateGenericTestWithObjectAndExactRows", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, true, "T"), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new global::TUnit.Core.ConcreteType(typeof(int)), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.GenerateGenericTestWithObjectAndExactRows<global::System.IO.MemoryStream>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.IO.MemoryStream>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1])));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.IO.MemoryStream)),
+            new global::TUnit.Core.MethodDataSourceAttribute("Streams"),
+            new global::TUnit.Core.MethodDataSourceAttribute("ExactStreams")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests>(
+            methodName: "GenerateGenericTestWithObjectAndExactRows<MemoryStream>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.GenerateGenericTestWithObjectAndExactRows<MemoryStream>",
+            methodTypeArgumentsIdentity: "<global::System.IO.MemoryStream>",
+            filePath: "",
+            lineNumber: 67,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("Streams")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
+    },
+    new global::TUnit.Core.MethodDataSourceAttribute("ExactStreams")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.ExactStreams()),
+    },
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7116_DeclaredTypeInferenceTests_GenerateGenericTestWithObjectA_8A53A25C_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests>(static () => TUnit_TestProject_Bugs__7116_DeclaredTypeInferenceTests_GenerateGenericTestWithObjectA_8A53A25C_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7116_DeclaredTypeInferenceTests_WrongArityGenerateGenericTestW_90CF52A6_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests", new global::TUnit.Core.ClassMetadata
@@ -516,7 +603,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.WrongArityGenerateGenericTestWithObjectRows",
             methodTypeArgumentsIdentity: "<object>",
             filePath: "",
-            lineNumber: 67,
+            lineNumber: 76,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -591,7 +678,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.EmptyGenerateGenericTestWithObjectRows",
             methodTypeArgumentsIdentity: "<object>",
             filePath: "",
-            lineNumber: 75,
+            lineNumber: 84,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

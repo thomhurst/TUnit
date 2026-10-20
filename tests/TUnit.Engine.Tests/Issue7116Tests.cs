@@ -60,10 +60,12 @@ public class Issue7116Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    public async Task GenerateGenericTest_Runs_Broad_Rows_Alongside_A_Source_That_Infers_Its_Type()
+    [Arguments("GenerateGenericTestWithExactAndObjectRows")]
+    [Arguments("GenerateGenericTestWithObjectAndExactRows")]
+    public async Task GenerateGenericTest_Runs_Broad_Rows_Alongside_A_Source_That_Infers_Its_Type(string methodName)
     {
         await RunTestsWithFilter(
-            $"{ClassFilter}/GenerateGenericTestWithExactAndObjectRows*",
+            $"{ClassFilter}/{methodName}*",
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(2),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(2),
