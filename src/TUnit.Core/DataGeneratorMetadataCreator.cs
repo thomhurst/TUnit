@@ -266,6 +266,7 @@ internal static class DataGeneratorMetadataCreator
     /// token to them wherever they are declared. Returns <paramref name="parameters"/> itself when
     /// there are none.
     /// </summary>
+    /// <remarks>Keep in step with the other copies of this rule: TUnit0001 (<c>ParameterExtensions.WithoutTestMethodCancellationTokens</c>), the generator (<c>TestMetadataGenerator.GetDataParameters</c>), the runtime (<c>DataGeneratorMetadataCreator.FilterOutCancellationToken</c>, <c>DataUnwrapper</c>) and reflection discovery (<c>ReflectionTestMetadata</c>, <c>ReflectionTestDataCollector</c>).</remarks>
     private static ParameterMetadata[] FilterOutCancellationToken(ParameterMetadata[] parameters)
     {
         var tokenCount = 0;

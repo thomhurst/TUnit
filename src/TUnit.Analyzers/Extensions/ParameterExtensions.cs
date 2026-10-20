@@ -10,6 +10,7 @@ public static class ParameterExtensions
     /// Removes the CancellationToken parameters of a test method, which take no data: the engine passes
     /// the test's token to them wherever they are declared.
     /// </summary>
+    /// <remarks>Keep in step with the other copies of this rule: TUnit0001 (<c>ParameterExtensions.WithoutTestMethodCancellationTokens</c>), the generator (<c>TestMetadataGenerator.GetDataParameters</c>), the runtime (<c>DataGeneratorMetadataCreator.FilterOutCancellationToken</c>, <c>DataUnwrapper</c>) and reflection discovery (<c>ReflectionTestMetadata</c>, <c>ReflectionTestDataCollector</c>).</remarks>
     public static ImmutableArray<IParameterSymbol> WithoutTestMethodCancellationTokens(this ImmutableArray<IParameterSymbol> parameterSymbols)
     {
         if (parameterSymbols.IsDefaultOrEmpty

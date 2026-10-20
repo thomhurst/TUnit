@@ -3768,6 +3768,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// The parameters a data row binds to: every parameter except CancellationTokens, which the
     /// engine supplies wherever they are declared.
     /// </summary>
+    /// <remarks>Keep in step with the other copies of this rule: TUnit0001 (<c>ParameterExtensions.WithoutTestMethodCancellationTokens</c>), the generator (<c>TestMetadataGenerator.GetDataParameters</c>), the runtime (<c>DataGeneratorMetadataCreator.FilterOutCancellationToken</c>, <c>DataUnwrapper</c>) and reflection discovery (<c>ReflectionTestMetadata</c>, <c>ReflectionTestDataCollector</c>).</remarks>
     private static IParameterSymbol[] GetDataParameters(IMethodSymbol methodSymbol)
         => methodSymbol.Parameters.Where(p => !p.Type.IsCancellationToken()).ToArray();
 
