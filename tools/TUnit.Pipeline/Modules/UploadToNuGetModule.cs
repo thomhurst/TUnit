@@ -38,7 +38,12 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
     private static readonly TimeSpan AotWorkflowPollInterval = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan AotWorkflowTimeout = TimeSpan.FromMinutes(60);
 
+    // Above the AOT wait, with time left to push the packages, so the module's own timeout
+    // cannot cut the wait short.
+    private static readonly TimeSpan ModuleTimeout = AotWorkflowTimeout + TimeSpan.FromMinutes(30);
+
     protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
+        .WithTimeout(ModuleTimeout)
         .WithSkipWhen(_ =>
         {
             if (!options.Value.ShouldPublish)
@@ -103,14 +108,21 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
         return results;
     }
 
-    // Blocks the release until an aot.yml run for this commit has succeeded. Fails when no run
-    // exists, when every run for the commit finished without success, or when the runs in
-    // progress do not finish within the timeout.
+    // Blocks the release until an aot.yml run for this commit has succeeded. Fails when every
+    // run for the commit finished without success, or when no run succeeds within the timeout.
+    // A run that is not listed yet counts as pending. Any successful run on the commit passes the
+    // gate, whatever its trigger: a push run and a dispatched run build the same code. A
+    // dotnet.yml publish dispatched on a commit with no aot.yml run fails closed.
     private static async Task WaitForAotWorkflowAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var gitHub = context.GitHub();
-        var repository = gitHub.EnvironmentVariables.Repository!.Split('/');
+        var repository = gitHub.EnvironmentVariables.Repository?.Split('/');
         var sha = gitHub.EnvironmentVariables.Sha;
+
+        if (repository is not [var owner, var name])
+        {
+            throw new InvalidOperationException("Refusing to publish to NuGet: GITHUB_REPOSITORY is not set as owner/name, so the AOT workflow result cannot be checked.");
+        }
 
         if (string.IsNullOrEmpty(sha))
         {
@@ -122,8 +134,8 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
         while (true)
         {
             var runs = await gitHub.Client.Actions.Workflows.Runs.ListByWorkflow(
-                repository[0],
-                repository[1],
+                owner,
+                name,
                 AotWorkflowFileName,
                 new WorkflowRunsRequest { HeadSha = sha });
 
@@ -133,20 +145,20 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
                 return;
             }
 
-            if (!runs.WorkflowRuns.Any(run => run.Status != WorkflowRunStatus.Completed))
+            if (runs.WorkflowRuns.Count > 0 && !runs.WorkflowRuns.Any(run => run.Status != WorkflowRunStatus.Completed))
             {
                 var conclusions = string.Join(", ", runs.WorkflowRuns.Select(run => $"{run.HtmlUrl} ({run.Conclusion?.StringValue})"));
 
                 throw new InvalidOperationException(
-                    runs.WorkflowRuns.Count == 0
-                        ? $"Refusing to publish to NuGet: no {AotWorkflowFileName} run exists for {sha}. Run that workflow on this commit and retry."
-                        : $"Refusing to publish to NuGet: no {AotWorkflowFileName} run passed for {sha}: {conclusions}");
+                    $"Refusing to publish to NuGet: no {AotWorkflowFileName} run passed for {sha}: {conclusions}");
             }
 
             if (DateTimeOffset.UtcNow >= deadline)
             {
                 throw new TimeoutException(
-                    $"Refusing to publish to NuGet: the {AotWorkflowFileName} run for {sha} did not finish within {AotWorkflowTimeout.TotalMinutes} minutes.");
+                    runs.WorkflowRuns.Count == 0
+                        ? $"Refusing to publish to NuGet: no {AotWorkflowFileName} run appeared for {sha} within {AotWorkflowTimeout.TotalMinutes} minutes. Run that workflow on this commit and retry."
+                        : $"Refusing to publish to NuGet: the {AotWorkflowFileName} run for {sha} did not finish within {AotWorkflowTimeout.TotalMinutes} minutes.");
             }
 
             context.Logger.LogInformation("Waiting for the {Workflow} workflow to finish for {Sha}", AotWorkflowFileName, sha);
