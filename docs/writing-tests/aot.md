@@ -114,6 +114,72 @@ public class GenericTestClass<T>
 }
 ```
 
+### Type Arguments Inferred from Data Sources[​](#type-arguments-inferred-from-data-sources "Direct link to Type Arguments Inferred from Data Sources")
+
+A generic test method can also take its type arguments from its data, such as a `[MethodDataSource]` that returns `IEnumerable<Func<(int, string)>>`. In source generation mode the calls are generated at compile time, so the type arguments come from the data source's **declared** type, not from the run-time type of each value. Reflection mode infers them from the run-time values instead.
+
+This matters when the declared type is broader than the values it holds, such as `object`, an interface, a non-sealed class or a nullable value type. A data source declared as `IEnumerable<Func<(object, int)>>` makes `T` `object` for a method with `where T : IDisposable`, even if every value is a `MemoryStream`. `object` does not satisfy the constraint, so analyzer `TUnit0001` reports an error at compile time, and the test fails if the diagnostic is suppressed. Creating the type argument from each run-time value would need `MethodInfo.MakeGenericMethod`, which Native AOT does not support.
+
+Declare the data source with a type that satisfies the constraint, or name the type argument with `[GenerateGenericTest]`. With `[GenerateGenericTest]`, the rows run on the type it lists, and each value is converted to that type:
+
+```
+using TUnit.Core;
+
+
+
+namespace MyTestProject;
+
+
+
+public class DeclaredTypeTests
+
+{
+
+    // T is inferred as MemoryStream, which satisfies the constraint.
+
+    public static IEnumerable<Func<(MemoryStream, int)>> Streams() => [() => (new MemoryStream(), 1)];
+
+
+
+    // The declared type is object, so [GenerateGenericTest] supplies the type argument.
+
+    public static IEnumerable<Func<(object, int)>> UntypedStreams() => [() => (new MemoryStream(), 1)];
+
+
+
+    [Test]
+
+    [MethodDataSource(nameof(Streams))]
+
+    public async Task InferredFromDeclaredType<T>(T stream, int id) where T : IDisposable
+
+    {
+
+        await Assert.That(stream is MemoryStream).IsTrue();
+
+    }
+
+
+
+    [Test]
+
+    [GenerateGenericTest(typeof(MemoryStream))]
+
+    [MethodDataSource(nameof(UntypedStreams))]
+
+    public async Task NamedByGenerateGenericTest<T>(T stream, int id) where T : IDisposable
+
+    {
+
+        await Assert.That(stream is MemoryStream).IsTrue();
+
+    }
+
+}
+```
+
+When a method has a `[GenerateGenericTest]` that lists one type for each type parameter, neither `TUnit0001` nor source generation mode reports a constraint that a data source's declared type breaks. Those rows run on the types that `[GenerateGenericTest]` lists, in both modes. If a value cannot be converted to the listed type, that test fails at run time, so check that the listed types fit every data source on the method.
+
 ## AOT-Compatible Data Sources[​](#aot-compatible-data-sources "Direct link to AOT-Compatible Data Sources")
 
 ### Static Data Sources[​](#static-data-sources "Direct link to Static Data Sources")
