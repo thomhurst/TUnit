@@ -1092,7 +1092,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
     };
     private static global::TUnit.TestProject.Bugs._7118.GenerateGenericTestOfUninferredType<object> __CreateInstance_2(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7118.GenerateGenericTestOfUninferredType<object>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7118.GenerateGenericTestOfUninferredType<object>), args)!;
+        return new global::TUnit.TestProject.Bugs._7118.GenerateGenericTestOfUninferredType<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_2(global::TUnit.TestProject.Bugs._7118.GenerateGenericTestOfUninferredType<object> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {

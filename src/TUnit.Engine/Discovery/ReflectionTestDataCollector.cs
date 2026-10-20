@@ -1390,16 +1390,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         "Add a class-level row with matching types, or change the method row to match an existing class row.";
 
     /// <summary>
-    /// For each test method of a generic class with class-level [Arguments] rows, the class type arguments
+    /// For each test method of a generic class with class-level data sources, the class type arguments
     /// each of its method data sources' [Arguments] rows infers, indexed like the method's data sources (null
     /// for a source that infers none). A method's entry is null when none of its rows infers any, for example
     /// when it is a generic method or its parameters do not use the class's type parameters. Null when the
-    /// class has no class-level [Arguments] row: the source generator scopes method rows only against those,
-    /// since the types other class data sources infer are known only at run time.
+    /// class has no class-level data source. The source generator infers an instantiation from each such row
+    /// whatever the class data sources are, since it cannot know the types a [MethodDataSource] or other
+    /// run-time source yields (#7161).
     /// </summary>
     private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, IDataSourceAttribute[] classDataSources)
     {
-        if (!Array.Exists(classDataSources, static source => source is ArgumentsAttribute))
+        if (classDataSources.Length == 0)
         {
             return null;
         }
@@ -1502,11 +1503,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     /// <summary>
     /// For a generic class with class-level data sources, builds the tests of method-level [Arguments] rows
-    /// whose inferred class type arguments no class row infers. No class row supplies their constructor
-    /// arguments, so they run on the instantiation they infer and fail with
-    /// <see cref="NoClassRowForMethodRowMessage"/>, as in the source generator (#7118). A class-level
-    /// [GenerateGenericTest] listing those type arguments runs the rows instead. Rows whose type arguments
-    /// break the class's constraints are skipped, as the source generator skips them.
+    /// whose inferred class type arguments no class row infers. They run on the instantiation they infer. When
+    /// the class has class-level [Arguments] rows, no class row supplies their constructor arguments, so they
+    /// fail with <see cref="NoClassRowForMethodRowMessage"/>, as in the source generator (#7118). Otherwise the
+    /// class data sources are known only at run time, and the source generator builds the instance from all
+    /// of them, so this does too (#7161). A class-level [GenerateGenericTest] listing those type arguments runs
+    /// the rows instead. Rows whose type arguments break the class's constraints are skipped, as the source
+    /// generator skips them.
     /// </summary>
     private static List<TestMetadata> BuildTestsForMethodRowsWithoutClassRow(
         Type genericTypeDefinition,
@@ -1516,6 +1519,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         GenerateGenericTestAttribute[] generateGenericTestAttributes)
     {
         List<TestMetadata>? tests = null;
+        var hasClassArgumentsRows = genericTypeDefinition.IsDefined(typeof(ArgumentsAttribute), inherit: false);
 
         for (var methodIndex = 0; methodIndex < testMethods.Length; methodIndex++)
         {
@@ -1570,12 +1574,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         continue;
                     }
 
-                    (tests ??= []).Add(BuildTestMetadata(
-                        concreteType,
-                        concreteMethod,
-                        classDataSources: [],
-                        methodDataSources: ScopeMethodRowsToClassTypeArguments(concreteType, concreteMethod, rowTypeArguments, typeArguments, onlyInferringRows: true),
-                        instanceFactory: static (_, _) => throw new InvalidOperationException(NoClassRowForMethodRowMessage)));
+                    var methodRows = ScopeMethodRowsToClassTypeArguments(concreteType, concreteMethod, rowTypeArguments, typeArguments, onlyInferringRows: true);
+                    (tests ??= []).Add(hasClassArgumentsRows
+                        ? BuildTestMetadata(
+                            concreteType,
+                            concreteMethod,
+                            classDataSources: [],
+                            methodDataSources: methodRows,
+                            instanceFactory: static (_, _) => throw new InvalidOperationException(NoClassRowForMethodRowMessage))
+                        : BuildTestMetadata(concreteType, concreteMethod, classDataSources: null, methodDataSources: methodRows));
                 }
                 catch (Exception ex)
                 {
