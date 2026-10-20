@@ -388,15 +388,18 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
         foreach (var group in distinct.GroupBy(conditionClass => conditionClass.Name, StringComparer.Ordinal).OrderBy(group => group.Key, StringComparer.Ordinal))
         {
-            var variants = group.OrderBy(conditionClass => conditionClass.Source, StringComparer.Ordinal).ToArray();
-            names.Add(variants[0], variants[0].Name);
+            var variants = group
+                .Select(conditionClass => (Class: conditionClass, Key: HostIndependent(conditionClass.Source)))
+                .OrderBy(variant => variant.Key, StringComparer.Ordinal)
+                .ToArray();
+            names.Add(variants[0].Class, variants[0].Class.Name);
 
-            foreach (var variant in variants.Skip(1))
+            foreach (var (variant, key) in variants.Skip(1))
             {
-                var name = WithHash(variant.Name, variant.Source);
+                var name = WithHash(variant.Name, key);
                 for (var salt = 1; !taken.Add(name); salt++)
                 {
-                    name = WithHash(variant.Name, variant.Source + salt.ToString(CultureInfo.InvariantCulture));
+                    name = WithHash(variant.Name, key + salt.ToString(CultureInfo.InvariantCulture));
                 }
 
                 names.Add(variant, name);
@@ -405,6 +408,12 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
         return names;
     }
+
+    /// <summary>
+    /// <paramref name="source"/> with <c>\n</c> line endings. The source is built with <see cref="StringBuilder.AppendLine()"/>,
+    /// which uses the host's line ending, and names derived from it are public, so they must not depend on the host.
+    /// </summary>
+    private static string HostIndependent(string source) => source.Replace("\r\n", "\n");
 
     /// <summary>
     /// Renames the identifier <paramref name="from"/> to <paramref name="to"/> in <paramref name="source"/>, token by

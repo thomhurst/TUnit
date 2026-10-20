@@ -72,6 +72,21 @@ internal class ConditionClassNamingTests
     }
 
     [Test]
+    public async Task Hashed_Names_Are_The_Same_On_Every_Host()
+    {
+        // Pinned values: generated source uses the host's line endings, which must not leak into public type names
+        var names = ClassNamesByExpectation(MessagesSource(first: "be first", second: "be second"));
+        var overloadNames = ClassNames(AssertionMethodGeneratorRunner.Run(OverloadsSource(Overloads)).Sources);
+
+        await Assert.That(names).IsEquivalentTo(new[]
+        {
+            @"StringMethodsSharedWithStringAssertion: $""to {(_negated ? ""not "" : """")}be first""",
+            @"StringMethodsSharedWithStringFCB89BCBAssertion: $""to {(_negated ? ""not "" : """")}be second""",
+        });
+        await Assert.That(overloadNames).IsEquivalentTo(new[] { "StringOverloadsMatchesWithStringAnd1MoreAssertion", "StringOverloadsMatchesWithStringAnd1More93A8D49CAssertion" });
+    }
+
+    [Test]
     public async Task Names_Do_Not_Depend_On_The_Order_Attributes_Are_Declared_In()
     {
         var names = ClassNamesByExpectation(MessagesSource(first: "be first", second: "be second"));
