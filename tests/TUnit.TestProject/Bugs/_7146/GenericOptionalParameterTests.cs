@@ -66,3 +66,51 @@ public class GenericMethodOptionalParameterTests
         await Assert.That(text).IsEqualTo("declared");
     }
 }
+
+// A row that omits an optional must still call the test method, not a shorter sibling overload
+// that the omitted-argument call would also match.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+public class GenericClassOptionalOverloadTests<T>(T value)
+{
+    [Test]
+    [Arguments("a")]
+    public async Task Omits_Optional_Beside_Shorter_Overload(string first, int other = 7)
+    {
+        await Assert.That(value).IsEqualTo((T)(object)1);
+        await Assert.That(first).IsEqualTo("a");
+        await Assert.That(other).IsEqualTo(7);
+    }
+
+    internal Task Omits_Optional_Beside_Shorter_Overload(string first)
+        => throw new InvalidOperationException("Bound to the wrong overload");
+
+    // An overload that differs only in the type of an optional parameter. The row supplies every
+    // value, but a generated call that left the optional out would be ambiguous between the two,
+    // and the project would not compile.
+    [Test]
+    [Arguments("a", 3)]
+    public async Task Overloaded_By_Optional(string first, int other = 7)
+    {
+        await Assert.That(first).IsEqualTo("a");
+        await Assert.That(other).IsEqualTo(3);
+    }
+
+    internal Task Overloaded_By_Optional(string first, string other = "x")
+        => throw new InvalidOperationException("Bound to the wrong overload");
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class GenericMethodOptionalOverloadTests
+{
+    [Test]
+    [Arguments(5)]
+    public async Task Inferred_Method_Beside_Shorter_Overload<T>(T arg, int other = 7)
+    {
+        await Assert.That(arg).IsEqualTo((T)(object)5);
+        await Assert.That(other).IsEqualTo(7);
+    }
+
+    internal Task Inferred_Method_Beside_Shorter_Overload<T>(T arg)
+        => throw new InvalidOperationException("Bound to the wrong overload");
+}
