@@ -430,10 +430,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 .OfType<IMethodSymbol>()
                 .ToArray() ?? Array.Empty<IMethodSymbol>();
 
+            // An overload that takes exactly the Arguments wins over one that also takes an injected trailing
+            // CancellationToken, as it does at runtime, whatever order the overloads are declared in.
             var dataSourceMethod = methodSymbols
                                                .FirstOrDefault(methodSymbol =>
                                                    methodSymbol.Name == methodName &&
-                                                   MatchesParameters(context, argumentsForMethodCall, methodSymbol))
+                                                   ArgumentsMatchParameterTypes(context, argumentsForMethodCall, methodSymbol.Parameters.Select(p => p.Type)))
+                                           ?? methodSymbols
+                                               .FirstOrDefault(methodSymbol =>
+                                                   methodSymbol.Name == methodName &&
+                                                   ArgumentsMatchParameterTypes(context, argumentsForMethodCall, methodSymbol.Parameters.WithoutCancellationTokenParameter().Select(p => p.Type)))
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
 
             // If no method found, check for properties or fields
@@ -708,29 +714,44 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private static bool MatchesParameters(SymbolAnalysisContext context, TypedConstant[] argumentsForMethodCall, IMethodSymbol methodSymbol)
-    {
-        return ArgumentsMatchParameterTypes(context, argumentsForMethodCall,
-            methodSymbol.Parameters.WithoutCancellationTokenParameter().Select(p => p.Type));
-    }
-
     private static bool ArgumentsMatchParameterTypes(SymbolAnalysisContext context, TypedConstant[] argumentsForMethodCall,
         IEnumerable<ITypeSymbol> parameterTypes)
     {
-        return argumentsForMethodCall.ZipAll(parameterTypes,
-                (argument, parameterType) => argument.IsNull
-                    ? parameterType is not null && CanAcceptNull(parameterType)
-                    : context.Compilation.HasImplicitConversionOrGenericParameter(argument.Type, parameterType))
-            .All(x => x);
+        var parameterTypeArray = parameterTypes as ITypeSymbol[] ?? parameterTypes.ToArray();
+
+        // Checked up front: a missing argument would otherwise reach the comparison below as default(TypedConstant),
+        // whose IsNull is true, and pass for any parameter that accepts null.
+        if (argumentsForMethodCall.Length != parameterTypeArray.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < argumentsForMethodCall.Length; i++)
+        {
+            var argument = argumentsForMethodCall[i];
+            var matches = argument.IsNull
+                ? CanAcceptNull(parameterTypeArray[i])
+                : context.Compilation.HasImplicitConversionOrGenericParameter(argument.Type, parameterTypeArray[i]);
+
+            if (!matches)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    // Mirrors reflection mode's binder and the source generator's overload scoring: a null argument binds to any
-    // parameter that can hold null, i.e. anything other than a non-nullable value type.
+    // Mirrors the null-argument overload selection in both execution modes (added in #7143): a null argument binds to
+    // any parameter that can hold null, i.e. anything other than a non-nullable value type.
     private static bool CanAcceptNull(ITypeSymbol parameterType)
     {
         if (parameterType is ITypeParameterSymbol typeParameter)
         {
-            return !typeParameter.HasValueTypeConstraint && !typeParameter.HasUnmanagedTypeConstraint;
+            // Neither mode infers a generic data source method's type arguments from a null argument.
+            return typeParameter.TypeParameterKind != TypeParameterKind.Method
+                   && !typeParameter.HasValueTypeConstraint
+                   && !typeParameter.HasUnmanagedTypeConstraint;
         }
 
         return !parameterType.IsValueType

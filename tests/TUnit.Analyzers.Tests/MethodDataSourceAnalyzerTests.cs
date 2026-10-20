@@ -707,6 +707,100 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    public async Task Missing_Argument_Is_Flagged_For_Parameter_That_Accepts_Null()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                #nullable enable
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data), Arguments = new object[] { 1 })|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(int value, string? label)
+                    {
+                        yield return value;
+                    }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("int", "int, string?")
+            );
+    }
+
+    [Test]
+    public async Task Exact_Overload_Wins_Over_Earlier_Overload_With_CancellationToken()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Collections.Generic;
+                using System.Threading;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1 })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<string> Data(int value, CancellationToken cancellationToken)
+                    {
+                        yield return "token";
+                    }
+
+                    public static IEnumerable<int> Data(int value)
+                    {
+                        yield return value;
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Null_Argument_Is_Flagged_For_Method_Type_Parameter()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                #nullable enable
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data), Arguments = new object?[] { null })|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data<T>(T value) where T : notnull
+                    {
+                        yield return 1;
+                    }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("null", "T")
+            );
+    }
+
+    [Test]
     public async Task Arguments_Are_Not_Flagged_When_Argument_Is_Convertible()
     {
         await Verifier
