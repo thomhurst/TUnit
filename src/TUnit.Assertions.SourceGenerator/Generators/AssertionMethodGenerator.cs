@@ -432,7 +432,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         return new AssertionClassModel(
             classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             classSymbol.Name,
-            classSymbol.ContainingNamespace?.ToDisplayString(),
+            NamespaceHelper.GetNamespaceOrNull(classSymbol.ContainingNamespace),
             entries.ToImmutableEquatableArray());
     }
 
