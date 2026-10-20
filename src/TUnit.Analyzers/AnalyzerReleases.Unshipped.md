@@ -7,6 +7,7 @@ TUnit0062 | Usage | Warning | CancellationToken must be the last parameter
 TUnit0073 | Usage | Error | Missing polyfill types required by TUnit
 TUnit0074 | Usage | Error | Hook attribute is redundant on an override
 TUnit0075 | Usage | Warning | Use the hook cancellation token for setup
+TUnit0076 | Usage | Error | Data source Arguments fit more than one overload equally well
 
 ### Removed Rules
 

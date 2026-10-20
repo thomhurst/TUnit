@@ -66,4 +66,5 @@ public static class DiagnosticIds
     public const string MissingPolyfillPackage = "TUnit0073";
     public const string RedundantHookAttributeOnOverride = "TUnit0074";
     public const string UseHookCancellationToken = "TUnit0075";
+    public const string AmbiguousMethodDataSourceOverload = "TUnit0076";
 }

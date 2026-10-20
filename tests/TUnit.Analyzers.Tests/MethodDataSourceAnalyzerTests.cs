@@ -1970,4 +1970,359 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task Arguments_That_Fit_Two_Overloads_Equally_Are_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Tie), Arguments = new object[] { "IComparable", 1 })|}]
+                    [Test]
+                    public Task MyTest(string expected, string chosen) => Task.CompletedTask;
+
+                    public static IEnumerable<(string, string)> Tie(string expected, IComparable value) { yield return (expected, "IComparable"); }
+                    public static IEnumerable<(string, string)> Tie(string expected, IConvertible value) { yield return (expected, "IConvertible"); }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.AmbiguousMethodDataSourceOverload)
+                    .WithLocation(0)
+                    .WithArguments("Tie", "MyClass.Tie(string, IComparable), MyClass.Tie(string, IConvertible)")
+            );
+    }
+
+    [Test]
+    public async Task Arguments_That_Fit_Overloads_In_Opposite_Directions_Are_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data), Arguments = new object[] { "a", "b" })|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(string first, object second) => [1];
+                    public static IEnumerable<int> Data(object first, string second) => [2];
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.AmbiguousMethodDataSourceOverload)
+                    .WithLocation(0)
+                    .WithArguments("Data", "MyClass.Data(string, object), MyClass.Data(object, string)")
+            );
+    }
+
+    [Test]
+    public async Task Arguments_With_A_More_Specific_Overload_Are_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { "a" })]
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1 })]
+                    [MethodDataSource(nameof(Numbers), Arguments = new object[] { 1 })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(object value) => [1];
+                    public static IEnumerable<int> Data(string value) => [2];
+                    public static IEnumerable<int> Data(IComparable value) => [3];
+
+                    public static IEnumerable<int> Numbers(long value) => [1];
+                    public static IEnumerable<int> Numbers(double value) => [2];
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Overloads_With_Other_Parameter_Counts_Are_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1 })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(IComparable value) => [1];
+                    public static IEnumerable<int> Data(IConvertible value, int other) => [2];
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Overridden_Data_Source_Methods_Are_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class BaseClass
+                {
+                    public virtual IEnumerable<int> Data(int value) => [1];
+                }
+
+                public class MyClass : BaseClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1 })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public override IEnumerable<int> Data(int value) => [2];
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Private_Base_Overloads_Are_Not_Flagged()
+    {
+        // Reflection never returns private members inherited from a base type.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class BaseClass
+                {
+                    private static IEnumerable<int> Data(IConvertible value) => [1];
+                }
+
+                public class MyClass : BaseClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1 })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(IComparable value) => [2];
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Protected_Base_Overloads_Are_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class BaseClass
+                {
+                    protected static IEnumerable<int> Data(IConvertible value) => [1];
+                }
+
+                public class MyClass : BaseClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data), Arguments = new object[] { 1 })|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(IComparable value) => [2];
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.AmbiguousMethodDataSourceOverload)
+                    .WithLocation(0)
+                    .WithArguments("Data", "MyClass.Data(IComparable), BaseClass.Data(IConvertible)")
+            );
+    }
+
+    [Test]
+    public async Task By_Ref_Overloads_Are_Not_Flagged()
+    {
+        // A by-ref parameter's runtime type (T&) never matches the argument's type.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1 })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(IComparable value) => [1];
+                    public static IEnumerable<int> Data(ref IConvertible value) => [2];
+                    public static IEnumerable<int> Data(in IFormattable value) => [3];
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Numeric_Conversions_The_Runtime_Does_Not_Widen_Are_Not_Flagged()
+    {
+        // The runtime binder does not widen int to decimal, so Data(double) is the only candidate.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1 })]
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1L })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data(decimal value) => [1];
+                    public static IEnumerable<int> Data(double value) => [2];
+                    public static IEnumerable<int> Data(nint value) => [3];
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Runtime_Only_Conversions_That_Tie_Are_Flagged()
+    {
+        // The runtime widens byte to char, and accepts an int for an int? parameter.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Chars), Arguments = new object[] { (byte)1 })|}]
+                    [{|#1:MethodDataSource(nameof(Nullables), Arguments = new object[] { 1 })|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Chars(char value) => [1];
+                    public static IEnumerable<int> Chars(short value) => [2];
+
+                    public static IEnumerable<int> Nullables(int? value) => [1];
+                    public static IEnumerable<int> Nullables(long value) => [2];
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.AmbiguousMethodDataSourceOverload)
+                    .WithLocation(0)
+                    .WithArguments("Chars", "MyClass.Chars(char), MyClass.Chars(short)"),
+                Verifier.Diagnostic(Rules.AmbiguousMethodDataSourceOverload)
+                    .WithLocation(1)
+                    .WithArguments("Nullables", "MyClass.Nullables(int?), MyClass.Nullables(long)")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Overloads_Do_Not_Hide_A_Tie()
+    {
+        // A parameter typed by a method type parameter never matches at runtime, so the generic overload is ignored.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(Data), Arguments = new object[] { 1 })|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data<T>(T value) => [1];
+                    public static IEnumerable<int> Data(IComparable value) => [2];
+                    public static IEnumerable<int> Data(IConvertible value) => [3];
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.AmbiguousMethodDataSourceOverload)
+                    .WithLocation(0)
+                    .WithArguments("Data", "MyClass.Data(IComparable), MyClass.Data(IConvertible)")
+            );
+    }
+
+    [Test]
+    public async Task Generic_Overload_With_Concrete_Parameters_Can_Break_A_Tie()
+    {
+        // The runtime selects Data<T>(int) for an int argument, because its parameter is an exact match.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data), Arguments = new object[] { 1 })]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<int> Data<T>(int value) => [1];
+                    public static IEnumerable<int> Data(IComparable value) => [2];
+                    public static IEnumerable<int> Data(IConvertible value) => [3];
+                }
+                """
+            );
+    }
 }
