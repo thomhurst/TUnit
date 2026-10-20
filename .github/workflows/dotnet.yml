@@ -27,6 +27,8 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     permissions:
+      # UploadToNuGetModule reads the aot.yml runs for the commit before it publishes.
+      actions: read
       contents: write
       id-token: write
 
