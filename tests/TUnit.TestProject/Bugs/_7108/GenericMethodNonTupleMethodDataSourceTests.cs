@@ -90,6 +90,21 @@ public class GenericMethodNonTupleMethodDataSourceTests
         yield return value;
     }
 
+    public static IEnumerable<int> NullRows(int value)
+    {
+        yield return value;
+    }
+
+    public static IEnumerable<string> NullRows(string? value)
+    {
+        yield return value ?? "null";
+    }
+
+    public static IEnumerable<int> NullableRows(int? value)
+    {
+        yield return value ?? -1;
+    }
+
     public static IEnumerable<string> ExactTypeRows(long value)
     {
         yield return "long";
@@ -238,6 +253,14 @@ public class GenericMethodNonTupleMethodDataSourceTests
     }
 
     [Test]
+    [MethodDataSource(nameof(NullableRows), Arguments = new object[] { 17 })]
+    public async Task Argument_Is_Wrapped_In_Nullable<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)17);
+    }
+
+    [Test]
     [MethodDataSource(nameof(ExactTypeRows), Arguments = new object[] { 15 })]
     public async Task Exact_Argument_Type_Beats_Conversion<T>(T value)
     {
@@ -270,6 +293,15 @@ public class GenericMethodNonTupleMethodDataSourceTests
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
         await Assert.That(value).IsEqualTo((T)(object)14);
+    }
+
+    // The analyzer does not yet treat a null argument as matching the string? overload (#7168)
+    [Test]
+    [MethodDataSource(nameof(NullRows), Arguments = new object?[] { null })]
+    public async Task Null_Argument_Skips_Value_Type_Overload<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(value).IsEqualTo((T)(object)"null");
     }
 #pragma warning restore TUnit0001
 

@@ -371,12 +371,15 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     // throw on SingleOrDefault.
     //
     // When any argument is null it has no runtime type, so it cannot be expressed in the binder's
-    // Type[]; we fall back to a name-only single-overload lookup (handled by the caller).
+    // Type[]. The overloads with one parameter per argument are then scanned instead: a null needs a
+    // reference or Nullable<T> parameter, and any other argument must be an instance of its parameter
+    // type. A single such overload is used, matching the source generator, which skips value-type
+    // parameters for a null argument. Otherwise we fall back to the caller's name-only lookup.
     //
     // With zero arguments the empty Type[] flows through the same binder path and selects the
     // parameterless overload directly — including when the name is shared with other-arity
-    // overloads, which the caller's name-only GetMethod(name, flags) would treat as ambiguous
-    // and silently return null for.
+    // overloads, which the caller's name-only GetMethod(name, flags) would reject as ambiguous
+    // with an AmbiguousMatchException.
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
     private MethodInfo? ResolveDataSourceMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType)
     {
@@ -392,8 +395,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             if (argumentType is null)
             {
                 // A null argument has no runtime type the binder can match on.
-                // Fall back to the name-only lookup performed by the caller.
-                return null;
+                return ResolveDataSourceMethodWithNullArgument(targetType, arguments);
             }
 
             argumentTypes[i] = argumentType;
@@ -403,6 +405,52 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // Ambiguous matches surface as AmbiguousMatchException (genuinely ambiguous code),
         // never as the spurious SingleOrDefault throw the old scan produced.
         return targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags, binder: null, argumentTypes, modifiers: null);
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
+    private MethodInfo? ResolveDataSourceMethodWithNullArgument([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType, object?[] arguments)
+    {
+        MethodInfo? match = null;
+        foreach (var method in targetType.GetMethods(BindingFlags))
+        {
+            if (method.Name != MethodNameProvidingDataSource || !AcceptsArguments(method.GetParameters(), arguments))
+            {
+                continue;
+            }
+
+            if (match is not null)
+            {
+                // Still ambiguous: the caller's name-only lookup reports it
+                return null;
+            }
+
+            match = method;
+        }
+
+        return match;
+    }
+
+    private static bool AcceptsArguments(ParameterInfo[] parameters, object?[] arguments)
+    {
+        if (parameters.Length != arguments.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            var parameterType = parameters[i].ParameterType;
+            var accepted = arguments[i] is { } argument
+                ? parameterType.IsInstanceOfType(argument)
+                : !parameterType.IsValueType || Nullable.GetUnderlyingType(parameterType) is not null;
+
+            if (!accepted)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // MethodInfo.Invoke does not auto-fill optional parameters the way a C# call site does.
