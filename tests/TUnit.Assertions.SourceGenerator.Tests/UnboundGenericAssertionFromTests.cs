@@ -251,6 +251,57 @@ internal class UnboundGenericAssertionFromTests : TestsBase
         await Assert.That(generated).DoesNotContain("ReproTwoBoxCheckAssertion<T>");
     }
 
+    [Test]
+    public async Task Renamed_Type_Parameters_Keep_Their_Constraints()
+    {
+        var (generatedFiles, errors) = RunGeneratorAndCompile("""
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Attributes;
+            using TUnit.Assertions.Extensions;
+
+            namespace Repro
+            {
+            #pragma warning disable CS0693
+                public class Holder<T> where T : class
+                {
+                    public bool Matches<T>(T other) where T : struct => other.Equals(default(T));
+                }
+
+                public class Nest<T> where T : notnull
+                {
+                    public class Leaf<T> where T : struct
+                    {
+                        public bool IsSet { get; set; }
+                    }
+                }
+            #pragma warning restore CS0693
+
+                [AssertionFrom(typeof(Holder<>), nameof(Holder<string>.Matches))]
+                [AssertionFrom(typeof(Nest<>.Leaf<>), nameof(Nest<string>.Leaf<int>.IsSet))]
+                public static partial class ConstrainedAssertions;
+            }
+
+            public static class CallSites
+            {
+                public static async Task Use()
+                {
+                    await Assert.That(new Repro.Holder<string>()).Matches<string, int>(0);
+                    await Assert.That(new Repro.Nest<string>.Leaf<int> { IsSet = true }).IsSet();
+                }
+            }
+            """);
+
+        await Assert.That(errors).IsEmpty();
+
+        var generated = string.Join("\n", generatedFiles);
+        await Assert.That(generated).Contains("public class HolderMatchesWithTAssertion<T, T1> : Assertion<Repro.Holder<T>>");
+        await Assert.That(generated).Contains("where T : class");
+        await Assert.That(generated).Contains("where T1 : struct");
+        await Assert.That(generated).Contains("public class LeafIsSetAssertion<T, T1> : Assertion<Repro.Nest<T>.Leaf<T1>>");
+        await Assert.That(generated).Contains("where T : notnull");
+    }
+
     private static (string[] GeneratedFiles, string[] Errors) RunGeneratorAndCompile(string source)
     {
         var compilation = CSharpCompilation.Create(
