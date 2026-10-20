@@ -88,4 +88,50 @@ public class TupleParameterWithCancellationTokenTests
         await Assert.That(values).IsEquivalentTo([2, 3]);
         await Assert.That(token.CanBeCanceled).IsTrue();
     }
+
+    // Every CancellationToken parameter receives the test's token; the row binds to the others.
+
+    [Test]
+    public async Task NonGeneric_Two_Tokens_No_Data(CancellationToken first, CancellationToken second)
+    {
+        await Assert.That(first.CanBeCanceled).IsTrue();
+        await Assert.That(second).IsEqualTo(first);
+    }
+
+    [Test]
+    [Arguments(7)]
+    public async Task NonGeneric_Tokens_Around_Data(CancellationToken first, int number, CancellationToken second)
+    {
+        await Assert.That(number).IsEqualTo(7);
+        await Assert.That(first.CanBeCanceled).IsTrue();
+        await Assert.That(second).IsEqualTo(first);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(TupleParameterRows))]
+    public async Task NonGeneric_Tokens_Around_Tuple(CancellationToken first, (int, int) pair, CancellationToken second)
+    {
+        await Assert.That(pair).IsEqualTo((25, 26));
+        await Assert.That(first.CanBeCanceled).IsTrue();
+        await Assert.That(second).IsEqualTo(first);
+    }
+
+    [Test]
+    [Arguments(1, 2, 3)]
+    public async Task NonGeneric_Array_Before_Two_Tokens(int[] values, CancellationToken first, CancellationToken second)
+    {
+        await Assert.That(values).IsEquivalentTo([1, 2, 3]);
+        await Assert.That(first.CanBeCanceled).IsTrue();
+        await Assert.That(second).IsEqualTo(first);
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [MethodDataSource(nameof(TupleParameterRows))]
+    public async Task Generic_Tokens_Around_Tuple<T>(CancellationToken first, (T, T) pair, CancellationToken second)
+    {
+        await Assert.That(pair).IsEqualTo(((T, T))(object)(25, 26));
+        await Assert.That(first.CanBeCanceled).IsTrue();
+        await Assert.That(second).IsEqualTo(first);
+    }
 }

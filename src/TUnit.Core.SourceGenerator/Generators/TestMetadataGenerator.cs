@@ -1380,7 +1380,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static void EmitConcreteInvokeBody(CodeWriter writer, TestMethodMetadata testMethod, ConcreteInstantiation entry)
     {
         var methodName = entry.MethodName;
-        var hasCancellationToken = testMethod.MethodSymbol.Parameters.Any(p =>
+        var cancellationTokenCount = testMethod.MethodSymbol.Parameters.Count(p =>
             p.Type.IsCancellationToken());
         var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
 
@@ -1402,7 +1402,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var invokedName = entry.MethodTypeArgs.Length > 0
                 ? $"{methodName}<{string.Join(", ", entry.MethodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>"
                 : methodName;
-            GenerateConcreteTestInvokerBody(writer, invokedName, returnPattern, hasCancellationToken, closedParameters);
+            GenerateConcreteTestInvokerBody(writer, invokedName, returnPattern, cancellationTokenCount, closedParameters);
         }
         // For any generic context (class or method), we need to substitute type parameters
         else if (entry.MethodTypeArgs.Length > 0 || entry.ClassTypeArgs.Length > 0)
@@ -1477,7 +1477,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var parametersFromArgs = testMethod.MethodSymbol.Parameters
                 .Where(p => !p.Type.IsCancellationToken())
                 .ToArray();
-            GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
+            GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, cancellationTokenCount, parametersFromArgs);
         }
     }
 
@@ -1494,13 +1494,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var collectsTrailingArguments = parameters.Length > 0 && parameters[parameters.Length - 1].CollectsTrailingArguments();
         if (!collectsTrailingArguments && parameters.Length != 1)
-        {
-            return null;
-        }
-
-        // The shared binder passes a single token. A method declaring several keeps the positional
-        // path, which passes the token to each of them.
-        if (testMethod.MethodSymbol.Parameters.Length - parameters.Length > 1)
         {
             return null;
         }
@@ -3177,57 +3170,54 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             else
             {
-                var (hasCancellationToken, parametersFromArgs) = ParseInvokerParameters(testMethod.MethodSymbol);
+                var (cancellationTokenCount, parametersFromArgs) = ParseInvokerParameters(testMethod.MethodSymbol);
                 var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
-                GenerateConcreteTestInvoker(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs);
+                GenerateConcreteTestInvoker(writer, testMethod.MethodSymbol.Name, returnPattern, cancellationTokenCount, parametersFromArgs);
             }
         }
     }
 
-    private static void GenerateConcreteTestInvoker(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
+    private static void GenerateConcreteTestInvoker(CodeWriter writer, string methodName, TestReturnPattern returnPattern, int cancellationTokenCount, IParameterSymbol[] parametersFromArgs)
     {
         // Generate InvokeTypedTest which is required by CreateExecutableTestFactory
         writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
-        GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
+        GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, cancellationTokenCount, parametersFromArgs);
         writer.Unindent();
         writer.AppendLine("},");
     }
 
     /// <summary>
-    /// Returns the name of the CancellationToken parameter of the method that declares
-    /// <paramref name="parameter"/>, or null when it has none.
+    /// Adds the test's token for every CancellationToken parameter of the method that declares
+    /// <paramref name="parametersFromArgs"/>. A token declared before the last data parameter goes back
+    /// to its declared position; later ones are appended, by name when <paramref name="nameTrailingTokens"/> is set.
     /// </summary>
-    private static string? GetCancellationTokenParameterName(IParameterSymbol parameter)
-        => (parameter.ContainingSymbol as IMethodSymbol)?.Parameters
-            .LastOrDefault(p => p.OriginalDefinition.Type.IsCancellationToken())
-            ?.Name;
-
-    /// <summary>
-    /// Returns the declared index of the CancellationToken parameter when it precedes the last
-    /// data parameter of the method declaring <paramref name="parametersFromArgs"/>, or -1 when
-    /// the token is trailing (or absent) and is appended after the data arguments.
-    /// </summary>
-    private static int GetLeadingCancellationTokenIndex(IParameterSymbol[] parametersFromArgs)
+    private static void AddCancellationTokenArguments(List<InvocationArgument> arguments, IParameterSymbol[] parametersFromArgs, string tokenArgument, bool nameTrailingTokens)
     {
-        if (parametersFromArgs.Length == 0
-            || parametersFromArgs[parametersFromArgs.Length - 1].ContainingSymbol is not IMethodSymbol method)
+        var lastDataParameter = parametersFromArgs[parametersFromArgs.Length - 1];
+        if (lastDataParameter.ContainingSymbol is not IMethodSymbol method)
         {
-            return -1;
+            return;
         }
 
-        var parameters = method.Parameters;
-        for (var i = 0; i < parameters.Length - 1; i++)
+        foreach (var parameter in method.Parameters)
         {
             // Check the declared type: a closed T that happens to be CancellationToken is a data parameter.
-            if (parameters[i].OriginalDefinition.Type.IsCancellationToken())
+            if (!parameter.OriginalDefinition.Type.IsCancellationToken())
             {
-                return i;
+                continue;
+            }
+
+            if (parameter.Ordinal < lastDataParameter.Ordinal)
+            {
+                InsertLeadingCancellationToken(arguments, parameter.Ordinal, parameter.Name, tokenArgument);
+            }
+            else
+            {
+                arguments.Add(new InvocationArgument(tokenArgument, nameTrailingTokens ? parameter.Name : null));
             }
         }
-
-        return -1;
     }
 
     /// <summary>
@@ -3235,7 +3225,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// argument before that position was omitted or named (an omitted optional before the
     /// trailing array), the token is appended by name instead, which C# allows after named arguments.
     /// </summary>
-    private static void InsertLeadingCancellationToken(List<InvocationArgument> arguments, int tokenIndex, IParameterSymbol[] parametersFromArgs, string tokenArgument)
+    private static void InsertLeadingCancellationToken(List<InvocationArgument> arguments, int tokenIndex, string tokenName, string tokenArgument)
     {
         var positional = tokenIndex <= arguments.Count;
         for (var i = 0; positional && i < tokenIndex; i++)
@@ -3249,14 +3239,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            var tokenName = ((IMethodSymbol)parametersFromArgs[parametersFromArgs.Length - 1].ContainingSymbol).Parameters[tokenIndex].Name;
             arguments.Add(new InvocationArgument(tokenArgument, tokenName));
         }
     }
 
     /// <summary>
-    /// Formats the argument list for a method with one data parameter, placing the
-    /// CancellationToken (when present) at its declared position.
+    /// Formats the argument list for a method with one data parameter, placing each
+    /// CancellationToken at its declared position.
     /// </summary>
     private static string FormatSingleArgumentCall(string argument, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
     {
@@ -3265,13 +3254,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return argument;
         }
 
-        return GetLeadingCancellationTokenIndex(parametersFromArgs) == 0
-            ? $"cancellationToken, {argument}"
-            : $"{argument}, cancellationToken";
+        var arguments = new List<InvocationArgument> { new(argument) };
+        AddCancellationTokenArguments(arguments, parametersFromArgs, "cancellationToken", nameTrailingTokens: false);
+        return string.Join(", ", arguments);
     }
 
-    private static void GenerateConcreteTestInvokerBody(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs, bool wrapInTryCatch = true)
+    private static void GenerateConcreteTestInvokerBody(CodeWriter writer, string methodName, TestReturnPattern returnPattern, int cancellationTokenCount, IParameterSymbol[] parametersFromArgs, bool wrapInTryCatch = true)
     {
+        var hasCancellationToken = cancellationTokenCount > 0;
+
         // Wrap entire body in try-catch to handle synchronous exceptions. The class-level
         // __Invoke switch opts out and wraps the whole switch in a single handler instead.
         if (wrapInTryCatch)
@@ -3327,9 +3318,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else if (parametersFromArgs.Length == 0)
         {
-            var typedMethodCall = hasCancellationToken
-                ? $"instance.{methodName}(cancellationToken)"
-                : $"instance.{methodName}()";
+            var typedMethodCall = $"instance.{methodName}({string.Join(", ", Enumerable.Repeat("cancellationToken", cancellationTokenCount))})";
             GenerateReturnHandling(writer, typedMethodCall, returnPattern);
         }
         else
@@ -3378,23 +3367,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     const string cancellationTokenArgument = "context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None";
 
                     // When optional leading parameters are omitted, the trailing array is passed by
-                    // name. A positional argument cannot follow it (CS8323), so name the token too.
+                    // name. A positional argument cannot follow it (CS8323), so name the tokens too.
                     // When any parameter is left out (e.g. an omitted trailing optional), a positional
                     // token would bind to the first omitted slot, so it needs the name as well.
-                    var cancellationTokenName = (hasParams && argCount < lastIndex) || argsToPass.Count < parametersFromArgs.Length
-                        ? GetCancellationTokenParameterName(parametersFromArgs[lastIndex])
-                        : null;
+                    var nameTrailingTokens = (hasParams && argCount < lastIndex) || argsToPass.Count < parametersFromArgs.Length;
 
                     // A token declared before a data parameter goes back to its declared position.
-                    var tokenIndex = GetLeadingCancellationTokenIndex(parametersFromArgs);
-                    if (tokenIndex >= 0)
-                    {
-                        InsertLeadingCancellationToken(argsToPass, tokenIndex, parametersFromArgs, cancellationTokenArgument);
-                    }
-                    else
-                    {
-                        argsToPass.Add(new InvocationArgument(cancellationTokenArgument, cancellationTokenName));
-                    }
+                    AddCancellationTokenArguments(argsToPass, parametersFromArgs, cancellationTokenArgument, nameTrailingTokens);
                 }
 
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";
@@ -3430,15 +3409,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 if (hasCancellationToken)
                 {
                     const string cancellationTokenArgument = "context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None";
-                    var tokenIndex = GetLeadingCancellationTokenIndex(parametersFromArgs);
-                    if (tokenIndex >= 0)
-                    {
-                        InsertLeadingCancellationToken(dynamicArgs, tokenIndex, parametersFromArgs, cancellationTokenArgument);
-                    }
-                    else
-                    {
-                        dynamicArgs.Add(new InvocationArgument(cancellationTokenArgument));
-                    }
+                    AddCancellationTokenArguments(dynamicArgs, parametersFromArgs, cancellationTokenArgument, nameTrailingTokens: false);
                 }
 
                 var dynamicMethodCall = $"instance.{methodName}({string.Join(", ", dynamicArgs)})";
@@ -3480,44 +3451,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
     }
 
-    private static (bool HasCancellationToken, IParameterSymbol[] ParametersFromArgs) ParseInvokerParameters(IMethodSymbol methodSymbol)
+    private static (int CancellationTokenCount, IParameterSymbol[] ParametersFromArgs) ParseInvokerParameters(IMethodSymbol methodSymbol)
     {
+        // The engine passes the test's token to every CancellationToken parameter wherever it is
+        // declared, so they take no row value (as in reflection mode).
         var parameters = methodSymbol.Parameters;
-
-        // The engine passes the test's token to a CancellationToken parameter wherever it is
-        // declared, so it takes no row value (as in reflection mode). With several tokens, only a
-        // trailing one is supplied by the engine; the invoker passes a single token.
-        var tokenIndex = -1;
-        var tokenCount = 0;
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            if (parameters[i].Type.IsCancellationToken())
-            {
-                tokenIndex = i;
-                tokenCount++;
-            }
-        }
-
-        if (tokenCount > 1)
-        {
-            tokenIndex = parameters[parameters.Length - 1].Type.IsCancellationToken() ? parameters.Length - 1 : -1;
-        }
-
-        if (tokenIndex < 0)
-        {
-            return (false, parameters.ToArray());
-        }
-
-        var parametersFromArgs = new IParameterSymbol[parameters.Length - 1];
-        for (int i = 0, j = 0; i < parameters.Length; i++)
-        {
-            if (i != tokenIndex)
-            {
-                parametersFromArgs[j++] = parameters[i];
-            }
-        }
-
-        return (true, parametersFromArgs);
+        var parametersFromArgs = parameters.Where(p => !p.Type.IsCancellationToken()).ToArray();
+        return (parameters.Length - parametersFromArgs.Length, parametersFromArgs);
     }
 
     private static HashSet<string> ExtractCategories(TestMethodMetadata testMethod)
@@ -3803,12 +3743,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var writer = new CodeWriter(includeHeader: false);
 
-        var (hasCancellationToken, parametersFromArgs) = ParseInvokerParameters(testMethod.MethodSymbol);
+        var (cancellationTokenCount, parametersFromArgs) = ParseInvokerParameters(testMethod.MethodSymbol);
         var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
 
         writer.AppendLine("{");
         writer.Indent();
-        GenerateConcreteTestInvokerBody(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs, wrapInTryCatch: false);
+        GenerateConcreteTestInvokerBody(writer, testMethod.MethodSymbol.Name, returnPattern, cancellationTokenCount, parametersFromArgs, wrapInTryCatch: false);
         writer.Unindent();
         writer.AppendLine("}");
 

@@ -2691,15 +2691,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // parameter (e.g. `string[] names`). Both collect remaining loose arguments
                 // into the array, letting `[Arguments(["a", "b"])]` map onto a single array
                 // parameter (issue #6120).
-                // The engine passes a trailing CancellationToken as the last argument. Exclude it so
-                // an array just before it (T[] values, CancellationToken token) collects the row
+                // The engine passes trailing CancellationTokens as the last arguments. Exclude them so
+                // an array just before them (T[] values, CancellationToken token) collects the row
                 // values, as source-gen mode does.
                 var dataParameterCount = parameters.Length;
                 var dataArgumentCount = args.Length;
-                if (parameters.Length > 1
-                    && parameters[^1].ParameterType == typeof(CancellationToken)
-                    && args.Length > 0
-                    && args[^1] is CancellationToken)
+                while (dataParameterCount > 1
+                    && parameters[dataParameterCount - 1].ParameterType == typeof(CancellationToken)
+                    && dataArgumentCount > 0
+                    && args[dataArgumentCount - 1] is CancellationToken)
                 {
                     dataParameterCount--;
                     dataArgumentCount--;
@@ -2721,7 +2721,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     if (dataParameterCount < parameters.Length)
                     {
-                        castedArgs[^1] = args[^1];
+                        for (var i = dataParameterCount; i < parameters.Length; i++)
+                        {
+                            castedArgs[i] = args[dataArgumentCount + i - dataParameterCount];
+                        }
 
                         // Slots padded with Type.Missing for omitted optional parameters are not row values.
                         while (dataArgumentCount > 0 && args[dataArgumentCount - 1] == Type.Missing)
