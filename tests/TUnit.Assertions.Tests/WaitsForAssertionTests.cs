@@ -496,6 +496,11 @@ public class WaitsForAssertionTests
     [Test]
     public async Task WaitsFor_Propagates_OCE_When_Predicate_Observes_Supplied_Token()
     {
+        // The predicate and WaitsFor deliberately share one token. The Func source captures the
+        // predicate's OperationCanceledException as an evaluation exception, so it never escapes on
+        // its own; the OCE the caller sees comes from WaitsFor observing the same token. The test
+        // proves that a token-aware predicate does not turn cancellation into an AssertionException.
+        // With an independent token passed to WaitsFor, the loop would poll until its 30s timeout.
         using var cts = new CancellationTokenSource();
         cts.CancelAfter(TimeSpan.FromMilliseconds(50));
 
