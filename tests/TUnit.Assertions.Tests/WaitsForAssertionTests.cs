@@ -5,6 +5,14 @@ namespace TUnit.Assertions.Tests;
 [NotInParallel]
 public class WaitsForAssertionTests
 {
+    // The cancellation tests use a long internal timeout so that "cancellation won" is never decided
+    // by wall-clock noise. If the supplied token were ignored, the internal timeout would produce an
+    // AssertionException (failing the Throws<OperationCanceledException> check) after 30s. The elapsed
+    // budget is a third of that: it still proves the timeout was short-circuited, while tolerating
+    // heavily loaded CI runners (see #7169), where sub-second budgets proved flaky.
+    private static readonly TimeSpan CancellationTestTimeout = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan CancellationElapsedBudget = TimeSpan.FromSeconds(10);
+
     [Test]
     public async Task WaitsFor_Passes_Immediately_When_Assertion_Succeeds()
     {
@@ -419,14 +427,14 @@ public class WaitsForAssertionTests
         var act = async () => await Assert.That(() => false)
             .WaitsFor(
                 assert => assert.IsTrue(),
-                timeout: TimeSpan.FromSeconds(30),
+                timeout: CancellationTestTimeout,
                 cancellationToken: cts.Token);
 
         await Assert.That(act).Throws<OperationCanceledException>();
 
         stopwatch.Stop();
 
-        await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromSeconds(1));
+        await Assert.That(stopwatch.Elapsed).IsLessThan(CancellationElapsedBudget);
     }
 
     [Test]
@@ -454,14 +462,14 @@ public class WaitsForAssertionTests
         var act = async () => await Assert.That(() => false)
             .WaitsFor(
                 assert => assert.IsTrue(),
-                timeout: TimeSpan.FromSeconds(5),
+                timeout: CancellationTestTimeout,
                 cancellationToken: cts.Token);
 
         await Assert.That(act).Throws<OperationCanceledException>();
 
         stopwatch.Stop();
 
-        await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromMilliseconds(500));
+        await Assert.That(stopwatch.Elapsed).IsLessThan(CancellationElapsedBudget);
     }
 
     [Test]
@@ -475,19 +483,24 @@ public class WaitsForAssertionTests
         var act = async () => await Assert.That(() => false)
             .Eventually(
                 assert => assert.IsTrue(),
-                timeout: TimeSpan.FromSeconds(30),
+                timeout: CancellationTestTimeout,
                 cancellationToken: cts.Token);
 
         await Assert.That(act).Throws<OperationCanceledException>();
 
         stopwatch.Stop();
 
-        await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromSeconds(1));
+        await Assert.That(stopwatch.Elapsed).IsLessThan(CancellationElapsedBudget);
     }
 
     [Test]
     public async Task WaitsFor_Propagates_OCE_When_Predicate_Observes_Supplied_Token()
     {
+        // The predicate and WaitsFor deliberately share one token. The Func source captures the
+        // predicate's OperationCanceledException as an evaluation exception, so it never escapes on
+        // its own; the OCE the caller sees comes from WaitsFor observing the same token. The test
+        // proves that a token-aware predicate does not turn cancellation into an AssertionException.
+        // With an independent token passed to WaitsFor, the loop would poll until its 30s timeout.
         using var cts = new CancellationTokenSource();
         cts.CancelAfter(TimeSpan.FromMilliseconds(50));
 
@@ -502,14 +515,14 @@ public class WaitsForAssertionTests
         var act = async () => await Assert.That(tokenAwarePredicate)
             .WaitsFor(
                 assert => assert.IsTrue(),
-                timeout: TimeSpan.FromSeconds(30),
+                timeout: CancellationTestTimeout,
                 cancellationToken: cts.Token);
 
         await Assert.That(act).Throws<OperationCanceledException>();
 
         stopwatch.Stop();
 
-        await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromMilliseconds(500));
+        await Assert.That(stopwatch.Elapsed).IsLessThan(CancellationElapsedBudget);
     }
 
     // Helper class for testing complex objects

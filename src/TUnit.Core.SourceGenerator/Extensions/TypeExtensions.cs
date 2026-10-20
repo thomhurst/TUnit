@@ -125,6 +125,14 @@ public static class TypeExtensions
 
     public static string GloballyQualified(this ISymbol typeSymbol)
     {
+        // `dynamic` is `object` at runtime, and `typeof(dynamic)` does not compile (CS1962). Rendering it as `object`
+        // also binds generated calls statically instead of through the runtime binder. Nested uses such as
+        // `List<dynamic>` or `dynamic[]` are valid everywhere, including inside typeof, so only the top level changes.
+        if (typeSymbol is ITypeSymbol { TypeKind: TypeKind.Dynamic })
+        {
+            return "object";
+        }
+
         // Handle open generic types where type arguments are type parameters
         // This prevents invalid C# like List<T>, Dictionary<TKey, TValue>, T? where type parameters are undefined
         if (typeSymbol is INamedTypeSymbol { IsGenericType: true, Arity: > 0 } namedTypeSymbol)
