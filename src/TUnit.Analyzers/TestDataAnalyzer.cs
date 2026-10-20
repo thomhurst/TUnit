@@ -1017,7 +1017,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         // Use the type arguments both execution modes actually infer from the typed source, not the
         // positional match against the test parameters: a single type parameter takes the source's first
         // type argument wherever it appears in the signature.
-        var engineTypeArguments = InferMethodTypeArgumentsFromTypedSource(attribute.AttributeClass, method);
+        var engineTypeArguments = TypedDataSourceInference.InferMethodTypeArguments(attribute.AttributeClass, method);
         if (engineTypeArguments is null)
         {
             return;
@@ -1047,49 +1047,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 argument.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
             return;
         }
-    }
-
-    /// <summary>
-    /// Mirrors the generator's <c>InferTypesFromDataSourceAttribute</c> and reflection mode's
-    /// <c>InferTypesFromTypedDataSource</c> for a generic test method on a non-generic class. The type arguments
-    /// come from the <c>DataSourceGeneratorAttribute</c> / <c>AsyncDataSourceGeneratorAttribute</c> base: one type
-    /// parameter takes the first type argument; otherwise a single tuple argument with one element per type
-    /// parameter, or one type argument per type parameter. Returns <see langword="null"/> when neither mode infers
-    /// the method's type arguments from this source.
-    /// </summary>
-    private static ITypeSymbol[]? InferMethodTypeArgumentsFromTypedSource(INamedTypeSymbol? attributeClass, IMethodSymbol method)
-    {
-        if (method.ContainingType.IsGenericType)
-        {
-            return null;
-        }
-
-        var typeParameterCount = method.TypeParameters.Length;
-        for (var baseType = attributeClass?.BaseType; baseType is not null; baseType = baseType.BaseType)
-        {
-            if (!baseType.IsGenericType
-                || baseType.Name is not ("DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute")
-                || baseType.ContainingNamespace?.ToDisplayString() != "TUnit.Core")
-            {
-                continue;
-            }
-
-            var typeArguments = baseType.TypeArguments;
-            if (typeParameterCount == 1 && typeArguments.Length >= 1)
-            {
-                return [typeArguments[0]];
-            }
-
-            if (typeArguments is [INamedTypeSymbol { IsTupleType: true } tupleType]
-                && tupleType.TupleElements.Length == typeParameterCount)
-            {
-                return tupleType.TupleElements.Select(e => e.Type).ToArray();
-            }
-
-            return typeArguments.Length == typeParameterCount ? typeArguments.ToArray() : null;
-        }
-
-        return null;
     }
 
     private static bool CanConvert(SymbolAnalysisContext context, TypedConstant argument, ITypeSymbol? methodParameterType)

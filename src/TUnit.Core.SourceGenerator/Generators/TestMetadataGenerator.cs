@@ -6409,6 +6409,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
+        // A generic method on a non-generic class uses the rules shared with analyzer TUnit0001.
+        if (method.IsGenericMethod && !method.ContainingType.IsGenericType)
+        {
+            return TypedDataSourceInference.InferMethodTypeArguments(attrClass, method);
+        }
+
         // Check if it's a typed data source by examining its base types
         var baseType = attrClass.BaseType;
         while (baseType != null)
@@ -6426,35 +6432,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Get the type arguments from the base class
                     var typeArgs = baseType.TypeArguments;
 
-                    // For generic method inference
-                    if (method.IsGenericMethod && !method.ContainingType.IsGenericType)
-                    {
-                        // Single type parameter method
-                        if (method.TypeParameters.Length == 1 && typeArgs.Length >= 1)
-                        {
-                            return new[] { typeArgs[0] };
-                        }
-
-                        // Multiple type parameters - check for tuple
-                        if (typeArgs is
-                            [
-                                INamedTypeSymbol { IsTupleType: true } tupleType
-                            ])
-                        {
-                            if (tupleType.TupleElements.Length == method.TypeParameters.Length)
-                            {
-                                return tupleType.TupleElements.Select(e => e.Type).ToArray();
-                            }
-                        }
-
-                        // Direct match for multiple type args
-                        if (typeArgs.Length == method.TypeParameters.Length)
-                        {
-                            return typeArgs.ToArray();
-                        }
-                    }
                     // For generic class inference (non-generic method)
-                    else if (!method.IsGenericMethod && method.ContainingType.IsGenericType)
+                    if (!method.IsGenericMethod && method.ContainingType.IsGenericType)
                     {
                         var classTypeParams = method.ContainingType.TypeParameters;
 

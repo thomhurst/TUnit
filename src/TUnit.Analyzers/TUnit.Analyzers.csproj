@@ -28,6 +28,7 @@
   <ItemGroup>
     <Compile Include="..\TUnit.Core.SourceGenerator\Extensions\ParsableTypeExtensions.cs" Link="Extensions\ParsableTypeExtensions.cs" />
     <Compile Include="..\TUnit.Core.SourceGenerator\Extensions\ExactTypeExtensions.cs" Link="Extensions\ExactTypeExtensions.cs" />
+    <Compile Include="..\TUnit.Core.SourceGenerator\Extensions\TypedDataSourceInference.cs" Link="Extensions\TypedDataSourceInference.cs" />
   </ItemGroup>
 
   <ItemGroup>
