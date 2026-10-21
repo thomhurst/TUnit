@@ -2321,12 +2321,21 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             FilePath = ExtractFilePath(method) ?? "Unknown",
             LineNumber = ExtractLineNumber(method) ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
-            AttributeFactory = () => method.GetCustomAttributes().ToArray(),
+            AttributeFactory = () => GetFailedTestAttributes(method),
             DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = []
         };
     }
+
+    /// <summary>
+    /// Attributes for a test whose discovery failed. Such a test has no producing data row, so the
+    /// row-scoped data sources (such as <see cref="ArgumentsAttribute"/>) are dropped, the same way
+    /// <c>TestBuilder.ScopeRowAttributesToTest</c> drops the rows that did not produce a test.
+    /// Otherwise every row's Skip, DisplayName and Categories would be applied to the failed test (#7076).
+    /// </summary>
+    private static Attribute[] GetFailedTestAttributes(MethodInfo method)
+        => TestBuilder.ScopeRowAttributesToTest(method.GetCustomAttributes().ToArray(), null, null);
 
     private static string? ExtractFilePath(MethodInfo method)
     {
@@ -2387,8 +2396,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             FilePath = ExtractFilePath(method) ?? "Unknown",
             LineNumber = ExtractLineNumber(method) ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
-            AttributeFactory = () => method.GetCustomAttributes()
-                .ToArray(),
+            AttributeFactory = () => GetFailedTestAttributes(method),
             DataSources =
             [
             ],
@@ -3350,7 +3358,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             FilePath = ExtractFilePath(method) ?? "Unknown",
             LineNumber = ExtractLineNumber(method) ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
-            AttributeFactory = () => method.GetCustomAttributes().ToArray(),
+            AttributeFactory = () => GetFailedTestAttributes(method),
             DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = []
