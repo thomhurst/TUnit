@@ -80,7 +80,7 @@ public class Issue7076Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    public async Task Failed_Metadata_Filters_Method_DataSources()
+    public Task Failed_Metadata_Filters_Method_DataSources()
     {
         var method = typeof(FailedMetadataDataSourceTest).GetMethod(nameof(FailedMetadataDataSourceTest.Test))!;
         var collectorType = typeof(ReflectionTestDataCollector);
@@ -94,12 +94,13 @@ public class Issue7076Tests(TestMode testMode) : InvokableTestBase(testMode)
 
         foreach (var (name, arguments) in factories)
         {
-            var factory = collectorType.GetMethod(name, BindingFlags.NonPublic | BindingFlags.Static)!;
+            var factory = collectorType.GetMethod(name, BindingFlags.NonPublic | BindingFlags.Static);
+            factory.ShouldNotBeNull(name);
             var metadata = (TestMetadata)factory.Invoke(null, arguments)!;
             metadata.AttributeFactory().OfType<IDataSourceAttribute>().ShouldBeEmpty(name);
         }
 
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     private sealed class FailedMetadataDataSourceTest
