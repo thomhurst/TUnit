@@ -102,6 +102,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
                 [
                     new global::TUnit.Core.TestAttribute(),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+                    new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
                     new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
                 ];
             }
@@ -113,6 +114,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
                     new global::TUnit.Core.TimeoutAttribute(5_000),
                     new global::TUnit.Core.CategoryAttribute("Blah"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Failure),
+                    new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
                     new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
                 ];
             }
@@ -123,6 +125,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
                     new global::TUnit.Core.TestAttribute(),
                     new global::TUnit.TestProject.TimeoutCancellationTokenTests.FiveSecondTimeout(),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Failure),
+                    new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
                     new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
                 ];
             }
@@ -133,6 +136,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
                     new global::TUnit.Core.TestAttribute(),
                     new global::TUnit.Core.TimeoutAttribute(5_000),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Failure),
+                    new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
                     new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
                 ];
             }
@@ -143,6 +147,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
                     new global::TUnit.Core.TimeoutAttribute(5_000),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Failure),
                     new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
                     new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
                 ];
             }
@@ -154,6 +159,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
                     new global::TUnit.Core.TimeoutAttribute(5_000),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Failure),
                     new global::TUnit.Core.CategoryAttribute("Blah"),
+                    new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
                     new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
                 ];
             }
@@ -400,6 +406,7 @@ internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
                 return
                 [
                     new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
                     new global::TUnit.Core.TimeoutAttribute(30_000),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
@@ -505,6 +512,7 @@ internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
                 return
                 [
                     new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
                     new global::TUnit.Core.TimeoutAttribute(5_000),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Failure),
                     new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")

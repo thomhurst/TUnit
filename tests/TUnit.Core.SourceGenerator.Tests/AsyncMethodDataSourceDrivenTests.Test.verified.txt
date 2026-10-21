@@ -250,7 +250,12 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncDataMethodWithArgs")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithArgs()),
+        Arguments = new object[] { 5 },
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        {
+            var arguments = new object[] { 5 };
+            return global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithArgs(((int)arguments[0]));
+        }),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),

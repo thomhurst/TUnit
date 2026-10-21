@@ -116,6 +116,30 @@ public class AspireDiagnosticsTests
     }
 
     [Test]
+    public async Task DescribeState_OutOfMemory_FormatsNegativeExitCodeInvariantly()
+    {
+        // Windows reports out-of-memory as a negative NTSTATUS; cultures such as sv-SE print it with U+2212 MINUS SIGN.
+        // The sign is set explicitly so the test does not depend on the host's ICU data or invariant globalization mode.
+        var minusSignCulture = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
+        minusSignCulture.NumberFormat.NegativeSign = "\u2212";
+
+        var diagnosis = new ResourceDiagnosis("cache", "Exited", -1073741801, ResourceFailureClass.OutOfMemory, null, null);
+        var original = System.Globalization.CultureInfo.CurrentCulture;
+        string description;
+        try
+        {
+            System.Globalization.CultureInfo.CurrentCulture = minusSignCulture;
+            description = DescribeState(diagnosis);
+        }
+        finally
+        {
+            System.Globalization.CultureInfo.CurrentCulture = original;
+        }
+
+        await Assert.That(description).Contains("exit code -1073741801");
+    }
+
+    [Test]
     public async Task DescribeState_HealthCheckFailing_IncludesDetail()
     {
         var diagnosis = new ResourceDiagnosis(

@@ -157,6 +157,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new gl
         {
             new global::TUnit.Core.TestAttribute(),
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+            new global::TUnit.Core.MethodDataSourceAttribute("GetNumbers"),
             new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeA)),
             new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeB))
         };
@@ -204,6 +205,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new gl
         {
             new global::TUnit.Core.TestAttribute(),
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+            new global::TUnit.Core.MethodDataSourceAttribute("GetNumbers"),
             new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeA)),
             new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeB))
         };
@@ -356,6 +358,7 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>(
             methodName: "GenericMethod_Should_Work<int>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<int>",
+            methodTypeArgumentsIdentity: "<int>",
             filePath: "",
             lineNumber: 74,
             methodMetadata: __mm_0,
@@ -367,6 +370,7 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>(
             methodName: "GenericMethod_Should_Work<string>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<string>",
+            methodTypeArgumentsIdentity: "<string>",
             filePath: "",
             lineNumber: 74,
             methodMetadata: __mm_0,
@@ -376,8 +380,9 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
             createAttributes: __Attributes_0,
             attributeGroupIndex: 1),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>(
-            methodName: "GenericMethod_Should_Work<global::TUnit.TestProject.Bugs._4431.TypeA>",
-            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<global::TUnit.TestProject.Bugs._4431.TypeA>",
+            methodName: "GenericMethod_Should_Work<TypeA>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<TypeA>",
+            methodTypeArgumentsIdentity: "<global::TUnit.TestProject.Bugs._4431.TypeA>",
             filePath: "",
             lineNumber: 74,
             methodMetadata: __mm_0,
@@ -466,7 +471,8 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
                     new global::TUnit.Core.TestAttribute(),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
-                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double))
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("GetStrings")
                 };
             }
             case 1:
@@ -476,7 +482,8 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
                     new global::TUnit.Core.TestAttribute(),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
-                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double))
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("GetStrings")
                 };
             }
             default:
@@ -488,6 +495,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource>(
             methodName: "GenericMethod_With_DataSource<int>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource.GenericMethod_With_DataSource<int>",
+            methodTypeArgumentsIdentity: "<int>",
             filePath: "",
             lineNumber: 97,
             hasDataSource: true,
@@ -507,6 +515,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource>(
             methodName: "GenericMethod_With_DataSource<double>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource.GenericMethod_With_DataSource<double>",
+            methodTypeArgumentsIdentity: "<double>",
             filePath: "",
             lineNumber: 97,
             hasDataSource: true,
@@ -626,6 +635,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeA>>(
             methodName: "BothGeneric_Should_Work<int>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeA>.BothGeneric_Should_Work<int>",
+            methodTypeArgumentsIdentity: "<int>",
             filePath: "",
             lineNumber: 117,
             methodMetadata: __mm_0,
@@ -637,6 +647,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeA>>(
             methodName: "BothGeneric_Should_Work<string>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeA>.BothGeneric_Should_Work<string>",
+            methodTypeArgumentsIdentity: "<string>",
             filePath: "",
             lineNumber: 117,
             methodMetadata: __mm_0,
@@ -717,6 +728,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeB>>(
             methodName: "BothGeneric_Should_Work<int>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeB>.BothGeneric_Should_Work<int>",
+            methodTypeArgumentsIdentity: "<int>",
             filePath: "",
             lineNumber: 117,
             methodMetadata: __mm_0,
@@ -728,6 +740,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeB>>(
             methodName: "BothGeneric_Should_Work<string>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeB>.BothGeneric_Should_Work<string>",
+            methodTypeArgumentsIdentity: "<string>",
             filePath: "",
             lineNumber: 117,
             methodMetadata: __mm_0,
@@ -1299,6 +1312,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("GetBooleans"),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeA)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeB))
                 };
@@ -1311,6 +1325,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("GetBooleans"),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeA)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeB))
                 };
@@ -1324,6 +1339,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>>(
             methodName: "FullyGeneric_With_DataSources<int>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeA>.FullyGeneric_With_DataSources<int>",
+            methodTypeArgumentsIdentity: "<int>",
             filePath: "",
             lineNumber: 236,
             hasDataSource: true,
@@ -1343,6 +1359,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>>(
             methodName: "FullyGeneric_With_DataSources<double>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeA>.FullyGeneric_With_DataSources<double>",
+            methodTypeArgumentsIdentity: "<double>",
             filePath: "",
             lineNumber: 236,
             hasDataSource: true,
@@ -1406,6 +1423,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("GetBooleans"),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeA)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeB))
                 };
@@ -1418,6 +1436,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(double)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("GetBooleans"),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeA)),
                     new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._4431.TypeB))
                 };
@@ -1431,6 +1450,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>>(
             methodName: "FullyGeneric_With_DataSources<int>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeB>.FullyGeneric_With_DataSources<int>",
+            methodTypeArgumentsIdentity: "<int>",
             filePath: "",
             lineNumber: 236,
             hasDataSource: true,
@@ -1450,6 +1470,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>>(
             methodName: "FullyGeneric_With_DataSources<double>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeB>.FullyGeneric_With_DataSources<double>",
+            methodTypeArgumentsIdentity: "<double>",
             filePath: "",
             lineNumber: 236,
             hasDataSource: true,

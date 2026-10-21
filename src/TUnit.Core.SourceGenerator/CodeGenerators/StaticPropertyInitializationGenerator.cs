@@ -396,7 +396,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine($"Type = typeof({propertyData.Property.GloballyQualifiedType}),");
         writer.AppendLine($"IsStatic = true,");
         writer.AppendLine($"ReflectionInfo = typeof({typeName}).GetProperty(\"{propertyName}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static),");
-        writer.AppendLine($"Getter = _ => {typeName}.{propertyName},");
+        writer.AppendLine($"Getter = _ => {typeName}.{IdentifierHelper.Escape(propertyName)},");
         writer.AppendLine("ClassMetadata = containingTypeMetadata,");
         writer.AppendLine("ContainingTypeMetadata = containingTypeMetadata");
         writer.Unindent();
@@ -439,7 +439,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("if (value != null)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine($"{typeName}.{propertyName} = ({propertyData.Property.GloballyQualifiedType})value;");
+        writer.AppendLine($"{typeName}.{IdentifierHelper.Escape(propertyName)} = ({propertyData.Property.GloballyQualifiedType})value;");
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();

@@ -43,6 +43,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
         return new global::System.Attribute[]
         {
             new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(2),
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         };
     }
@@ -51,6 +52,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NonPublicTestMethodRootingTests>(
             methodName: "Internal_Generic<int>",
             fullyQualifiedName: "TUnit.TestProject.NonPublicTestMethodRootingTests.Internal_Generic<int>",
+            methodTypeArgumentsIdentity: "<int>",
             filePath: "",
             lineNumber: 26,
             hasDataSource: true,

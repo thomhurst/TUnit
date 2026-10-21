@@ -82,7 +82,7 @@ public static class AttributeDataExtensions
         }
 
         return InterfaceHelper.ImplementsGenericInterface(attributeData.AttributeClass,
-            WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "`1");
+            WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "<>");
     }
 
     public static ITypeSymbol? GetTypedDataSourceType(this AttributeData? attributeData)
@@ -93,7 +93,7 @@ public static class AttributeDataExtensions
         }
 
         var typedInterface = InterfaceHelper.GetGenericInterface(attributeData.AttributeClass,
-            WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "`1");
+            WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "<>");
 
         return typedInterface?.TypeArguments.FirstOrDefault();
     }

@@ -238,9 +238,9 @@ Use `[AssertionFrom]` to create assertions from existing methods in libraries or
 ```csharp
 using TUnit.Assertions.Attributes;
 
-[AssertionFrom<string>(nameof(string.IsNullOrEmpty), CustomName = "IsBlank", ExpectationMessage = "to be null or empty")]
-[AssertionFrom<string>(nameof(string.StartsWith), CustomName = "BeginsWithText", ExpectationMessage = "to start with {value}")]
-[AssertionFrom<string>(nameof(string.EndsWith), CustomName = "EndsWithText", ExpectationMessage = "to end with {value}")]
+[AssertionFrom<string>(nameof(string.IsNullOrEmpty), CustomName = "IsBlank", ExpectationMessage = "be null or empty")]
+[AssertionFrom<string>(nameof(string.StartsWith), CustomName = "BeginsWithText", ExpectationMessage = "start with '{value}'")]
+[AssertionFrom<string>(nameof(string.EndsWith), CustomName = "EndsWithText", ExpectationMessage = "end with '{value}'")]
 public static partial class StringAssertionExtensions
 {
 }
@@ -256,7 +256,7 @@ await Assert.That("hello").BeginsWithText("he");
 ### With Custom Names
 
 ```csharp
-[AssertionFrom<string>(nameof(string.Contains), CustomName = "Has", ExpectationMessage = "to have '{value}'")]
+[AssertionFrom<string>(nameof(string.Contains), CustomName = "Has", ExpectationMessage = "have '{value}'")]
 public static partial class StringAssertionExtensions
 {
 }
@@ -271,7 +271,7 @@ await Assert.That("hello").Has("world");        // ❌ Fails: "Expected to have 
 For `bool`-returning methods, you can generate negated versions:
 
 ```csharp
-[AssertionFrom<string>(nameof(string.Contains), CustomName = "LacksText", NegateLogic = true, ExpectationMessage = "to not contain '{value}'")]
+[AssertionFrom<string>(nameof(string.Contains), CustomName = "LacksText", NegateLogic = true, ExpectationMessage = "contain '{value}'")]
 public static partial class StringAssertionExtensions
 {
 }
@@ -283,11 +283,19 @@ await Assert.That("hello").LacksText("ell");  // ❌ Fails: "Expected to not con
 
 **Note:** Negation only works with `bool`-returning methods. `AssertionResult` methods determine their own pass/fail logic.
 
+### How `ExpectationMessage` Is Rendered
+
+For `[AssertionFrom]`, the message is the phrase that follows "Expected to". Write it in the positive form, without the leading "to", as in the examples above:
+
+- The generator adds "to", plus "not" when `NegateLogic = true`: `"contain '{value}'"` renders as "to contain 'x'", or "to not contain 'x'" when negated.
+- For compatibility, a leading "to" is ignored (`"to be null or empty"` renders the same as `"be null or empty"`), and a phrase that already starts with "not" (`"to not contain '{value}'"`) is used as written rather than negated again.
+- `{paramName}` is replaced with that parameter's value. Everything else is literal text: write `{{` and `}}` for literal braces, and a placeholder that names no parameter is printed as is.
+
 ### Referencing Methods on Different Types
 
 ```csharp
 // Reference static methods from another type
-[AssertionFrom<string>(typeof(StringHelper), nameof(StringHelper.IsValidEmail), ExpectationMessage = "to be a valid email")]
+[AssertionFrom<string>(typeof(StringHelper), nameof(StringHelper.IsValidEmail), ExpectationMessage = "be a valid email")]
 public static partial class StringAssertionExtensions
 {
 }
@@ -305,6 +313,28 @@ public static class StringHelper
 await Assert.That("user@example.com").IsValidEmail();  // ✅ Passes
 await Assert.That("invalid-email").IsValidEmail();     // ❌ Fails: "Expected to be a valid email but found 'invalid-email'"
 ```
+
+### Open Generic Types
+
+Pass an unbound generic type, such as `typeof(Container<>)`, to generate one assertion that works for every closed type. The generated assertion is generic over the type's parameters.
+
+```csharp
+[AssertionFrom(typeof(Container<>), nameof(Container<int>.IsVacant), ExpectationMessage = "to be vacant")]
+public static partial class ContainerAssertionExtensions
+{
+}
+
+public class Container<T>
+{
+    public bool IsVacant => true;
+}
+
+// Usage:
+await Assert.That(new Container<int>()).IsVacant();
+await Assert.That(new Container<string>()).IsVacant();
+```
+
+The method or property must be declared on the generic type itself. If it is declared on another type, the generator reports error `TU0001`.
 
 ---
 

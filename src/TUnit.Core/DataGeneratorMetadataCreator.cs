@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Enums;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -21,16 +22,10 @@ internal static class DataGeneratorMetadataCreator
             ? testMetadata.MethodMetadata.Class.Parameters
             : testMetadata.MethodMetadata.Parameters;
 
-        // Filter out CancellationToken if it's the last parameter (handled by the engine)
-        if (generatorType == DataGeneratorType.TestParameters && parametersToGenerate.Length > 0)
+        // Filter out CancellationToken parameters (supplied by the engine wherever they are declared)
+        if (generatorType == DataGeneratorType.TestParameters)
         {
-            var lastParam = parametersToGenerate[^1];
-            if (lastParam.Type == typeof(CancellationToken))
-            {
-                var newArray = new ParameterMetadata[parametersToGenerate.Length - 1];
-                Array.Copy(parametersToGenerate, 0, newArray, 0, parametersToGenerate.Length - 1);
-                parametersToGenerate = newArray;
-            }
+            parametersToGenerate = FilterOutCancellationToken(parametersToGenerate);
         }
 
         IMemberMetadata[] membersToGenerate;
@@ -266,19 +261,39 @@ internal static class DataGeneratorMetadataCreator
             objectBag);
     }
 
+    /// <summary>
+    /// Removes CancellationToken parameters, which take no row value: the engine passes the test's
+    /// token to them wherever they are declared. Returns <paramref name="parameters"/> itself when
+    /// there are none.
+    /// </summary>
+    /// <remarks>Keep in step with the other copies of this rule: TUnit0001 (<c>ParameterExtensions.WithoutTestMethodCancellationTokens</c>), the generator (<c>TestMetadataGenerator.GetDataParameters</c>), the runtime (<c>DataGeneratorMetadataCreator.FilterOutCancellationToken</c>, <c>DataUnwrapper</c>) and reflection discovery (<c>ReflectionTestMetadata</c>, <c>ReflectionTestDataCollector</c>).</remarks>
     private static ParameterMetadata[] FilterOutCancellationToken(ParameterMetadata[] parameters)
     {
-        if (parameters.Length > 0)
+        var tokenCount = 0;
+        foreach (var parameter in parameters)
         {
-            var lastParam = parameters[^1];
-            if (lastParam.Type == typeof(CancellationToken))
+            if (parameter.Type == typeof(CancellationToken))
             {
-                var newArray = new ParameterMetadata[parameters.Length - 1];
-                Array.Copy(parameters, 0, newArray, 0, parameters.Length - 1);
-                return newArray;
+                tokenCount++;
             }
         }
-        return parameters;
+
+        if (tokenCount == 0)
+        {
+            return parameters;
+        }
+
+        var filtered = new ParameterMetadata[parameters.Length - tokenCount];
+        var index = 0;
+        foreach (var parameter in parameters)
+        {
+            if (parameter.Type != typeof(CancellationToken))
+            {
+                filtered[index++] = parameter;
+            }
+        }
+
+        return filtered;
     }
 
     #if NET8_0_OR_GREATER
@@ -307,7 +322,7 @@ internal static class DataGeneratorMetadataCreator
             {
                 Type = type,
                 TypeInfo = new ConcreteType(type),
-                Name = type.Name,
+                Name = TypeNameFormatter.GetNameWithoutGenericArity(type),
                 Namespace = type.Namespace ?? string.Empty,
                 Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? type.Assembly.GetName().FullName ?? "Unknown", () => new AssemblyMetadata
                 {

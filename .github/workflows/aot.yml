@@ -1,0 +1,132 @@
+name: AOT
+
+# The native AOT publishes: the test app with the AOT-mode engine tests that run against it, and the
+# NugetTester against freshly packed packages. Inside the .NET matrix they competed with the test
+# modules for CPUs, and the test-app publish was the critical path on every OS (12-25 minutes, with
+# the Reflection-mode engine tests held back until it finished). Here they need no full solution
+# build: TUnit.Engine.Tests builds the test projects it launches, packing needs only the libraries,
+# and the test-app publish compiles into its own artifacts tree.
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  aot:
+    name: AOT (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          # Versioning reads the fetched history only; nothing in this job pushes.
+          persist-credentials: false
+
+      - name: Setup Dev Drive (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: samypr100/setup-dev-drive@v4
+        with:
+          drive-size: 10GB
+          trusted-dev-drive: true
+          env-mapping: |
+            NUGET_PACKAGES,{{ DEV_DRIVE }}/.nuget/packages
+            TEMP,{{ DEV_DRIVE }}/tmp
+            TMP,{{ DEV_DRIVE }}/tmp
+
+      - name: Setup .NET Framework
+        if: matrix.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+
+      - name: Enable Long Paths on Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+        shell: pwsh
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4
+        with:
+          versionSpec: '6.7.x'
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4
+
+      # See the matching step in dotnet.yml's modularpipeline job (issue #5622).
+      - name: Export version env vars
+        shell: bash
+        # Passed through env, not expanded into the script: InformationalVersion carries the branch
+        # name, which a workflow_dispatch run takes from whatever branch was selected. The GV_ prefix
+        # matters: Windows environment names are case-insensitive, so GITVERSION_SEMVER would merge
+        # with the action's own GitVersion_SemVer and bash would see only that spelling.
+        env:
+          GV_SEMVER: ${{ steps.gitversion.outputs.semVer }}
+          GV_ASSEMBLYSEMVER: ${{ steps.gitversion.outputs.assemblySemVer }}
+          GV_ASSEMBLYSEMFILEVER: ${{ steps.gitversion.outputs.assemblySemFileVer }}
+          GV_INFORMATIONALVERSION: ${{ steps.gitversion.outputs.informationalVersion }}
+          GV_FULLSEMVER: ${{ steps.gitversion.outputs.fullSemVer }}
+        run: |
+          if [ -z "$GV_SEMVER" ]; then
+            echo "::error::GitVersion produced no semVer; Version would be empty."
+            exit 1
+          fi
+          {
+            echo "Version=$GV_SEMVER"
+            echo "AssemblyVersion=$GV_ASSEMBLYSEMVER"
+            echo "FileVersion=$GV_ASSEMBLYSEMFILEVER"
+            echo "InformationalVersion=$GV_INFORMATIONALVERSION"
+            echo "PackageVersion=$GV_FULLSEMVER"
+          } >> "$GITHUB_ENV"
+
+      # Every library project (packing reads the Roslyn variants from their own bin folders), the
+      # engine tests with the test projects they launch, and the pipeline itself.
+      - name: Build
+        shell: bash
+        run: |
+          grep -oE 'src/[^"]+\.(cs|fs|vb)proj' TUnit.CI.slnx | grep -v '/content/' \
+            | jq -R . | jq -s '{solution: {path: "TUnit.CI.slnx", projects: .}}' > libraries.slnf
+          if [ "$(jq '.solution.projects | length' libraries.slnf)" -eq 0 ]; then
+            echo "::error::No library projects found in TUnit.CI.slnx; update the filter in this step."
+            exit 1
+          fi
+          dotnet build libraries.slnf -c Release
+          dotnet build tests/TUnit.Engine.Tests/TUnit.Engine.Tests.csproj -c Release
+          dotnet build tools/TUnit.Pipeline/TUnit.Pipeline.csproj -c Release
+
+      - name: Run Pipeline
+        uses: ./.github/actions/execute-pipeline
+        with:
+          categories: Aot Packaging
+          admin-token: ${{ github.token }}
+
+      - name: Upload Diagnostic Logs
+        uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: TestingPlatformDiagnosticLogs-aot-${{ matrix.os }}
+          path: '**/log_*.diag'
+
+      - name: Upload Hang Dumps
+        uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: HangDump-aot-${{ matrix.os }}
+          path: '**/hangdump*'

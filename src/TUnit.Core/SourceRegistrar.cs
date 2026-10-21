@@ -16,7 +16,79 @@ namespace TUnit.Core;
 /// </summary>
 public class SourceRegistrar
 {
-    public static bool IsEnabled { get; set; }
+    private static readonly Lock ModeLock = new();
+    private static volatile bool _isEnabled;
+    private static volatile bool _isSourceGenerationAvailable;
+    private static bool _isModeLocked;
+
+    /// <summary>
+    /// Gets whether the source-generated execution mode is in use.
+    /// Generated module initializers set this to <c>true</c>. Once the engine has chosen the
+    /// execution mode, later writes do not change it, so a module initializer from an assembly that
+    /// loads mid-run cannot switch a reflection-mode run back to source-generated mode. Every write
+    /// still updates <see cref="IsSourceGenerationAvailable"/>.
+    /// </summary>
+    /// <remarks>
+    /// The engine owns this value after startup. Setting it once the engine has selected the
+    /// execution mode has no effect. A write that would have changed the value is reported
+    /// through <see cref="Trace.WriteLine(string)"/>. To choose the mode, use the
+    /// <c>--reflection</c> or <c>--tunit-execution-mode</c> command-line options, the
+    /// <c>TUNIT_EXECUTION_MODE</c> environment variable, or <see cref="ReflectionModeAttribute"/>.
+    /// </remarks>
+    public static bool IsEnabled
+    {
+        get => _isEnabled;
+        set
+        {
+            lock (ModeLock)
+            {
+                _isSourceGenerationAvailable = value;
+
+                if (!_isModeLocked)
+                {
+                    _isEnabled = value;
+                    return;
+                }
+
+                if (_isEnabled == value)
+                {
+                    return;
+                }
+            }
+
+            ReportIgnoredWrite(value);
+        }
+    }
+
+    /// <summary>
+    /// Gets whether generated module initializers registered source-generated tests, independent of
+    /// the execution mode the engine selected. Writes to <see cref="IsEnabled"/> update this value
+    /// even after the mode is locked, so a later engine instance in the same process that has no
+    /// explicit mode option still falls back to source-generated mode when it is available.
+    /// </summary>
+    internal static bool IsSourceGenerationAvailable => _isSourceGenerationAvailable;
+
+    /// <summary>
+    /// Sets the execution mode the engine selected and stops later <see cref="IsEnabled"/> writes
+    /// from changing it. A later call, such as from another engine instance in the same process,
+    /// replaces the locked value, so the most recent engine run decides the mode.
+    /// </summary>
+    internal static void LockExecutionMode(bool useSourceGeneration)
+    {
+        lock (ModeLock)
+        {
+            _isEnabled = useSourceGeneration;
+            _isModeLocked = true;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void ReportIgnoredWrite(bool value)
+    {
+        Trace.WriteLine(value
+            ? "[TUnit.Core] Ignored SourceRegistrar.IsEnabled = true: the engine already selected reflection mode. A generated module initializer from an assembly that loaded after startup usually causes this."
+            : "[TUnit.Core] Ignored SourceRegistrar.IsEnabled = false: the engine already selected source-generated mode. Use --reflection, --tunit-execution-mode, TUNIT_EXECUTION_MODE or [assembly: ReflectionMode] to choose the mode.");
+    }
 
     /// <summary>
     /// Registers an assembly loader.
@@ -136,6 +208,35 @@ public class SourceRegistrar
             }
 
             // Another thread added between TryGetValue and TryAdd — retry to merge
+        }
+    }
+
+    /// <summary>
+    /// Registers test methods of the open generic type <paramref name="genericTypeDefinition"/> whose
+    /// inferred class type arguments break the class's generic constraints. Each message is reported
+    /// as a failed test. Returns a dummy value for use as a static field initializer.
+    /// Multiple calls for the same type are additive.
+    /// </summary>
+    public static int RegisterGenericConstraintViolations([System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] Type genericTypeDefinition, Func<GenericConstraintViolationEntry[]> factory)
+    {
+        while (true)
+        {
+            if (Sources.TestEntries.TryGetValue(genericTypeDefinition, out var existing))
+            {
+                if (existing is GenericConstraintViolationEntrySource existingSource)
+                {
+                    existingSource.AddFactory(factory);
+                    return 0;
+                }
+
+                throw new InvalidOperationException(
+                    $"Type mismatch in TestEntries for '{genericTypeDefinition.FullName}': expected {nameof(GenericConstraintViolationEntrySource)}, found {existing.GetType().Name}");
+            }
+
+            if (Sources.TestEntries.TryAdd(genericTypeDefinition, new GenericConstraintViolationEntrySource(genericTypeDefinition, factory)))
+            {
+                return 0;
+            }
         }
     }
 }

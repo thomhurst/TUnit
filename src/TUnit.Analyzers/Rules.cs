@@ -9,6 +9,13 @@ public static class Rules
     public static readonly DiagnosticDescriptor WrongArgumentTypeTestData =
         CreateDescriptor(DiagnosticIds.WrongArgumentTypeTestData, UsageCategory, DiagnosticSeverity.Error);
 
+    // TUnit0001 with a message that explains why a broad declared type fails a generic constraint (#7116).
+    // It deliberately shares the ID, category and severity of WrongArgumentTypeTestData, so existing
+    // suppressions and the release tracking entry for TUnit0001 still apply; only the text differs.
+    public static readonly DiagnosticDescriptor GenericTypeArgumentInferredFromDeclaredType =
+        CreateDescriptor(DiagnosticIds.WrongArgumentTypeTestData, UsageCategory, DiagnosticSeverity.Error,
+            resourcePrefix: DiagnosticIds.WrongArgumentTypeTestData + "DeclaredType");
+
     public static readonly DiagnosticDescriptor NoTestDataProvided =
         CreateDescriptor(DiagnosticIds.NoTestDataProvided, UsageCategory, DiagnosticSeverity.Error);
 
@@ -176,19 +183,24 @@ public static class Rules
     public static readonly DiagnosticDescriptor UseHookCancellationToken =
         CreateDescriptor(DiagnosticIds.UseHookCancellationToken, UsageCategory, DiagnosticSeverity.Warning);
 
+    public static readonly DiagnosticDescriptor AmbiguousMethodDataSourceOverload =
+        CreateDescriptor(DiagnosticIds.AmbiguousMethodDataSourceOverload, UsageCategory, DiagnosticSeverity.Error);
+
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity,
-        string[]? customTags = null, string? helpLinkUri = null)
+        string[]? customTags = null, string? helpLinkUri = null, string? resourcePrefix = null)
     {
+        resourcePrefix ??= diagnosticId;
+
         return new DiagnosticDescriptor(
             id: diagnosticId,
-            title: new LocalizableResourceString(diagnosticId + "Title",
+            title: new LocalizableResourceString(resourcePrefix + "Title",
                 Resources.ResourceManager, typeof(Resources)),
-            messageFormat: new LocalizableResourceString(diagnosticId + "MessageFormat", Resources.ResourceManager,
+            messageFormat: new LocalizableResourceString(resourcePrefix + "MessageFormat", Resources.ResourceManager,
                 typeof(Resources)),
             category: category,
             defaultSeverity: severity,
             isEnabledByDefault: true,
-            description: new LocalizableResourceString(diagnosticId + "Description", Resources.ResourceManager,
+            description: new LocalizableResourceString(resourcePrefix + "Description", Resources.ResourceManager,
                 typeof(Resources)),
             helpLinkUri: helpLinkUri,
             customTags: customTags ?? []

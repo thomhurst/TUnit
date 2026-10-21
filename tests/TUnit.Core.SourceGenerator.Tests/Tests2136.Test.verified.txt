@@ -100,6 +100,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
                 return new global::System.Attribute[]
                 {
                     new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.ArgumentsAttribute(true, "True"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 };
             }
@@ -108,6 +109,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
                 return new global::System.Attribute[]
                 {
                     new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.ArgumentsAttribute(1, "1"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 };
             }
@@ -116,6 +118,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
                 return new global::System.Attribute[]
                 {
                     new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.ArgumentsAttribute(1.1, "1.1"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 };
             }
@@ -124,6 +127,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
                 return new global::System.Attribute[]
                 {
                     new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.ArgumentsAttribute("hello", "hello"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 };
             }
@@ -132,6 +136,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
                 return new global::System.Attribute[]
                 {
                     new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item"),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 };
             }
@@ -144,6 +149,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2136.Tests>(
             methodName: "GenericArgumentsTest<bool>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<bool>",
+            methodTypeArgumentsIdentity: "<bool>",
             filePath: "",
             lineNumber: 8,
             hasDataSource: true,
@@ -160,6 +166,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2136.Tests>(
             methodName: "GenericArgumentsTest<int>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<int>",
+            methodTypeArgumentsIdentity: "<int>",
             filePath: "",
             lineNumber: 8,
             hasDataSource: true,
@@ -176,6 +183,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2136.Tests>(
             methodName: "GenericArgumentsTest<double>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<double>",
+            methodTypeArgumentsIdentity: "<double>",
             filePath: "",
             lineNumber: 8,
             hasDataSource: true,
@@ -192,6 +200,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2136.Tests>(
             methodName: "GenericArgumentsTest<string>",
             fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<string>",
+            methodTypeArgumentsIdentity: "<string>",
             filePath: "",
             lineNumber: 8,
             hasDataSource: true,
@@ -206,8 +215,9 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
             createAttributes: __Attributes_0,
             attributeGroupIndex: 3),
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2136.Tests>(
-            methodName: "GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>",
-            fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>",
+            methodName: "GenericArgumentsTest<MyEnum>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<MyEnum>",
+            methodTypeArgumentsIdentity: "<global::TUnit.TestProject.Bugs._2136.MyEnum>",
             filePath: "",
             lineNumber: 8,
             hasDataSource: true,

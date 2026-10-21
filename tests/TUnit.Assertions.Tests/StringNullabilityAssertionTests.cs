@@ -83,6 +83,22 @@ public class StringNullabilityAssertionTests
     }
 
     [Test]
+    public async Task IsNullOrEmpty_Failure_Messages_Read_As_Sentences()
+    {
+        // [AssertionFrom] expectation messages omit the leading "to"; the generated assertion adds it.
+        var value = "Foo";
+        var emptyString = "";
+
+        await Assert.That(async () => await Assert.That(value).IsNullOrEmpty())
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to be null or empty");
+
+        await Assert.That(async () => await Assert.That(emptyString).IsNotNullOrEmpty())
+            .Throws<AssertionException>()
+            .WithMessageContaining("Expected to not be null or empty");
+    }
+
+    [Test]
     public async Task IsNotNullOrEmpty_WithNonEmptyString_Passes()
     {
         var value = "Hello";

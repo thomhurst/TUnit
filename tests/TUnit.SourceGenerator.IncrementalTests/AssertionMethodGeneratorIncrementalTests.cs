@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.SourceGenerator.Generators;
 
-namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
+namespace TUnit.SourceGenerator.IncrementalTests;
 
 public class AssertionMethodGeneratorIncrementalTests
 {
@@ -28,20 +28,20 @@ public class AssertionMethodGeneratorIncrementalTests
         }
         """;
 
-    [Fact]
-    public void GenericAndNonGenericAttributesAreDiscovered()
+    [Test]
+    public async Task GenericAndNonGenericAttributesAreDiscovered()
     {
         var compilation = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
 
         var driver = TestHelper.GenerateTracked<AssertionMethodGenerator>(compilation);
 
         var hintNames = driver.GetRunResult().Results[0].GeneratedSources.Select(x => x.HintName).ToArray();
-        Xunit.Assert.Contains("MyCharAssertionExtensions.g.cs", hintNames);
-        Xunit.Assert.Contains("MyStringAssertionExtensions.g.cs", hintNames);
+        await Assert.That(hintNames).Contains("MyCharAssertionExtensions.g.cs");
+        await Assert.That(hintNames).Contains("MyStringAssertionExtensions.g.cs");
     }
 
-    [Fact]
-    public void AddUnrelatedTypeShouldNotRegenerate()
+    [Test]
+    public async Task AddUnrelatedTypeShouldNotRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
         var driver1 = TestHelper.GenerateTracked<AssertionMethodGenerator>(compilation1);
@@ -49,11 +49,11 @@ public class AssertionMethodGeneratorIncrementalTests
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
 
-        AssertUnchanged(driver2.GetRunResult().Results[0]);
+        await AssertUnchanged(driver2.GetRunResult().Results[0]);
     }
 
-    [Fact]
-    public void EditUnrelatedTypeShouldNotRegenerate()
+    [Test]
+    public async Task EditUnrelatedTypeShouldNotRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
         var driver1 = TestHelper.GenerateTracked<AssertionMethodGenerator>(compilation1);
@@ -61,11 +61,52 @@ public class AssertionMethodGeneratorIncrementalTests
         var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "Method", "public void Method() { var x = 1; }");
         var driver2 = driver1.RunGenerators(compilation2);
 
-        AssertUnchanged(driver2.GetRunResult().Results[0]);
+        await AssertUnchanged(driver2.GetRunResult().Results[0]);
     }
 
-    [Fact]
-    public void ModifyGenericAttributeShouldRegenerate()
+    [Test]
+    public async Task EditAboveAttributesShouldNotRegenerate()
+    {
+        var tree = CSharpSyntaxTree.ParseText(DefaultSource);
+        var compilation1 = Fixture.CreateLibrary(tree);
+        var driver1 = TestHelper.GenerateTracked<AssertionMethodGenerator>(compilation1);
+
+        // Shifts every attribute's location without changing what it generates
+        var compilation2 = compilation1.ReplaceSyntaxTree(tree, CSharpSyntaxTree.ParseText("// A comment\n" + DefaultSource));
+        var driver2 = driver1.RunGenerators(compilation2);
+
+        await AssertUnchanged(driver2.GetRunResult().Results[0]);
+    }
+
+    [Test]
+    public async Task MissingMethodDiagnosticFollowsItsAttributeAfterAnEditAboveIt()
+    {
+        const string source =
+            """
+            using TUnit.Assertions.Attributes;
+
+            namespace MyTests;
+
+            [AssertionFrom(typeof(string), "DoesNotExist")]
+            public static partial class MissingAssertionExtensions
+            {
+            }
+            """;
+
+        var tree = CSharpSyntaxTree.ParseText(source);
+        var compilation1 = Fixture.CreateLibrary(tree);
+        var driver1 = TestHelper.GenerateTracked<AssertionMethodGenerator>(compilation1);
+
+        var tree2 = CSharpSyntaxTree.ParseText("// A comment\n" + source);
+        var driver2 = driver1.RunGenerators(compilation1.ReplaceSyntaxTree(tree, tree2));
+
+        var diagnostic = driver2.GetRunResult().Results[0].Diagnostics.Single(x => x.Id == "TU0001");
+        await Assert.That(diagnostic.Location.SourceTree).IsSameReferenceAs(tree2);
+        await Assert.That(diagnostic.Location.GetLineSpan().StartLinePosition.Line).IsEqualTo(5);
+    }
+
+    [Test]
+    public async Task ModifyGenericAttributeShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
         var driver1 = TestHelper.GenerateTracked<AssertionMethodGenerator>(compilation1);
@@ -80,14 +121,14 @@ public class AssertionMethodGeneratorIncrementalTests
         var driver2 = driver1.RunGenerators(compilation2);
 
         var runResult = driver2.GetRunResult().Results[0];
-        TestHelper.AssertAnyRunReason(runResult, AssertionMethodGenerator.GenericAssertionFromStep, IncrementalStepRunReason.Modified);
-        TestHelper.AssertAllRunReasons(runResult, AssertionMethodGenerator.NonGenericAssertionFromStep,
+        await TestHelper.AssertAnyRunReason(runResult, AssertionMethodGenerator.GenericAssertionFromStep, IncrementalStepRunReason.Modified);
+        await TestHelper.AssertAllRunReasons(runResult, AssertionMethodGenerator.NonGenericAssertionFromStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        Xunit.Assert.Contains("be a letter!", runResult.GeneratedSources.Single(x => x.HintName == "MyCharAssertionExtensions.g.cs").SourceText.ToString());
+        await Assert.That(runResult.GeneratedSources.Single(x => x.HintName == "MyCharAssertionExtensions.g.cs").SourceText.ToString()).Contains("be a letter!");
     }
 
-    [Fact]
-    public void ModifyNonGenericAttributeShouldRegenerate()
+    [Test]
+    public async Task ModifyNonGenericAttributeShouldRegenerate()
     {
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultSource));
         var driver1 = TestHelper.GenerateTracked<AssertionMethodGenerator>(compilation1);
@@ -102,18 +143,18 @@ public class AssertionMethodGeneratorIncrementalTests
         var driver2 = driver1.RunGenerators(compilation2);
 
         var runResult = driver2.GetRunResult().Results[0];
-        TestHelper.AssertAnyRunReason(runResult, AssertionMethodGenerator.NonGenericAssertionFromStep, IncrementalStepRunReason.Modified);
-        TestHelper.AssertAllRunReasons(runResult, AssertionMethodGenerator.GenericAssertionFromStep,
+        await TestHelper.AssertAnyRunReason(runResult, AssertionMethodGenerator.NonGenericAssertionFromStep, IncrementalStepRunReason.Modified);
+        await TestHelper.AssertAllRunReasons(runResult, AssertionMethodGenerator.GenericAssertionFromStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        Xunit.Assert.Contains("IsNullOrWhiteSpace", runResult.GeneratedSources.Single(x => x.HintName == "MyStringAssertionExtensions.g.cs").SourceText.ToString());
+        await Assert.That(runResult.GeneratedSources.Single(x => x.HintName == "MyStringAssertionExtensions.g.cs").SourceText.ToString()).Contains("IsNullOrWhiteSpace");
     }
 
-    private static void AssertUnchanged(GeneratorRunResult runResult)
+    private static async Task AssertUnchanged(GeneratorRunResult runResult)
     {
-        TestHelper.AssertAllRunReasons(runResult, AssertionMethodGenerator.GenericAssertionFromStep,
+        await TestHelper.AssertAllRunReasons(runResult, AssertionMethodGenerator.GenericAssertionFromStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertAllRunReasons(runResult, AssertionMethodGenerator.NonGenericAssertionFromStep,
+        await TestHelper.AssertAllRunReasons(runResult, AssertionMethodGenerator.NonGenericAssertionFromStep,
             IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged);
-        TestHelper.AssertSourceOutputsCached(runResult);
+        await TestHelper.AssertSourceOutputsCached(runResult);
     }
 }

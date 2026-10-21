@@ -27,6 +27,15 @@
     <data name="TUnit0001Title" xml:space="preserve">
         <value>Test argument types don't match method parameters</value>
     </data>
+    <data name="TUnit0001DeclaredTypeDescription" xml:space="preserve">
+        <value>In source-generated mode, which is the default and the only mode under Native AOT, a generic test method's type arguments are inferred from the declared type of its data source's values, not from the run-time type of each value, because the generic tests are created at compile time. A declared type such as object, an interface, a non-sealed class or a nullable value type can therefore fail a constraint that every run-time value meets. Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].</value>
+    </data>
+    <data name="TUnit0001DeclaredTypeMessageFormat" xml:space="preserve">
+        <value>Type argument '{0}' is inferred from the data source's declared type '{1}', which does not satisfy its constraints. Source-generated mode infers it from the declared type, not from the run-time type of the values. Declare the data source with a type that satisfies the constraints, or list the type argument with [GenerateGenericTest].</value>
+    </data>
+    <data name="TUnit0001DeclaredTypeTitle" xml:space="preserve">
+        <value>Generic type argument is inferred from the data source's declared type</value>
+    </data>
     <data name="TUnit0002Description" xml:space="preserve">
         <value>Test method requires data but none was provided. Add [Arguments] or data source attributes to provide test data.</value>
     </data>
@@ -533,5 +542,14 @@
     </data>
     <data name="TUnit0075Title" xml:space="preserve">
         <value>Use the hook cancellation token for setup</value>
+    </data>
+    <data name="TUnit0076Description" xml:space="preserve">
+        <value>The `Arguments` of a data source must select a single overload of the data source method. When they fit two or more overloads equally well, the overload to call is ambiguous, as a C# call with the same arguments would be (CS0121).</value>
+    </data>
+    <data name="TUnit0076MessageFormat" xml:space="preserve">
+        <value>The `Arguments` fit more than one overload of '{0}' equally well: {1}</value>
+    </data>
+    <data name="TUnit0076Title" xml:space="preserve">
+        <value>Data source Arguments fit more than one overload equally well</value>
     </data>
 </root>

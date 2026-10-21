@@ -91,7 +91,9 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
                 return
                 [
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+                    new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
+                    new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute()
                 ];
             }
             default:

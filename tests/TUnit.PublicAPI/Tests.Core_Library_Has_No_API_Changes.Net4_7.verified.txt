@@ -1,4 +1,4 @@
-﻿[assembly: .(@".Core, PublicKey=0024000004800000940000000602000000240000525341310004000001000100698a70398fa0b2230c5a72e3bd9d56b48f809f6173e49a19fbb942d621be93ad48c5566b47b28faabc359b9ad3ff4e00bbdea88f5bdfa250f391fedd28182b2e37b55d429c0151a42a98ea7a5821818cd15a79fef9903e8607a88304cf3e0317bf86ec96e32e1381535a6582251e5a6eed40b5a3ed82bc444598b1269cce57a7")]
+[assembly: .(@".Core, PublicKey=0024000004800000940000000602000000240000525341310004000001000100698a70398fa0b2230c5a72e3bd9d56b48f809f6173e49a19fbb942d621be93ad48c5566b47b28faabc359b9ad3ff4e00bbdea88f5bdfa250f391fedd28182b2e37b55d429c0151a42a98ea7a5821818cd15a79fef9903e8607a88304cf3e0317bf86ec96e32e1381535a6582251e5a6eed40b5a3ed82bc444598b1269cce57a7")]
 [assembly: .(@", PublicKey=0024000004800000940000000602000000240000525341310004000001000100698a70398fa0b2230c5a72e3bd9d56b48f809f6173e49a19fbb942d621be93ad48c5566b47b28faabc359b9ad3ff4e00bbdea88f5bdfa250f391fedd28182b2e37b55d429c0151a42a98ea7a5821818cd15a79fef9903e8607a88304cf3e0317bf86ec96e32e1381535a6582251e5a6eed40b5a3ed82bc444598b1269cce57a7")]
 [assembly: .(@".Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100698a70398fa0b2230c5a72e3bd9d56b48f809f6173e49a19fbb942d621be93ad48c5566b47b28faabc359b9ad3ff4e00bbdea88f5bdfa250f391fedd28182b2e37b55d429c0151a42a98ea7a5821818cd15a79fef9903e8607a88304cf3e0317bf86ec96e32e1381535a6582251e5a6eed40b5a3ed82bc444598b1269cce57a7")]
 [assembly: .(@", PublicKey=0024000004800000940000000602000000240000525341310004000001000100698a70398fa0b2230c5a72e3bd9d56b48f809f6173e49a19fbb942d621be93ad48c5566b47b28faabc359b9ad3ff4e00bbdea88f5bdfa250f391fedd28182b2e37b55d429c0151a42a98ea7a5821818cd15a79fef9903e8607a88304cf3e0317bf86ec96e32e1381535a6582251e5a6eed40b5a3ed82bc444598b1269cce57a7")]
@@ -85,7 +85,7 @@ namespace
         public string? Skip { get; set; }
         public bool SkipIfEmpty { get; set; }
         public object?[] Values { get; }
-        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__23))]
+        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__26))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
@@ -767,6 +767,26 @@ namespace
         public . ExecuteBeforeTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action) { }
         public . ExecuteTest(.TestContext context, <.> action) { }
     }
+    public class GenericConstraintViolationDataSource : , .IDataSourceAttribute
+    {
+        public bool DeferEnumeration { get; set; }
+        public .IDataSourceAttribute? InnerDataSource { get; }
+        public string Message { get; }
+        public bool SkipIfEmpty { get; set; }
+        [.(typeof(.GenericConstraintViolationDataSource.<GetDataRowsAsync>d__15))]
+        public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public static .GenericConstraintViolationDataSource Create(string message) { }
+        public static .GenericConstraintViolationDataSource Create(string message, .IDataSourceAttribute innerDataSource) { }
+    }
+    public sealed class GenericConstraintViolationEntry
+    {
+        public GenericConstraintViolationEntry() { }
+        public required string FilePath { get; init; }
+        public required int LineNumber { get; init; }
+        public required string[] Messages { get; init; }
+        public required .MethodMetadata MethodMetadata { get; init; }
+        public required string MethodName { get; init; }
+    }
     public sealed class GenericMethodInfo
     {
         public GenericMethodInfo() { }
@@ -1273,6 +1293,7 @@ namespace
         public static int RegisterDynamic(.IDynamicTestSource testSource) { }
         public static int RegisterEntries<T>(<.TestEntry<T>[]> factory)
             where T :  class { }
+        public static int RegisterGenericConstraintViolations( genericTypeDefinition, <.GenericConstraintViolationEntry[]> factory) { }
         public static void RegisterGlobalInitializer(<.> initializer) { }
         public static int RegisterHook<T>(.<.<T>> bag, int registrationIndex, <int, T> factory)
             where T : . { }
@@ -1530,7 +1551,8 @@ namespace
                     .TestDependency[]? dependencies = null,
                     .IDataSourceAttribute[]? testDataSources = null,
                     .IDataSourceAttribute[]? classDataSources = null,
-                    .InjectableProperty[]? injectableProperties = null)
+                    .InjectableProperty[]? injectableProperties = null,
+                    string? methodTypeArgumentsIdentity = null)
             where T :  class { }
         public static .TestEntry<T> CreateWithClassMetadata<T>(
                     string methodName,
@@ -1602,6 +1624,7 @@ namespace
         public required int MethodIndex { get; init; }
         public required .MethodMetadata MethodMetadata { get; init; }
         public required string MethodName { get; init; }
+        public string? MethodTypeArgumentsIdentity { get; init; }
         public string[] Properties { get; init; }
         public int RepeatCount { get; init; }
         public int StartColumnNumber { get; init; }
@@ -2249,12 +2272,16 @@ namespace .Helpers
         public static .<<.<object?[]?>>> FromInstanceAsyncEnumerable<T>(.DataGeneratorMetadata dataGeneratorMetadata, <object, .<T>> invoke) { }
         [.(typeof(..<FromInstanceEnumerable>d__6))]
         public static .<<.<object?[]?>>> FromInstanceEnumerable(.DataGeneratorMetadata dataGeneratorMetadata, <object, object?> invoke) { }
+        [.(typeof(..<FromInstanceRuntimeValue>d__11))]
+        public static .<<.<object?[]?>>> FromInstanceRuntimeValue(.DataGeneratorMetadata dataGeneratorMetadata, <object, object?> invoke) { }
         [.(typeof(..<FromInstanceTask>d__7<T>))]
         public static .<<.<object?[]?>>> FromInstanceTask<T>(.DataGeneratorMetadata dataGeneratorMetadata, <object, .<T>> invoke) { }
         [.(typeof(..<FromInstanceValue>d__5))]
         public static .<<.<object?[]?>>> FromInstanceValue(.DataGeneratorMetadata dataGeneratorMetadata, <object, object?> invoke) { }
         [.(typeof(..<FromInstanceValueTask>d__8<T>))]
         public static .<<.<object?[]?>>> FromInstanceValueTask<T>(.DataGeneratorMetadata dataGeneratorMetadata, <object, .<T>> invoke) { }
+        [.(typeof(..<FromRuntimeValue>d__10))]
+        public static .<<.<object?[]?>>> FromRuntimeValue(.DataGeneratorMetadata dataGeneratorMetadata, <object?> invoke) { }
         [.(typeof(..<FromTask>d__2<T>))]
         public static .<<.<object?[]?>>> FromTask<T>(<.<T>> invoke) { }
         [.(typeof(..<FromValue>d__0))]

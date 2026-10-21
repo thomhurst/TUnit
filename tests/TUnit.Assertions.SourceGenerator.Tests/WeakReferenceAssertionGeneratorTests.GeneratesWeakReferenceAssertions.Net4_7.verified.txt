@@ -43,7 +43,7 @@ public class WeakReferenceIsAliveAssertion : Assertion<System.WeakReference>
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} be alive";
+        return $"to {(_negated ? "not " : "")}be alive";
     }
 }
 
@@ -79,7 +79,7 @@ public class WeakReferenceTrackResurrectionAssertion : Assertion<System.WeakRefe
 
     protected override string GetExpectation()
     {
-        return $"{(_negated ? "not " : "")} track resurrection";
+        return $"to {(_negated ? "not " : "")}track resurrection";
     }
 }
 

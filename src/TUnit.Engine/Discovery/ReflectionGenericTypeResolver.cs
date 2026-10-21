@@ -186,4 +186,207 @@ internal static class ReflectionGenericTypeResolver
 
         return genericTypeDefinition.MakeGenericType(typeArguments);
     }
+
+    /// <summary>
+    /// Describes the first generic constraint of <paramref name="genericTypeDefinition"/> that
+    /// <paramref name="typeArguments"/> break, or returns <c>null</c> when they satisfy every constraint.
+    /// The wording matches <see cref="TUnit.Engine.Services.TestGenericTypeResolver"/> and the source
+    /// generator, so both modes report the same failure message.
+    /// </summary>
+    public static string? FindConstraintViolation(Type genericTypeDefinition, Type[] typeArguments)
+    {
+        var genericParameters = genericTypeDefinition.GetGenericArguments();
+        if (genericParameters.Length != typeArguments.Length)
+        {
+            return null;
+        }
+
+        var violation = DescribeConstraintViolation(genericParameters, typeArguments);
+        if (violation != null)
+        {
+            return violation;
+        }
+
+        try
+        {
+            _ = genericTypeDefinition.MakeGenericType(typeArguments);
+            return null;
+        }
+        catch (ArgumentException)
+        {
+            return $"Type arguments '{JoinTypeNames(typeArguments)}' do not satisfy the generic constraints of type '{genericTypeDefinition.Name}'";
+        }
+    }
+
+    /// <summary>
+    /// Describes the first generic constraint of <paramref name="genericMethodDefinition"/> that
+    /// <paramref name="typeArguments"/> break, or returns <c>null</c> when they satisfy every constraint.
+    /// </summary>
+    /// <remarks>
+    /// A method constraint may name a type parameter of the declaring class
+    /// (<c>where U : IEnumerable&lt;T&gt;</c>). Its constraints still name the open class parameter even when
+    /// the method comes from a constructed class, so the class's type arguments are substituted in first,
+    /// as the source generator does.
+    /// </remarks>
+    public static string? FindConstraintViolation(MethodInfo genericMethodDefinition, Type[] typeArguments)
+    {
+        var genericParameters = genericMethodDefinition.GetGenericArguments();
+        if (genericParameters.Length != typeArguments.Length)
+        {
+            return null;
+        }
+
+        var substitutionParameters = genericParameters;
+        var substitutionArguments = typeArguments;
+        if (genericMethodDefinition.DeclaringType is { IsConstructedGenericType: true } declaringType)
+        {
+            var classGenericParameters = declaringType.GetGenericTypeDefinition().GetGenericArguments();
+            var classTypeArguments = declaringType.GenericTypeArguments;
+            if (classGenericParameters.Length == classTypeArguments.Length)
+            {
+                substitutionParameters = classGenericParameters.Concat(genericParameters).ToArray();
+                substitutionArguments = classTypeArguments.Concat(typeArguments).ToArray();
+            }
+        }
+
+        var violation = DescribeConstraintViolation(genericParameters, typeArguments, substitutionParameters, substitutionArguments);
+        if (violation != null)
+        {
+            return violation;
+        }
+
+        try
+        {
+            _ = genericMethodDefinition.MakeGenericMethod(typeArguments);
+            return null;
+        }
+        catch (ArgumentException)
+        {
+            return $"Type arguments '{JoinTypeNames(typeArguments)}' do not satisfy the generic constraints of method '{genericMethodDefinition.Name}'";
+        }
+    }
+
+    private static string? DescribeConstraintViolation(Type[] genericParameters, Type[] typeArguments)
+        => DescribeConstraintViolation(genericParameters, typeArguments, genericParameters, typeArguments);
+
+    /// <param name="genericParameters">The generic parameters whose constraints are checked.</param>
+    /// <param name="typeArguments">The type arguments for <paramref name="genericParameters"/>.</param>
+    /// <param name="substitutionParameters">Every generic parameter a constraint may name (the
+    /// declaring class's as well as <paramref name="genericParameters"/>).</param>
+    /// <param name="substitutionArguments">The type arguments for <paramref name="substitutionParameters"/>.</param>
+    private static string? DescribeConstraintViolation(Type[] genericParameters, Type[] typeArguments, Type[] substitutionParameters, Type[] substitutionArguments)
+    {
+        for (var i = 0; i < genericParameters.Length; i++)
+        {
+            var genericParameter = genericParameters[i];
+            var typeArgument = typeArguments[i];
+            var attributes = genericParameter.GenericParameterAttributes;
+
+            // Nullable<T> is a value type but never satisfies 'struct'.
+            if ((attributes & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0
+                && (!typeArgument.IsValueType || Nullable.GetUnderlyingType(typeArgument) != null))
+            {
+                return $"Type '{typeArgument.Name}' does not satisfy the 'struct' constraint for generic parameter '{genericParameter.Name}'";
+            }
+
+            if ((attributes & GenericParameterAttributes.ReferenceTypeConstraint) != 0 && typeArgument.IsValueType)
+            {
+                return $"Type '{typeArgument.Name}' does not satisfy the 'class' constraint for generic parameter '{genericParameter.Name}'";
+            }
+
+            var constraints = genericParameter.GetGenericParameterConstraints();
+
+            // The base type constraint is checked before interface constraints, as in the engine. A
+            // constraint naming another generic parameter (`where T : U`) is checked against U's type
+            // argument, classified by what that argument is, as the source generator does.
+            foreach (var constraint in constraints)
+            {
+                if (constraint == typeof(ValueType))
+                {
+                    continue;
+                }
+
+                var substituted = SubstituteGenericParameters(constraint, substitutionParameters, substitutionArguments);
+                if (substituted != null && !substituted.IsInterface && !substituted.IsAssignableFrom(typeArgument))
+                {
+                    return $"Type '{typeArgument.Name}' does not satisfy the base type constraint '{substituted.Name}' for generic parameter '{genericParameter.Name}'";
+                }
+            }
+
+            foreach (var constraint in constraints)
+            {
+                var substituted = SubstituteGenericParameters(constraint, substitutionParameters, substitutionArguments);
+                if (substituted != null && substituted.IsInterface && !substituted.IsAssignableFrom(typeArgument))
+                {
+                    return $"Type '{typeArgument.Name}' does not implement interface '{substituted.Name}' required for generic parameter '{genericParameter.Name}'";
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Replaces the generic parameters in <paramref name="type"/> (for example, <c>IComparable&lt;T&gt;</c>)
+    /// with their type arguments. Returns <c>null</c> when the type cannot be constructed.
+    /// </summary>
+    private static Type? SubstituteGenericParameters(Type type, Type[] genericParameters, Type[] typeArguments)
+    {
+        if (!type.ContainsGenericParameters)
+        {
+            return type;
+        }
+
+        if (type.IsGenericParameter)
+        {
+            var index = Array.IndexOf(genericParameters, type);
+            return index >= 0 ? typeArguments[index] : null;
+        }
+
+        // An array of a generic parameter (the U[] in IEnumerable<U[]>): substitute the element type,
+        // as the source generator does, so the specific constraint message is reported.
+        if (type.IsArray)
+        {
+            var element = SubstituteGenericParameters(type.GetElementType()!, genericParameters, typeArguments);
+            if (element == null)
+            {
+                return null;
+            }
+
+#if NET
+            var isVector = type.IsSZArray;
+#else
+            var isVector = type.Name.EndsWith("[]", StringComparison.Ordinal);
+#endif
+            return isVector ? element.MakeArrayType() : element.MakeArrayType(type.GetArrayRank());
+        }
+
+        if (!type.IsGenericType)
+        {
+            return null;
+        }
+
+        var arguments = type.GetGenericArguments();
+        for (var i = 0; i < arguments.Length; i++)
+        {
+            var substituted = SubstituteGenericParameters(arguments[i], genericParameters, typeArguments);
+            if (substituted == null)
+            {
+                return null;
+            }
+
+            arguments[i] = substituted;
+        }
+
+        try
+        {
+            return type.GetGenericTypeDefinition().MakeGenericType(arguments);
+        }
+        catch (ArgumentException)
+        {
+            return null;
+        }
+    }
+
+    private static string JoinTypeNames(Type[] types) => string.Join(", ", types.Select(static t => t.Name));
 }

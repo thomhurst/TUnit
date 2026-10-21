@@ -10,18 +10,21 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
+[ModuleCategory(PipelineCategories.NuGetPackageTests)]
 [NotInParallel("NugetTester")]
 public class TestNugetPackageModule : AbstractTestNugetPackageModule
 {
     public override string ProjectName => "TUnit.NugetTester.csproj";
 }
 
+[ModuleCategory(PipelineCategories.NuGetPackageTests)]
 [NotInParallel("NugetTester")]
 public class TestFSharpNugetPackageModule : AbstractTestNugetPackageModule
 {
     public override string ProjectName => "TUnit.NugetTester.FSharp.fsproj";
 }
 
+[ModuleCategory(PipelineCategories.NuGetPackageTests)]
 [NotInParallel("NugetTester")]
 public class TestVBNugetPackageModule : AbstractTestNugetPackageModule
 {

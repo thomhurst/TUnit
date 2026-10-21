@@ -11,6 +11,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="..\SharedTestHelpers\DotNetCli.cs" Link="Shared\DotNetCli.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="CliWrap" />
         <PackageReference Include="MessagePack" />
         <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />

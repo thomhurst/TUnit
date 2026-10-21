@@ -50,7 +50,8 @@ internal sealed class TestGenericTypeResolver
                 metadata.MethodMetadata,
                 metadata.GenericMethodInfo,
                 testData.MethodData,
-                parameterTypes);
+                parameterTypes,
+                result.ResolvedClassGenericArguments);
         }
 
         return result;
@@ -119,7 +120,7 @@ internal sealed class TestGenericTypeResolver
         }
 
         // Validate against constraints from metadata
-        ValidateAgainstConstraints(genericTypeInfo.Constraints, resolvedTypes);
+        ValidateAgainstConstraints(genericTypeInfo.Constraints, resolvedTypes, classTypeArguments: resolvedTypes);
 
         return resolvedTypes;
     }
@@ -131,11 +132,16 @@ internal sealed class TestGenericTypeResolver
         MethodMetadata methodMetadata,
         GenericMethodInfo genericMethodInfo,
         object?[] methodArguments,
-        Type[] parameterTypes)
+        Type[] parameterTypes,
+        Type[] classTypeArguments)
     {
         // Handle the case where some parameter types are Object (placeholders for generic parameters)
         // This happens when data sources provide untyped data or when we have mixed generic/non-generic parameters
+        // When a parameter type contains a generic parameter, the types are the method's declared ones
+        // (reflection mode), so an object parameter is a real object parameter, not a placeholder for one:
+        // Run<T>(T value, object other) must infer T from its own argument, not from other's.
         var hasObjectParameter = false;
+        var hasGenericParameterType = false;
         if (methodArguments.Length > 0)
         {
             foreach (var parameterType in parameterTypes)
@@ -143,10 +149,16 @@ internal sealed class TestGenericTypeResolver
                 if (parameterType == typeof(object))
                 {
                     hasObjectParameter = true;
+                }
+                else if (parameterType.ContainsGenericParameters)
+                {
+                    hasGenericParameterType = true;
                     break;
                 }
             }
         }
+
+        hasObjectParameter &= !hasGenericParameterType;
         if (hasObjectParameter)
         {
             // Check if this is a simple generic method with one type parameter and mixed parameters
@@ -161,7 +173,7 @@ internal sealed class TestGenericTypeResolver
                         resolvedTypes[0] = methodArguments[i]!.GetType();
                         
                         // Validate against constraints from metadata
-                        ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes);
+                        ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes, classTypeArguments);
                         
                         return resolvedTypes;
                     }
@@ -199,7 +211,7 @@ internal sealed class TestGenericTypeResolver
                 }
                 
                 // Validate against constraints from metadata
-                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes);
+                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes, classTypeArguments);
                 
                 return resolvedTypes;
             }
@@ -365,7 +377,7 @@ internal sealed class TestGenericTypeResolver
                 }
                 
                 // Validate against constraints from metadata
-                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes);
+                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes, classTypeArguments);
                 
                 return resolvedTypes;
             }
@@ -386,7 +398,7 @@ internal sealed class TestGenericTypeResolver
                 }
                 
                 // Validate against constraints from metadata
-                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes);
+                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes, classTypeArguments);
                 
                 return resolvedTypes;
             }
@@ -395,11 +407,58 @@ internal sealed class TestGenericTypeResolver
         // Try the original approach for cases with typed parameters
         var typeMapping = new Dictionary<Type, Type>();
         
-        // Map parameter types to argument types
-        for (var i = 0; i < Math.Min(parameterTypes.Length, methodArguments.Length); i++)
+        // A trailing params T[] (or plain T[]) collects loose values, which do not match the array type itself.
+        // They are left out of inference: the reflection invoker re-infers type arguments from the
+        // declared parameter types, so inferring T from them here would not reach the invocation.
+        // T must come from another argument, or from a lone array value passed as the array.
+        // Row values bind to the data parameters only: the engine supplies a CancellationToken parameter
+        // wherever it is declared, so it takes no row value (as in source-gen mode). An array just before
+        // a trailing token (T[] values, CancellationToken token) is still the trailing array.
+        var dataParameterCount = 0;
+        var lastDataParameterIndex = -1;
+        for (var i = 0; i < parameterTypes.Length; i++)
         {
-            var paramType = parameterTypes[i];
+            if (parameterTypes[i] != typeof(CancellationToken))
+            {
+                dataParameterCount++;
+                lastDataParameterIndex = i;
+            }
+        }
+
+        var hasGenericParamsArray = HasGenericParamsArray(methodMetadata, parameterTypes, lastDataParameterIndex);
+
+        // Method type parameters that only received null values, if any
+        List<Type>? nullArgumentParameters = null;
+
+        // Map parameter types to argument types; parameterIndex skips CancellationToken parameters
+        var parameterIndex = 0;
+        for (var i = 0; i < Math.Min(dataParameterCount, methodArguments.Length); i++, parameterIndex++)
+        {
+            while (parameterTypes[parameterIndex] == typeof(CancellationToken))
+            {
+                parameterIndex++;
+            }
+
+            var paramType = parameterTypes[parameterIndex];
             var argValue = methodArguments[i];
+
+            if (hasGenericParamsArray && parameterIndex == lastDataParameterIndex)
+            {
+                // A lone array value may be the array itself (normal form) or one element of it
+                // (expanded form, e.g. T = int[] from a leading argument). Use it for inference only
+                // when the normal form agrees with what the other arguments inferred.
+                if (methodArguments.Length == dataParameterCount
+                    && argValue?.GetType() is { IsArray: true } lastArgType)
+                {
+                    var normalFormMapping = new Dictionary<Type, Type>(typeMapping);
+                    if (TryInferTypeMapping(paramType, lastArgType, normalFormMapping))
+                    {
+                        typeMapping = normalFormMapping;
+                    }
+                }
+
+                continue;
+            }
 
             if (argValue != null)
             {
@@ -416,8 +475,30 @@ internal sealed class TestGenericTypeResolver
                     InferTypeMapping(paramType, argType, typeMapping, genericMethodInfo.ParameterPositions);
                 }
             }
+            else if (paramType is { IsGenericParameter: true, DeclaringMethod: not null })
+            {
+                (nullArgumentParameters ??= []).Add(paramType);
+            }
         }
-        
+
+        // A null value passed straight to a method type parameter infers object, as in the source
+        // generator and the reflection invoker ([Arguments(null)] runs as Test<object>(null), #7120).
+        // A non-null value for the same type parameter takes precedence, as the invoker's does, unless it
+        // infers a value type, which cannot hold the null: [Arguments(1, null)] runs as Run<object>(1, null),
+        // not Run<int>(1, 0) (#7155). A Nullable<T> inferred from a nested type, such as List<int?>, holds the
+        // null, so it stays, as in the source generator.
+        if (nullArgumentParameters is not null)
+        {
+            foreach (var nullArgumentParameter in nullArgumentParameters)
+            {
+                if (!typeMapping.TryGetValue(nullArgumentParameter, out var inferredType)
+                    || CannotHoldNull(inferredType))
+                {
+                    typeMapping[nullArgumentParameter] = typeof(object);
+                }
+            }
+        }
+
         // Create resolved types array
         var resolvedTypesFromMapping = new Type[genericMethodInfo.ParameterNames.Length];
         for (var i = 0; i < genericMethodInfo.ParameterNames.Length; i++)
@@ -445,9 +526,37 @@ internal sealed class TestGenericTypeResolver
         }
         
         // Validate against constraints from metadata
-        ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypesFromMapping);
+        ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypesFromMapping, classTypeArguments);
         
         return resolvedTypesFromMapping;
+    }
+
+    /// <summary>
+    /// Whether the method's last data parameter collects trailing values and involves a generic
+    /// parameter: a <c>params T[]</c>, or a plain single-dimensional <c>T[]</c>, which the
+    /// reflection invoker also fills from loose values.
+    /// </summary>
+    /// <summary>
+    /// Whether a type inferred for a method type parameter cannot hold a null passed to the same type parameter:
+    /// a value type other than <see cref="Nullable{T}"/>. Such a type parameter infers object instead (#7155).
+    /// Shared by every reflection-mode inference path, so they cannot drift apart; the source generator applies
+    /// the same rule to symbols in TestMetadataGenerator.InferTypesFromArgumentsAttribute.
+    /// </summary>
+    internal static bool CannotHoldNull(Type inferredType)
+        => inferredType.IsValueType && Nullable.GetUnderlyingType(inferredType) is null;
+
+    private static bool HasGenericParamsArray(MethodMetadata methodMetadata, Type[] parameterTypes, int lastDataParameterIndex)
+    {
+        var parameters = methodMetadata.Parameters;
+        if (lastDataParameterIndex < 0 || parameters.Length != parameterTypes.Length)
+        {
+            return false;
+        }
+
+        var lastType = parameterTypes[lastDataParameterIndex];
+        return lastType.IsArray
+            && lastType.ContainsGenericParameters
+            && (parameters[lastDataParameterIndex].IsParams || lastType.GetArrayRank() == 1);
     }
 
     #if NET8_0_OR_GREATER
@@ -596,9 +705,16 @@ internal sealed class TestGenericTypeResolver
         return parameterType.IsAssignableFrom(argumentType);
     }
 
+    /// <param name="constraints">The constraints of the generic parameters that <paramref name="resolvedTypes"/> fill.</param>
+    /// <param name="resolvedTypes">The resolved type arguments, one per constraint.</param>
+    /// <param name="classTypeArguments">
+    /// The resolved type arguments of the test class, substituted for class type parameters that a constraint
+    /// mentions (e.g. <c>where TMethod : IComparable&lt;TClass&gt;</c>).
+    /// </param>
     private static void ValidateAgainstConstraints(
         GenericParameterConstraints[] constraints,
-        Type[] resolvedTypes)
+        Type[] resolvedTypes,
+        Type[] classTypeArguments)
     {
         for (var i = 0; i < Math.Min(constraints.Length, resolvedTypes.Length); i++)
         {
@@ -606,7 +722,8 @@ internal sealed class TestGenericTypeResolver
             var resolvedType = resolvedTypes[i];
 
             // Check value type constraint
-            if (constraint.HasValueTypeConstraint && !resolvedType.IsValueType)
+            // Nullable<T> is a value type but never satisfies 'struct'.
+            if (constraint.HasValueTypeConstraint && (!resolvedType.IsValueType || Nullable.GetUnderlyingType(resolvedType) != null))
             {
                 throw new GenericTypeResolutionException(
                     $"Type '{resolvedType.Name}' does not satisfy the 'struct' constraint for generic parameter '{constraint.ParameterName}'");
@@ -629,16 +746,20 @@ internal sealed class TestGenericTypeResolver
             }
 
             // Check base type constraint
-            if (constraint.BaseTypeConstraint != null &&
-                !constraint.BaseTypeConstraint.IsAssignableFrom(resolvedType))
+            if (constraint.BaseTypeConstraint != null)
             {
-                throw new GenericTypeResolutionException(
-                    $"Type '{resolvedType.Name}' does not satisfy the base type constraint '{constraint.BaseTypeConstraint.Name}' for generic parameter '{constraint.ParameterName}'");
+                var baseTypeConstraint = SubstituteGenericParameters(constraint.BaseTypeConstraint, classTypeArguments, resolvedTypes);
+                if (!baseTypeConstraint.IsAssignableFrom(resolvedType))
+                {
+                    throw new GenericTypeResolutionException(
+                        $"Type '{resolvedType.Name}' does not satisfy the base type constraint '{baseTypeConstraint.Name}' for generic parameter '{constraint.ParameterName}'");
+                }
             }
 
             // Check interface constraints
-            foreach (var interfaceConstraint in constraint.InterfaceConstraints)
+            foreach (var constraintType in constraint.InterfaceConstraints)
             {
+                var interfaceConstraint = SubstituteGenericParameters(constraintType, classTypeArguments, resolvedTypes);
                 if (!interfaceConstraint.IsAssignableFrom(resolvedType))
                 {
                     throw new GenericTypeResolutionException(
@@ -646,6 +767,62 @@ internal sealed class TestGenericTypeResolver
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Replaces the generic parameters in a constraint type (e.g. <c>IComparable&lt;T&gt;</c> or
+    /// <c>IEnumerable&lt;U[]&gt;</c>) with their resolved type arguments, so the constraint can be checked
+    /// with <see cref="Type.IsAssignableFrom"/>. Class type parameters come from <paramref name="classTypeArguments"/>
+    /// and method type parameters from <paramref name="methodTypeArguments"/>. A parameter with no resolved
+    /// argument leaves the constraint unchanged.
+    /// </summary>
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Only constraint types that mention generic parameters are rebuilt. Those come from open generic tests, which are resolved at runtime in reflection mode only; source-generated tests are already closed.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = "The generic definition and its arguments come from the constraint and the resolved test types, which are already in use.")]
+    private static Type SubstituteGenericParameters(Type type, Type[] classTypeArguments, Type[] methodTypeArguments)
+    {
+        if (!type.ContainsGenericParameters)
+        {
+            return type;
+        }
+
+        if (type.IsGenericParameter)
+        {
+            var typeArguments = type.DeclaringMethod != null ? methodTypeArguments : classTypeArguments;
+            var position = type.GenericParameterPosition;
+            return position < typeArguments.Length ? typeArguments[position] : type;
+        }
+
+        if (type.IsArray)
+        {
+            var elementType = type.GetElementType()!;
+            var substitutedElement = SubstituteGenericParameters(elementType, classTypeArguments, methodTypeArguments);
+            if (substitutedElement.ContainsGenericParameters)
+            {
+                return type;
+            }
+
+            // A single-dimensional zero-based array (T[]) differs from a rank-1 multi-dimensional one (T[*])
+            return type == elementType.MakeArrayType()
+                ? substitutedElement.MakeArrayType()
+                : substitutedElement.MakeArrayType(type.GetArrayRank());
+        }
+
+        if (type.IsGenericType)
+        {
+            var typeArguments = type.GetGenericArguments();
+            for (var i = 0; i < typeArguments.Length; i++)
+            {
+                typeArguments[i] = SubstituteGenericParameters(typeArguments[i], classTypeArguments, methodTypeArguments);
+                if (typeArguments[i].ContainsGenericParameters)
+                {
+                    return type;
+                }
+            }
+
+            return type.GetGenericTypeDefinition().MakeGenericType(typeArguments);
+        }
+
+        return type;
     }
 }
 

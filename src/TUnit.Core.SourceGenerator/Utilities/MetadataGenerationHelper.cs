@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Utilities;
 
@@ -331,13 +332,13 @@ internal static class MetadataGenerationHelper
                 // Use reflection to get the value at runtime
                 ? $"_ => typeof({namedTypeSymbol.GloballyQualified()}).GetProperty(\"{property.Name}\")?.GetValue(null)"
                 // Use dynamic to avoid invalid cast to open generic type
-                : $"o => ((dynamic)o).{property.Name}";
+                : $"o => ((dynamic)o).{IdentifierHelper.Escape(property.Name)}";
         }
 
         var safeTypeName = namedTypeSymbol.GloballyQualified();
         return property.IsStatic
-            ? $"_ => {safeTypeName}.{property.Name}"
-            : $"o => (({safeTypeName})o).{property.Name}";
+            ? $"_ => {safeTypeName}.{IdentifierHelper.Escape(property.Name)}"
+            : $"o => (({safeTypeName})o).{IdentifierHelper.Escape(property.Name)}";
     }
 
     /// <summary>

@@ -43,11 +43,13 @@ public static class TestEntryFactory
         TestDependency[]? dependencies = null,
         IDataSourceAttribute[]? testDataSources = null,
         IDataSourceAttribute[]? classDataSources = null,
-        InjectableProperty[]? injectableProperties = null) where T : class
+        InjectableProperty[]? injectableProperties = null,
+        string? methodTypeArgumentsIdentity = null) where T : class
     {
         return new TestEntry<T>
         {
             MethodName = methodName,
+            MethodTypeArgumentsIdentity = methodTypeArgumentsIdentity,
             FullyQualifiedName = fullyQualifiedName,
             FilePath = filePath,
             LineNumber = lineNumber,

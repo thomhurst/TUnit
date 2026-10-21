@@ -27,6 +27,7 @@ internal sealed class TestArgumentRegistrationService
         var testDetails = testContext.Metadata.TestDetails;
         if (testDetails.TestClassArguments.Length == 0 &&
             testDetails.TestMethodArguments.Length == 0 &&
+            testDetails.UnreceivedDataRowObjects.Length == 0 &&
             !PropertyInjectionCache.GetOrCreatePlan(testDetails.ClassType).HasProperties)
         {
             // Nothing to register, so no user code runs here — skip the AsyncLocal write.
@@ -36,6 +37,31 @@ internal sealed class TestArgumentRegistrationService
         TestContext.Current = testContext;
 
         return RegisterTestArgumentsCoreAsync(testContext, testDetails, cancellationToken);
+    }
+
+    /// <summary>
+    /// Called instead of <see cref="RegisterTestArgumentsAsync"/> for a test that is skipped before it
+    /// executes. Tracks the argument objects the builder already created so they are disposed through
+    /// reference counting when the skipped test completes, without injecting properties or creating
+    /// shared fixtures for a test that never runs.
+    /// </summary>
+    public void TrackSkippedTestArguments(TestContext testContext)
+    {
+        var testDetails = testContext.Metadata.TestDetails;
+        if (testDetails.TestClassArguments.Length == 0 &&
+            testDetails.TestMethodArguments.Length == 0 &&
+            testDetails.TestClassInjectedPropertyArguments.Count == 0 &&
+            testDetails.UnreceivedDataRowObjects.Length == 0)
+        {
+            // Nothing to track, so no user code runs here — skip the AsyncLocal write.
+            return;
+        }
+
+        // Tracking reads property getters (user code), so they see this test as the current one,
+        // as they do during RegisterTestArgumentsAsync.
+        TestContext.Current = testContext;
+
+        _objectLifecycleService.TrackTestObjects(testContext);
     }
 
     private static bool HasInjectableArgument(object?[] arguments)

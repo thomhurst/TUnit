@@ -31,6 +31,15 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     public required object ClassInstance { get; set; }
     public required object?[] TestMethodArguments { get; set; }
     public required object?[] TestClassArguments { get; set; }
+
+    /// <summary>
+    /// Objects that data sources produced for this test's row but that the test never receives: the row
+    /// of a test that failed while it was being built, for example one whose inferred generic type
+    /// arguments break a constraint (#7123), or a class row that only the temporary instance for an
+    /// instance method data source used (#7157). They are tracked like the test's arguments, so they are
+    /// disposed when the test completes unless another test still references a shared instance.
+    /// </summary>
+    internal object?[] UnreceivedDataRowObjects { get; init; } = [];
     public TimeSpan? Timeout { get; set; }
     public int RetryLimit { get; set; }
 

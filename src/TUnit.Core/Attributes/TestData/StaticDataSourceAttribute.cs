@@ -14,6 +14,13 @@ internal sealed class StaticDataSourceAttribute : Attribute, IDataSourceAttribut
     /// <inheritdoc />
     public bool DeferEnumeration { get; set; }
 
+    /// <summary>
+    /// The data source whose rows this instance holds a subset of, when the engine splits a source's
+    /// rows across generic instantiations. The test keeps that source's attribute behaviour, such as
+    /// its <see cref="Interfaces.ITestRegisteredEventReceiver"/> callback.
+    /// </summary>
+    public IDataSourceAttribute? PartitionOf { get; init; }
+
     public StaticDataSourceAttribute(params object?[][] data)
     {
         _data = data ?? throw new ArgumentNullException(nameof(data));

@@ -20,8 +20,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7.0.1
-        with:
-          fetch-depth: 0
 
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v6.0.0

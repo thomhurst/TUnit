@@ -122,6 +122,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", ne
         return new global::System.Attribute[]
         {
             new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MatrixDataSourceAttribute(),
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
             new global::TUnit.Core.InheritsTestsAttribute()
         };
@@ -208,6 +209,8 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", ne
         return new global::System.Attribute[]
         {
             new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(false),
+            new global::TUnit.Core.ArgumentsAttribute(true),
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
             new global::TUnit.Core.InheritsTestsAttribute()
         };

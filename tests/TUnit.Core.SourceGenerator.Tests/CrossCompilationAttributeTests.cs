@@ -72,8 +72,9 @@ public class CrossCompilationAttributeTests
     [Test]
     public async Task AttributeWriter_FallsBackToTypedConstants_ForAttributesFromReferencedCompilation()
     {
-        var baseCompilation = CreateCompilation("CrossCompilationBase", BaseSource);
-        var derivedCompilation = CreateCompilation("CrossCompilationDerived", DerivedSource, baseCompilation.ToMetadataReference());
+        var references = CreateIsolatedReferences();
+        var baseCompilation = CreateCompilation("CrossCompilationBase", BaseSource, references);
+        var derivedCompilation = CreateCompilation("CrossCompilationDerived", DerivedSource, references, baseCompilation.ToMetadataReference());
 
         var derivedType = derivedCompilation.GetTypeByMetadataName("DerivedTests")!;
         var baseAttributes = derivedType.BaseType!.GetAttributes();
@@ -99,10 +100,12 @@ public class CrossCompilationAttributeTests
     [Test]
     public async Task TestMetadataGenerator_DoesNotThrow_ForAttributesFromReferencedCompilation()
     {
-        var baseCompilation = CreateCompilation("CrossCompilationBase", BaseSource);
+        var references = CreateIsolatedReferences();
+        var baseCompilation = CreateCompilation("CrossCompilationBase", BaseSource, references);
         var derivedCompilation = CreateCompilation(
             "CrossCompilationDerived",
             DerivedSource,
+            references,
             baseCompilation.ToMetadataReference())
             .AddSyntaxTrees(
                 Parse(
@@ -170,16 +173,28 @@ public class CrossCompilationAttributeTests
         await Assert.That(compilationErrors).IsEmpty();
     }
 
-    private static CSharpCompilation CreateCompilation(string assemblyName, string source, params MetadataReference[] additionalReferences)
+    private static CSharpCompilation CreateCompilation(string assemblyName, string source, MetadataReference[] references, params MetadataReference[] additionalReferences)
     {
         return CSharpCompilation.Create(
             assemblyName,
             [Parse(source)],
-            [..ReferencesHelper.References, ..additionalReferences],
+            [..references, ..additionalReferences],
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
     }
 
     private static readonly CSharpParseOptions ParseOptions = new(LanguageVersion.Preview);
+
+    // Roslyn caches assembly symbols on each reference's metadata. When the shared
+    // ReferencesHelper.References are also bound by tests running in parallel, the derived
+    // compilation can pick different cached symbols than the base compilation did. It then sees
+    // the base project through retargeting symbols, whose attributes have no syntax reference, and
+    // the IDE-shape precondition fails. Fresh references per test avoid that race.
+    private static MetadataReference[] CreateIsolatedReferences()
+    {
+        return ReferencesHelper.References
+            .Select(reference => (MetadataReference) MetadataReference.CreateFromFile(reference.FilePath!))
+            .ToArray();
+    }
 
     private static SyntaxTree Parse(string source)
     {

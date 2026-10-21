@@ -182,20 +182,65 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         var testDetails = testContext.Metadata.TestDetails;
         if (testDetails.TestClassArguments.Length == 0
             && testDetails.TestMethodArguments.Length == 0
-            && testDetails.TestClassInjectedPropertyArguments.Count == 0)
+            && testDetails.TestClassInjectedPropertyArguments.Count == 0
+            && testDetails.UnreceivedDataRowObjects.Length == 0)
         {
             // No root objects, so nothing to discover — skip the traversal closures.
             return visitedObjects;
         }
 
+        TryAddObjectFunc tryAdd = (obj, depth) => TryAddToHashSet(visitedObjects, depth, obj);
+        RootObjectCallback onRootObjectAdded = obj => DiscoverNestedObjectsForTracking(obj, visitedObjects, 1, cancellationToken);
+
         // Collect root-level objects and discover nested objects for tracking
-        CollectRootObjects(
-            testContext.Metadata.TestDetails,
-            (obj, depth) => TryAddToHashSet(visitedObjects, depth, obj),
-            obj => DiscoverNestedObjectsForTracking(obj, visitedObjects, 1, cancellationToken),
-            cancellationToken);
+        CollectRootObjects(testDetails, tryAdd, onRootObjectAdded, cancellationToken);
+
+        // Row objects that the test never receives (a failed test's row, or a class row that only a
+        // temporary instance used) are tracked here only, never initialized: tracking them gives them
+        // the same reference-counted disposal as arguments, so they are disposed when the test completes
+        // unless another test still holds a shared instance (#7123, #7157).
+        if (testDetails.UnreceivedDataRowObjects.Length > 0)
+        {
+            TrackUnreceivedDataRowObjects(testContext, visitedObjects, tryAdd, onRootObjectAdded, cancellationToken);
+        }
 
         return visitedObjects;
+    }
+
+    private static void TrackUnreceivedDataRowObjects(
+        TestContext testContext,
+        SortedList<int, HashSet<object>> visitedObjects,
+        TryAddObjectFunc tryAdd,
+        RootObjectCallback onRootObjectAdded,
+        CancellationToken cancellationToken)
+    {
+        // Objects the test receives were added above. Anything this step adds is reachable only from the
+        // unreceived rows, so execution must not initialize it: it may already be disposed, for example
+        // by the temporary instance that used it (#7157).
+        var receivedObjects = new HashSet<object>(ReferenceComparer);
+        foreach (var bucket in visitedObjects.Values)
+        {
+            receivedObjects.UnionWith(bucket);
+        }
+
+        ProcessRootCollection(testContext.Metadata.TestDetails.UnreceivedDataRowObjects, tryAdd, onRootObjectAdded, cancellationToken);
+
+        HashSet<object>? disposalOnly = null;
+        foreach (var bucket in visitedObjects.Values)
+        {
+            foreach (var obj in bucket)
+            {
+                if (!receivedObjects.Contains(obj))
+                {
+                    (disposalOnly ??= new HashSet<object>(ReferenceComparer)).Add(obj);
+                }
+            }
+        }
+
+        if (disposalOnly is not null)
+        {
+            testContext.DisposalOnlyTrackedObjects = disposalOnly;
+        }
     }
 
     /// <summary>

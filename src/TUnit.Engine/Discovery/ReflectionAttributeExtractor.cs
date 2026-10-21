@@ -254,32 +254,9 @@ internal static class ReflectionAttributeExtractor
 
             // Add in reverse order of precedence so method attributes come first
             // This ensures ScopedAttributeFilter will keep method-level attributes over class/assembly
-            // Method-level data source attributes are left out, matching the source generator. The
-            // data source that produced each test case is appended per test by the TestBuilder, so
-            // per-row settings such as [Arguments(Skip = "...")] only apply to their own row.
-            foreach (var attribute in key.Item2.GetCustomAttributes())
-            {
-                if (attribute is not IDataSourceAttribute)
-                {
-                    attributes.Add(attribute);
-                }
-            }
-
-            foreach (var attribute in key.Item1.GetCustomAttributes())
-            {
-                if (attribute is not IDataSourceAttribute)
-                {
-                    attributes.Add(attribute);
-                }
-            }
-
-            foreach (var attribute in key.Item1.Assembly.GetCustomAttributes())
-            {
-                if (attribute is not IDataSourceAttribute)
-                {
-                    attributes.Add(attribute);
-                }
-            }
+            attributes.AddRange(key.Item2.GetCustomAttributes());
+            attributes.AddRange(key.Item1.GetCustomAttributes());
+            attributes.AddRange(key.Item1.Assembly.GetCustomAttributes());
 
             return attributes.ToArray();
         });

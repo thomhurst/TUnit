@@ -11,10 +11,21 @@ namespace TUnit.Pipeline.Modules.Abstract;
 
 public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 {
-    protected virtual IEnumerable<string> TestableFrameworks
-    {
-        get { yield return "net10.0"; }
-    }
+    /// <summary>Every modern TFM the repo targets.</summary>
+    protected static IReadOnlyList<string> ModernFrameworks { get; } = ["net10.0", "net9.0", "net8.0"];
+
+    /// <summary>
+    /// <see cref="ModernFrameworks"/>, plus net472 on Windows, the only OS that can run .NET Framework tests.
+    /// </summary>
+    protected static IReadOnlyList<string> ModernAndNetFrameworks { get; } =
+        IsWindows ? [.. ModernFrameworks, "net472"] : ModernFrameworks;
+
+    /// <summary>
+    /// Frameworks to run. Defaults to <see cref="ModernFrameworks"/>; frameworks the project did not
+    /// build are skipped (see <see cref="HasFrameworkOutput"/>), so net10.0-only projects run once.
+    /// Override with <see cref="ModernAndNetFrameworks"/> to add net472 on Windows, or to deliberately narrow the set.
+    /// </summary>
+    protected virtual IEnumerable<string> TestableFrameworks => ModernFrameworks;
 
     /// <summary>True on Windows, where legacy .NET Framework TFMs (net4xx) can be tested.</summary>
     protected static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
@@ -30,8 +41,10 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
             // Test projects no longer multi-target every TFM by default (see TestProject.props).
             // Skip frameworks that this project did not actually build to avoid spurious
             // "process cannot find the file" errors for missing per-TFM output binaries.
+            // Only --no-build runs depend on prebuilt output: the NuGet tester modules let
+            // `dotnet run` build against the packed packages, so probing them would skip them all.
             var configuration = testOptions.Configuration ?? "Release";
-            if (!HasFrameworkOutput(context.Logger, executionOptions, framework, configuration))
+            if (testOptions.NoBuild == true && !HasFrameworkOutput(context.Logger, executionOptions, framework, configuration))
             {
                 context.Logger.LogInformation("Skipping {Framework}: no build output found for this test project.", framework);
                 continue;

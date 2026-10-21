@@ -11,7 +11,11 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
-[DependsOn<TestNugetPackageModule>]
+// Runs in aot.yml with the Packaging modules, so its native AOT publishes don't compete with the
+// test matrix for CPUs. The test module shares the NugetTester project's bin and obj folders, so a
+// local run that registers both still runs them in turn; aot.yml doesn't register it.
+[ModuleCategory(PipelineCategories.Aot)]
+[DependsOn<TestNugetPackageModule>(Optional = true)]
 [DependsOn<GenerateVersionModule>]
 [DependsOn<CopyToLocalNuGetModule>]
 public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>

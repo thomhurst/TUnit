@@ -249,6 +249,7 @@ const sidebars: SidebarsConfig = {
         'reference/environment-variables',
         'reference/test-configuration',
         'reference/tunit0075',
+        'reference/tunit0076',
         {
           type: 'doc',
           id: 'guides/best-practices',

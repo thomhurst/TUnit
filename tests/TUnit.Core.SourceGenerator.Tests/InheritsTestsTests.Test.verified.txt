@@ -182,6 +182,9 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         return new global::System.Attribute[]
         {
             new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(1),
+            new global::TUnit.Core.ArgumentsAttribute(2),
+            new global::TUnit.Core.ArgumentsAttribute(3),
             new global::TUnit.Core.RepeatAttribute(10),
             new global::TUnit.Core.InheritsTestsAttribute(),
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -274,6 +277,9 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         return new global::System.Attribute[]
         {
             new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(1),
+            new global::TUnit.Core.ArgumentsAttribute(2),
+            new global::TUnit.Core.ArgumentsAttribute(3),
             new global::TUnit.Core.RepeatAttribute(10),
             new global::TUnit.Core.InheritsTestsAttribute(),
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -366,6 +372,9 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         return new global::System.Attribute[]
         {
             new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(1),
+            new global::TUnit.Core.ArgumentsAttribute(2),
+            new global::TUnit.Core.ArgumentsAttribute(3),
             new global::TUnit.Core.RepeatAttribute(10),
             new global::TUnit.Core.InheritsTestsAttribute(),
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)

@@ -14,16 +14,16 @@ namespace TUnit.Assertions.Extensions;
 /// <summary>
 /// Generated assertion for IsSuccess
 /// </summary>
-public sealed class HttpStatusCode_IsSuccess_Assertion : Assertion<HttpStatusCode>
+public sealed class HttpStatusCode_IsSuccess_Assertion : Assertion<System.Net.HttpStatusCode>
 {
     private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
 
-    public HttpStatusCode_IsSuccess_Assertion(AssertionContext<HttpStatusCode> context)
+    public HttpStatusCode_IsSuccess_Assertion(AssertionContext<System.Net.HttpStatusCode> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Net.HttpStatusCode> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -33,12 +33,7 @@ public sealed class HttpStatusCode_IsSuccess_Assertion : Assertion<HttpStatusCod
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = (int)value! is >= 200 and < 300;
+        var result = (int)value is >= 200 and < 300;
         return result
             ? _passedTask
             : Task.FromResult(AssertionResult.Failed($"found {value}"));
@@ -53,16 +48,16 @@ public sealed class HttpStatusCode_IsSuccess_Assertion : Assertion<HttpStatusCod
 /// <summary>
 /// Generated assertion for IsNotSuccess
 /// </summary>
-public sealed class HttpStatusCode_IsNotSuccess_Assertion : Assertion<HttpStatusCode>
+public sealed class HttpStatusCode_IsNotSuccess_Assertion : Assertion<System.Net.HttpStatusCode>
 {
     private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
 
-    public HttpStatusCode_IsNotSuccess_Assertion(AssertionContext<HttpStatusCode> context)
+    public HttpStatusCode_IsNotSuccess_Assertion(AssertionContext<System.Net.HttpStatusCode> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Net.HttpStatusCode> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -72,12 +67,7 @@ public sealed class HttpStatusCode_IsNotSuccess_Assertion : Assertion<HttpStatus
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = (int)value! is < 200 or >= 300;
+        var result = (int)value is < 200 or >= 300;
         return result
             ? _passedTask
             : Task.FromResult(AssertionResult.Failed($"found {value}"));
@@ -92,16 +82,16 @@ public sealed class HttpStatusCode_IsNotSuccess_Assertion : Assertion<HttpStatus
 /// <summary>
 /// Generated assertion for IsClientError
 /// </summary>
-public sealed class HttpStatusCode_IsClientError_Assertion : Assertion<HttpStatusCode>
+public sealed class HttpStatusCode_IsClientError_Assertion : Assertion<System.Net.HttpStatusCode>
 {
     private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
 
-    public HttpStatusCode_IsClientError_Assertion(AssertionContext<HttpStatusCode> context)
+    public HttpStatusCode_IsClientError_Assertion(AssertionContext<System.Net.HttpStatusCode> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Net.HttpStatusCode> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -111,12 +101,7 @@ public sealed class HttpStatusCode_IsClientError_Assertion : Assertion<HttpStatu
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = (int)value! is >= 400 and < 500;
+        var result = (int)value is >= 400 and < 500;
         return result
             ? _passedTask
             : Task.FromResult(AssertionResult.Failed($"found {value}"));
@@ -131,16 +116,16 @@ public sealed class HttpStatusCode_IsClientError_Assertion : Assertion<HttpStatu
 /// <summary>
 /// Generated assertion for IsServerError
 /// </summary>
-public sealed class HttpStatusCode_IsServerError_Assertion : Assertion<HttpStatusCode>
+public sealed class HttpStatusCode_IsServerError_Assertion : Assertion<System.Net.HttpStatusCode>
 {
     private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
 
-    public HttpStatusCode_IsServerError_Assertion(AssertionContext<HttpStatusCode> context)
+    public HttpStatusCode_IsServerError_Assertion(AssertionContext<System.Net.HttpStatusCode> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Net.HttpStatusCode> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -150,12 +135,7 @@ public sealed class HttpStatusCode_IsServerError_Assertion : Assertion<HttpStatu
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = (int)value! is >= 500 and < 600;
+        var result = (int)value is >= 500 and < 600;
         return result
             ? _passedTask
             : Task.FromResult(AssertionResult.Failed($"found {value}"));
@@ -170,16 +150,16 @@ public sealed class HttpStatusCode_IsServerError_Assertion : Assertion<HttpStatu
 /// <summary>
 /// Generated assertion for IsRedirection
 /// </summary>
-public sealed class HttpStatusCode_IsRedirection_Assertion : Assertion<HttpStatusCode>
+public sealed class HttpStatusCode_IsRedirection_Assertion : Assertion<System.Net.HttpStatusCode>
 {
     private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
 
-    public HttpStatusCode_IsRedirection_Assertion(AssertionContext<HttpStatusCode> context)
+    public HttpStatusCode_IsRedirection_Assertion(AssertionContext<System.Net.HttpStatusCode> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Net.HttpStatusCode> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -189,12 +169,7 @@ public sealed class HttpStatusCode_IsRedirection_Assertion : Assertion<HttpStatu
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = (int)value! is >= 300 and < 400;
+        var result = (int)value is >= 300 and < 400;
         return result
             ? _passedTask
             : Task.FromResult(AssertionResult.Failed($"found {value}"));
@@ -209,16 +184,16 @@ public sealed class HttpStatusCode_IsRedirection_Assertion : Assertion<HttpStatu
 /// <summary>
 /// Generated assertion for IsInformational
 /// </summary>
-public sealed class HttpStatusCode_IsInformational_Assertion : Assertion<HttpStatusCode>
+public sealed class HttpStatusCode_IsInformational_Assertion : Assertion<System.Net.HttpStatusCode>
 {
     private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
 
-    public HttpStatusCode_IsInformational_Assertion(AssertionContext<HttpStatusCode> context)
+    public HttpStatusCode_IsInformational_Assertion(AssertionContext<System.Net.HttpStatusCode> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Net.HttpStatusCode> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -228,12 +203,7 @@ public sealed class HttpStatusCode_IsInformational_Assertion : Assertion<HttpSta
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = (int)value! is >= 100 and < 200;
+        var result = (int)value is >= 100 and < 200;
         return result
             ? _passedTask
             : Task.FromResult(AssertionResult.Failed($"found {value}"));
@@ -248,16 +218,16 @@ public sealed class HttpStatusCode_IsInformational_Assertion : Assertion<HttpSta
 /// <summary>
 /// Generated assertion for IsError
 /// </summary>
-public sealed class HttpStatusCode_IsError_Assertion : Assertion<HttpStatusCode>
+public sealed class HttpStatusCode_IsError_Assertion : Assertion<System.Net.HttpStatusCode>
 {
     private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
 
-    public HttpStatusCode_IsError_Assertion(AssertionContext<HttpStatusCode> context)
+    public HttpStatusCode_IsError_Assertion(AssertionContext<System.Net.HttpStatusCode> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Net.HttpStatusCode> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -267,12 +237,7 @@ public sealed class HttpStatusCode_IsError_Assertion : Assertion<HttpStatusCode>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = (int)value! is >= 400 and < 600;
+        var result = (int)value is >= 400 and < 600;
         return result
             ? _passedTask
             : Task.FromResult(AssertionResult.Failed($"found {value}"));
@@ -289,7 +254,7 @@ public static partial class HttpStatusCodeAssertionExtensions
     /// <summary>
     /// Generated extension method for IsSuccess
     /// </summary>
-    public static HttpStatusCode_IsSuccess_Assertion IsSuccess(this IAssertionSource<HttpStatusCode> source)
+    public static HttpStatusCode_IsSuccess_Assertion IsSuccess(this IAssertionSource<System.Net.HttpStatusCode> source)
     {
         source.Context.ExpressionBuilder.Append(".IsSuccess()");
         return new HttpStatusCode_IsSuccess_Assertion(source.Context);
@@ -298,7 +263,7 @@ public static partial class HttpStatusCodeAssertionExtensions
     /// <summary>
     /// Generated extension method for IsNotSuccess
     /// </summary>
-    public static HttpStatusCode_IsNotSuccess_Assertion IsNotSuccess(this IAssertionSource<HttpStatusCode> source)
+    public static HttpStatusCode_IsNotSuccess_Assertion IsNotSuccess(this IAssertionSource<System.Net.HttpStatusCode> source)
     {
         source.Context.ExpressionBuilder.Append(".IsNotSuccess()");
         return new HttpStatusCode_IsNotSuccess_Assertion(source.Context);
@@ -307,7 +272,7 @@ public static partial class HttpStatusCodeAssertionExtensions
     /// <summary>
     /// Generated extension method for IsClientError
     /// </summary>
-    public static HttpStatusCode_IsClientError_Assertion IsClientError(this IAssertionSource<HttpStatusCode> source)
+    public static HttpStatusCode_IsClientError_Assertion IsClientError(this IAssertionSource<System.Net.HttpStatusCode> source)
     {
         source.Context.ExpressionBuilder.Append(".IsClientError()");
         return new HttpStatusCode_IsClientError_Assertion(source.Context);
@@ -316,7 +281,7 @@ public static partial class HttpStatusCodeAssertionExtensions
     /// <summary>
     /// Generated extension method for IsServerError
     /// </summary>
-    public static HttpStatusCode_IsServerError_Assertion IsServerError(this IAssertionSource<HttpStatusCode> source)
+    public static HttpStatusCode_IsServerError_Assertion IsServerError(this IAssertionSource<System.Net.HttpStatusCode> source)
     {
         source.Context.ExpressionBuilder.Append(".IsServerError()");
         return new HttpStatusCode_IsServerError_Assertion(source.Context);
@@ -325,7 +290,7 @@ public static partial class HttpStatusCodeAssertionExtensions
     /// <summary>
     /// Generated extension method for IsRedirection
     /// </summary>
-    public static HttpStatusCode_IsRedirection_Assertion IsRedirection(this IAssertionSource<HttpStatusCode> source)
+    public static HttpStatusCode_IsRedirection_Assertion IsRedirection(this IAssertionSource<System.Net.HttpStatusCode> source)
     {
         source.Context.ExpressionBuilder.Append(".IsRedirection()");
         return new HttpStatusCode_IsRedirection_Assertion(source.Context);
@@ -334,7 +299,7 @@ public static partial class HttpStatusCodeAssertionExtensions
     /// <summary>
     /// Generated extension method for IsInformational
     /// </summary>
-    public static HttpStatusCode_IsInformational_Assertion IsInformational(this IAssertionSource<HttpStatusCode> source)
+    public static HttpStatusCode_IsInformational_Assertion IsInformational(this IAssertionSource<System.Net.HttpStatusCode> source)
     {
         source.Context.ExpressionBuilder.Append(".IsInformational()");
         return new HttpStatusCode_IsInformational_Assertion(source.Context);
@@ -343,7 +308,7 @@ public static partial class HttpStatusCodeAssertionExtensions
     /// <summary>
     /// Generated extension method for IsError
     /// </summary>
-    public static HttpStatusCode_IsError_Assertion IsError(this IAssertionSource<HttpStatusCode> source)
+    public static HttpStatusCode_IsError_Assertion IsError(this IAssertionSource<System.Net.HttpStatusCode> source)
     {
         source.Context.ExpressionBuilder.Append(".IsError()");
         return new HttpStatusCode_IsError_Assertion(source.Context);

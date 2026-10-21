@@ -11,14 +11,21 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
     private readonly TUnitFrameworkLogger _logger;
     private readonly HashSetPool _hashSetPool;
 
+    // Constraint keys only exclude tests that share a key, so without this cap distinct
+    // keys would all run at once (#7074). The limiter is the session-wide budget that the
+    // unconstrained phase also draws from, because both phases run concurrently.
+    private readonly MaxParallelismLimiter _maxParallelismLimiter;
+
     public ConstraintKeyScheduler(
         TestRunner testRunner,
         TUnitFrameworkLogger logger,
-        HashSetPool hashSetPool)
+        HashSetPool hashSetPool,
+        MaxParallelismLimiter maxParallelismLimiter)
     {
         _testRunner = testRunner;
         _logger = logger;
         _hashSetPool = hashSetPool;
+        _maxParallelismLimiter = maxParallelismLimiter;
     }
 
     #if NET8_0_OR_GREATER
@@ -59,7 +66,10 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         // Process each test
         foreach (var (test, constraintKeys, priority) in sortedTests)
         {
-            var startSignal = new TaskCompletionSource<bool>();
+            // Run continuations asynchronously: a releasing test signals waiters from its
+            // finally block, and an inline continuation would run the next (possibly
+            // synchronous) test on that thread before the remaining waiters are signalled.
+            var startSignal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             bool canStart;
             lock (lockObject)
@@ -104,7 +114,13 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                     await _logger.LogTraceAsync($"Starting test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
                 startSignal.SetResult(true);
 
-                var testTask = ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTestIndex, cancellationToken);
+                // Dispatch to the thread pool: invoking directly would run a synchronous
+                // test body on this loop's thread, serializing every test with distinct keys.
+                // Pass CancellationToken.None so the delegate always runs: the keys are already
+                // taken, and only its finally block releases them and signals waiting tests.
+                var testTask = Task.Run(
+                    () => ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTestIndex, cancellationToken),
+                    CancellationToken.None);
                 test.ExecutionTask = testTask;
                 activeTasks.Add(testTask);
             }
@@ -136,8 +152,15 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         WaitingTestIndex waitingTestIndex,
         CancellationToken cancellationToken)
     {
-        // Wait for signal to start
-        await startSignal.Task.ConfigureAwait(false);
+        // Wait for signal to start, always yielding. The scheduling loop calls this method
+        // directly, and a running test can release our keys between the loop queueing us and
+        // this await. Awaiting that completed signal normally would run a synchronous test
+        // body on the loop's thread and stall every test after it (#7075).
+#if NET8_0_OR_GREATER
+        await startSignal.Task.ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
+#else
+        await new ForceYieldingTaskAwaitable(startSignal.Task);
+#endif
 
         if (_logger.IsTraceEnabled)
             await _logger.LogTraceAsync($"Starting previously queued test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
@@ -158,7 +181,20 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
     {
         try
         {
-            await _testRunner.ExecuteTestWithoutExecutionTaskAsync(test, cancellationToken).ConfigureAwait(false);
+            // Take a parallelism slot only after the constraint keys are held: slot holders
+            // are always running tests, never waiting on keys, so the two never deadlock.
+            // Acquired before entering TestRunner so a dependency that reaches this test
+            // first runs it inline instead of waiting behind a slot.
+            var semaphore = _maxParallelismLimiter.Semaphore;
+            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await _testRunner.ExecuteTestWithoutExecutionTaskAsync(test, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
         finally
         {

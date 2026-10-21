@@ -6,7 +6,29 @@ using TUnit.Core.SourceGenerator.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Models;
 
-public record CompilationContext(CSharpCompilation Compilation, AttributeWriter AttributeWriter, WellKnownTypes WellKnownTypes);
+public record CompilationContext(CSharpCompilation Compilation, AttributeWriter AttributeWriter, WellKnownTypes WellKnownTypes)
+{
+    private MethodDataSourceRowTypes? _methodDataSourceRowTypes;
+
+    /// <summary>
+    /// The generic definitions used to unwrap [MethodDataSource] row types, looked up once per compilation
+    /// on first use. A race only repeats the lookups: both instances hold the same symbols.
+    /// </summary>
+    public MethodDataSourceRowTypes MethodDataSourceRowTypes => _methodDataSourceRowTypes ??= new MethodDataSourceRowTypes(Compilation);
+}
+
+/// <summary>
+/// The generic type definitions that wrap a [MethodDataSource] row. It holds symbols from one compilation, so,
+/// like <see cref="CompilationContext"/>, it must never flow through the incremental pipeline.
+/// </summary>
+public sealed class MethodDataSourceRowTypes(Compilation compilation)
+{
+    public INamedTypeSymbol? TaskType { get; } = compilation.GetTypeByMetadataName("System.Threading.Tasks.Task`1");
+    public INamedTypeSymbol? ValueTaskType { get; } = compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask`1");
+    public INamedTypeSymbol? FuncType { get; } = compilation.GetTypeByMetadataName("System.Func`1");
+    public INamedTypeSymbol? AsyncEnumerableType { get; } = compilation.GetTypeByMetadataName("System.Collections.Generic.IAsyncEnumerable`1");
+    public INamedTypeSymbol? TestDataRowType { get; } = compilation.GetTypeByMetadataName("TUnit.Core.TestDataRow`1");
+}
 
 /// <summary>
 /// Contains all the metadata about a test method discovered by the source generator.
