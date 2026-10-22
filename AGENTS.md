@@ -36,7 +36,14 @@ Read only as needed:
 
 Use `scripts/AgentLocks.ps1` from the shared checkout for work-item ownership (`pr-<N>` or `issue-<N>`). Set `$agentLocks` to its absolute path, acquire before creating the checkout, and pass the same stable `-OwnerId` to every verb (`acquire`, `renew`, `release`) outside Codex, or set `TUNIT_AGENT_LOCK_OWNER_ID`. Git and Docker are required locally.
 
-Immediately after checkout, run `pwsh $agentLocks renew -LockName $lockName -Worktree $worktree -OwnerId $ownerId` once to register its path. Stop owned processes, archive needed evidence outside the worktree, then release from the shared checkout in `finally`. Release removes clean checkouts even for open PRs; branches and detached commits remain available for re-checkout. See [local worktree lifecycle](scripts/WorktreeLifecycle.md) for preservation rules and crash behavior.
+Immediately after checkout, run `pwsh $agentLocks renew -LockName $lockName -Worktree $worktree -OwnerId $ownerId` once to register its path. Stop owned processes, save needed evidence under the evidence root (below), then release from the shared checkout in `finally`. Release removes clean checkouts even for open PRs; branches and detached commits remain available for re-checkout. See [local worktree lifecycle](scripts/WorktreeLifecycle.md) for preservation rules and crash behavior.
+
+Never edit the main checkout, and write nothing loose beside it. Every file an agent produces outside a worktree has one home, so cleanup can find it:
+
+- Evidence (build and test logs, reports, PR and comment body drafts, diffs, validation projects) goes in `<repo-parent>/TUnit-evidence/<lock-name>/`, for example `C:/git/TUnit-evidence/issue-1234/build.log`. `pwsh scripts/Remove-MergedWorktrees.ps1` deletes an entry once its newest file is older than `-EvidenceRetentionDays` (default 7).
+- Worktrees, including throwaway checkouts and baselines, go under the dedicated worktree root `<repo-parent>/TUnit-worktrees/<name>`, never as plain copies. It is the only root whose orphaned directories the sweep cleans.
+- Downloaded SDKs and CLI tools go in `<repo-parent>/toolchains/<name>-<version>/`, shared by every repository.
+- Never write to the repository's parent directory itself or to the main checkout.
 
 ## Autonomous self-improvement
 

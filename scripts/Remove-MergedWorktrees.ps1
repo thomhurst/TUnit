@@ -33,6 +33,10 @@
 #   (its .git file targets $mainRepo/.git/worktrees/* and that gitdir is gone).
 #   Dirs without a .git worktree marker (artifacts, scratch output) are never touched.
 #
+# AGENT EVIDENCE:
+#   Entries under <main checkout>-evidence/ (one per work item) are removed once their
+#   newest write is older than -EvidenceRetentionDays (default 7).
+#
 # Guards (never delete work):
 #   - skip the main checkout and anything inside it (.claude/worktrees is harness-managed)
 #   - skip locked worktrees (an agent session may still own them)
@@ -46,7 +50,7 @@
 # Run it once per loop iteration (cheap: ~3 gh calls in bulk, plus one association
 # call per unmatched leftover — a set that shrinks to near-zero after the first run).
 #
-# Usage:  pwsh scripts/Remove-MergedWorktrees.ps1 [-Repo owner/name] [-WhatIf] [-StaleDays n]
+# Usage:  pwsh scripts/Remove-MergedWorktrees.ps1 [-Repo owner/name] [-WhatIf] [-StaleDays n] [-EvidenceRetentionDays n]
 # Known ignored workflow output is disposable, like build artifacts.
 # -WhatIf reports the same dirty-file blockers as a real sweep.
 # Exit:   0 always (a sweep failure must not break the loop; problems are logged)
@@ -58,7 +62,10 @@ param(
     # Opt-in: also remove CLEAN worktrees with no PR evidence at all (scratch / A-B
     # checkouts, local-only fix branches) whose HEAD commit is older than this many
     # days. 0 = off. Dirty worktrees are still preserved.
-    [int]$StaleDays = 0
+    [int]$StaleDays = 0,
+    # Remove agent evidence entries whose newest file is older than this many days.
+    [ValidateRange(1, 3650)]
+    [int]$EvidenceRetentionDays = 7
 )
 
 $ErrorActionPreference = 'Stop'
@@ -254,8 +261,10 @@ try {
         }
     }
 
+    $evidenceRemoved = Remove-StaleAgentEvidence -Root (Get-AgentEvidenceRoot -MainCheckout $mainRepo) -RetentionDays $EvidenceRetentionDays -WhatIf:$WhatIf
+
     if (-not $WhatIf) { git -C $mainRepo worktree prune }
-    Write-Host "sweep: removed $removed merged worktree(s), $orphansRemoved orphaned dir(s)."
+    Write-Host "sweep: removed $removed merged worktree(s), $orphansRemoved orphaned dir(s), $evidenceRemoved stale evidence entr(ies)."
 }
 catch {
     Warn "unexpected sweep error (ignored, loop continues): $_"

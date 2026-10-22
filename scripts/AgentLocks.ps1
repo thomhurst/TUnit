@@ -41,8 +41,11 @@
 # Lock-name resolution (renew/release/status): -LockName is OPTIONAL there. When
 # omitted it is resolved from, in order: (1) a marker persisted in the current
 # worktree's per-worktree git config (`agent.lockName`), which
-# `acquire`/`renew -Worktree` writes after enabling `extensions.worktreeConfig`;
-# then (2) an `issue-<N>-*` branch name -> `issue-<N>`. `acquire` still REQUIRES an
+# `acquire`/`renew -Worktree` writes after enabling `extensions.worktreeConfig`,
+# together with `agent.lockWorktree` (the worktree's own path). The marker counts only
+# when that path matches the current worktree: `git worktree add` copies the source
+# checkout's config.worktree, so a copied marker names another path and is ignored.
+# The main checkout never receives a marker; then (2) an `issue-<N>-*` branch name -> `issue-<N>`. `acquire` still REQUIRES an
 # explicit name (or an `issue-<N>-*` branch): it runs before the worktree exists, and
 # a PR lock's number (`pr-<N>`) is not derivable from the branch (`issue-<M>-...`).
 # For PR locks either pass -LockName to release, or write the marker once via
@@ -90,16 +93,37 @@ function Get-WorktreeLockMarker {
     if ($LASTEXITCODE -ne 0 -or -not $enabled -or $enabled.Trim() -ne 'true') { return $null }
 
     $marker = (git config --worktree --get agent.lockName 2>$null)
-    if ($LASTEXITCODE -eq 0 -and $marker) { return $marker.Trim() }
-    return $null
+    if ($LASTEXITCODE -ne 0 -or -not $marker) { return $null }
+    # `git worktree add` copies the source checkout's config.worktree into the new
+    # worktree, so a marker counts only in the worktree whose path it records.
+    $owner = (git config --worktree --get agent.lockWorktree 2>$null)
+    if ($LASTEXITCODE -ne 0 -or -not $owner) { return $null }
+    $top = (git rev-parse --show-toplevel 2>$null)
+    if ($LASTEXITCODE -ne 0 -or -not $top) { return $null }
+    if ((Get-MarkerPath $owner) -ne (Get-MarkerPath $top)) { return $null }
+    return $marker.Trim()
 }
 
+function Get-MarkerPath([string]$Path) { return [IO.Path]::GetFullPath($Path.Trim()).TrimEnd('\', '/') }
+
 function Set-WorktreeLockMarker([string]$Path) {
+    # The main checkout is shared, never a work item's worktree, and new worktrees
+    # inherit its config.worktree, so it never receives a marker.
+    $gitDirectory = git -C $Path rev-parse --path-format=absolute --git-dir 2>$null
+    if ($LASTEXITCODE -ne 0) { return }
+    $commonDirectory = git -C $Path rev-parse --path-format=absolute --git-common-dir 2>$null
+    if ($LASTEXITCODE -ne 0) { return }
+    $top = git -C $Path rev-parse --show-toplevel 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $top -or $gitDirectory -eq $commonDirectory) {
+        [Console]::Error.WriteLine("not writing lock marker: $Path is not a linked worktree")
+        return
+    }
     # Linked worktrees share --local config. Enable the extension in that common
     # config, then persist the marker in the target worktree's config.worktree file.
     git -C $Path config --local extensions.worktreeConfig true 2>$null | Out-Null
     if ($LASTEXITCODE -ne 0) { return }
     git -C $Path config --worktree agent.lockName $LockName 2>$null | Out-Null
+    git -C $Path config --worktree agent.lockWorktree (Get-MarkerPath $top) 2>$null | Out-Null
 }
 
 function Resolve-OwnerIdentity([string]$Explicit) {

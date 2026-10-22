@@ -26,7 +26,10 @@ function Remove-ReleasedWorktree {
         return
     }
     $marker = git -C $target config --worktree --get agent.lockName 2>$null
-    if ($LASTEXITCODE -ne 0 -or $marker -cne $LockName) {
+    $markerOwner = git -C $target config --worktree --get agent.lockWorktree 2>$null
+    # A marker copied in by `git worktree add` names another checkout's path.
+    if ($marker -cne $LockName -or -not $markerOwner -or
+        [IO.Path]::GetFullPath($markerOwner.Trim()).TrimEnd('\', '/') -ne $target) {
         Write-Host "Preserving worktree without a matching lock marker: $target"
         return
     }

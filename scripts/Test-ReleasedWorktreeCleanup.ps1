@@ -82,7 +82,22 @@ try {
         Assert (Test-Path (Join-Path $outside 'keep.txt')) 'Release deleted files through a junction.'
     }
 
-    foreach ($kind in @('tracked', 'untracked', 'ignored', 'locked', 'main', 'foreign', 'harness', 'reassigned')) {
+    # `git worktree add` copies the source's config.worktree; the copy names the source's path.
+    $source = New-Checkout marker-source
+    $key = Claim marker-source $source
+    $inherited = Join-Path $testRoot 'marker-inherited'
+    Invoke-TestGit -C $source worktree add -b marker-inherited $inherited HEAD
+    Push-Location $source
+    try { $status = & pwsh -NoProfile -File $agentLocks status -OwnerId $owner 2>&1 } finally { Pop-Location }
+    Assert ($LASTEXITCODE -eq 0 -and $status -eq 'HELD-BY-ME') "Marker did not resolve in its own worktree: $status"
+    Push-Location $inherited
+    try { $status = & pwsh -NoProfile -File $agentLocks status -OwnerId $owner 2>&1 } finally { Pop-Location }
+    Assert ($LASTEXITCODE -ne 0) "Inherited marker resolved a lock: $status"
+    Lock release -LockName $key
+    Assert (-not (Test-Path $source)) 'Marked source checkout survived release.'
+    Assert (Test-Path $inherited) 'Release removed a checkout that inherited the marker.'
+
+    foreach ($kind in @('tracked', 'untracked', 'ignored', 'locked', 'main', 'foreign', 'harness', 'reassigned', 'copied')) {
         $path = switch ($kind) {
             main { $repo }
             foreign {
@@ -105,12 +120,18 @@ try {
         }
         $key = Claim $kind $path
         if ($kind -eq 'reassigned') { Invoke-TestGit -C $path config --worktree agent.lockName 'another-item' }
+        # A marker whose recorded path is another checkout's was copied, not written here.
+        if ($kind -eq 'copied') { Invoke-TestGit -C $path config --worktree agent.lockWorktree (Join-Path $testRoot 'elsewhere') }
+        if ($kind -eq 'main') {
+            $mainMarker = & git -C $repo config --worktree --get agent.lockName 2>$null
+            Assert (-not $mainMarker) "Main checkout received lock marker '$mainMarker'."
+        }
         Lock release -LockName $key
         Assert (Test-Path $path) "$kind checkout was removed."
         $status = & pwsh -NoProfile -File $agentLocks status -LockName $key -OwnerId $owner
         Assert ($status -eq 'FREE') "$kind lock was not released."
     }
-    Write-Host 'OK released worktree cleanup: generated output, unpublished branches, detached commits, re-checkout, dirty/ignored/locked/main/foreign/harness/reassigned preservation.'
+    Write-Host 'OK released worktree cleanup: generated output, unpublished branches, detached commits, re-checkout, inherited markers ignored, no main-checkout marker, dirty/ignored/locked/main/foreign/harness/reassigned/copied preservation.'
 } finally {
     if (Test-Path $repo) {
         Set-Location $repo
