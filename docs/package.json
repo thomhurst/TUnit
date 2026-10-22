@@ -50,7 +50,7 @@
     "lodash": "4.18.1",
     "lodash-es": "4.18.1",
     "minimatch": "10.2.6",
-    "express/path-to-regexp": "8.4.2",
+    "express/path-to-regexp": "9.0.0",
     "serialize-javascript": "7.1.2",
     "brace-expansion": "5.0.12",
     "qs": "6.16.1",
