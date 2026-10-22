@@ -110,7 +110,7 @@ function Test-DisposableWorktreePath {
     # Keep these root-only patterns aligned with .gitignore. Ignore rules alone
     # cannot authorize deleting arbitrary files: ignored source and secrets survive.
     if (-not $normalizedPath.Contains('/') -and
-        ($normalizedPath -cmatch '\.(log|nettrace)$' -or
+        ($normalizedPath -cmatch '\.(binlog|log|nettrace)$' -or
          $normalizedPath -cmatch '(^|-)(pr-body|review-disposition|review-validation|rebase-validation|comment|issue)\.md$')) {
         return $true
     }

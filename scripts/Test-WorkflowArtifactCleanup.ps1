@@ -24,7 +24,7 @@ try {
     $removeArgs = @{ Repo = $repo; Worktree = $worktree }
     if ((Get-Command Remove-MergedWorktree).Parameters.ContainsKey('ExpectedHead')) { $removeArgs.ExpectedHead = $head }
 
-    foreach ($file in @('build.log', 'pressure.nettrace', 'pr-body.md', 'review-pr-body.md', 'sdk-review-disposition.md', 'rebase-validation.md', 'ci-fix-comment.md', 'throttle-issue.md', '.artifacts/run.txt')) {
+    foreach ($file in @('build.log', 'certificate-tests.binlog', 'pressure.nettrace', 'pr-body.md', 'review-pr-body.md', 'sdk-review-disposition.md', 'rebase-validation.md', 'ci-fix-comment.md', 'throttle-issue.md', '.artifacts/run.txt')) {
         git -C $worktree check-ignore --quiet -- $file
         Assert-True ($LASTEXITCODE -eq 0) "Workflow output is not ignored: $file"
         Assert-True (Test-DisposableWorktreePath -Path $file) "Workflow output is not disposable: $file"
