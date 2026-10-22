@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.6.2">
+<Project Sdk="Aspire.AppHost.Sdk/13.6.3">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.6.2" />
-    <PackageReference Include="Aspire.Hosting.Redis" Version="13.6.2" />
-    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.6.2" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.6.3" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.6.3" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.6.3" />
     <!-- Patched MessagePack (GHSA-qhrr-8q5h-9q3h); see src/TUnit.Aspire.Core/TUnit.Aspire.Core.csproj. -->
     <PackageReference Include="MessagePack" Version="3.1.12" />
   </ItemGroup>
