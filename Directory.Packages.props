@@ -31,8 +31,8 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.1.0" />
     <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.20" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.6.2" />
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.2" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.6.3" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.3" />
     <PackageVersion Include="Azure.Data.Tables" Version="12.13.0" />
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.30.1" />
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
@@ -43,7 +43,7 @@
     <PackageVersion Include="CliWrap" Version="3.10.5" />
     <PackageVersion Include="FakeItEasy" Version="9.0.1" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
-    <PackageVersion Include="FsCheck" Version="3.5.0" />
+    <PackageVersion Include="FsCheck" Version="3.6.0" />
     <PackageVersion Include="FSharp.Core" Version="10.1.402" />
     <PackageVersion Include="Humanizer" Version="3.0.10" />
     <PackageVersion Include="MessagePack" Version="3.1.12" />
