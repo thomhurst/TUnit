@@ -27,7 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Grpc.Core.Api" Version="2.84.0" />
-    <PackageVersion Include="MassTransit" Version="9.2.3" />
+    <PackageVersion Include="MassTransit" Version="9.2.4" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.1.0" />
     <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.20" />
@@ -67,7 +67,7 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
     <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="2.1.2" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
-    <PackageVersion Include="Microsoft.Playwright" Version="1.64.0" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.64.1" />
     <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="10.0.402" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.5.1" />
