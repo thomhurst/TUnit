@@ -19,6 +19,10 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     private static readonly ConcurrentDictionary<object, Counter> s_trackedObjects =
         new(Helpers.ReferenceEqualityComparer.Instance);
 
+    // Serializes retiring a cached shared instance (count reached zero) with a running test taking
+    // a reference to it, so the instance is either retired or held, never both.
+    private static readonly object s_sharedInstanceLock = new();
+
     // Collects errors from async disposal callbacks for post-session review
     private static readonly ConcurrentBag<Exception> s_asyncCallbackErrors = new();
 
@@ -303,10 +307,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
             if (count == 0)
             {
-                // Remove from tracking dictionary to prevent memory leak
-                // Use TryRemove to ensure atomicity - only remove if still in dictionary
-                s_trackedObjects.TryRemove(obj, out _);
-                shouldDispose = true;
+                shouldDispose = TestDataContainer.IsCached(obj)
+                    ? TryRetireSharedInstance(obj, counter)
+                    : RemoveCounter(obj);
             }
         }
 
@@ -317,6 +320,100 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             // per-test disposal gets a span (via TestCoordinator.DisposeTestInstanceWithSpanAsync).
             await disposer.DisposeAsync(obj).ConfigureAwait(false);
         }
+    }
+
+    private static bool RemoveCounter(object obj)
+    {
+        // Remove from tracking dictionary to prevent memory leak
+        // Use TryRemove to ensure atomicity - only remove if still in dictionary
+        s_trackedObjects.TryRemove(obj, out _);
+        return true;
+    }
+
+    /// <summary>
+    /// Stops tracking a cached shared instance whose count has reached zero and evicts it from
+    /// <see cref="TestDataContainer"/>, so later requests create a new instance instead of
+    /// receiving this one after it is disposed (#7204). Returns false when a running test took a
+    /// reference (<see cref="TryHoldForRunningTest"/>) after the count reached zero.
+    /// </summary>
+    private static bool TryRetireSharedInstance(object obj, Counter counter)
+    {
+        lock (s_sharedInstanceLock)
+        {
+            if (counter.CurrentCount != 0)
+            {
+                return false;
+            }
+
+            s_trackedObjects.TryRemove(obj, out _);
+            TestDataContainer.Evict(obj);
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Makes a running test hold a reference to a shared instance that it fetched itself (through
+    /// <see cref="SharedDataSources"/>) rather than receiving it from a data source. The reference
+    /// is released, and the instance disposed if no other test holds it, when the test's tracked
+    /// objects are untracked at the end of the test.
+    /// </summary>
+    /// <returns>
+    /// False only when the instance has already been retired (disposed or about to be), in which
+    /// case the caller must fetch the instance again; the cache then creates a new one.
+    /// True otherwise, including when no test is running or the test already holds the instance.
+    /// </returns>
+    internal static bool TryHoldForRunningTest(TestContext testContext, object instance)
+    {
+        if (ShouldSkipTracking(instance) || !testContext.HoldsSharedReferences)
+        {
+            return true;
+        }
+
+        var trackedObjects = testContext.TrackedObjects;
+
+        // Code inside a test can fetch shared instances concurrently; the lock also lets
+        // TestContext.StopHoldingSharedReferences wait for any add in progress.
+        lock (trackedObjects)
+        {
+            if (!testContext.HoldsSharedReferences || Contains(trackedObjects, instance))
+            {
+                return true;
+            }
+
+            lock (s_sharedInstanceLock)
+            {
+                if (!TestDataContainer.IsCached(instance))
+                {
+                    return false;
+                }
+
+                GetOrCreateCounter(instance).Increment();
+            }
+
+            // Deepest level, so it is released after the test's own objects that may depend on it.
+            if (!trackedObjects.TryGetValue(int.MaxValue, out var bucket))
+            {
+                bucket = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
+                trackedObjects[int.MaxValue] = bucket;
+            }
+
+            bucket.Add(instance);
+            return true;
+        }
+    }
+
+    private static bool Contains(SortedList<int, HashSet<object>> trackedObjects, object obj)
+    {
+        var values = trackedObjects.Values;
+        for (var i = 0; i < values.Count; i++)
+        {
+            if (values[i].Contains(obj))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

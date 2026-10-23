@@ -137,6 +137,9 @@ internal sealed class TestCoordinator : ITestCoordinator
                     // constructor (#6192). Hook tasks are cached, so ExecuteAsync's later awaits are no-ops.
                     await _testExecutor.EnsureClassAndAssemblyHooksExecutedAsync(test, cancellationToken).ConfigureAwait(false);
 
+                    // From here until UntrackObjects, shared instances the test fetches itself are held by it.
+                    test.Context.StartHoldingSharedReferences();
+
                     // Flow AsyncLocals captured by Before(Assembly)/Before(Class) hooks into the
                     // constructor. Must run here (not inside the gate above) so the restored ambient
                     // ExecutionContext is still in effect when CreateInstanceAsync runs the constructor.
@@ -221,6 +224,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             // Stay null on the success path — materializing the list only when something actually fails
             // saves ~56 bytes per passing test (and passing is the overwhelming majority).
+            test.Context.StopHoldingSharedReferences();
             var cleanupExceptions = await _objectTracker.UntrackObjects(test.Context).ConfigureAwait(false);
 
 #if NET
@@ -385,6 +389,9 @@ internal sealed class TestCoordinator : ITestCoordinator
         // Run Before(TestSession/Assembly/Class) hooks (incl. BeforeEvery) before constructing the
         // instance so hooks precede the constructor (#6192). Cached, so ExecuteAsync re-awaits are no-ops.
         await _testExecutor.EnsureClassAndAssemblyHooksExecutedAsync(test, cancellationToken).ConfigureAwait(false);
+
+        // From here until UntrackObjects, shared instances the test fetches itself are held by it.
+        test.Context.StartHoldingSharedReferences();
 
         // Flow AsyncLocals captured by Before(Assembly)/Before(Class) hooks into the constructor.
         // Must run here (not inside the gate above) so the restored ambient ExecutionContext is still

@@ -170,6 +170,35 @@ public class ProductTests
 
 Use `IAsyncInitializer`, not `IAsyncDiscoveryInitializer`, for this work. `IAsyncDiscoveryInitializer` runs while tests are built. See the [test lifecycle](lifecycle.md) for the full order.
 
+## When Shared Instances Are Disposed
+
+TUnit counts the tests that hold a shared instance. When the last of them ends, TUnit disposes the instance. A test that asks for the same instance after that, such as a dynamic test added later in the run, gets a new instance.
+
+A test can also fetch a shared instance itself with `SharedDataSources.GetOrCreate`. It gets the same instance that `ClassDataSource` injects with the same `SharedType` (and key or class). While the test runs, it holds the instance, so TUnit does not dispose it before the test ends:
+
+<!-- doc-test-declaration -->
+```csharp
+public class Database : IAsyncDisposable
+{
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+}
+
+public class ReportTests
+{
+    [Test]
+    public async Task Reads_From_Shared_Database()
+    {
+        var database = SharedDataSources.GetOrCreate<Database>(SharedType.PerTestSession);
+
+        await Assert.That(database).IsNotNull();
+    }
+}
+```
+
+`GetOrCreate` does not call `IAsyncInitializer.InitializeAsync`. Only instances that TUnit injects are initialized.
+
+Outside a running test, for example in a hook, nothing holds a fetched instance. TUnit disposes it when the last test that holds it ends, which can be while you still use it. If no test holds it, TUnit does not dispose it. To keep a shared instance for the whole session, inject it into a static property with `ClassDataSource` instead.
+
 # Class Data Source Overloads
 
 If you are using an overload that supports injecting multiple classes at once (e.g. `ClassDataSource<T1, T2, T3>`) then you should specify multiple SharedTypes in an array and keys where applicable.

@@ -495,6 +495,37 @@ public partial class TestContext : Context,
 
     internal SortedList<int, HashSet<object>>? TrackedObjectsIfCreated => Volatile.Read(ref _trackedObjects);
 
+    private int _holdsSharedReferences;
+
+    /// <summary>
+    /// True while the test's own lifecycle runs (from instance creation until its tracked objects
+    /// are untracked). Shared instances that the test fetches through <see cref="SharedDataSources"/>
+    /// during this window are held by the test (<see cref="Tracking.ObjectTracker.TryHoldForRunningTest"/>).
+    /// False during discovery and registration, where data-source objects are counted by the
+    /// object-graph walk instead.
+    /// </summary>
+    internal bool HoldsSharedReferences => Volatile.Read(ref _holdsSharedReferences) == 1;
+
+    internal void StartHoldingSharedReferences() => Volatile.Write(ref _holdsSharedReferences, 1);
+
+    /// <summary>
+    /// Stops new shared references being added, and waits for any add in progress, so the tracked
+    /// objects can be untracked safely.
+    /// </summary>
+    internal void StopHoldingSharedReferences()
+    {
+        // Full fence: either an adder that creates the tracked set after this sees the flag
+        // cleared, or this sees the set and waits on its lock.
+        Interlocked.Exchange(ref _holdsSharedReferences, 0);
+
+        if (TrackedObjectsIfCreated is { } trackedObjects)
+        {
+            lock (trackedObjects)
+            {
+            }
+        }
+    }
+
     /// <summary>
     /// Tracked objects that are reachable only from data rows the test never receives
     /// (<see cref="TestDetails.UnreceivedDataRowObjects"/>). They are tracked for reference-counted
