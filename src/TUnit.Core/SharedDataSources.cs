@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Tracking;
 
 namespace TUnit.Core;
 
@@ -64,15 +65,12 @@ public static class SharedDataSources
     {
         _ = factory ?? throw new ArgumentNullException(nameof(factory));
 
-        return sharedType switch
+        if (sharedType == SharedType.None)
         {
-            SharedType.None => factory(),
-            SharedType.PerTestSession => (T)TestDataContainer.GetGlobalInstance(typeof(T), _ => factory()!)!,
-            SharedType.PerClass => GetForClass<T>(testClassType, factory),
-            SharedType.Keyed => GetForKey<T>(key, factory),
-            SharedType.PerAssembly => GetForAssembly<T>(testClassType, factory),
-            _ => throw new ArgumentOutOfRangeException(nameof(sharedType), sharedType, "Invalid SharedType value.")
-        };
+            return factory();
+        }
+
+        return (T)GetShared(sharedType, typeof(T), testClassType, key, () => factory())!;
     }
 
     /// <summary>
@@ -144,25 +142,48 @@ public static class SharedDataSources
         _ = type ?? throw new ArgumentNullException(nameof(type));
         _ = factory ?? throw new ArgumentNullException(nameof(factory));
 
+        if (sharedType == SharedType.None)
+        {
+            return factory();
+        }
+
+        return GetShared(sharedType, type, testClassType, key, factory);
+    }
+
+    /// <summary>
+    /// Fetches a shared instance. Inside a running test, the test holds a reference to it until the
+    /// test ends, so it is not disposed while the test uses it, and is disposed afterwards if no
+    /// other test holds it. If the instance was disposed before the test could hold it, a new one
+    /// is created.
+    /// </summary>
+    private static object? GetShared(SharedType sharedType, Type type, Type? testClassType, string? key, Func<object?> factory)
+    {
+        var instance = Resolve(sharedType, type, testClassType, key, factory);
+
+        if (instance is null || TestContext.Current is not { } testContext)
+        {
+            return instance;
+        }
+
+        // Fails only when the instance has just been retired, which also evicts it from the cache.
+        while (!ObjectTracker.TryHoldForRunningTest(testContext, instance))
+        {
+            instance = Resolve(sharedType, type, testClassType, key, factory)!;
+        }
+
+        return instance;
+    }
+
+    private static object? Resolve(SharedType sharedType, Type type, Type? testClassType, string? key, Func<object?> factory)
+    {
         return sharedType switch
         {
-            SharedType.None => factory(),
             SharedType.PerTestSession => TestDataContainer.GetGlobalInstance(type, _ => factory()!),
             SharedType.PerClass => GetForClass(type, testClassType, factory),
             SharedType.Keyed => GetForKey(type, key, factory),
             SharedType.PerAssembly => GetForAssembly(type, testClassType, factory),
             _ => throw new ArgumentOutOfRangeException(nameof(sharedType), sharedType, "Invalid SharedType value.")
         };
-    }
-
-    private static T GetForClass<T>(Type? testClassType, Func<T> factory)
-    {
-        if (testClassType is null)
-        {
-            throw new ArgumentNullException(nameof(testClassType), "testClassType is required when SharedType is PerClass.");
-        }
-
-        return (T)TestDataContainer.GetInstanceForClass(testClassType, typeof(T), _ => factory()!)!;
     }
 
     private static object? GetForClass(Type type, Type? testClassType, Func<object?> factory)
@@ -173,26 +194,6 @@ public static class SharedDataSources
         }
 
         return TestDataContainer.GetInstanceForClass(testClassType, type, _ => factory()!);
-    }
-
-    private static T GetForKey<T>(string? key, Func<T> factory)
-    {
-        if (string.IsNullOrEmpty(key))
-        {
-            throw new ArgumentNullException(nameof(key), "key is required when SharedType is Keyed.");
-        }
-
-        return (T)TestDataContainer.GetInstanceForKey(key!, typeof(T), _ =>
-        {
-            var instance = factory()!;
-
-            if (instance is IKeyedDataSource keyed)
-            {
-                keyed.Key = key!;
-            }
-
-            return instance;
-        })!;
     }
 
     private static object? GetForKey(Type type, string? key, Func<object?> factory)
@@ -213,16 +214,6 @@ public static class SharedDataSources
 
             return instance;
         });
-    }
-
-    private static T GetForAssembly<T>(Type? testClassType, Func<T> factory)
-    {
-        if (testClassType is null)
-        {
-            throw new ArgumentNullException(nameof(testClassType), "testClassType is required when SharedType is PerAssembly.");
-        }
-
-        return (T)TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), _ => factory()!)!;
     }
 
     private static object? GetForAssembly(Type type, Type? testClassType, Func<object?> factory)
