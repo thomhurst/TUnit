@@ -174,7 +174,7 @@ Use `IAsyncInitializer`, not `IAsyncDiscoveryInitializer`, for this work. `IAsyn
 
 TUnit counts the tests that hold a shared instance. When the last of them ends, TUnit disposes the instance. A test that asks for the same instance after that, such as a dynamic test added later in the run, gets a new instance.
 
-A test can also fetch a shared instance itself with `SharedDataSources.GetOrCreate`. It gets the same instance that `ClassDataSource` injects with the same `SharedType` (and key or class). While the test runs, it holds the instance, so TUnit does not dispose it before the test ends:
+A test can also fetch a shared instance itself with `SharedDataSources.GetOrCreate`. It gets the same instance that `ClassDataSource` injects with the same `SharedType` (and key or class). While the test runs, it holds the instance, so TUnit does not dispose it before the test ends. This covers the test class constructor, the test method, and `[Before(Test)]` and `[After(Test)]` hooks: an instance fetched in any of them is held by that test, and is disposed after the test ends if no other test holds it:
 
 <!-- doc-test-declaration -->
 ```csharp
@@ -197,7 +197,7 @@ public class ReportTests
 
 `GetOrCreate` does not call `IAsyncInitializer.InitializeAsync`. Only instances that TUnit injects are initialized.
 
-Outside a running test, for example in a hook, nothing holds a fetched instance. TUnit disposes it when the last test that holds it ends, which can be while you still use it. If no test holds it, TUnit does not dispose it. To keep a shared instance for the whole session, inject it into a static property with `ClassDataSource` instead.
+Outside a running test, nothing holds a fetched instance. This includes `[Before(Class)]`, `[After(Class)]`, `[Before(Assembly)]`, `[After(Assembly)]`, `[Before(TestSession)]` and `[After(TestSession)]` hooks, and background code. TUnit disposes it when the last test that holds it ends, which can be while you still use it. If no test holds it, TUnit does not dispose it. To keep a shared instance for the whole session, inject it into a static property with `ClassDataSource` instead.
 
 # Class Data Source Overloads
 

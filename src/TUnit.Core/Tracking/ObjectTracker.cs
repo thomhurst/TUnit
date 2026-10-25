@@ -189,57 +189,74 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     public ValueTask<List<Exception>?> UntrackObjects(TestContext testContext)
     {
         var trackedObjects = testContext.TrackedObjectsIfCreated;
+        var heldSharedInstances = testContext.HeldSharedInstancesIfCreated;
 
-        if (CountTrackedObjects(trackedObjects) == 0)
+        if (CountTrackedObjects(trackedObjects) == 0 && heldSharedInstances is not { Count: > 0 })
         {
             return new ValueTask<List<Exception>?>((List<Exception>?)null);
         }
 
-        return UntrackObjectsAsync(trackedObjects!);
+        return UntrackObjectsAsync(trackedObjects, heldSharedInstances);
     }
 
-    private async ValueTask<List<Exception>?> UntrackObjectsAsync(SortedList<int, HashSet<object>> trackedObjects)
+    private async ValueTask<List<Exception>?> UntrackObjectsAsync(SortedList<int, HashSet<object>>? trackedObjects, HashSet<object>? heldSharedInstances)
     {
         // SortedList keeps keys in ascending order; iterate in ascending order (shallowest depth first).
         // This ensures disposal happens in reverse order of initialization (which goes deepest first).
         // Dependents (shallow) are disposed before their dependencies (deep).
         List<Exception>? cleanupExceptions = null;
-        var values = trackedObjects.Values;
 
-        for (var i = 0; i < values.Count; i++)
+        if (trackedObjects is not null)
         {
-            var bucket = values[i];
-            List<Task>? disposalTasks = null;
+            var values = trackedObjects.Values;
 
-            foreach (var obj in bucket)
+            for (var i = 0; i < values.Count; i++)
             {
-                try
-                {
-                    var task = UntrackObject(obj);
+                cleanupExceptions = await UntrackBucketAsync(values[i], cleanupExceptions).ConfigureAwait(false);
+            }
+        }
 
-                    if (!task.IsCompletedSuccessfully)
-                    {
-                        disposalTasks ??= [];
-                        disposalTasks.Add(task.AsTask());
-                    }
-                }
-                catch (Exception e)
+        // Released last: the test's own objects may depend on the shared instances it fetched.
+        if (heldSharedInstances is { Count: > 0 })
+        {
+            cleanupExceptions = await UntrackBucketAsync(heldSharedInstances, cleanupExceptions).ConfigureAwait(false);
+        }
+
+        return cleanupExceptions;
+    }
+
+    private async ValueTask<List<Exception>?> UntrackBucketAsync(HashSet<object> bucket, List<Exception>? cleanupExceptions)
+    {
+        List<Task>? disposalTasks = null;
+
+        foreach (var obj in bucket)
+        {
+            try
+            {
+                var task = UntrackObject(obj);
+
+                if (!task.IsCompletedSuccessfully)
                 {
-                    (cleanupExceptions ??= []).Add(e);
+                    disposalTasks ??= [];
+                    disposalTasks.Add(task.AsTask());
                 }
             }
-
-            if (disposalTasks is { Count: > 0 })
+            catch (Exception e)
             {
-                var whenAllTask = Task.WhenAll(disposalTasks);
-                try
-                {
-                    await whenAllTask.ConfigureAwait(false);
-                }
-                catch
-                {
-                    (cleanupExceptions ??= []).AddRange(whenAllTask.Exception!.InnerExceptions);
-                }
+                (cleanupExceptions ??= []).Add(e);
+            }
+        }
+
+        if (disposalTasks is { Count: > 0 })
+        {
+            var whenAllTask = Task.WhenAll(disposalTasks);
+            try
+            {
+                await whenAllTask.ConfigureAwait(false);
+            }
+            catch
+            {
+                (cleanupExceptions ??= []).AddRange(whenAllTask.Exception!.InnerExceptions);
             }
         }
 
@@ -309,7 +326,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             {
                 shouldDispose = TestDataContainer.IsCached(obj)
                     ? TryRetireSharedInstance(obj, counter)
-                    : RemoveCounter(obj);
+                    : RemoveCounter(obj, counter);
             }
         }
 
@@ -322,30 +339,33 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         }
     }
 
-    private static bool RemoveCounter(object obj)
-    {
-        // Remove from tracking dictionary to prevent memory leak
-        // Use TryRemove to ensure atomicity - only remove if still in dictionary
-        s_trackedObjects.TryRemove(obj, out _);
-        return true;
-    }
+    /// <summary>
+    /// Removes <paramref name="counter"/> from the tracking dictionary (preventing a memory leak),
+    /// but only while it is still the object's counter. Returns whether it was removed. The caller
+    /// disposes the object only then, so two callers that both saw the count reach zero (a shared
+    /// instance held again by a running test in between) cannot both dispose it.
+    /// </summary>
+    private static bool RemoveCounter(object obj, Counter counter) =>
+        ((ICollection<KeyValuePair<object, Counter>>) s_trackedObjects).Remove(new KeyValuePair<object, Counter>(obj, counter));
 
     /// <summary>
     /// Stops tracking a cached shared instance whose count has reached zero and evicts it from
     /// <see cref="TestDataContainer"/>, so later requests create a new instance instead of
     /// receiving this one after it is disposed (#7204). Returns false when a running test took a
-    /// reference (<see cref="TryHoldForRunningTest"/>) after the count reached zero.
+    /// reference (<see cref="TryHoldForRunningTest"/>) after the count reached zero, or when that
+    /// test has already retired it.
     /// </summary>
     private static bool TryRetireSharedInstance(object obj, Counter counter)
     {
         lock (s_sharedInstanceLock)
         {
-            if (counter.CurrentCount != 0)
+            // Fails if a running test took a reference after the count reached zero, or if that
+            // test has since released it and retired the instance itself.
+            if (counter.CurrentCount != 0 || !RemoveCounter(obj, counter))
             {
                 return false;
             }
 
-            s_trackedObjects.TryRemove(obj, out _);
             TestDataContainer.Evict(obj);
             return true;
         }
@@ -369,13 +389,16 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return true;
         }
 
-        var trackedObjects = testContext.TrackedObjects;
+        var heldSharedInstances = testContext.HeldSharedInstances;
 
         // Code inside a test can fetch shared instances concurrently; the lock also lets
         // TestContext.StopHoldingSharedReferences wait for any add in progress.
-        lock (trackedObjects)
+        lock (heldSharedInstances)
         {
-            if (!testContext.HoldsSharedReferences || Contains(trackedObjects, instance))
+            // The tracked objects no longer change once the test runs, so they can be read here.
+            if (!testContext.HoldsSharedReferences
+                || heldSharedInstances.Contains(instance)
+                || Contains(testContext.TrackedObjectsIfCreated, instance))
             {
                 return true;
             }
@@ -390,20 +413,19 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
                 GetOrCreateCounter(instance).Increment();
             }
 
-            // Deepest level, so it is released after the test's own objects that may depend on it.
-            if (!trackedObjects.TryGetValue(int.MaxValue, out var bucket))
-            {
-                bucket = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
-                trackedObjects[int.MaxValue] = bucket;
-            }
-
-            bucket.Add(instance);
+            // Kept out of the tracked objects, so the engine does not initialize it.
+            heldSharedInstances.Add(instance);
             return true;
         }
     }
 
-    private static bool Contains(SortedList<int, HashSet<object>> trackedObjects, object obj)
+    private static bool Contains(SortedList<int, HashSet<object>>? trackedObjects, object obj)
     {
+        if (trackedObjects is null)
+        {
+            return false;
+        }
+
         var values = trackedObjects.Values;
         for (var i = 0; i < values.Count; i++)
         {

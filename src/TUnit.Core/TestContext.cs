@@ -508,19 +508,44 @@ public partial class TestContext : Context,
 
     internal void StartHoldingSharedReferences() => Volatile.Write(ref _holdsSharedReferences, 1);
 
+    private HashSet<object>? _heldSharedInstances;
+
     /// <summary>
-    /// Stops new shared references being added, and waits for any add in progress, so the tracked
-    /// objects can be untracked safely.
+    /// Shared instances the test fetched itself through <see cref="SharedDataSources"/> while
+    /// <see cref="HoldsSharedReferences"/> was true. Each holds one reference, released when the
+    /// test's tracked objects are untracked. Kept apart from <see cref="TrackedObjects"/> so the
+    /// engine does not initialize them and its initialization walk never sees the set change.
+    /// Lock on the set itself to read or change it.
+    /// </summary>
+    internal HashSet<object> HeldSharedInstances
+    {
+        get
+        {
+            if (Volatile.Read(ref _heldSharedInstances) is { } existing)
+            {
+                return existing;
+            }
+
+            var created = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
+            return Interlocked.CompareExchange(ref _heldSharedInstances, created, null) ?? created;
+        }
+    }
+
+    internal HashSet<object>? HeldSharedInstancesIfCreated => Volatile.Read(ref _heldSharedInstances);
+
+    /// <summary>
+    /// Stops new shared references being added, and waits for any add in progress, so the held
+    /// instances can be untracked safely.
     /// </summary>
     internal void StopHoldingSharedReferences()
     {
-        // Full fence: either an adder that creates the tracked set after this sees the flag
+        // Full fence: either an adder that creates the held set after this sees the flag
         // cleared, or this sees the set and waits on its lock.
         Interlocked.Exchange(ref _holdsSharedReferences, 0);
 
-        if (TrackedObjectsIfCreated is { } trackedObjects)
+        if (HeldSharedInstancesIfCreated is { } heldSharedInstances)
         {
-            lock (trackedObjects)
+            lock (heldSharedInstances)
             {
             }
         }

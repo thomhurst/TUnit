@@ -17,8 +17,8 @@ public class Issue7204Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7204/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(5),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(5),
+                result => result.ResultSummary.Counters.Total.ShouldBe(6),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(6),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }

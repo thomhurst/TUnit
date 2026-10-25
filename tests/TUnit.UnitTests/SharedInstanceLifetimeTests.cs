@@ -128,7 +128,112 @@ public class SharedInstanceLifetimeTests
         }
 
         await Assert.That(registering.TrackedObjectsIfCreated?.Count ?? 0).IsEqualTo(0);
+        await Assert.That(registering.HeldSharedInstancesIfCreated?.Count ?? 0).IsEqualTo(0);
         await Assert.That(ended.TrackedObjectsIfCreated?.Count ?? 0).IsEqualTo(0);
+        await Assert.That(ended.HeldSharedInstancesIfCreated?.Count ?? 0).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task Held_Instances_Are_Kept_Out_Of_The_Tracked_Objects()
+    {
+        // The engine initializes everything in TrackedObjects, and an initializer can fetch another
+        // shared instance while that walk runs. Held instances must not be initialized or change
+        // the set the walk reads.
+        var key = NewKey();
+        var (tracker, _) = CreateTracker();
+        var running = CreateContext();
+
+        running.StartHoldingSharedReferences();
+        SharedDisposable instance;
+        using (running.MakeCurrent())
+        {
+            instance = SharedDataSources.GetOrCreate<SharedDisposable>(SharedType.Keyed, key: key);
+        }
+
+        await Assert.That(running.TrackedObjectsIfCreated?.Count ?? 0).IsEqualTo(0);
+        await Assert.That(running.HeldSharedInstances).Contains(instance);
+
+        running.StopHoldingSharedReferences();
+        await tracker.UntrackObjects(running);
+        await Assert.That(instance.IsDisposed).IsTrue();
+    }
+
+    [Test]
+    public async Task Instance_Cached_Under_Several_Keys_Is_Evicted_From_All_Of_Them()
+    {
+        var firstKey = NewKey();
+        var secondKey = NewKey();
+        var (tracker, discoverer) = CreateTracker();
+        var holder = CreateContext();
+        var running = CreateContext();
+
+        var shared = new SharedDisposable();
+        using (CreateContext().MakeCurrent())
+        {
+            SharedDataSources.GetOrCreate(SharedType.Keyed, (Type?) null, firstKey, () => shared);
+            SharedDataSources.GetOrCreate(SharedType.Keyed, (Type?) null, secondKey, () => shared);
+        }
+
+        discoverer.Discover = context => Add(context, shared);
+        tracker.TrackObjects(holder);
+        await tracker.UntrackObjects(holder);
+        await Assert.That(shared.IsDisposed).IsTrue();
+
+        running.StartHoldingSharedReferences();
+        var fetched = await Task.Run(() =>
+        {
+            using (running.MakeCurrent())
+            {
+                return (
+                    First: SharedDataSources.GetOrCreate(SharedType.Keyed, (Type?) null, firstKey, () => new SharedDisposable()),
+                    Second: SharedDataSources.GetOrCreate(SharedType.Keyed, (Type?) null, secondKey, () => new SharedDisposable()));
+            }
+        }).WaitAsync(TimeSpan.FromSeconds(30));
+
+        await Assert.That(fetched.First).IsNotSameReferenceAs(shared);
+        await Assert.That(fetched.First.IsDisposed).IsFalse();
+        await Assert.That(fetched.Second).IsNotSameReferenceAs(shared);
+        await Assert.That(fetched.Second.IsDisposed).IsFalse();
+
+        running.StopHoldingSharedReferences();
+        await tracker.UntrackObjects(running);
+    }
+
+    [Test]
+    public async Task Instance_Held_Again_After_Its_Count_Reached_Zero_Is_Disposed_Once()
+    {
+        // The last holder's count reaches zero; before it retires the instance, a running test
+        // holds the instance, ends, and retires and disposes it. The first holder must not then
+        // dispose it a second time.
+        var key = NewKey();
+        var (tracker, discoverer) = CreateTracker();
+        var holder = CreateContext();
+        var running = CreateContext();
+
+        var instance = Fetch(key);
+        discoverer.Discover = context => Add(context, instance);
+        tracker.TrackObjects(holder);
+
+        // Raised synchronously when the count reaches zero, before the holder retires the instance.
+        ObjectTracker.OnDisposed(instance, () =>
+        {
+            running.StartHoldingSharedReferences();
+            using (running.MakeCurrent())
+            {
+                SharedDataSources.GetOrCreate<SharedDisposable>(SharedType.Keyed, key: key);
+            }
+
+            running.StopHoldingSharedReferences();
+            var untracking = tracker.UntrackObjects(running);
+            if (!untracking.IsCompleted)
+            {
+                throw new InvalidOperationException("Expected synchronous disposal.");
+            }
+        });
+
+        await tracker.UntrackObjects(holder);
+
+        await Assert.That(instance.DisposeCount).IsEqualTo(1);
     }
 
     [Test]
@@ -194,9 +299,13 @@ public class SharedInstanceLifetimeTests
 
     public sealed class SharedDisposable : IDisposable
     {
-        public bool IsDisposed { get; private set; }
+        private int _disposeCount;
 
-        public void Dispose() => IsDisposed = true;
+        public int DisposeCount => Volatile.Read(ref _disposeCount);
+
+        public bool IsDisposed => DisposeCount > 0;
+
+        public void Dispose() => Interlocked.Increment(ref _disposeCount);
     }
 
     private sealed class FakeDiscoverer : IObjectGraphDiscoverer

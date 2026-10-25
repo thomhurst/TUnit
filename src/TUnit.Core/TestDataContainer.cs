@@ -11,8 +11,9 @@ internal static class TestDataContainer
 
     // Disposable cached instances only, by identity, so that a disposed instance can be evicted.
     // Without eviction, a test registered after the last holder has disposed a shared instance
-    // (e.g. a dynamic test) would be handed the disposed instance (#7204).
-    private static readonly ConcurrentDictionary<object, KeyValuePair<InstanceKey, Lazy<object?>>> _entriesByInstance =
+    // (e.g. a dynamic test) would be handed the disposed instance (#7204). A factory can return
+    // the same instance for several keys or types, so every entry holding it is recorded.
+    private static readonly ConcurrentDictionary<object, KeyValuePair<InstanceKey, Lazy<object?>>[]> _entriesByInstance =
         new(Helpers.ReferenceEqualityComparer.Instance);
 
     public static object? GetInstanceForClass(Type testClass, Type type, Func<Type, object> func)
@@ -41,15 +42,18 @@ internal static class TestDataContainer
     public static bool IsCached(object instance) => _entriesByInstance.ContainsKey(instance);
 
     /// <summary>
-    /// Removes <paramref name="instance"/> from the cache, so the next request for its scope and
-    /// type creates a new instance. Does nothing if it is not cached.
+    /// Removes <paramref name="instance"/> from the cache, so the next request for any scope and
+    /// type it is cached under creates a new instance. Does nothing if it is not cached.
     /// </summary>
     public static void Evict(object instance)
     {
-        if (_entriesByInstance.TryRemove(instance, out var entry))
+        if (_entriesByInstance.TryRemove(instance, out var entries))
         {
-            // Removes the entry only while it still holds this instance's Lazy (reference equality).
-            ((ICollection<KeyValuePair<InstanceKey, Lazy<object?>>>) _instances).Remove(entry);
+            foreach (var entry in entries)
+            {
+                // Removes the entry only while it still holds this instance's Lazy (reference equality).
+                ((ICollection<KeyValuePair<InstanceKey, Lazy<object?>>>) _instances).Remove(entry);
+            }
         }
     }
 
@@ -84,7 +88,8 @@ internal static class TestDataContainer
 
             if (instance is IDisposable or IAsyncDisposable)
             {
-                _entriesByInstance[instance] = new KeyValuePair<InstanceKey, Lazy<object?>>(key, lazy);
+                var entry = new KeyValuePair<InstanceKey, Lazy<object?>>(key, lazy);
+                _entriesByInstance.AddOrUpdate(instance, _ => [entry], (_, entries) => [..entries, entry]);
             }
 
             return instance;
