@@ -349,6 +349,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                 test.Context.TimeoutCancellationSource = null;
 
                 test.Context.RemoveFromRegistry();
+                test.Context.ReleaseFinishedTestState();
             }
         }
     }

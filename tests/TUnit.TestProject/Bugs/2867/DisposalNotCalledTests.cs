@@ -106,7 +106,14 @@ public class PerClassSharedDisposalTest : IAsyncDisposable
     
     private static readonly List<string> _webAppIds = new();
     private static readonly List<string> _serviceIds = new();
+    // Finished tests release their class instance (#7260), so keep our own references to inspect.
+    private static readonly System.Collections.Concurrent.ConcurrentBag<PerClassSharedDisposalTest> _instances = [];
     private bool _isDisposed;
+
+    public PerClassSharedDisposalTest()
+    {
+        _instances.Add(this);
+    }
     
     [Before(Class)]
     public static void BeforeClass()
@@ -115,6 +122,7 @@ public class PerClassSharedDisposalTest : IAsyncDisposable
         DisposalNotCalledTests.DisposableService.Reset();
         _webAppIds.Clear();
         _serviceIds.Clear();
+        _instances.Clear();
     }
     
     public ValueTask DisposeAsync()
@@ -215,8 +223,8 @@ public class PerClassSharedDisposalTest : IAsyncDisposable
         await Assert.That(_serviceIds.Distinct().Count()).IsEqualTo(1);
         
         // Verify all test instances themselves are disposed
-        var testInstances = context.Tests.Select(t => t.Metadata.TestDetails.ClassInstance).OfType<PerClassSharedDisposalTest>().ToList();
-        foreach (var instance in testInstances)
+        await Assert.That(_instances).IsNotEmpty();
+        foreach (var instance in _instances)
         {
             await Assert.That(instance._isDisposed).IsTrue();
         }

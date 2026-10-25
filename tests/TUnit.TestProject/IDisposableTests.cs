@@ -1,10 +1,19 @@
-﻿using TUnit.TestProject.Attributes;
+﻿using System.Collections.Concurrent;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
 [EngineTest(ExpectedResult.Pass)]
 public class DisposableTests : IDisposable
 {
+    // Finished tests release their class instance (#7260), so keep our own references to inspect.
+    private static readonly ConcurrentBag<DisposableTests> Instances = [];
+
+    public DisposableTests()
+    {
+        Instances.Add(this);
+    }
+
     [Test]
     public void One()
     {
@@ -26,9 +35,11 @@ public class DisposableTests : IDisposable
     [After(Class)]
     public static async Task AssertDisposed(ClassHookContext context)
     {
-        foreach (var disposableTestse in context.Tests.Select(x => x.Metadata.TestDetails.ClassInstance).OfType<DisposableTests>())
+        await Assert.That(Instances).IsNotEmpty();
+
+        foreach (var disposableTests in Instances)
         {
-            await Assert.That(disposableTestse.IsDisposed).IsTrue();
+            await Assert.That(disposableTests.IsDisposed).IsTrue();
         }
     }
 

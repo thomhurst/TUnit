@@ -226,6 +226,27 @@ public partial class TestContext : Context,
         Volatile.Write(ref CachedReportingProperties, null);
     }
 
+    /// <summary>
+    /// Drops this context's references to the disposed class instance and untracked objects once the
+    /// test has finished, so per-test state can be collected while the session keeps the context alive (#7260).
+    /// </summary>
+    internal void ReleaseFinishedTestState()
+    {
+        var details = Metadata.TestDetails;
+        if (details.ClassInstance is not (SkippedTestInstance or PlaceholderInstance))
+        {
+            details.ClassInstance = PlaceholderInstance.Instance;
+        }
+
+        // The cached receiver lists can hold the instance when it implements event receiver interfaces.
+        InvalidateEventReceiverCaches();
+
+        // Tracked objects were untracked (and disposed when no longer shared) during cleanup.
+        Volatile.Write(ref _trackedObjects, null);
+        DisposalOnlyTrackedObjects = null;
+        details.ReleaseInjectedPropertyArguments();
+    }
+
     internal static void ClearReportingCaches()
     {
         // Discovery-only sessions and failures before execution can leave contexts

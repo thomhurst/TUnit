@@ -90,6 +90,10 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
         return Interlocked.CompareExchange(ref _testClassInjectedPropertyArguments, created, null) ?? created;
     }
 
+    // The cache is only read while the test registers and executes; dropping it afterwards lets
+    // per-test injected objects be collected while the session keeps the context alive (#7260).
+    internal void ReleaseInjectedPropertyArguments() => _testClassInjectedPropertyArguments = null;
+
     private static class EmptyInjectedPropertyArguments
     {
         public static readonly IDictionary<string, object?> Instance =
