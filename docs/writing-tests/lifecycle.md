@@ -123,6 +123,10 @@ Objects are initialized **depth-first** (deepest nested objects first):
 | `PerTestSession` | After test session ends                |
 | `Keyed`          | When all tests using that key complete |
 
+Finished test instances are released
+
+Once a test has finished and its result has been reported, its `TestContext` drops its reference to the class instance and its per-test injected objects so they can be garbage collected. Reading `TestContext.Metadata.TestDetails.ClassInstance` for a finished test (for example from `ClassHookContext.Tests` in an `[After(Class)]` or `[After(TestSession)]` hook) no longer returns the test object. Keep your own reference if you need to inspect instances after their tests complete.
+
 ## Property Injection Lifecycle[​](#property-injection-lifecycle "Direct link to Property Injection Lifecycle")
 
 <!-- -->
