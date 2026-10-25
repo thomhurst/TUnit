@@ -12,4 +12,9 @@ internal sealed class PlaceholderInstance
     {
         // Private constructor to ensure singleton pattern
     }
+
+    // Surfaces in debuggers and logs when user code reads ClassInstance before it is created or after
+    // a finished test has released it (#7260).
+    public override string ToString() =>
+        "Test class instance not available: it has not been created yet, or it was released after the test finished.";
 }

@@ -36,7 +36,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     // Track initialization state per object. ConditionalWeakTable compares keys by reference, so objects
     // with custom Equals never share initialization state, and it does not keep per-test objects alive
     // for the rest of the session once their test has finished (#7260).
-    private ConditionalWeakTable<object, TaskCompletionSource<bool>> _initializationTasks = new();
+    private readonly ConditionalWeakTable<object, TaskCompletionSource<bool>> _initializationTasks = new();
 
 #if NET
     // Gates span creation so only the first caller for a given object creates a trace span.
@@ -481,7 +481,15 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
         // Slow path: need to initialize
         var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        existingTcs = _initializationTasks.GetValue(obj, _ => tcs);
+        // Lock instead of GetValue(obj, _ => tcs) so the slow path does not allocate a closure.
+        lock (_initializationTasks)
+        {
+            if (!_initializationTasks.TryGetValue(obj, out existingTcs))
+            {
+                _initializationTasks.Add(obj, tcs);
+                existingTcs = tcs;
+            }
+        }
 
         if (existingTcs == tcs)
         {
@@ -622,16 +630,4 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     }
 
     #endregion
-
-    /// <summary>
-    /// Clears the initialization cache. Called at end of test session.
-    /// </summary>
-    public void ClearCache()
-    {
-        // ConditionalWeakTable.Clear is unavailable on netstandard2.0.
-        _initializationTasks = new();
-#if NET
-        _spannedObjects.Clear();
-#endif
-    }
 }

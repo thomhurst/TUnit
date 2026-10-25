@@ -41,11 +41,15 @@ public class DisposableSharedInstance : IAsyncDisposable
 [ClassDataSource<DisposableSharedInstance>(Shared = SharedType.PerClass)]
 public class SharedDisposalTest
 {
+    // Finished tests release their class instance (#7260), so keep our own references to inspect.
+    private static readonly System.Collections.Concurrent.ConcurrentBag<SharedDisposalTest> Instances = [];
+
     private readonly DisposableSharedInstance sharedInstance;
     
     public SharedDisposalTest(DisposableSharedInstance sharedInstance)
     {
         this.sharedInstance = sharedInstance;
+        Instances.Add(this);
     }
     [Test]
     public async Task Test1_ShouldUseSharedInstance()
@@ -102,7 +106,7 @@ public class SharedDisposalTest
         }
         
         // Print the test instances to see if they were using the same shared instance
-        var testInstances = context.Tests.Select(t => t.Metadata.TestDetails.ClassInstance).OfType<SharedDisposalTest>().ToList();
+        var testInstances = Instances.ToList();
         Console.WriteLine($"[AfterClass] Test instances: {testInstances.Count}");
         for (var i = 0; i < testInstances.Count; i++)
         {
