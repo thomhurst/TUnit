@@ -37,6 +37,8 @@ public class ClassDataSourceRetryTests
 {
     private static bool _wasExecuted;
     private static int _attemptCount;
+    // Finished tests release their class instance (#7260), so keep our own reference to inspect.
+    private static DataClass? _dataClass;
 
     [ClassDataSource<DataClass>(Shared = SharedType.PerTestSession)]
     public required DataClass DataClass { get; init; }
@@ -53,6 +55,7 @@ public class ClassDataSourceRetryTests
     {
         _wasExecuted = true;
         _attemptCount++;
+        _dataClass = DataClass;
 
         await Assert.That(DataClass.Value).IsEqualTo(42);
 
@@ -75,9 +78,7 @@ public class ClassDataSourceRetryTests
     [After(TestSession)]
     public static async Task VerifyDisposalAfterTestSession(TestSessionContext context)
     {
-        var classInstance = context.TestClasses.FirstOrDefault(x => x.ClassType  == typeof(ClassDataSourceRetryTests))?.Tests.FirstOrDefault()?.Metadata.TestDetails.ClassInstance as ClassDataSourceRetryTests;
-
-        var dataClass = classInstance?.DataClass;
+        var dataClass = _dataClass;
 
         if (dataClass != null)
         {

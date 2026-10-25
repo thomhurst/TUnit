@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
@@ -9,6 +10,14 @@ namespace TUnit.TestProject;
 [EngineTest(ExpectedResult.Pass)]
 public class DisposalRegressionTests : IAsyncDisposable
 {
+    // Finished tests release their class instance (#7260), so keep our own references to inspect.
+    private static readonly ConcurrentBag<DisposalRegressionTests> Instances = [];
+
+    public DisposalRegressionTests()
+    {
+        Instances.Add(this);
+    }
+
     [ClassDataSource<DisposableTestData>(Shared = SharedType.PerTestSession)]
     public required DisposableTestData InjectedData { get; init; }
 
@@ -32,7 +41,9 @@ public class DisposalRegressionTests : IAsyncDisposable
     public static async Task VerifyDisposal(ClassHookContext context)
     {
         // After the test class is done, both the test instance and injected property should be disposed
-        foreach (var testInstance in context.Tests.Select(x => x.Metadata.TestDetails.ClassInstance).OfType<DisposalRegressionTests>())
+        await Assert.That(Instances).IsNotEmpty();
+
+        foreach (var testInstance in Instances)
         {
             await Assert.That(testInstance.IsDisposed).IsTrue();
             await Assert.That(testInstance.InjectedData.IsDisposed).IsTrue();
