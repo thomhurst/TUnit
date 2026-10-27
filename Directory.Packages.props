@@ -70,16 +70,16 @@
     <PackageVersion Include="Microsoft.Playwright" Version="1.64.1" />
     <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="10.0.403" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.5.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.5.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.HtmlReport" Version="2.5.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="2.5.1" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.5.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.5.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.HtmlReport" Version="2.5.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="2.5.2" />
     <!-- 2.4.0's controller-backed TRX path kills the test host on Ctrl+C instead of allowing hook cleanup. -->
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.5.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="2.5.1" />
-    <PackageVersion Include="Microsoft.Testing.Platform" Version="2.5.1" />
-    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.5.1" />
-    <PackageVersion Include="Imposter" Version="1.0.8"/>
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.5.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="2.5.2" />
+    <PackageVersion Include="Microsoft.Testing.Platform" Version="2.5.2" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.5.2" />
+    <PackageVersion Include="Imposter" Version="1.0.9"/>
     <PackageVersion Include="Mockolate" Version="3.6.0" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="Moq" Version="4.21.0" />
@@ -87,9 +87,9 @@
     <PackageVersion Include="ModularPipelines.DotNet" Version="3.2.8" />
     <PackageVersion Include="ModularPipelines.Git" Version="3.2.8" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="3.2.8" />
-    <PackageVersion Include="MSTest" Version="4.5.1" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="4.5.1" />
-    <PackageVersion Include="MSTest.TestFramework" Version="4.5.1" />
+    <PackageVersion Include="MSTest" Version="4.5.2" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.5.2" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.5.2" />
     <PackageVersion Include="Npgsql" Version="10.0.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
