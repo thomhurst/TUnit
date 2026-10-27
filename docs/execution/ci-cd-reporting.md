@@ -15,6 +15,10 @@ The GitHub reporter automatically enables when:
 
 No additional configuration is required for basic functionality.
 
+info
+
+Forgejo, a free open source alternative to GitHub, also sets these environment variables for compatibility. Starting with Forgejo version `17.0` and Forgejo Runner version `13.2`, the test summary works without additional configuration. See [Forgejo 17 announcement](https://forgejo.org/2026-10-release-v17-0/#forgejo-actions-job-summaries) for details.
+
 ### Reporter Styles[​](#reporter-styles "Direct link to Reporter Styles")
 
 TUnit's GitHub reporter supports two output styles:
