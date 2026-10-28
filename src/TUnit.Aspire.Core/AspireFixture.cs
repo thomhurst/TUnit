@@ -1409,6 +1409,23 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             throw new TimeoutException(
                 await BuildDiagnosticsAndAttachAsync(app, notificationService, headline, pending, readySet));
         }
+        catch (DistributedApplicationException ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            // Aspire's health wait throws once a resource reaches a terminal state without becoming
+            // healthy. That can beat the fail-fast watcher to the same crash, so report it the same
+            // way (with diagnostics) instead of leaking Aspire's bare exception.
+            var readySet = new HashSet<string>(readyResources);
+            var pending = visibleNames.Where(n => !readySet.Contains(n)).ToList();
+            var failed = pending
+                .Where(n => notificationService.TryGetCurrentState(n, out var ev) && ev.Snapshot.State?.Text is { } state && IsTerminalState(state))
+                .ToList();
+
+            var headline = $"Aspire startup aborted: {ex.Message}";
+            throw new InvalidOperationException(
+                await BuildDiagnosticsAndAttachAsync(
+                    app, notificationService, headline, failed.Count > 0 ? failed : pending, readySet),
+                ex);
+        }
     }
 
     /// <summary>
