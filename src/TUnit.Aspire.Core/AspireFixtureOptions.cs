@@ -57,9 +57,9 @@ public sealed class AspireFixtureOptions
     /// This makes on-demand and post-mortem retrieval via
     /// <see cref="AspireFixture{TAppHost}.GetResourceLogsAsync"/> and
     /// <see cref="AspireFixture{TAppHost}.DumpResourceDiagnosticsAsync"/> reliable even for a
-    /// resource that has already exited — avoiding the "(no logs available)" race you get when
-    /// fetching logs via <c>ResourceLoggerService.WatchAsync</c> only after the fact. Default:
-    /// <c>false</c> (opt-in). When off, those helpers fall back to a best-effort live backlog read.
+    /// resource that has already exited, and after the application has been disposed. Default:
+    /// <c>false</c> (opt-in). When off, those helpers fall back to a best-effort read of Aspire's
+    /// console streams, which is only available while the application is running.
     /// </summary>
     /// <remarks>
     /// The buffer is bounded to <see cref="ResourceLogBufferCapacity"/> lines per resource. It is
