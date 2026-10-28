@@ -1284,62 +1284,39 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         // Track which resources have become ready (for timeout reporting)
         var readyResources = new ConcurrentBag<string>();
 
-        // Linked CTS lets us cancel the failure watchers once all resources are ready
-        using var failureCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
         var targetState = waitForHealthy ? "healthy" : "running";
         LogProgress($"Waiting for {visibleNames.Count} resource(s) to become {targetState}: [{string.Join(", ", visibleNames)}]");
 
-        // Success path: wait for all resources to reach the desired state
-        var readyTask = Task.WhenAll(visibleNames.Select(async name =>
-        {
-            if (waitForHealthy)
-            {
-                await notificationService.WaitForResourceHealthyAsync(name, cancellationToken);
-            }
-            else
-            {
-                await notificationService.WaitForResourceAsync(name, KnownResourceStates.Running, cancellationToken);
-            }
-
-            readyResources.Add(name);
-            LogProgress($"  Resource '{name}' is {targetState} ({readyResources.Count}/{visibleNames.Count})");
-        }));
-
-        // Fail-fast path: complete as soon as ANY resource enters a genuine failure state.
-        // Watch a non-zero Exited too — a container that crash-exits cleanly never reports
-        // FailedToStart, so without it we would wait the full timeout for an already-dead
-        // resource. A clean (code 0) exit is excluded so successful one-shot resources
-        // (migration runners, seeders) aren't mis-reported as failures (see IsFailureState).
-        var failureTasks = visibleNames.Select(async name =>
-        {
-            await notificationService.WaitForResourceAsync(name, evt => IsFailureState(evt.Snapshot), failureCts.Token);
-            return name;
-        }).ToList();
-        var anyFailureTask = Task.WhenAny(failureTasks);
-
         try
         {
-            // Race: all resources ready vs. any resource failed
-            var completed = await Task.WhenAny(readyTask, anyFailureTask);
+            var failedName = await ResourceStartupWaiter.WaitAsync(
+                visibleNames,
+                async (name, token) =>
+                {
+                    if (waitForHealthy)
+                    {
+                        await notificationService.WaitForResourceHealthyAsync(name, token);
+                    }
+                    else
+                    {
+                        await notificationService.WaitForResourceAsync(name, KnownResourceStates.Running, token);
+                    }
 
-            if (completed == anyFailureTask)
+                    readyResources.Add(name);
+                    LogProgress($"  Resource '{name}' is {targetState} ({readyResources.Count}/{visibleNames.Count})");
+                },
+                // Watch both launch failures and non-zero terminal exits, but not successful one-shot resources.
+                (name, token) => notificationService.WaitForResourceAsync(
+                    name, evt => IsFailureState(evt.Snapshot), token),
+                cancellationToken);
+
+            if (failedName is not null)
             {
-                failureCts.Cancel();
-                var failedName = await await anyFailureTask;
-
-                // "failed during startup" (not "failed to start") because the trigger covers both a
-                // launch failure (FailedToStart) and a crash-exit that reached a terminal state
-                // (Exited/Finished with a non-zero code) — see IsFailureState.
                 var headline = $"Aspire startup aborted: resource '{failedName}' failed during startup.";
                 throw new InvalidOperationException(
                     await BuildDiagnosticsAndAttachAsync(
                         app, notificationService, headline, [failedName], readyResources.ToArray()));
             }
-
-            // All resources are ready - cancel the failure watchers
-            failureCts.Cancel();
-            await readyTask;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -1352,8 +1329,6 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
 
             // Timeout - diagnose each pending resource (state, exit code, health, dependencies)
             // and attach the full timeline + untruncated logs as an artifact.
-            failureCts.Cancel();
-
             var readySet = new HashSet<string>(readyResources);
             var pending = visibleNames.Where(n => !readySet.Contains(n)).ToList();
 
