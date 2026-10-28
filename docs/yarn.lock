@@ -2042,10 +2042,10 @@
     "@iconify/types" "^2.0.0"
     import-meta-resolve "^4.2.0"
 
-"@isaacs/nonrecursive-glob-match@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@isaacs/nonrecursive-glob-match/-/nonrecursive-glob-match-1.0.1.tgz#1a652412dcfe533c0ec57097e5bbaef00ba1b6ff"
-  integrity sha512-rNKPuTXBacPpn5+CP+S3/UI6uq/0jHZjPpaBLaRE3blpgX+E+ZUIrGfViPvUjUnQG6W1+3OTFUiVRCjTffs2+Q==
+"@isaacs/nonrecursive-glob-match@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@isaacs/nonrecursive-glob-match/-/nonrecursive-glob-match-1.0.2.tgz#aeaab8a9a4bbc3c406f8c12ff674227ea78a6028"
+  integrity sha512-GJPHIgPPtFl+nLhFHyF0zZoFcOFLsZWbHFFzo+Zr+PWDXJbl9hHxb2w+9SiF2fHmLgKaXIpUzQo3SbBBZ9WObw==
 
 "@jest/schemas@^29.6.3":
   version "29.6.3"
@@ -7483,12 +7483,12 @@ minimalistic-assert@^1.0.0:
   resolved "https://registry.yarnpkg.com/minimalistic-assert/-/minimalistic-assert-1.0.1.tgz#2e194de044626d4a10e7f7fbc00ce73e83e4d5c7"
   integrity sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==
 
-minimatch@11.0.1, minimatch@3.1.5:
-  version "11.0.1"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-11.0.1.tgz#6958bb689808489c3b4320428537fda7ae2a881c"
-  integrity sha512-t+Vn6DX4wPCxS23y03C0uhF7S1jpi1GfqPrnlEipCJaA2ykiNbMkVlDutZtmvLfRcUN6R8AYVlzTsQrT4RZoLQ==
+minimatch@11.0.2, minimatch@3.1.5:
+  version "11.0.2"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-11.0.2.tgz#c51ab06cf560793fa5472fdd70829e088cd1a218"
+  integrity sha512-pWTgz5CN3tjqyZNSK2tePlSmu9IwM41q8yn8Usdqqwe9TIHh+9dEpLLjF4uApsfPEAZY71qtSiA2B2APEr+1Yw==
   dependencies:
-    "@isaacs/nonrecursive-glob-match" "^1.0.1"
+    "@isaacs/nonrecursive-glob-match" "^1.0.2"
     brace-expansion "^5.0.12"
 
 minimist@^1.2.0:
