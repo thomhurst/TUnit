@@ -188,8 +188,16 @@ public class AppFixture : AspireFixture<Projects.MyAppHost>
 ```
 
 :::tip
-Resources are removed by exact name (case-sensitive) after the builder is created but before the app is built, so they never start. Unrecognised names are silently ignored.
+Resources are removed by exact name (case-sensitive) after the builder is created but before the app is built, so they never start. Unrecognised names are skipped with a log message.
 :::
+
+Removed resources can still have dependents. TUnit detaches the kept resources from them, so the kept resources start without them:
+
+- Child resources of a removed resource (for example a database on a removed server) are removed too.
+- `WaitFor` and `WaitForCompletion` on a removed resource are dropped.
+- Environment variables and arguments that reference a removed resource are not set. This covers `WithReference` (endpoints and connection strings) and endpoint values passed to `WithEnvironment` or `WithArgs`.
+
+Each change is written to the fixture's progress log. The kept resource must work without the removed dependency. For example, it must not require a connection string that is no longer set.
 
 ### Timeouts
 
