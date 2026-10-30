@@ -141,14 +141,41 @@ internal static class ResourceRemoval
 
             for (var i = context.Args.Count - 1; i >= 0; i--)
             {
-                if (ReferencesRemoved(context.Args[i], removed, 0))
+                var argument = context.Args[i];
+                if (!ReferencesRemoved(argument, removed, 0))
                 {
-                    context.Args.RemoveAt(i);
-                    log($"ResourcesToRemove: dropped a command-line argument from '{resource.Name}' because it references a removed resource.");
+                    continue;
+                }
+
+                context.Args.RemoveAt(i);
+
+                // "--name value": dropping only the value would make the next argument the option's value.
+                // A dropped "--name=value" is an option itself, so it is never the previous option's value.
+                if (i > 0 && !IsOption(argument) && IsOptionName(context.Args[i - 1]))
+                {
+                    var option = (string)context.Args[i - 1];
+                    context.Args.RemoveAt(i - 1);
+                    i--;
+                    log($"ResourcesToRemove: dropped argument '{option}' and its value from '{resource.Name}' because the value references a removed resource.");
+                }
+                else
+                {
+                    log($"ResourcesToRemove: dropped argument {i} from '{resource.Name}' because it references a removed resource.");
                 }
             }
         });
     }
+
+    // "--url=value" is one argument and is dropped whole, so only a bare option name pairs with the next argument.
+    private static bool IsOptionName(object? argument)
+        => argument is string { Length: > 1 } text && text[0] == '-' && !text.Contains('=');
+
+    private static bool IsOption(object? argument) => argument switch
+    {
+        string text => text.StartsWith('-'),
+        ReferenceExpression expression => expression.Format.StartsWith('-'),
+        _ => false,
+    };
 
     private static bool ReferencesRemoved(object? value, HashSet<IResource> removed, int depth)
     {

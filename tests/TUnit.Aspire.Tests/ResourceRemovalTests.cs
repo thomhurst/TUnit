@@ -87,20 +87,38 @@ public class ResourceRemovalTests
         var api = builder.AddContainer("api", "nginx")
             .WithArgs(context =>
             {
+                context.Args.Add("--optional-url");
+                context.Args.Add(optional.GetEndpoint("http"));
                 context.Args.Add("--verbose");
+                context.Args.Add(ReferenceExpression.Create($"--inline-url={optional.GetEndpoint("http")}"));
+                context.Args.Add("positional");
                 context.Args.Add(optional.GetEndpoint("http"));
             });
+        var log = new List<string>();
+
+        ResourceRemoval.Remove(builder.Resources, ["optional"], log.Add);
+
+        var args = await RunArgsCallbacksAsync(api.Resource);
+        await Assert.That(args).IsEquivalentTo(new object[] { "--verbose", "positional" });
+        await Assert.That(log).Contains(
+            "ResourcesToRemove: dropped argument '--optional-url' and its value from 'api' because the value references a removed resource.");
+    }
+
+    [Test]
+    public async Task Remove_DropsWholeValueThatMixesKeptAndRemovedReferences()
+    {
+        // A value that cannot fully resolve cannot be passed in part, so the whole variable goes.
+        var builder = DistributedApplication.CreateBuilder();
+        var kept = builder.AddContainer("kept", "nginx").WithHttpEndpoint(targetPort: 80);
+        var optional = builder.AddContainer("optional", "nginx").WithHttpEndpoint(targetPort: 80);
+        var api = builder.AddContainer("api", "nginx")
+            .WithEnvironment("MIXED", ReferenceExpression.Create($"{kept.GetEndpoint("http")};{optional.GetEndpoint("http")}"))
+            .WithEnvironment("KEPT_URL", kept.GetEndpoint("http"));
 
         ResourceRemoval.Remove(builder.Resources, ["optional"], _ => { });
 
-        var args = new List<object>();
-        var context = new CommandLineArgsCallbackContext(args, api.Resource);
-        foreach (var annotation in api.Resource.Annotations.OfType<CommandLineArgsCallbackAnnotation>())
-        {
-            await annotation.Callback(context);
-        }
-
-        await Assert.That(args).IsEquivalentTo(new object[] { "--verbose" });
+        var environment = await RunEnvironmentCallbacksAsync(api.Resource);
+        await Assert.That(environment.Keys).IsEquivalentTo(["KEPT_URL"]);
     }
 
     [Test]
@@ -145,5 +163,18 @@ public class ResourceRemovalTests
         }
 
         return context.EnvironmentVariables;
+    }
+
+    private static async Task<List<object>> RunArgsCallbacksAsync(IResource resource)
+    {
+        var args = new List<object>();
+        var context = new CommandLineArgsCallbackContext(args, resource);
+
+        foreach (var annotation in resource.Annotations.OfType<CommandLineArgsCallbackAnnotation>())
+        {
+            await annotation.Callback(context);
+        }
+
+        return args;
     }
 }

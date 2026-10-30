@@ -684,6 +684,9 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         LogProgress($"Creating distributed application builder for {typeof(TAppHost).Name}...");
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>(Args, ConfigureAppHost, RunCancellationToken);
         ConfigureBuilder(builder);
+
+        // After ConfigureBuilder so edges the user adds are detached too. Removal wraps the
+        // environment and args callbacks present now; ones added later are not filtered.
         RemoveResources(builder);
 
         // Configure OTLP endpoint on project resources AFTER user's ConfigureBuilder
