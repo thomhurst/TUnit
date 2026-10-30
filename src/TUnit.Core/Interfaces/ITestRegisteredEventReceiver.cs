@@ -28,6 +28,12 @@ namespace TUnit.Core.Interfaces;
 /// Each receiver instance is invoked at most once per test, even when it is both an eligible
 /// event object and an installed executor. Distinct instances are compared by reference identity.
 /// </para>
+/// <para>
+/// Injected property values are resolved after the first registration pass, so that receivers
+/// such as <see cref="SkipAttribute"/> can skip a test before expensive data sources are created.
+/// An injected property value that implements this interface is invoked in a second pass, after
+/// every receiver from the first pass and before the test executes.
+/// </para>
 /// </remarks>
 public interface ITestRegisteredEventReceiver : IEventReceiver
 {
