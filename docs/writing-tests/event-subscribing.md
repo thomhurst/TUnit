@@ -22,6 +22,12 @@ The interfaces they can implement are:
 
 This can be useful especially when generating data that you need to track and maybe dispose later. By hooking into these events, we can do things like track and dispose our objects when we need.
 
+## Registration callbacks for injected properties[​](#registration-callbacks-for-injected-properties "Direct link to Registration callbacks for injected properties")
+
+TUnit creates injected property values after the first `OnTestRegistered` pass, so that a receiver such as a `SkipAttribute` can skip the test before expensive data sources are created. An injected property value that implements `ITestRegisteredEventReceiver` receives its callback in a second pass, after the property values are resolved and before the test runs. The second pass uses the same `Order` sorting, but it always runs after every receiver from the first pass.
+
+A property value can still call `SetParallelLimiter`, `SetSkipped` and the other `TestRegisteredContext` methods. If it skips the test, its shared data source objects have already been created.
+
 ## Registration callbacks for executors[​](#registration-callbacks-for-executors "Direct link to Registration callbacks for executors")
 
 An executor that implements `ITestRegisteredEventReceiver` receives `OnTestRegistered` when a registration receiver installs it through `SetTestExecutor` or `SetHookExecutor`, unless it has already received the callback for that test. Its callback runs after the installing receiver returns. Dynamically installed executors are not globally sorted by their own `Order`.
