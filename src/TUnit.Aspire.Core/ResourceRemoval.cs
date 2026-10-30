@@ -141,12 +141,11 @@ internal static class ResourceRemoval
     {
         return new CommandLineArgsCallbackAnnotation(async context =>
         {
-            // A callback can replace or rebuild earlier arguments, so the whole list is scanned. An option
-            // is only paired with a value when both were added by this callback, so the pairing boundary
-            // is where the list first differs from what it held before the callback ran.
-            var before = context.Args.ToArray();
+            // A callback can replace or rebuild earlier arguments, so the whole list is scanned. An option is
+            // only paired with a value when this callback added it: an argument object that was in the list
+            // before the callback ran belongs to an earlier WithArgs call, wherever it now sits.
+            var before = new HashSet<object>(context.Args, ReferenceEqualityComparer.Instance);
             await original.Callback(context).ConfigureAwait(false);
-            var start = UnchangedPrefixLength(before, context.Args);
 
             for (var i = context.Args.Count - 1; i >= 0; i--)
             {
@@ -161,7 +160,8 @@ internal static class ResourceRemoval
                 // "--name value": dropping only the value would make the next argument the option's value.
                 // A dropped "--name=value" is an option itself, so it is never the previous option's value,
                 // and after a "--" separator every argument is positional.
-                if (i > start
+                if (i > 0
+                    && !before.Contains(context.Args[i - 1])
                     && !IsOption(argument)
                     && IsOptionName(context.Args[i - 1])
                     && !HasSeparatorBefore(context.Args, i - 1))
@@ -182,20 +182,6 @@ internal static class ResourceRemoval
     // "--url=value" is one argument and is dropped whole, so only a bare option name pairs with the next argument.
     private static bool IsOptionName(object? argument)
         => argument is string { Length: > 1 } text && text[0] == '-' && text != "--" && !text.Contains('=');
-
-    private static int UnchangedPrefixLength(object[] before, IList<object> after)
-    {
-        var length = Math.Min(before.Length, after.Count);
-        for (var i = 0; i < length; i++)
-        {
-            if (!ReferenceEquals(before[i], after[i]))
-            {
-                return i;
-            }
-        }
-
-        return length;
-    }
 
     private static bool HasSeparatorBefore(IList<object> args, int index)
     {

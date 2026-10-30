@@ -186,6 +186,25 @@ public class ResourceRemovalTests
     }
 
     [Test]
+    public async Task Remove_KeepsEarlierFlagWhenLaterCallbackReplacesAnArgument()
+    {
+        var builder = DistributedApplication.CreateBuilder();
+        var optional = builder.AddContainer("optional", "nginx").WithHttpEndpoint(targetPort: 80);
+        var api = builder.AddContainer("api", "nginx")
+            .WithArgs("old", "--verbose")
+            .WithArgs(context =>
+            {
+                context.Args[0] = "new";
+                context.Args.Add(optional.GetEndpoint("http"));
+            });
+
+        ResourceRemoval.Remove(builder.Resources, ["optional"], _ => { });
+
+        var args = await RunArgsCallbacksAsync(api.Resource);
+        await Assert.That(args).IsEquivalentTo(new object[] { "new", "--verbose" }, CollectionOrdering.Matching);
+    }
+
+    [Test]
     public async Task Remove_DropsWholeValueThatMixesKeptAndRemovedReferences()
     {
         // A value that cannot fully resolve cannot be passed in part, so the whole variable goes.
