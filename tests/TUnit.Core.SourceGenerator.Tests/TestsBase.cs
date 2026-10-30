@@ -20,6 +20,7 @@ public class TestsBase
     public TestsBase<HookMetadataGenerator> HooksGenerator = new();
     public TestsBase<InfrastructureGenerator> InfrastructureGenerator = new();
     public TestsBase<DynamicTestsGenerator> DynamicTestsGenerator = new();
+    public TestsBase<PropertyInjectionSourceGenerator> PropertyInjectionGenerator = new();
 
     public Task RunTest(string inputFile, Func<string[], Task> assertions)
     {
