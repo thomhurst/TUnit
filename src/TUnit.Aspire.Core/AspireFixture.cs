@@ -561,6 +561,12 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
 
     /// <summary>
     /// Resources to be removed from the <see cref="DistributedApplicationTestingBuilder"/>.
+    /// <para>
+    /// Children of a removed resource (for example a database on a removed server) are removed too.
+    /// Kept resources lose their <c>WaitFor</c> edges on removed resources, and environment variables
+    /// or arguments that reference a removed resource (from <c>WithReference</c>, endpoint or
+    /// connection-string values) are not set. Each change is logged through <see cref="LogProgress"/>.
+    /// </para>
     /// </summary>
     protected virtual IEnumerable<string> ResourcesToRemove() => [];
 
@@ -678,6 +684,9 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         LogProgress($"Creating distributed application builder for {typeof(TAppHost).Name}...");
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>(Args, ConfigureAppHost, RunCancellationToken);
         ConfigureBuilder(builder);
+
+        // After ConfigureBuilder so edges the user adds are detached too. Removal wraps the
+        // environment and args callbacks present now; ones added later are not filtered.
         RemoveResources(builder);
 
         // Configure OTLP endpoint on project resources AFTER user's ConfigureBuilder
@@ -768,23 +777,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     }
 
     private void RemoveResources(IDistributedApplicationTestingBuilder builder)
-    {
-        foreach (var name in ResourcesToRemove())
-        {
-            var resource =
-                builder.Resources.SingleOrDefault(r =>
-                    string.Equals(r.Name, name, StringComparison.Ordinal));
-
-            if (resource is not null)
-            {
-                builder.Resources.Remove(resource);
-            }
-            else
-            {
-                LogProgress($"ResourcesToRemove: resource '{name}' not found (skipped).");
-            }
-        }
-    }
+        => ResourceRemoval.Remove(builder.Resources, ResourcesToRemove(), LogProgress);
 
     /// <summary>
     /// Disposes the Aspire distributed application. Override to add custom cleanup:
