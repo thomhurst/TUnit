@@ -141,12 +141,12 @@ internal static class ResourceRemoval
     {
         return new CommandLineArgsCallbackAnnotation(async context =>
         {
-            // Earlier callbacks' arguments are already filtered, and an option is only paired with a
-            // value that the same callback added.
+            // A callback can replace or rebuild earlier arguments, so the whole list is scanned. An option
+            // is only paired with a value when both were added by this callback.
             var start = context.Args.Count;
             await original.Callback(context).ConfigureAwait(false);
 
-            for (var i = context.Args.Count - 1; i >= start; i--)
+            for (var i = context.Args.Count - 1; i >= 0; i--)
             {
                 var argument = context.Args[i];
                 if (!ReferencesRemoved(argument, removed, 0))
