@@ -165,6 +165,27 @@ public class ResourceRemovalTests
     }
 
     [Test]
+    public async Task Remove_PairsOptionAndValueInRebuiltArguments()
+    {
+        var builder = DistributedApplication.CreateBuilder();
+        var optional = builder.AddContainer("optional", "nginx").WithHttpEndpoint(targetPort: 80);
+        var api = builder.AddContainer("api", "nginx")
+            .WithArgs("placeholder")
+            .WithArgs(context =>
+            {
+                context.Args.Clear();
+                context.Args.Add("--url");
+                context.Args.Add(optional.GetEndpoint("http"));
+                context.Args.Add("kept");
+            });
+
+        ResourceRemoval.Remove(builder.Resources, ["optional"], _ => { });
+
+        var args = await RunArgsCallbacksAsync(api.Resource);
+        await Assert.That(args).IsEquivalentTo(new object[] { "kept" }, CollectionOrdering.Matching);
+    }
+
+    [Test]
     public async Task Remove_DropsWholeValueThatMixesKeptAndRemovedReferences()
     {
         // A value that cannot fully resolve cannot be passed in part, so the whole variable goes.
