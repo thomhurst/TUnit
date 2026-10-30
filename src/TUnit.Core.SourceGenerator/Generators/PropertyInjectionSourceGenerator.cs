@@ -24,6 +24,10 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     public const string AsyncInitializersStep = "PropertyInjection_AsyncInitializers";
     public const string ConcreteGenericTypesStep = "PropertyInjection_ConcreteGenericTypes";
 
+    // Generated code lives in namespace TUnit.Core, so type names need global:: and keyword escaping (@event)
+    private static readonly SymbolDisplayFormat GlobalTypeNameFormat = DisplayFormats.FullyQualifiedGenericWithGlobalPrefix
+        .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var enabledProvider = context.AnalyzerConfigOptionsProvider
@@ -225,9 +229,9 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         if (containingType.IsGenericType)
         {
             var originalDefinition = containingType.OriginalDefinition;
-            openGenericType = originalDefinition.ToDisplayString();
+            openGenericType = originalDefinition.ToDisplayString(GlobalTypeNameFormat);
             typeParameters = string.Join(", ", originalDefinition.TypeParameters.Select(tp => tp.Name));
-            typeArguments = string.Join(", ", containingType.TypeArguments.Select(ta => ta.ToDisplayString()));
+            typeArguments = string.Join(", ", containingType.TypeArguments.Select(ta => ta.ToDisplayString(GlobalTypeNameFormat)));
             typeConstraints = GetTypeParameterConstraints(originalDefinition.TypeParameters);
         }
 
@@ -236,7 +240,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             PropertyName = property.Name,
             PropertyTypeFullyQualified = GetNonNullableTypeName(propertyType),
             PropertyTypeForTypeof = GetNonNullableTypeString(propertyType),
-            ContainingTypeFullyQualified = containingType.ToDisplayString(),
+            ContainingTypeFullyQualified = containingType.ToDisplayString(GlobalTypeNameFormat),
             ContainingTypeClrName = GetClrTypeName(containingType),
             ContainingTypeOpenGeneric = openGenericType,
             GenericTypeParameters = typeParameters,
@@ -248,7 +252,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             PropertyTypeAsTypeParameter = propertyTypeAsTypeParameter,
             IsValueType = propertyType.IsValueType,
             IsNullableValueType = isNullableValueType,
-            AttributeTypeName = attribute.AttributeClass!.ToDisplayString(),
+            AttributeTypeName = attribute.AttributeClass!.ToDisplayString(GlobalTypeNameFormat),
             ConstructorArgs = new EquatableArray<string>(ctorArgs),
             NamedArgs = new EquatableArray<NamedArgModel>(namedArgs)
         };
@@ -1199,7 +1203,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     {
         if (constant is { Type: not null, Value: not null })
         {
-            var enumTypeName = constant.Type.ToDisplayString();
+            var enumTypeName = constant.Type.ToDisplayString(GlobalTypeNameFormat);
             return $"({enumTypeName}){constant.Value.ToInvariantString()}";
         }
         return constant.Value.ToInvariantString() ?? "null";
@@ -1429,7 +1433,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             // Type constraints (base class and interfaces)
             foreach (var constraintType in tp.ConstraintTypes)
             {
-                constraints.Add(constraintType.ToDisplayString());
+                constraints.Add(constraintType.ToDisplayString(GlobalTypeNameFormat));
             }
 
             // Constructor constraint (must come last)

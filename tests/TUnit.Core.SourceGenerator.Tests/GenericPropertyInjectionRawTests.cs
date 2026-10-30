@@ -642,4 +642,141 @@ internal class GenericPropertyInjectionRawTests
             .IsTrue()
             .Because("Should generate property source for WebAppFactoryBase<CustomFactory<MyProgram>, MyProgram>");
     }
+
+    [Test]
+    public async Task NamespaceStartingWithCore_GeneratedCodeCompiles()
+    {
+        // Generated sources live in namespace TUnit.Core, where an unqualified Core.X binds to TUnit.Core.X
+        var source = """
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+            using TUnit.Core.Interfaces;
+
+            namespace Core.Api.Tests;
+
+            public enum Mode { A, B }
+
+            public class ModeDataSourceAttribute : DataSourceGeneratorAttribute<InMemoryDatabase>
+            {
+                public Mode Mode { get; set; }
+
+                protected override IEnumerable<Func<InMemoryDatabase>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+                {
+                    yield return () => new InMemoryDatabase();
+                }
+            }
+
+            public interface IMarker { }
+
+            public abstract class GenericFixtureBase<TProgram> where TProgram : class, IMarker
+            {
+                [ClassDataSource<InMemoryDatabase>(Shared = SharedType.PerTestSession)]
+                public InMemoryDatabase? Database { get; init; }
+            }
+
+            public class MyTests : GenericFixtureBase<MyTests>, IMarker
+            {
+                [ClassDataSource<InMemoryDatabase>(Shared = SharedType.PerTestSession)]
+                public required InMemoryDatabase Db { get; init; }
+
+                [ModeDataSource(Mode = Mode.B)]
+                public InMemoryDatabase? Other { get; set; }
+
+                [Test]
+                public Task MyTest() => Task.CompletedTask;
+            }
+
+            public class InMemoryDatabase : IAsyncInitializer
+            {
+                public Task InitializeAsync() => Task.CompletedTask;
+            }
+            """;
+
+        await AssertGeneratedCodeCompilesAsync(source);
+    }
+
+    [Test]
+    public async Task KeywordEnumArgument_GeneratedCodeCompiles()
+    {
+        var source = """
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            namespace TestProject;
+
+            public enum @event { A, B }
+
+            public class EventDataSourceAttribute : DataSourceGeneratorAttribute<string>
+            {
+                public @event Kind { get; set; }
+
+                protected override IEnumerable<Func<string>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+                {
+                    yield return () => Kind.ToString();
+                }
+            }
+
+            public class MyTests
+            {
+                [EventDataSource(Kind = @event.B)]
+                public string? Value { get; set; }
+
+                [Test]
+                public Task MyTest() => Task.CompletedTask;
+            }
+            """;
+
+        await AssertGeneratedCodeCompilesAsync(source);
+    }
+
+    // Generated code switches on NET8_0_OR_GREATER (UnsafeAccessor) and NET9_0_OR_GREATER (generic UnsafeAccessor),
+    // so compile it once per branch a consumer can hit: the reflection fallback, .NET 8 and .NET 9+.
+    private static readonly string[][] TargetFrameworkSymbols =
+    [
+        [],
+        ["NET8_0_OR_GREATER"],
+        ["NET8_0_OR_GREATER", "NET9_0_OR_GREATER"]
+    ];
+
+    private static async Task AssertGeneratedCodeCompilesAsync(string source)
+    {
+        foreach (var symbols in TargetFrameworkSymbols)
+        {
+            var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols(symbols);
+
+            var compilation = CSharpCompilation.Create(
+                    "TestAssembly",
+                    [CSharpSyntaxTree.ParseText(source, parseOptions)],
+                    options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                )
+                .WithReferences(ReferencesHelper.References);
+
+            var driver = CSharpGeneratorDriver.Create(
+                    [new PropertyInjectionSourceGenerator().AsSourceGenerator()],
+                    parseOptions: parseOptions)
+                .RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var generatorDiagnostics);
+
+            var runResult = driver.GetRunResult();
+            var symbolsLabel = symbols.Length == 0 ? "no symbols" : string.Join(", ", symbols);
+
+            await Assert.That(runResult.Results.Select(r => r.Exception?.ToString()).OfType<string>().ToList()).IsEmpty()
+                .Because($"Generator threw ({symbolsLabel})");
+            await Assert.That(generatorDiagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).Select(d => d.ToString()).ToList()).IsEmpty()
+                .Because($"Generator reported errors ({symbolsLabel})");
+            await Assert.That(runResult.GeneratedTrees).IsNotEmpty()
+                .Because($"Generator emitted nothing ({symbolsLabel})");
+
+            var errors = newCompilation.GetDiagnostics()
+                .Where(d => d.Severity == DiagnosticSeverity.Error)
+                .Select(d => d.ToString())
+                .ToList();
+
+            await Assert.That(errors).IsEmpty()
+                .Because($"Generated code does not compile ({symbolsLabel})");
+        }
+    }
 }
