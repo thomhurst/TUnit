@@ -692,6 +692,47 @@ internal class GenericPropertyInjectionRawTests
             }
             """;
 
+        await AssertGeneratedCodeCompilesAsync(source);
+    }
+
+    [Test]
+    public async Task KeywordEnumArgument_GeneratedCodeCompiles()
+    {
+        var source = """
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            namespace TestProject;
+
+            public enum @event { A, B }
+
+            public class EventDataSourceAttribute : DataSourceGeneratorAttribute<string>
+            {
+                public @event Kind { get; set; }
+
+                protected override IEnumerable<Func<string>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+                {
+                    yield return () => Kind.ToString();
+                }
+            }
+
+            public class MyTests
+            {
+                [EventDataSource(Kind = @event.B)]
+                public string? Value { get; set; }
+
+                [Test]
+                public Task MyTest() => Task.CompletedTask;
+            }
+            """;
+
+        await AssertGeneratedCodeCompilesAsync(source);
+    }
+
+    private static async Task AssertGeneratedCodeCompilesAsync(string source)
+    {
         var compilation = CSharpCompilation.Create(
                 "TestAssembly",
                 [CSharpSyntaxTree.ParseText(source)],
