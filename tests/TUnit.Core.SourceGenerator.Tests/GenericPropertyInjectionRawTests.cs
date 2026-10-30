@@ -642,4 +642,71 @@ internal class GenericPropertyInjectionRawTests
             .IsTrue()
             .Because("Should generate property source for WebAppFactoryBase<CustomFactory<MyProgram>, MyProgram>");
     }
+
+    [Test]
+    public async Task NamespaceStartingWithCore_GeneratedCodeCompiles()
+    {
+        // Generated sources live in namespace TUnit.Core, where an unqualified Core.X binds to TUnit.Core.X
+        var source = """
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+            using TUnit.Core.Interfaces;
+
+            namespace Core.Api.Tests;
+
+            public enum Mode { A, B }
+
+            public class ModeDataSourceAttribute : DataSourceGeneratorAttribute<InMemoryDatabase>
+            {
+                public Mode Mode { get; set; }
+
+                protected override IEnumerable<Func<InMemoryDatabase>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+                {
+                    yield return () => new InMemoryDatabase();
+                }
+            }
+
+            public abstract class GenericFixtureBase<TProgram> where TProgram : class
+            {
+                [ClassDataSource<InMemoryDatabase>(Shared = SharedType.PerTestSession)]
+                public InMemoryDatabase? Database { get; init; }
+            }
+
+            public class MyTests : GenericFixtureBase<MyTests>
+            {
+                [ClassDataSource<InMemoryDatabase>(Shared = SharedType.PerTestSession)]
+                public required InMemoryDatabase Db { get; init; }
+
+                [ModeDataSource(Mode = Mode.B)]
+                public InMemoryDatabase? Other { get; set; }
+
+                [Test]
+                public Task MyTest() => Task.CompletedTask;
+            }
+
+            public class InMemoryDatabase : IAsyncInitializer
+            {
+                public Task InitializeAsync() => Task.CompletedTask;
+            }
+            """;
+
+        var compilation = CSharpCompilation.Create(
+                "TestAssembly",
+                [CSharpSyntaxTree.ParseText(source)],
+                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+            )
+            .WithReferences(ReferencesHelper.References);
+
+        CSharpGeneratorDriver.Create(new PropertyInjectionSourceGenerator())
+            .RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out _);
+
+        var errors = newCompilation.GetDiagnostics()
+            .Where(d => d.Severity == DiagnosticSeverity.Error)
+            .Select(d => d.ToString())
+            .ToList();
+
+        await Assert.That(errors).IsEmpty();
+    }
 }
