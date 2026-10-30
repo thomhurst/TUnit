@@ -205,6 +205,28 @@ public class ResourceRemovalTests
     }
 
     [Test]
+    public async Task Remove_PairsRepeatedOptionWithItsOwnValue()
+    {
+        // Both calls pass the same interned "--url" object, so identity alone cannot tell them apart.
+        const string option = "--url";
+        var builder = DistributedApplication.CreateBuilder();
+        var optional = builder.AddContainer("optional", "nginx").WithHttpEndpoint(targetPort: 80);
+        var api = builder.AddContainer("api", "nginx")
+            .WithArgs(option, "http://kept")
+            .WithArgs(context =>
+            {
+                context.Args.Add(option);
+                context.Args.Add(optional.GetEndpoint("http"));
+                context.Args.Add("positional");
+            });
+
+        ResourceRemoval.Remove(builder.Resources, ["optional"], _ => { });
+
+        var args = await RunArgsCallbacksAsync(api.Resource);
+        await Assert.That(args).IsEquivalentTo(new object[] { "--url", "http://kept", "positional" }, CollectionOrdering.Matching);
+    }
+
+    [Test]
     public async Task Remove_DropsWholeValueThatMixesKeptAndRemovedReferences()
     {
         // A value that cannot fully resolve cannot be passed in part, so the whole variable goes.
