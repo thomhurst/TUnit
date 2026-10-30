@@ -197,7 +197,7 @@ Removed resources can still have dependents. TUnit detaches the kept resources f
 - `WaitFor` and `WaitForCompletion` on a removed resource are dropped.
 - Environment variables and arguments that reference a removed resource are not set. This covers `WithReference` (endpoints and connection strings) and endpoint values passed to `WithEnvironment` or `WithArgs`.
 - A value that combines a removed resource with other parts, such as a URL built from a kept and a removed endpoint, is dropped whole, because it cannot be resolved.
-- If a dropped argument follows an option name such as `--optional-url`, the option name is dropped too, so the next argument does not become its value.
+- If a dropped argument follows an option name such as `--optional-url` added by the same `WithArgs` call, the option name is dropped too, so the next argument does not become its value. Arguments after a `--` separator are never paired. To keep a standalone flag that comes just before a referenced value, add the flag with a separate `WithArgs` call.
 
 Each change is written to the fixture's progress log. The kept resource must work without the removed dependency. For example, it must not require a connection string that is no longer set.
 

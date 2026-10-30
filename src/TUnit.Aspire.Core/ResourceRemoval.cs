@@ -85,8 +85,12 @@ internal static class ResourceRemoval
                     log($"ResourcesToRemove: dropped wait on removed resource '{wait.Resource.Name}' from '{resource.Name}'.");
                     break;
                 case EndpointReferenceAnnotation endpointReference when removed.Contains(endpointReference.Resource):
+                    annotations.RemoveAt(i);
+                    log($"ResourcesToRemove: dropped endpoint reference to removed resource '{endpointReference.Resource.Name}' from '{resource.Name}'.");
+                    break;
                 case ResourceRelationshipAnnotation relationship when removed.Contains(relationship.Resource):
                     annotations.RemoveAt(i);
+                    log($"ResourcesToRemove: dropped relationship to removed resource '{relationship.Resource.Name}' from '{resource.Name}'.");
                     break;
                 case EnvironmentCallbackAnnotation environment:
                     annotations[i] = WrapEnvironmentCallback(environment, resource, removed, log);
@@ -137,9 +141,12 @@ internal static class ResourceRemoval
     {
         return new CommandLineArgsCallbackAnnotation(async context =>
         {
+            // Earlier callbacks' arguments are already filtered, and an option is only paired with a
+            // value that the same callback added.
+            var start = context.Args.Count;
             await original.Callback(context).ConfigureAwait(false);
 
-            for (var i = context.Args.Count - 1; i >= 0; i--)
+            for (var i = context.Args.Count - 1; i >= start; i--)
             {
                 var argument = context.Args[i];
                 if (!ReferencesRemoved(argument, removed, 0))
@@ -150,8 +157,12 @@ internal static class ResourceRemoval
                 context.Args.RemoveAt(i);
 
                 // "--name value": dropping only the value would make the next argument the option's value.
-                // A dropped "--name=value" is an option itself, so it is never the previous option's value.
-                if (i > 0 && !IsOption(argument) && IsOptionName(context.Args[i - 1]))
+                // A dropped "--name=value" is an option itself, so it is never the previous option's value,
+                // and after a "--" separator every argument is positional.
+                if (i > start
+                    && !IsOption(argument)
+                    && IsOptionName(context.Args[i - 1])
+                    && !HasSeparatorBefore(context.Args, i - 1))
                 {
                     var option = (string)context.Args[i - 1];
                     context.Args.RemoveAt(i - 1);
@@ -168,7 +179,20 @@ internal static class ResourceRemoval
 
     // "--url=value" is one argument and is dropped whole, so only a bare option name pairs with the next argument.
     private static bool IsOptionName(object? argument)
-        => argument is string { Length: > 1 } text && text[0] == '-' && !text.Contains('=');
+        => argument is string { Length: > 1 } text && text[0] == '-' && text != "--" && !text.Contains('=');
+
+    private static bool HasSeparatorBefore(IList<object> args, int index)
+    {
+        for (var i = 0; i < index; i++)
+        {
+            if (args[i] is "--")
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private static bool IsOption(object? argument) => argument switch
     {

@@ -2,6 +2,7 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using TUnit.Aspire.Tests.Helpers;
 using TUnit.Assertions;
+using TUnit.Assertions.Enums;
 using TUnit.Assertions.Extensions;
 using TUnit.Core;
 
@@ -39,13 +40,17 @@ public class ResourceRemovalTests
             .WithEnvironment("OPTIONAL_URL", optional.GetEndpoint("http"))
             .WithEnvironment("KEEP", "value");
 
-        ResourceRemoval.Remove(builder.Resources, ["optional"], _ => { });
+        var log = new List<string>();
+
+        ResourceRemoval.Remove(builder.Resources, ["optional"], log.Add);
 
         var environment = await RunEnvironmentCallbacksAsync(api.Resource);
         await Assert.That(environment.Keys).IsEquivalentTo(["KEEP"]);
         await Assert.That(api.Resource.Annotations.OfType<EndpointReferenceAnnotation>()).IsEmpty();
         await Assert.That(api.Resource.Annotations.OfType<ResourceRelationshipAnnotation>()
             .Where(r => r.Resource.Name == "optional")).IsEmpty();
+        await Assert.That(log).Contains("ResourcesToRemove: dropped endpoint reference to removed resource 'optional' from 'api'.");
+        await Assert.That(log).Contains("ResourcesToRemove: dropped relationship to removed resource 'optional' from 'api'.");
     }
 
     [Test]
@@ -102,6 +107,41 @@ public class ResourceRemovalTests
         await Assert.That(args).IsEquivalentTo(new object[] { "--verbose", "positional" });
         await Assert.That(log).Contains(
             "ResourcesToRemove: dropped argument '--optional-url' and its value from 'api' because the value references a removed resource.");
+    }
+
+    [Test]
+    public async Task Remove_KeepsSeparatorAndArgumentsAfterIt()
+    {
+        var builder = DistributedApplication.CreateBuilder();
+        var optional = builder.AddContainer("optional", "nginx").WithHttpEndpoint(targetPort: 80);
+        var api = builder.AddContainer("api", "nginx")
+            .WithArgs(context =>
+            {
+                context.Args.Add("--");
+                context.Args.Add(optional.GetEndpoint("http"));
+                context.Args.Add("-report.txt");
+                context.Args.Add(optional.GetEndpoint("http"));
+            });
+
+        ResourceRemoval.Remove(builder.Resources, ["optional"], _ => { });
+
+        var args = await RunArgsCallbacksAsync(api.Resource);
+        await Assert.That(args).IsEquivalentTo(new object[] { "--", "-report.txt" }, CollectionOrdering.Matching);
+    }
+
+    [Test]
+    public async Task Remove_PairsOptionOnlyWithValueFromSameCallback()
+    {
+        var builder = DistributedApplication.CreateBuilder();
+        var optional = builder.AddContainer("optional", "nginx").WithHttpEndpoint(targetPort: 80);
+        var api = builder.AddContainer("api", "nginx")
+            .WithArgs("--verbose")
+            .WithArgs(optional.GetEndpoint("http"));
+
+        ResourceRemoval.Remove(builder.Resources, ["optional"], _ => { });
+
+        var args = await RunArgsCallbacksAsync(api.Resource);
+        await Assert.That(args).IsEquivalentTo(new object[] { "--verbose" }, CollectionOrdering.Matching);
     }
 
     [Test]
