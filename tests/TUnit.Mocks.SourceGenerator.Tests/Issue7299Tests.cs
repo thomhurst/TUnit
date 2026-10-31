@@ -24,6 +24,8 @@ public class Issue7299Tests : SnapshotTestBase
 
             public interface IParameterNamed<T> { void Invoke<T>(int TMethod, T value); }
 
+            public interface IMethodNamed<T> { void TMethod<T>(T value); }
+
             public class Usage
             {
                 void M()
@@ -33,6 +35,7 @@ public class Issue7299Tests : SnapshotTestBase
                     _ = Mock.Of<IConstrained<int>>();
                     _ = Mock.Of<ITaken<int>>();
                     _ = Mock.Of<IParameterNamed<int>>();
+                    _ = Mock.Of<IMethodNamed<int>>();
                 }
             }
         }

@@ -107,7 +107,8 @@ internal static class MethodTypeParameterRenames
         IReadOnlyCollection<string> outerTypeParameterNames,
         Dictionary<ITypeParameterSymbol, string> renames)
     {
-        if (Contains(outerTypeParameterNames, candidate))
+        // A method type parameter may not share the method's own name (CS0694).
+        if (candidate == method.Name || Contains(outerTypeParameterNames, candidate))
         {
             return true;
         }
@@ -153,6 +154,10 @@ internal static class MethodTypeParameterRenames
         return false;
     }
 
+    /// <summary>
+    /// Restores the previous renames on dispose. Scopes do not nest in practice, since each method
+    /// model is rendered on its own, but restoring the previous state keeps nesting safe.
+    /// </summary>
     public readonly struct Scope : IDisposable
     {
         private readonly Dictionary<ITypeParameterSymbol, string>? _previous;

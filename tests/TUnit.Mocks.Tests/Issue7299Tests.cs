@@ -44,6 +44,12 @@ public interface IParameterNamed7299<T>
     int Invoke<T>(int TMethod, T value);
 }
 
+// The default replacement name is the method's own name (CS0694).
+public interface IMethodNamed7299<T>
+{
+    int TMethod<T>(T value);
+}
+
 // A mocked class's virtual generic method collides with the class's type parameter.
 public class Handler7299<T>
 {
@@ -108,6 +114,16 @@ public class Issue7299Tests
 
         await Assert.That(mock.Object.Invoke(1, "value")).IsEqualTo(7);
         await Assert.That(mock.Object.Invoke(1, 5)).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task Renamed_Type_Parameter_Does_Not_Clash_With_The_Method_Name()
+    {
+        var mock = IMethodNamed7299<string>.Mock();
+        mock.TMethod<int>(4).Returns(16);
+
+        await Assert.That(mock.Object.TMethod(4)).IsEqualTo(16);
+        await Assert.That(mock.Object.TMethod("4")).IsEqualTo(0);
     }
 
     [Test]
