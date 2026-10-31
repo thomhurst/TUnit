@@ -48,7 +48,7 @@ namespace .
         public ..ShouldAssertion<.<TItem>> HaveCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems() { }
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
-        public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
+        public ..ShouldSingleItemAssertion<.<TItem>, TItem> HaveSingleItem() { }
         public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
@@ -142,7 +142,7 @@ namespace .
         public ..ShouldAssertion<.<TItem>> HaveCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems() { }
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
-        public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
+        public ..ShouldSingleItemAssertion<.<TItem>, TItem> HaveSingleItem() { }
         public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
@@ -196,7 +196,7 @@ namespace .
         public ..ShouldAssertion<.<TItem>> HaveCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems() { }
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
-        public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
+        public ..ShouldSingleItemAssertion<.<TItem>, TItem> HaveSingleItem() { }
         public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
@@ -232,10 +232,21 @@ namespace .
         public ..ShouldAssertion<.<TItem>> HaveCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems() { }
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
-        public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
+        public ..ShouldSingleItemAssertion<.<TItem>, TItem> HaveSingleItem() { }
         public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+    }
+    public sealed class ShouldSingleItemAssertion<TCollection, TItem> : ., ..IShouldSource, ..IShouldSource<TCollection>
+        where TCollection : .<TItem>
+    {
+        public ShouldSingleItemAssertion(.<TCollection> context, .<TCollection, TItem> inner) { }
+        public ..ShouldContinuation<TCollection> And { get; }
+        public .<TCollection> Context { get; }
+        public ..ShouldContinuation<TCollection> Or { get; }
+        public .<TCollection?> AssertAsync() { }
+        public ..ShouldSingleItemAssertion<TCollection, TItem> Because(string message) { }
+        public .<TItem> GetAwaiter() { }
     }
     public abstract class ShouldSourceBase<TValue, TSelf> : ..IShouldSource, ..IShouldSource<TValue>
         where TSelf : ..ShouldSourceBase<TValue, TSelf>
@@ -628,7 +639,8 @@ namespace .
     }
     public static class ShouldHasSingleItemAssertionExtensions
     {
-        public static ..ShouldAssertion<TCollection> HaveSingleItem<TCollection, TItem>(this ..IShouldSource<TCollection> source)
+        public static ..ShouldSingleItemAssertion<.<TItem>, TItem> HaveSingleItem<TItem>(this ..IShouldSource<.<TItem>> source) { }
+        public static ..ShouldSingleItemAssertion<TCollection, TItem> HaveSingleItem<TCollection, TItem>(this ..IShouldSource<TCollection> source)
             where TCollection : .<TItem> { }
     }
     public static class ShouldHasSingleItemPredicateAssertionExtensions
