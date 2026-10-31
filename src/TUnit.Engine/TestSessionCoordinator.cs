@@ -117,14 +117,23 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             GC.WaitForPendingFinalizers();
         }
 
-        var sessionExceptions = _contextProvider.TestSessionContext.UnobservedTaskExceptions;
+        var entries = _contextProvider.TestSessionContext.GetUnobservedTaskExceptionEntries();
 
-        if (sessionExceptions.Count == 0)
+        if (entries.Length == 0)
         {
             return;
         }
 
-        var exceptions = sessionExceptions.ToArray();
+        var exceptions = new Exception[entries.Length];
+        var unattributed = 0;
+        for (var i = 0; i < entries.Length; i++)
+        {
+            exceptions[i] = entries[i].Exception;
+            if (!entries[i].Attributable)
+            {
+                unattributed++;
+            }
+        }
 
         var message = new StringBuilder()
             .Append(exceptions.Length)
@@ -134,6 +143,11 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         if (!failOnUnobserved)
         {
             message.Append(" Use --fail-on-unobserved-task-exceptions to fail the run when this happens.");
+        }
+        else if (unattributed > 0)
+        {
+            message.Append(' ').Append(unattributed)
+                .Append(" occurred while other test sessions were running in this process, so they cannot be attributed to this session and do not fail it.");
         }
 
         foreach (var exception in exceptions)
@@ -154,9 +168,12 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
 
         if (failOnUnobserved)
         {
-            foreach (var exception in exceptions)
+            foreach (var (exception, attributable) in entries)
             {
-                await _serviceProvider.MessageBus.UnobservedTaskExceptionFailed(exception);
+                if (attributable)
+                {
+                    await _serviceProvider.MessageBus.UnobservedTaskExceptionFailed(exception);
+                }
             }
         }
     }

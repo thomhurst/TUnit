@@ -116,7 +116,7 @@ public class TestSessionContext : Context
 
     internal void MarkFailure() => Interlocked.Increment(ref _failureCount);
 
-    private readonly ConcurrentQueue<Exception> _unobservedTaskExceptions = new();
+    private readonly ConcurrentQueue<(Exception Exception, bool Attributable)> _unobservedTaskExceptions = new();
 
     /// <summary>
     /// Exceptions from faulted tasks that nothing awaited or observed, raised through
@@ -129,9 +129,29 @@ public class TestSessionContext : Context
     /// recorded so far. With <c>--fail-on-unobserved-task-exceptions</c>, TUnit also runs a final
     /// garbage collection after the session hooks so late faults are not lost.
     /// </remarks>
-    public IReadOnlyCollection<Exception> UnobservedTaskExceptions => _unobservedTaskExceptions;
+    public IReadOnlyCollection<Exception> UnobservedTaskExceptions
+    {
+        get
+        {
+            var entries = _unobservedTaskExceptions.ToArray();
+            var exceptions = new Exception[entries.Length];
+            for (var i = 0; i < entries.Length; i++)
+            {
+                exceptions[i] = entries[i].Exception;
+            }
 
-    internal void AddUnobservedTaskException(Exception exception) => _unobservedTaskExceptions.Enqueue(exception);
+            return exceptions;
+        }
+    }
+
+    /// <summary>
+    /// Each recorded exception, and whether it can be attributed to this session. It cannot when
+    /// other sessions were running in the same process when the runtime raised it.
+    /// </summary>
+    internal (Exception Exception, bool Attributable)[] GetUnobservedTaskExceptionEntries() => _unobservedTaskExceptions.ToArray();
+
+    internal void AddUnobservedTaskException(Exception exception, bool attributable) =>
+        _unobservedTaskExceptions.Enqueue((exception, attributable));
 
     internal readonly List<Artifact> Artifacts = [];
 

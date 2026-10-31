@@ -228,6 +228,8 @@ The runtime raises the event on the finalizer thread, often after the test that 
 
 By default these exceptions do not fail the run. To gate CI on them, pass `--fail-on-unobserved-task-exceptions` or set `context.Settings.Execution.FailOnUnobservedTaskExceptions = true`. With the option, TUnit runs a final garbage collection at the end of the session so late faults are not lost, and reports each exception as a failed result named `Unobserved task exception - <type>: <message>`. That result appears in TRX and every other report, and the run exits with a failure code.
 
+When an IDE runs several test sessions in the same process at once, TUnit cannot tell which session an exception belongs to. Every running session then reports it, but none of them fails because of it.
+
 ```csharp
 public static class UnobservedTaskExceptionLog
 {

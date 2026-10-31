@@ -122,6 +122,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         lock (_htmlReportStateLock)
         {
             _updates.Clear();
+            _unobservedTaskExceptions.Clear();
             _githubReporter?.ResetSessionState();
             Volatile.Write(ref _htmlReportEnabledAfterDiscovery, HtmlReportEnabledUnresolved);
 #if NET

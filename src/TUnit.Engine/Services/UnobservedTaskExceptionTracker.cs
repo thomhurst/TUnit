@@ -17,15 +17,22 @@ internal static class UnobservedTaskExceptionTracker
 
     public static void Unregister(TestSessionContext session) => s_activeSessions.TryRemove(session, out _);
 
-    public static void Record(AggregateException exception)
-    {
-        // The runtime wraps the task's exceptions in an AggregateException. Keep a single cause
-        // unwrapped so reports show the real exception type.
-        Exception reported = exception.InnerExceptions.Count == 1 ? exception.InnerExceptions[0] : exception;
+    public static void Record(AggregateException exception) => Record(exception, s_activeSessions.Keys);
 
-        foreach (var session in s_activeSessions.Keys)
+    internal static void Record(AggregateException exception, ICollection<TestSessionContext> sessions)
+    {
+        // The event names no session. With one session running, the fault is attributed to it.
+        // With several (MTP server mode), every session reports it, but none fails because of it.
+        var attributable = sessions.Count == 1;
+
+        // The runtime wraps the task's exceptions in an AggregateException. Record each cause on
+        // its own, so every report keeps each cause's type and stack trace.
+        foreach (var cause in exception.Flatten().InnerExceptions)
         {
-            session.AddUnobservedTaskException(reported);
+            foreach (var session in sessions)
+            {
+                session.AddUnobservedTaskException(cause, attributable);
+            }
         }
     }
 }
