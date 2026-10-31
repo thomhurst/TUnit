@@ -38,6 +38,18 @@ public interface IConstrained7299<T>
     TOther Select<T, TOther>(T value) where TOther : T;
 }
 
+// The default replacement name is taken by a value parameter of the method (CS0412).
+public interface IParameterNamed7299<T>
+{
+    int Invoke<T>(int TMethod, T value);
+}
+
+// A mocked class's virtual generic method collides with the class's type parameter.
+public class Handler7299<T>
+{
+    public virtual T Handle<T>(T input) => input;
+}
+
 #endregion
 
 public class Issue7299Tests
@@ -86,5 +98,24 @@ public class Issue7299Tests
         mock.Select<object, string>("value").Returns("selected");
 
         await Assert.That(mock.Object.Select<object, string>("value")).IsEqualTo("selected");
+    }
+
+    [Test]
+    public async Task Renamed_Type_Parameter_Does_Not_Clash_With_A_Value_Parameter_Name()
+    {
+        var mock = IParameterNamed7299<string>.Mock();
+        mock.Invoke<string>(1, "value").Returns(7);
+
+        await Assert.That(mock.Object.Invoke(1, "value")).IsEqualTo(7);
+        await Assert.That(mock.Object.Invoke(1, 5)).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task Class_Virtual_Generic_Method_With_Same_Type_Parameter_Name_Can_Be_Configured()
+    {
+        var mock = Handler7299<string>.Mock();
+        mock.Handle<int>(3).Returns(9);
+
+        await Assert.That(mock.Object.Handle(3)).IsEqualTo(9);
     }
 }

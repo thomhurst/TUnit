@@ -13,7 +13,9 @@ namespace TUnit.Mocks.SourceGenerator.Extensions;
 /// <c>extension&lt;T&gt;(...) { Invoke&lt;T&gt;() }</c> (CS9289). Both parameters display as
 /// <c>T</c>, so the rename is applied per symbol while a method's model strings are rendered:
 /// every display helper routes through <see cref="ToDisplayString"/>, which swaps the renamed
-/// type parameters' display parts while a <see cref="Scope"/> is active.
+/// type parameters' display parts while a <see cref="Scope"/> is active. Renames apply only while
+/// the scope is active, so every model string for a method must be rendered eagerly inside it;
+/// anything rendered later (for example by a deferred LINQ query) keeps the original names.
 /// </summary>
 internal static class MethodTypeParameterRenames
 {
@@ -113,6 +115,15 @@ internal static class MethodTypeParameterRenames
         foreach (var typeParameter in method.TypeParameters)
         {
             if (typeParameter.Name == candidate)
+            {
+                return true;
+            }
+        }
+
+        // A method type parameter may not share a name with one of the method's value parameters (CS0412).
+        foreach (var parameter in method.Parameters)
+        {
+            if (parameter.Name == candidate)
             {
                 return true;
             }
