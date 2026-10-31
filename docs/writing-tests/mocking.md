@@ -92,6 +92,8 @@ Prefer `T.Mock()` for creating mocks. The `Mock.Of<T>()` factory is equivalent, 
 var mock = Mock.Of<IGreeter>(); // equivalent to IGreeter.Mock(), which is preferred
 ```
 
+The **TM010** suggestion flags `Mock.Of<T>()` and `Mock.Of<T>(behavior)` calls that can use `T.Mock()` instead, and its code fix rewrites them (adding `using TUnit.Mocks;` when needed). Use "Fix all" in your IDE, or run `dotnet format analyzers --diagnostics TM010 --severity info` to migrate a whole project.
+
 ## Key Concepts[​](#key-concepts "Direct link to Key Concepts")
 
 ### Creating Mocks[​](#creating-mocks "Direct link to Creating Mocks")
