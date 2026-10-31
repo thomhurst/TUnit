@@ -27,8 +27,21 @@ internal static class UnobservedTaskExceptionTracker
 
         // The runtime wraps the task's exceptions in an AggregateException. Record each cause on
         // its own, so every report keeps each cause's type and stack trace.
-        foreach (var cause in exception.Flatten().InnerExceptions)
+        RecordCauses(exception, sessions, attributable);
+    }
+
+    // Not AggregateException.Flatten(): it drops an empty AggregateException, so a task that threw
+    // one would record nothing. Only aggregates that wrap causes are unwrapped here.
+    private static void RecordCauses(AggregateException exception, ICollection<TestSessionContext> sessions, bool attributable)
+    {
+        foreach (var cause in exception.InnerExceptions)
         {
+            if (cause is AggregateException { InnerExceptions.Count: > 0 } nested)
+            {
+                RecordCauses(nested, sessions, attributable);
+                continue;
+            }
+
             foreach (var session in sessions)
             {
                 session.AddUnobservedTaskException(cause, attributable);

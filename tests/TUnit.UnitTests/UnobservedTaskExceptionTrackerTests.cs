@@ -60,4 +60,19 @@ public class UnobservedTaskExceptionTrackerTests
 
         await Assert.That(session.UnobservedTaskExceptions).IsEquivalentTo(new Exception[] { first, second, nested });
     }
+
+    [Test]
+    public async Task Empty_Aggregate_Cause_Is_Recorded()
+    {
+        var session = CreateSession();
+        var empty = new AggregateException();
+        var other = new InvalidOperationException("other");
+
+        // The runtime wraps what the task threw, so a task that threw an empty aggregate arrives
+        // as an aggregate whose only cause is that empty aggregate.
+        UnobservedTaskExceptionTracker.Record(new AggregateException(empty), [session]);
+        UnobservedTaskExceptionTracker.Record(new AggregateException(new AggregateException(empty, other)), [session]);
+
+        await Assert.That(session.UnobservedTaskExceptions).IsEquivalentTo(new Exception[] { empty, empty, other });
+    }
 }
