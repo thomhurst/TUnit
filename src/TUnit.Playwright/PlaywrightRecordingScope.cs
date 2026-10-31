@@ -7,6 +7,7 @@ internal sealed class PlaywrightRecordingScope
     private const string StateBagKey = "TUnit.Playwright.RecordingScope";
     private readonly Lock _lock = new();
     private readonly List<(Func<ValueTask> Dispose, int Order)> _cleanup = [];
+    private readonly List<PlaywrightFailureCapture> _captures = [];
 
     internal static PlaywrightRecordingScope For(TestContext context) =>
         (PlaywrightRecordingScope)context.StateBag.Items.GetOrAdd(StateBagKey, static _ => new PlaywrightRecordingScope())!;
@@ -19,6 +20,14 @@ internal sealed class PlaywrightRecordingScope
         }
     }
 
+    internal void RegisterCapture(PlaywrightFailureCapture capture)
+    {
+        lock (_lock)
+        {
+            _captures.Add(capture);
+        }
+    }
+
     internal static ValueTask CompleteAsync(TestContext context) =>
         context.StateBag.TryGetValue<PlaywrightRecordingScope>(StateBagKey, out var scope) && scope is not null
             ? scope.CompleteAsync()
@@ -27,11 +36,20 @@ internal sealed class PlaywrightRecordingScope
     private async ValueTask CompleteAsync()
     {
         (Func<ValueTask> Dispose, int Order)[] cleanup;
+        PlaywrightFailureCapture[] captures;
         lock (_lock)
         {
+            captures = _captures.ToArray();
+            _captures.Clear();
             _cleanup.Sort(static (left, right) => left.Order.CompareTo(right.Order));
             cleanup = _cleanup.ToArray();
             _cleanup.Clear();
+        }
+
+        // Capture while pages are still open: disposal below closes them.
+        foreach (var capture in captures)
+        {
+            await capture.CompleteAsync().ConfigureAwait(false);
         }
 
         List<Exception>? exceptions = null;

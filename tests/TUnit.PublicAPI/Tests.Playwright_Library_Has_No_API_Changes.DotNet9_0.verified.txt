@@ -7,6 +7,7 @@ namespace
         public BrowserFixture() { }
         public .IBrowser Browser { get; }
         public virtual string BrowserName { get; }
+        public ? DisconnectedAt { get; }
         [.ClassDataSourceAttribute<.PlaywrightFixture>(Shared=.)]
         public required .PlaywrightFixture PlaywrightFixture { get; init; }
         public virtual . DisposeAsync() { }
@@ -26,7 +27,19 @@ namespace
         public . BrowserTearDown(.TestContext testContext) { }
         public .<.IBrowserContext> NewContext(.BrowserNewContextOptions options) { }
     }
-    public class ContextFixture : , .
+    [(.Assembly | .Class | .Method)]
+    public class CaptureOnFailureAttribute : .TUnitAttribute, .IScopedAttribute, ., ., .
+    {
+        public CaptureOnFailureAttribute(string path = "playwright-artifacts") { }
+        public int Order { get; }
+        public string Path { get; }
+        public  ScopeType { get; }
+        public bool Screenshot { get; set; }
+        public bool Trace { get; set; }
+        public . OnTestDiscovered(.DiscoveredTestContext discoveredTestContext) { }
+        public . OnTestEnd(.TestContext context) { }
+    }
+    public class ContextFixture : , ., ., .
     {
         public ContextFixture() { }
         [.ClassDataSourceAttribute<.BrowserFixture>(Shared=.)]
@@ -57,7 +70,7 @@ namespace
         . DisposeAsync();
         . ResetAsync();
     }
-    public class PageFixture : , .
+    public class PageFixture : , ., ., .
     {
         public PageFixture() { }
         [.ClassDataSourceAttribute<.ContextFixture>]
@@ -138,6 +151,7 @@ namespace
     {
         public .BrowserNewContextOptions? DefaultBrowserNewContextOptions { get; set; }
         public .BrowserTypeLaunchOptions? DefaultBrowserTypeLaunchOptions { get; set; }
+        public bool RelaunchDisconnectedBrowser { get; set; }
     }
     public class WorkerAwareTest : ., .
     {

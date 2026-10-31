@@ -193,6 +193,72 @@ public class LoginPageTests : PageTest
 - `width` - viewport width used for the recording, in pixels. Defaults to `1280`.
 - `height` - viewport height used for the recording, in pixels. Defaults to `1400`.
 
+## Screenshots and Traces on Failure
+
+Add `[CaptureOnFailure]` to capture a full-page screenshot of each open page and a [Playwright trace](https://playwright.dev/dotnet/docs/trace-viewer) when a test fails, times out or is cancelled. Both files are attached to the test result. Passing and skipped tests discard the trace and write no files.
+
+```csharp
+[CaptureOnFailure]
+public class LoginPageTests : PageTest
+{
+    [Test]
+    public async Task Login_Button_Is_Visible()
+    {
+        await Page.GotoAsync("https://example.com/login");
+
+        await Assert.That(await Page.Locator("button#login").IsVisibleAsync()).IsTrue();
+    }
+}
+```
+
+The attribute can go on a method, a class or an assembly (`[assembly: CaptureOnFailure]`); the closest one applies. It works for contexts created by `ContextTest`, `PageTest` and per-test `ContextFixture` and `PageFixture` instances.
+
+Files are named `<test id hash>_<display name>.png` and `<test id hash>_<display name>.trace.zip`. The hash comes from the unique test id, so parallel tests in one class and `[Arguments]` variants of one method never write to the same file. Retries add `-attemptN`, and a test with more than one open page gets one screenshot per page (`-page1`, `-page2`). Open a trace with `pwsh bin/Debug/netX/playwright.ps1 show-trace <file>` or at [trace.playwright.dev](https://trace.playwright.dev).
+
+```csharp
+public class CheckoutTests : PageTest
+{
+    [Test]
+    [CaptureOnFailure(path: "failures", Trace = false)]
+    public async Task Checkout_Page_Is_Visible()
+    {
+        await Page.GotoAsync("https://example.com/checkout");
+
+        await Assert.That(await Page.Locator("body").IsVisibleAsync()).IsTrue();
+    }
+}
+```
+
+- `path` - directory files are written to, resolved relative to the test application's working directory unless given as an absolute path. Defaults to `"playwright-artifacts"`.
+- `Screenshot` - take a full-page screenshot of each open page. Defaults to `true`.
+- `Trace` - record a trace with screenshots, DOM snapshots and sources. Defaults to `true`.
+
+Capture runs after your `[After(Test)]` hooks and before the context closes. As with `[RecordVideo]`, captured `ContextFixture` and `PageFixture` instances are created again for each retry attempt. Fixtures shared between tests are skipped, because no single test owns them. If a screenshot or trace cannot be saved, for example because the browser crashed, the reason is written to the test's error output and the test result is not changed.
+
+## Shared Browser Crashes
+
+When a shared browser disconnects without TUnit closing it, for example because it crashed, every test that uses it fails with `TargetClosedException: Target page, context or browser has been closed`. TUnit records when the browser disconnected and reports it on each affected test:
+
+- A fixture that cannot create its context or page fails with `The shared chromium browser disconnected at 2026-10-31 12:01:03.412 UTC, before this failure...`, with the Playwright error as the inner exception.
+- A test that fails with a Playwright error after the disconnect gets the same note in its error output.
+
+`BrowserFixture.DisconnectedAt` exposes the time. To keep a long run going after a crash, let the shared `BrowserFixture` launch a new browser for the next context it creates:
+
+```csharp
+public class PlaywrightSetup
+{
+    [Before(HookType.TestDiscovery)]
+    public static Task Configure(BeforeTestDiscoveryContext context)
+    {
+        context.Settings.PlaywrightSettings.RelaunchDisconnectedBrowser = true;
+
+        return Task.CompletedTask;
+    }
+}
+```
+
+Tests that inherit `BrowserTest`, `ContextTest` or `PageTest` already get a new browser after a failed test.
+
 ## Trace Context Propagation
 
 TUnit can add W3C `traceparent` and `baggage` headers from the current test to the requests your page sends to the application under test. This lets the application's telemetry be correlated with the test that triggered it.

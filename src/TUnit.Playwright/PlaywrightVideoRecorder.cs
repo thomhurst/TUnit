@@ -72,7 +72,7 @@ internal sealed class PlaywrightVideoRecorder
         // line up with the attempts shown in the run report instead of overwriting.
         var testContext = _owner;
         var attempt = _attempt;
-        var baseName = SanitizeForFileName(testContext.Metadata.TestName) +
+        var baseName = PlaywrightArtifactNames.Sanitize(testContext.Metadata.TestName) +
                        (attempt > 0 ? $"-attempt{attempt + 1}" : string.Empty);
 
         for (var i = 0; i < videos.Count; i++)
@@ -118,31 +118,5 @@ internal sealed class PlaywrightVideoRecorder
                 Console.WriteLine($"Could not rename video for {testContext.Metadata.TestName}: {renameFailure.Message}");
             }
         }
-    }
-
-    private static string SanitizeForFileName(string value)
-    {
-        var characters = value.ToCharArray();
-        var invalidCharacters = Path.GetInvalidFileNameChars();
-        for (var i = 0; i < characters.Length; i++)
-        {
-            if (Array.IndexOf(invalidCharacters, characters[i]) >= 0)
-            {
-                characters[i] = '_';
-            }
-            else if (characters[i] == ' ')
-            {
-                characters[i] = '-';
-            }
-        }
-
-        var name = characters.Length == 0 ? "test" : new string(characters);
-        // Windows device names remain reserved even when followed by an extension.
-        var dot = name.IndexOf('.');
-        var stem = (dot < 0 ? name : name.Substring(0, dot)).ToUpperInvariant();
-        var reserved = stem is "CON" or "PRN" or "AUX" or "NUL" or "CONIN$" or "CONOUT$" ||
-                       (stem.Length == 4 && (stem.StartsWith("COM", StringComparison.Ordinal) || stem.StartsWith("LPT", StringComparison.Ordinal)) &&
-                        stem[3] is >= '1' and <= '9' or '¹' or '²' or '³');
-        return reserved ? "_" + name : name;
     }
 }

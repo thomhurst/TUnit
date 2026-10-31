@@ -10,7 +10,7 @@ namespace TUnit.Playwright;
 /// properties on the same test class therefore yield two isolated browser contexts while
 /// sharing the underlying <see cref="BrowserFixture"/> at <see cref="SharedType.PerTestSession"/>.
 /// </summary>
-public class PageFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptInitializer
+public class PageFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptInitializer, ITestEndEventReceiver
 {
     private readonly PlaywrightFixtureLifecycle _lifecycle = new();
     private IPage? _page;
@@ -29,13 +29,28 @@ public class PageFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptInit
         }
         var context = ContextFixture.Context
             ?? throw new InvalidOperationException("ContextFixture did not create a browser context during initialization.");
-        _page = await context.NewPageAsync().ConfigureAwait(false);
+        try
+        {
+            _page = await context.NewPageAsync().ConfigureAwait(false);
+        }
+        catch (Exception exception) when (ContextFixture.BrowserMonitor?.WrapIfDisconnected(exception, TestContext.Current) is { } wrapped)
+        {
+            throw wrapped;
+        }
     }
 
     bool ITestAttemptInitializer.IsInitialized => _lifecycle.IsInitialized;
 
     async ValueTask ITestAttemptInitializer.InitializeForTestAttemptAsync(TestContext context, CancellationToken cancellationToken) =>
         await _lifecycle.InitializeAsync(this, context).WaitAsync(cancellationToken).ConfigureAwait(false);
+
+    int IEventReceiver.Order => 0;
+
+    ValueTask ITestEndEventReceiver.OnTestEnd(TestContext context)
+    {
+        PlaywrightBrowserMonitor.ReportIfDisconnected(context);
+        return default;
+    }
 
     public virtual async ValueTask DisposeAsync()
     {

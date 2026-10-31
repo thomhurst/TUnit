@@ -9,6 +9,7 @@ internal class BrowserService : IWorkerService
     private BrowserService(IBrowser browser)
     {
         Browser = browser;
+        PlaywrightBrowserMonitor.For(browser);
     }
 
     public static Task<BrowserService> Register(
@@ -28,6 +29,7 @@ internal class BrowserService : IWorkerService
 
         if (browser != null)
         {
+            PlaywrightBrowserMonitor.MarkClosing(browser);
             await browser.CloseAsync().ConfigureAwait(false);
         }
     }
