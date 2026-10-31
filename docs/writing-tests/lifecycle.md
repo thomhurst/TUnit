@@ -66,15 +66,15 @@ Exact order of operations for a single test:
 | 7     | **Create test class instance**                   | Constructor runs                    |
 | 8     | **Set property values on instance**              | Cached values applied               |
 | 9     | **`IAsyncInitializer.InitializeAsync()`**        | All tracked objects initialized     |
-| 10    | `[BeforeEvery(Test)]`                            | Hook                                |
-| 11    | `ITestStartEventReceiver` (Early)                | Event                               |
+| 10    | `ITestStartEventReceiver` (Early)                | Event                               |
+| 11    | `[BeforeEvery(Test)]`                            | Hook                                |
 | 12    | `[Before(Test)]`                                 | Hook (instance method)              |
 | 13    | `ITestStartEventReceiver` (Late)                 | Event                               |
 | 14    | **Test Body Execution**                          | Your test code runs                 |
 | 15    | `ITestEndEventReceiver` (Early)                  | Event                               |
 | 16    | `[After(Test)]`                                  | Hook (instance method)              |
-| 17    | `ITestEndEventReceiver` (Late)                   | Event                               |
-| 18    | `[AfterEvery(Test)]`                             | Hook                                |
+| 17    | `[AfterEvery(Test)]`                             | Hook                                |
+| 18    | `ITestEndEventReceiver` (Late)                   | Event                               |
 | 19    | **`IAsyncDisposable` / `IDisposable`**           | Test instance disposed              |
 | 20    | **Cleanup tracked objects**                      | Ref count decremented, dispose if 0 |
 | 21    | `ILastTestInClassEventReceiver`                  | Event (after last test in class)    |
@@ -158,7 +158,7 @@ Once a test has finished and its result has been reported, its `TestContext` dro
 
 ### Early vs Late Stage[​](#early-vs-late-stage "Direct link to Early vs Late Stage")
 
-For `ITestStartEventReceiver` and `ITestEndEventReceiver`:
+For `ITestStartEventReceiver` and `ITestEndEventReceiver` on .NET 8 and later. On older target frameworks (`netstandard2.0`, for example .NET Framework), `Stage` is ignored and every receiver runs at the late stage:
 
 <!-- -->
 
@@ -167,9 +167,9 @@ public class MyAttribute : Attribute, ITestStartEventReceiver
 
 {
 
-    // Early = runs BEFORE [Before(Test)]
+    // Early = runs BEFORE [BeforeEvery(Test)] and [Before(Test)]
 
-    // Late (default) = runs AFTER [Before(Test)]
+    // Late (default) = runs AFTER them
 
     public EventReceiverStage Stage => EventReceiverStage.Early;
 
@@ -179,6 +179,8 @@ public class MyAttribute : Attribute, ITestStartEventReceiver
 
 }
 ```
+
+A late `ITestEndEventReceiver` sees the result established before the late stage. If the test body passed but an early end receiver, an `[After(Test)]` hook or an `[AfterEvery(Test)]` hook threw, `context.Execution.Result` is already `Failed` when the late receiver runs, unless the result was overridden (`Result.IsOverridden`). This is not necessarily the final result: a late receiver that throws can still fail the test, and the test can still end as `Cancelled`.
 
 ## Hook Attributes Reference[​](#hook-attributes-reference "Direct link to Hook Attributes Reference")
 
