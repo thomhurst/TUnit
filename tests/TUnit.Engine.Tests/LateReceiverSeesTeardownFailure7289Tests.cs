@@ -23,6 +23,9 @@ public class LateReceiverSeesTeardownFailure7289Tests(TestMode testMode) : Invok
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(0),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                // The interim Failed result is only for late receivers. The reported result is
+                // recorded afterwards and must still carry the teardown exception.
+                result => result.Results.Single().Output?.ErrorInfo?.Message.ShouldContain("Teardown failed on purpose"),
                 _ => FindFile(x => x.Name == $"{runId}-LateReceiverSeesTeardownFailure-Failed.txt").AssertExists(),
                 _ => FindFile(x => x.Name.StartsWith(runId, StringComparison.Ordinal) && !x.Name.EndsWith("-Failed.txt", StringComparison.Ordinal)).ShouldBeNull()
             ],

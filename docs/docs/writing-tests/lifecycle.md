@@ -299,7 +299,7 @@ sequenceDiagram
 
 ### Early vs Late Stage
 
-For `ITestStartEventReceiver` and `ITestEndEventReceiver`:
+For `ITestStartEventReceiver` and `ITestEndEventReceiver` on .NET 8 and later. On older target frameworks (`netstandard2.0`, for example .NET Framework), `Stage` is ignored and every receiver runs at the late stage:
 
 ```mermaid
 flowchart LR
@@ -335,7 +335,7 @@ public class MyAttribute : Attribute, ITestStartEventReceiver
 }
 ```
 
-A late `ITestEndEventReceiver` sees the result that will be reported. If the test body passed but an early end receiver, an `[After(Test)]` hook or an `[AfterEvery(Test)]` hook threw, `context.Execution.Result` is already `Failed` when the late receiver runs, unless a hook overrode the result.
+A late `ITestEndEventReceiver` sees the result established before the late stage. If the test body passed but an early end receiver, an `[After(Test)]` hook or an `[AfterEvery(Test)]` hook threw, `context.Execution.Result` is already `Failed` when the late receiver runs, unless the result was overridden (`Result.IsOverridden`). This is not necessarily the final result: a late receiver that throws can still fail the test, and the test can still end as `Cancelled`.
 
 ## Hook Attributes Reference
 

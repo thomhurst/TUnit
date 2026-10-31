@@ -106,7 +106,23 @@ internal sealed class PlaywrightFixtureLifecycle
     private async ValueTask CompleteAsync(IAsyncDisposable fixture)
     {
         // Let setup settle before disposing any resources it managed to create.
+        var initialization = _initialization;
         await SettleAsync().ConfigureAwait(false);
-        await fixture.DisposeAsync().ConfigureAwait(false);
+        try
+        {
+            await fixture.DisposeAsync().ConfigureAwait(false);
+        }
+        finally
+        {
+            // The fixture's resources are gone. A later test that reuses a shared parent fixture
+            // must initialize again instead of getting this completed initialization back.
+            lock (_lock)
+            {
+                if (ReferenceEquals(_initialization, initialization))
+                {
+                    _initialization = null;
+                }
+            }
+        }
     }
 }

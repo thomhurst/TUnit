@@ -236,6 +236,30 @@ public class PlaywrightFailureCaptureTests
     }
 
     [Test]
+    public async Task LaterTestReusingSharedPageFixtureGetsNewContextAfterCapture()
+    {
+        using var first = new CaptureScope("First");
+        var attribute = new CaptureOnFailureAttribute(first.Directory);
+        await first.DiscoverAsync(attribute);
+        var fixture = first.CreateFixture();
+        TraceScopeRegistry.RegisterFromDataSource(new ClassDataSourceAttribute<PageFixture> { Shared = SharedType.PerClass }, [fixture]);
+        await ObjectInitializer.InitializeAsync(fixture);
+        var firstPage = fixture.Page;
+        first.SetResult(TestState.Failed);
+        await attribute.OnTestEnd(first.Context);
+        await first.BrowserContext.Received(1).CloseAsync(Arg.Any<BrowserContextCloseOptions>());
+
+        using var second = new CaptureScope("Second");
+        await ObjectInitializer.InitializeAsync(fixture);
+
+        await Assert.That(fixture.ContextFixture.Context).IsNotNull();
+        await Assert.That(fixture.Page).IsNotSameReferenceAs(firstPage);
+        await first.Browser.Received(2).NewContextAsync(Arg.Any<BrowserNewContextOptions>());
+        await fixture.DisposeAsync();
+        await fixture.ContextFixture.DisposeAsync();
+    }
+
+    [Test]
     public async Task WithoutAttributeNothingIsTraced()
     {
         using var scope = new CaptureScope();
