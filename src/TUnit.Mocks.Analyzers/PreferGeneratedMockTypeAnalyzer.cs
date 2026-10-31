@@ -303,10 +303,13 @@ public class PreferGeneratedMockTypeAnalyzer : DiagnosticAnalyzer
 
         /// <summary>
         /// Checks every reference to the declared symbols: writes must store a value
-        /// <see cref="AcceptValue"/> accepts, and reads must not depend on the member's type.
+        /// <see cref="AcceptValue"/> accepts, and no use may depend on the member's type. Writes
+        /// are checked first, so the generated type is known when the uses are checked.
         /// </summary>
         public bool AcceptReferences(IReadOnlyList<SyntaxNode> scopes, List<ISymbol> symbols)
         {
+            var uses = new List<ExpressionSyntax>();
+
             foreach (var scope in scopes)
             {
                 foreach (var identifier in scope.DescendantNodes().OfType<IdentifierNameSyntax>())
@@ -316,10 +319,35 @@ public class PreferGeneratedMockTypeAnalyzer : DiagnosticAnalyzer
                         continue;
                     }
 
-                    if (!AcceptReference(identifier))
+                    if (GetReference(identifier) is not { } reference)
                     {
                         return false;
                     }
+
+                    if (MockTypeFlow.IsWrite(reference))
+                    {
+                        if (GetStore(reference) is not { } store || !AcceptValue(store.Right))
+                        {
+                            return false;
+                        }
+
+                        // The assignment's own value has the member's type, so it must not flow
+                        // anywhere type-sensitive either.
+                        uses.Add(store);
+                    }
+                    else
+                    {
+                        uses.Add(reference);
+                    }
+                }
+            }
+
+            foreach (var use in uses)
+            {
+                if (MockTypeFlow.ClimbTypeFlow(use) != use
+                    || !MockTypeFlow.IsTypeInsensitivePosition(use, GeneratedMockType, _semanticModel, _cancellationToken))
+                {
+                    return false;
                 }
             }
 
@@ -334,35 +362,30 @@ public class PreferGeneratedMockTypeAnalyzer : DiagnosticAnalyzer
                 return false;
             }
 
-            var referenced = _semanticModel.GetSymbolInfo(identifier, _cancellationToken).Symbol;
+            // A member of a generic type can also be reached through another constructed type
+            // (`Holder<int> other; other._mock = ...`), so compare original definitions.
+            var referenced = _semanticModel.GetSymbolInfo(identifier, _cancellationToken).Symbol?.OriginalDefinition;
             return referenced is not null
-                   && symbols.Any(s => SymbolEqualityComparer.Default.Equals(s, referenced));
+                   && symbols.Any(s => SymbolEqualityComparer.Default.Equals(s.OriginalDefinition, referenced));
         }
 
-        private bool AcceptReference(IdentifierNameSyntax identifier)
+        private static ExpressionSyntax? GetReference(IdentifierNameSyntax identifier)
         {
-            ExpressionSyntax reference = identifier;
-            switch (identifier.Parent)
+            return identifier.Parent switch
             {
                 // this._mock, Tests._mock, other._mock
-                case MemberAccessExpressionSyntax memberAccess when memberAccess.Name == identifier:
-                    reference = memberAccess;
-                    break;
+                MemberAccessExpressionSyntax memberAccess when memberAccess.Name == identifier => memberAccess,
                 // other?._mock: the conditional access result type would change.
-                case MemberBindingExpressionSyntax:
-                    return false;
-            }
-
-            if (MockTypeFlow.IsWrite(reference))
-            {
-                return AcceptWrite(reference);
-            }
-
-            return MockTypeFlow.ClimbTypeFlow(reference) == reference
-                   && MockTypeFlow.IsTypeInsensitivePosition(reference, _semanticModel, _cancellationToken);
+                MemberBindingExpressionSyntax => null,
+                _ => identifier,
+            };
         }
 
-        private bool AcceptWrite(ExpressionSyntax reference)
+        /// <summary>
+        /// Plain stores only (<c>=</c> and <c>??=</c>). Ref/out arguments, ref expressions and
+        /// deconstruction could bind differently once the member's type changes.
+        /// </summary>
+        private static AssignmentExpressionSyntax? GetStore(ExpressionSyntax reference)
         {
             SyntaxNode target = reference;
             while (target.Parent is ParenthesizedExpressionSyntax parenthesized)
@@ -370,15 +393,11 @@ public class PreferGeneratedMockTypeAnalyzer : DiagnosticAnalyzer
                 target = parenthesized;
             }
 
-            // Plain stores only; ref/out arguments, ref expressions and deconstruction could bind
-            // differently once the member's type changes. The assignment's own value has the
-            // member's type, so it must not flow anywhere type-sensitive either.
             return target.Parent is AssignmentExpressionSyntax assignment
                    && assignment.Left == target
                    && (assignment.IsKind(SyntaxKind.SimpleAssignmentExpression) || assignment.IsKind(SyntaxKind.CoalesceAssignmentExpression))
-                   && AcceptValue(assignment.Right)
-                   && MockTypeFlow.ClimbTypeFlow(assignment) == assignment
-                   && MockTypeFlow.IsTypeInsensitivePosition(assignment, _semanticModel, _cancellationToken);
+                ? assignment
+                : null;
         }
     }
 }

@@ -73,7 +73,7 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
         // generic type inference), that inferred type would change, and later code relying on it
         // being Mock<T> could stop compiling after the fix.
         if (mockedType.TypeKind == TypeKind.Interface
-            && MayChangeInferredType(invocation, context.SemanticModel, context.CancellationToken))
+            && MayChangeInferredType(invocation, typeArgumentSyntax, context.SemanticModel, context.CancellationToken))
         {
             return;
         }
@@ -292,20 +292,47 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
     /// </summary>
     private static bool MayChangeInferredType(
         InvocationExpressionSyntax invocation,
+        TypeSyntax typeArgumentSyntax,
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
         var node = MockTypeFlow.ClimbTypeFlow(invocation);
+        var wrapperType = GetStaticMockReturnType(invocation, typeArgumentSyntax, semanticModel);
 
         if (node.Parent is EqualsValueClauseSyntax
             {
                 Parent: VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Type.IsVar: true } } declarator
             })
         {
-            return HasTypeSensitiveReference(declarator, semanticModel, cancellationToken);
+            return HasTypeSensitiveReference(declarator, wrapperType, semanticModel, cancellationToken);
         }
 
-        return !MockTypeFlow.IsTypeInsensitivePosition(node, semanticModel, cancellationToken);
+        return !MockTypeFlow.IsTypeInsensitivePosition(node, wrapperType, semanticModel, cancellationToken);
+    }
+
+    /// <summary>
+    /// The type the rewritten <c>T.Mock(...)</c> call would have, or null when it can't be bound
+    /// here (for example because the fix still has to add <c>using TUnit.Mocks;</c>).
+    /// </summary>
+    private static ITypeSymbol? GetStaticMockReturnType(
+        InvocationExpressionSyntax invocation,
+        TypeSyntax typeArgumentSyntax,
+        SemanticModel semanticModel)
+    {
+        if (typeArgumentSyntax is NullableTypeSyntax nullable)
+        {
+            typeArgumentSyntax = nullable.ElementType;
+        }
+
+        var rewritten = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.ParseExpression(typeArgumentSyntax.WithoutTrivia().ToFullString()),
+                SyntaxFactory.IdentifierName("Mock")),
+            invocation.ArgumentList.WithoutTrivia());
+
+        var type = semanticModel.GetSpeculativeTypeInfo(invocation.SpanStart, rewritten, SpeculativeBindingOption.BindAsExpression).Type;
+        return type is null or IErrorTypeSymbol ? null : type;
     }
 
     /// <summary>
@@ -315,6 +342,7 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
     /// </summary>
     private static bool HasTypeSensitiveReference(
         VariableDeclaratorSyntax declarator,
+        ITypeSymbol? wrapperType,
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
@@ -344,7 +372,7 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
 
             if (reference != identifier
                 || MockTypeFlow.IsWrite(identifier)
-                || !MockTypeFlow.IsTypeInsensitivePosition(identifier, semanticModel, cancellationToken))
+                || !MockTypeFlow.IsTypeInsensitivePosition(identifier, wrapperType, semanticModel, cancellationToken))
             {
                 return true;
             }

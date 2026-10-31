@@ -92,6 +92,6 @@ public static class Rules
         category: "TUnit.Mocks",
         defaultSeverity: DiagnosticSeverity.Info,
         isEnabledByDefault: true,
-        description: "For interfaces, T.Mock() returns a generated mock type that derives from Mock<T> and also implements T. Declaring the variable, field or property as Mock<T> hides that type, so the mock can no longer be passed where a T is expected and IntelliSense offers less."
+        description: "For interfaces, T.Mock() returns a generated mock type that derives from Mock<T> and also implements T. Declaring the variable, field or property as Mock<T> hides that type. C# never applies user-defined conversions to interface types, so a Mock<T> needs .Object wherever a T is expected, and IntelliSense offers less."
     );
 }

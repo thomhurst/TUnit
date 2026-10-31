@@ -354,4 +354,208 @@ public class PreferGeneratedMockTypeAnalyzerTests
             """,
             Stubs);
     }
+
+    [Test]
+    public async Task Overloads_That_Would_Bind_Differently_Are_Not_Reported()
+    {
+        await Verifier.VerifyNoDiagnosticAsync(
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Consumer
+            {
+                public Consumer(Mock<IFoo> mock) { }
+                public Consumer(IFoo foo) { }
+
+                public int this[Mock<IFoo> mock] => 0;
+                public int this[IFooMock mock] => 1;
+            }
+
+            public class Tests
+            {
+                public void Test(Consumer consumer)
+                {
+                    Mock<IFoo> ambiguous = IFoo.Mock();
+                    Use(ambiguous);
+
+                    Mock<IFoo> moreSpecific = IFoo.Mock();
+                    Pick(moreSpecific);
+
+                    Mock<IFoo> constructor = IFoo.Mock();
+                    _ = new Consumer(constructor);
+
+                    Mock<IFoo> indexer = IFoo.Mock();
+                    _ = consumer[indexer];
+                }
+
+                private static void Use(Mock<IFoo> mock) { }
+                private static void Use(IFoo foo) { }
+
+                private static void Pick(Mock<IFoo> mock) { }
+                private static void Pick(IFooMock mock) { }
+            }
+            """,
+            Stubs);
+    }
+
+    [Test]
+    public async Task Casts_And_Type_Tests_The_Sealed_Wrapper_Rejects_Are_Not_Reported()
+    {
+        await Verifier.VerifyNoDiagnosticAsync(
+            """
+            using System;
+            using TUnit.Mocks;
+            using App;
+
+            public class Tests
+            {
+                public void Test()
+                {
+                    Mock<IFoo> asInterface = IFoo.Mock();
+                    var disposable = asInterface as IDisposable;
+
+                    Mock<IFoo> cast = IFoo.Mock();
+                    var castDisposable = (IDisposable)cast;
+
+                    Mock<IFoo> isOperator = IFoo.Mock();
+                    var isDisposable = isOperator is IDisposable;
+
+                    Mock<IFoo> alwaysTrue = IFoo.Mock();
+                    var isFoo = alwaysTrue is IFoo;
+
+                    Mock<IFoo> pattern = IFoo.Mock();
+                    if (pattern is IDisposable d) { }
+                }
+            }
+            """,
+            Stubs);
+    }
+
+    [Test]
+    public async Task Casts_And_Type_Tests_The_Wrapper_Allows_Are_Reported()
+    {
+        await Verifier.VerifyCodeFixAsync(
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Tests
+            {
+                public void Test(object other)
+                {
+                    {|#0:Mock<IFoo>|} mock = IFoo.Mock();
+                    var foo = (IFoo)mock;
+                    var asObject = mock as object;
+                    var same = mock == other;
+                    if (mock is IFoo typed) { }
+                    if (mock is not null) { }
+                }
+            }
+            """,
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Tests
+            {
+                public void Test(object other)
+                {
+                    IFooMock mock = IFoo.Mock();
+                    var foo = (IFoo)mock;
+                    var asObject = mock as object;
+                    var same = mock == other;
+                    if (mock is IFoo typed) { }
+                    if (mock is not null) { }
+                }
+            }
+            """,
+            Stubs,
+            Verifier.Diagnostic(Rules.TM011_PreferGeneratedMockType).WithLocation(0).WithArguments("mock", "IFooMock", "Mock<IFoo>"));
+    }
+
+    [Test]
+    public async Task Reads_Before_The_Assigning_Write_Are_Checked_With_The_Generated_Type()
+    {
+        await Verifier.VerifyCodeFixAsync(
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Tests
+            {
+                private {|#0:Mock<IFoo>|} _mock = null!;
+
+                public void Test() => Use(_mock);
+
+                public void Setup() => _mock = IFoo.Mock();
+
+                private static void Use(Mock<IFoo> mock) { }
+            }
+            """,
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Tests
+            {
+                private IFooMock _mock = null!;
+
+                public void Test() => Use(_mock);
+
+                public void Setup() => _mock = IFoo.Mock();
+
+                private static void Use(Mock<IFoo> mock) { }
+            }
+            """,
+            Stubs,
+            Verifier.Diagnostic(Rules.TM011_PreferGeneratedMockType).WithLocation(0).WithArguments("_mock", "IFooMock", "Mock<IFoo>"));
+    }
+
+    [Test]
+    public async Task Writes_Through_Other_Constructed_Generic_Types_Are_Checked()
+    {
+        await Verifier.VerifyNoDiagnosticAsync(
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Holder<T>
+            {
+                private Mock<IFoo> _mock = IFoo.Mock();
+
+                public void Reset(Holder<int> other) => other._mock = Mock.Of<IFoo>();
+            }
+            """,
+            Stubs);
+    }
+
+    [Test]
+    public async Task Collection_Initializers_With_Add_Overloads_Are_Not_Reported()
+    {
+        await Verifier.VerifyNoDiagnosticAsync(
+            """
+            using System.Collections;
+            using System.Collections.Generic;
+            using TUnit.Mocks;
+            using App;
+
+            public class Mocks : IEnumerable
+            {
+                public void Add(Mock<IFoo> mock) { }
+                public void Add(IFoo foo) { }
+                public IEnumerator GetEnumerator() => null!;
+            }
+
+            public class Tests
+            {
+                public void Test()
+                {
+                    Mock<IFoo> mock = IFoo.Mock();
+                    var mocks = new Mocks { mock };
+                }
+            }
+            """,
+            Stubs);
+    }
 }
