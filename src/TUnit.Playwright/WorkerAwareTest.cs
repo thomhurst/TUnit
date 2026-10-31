@@ -17,6 +17,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
 
     private static readonly ConcurrentStack<Worker> AllWorkers = [];
     private Worker _currentWorker = null!;
+    private bool _releaseDeferred;
 
     public int WorkerIndex { get; internal set; }
 
@@ -41,7 +42,14 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
         }
 
         WorkerIndex = _currentWorker.WorkerIndex;
+        _releaseDeferred = false;
     }
+
+    /// <summary>
+    /// Keeps this test's worker out of the pool until test end. Contexts left open for failure
+    /// capture still use the worker's browser, and another test must not close it meanwhile.
+    /// </summary>
+    internal void DeferWorkerRelease() => _releaseDeferred = true;
 
     [After(HookType.Test, "", 0)]
     public async Task WorkerTeardown(TestContext testContext)
@@ -62,6 +70,16 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
                     await kv.Value.ResetAsync().ConfigureAwait(false);
                 }
 
+                if (_releaseDeferred)
+                {
+                    // Decide at test end, after deferred captures closed their contexts. A later
+                    // teardown failure then disposes the worker, like any other failed test.
+                    _releaseDeferred = false;
+                    PlaywrightRecordingScope.For(testContext).Register(
+                        () => new ValueTask(ReleaseDeferredWorkerAsync(worker, testContext)), PlaywrightCleanupOrder.WorkerRelease);
+                    return;
+                }
+
                 AllWorkers.Push(worker);
             }
             catch
@@ -69,6 +87,18 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
                 await DisposeAllServicesAsync(worker).ConfigureAwait(false);
                 throw;
             }
+        }
+        else
+        {
+            await DisposeAllServicesAsync(worker).ConfigureAwait(false);
+        }
+    }
+
+    private async Task ReleaseDeferredWorkerAsync(Worker worker, TestContext testContext)
+    {
+        if (TestOk(testContext))
+        {
+            AllWorkers.Push(worker);
         }
         else
         {

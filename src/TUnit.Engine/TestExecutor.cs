@@ -447,6 +447,21 @@ internal class TestExecutor
                 ? await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, CancellationToken.None).ConfigureAwait(false)
                 : [];
 
+            // A failed teardown fails the test. Record that before the late receivers run, so
+            // they see the outcome that will be reported instead of the body's Passed result.
+            // SetResult keeps the first result, so replace it. TestStateManager.MarkFailed later
+            // records the final result with every hook and receiver exception.
+            if ((hookExceptions.Count > 0 || earlyStageExceptions.Count > 0)
+                && executableTest.Context.Execution.Result is { State: TestState.Passed, IsOverridden: false } bodyResult)
+            {
+                executableTest.State = TestState.Failed;
+                executableTest.Context.Execution.Result = bodyResult with
+                {
+                    State = TestState.Failed,
+                    Exception = new TestExecutionException(null, hookExceptions, earlyStageExceptions),
+                };
+            }
+
             // Late stage test end receivers run after instance-level hooks (default behavior)
             var lateStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, CancellationToken.None, EventReceiverStage.Late).ConfigureAwait(false);
 

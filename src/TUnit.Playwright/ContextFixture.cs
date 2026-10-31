@@ -9,11 +9,15 @@ namespace TUnit.Playwright;
 /// Authoring a new fixture class is the way to change that scope — attribute arguments on
 /// inherited <c>init</c> properties cannot be overridden.
 /// </summary>
-public class ContextFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptInitializer
+public class ContextFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptInitializer, ITestEndEventReceiver
 {
     private readonly PlaywrightFixtureLifecycle _lifecycle = new();
     private IBrowserContext? _context;
     private PlaywrightVideoRecorder? _recording;
+    private PlaywrightFailureCapture? _capture;
+
+    /// <summary>The monitor of the browser that created the current context.</summary>
+    internal PlaywrightBrowserMonitor? BrowserMonitor { get; private set; }
 
     [ClassDataSource<BrowserFixture>(Shared = SharedType.PerTestSession)]
     public required BrowserFixture BrowserFixture { get; init; }
@@ -58,25 +62,40 @@ public class ContextFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptI
     public virtual async Task InitializeAsync()
     {
         var owner = TestContext.Current;
+        var captureOwner = _lifecycle.CaptureOwner;
+        _lifecycle.ClearCaptureOwner();
         _recording = null;
+        _capture = null;
         var options = PlaywrightContextOptions.ApplyRecording(GetContextOptions(), owner);
         var traceContext = PlaywrightTraceContextRoute.Create(PropagateTraceContext, TraceContextOrigins, options);
-        _context = await BrowserFixture.Browser.NewContextAsync(options).ConfigureAwait(false);
-        if (traceContext is not null)
+        var browser = await BrowserFixture.GetBrowserForNewContextAsync().ConfigureAwait(false);
+        var monitor = BrowserMonitor = PlaywrightBrowserMonitor.RecordUse(owner, browser);
+        try
         {
-            try
+            _context = await browser.NewContextAsync(options).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (monitor.WrapIfDisconnected(exception, owner) is { } wrapped)
+        {
+            throw wrapped;
+        }
+
+        try
+        {
+            if (traceContext is not null)
             {
                 await traceContext.RegisterAsync(_context).ConfigureAwait(false);
             }
-            catch
-            {
-                if (Interlocked.Exchange(ref _context, null) is { } context)
-                {
-                    await context.CloseAsync().ConfigureAwait(false);
-                }
 
-                throw;
+            _capture = await PlaywrightFailureCapture.StartAsync(_context, captureOwner).ConfigureAwait(false);
+        }
+        catch
+        {
+            if (Interlocked.Exchange(ref _context, null) is { } context)
+            {
+                await context.CloseAsync().ConfigureAwait(false);
             }
+
+            throw;
         }
 
         // Option-only recording can span shared fixture lifetimes and has no single test owner.
@@ -90,8 +109,27 @@ public class ContextFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptI
     async ValueTask ITestAttemptInitializer.InitializeForTestAttemptAsync(TestContext context, CancellationToken cancellationToken) =>
         await _lifecycle.InitializeAsync(this, context).WaitAsync(cancellationToken).ConfigureAwait(false);
 
+    int IEventReceiver.Order => 0;
+
+    ValueTask ITestEndEventReceiver.OnTestEnd(TestContext context)
+    {
+        if (BrowserMonitor is { } monitor)
+        {
+            PlaywrightBrowserMonitor.RecordUse(context, monitor);
+        }
+
+        PlaywrightBrowserMonitor.ReportIfDisconnected(context);
+        return default;
+    }
+
     public virtual async ValueTask DisposeAsync()
     {
+        // Save failure artifacts before the context closes; this is a no-op when already saved.
+        if (Interlocked.Exchange(ref _capture, null) is { } capture)
+        {
+            await capture.CompleteAsync().ConfigureAwait(false);
+        }
+
         if (_recording is { } recording)
         {
             await recording.CloseAsync().ConfigureAwait(false);

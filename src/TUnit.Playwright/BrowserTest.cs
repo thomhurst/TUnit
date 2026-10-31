@@ -46,7 +46,7 @@ public class BrowserTest : PlaywrightTest
     /// </remarks>
     public virtual IReadOnlyList<string>? TraceContextOrigins => null;
 
-    private readonly List<Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording)>> _contexts = [];
+    private readonly List<Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording, PlaywrightFailureCapture? Capture)>> _contexts = [];
     private readonly Lock _contextsLock = new();
     private readonly BrowserTypeLaunchOptions _options;
 
@@ -54,7 +54,7 @@ public class BrowserTest : PlaywrightTest
     {
         var owner = TestContext.Current;
         var traceContext = PlaywrightTraceContextRoute.Create(PropagateTraceContext, TraceContextOrigins, options);
-        Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording)> creation;
+        Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording, PlaywrightFailureCapture? Capture)> creation;
         lock (_contextsLock)
         {
             var browser = Browser ?? throw new InvalidOperationException("Cannot create a browser context before setup or after teardown has started.");
@@ -66,28 +66,41 @@ public class BrowserTest : PlaywrightTest
         return (await creation.ConfigureAwait(false)).Context;
     }
 
-    private static async Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording)> CreateContextAsync(
+    private static async Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording, PlaywrightFailureCapture? Capture)> CreateContextAsync(
         IBrowser browser, BrowserNewContextOptions options, PlaywrightTraceContextRoute? traceContext, TestContext? owner)
     {
-        var context = await browser.NewContextAsync(options).ConfigureAwait(false);
-        if (traceContext is not null)
+        var monitor = PlaywrightBrowserMonitor.RecordUse(owner, browser);
+        IBrowserContext context;
+        try
         {
-            try
+            context = await browser.NewContextAsync(options).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (monitor.WrapIfDisconnected(exception, owner) is { } wrapped)
+        {
+            throw wrapped;
+        }
+
+        PlaywrightFailureCapture? capture;
+        try
+        {
+            if (traceContext is not null)
             {
                 await traceContext.RegisterAsync(context).ConfigureAwait(false);
             }
-            catch
-            {
-                await context.CloseAsync().ConfigureAwait(false);
-                throw;
-            }
+
+            capture = await PlaywrightFailureCapture.StartAsync(context, owner).ConfigureAwait(false);
+        }
+        catch
+        {
+            await context.CloseAsync().ConfigureAwait(false);
+            throw;
         }
 
         var recording = !string.IsNullOrEmpty(options.RecordVideoDir) && owner is not null
             ? new PlaywrightVideoRecorder(context, owner)
             : null;
 
-        return (context, recording);
+        return (context, recording, capture);
     }
 
     [Before(HookType.Test, "", 0)]
@@ -108,7 +121,7 @@ public class BrowserTest : PlaywrightTest
     [After(HookType.Test, "", 0)]
     public async Task BrowserTearDown(TestContext testContext)
     {
-        Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording)>[] contexts;
+        Task<(IBrowserContext Context, PlaywrightVideoRecorder? Recording, PlaywrightFailureCapture? Capture)>[] contexts;
         lock (_contextsLock)
         {
             Browser = null!;
@@ -116,10 +129,12 @@ public class BrowserTest : PlaywrightTest
             _contexts.Clear();
         }
 
+        PlaywrightBrowserMonitor.ReportIfDisconnected(testContext);
+
         List<Exception>? exceptions = null;
         foreach (var creation in contexts)
         {
-            (IBrowserContext Context, PlaywrightVideoRecorder? Recording) created;
+            (IBrowserContext Context, PlaywrightVideoRecorder? Recording, PlaywrightFailureCapture? Capture) created;
             try
             {
                 created = await creation.ConfigureAwait(false);
@@ -130,9 +145,27 @@ public class BrowserTest : PlaywrightTest
                 continue;
             }
 
+            var (context, recording, capture) = created;
+            if (capture is not null)
+            {
+                if (!capture.TestHasFailed)
+                {
+                    // A later [After(Test)] hook can still fail the test. The engine records that
+                    // before the late test-end receivers run, so let [CaptureOnFailure] decide then.
+                    // The worker's browser must stay open until then, so keep the worker out of the pool.
+                    PlaywrightRecordingScope.For(capture.Owner).Register(
+                        () => new ValueTask(recording?.CloseAsync() ?? context.CloseAsync()), PlaywrightCleanupOrder.DeferredContext);
+                    DeferWorkerRelease();
+                    continue;
+                }
+
+                // Capture while the pages are still open; closing the context ends the trace.
+                // Capture never throws, so the context below is always closed.
+                await capture.CompleteAsync().ConfigureAwait(false);
+            }
+
             try
             {
-                var (context, recording) = created;
                 await (recording?.CloseAsync() ?? context.CloseAsync()).ConfigureAwait(false);
             }
             catch (Exception exception)
