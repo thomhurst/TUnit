@@ -295,7 +295,7 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
-        var node = ClimbTypeFlow(invocation);
+        var node = MockTypeFlow.ClimbTypeFlow(invocation);
 
         if (node.Parent is EqualsValueClauseSyntax
             {
@@ -305,89 +305,7 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
             return HasTypeSensitiveReference(declarator, semanticModel, cancellationToken);
         }
 
-        return !IsTypeInsensitivePosition(node, semanticModel, cancellationToken);
-    }
-
-    /// <summary>
-    /// Climbs through expressions whose type flows from this operand (parentheses, conditional,
-    /// null-coalescing and switch expressions).
-    /// </summary>
-    private static SyntaxNode ClimbTypeFlow(SyntaxNode node)
-    {
-        while (node.Parent is { } parent)
-        {
-            if (parent is ParenthesizedExpressionSyntax
-                || (parent is ConditionalExpressionSyntax conditional && node != conditional.Condition)
-                || parent.IsKind(SyntaxKind.CoalesceExpression))
-            {
-                node = parent;
-                continue;
-            }
-
-            if (parent is SwitchExpressionArmSyntax arm && node == arm.Expression && arm.Parent is { } switchExpression)
-            {
-                node = switchExpression;
-                continue;
-            }
-
-            break;
-        }
-
-        return node;
-    }
-
-    /// <summary>
-    /// Whether an expression in this position is converted to, or used through, a type that
-    /// doesn't depend on the expression's own type. Anything not recognised counts as sensitive.
-    /// </summary>
-    private static bool IsTypeInsensitivePosition(SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken)
-    {
-        switch (node.Parent)
-        {
-            // mock.Member / mock?.Member: the wrapper derives from Mock<T>, so the same members bind.
-            case MemberAccessExpressionSyntax memberAccess:
-                return memberAccess.Expression == node;
-            case ConditionalAccessExpressionSyntax conditionalAccess:
-                return conditionalAccess.Expression == node;
-
-            case ArgumentSyntax argument when argument.RefKindKeyword.IsKind(SyntaxKind.None):
-                return argument.Parent?.Parent switch
-                {
-                    // Generic type inference would pick up the wrapper type.
-                    InvocationExpressionSyntax outer =>
-                        semanticModel.GetSymbolInfo(outer, cancellationToken).Symbol is IMethodSymbol method
-                        && (!method.IsGenericMethod || GetInvokedName(outer) is GenericNameSyntax),
-                    BaseObjectCreationExpressionSyntax or ConstructorInitializerSyntax or PrimaryConstructorBaseTypeSyntax or ElementAccessExpressionSyntax => true,
-                    _ => false,
-                };
-
-            // Explicitly typed targets.
-            case EqualsValueClauseSyntax { Parent: VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Type.IsVar: false } } }:
-            case EqualsValueClauseSyntax { Parent: PropertyDeclarationSyntax or ParameterSyntax }:
-                return true;
-            case AssignmentExpressionSyntax assignment:
-                return assignment.Right == node;
-            case CastExpressionSyntax:
-            case BinaryExpressionSyntax:
-            case IsPatternExpressionSyntax:
-            case InterpolationSyntax:
-            case ExpressionStatementSyntax:
-            case ExpressionElementSyntax:
-            case YieldStatementSyntax:
-                return true;
-            case InitializerExpressionSyntax initializer:
-                return initializer.Parent is not (ImplicitArrayCreationExpressionSyntax or AnonymousObjectCreationExpressionSyntax);
-
-            // Declared return types, except for lambdas whose return type is inferred.
-            case ReturnStatementSyntax returnStatement:
-                return returnStatement.Ancestors().FirstOrDefault(static a =>
-                    a is AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax or MemberDeclarationSyntax) is not AnonymousFunctionExpressionSyntax;
-            case ArrowExpressionClauseSyntax:
-                return true;
-
-            default:
-                return false;
-        }
+        return !MockTypeFlow.IsTypeInsensitivePosition(node, semanticModel, cancellationToken);
     }
 
     /// <summary>
@@ -422,28 +340,17 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            var reference = ClimbTypeFlow(identifier);
+            var reference = MockTypeFlow.ClimbTypeFlow(identifier);
 
             if (reference != identifier
-                || IsWrite(identifier)
-                || !IsTypeInsensitivePosition(identifier, semanticModel, cancellationToken))
+                || MockTypeFlow.IsWrite(identifier)
+                || !MockTypeFlow.IsTypeInsensitivePosition(identifier, semanticModel, cancellationToken))
             {
                 return true;
             }
         }
 
         return false;
-    }
-
-    private static SimpleNameSyntax? GetInvokedName(InvocationExpressionSyntax invocation)
-    {
-        return invocation.Expression switch
-        {
-            MemberAccessExpressionSyntax memberAccess => memberAccess.Name,
-            MemberBindingExpressionSyntax memberBinding => memberBinding.Name,
-            SimpleNameSyntax simpleName => simpleName,
-            _ => null,
-        };
     }
 
     private static bool ReceiverBindsToType(
@@ -579,20 +486,4 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
         return true;
     }
 
-    private static bool IsWrite(IdentifierNameSyntax identifier)
-    {
-        SyntaxNode expression = identifier;
-        while (expression.Parent is ParenthesizedExpressionSyntax parenthesized)
-        {
-            expression = parenthesized;
-        }
-
-        return expression.Parent switch
-        {
-            AssignmentExpressionSyntax assignment => assignment.Left == expression,
-            ArgumentSyntax argument => !argument.RefKindKeyword.IsKind(SyntaxKind.None) && !argument.RefKindKeyword.IsKind(SyntaxKind.InKeyword),
-            RefExpressionSyntax => true,
-            _ => false,
-        };
-    }
 }

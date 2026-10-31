@@ -19,4 +19,5 @@ public static class DiagnosticIds
     public const string CannotMockInterfaceWithInaccessibleMember = "TM007";
     // TM008 and TM009 are reported by TUnit.Mocks.SourceGenerator (see its Diagnostics.cs).
     public const string PreferStaticMockSyntax = "TM010";
+    public const string PreferGeneratedMockType = "TM011";
 }

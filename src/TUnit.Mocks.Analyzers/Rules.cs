@@ -84,4 +84,14 @@ public static class Rules
         isEnabledByDefault: true,
         description: "T.Mock() is the recommended way to create a single-type mock. Mock.Of<T>() remains available for the cases T.Mock() does not cover, such as multi-interface mocks and custom default value providers."
     );
+
+    public static readonly DiagnosticDescriptor TM011_PreferGeneratedMockType = new(
+        id: DiagnosticIds.PreferGeneratedMockType,
+        title: "Declare mocks with the generated mock type",
+        messageFormat: "Declare '{0}' as '{1}' instead of '{2}'",
+        category: "TUnit.Mocks",
+        defaultSeverity: DiagnosticSeverity.Info,
+        isEnabledByDefault: true,
+        description: "For interfaces, T.Mock() returns a generated mock type that derives from Mock<T> and also implements T. Declaring the variable, field or property as Mock<T> hides that type, so the mock can no longer be passed where a T is expected and IntelliSense offers less."
+    );
 }
