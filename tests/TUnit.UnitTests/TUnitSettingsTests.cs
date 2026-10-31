@@ -18,6 +18,7 @@ public class TUnitSettingsTests
     private int? _savedMaximumParallelTests;
     private bool _savedDetailedStackTrace;
     private bool _savedFailFast;
+    private bool _savedFailOnUnobservedTaskExceptions;
     private bool _savedThreadPoolTuningEnabled;
     private bool _savedHtmlReportEnabled;
     private bool _savedJsonReportEnabled;
@@ -33,6 +34,7 @@ public class TUnitSettingsTests
         _savedMaximumParallelTests = TUnitSettings.Default.Parallelism.MaximumParallelTests;
         _savedDetailedStackTrace = TUnitSettings.Default.Display.DetailedStackTrace;
         _savedFailFast = TUnitSettings.Default.Execution.FailFast;
+        _savedFailOnUnobservedTaskExceptions = TUnitSettings.Default.Execution.FailOnUnobservedTaskExceptions;
         _savedThreadPoolTuningEnabled = TUnitSettings.Default.Execution.ThreadPoolTuningEnabled;
         _savedHtmlReportEnabled = TUnitSettings.Default.Reporting.HtmlReportEnabled;
         _savedJsonReportEnabled = TUnitSettings.Default.Reporting.JsonReportEnabled;
@@ -49,6 +51,7 @@ public class TUnitSettingsTests
         TUnitSettings.Default.Parallelism.MaximumParallelTests = _savedMaximumParallelTests;
         TUnitSettings.Default.Display.DetailedStackTrace = _savedDetailedStackTrace;
         TUnitSettings.Default.Execution.FailFast = _savedFailFast;
+        TUnitSettings.Default.Execution.FailOnUnobservedTaskExceptions = _savedFailOnUnobservedTaskExceptions;
         TUnitSettings.Default.Execution.ThreadPoolTuningEnabled = _savedThreadPoolTuningEnabled;
         TUnitSettings.Default.Reporting.HtmlReportEnabled = _savedHtmlReportEnabled;
         TUnitSettings.Default.Reporting.JsonReportEnabled = _savedJsonReportEnabled;
@@ -65,6 +68,7 @@ public class TUnitSettingsTests
         await Assert.That(TUnitSettings.Default.Parallelism.MaximumParallelTests).IsNull();
         await Assert.That(TUnitSettings.Default.Display.DetailedStackTrace).IsFalse();
         await Assert.That(TUnitSettings.Default.Execution.FailFast).IsFalse();
+        await Assert.That(TUnitSettings.Default.Execution.FailOnUnobservedTaskExceptions).IsFalse();
         await Assert.That(TUnitSettings.Default.Execution.ThreadPoolTuningEnabled).IsTrue();
         await Assert.That(TUnitSettings.Default.Reporting.HtmlReportEnabled).IsTrue();
         await Assert.That(TUnitSettings.Default.Reporting.JsonReportEnabled).IsTrue();

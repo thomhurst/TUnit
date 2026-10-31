@@ -50,8 +50,20 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
 
     private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _latestUpdates = [];
 
+    private readonly ConcurrentQueue<Exception> _unobservedTaskExceptions = new();
+
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
+        if (value is UnobservedTaskExceptionsData unobserved)
+        {
+            foreach (var exception in unobserved.Exceptions)
+            {
+                _unobservedTaskExceptions.Enqueue(exception);
+            }
+
+            return Task.CompletedTask;
+        }
+
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
 
         _latestUpdates[testNodeUpdateMessage.TestNode.Uid.Value] = testNodeUpdateMessage;
@@ -59,7 +71,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         return Task.CompletedTask;
     }
 
-    public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage)];
+    public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage), typeof(UnobservedTaskExceptionsData)];
 
     public Task BeforeRunAsync(CancellationToken cancellationToken)
     {
@@ -81,7 +93,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         }
 
         // Generate JUnit XML
-        var xmlContent = JUnitXmlWriter.GenerateXml(lastUpdates, Filter);
+        var xmlContent = JUnitXmlWriter.GenerateXml(lastUpdates, Filter, _unobservedTaskExceptions.ToArray());
 
         if (string.IsNullOrEmpty(xmlContent))
         {

@@ -196,6 +196,17 @@ internal static class ReportDataJson
             w.WriteEndObject();
         }
 
+        if (data.UnobservedTaskExceptions is { Length: > 0 } unobserved)
+        {
+            w.WritePropertyName("unobservedTaskExceptions");
+            w.WriteStartArray();
+            foreach (var exception in unobserved)
+            {
+                WriteException(w, exception);
+            }
+            w.WriteEndArray();
+        }
+
         w.WritePropertyName("summary");
         WriteSummary(w, data.Summary);
 
@@ -477,6 +488,7 @@ internal static class ReportDataJson
             Summary = root.TryGetProperty("summary", out var summary) ? ReadSummary(summary) : new ReportSummary(),
             Groups = ReadArray(root, "groups", ReadGroup) ?? [],
             Spans = ReadArray(root, "spans", ReadSpan),
+            UnobservedTaskExceptions = ReadArray(root, "unobservedTaskExceptions", ReadException),
         };
     }
 

@@ -111,6 +111,7 @@ internal static class ReportDataMerger
             Summary = summary,
             Groups = groups.ToArray(),
             Spans = spans.Count > 0 ? spans.ToArray() : null,
+            UnobservedTaskExceptions = MergeUnobservedTaskExceptions(ordered),
             // Source-control metadata (and the link templates built from it) applies to the
             // whole merged report, so it is only kept when every suite that has it agrees —
             // merging sidecars from different commits/runs must not label every test with
@@ -121,6 +122,20 @@ internal static class ReportDataMerger
             RepositorySlug = SingleDistinctOrNull(ordered, static s => s.RepositorySlug),
             SourceLinks = SingleDistinctSourceLinksOrNull(ordered),
         };
+    }
+
+    private static ReportExceptionData[]? MergeUnobservedTaskExceptions(ReportData[] suites)
+    {
+        List<ReportExceptionData>? merged = null;
+        foreach (var suite in suites)
+        {
+            if (suite.UnobservedTaskExceptions is { Length: > 0 } exceptions)
+            {
+                (merged ??= []).AddRange(exceptions);
+            }
+        }
+
+        return merged?.ToArray();
     }
 
 #if NET

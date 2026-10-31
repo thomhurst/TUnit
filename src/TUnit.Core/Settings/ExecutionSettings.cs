@@ -14,6 +14,14 @@ public sealed class ExecutionSettings
     public bool FailFast { get; set; }
 
     /// <summary>
+    /// Whether the test run fails when a task faults and nothing awaits or observes its exception
+    /// (<see cref="System.Threading.Tasks.TaskScheduler.UnobservedTaskException"/>). Each such
+    /// exception is reported as a failed result. Default: <c>false</c>.
+    /// Precedence: <c>--fail-on-unobserved-task-exceptions</c> → TUnitSettings → built-in default.
+    /// </summary>
+    public bool FailOnUnobservedTaskExceptions { get; set; }
+
+    /// <summary>
     /// Whether TUnit raises the thread pool's minimum worker thread count when blocking tests
     /// starve the pool. Starvation delays timers and <c>[Timeout]</c> handling in unrelated tests.
     /// The minimum is raised only after starvation is detected (and doubled, up to 64 threads per

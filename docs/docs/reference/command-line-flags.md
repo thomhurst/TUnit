@@ -82,6 +82,10 @@ Please note that for the coverage and trx report, you need to install [additiona
         Cancel the test run after the first test failure
         Programmatic equivalent: context.Settings.Execution.FailFast
 
+    --fail-on-unobserved-task-exceptions
+        Fail the test run when a task faults and nothing observes its exception
+        Programmatic equivalent: context.Settings.Execution.FailOnUnobservedTaskExceptions
+
     --maximum-parallel-tests
         Maximum Parallel Tests
         Programmatic equivalent: context.Settings.Parallelism.MaximumParallelTests

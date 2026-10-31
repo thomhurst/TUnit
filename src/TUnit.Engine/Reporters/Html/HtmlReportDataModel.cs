@@ -46,6 +46,9 @@ internal sealed class ReportData
     [JsonPropertyName("spans")]
     public SpanData[]? Spans { get; init; }
 
+    [JsonPropertyName("unobservedTaskExceptions")]
+    public ReportExceptionData[]? UnobservedTaskExceptions { get; init; }
+
     [JsonPropertyName("commitSha")]
     public string? CommitSha { get; init; }
 

@@ -4,6 +4,7 @@ using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Helpers;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
 
@@ -45,6 +46,9 @@ internal static class TUnitProcessInitializer
         TaskScheduler.UnobservedTaskException += static (_, args) =>
         {
             Console.Error.WriteLine($"Unobserved task exception: {args.Exception}");
+
+            // Keep it for the session results as well, so it is not visible only in raw output.
+            UnobservedTaskExceptionTracker.Record(args.Exception);
 
             // Mark as observed to prevent process termination
             args.SetObserved();

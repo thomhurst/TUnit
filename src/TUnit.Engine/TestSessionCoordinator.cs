@@ -1,10 +1,14 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Logging;
 using TUnit.Core.Services;
+using TUnit.Core.Settings;
 using TUnit.Core.Tracking;
+using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
@@ -91,9 +95,85 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
 
             TestDataContainer.Reset();
 
+            await ReportUnobservedTaskExceptionsAsync();
+
             foreach (var artifact in _contextProvider.TestSessionContext.Artifacts)
             {
                 await _messageBus.SessionArtifact(artifact);
+            }
+        }
+    }
+
+    private async Task ReportUnobservedTaskExceptionsAsync()
+    {
+        var failOnUnobserved = _serviceProvider.CommandLineOptions.IsOptionSet(FailOnUnobservedTaskExceptionsCommandProvider.FailOnUnobservedTaskExceptions)
+            || TUnitSettings.Default.Execution.FailOnUnobservedTaskExceptions;
+
+        if (failOnUnobserved)
+        {
+            // The runtime raises UnobservedTaskException only when a faulted task is finalized.
+            // Collect now so tasks that faulted late in the run are not lost when the process exits.
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        var entries = _contextProvider.TestSessionContext.GetUnobservedTaskExceptionEntries();
+
+        if (entries.Length == 0)
+        {
+            return;
+        }
+
+        var exceptions = new Exception[entries.Length];
+        var unattributed = 0;
+        for (var i = 0; i < entries.Length; i++)
+        {
+            exceptions[i] = entries[i].Exception;
+            if (!entries[i].Attributable)
+            {
+                unattributed++;
+            }
+        }
+
+        var message = new StringBuilder()
+            .Append(exceptions.Length)
+            .Append(exceptions.Length == 1 ? " unobserved task exception" : " unobserved task exceptions")
+            .Append(" occurred during the test session.");
+
+        if (!failOnUnobserved)
+        {
+            message.Append(" Use --fail-on-unobserved-task-exceptions to fail the run when this happens.");
+        }
+        else if (unattributed > 0)
+        {
+            message.Append(' ').Append(unattributed)
+                .Append(" occurred while other test sessions were running in this process, so they cannot be attributed to this session and do not fail it.");
+        }
+
+        foreach (var exception in exceptions)
+        {
+            message.AppendLine().Append("  ").Append(exception);
+        }
+
+        if (failOnUnobserved)
+        {
+            await _logger.LogErrorAsync(message.ToString());
+        }
+        else
+        {
+            await _logger.LogWarningAsync(message.ToString());
+        }
+
+        await _serviceProvider.MessageBus.UnobservedTaskExceptions(exceptions);
+
+        if (failOnUnobserved)
+        {
+            foreach (var (exception, attributable) in entries)
+            {
+                if (attributable)
+                {
+                    await _serviceProvider.MessageBus.UnobservedTaskExceptionFailed(exception);
+                }
             }
         }
     }

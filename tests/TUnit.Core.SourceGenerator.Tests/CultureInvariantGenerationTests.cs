@@ -59,26 +59,6 @@ internal class CultureInvariantGenerationTests
         }
         """;
 
-#if NETFRAMEWORK
-    // The net472 leg compiles against .NET Framework's mscorlib, which lacks the types behind
-    // `required` and `init` used by PropertyDataSource above.
-    private const string Polyfills =
-        """
-        namespace System.Runtime.CompilerServices;
-
-        internal static class IsExternalInit;
-
-        [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
-        internal sealed class CompilerFeatureRequiredAttribute(string featureName) : Attribute
-        {
-            public string FeatureName { get; } = featureName;
-        }
-
-        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-        internal sealed class RequiredMemberAttribute : Attribute;
-        """;
-#endif
-
     [Test]
     [Arguments("sv-SE")]
     [Arguments("de-DE")]
@@ -110,7 +90,7 @@ internal class CultureInvariantGenerationTests
                 [
                     CSharpSyntaxTree.ParseText(Source, parseOptions),
 #if NETFRAMEWORK
-                    CSharpSyntaxTree.ParseText(Polyfills, parseOptions),
+                    CSharpSyntaxTree.ParseText(ReferencesHelper.NetFrameworkPolyfills, parseOptions),
 #endif
                 ],
                 ReferencesHelper.References,
