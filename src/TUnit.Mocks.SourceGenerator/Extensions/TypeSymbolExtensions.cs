@@ -24,14 +24,14 @@ internal static class TypeSymbolExtensions
     /// </summary>
     public static string GetFullyQualifiedName(this ITypeSymbol type)
     {
-        return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        return MethodTypeParameterRenames.ToDisplayString(type, SymbolDisplayFormat.FullyQualifiedFormat);
     }
 
     public static string GetFullyQualifiedNameWithNullability(this ITypeSymbol type)
-        => type.ToDisplayString(FullyQualifiedWithNullability);
+        => MethodTypeParameterRenames.ToDisplayString(type, FullyQualifiedWithNullability);
 
     public static string GetMinimallyQualifiedNameWithNullability(this ITypeSymbol type)
-        => type.ToDisplayString(MinimallyQualifiedWithNullability);
+        => MethodTypeParameterRenames.ToDisplayString(type, MinimallyQualifiedWithNullability);
 
     public static string GetFullyQualifiedNameWithoutGlobal(this ITypeSymbol type)
     {

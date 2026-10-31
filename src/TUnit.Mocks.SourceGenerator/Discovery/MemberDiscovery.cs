@@ -42,6 +42,11 @@ internal static class MemberDiscovery
         /// </summary>
         public readonly HashSet<string> SeenExplicitImpls = new();
         public int MemberIdCounter;
+        /// <summary>
+        /// Type parameter names the generated mock declares alongside each method's own; colliding
+        /// method type parameters are renamed (#7299).
+        /// </summary>
+        public readonly List<string> OuterTypeParameterNames = new();
 
         public (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events) ToResult() => (
             new EquatableArray<MockMemberModel>(Methods.ToImmutableArray()),
@@ -54,6 +59,7 @@ internal static class MemberDiscovery
         DiscoverMembers(ITypeSymbol typeSymbol, IAssemblySymbol? compilationAssembly, Compilation compilation)
     {
         var state = new DiscoveryState();
+        AddOuterTypeParameterNames(typeSymbol, state.OuterTypeParameterNames);
         CollectMembers(typeSymbol, compilationAssembly, compilation, state, ownerTypeIndex: 0, primaryClassSymbol: null);
         return state.ToResult();
     }
@@ -71,6 +77,10 @@ internal static class MemberDiscovery
     {
         var state = new DiscoveryState();
         var primaryClass = typeSymbols[0].TypeKind == TypeKind.Class ? typeSymbols[0] : null;
+        foreach (var typeSymbol in typeSymbols)
+        {
+            AddOuterTypeParameterNames(typeSymbol, state.OuterTypeParameterNames);
+        }
         for (int i = 0; i < typeSymbols.Length; i++)
         {
             CollectMembers(typeSymbols[i], compilationAssembly, compilation, state,
@@ -153,6 +163,24 @@ internal static class MemberDiscovery
         if (array.Contains(interfaceFqn)) return slots;
         changed = true;
         return new EquatableArray<string>(array.Add(interfaceFqn));
+    }
+
+    /// <summary>
+    /// Collects the type parameters left open in <paramref name="type"/>, including those of its
+    /// containing types — the generated mock declares all of them.
+    /// </summary>
+    private static void AddOuterTypeParameterNames(ITypeSymbol type, List<string> names)
+    {
+        for (var current = type as INamedTypeSymbol; current is not null; current = current.ContainingType)
+        {
+            foreach (var typeArgument in current.TypeArguments)
+            {
+                if (typeArgument is ITypeParameterSymbol typeParameter && !names.Contains(typeParameter.Name))
+                {
+                    names.Add(typeParameter.Name);
+                }
+            }
+        }
     }
 
     private static MockMemberModel Tag(MockMemberModel model, int ownerTypeIndex)
@@ -245,7 +273,7 @@ internal static class MemberDiscovery
                                     continue;
                                 }
                                 if (!state.SeenExplicitImpls.Add($"{interfaceFqn}|{fullKey}")) continue;
-                                state.Methods.Add(Tag(CreateMethodModel(method, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, explicitInterfaceCanDelegate: false, compilation: compilation), ownerTypeIndex));
+                                state.Methods.Add(Tag(CreateMethodModel(method, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, explicitInterfaceCanDelegate: false, compilation: compilation, outerTypeParameterNames: state.OuterTypeParameterNames), ownerTypeIndex));
                                 break;
                             }
 
@@ -254,14 +282,14 @@ internal static class MemberDiscovery
                             // the explicit impl's return type (e.g. IEnumerator<T> : IEnumerator).
                             var canDelegate = existing.ReturnType is not null
                                 && CanDelegateReturnType(existing.ReturnType, method.ReturnType);
-                            state.Methods.Add(Tag(CreateMethodModel(method, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, explicitInterfaceCanDelegate: canDelegate, compilation: compilation), ownerTypeIndex));
+                            state.Methods.Add(Tag(CreateMethodModel(method, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, explicitInterfaceCanDelegate: canDelegate, compilation: compilation, outerTypeParameterNames: state.OuterTypeParameterNames), ownerTypeIndex));
                         }
                         else
                         {
                             var explicitName = RequiresExplicitImpl(primaryClassSymbol, method) ? interfaceFqn : null;
                             state.SeenMethods[key] = (state.Methods.Count, method.ReturnType);
                             state.SeenFullMethods.Add(GetFullMethodKey(method));
-                            state.Methods.Add(Tag(CreateMethodModel(method, ref state.MemberIdCounter, explicitName, interfaceFqn, compilation: compilation), ownerTypeIndex));
+                            state.Methods.Add(Tag(CreateMethodModel(method, ref state.MemberIdCounter, explicitName, interfaceFqn, compilation: compilation, outerTypeParameterNames: state.OuterTypeParameterNames), ownerTypeIndex));
                         }
                         break;
                     }
@@ -471,7 +499,7 @@ internal static class MemberDiscovery
                         {
                             if (seenMethods.ContainsKey(key)) continue;
                             seenMethods[key] = (methods.Count, method.ReturnType);
-                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null, compilationAssembly: compilationAssembly, compilation: compilation));
+                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null, compilationAssembly: compilationAssembly, compilation: compilation, outerTypeParameterNames: state.OuterTypeParameterNames));
                         }
                         else
                         {
@@ -707,8 +735,12 @@ internal static class MemberDiscovery
         return CreateMethodModel(invokeMethod, ref memberIdCounter, null, compilation: compilation);
     }
 
-    private static MockMemberModel CreateMethodModel(IMethodSymbol method, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, bool explicitInterfaceCanDelegate = false, IAssemblySymbol? compilationAssembly = null, Compilation compilation = null!)
+    private static MockMemberModel CreateMethodModel(IMethodSymbol method, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, bool explicitInterfaceCanDelegate = false, IAssemblySymbol? compilationAssembly = null, Compilation compilation = null!, IReadOnlyCollection<string>? outerTypeParameterNames = null)
     {
+        // Every type display below renders through the scope, so colliding method type
+        // parameters come out renamed consistently in signatures, constraints and defaults.
+        using var renames = MethodTypeParameterRenames.Enter(method, outerTypeParameterNames);
+
         var returnType = method.ReturnType;
         var isAsync = returnType.IsAsyncReturnType();
         var isValueTask = returnType.IsValueTaskReturnType();
@@ -757,7 +789,7 @@ internal static class MemberDiscovery
             TypeParameters = new EquatableArray<MockTypeParameterModel>(
                 method.TypeParameters.Select(tp => new MockTypeParameterModel
                 {
-                    Name = tp.Name,
+                    Name = MethodTypeParameterRenames.GetName(tp),
                     Constraints = tp.GetGenericConstraints(),
                     HasReferenceTypeConstraint = tp.HasReferenceTypeConstraint,
                     HasValueTypeConstraint = tp.HasValueTypeConstraint,
@@ -1413,7 +1445,7 @@ internal static class MemberDiscovery
                 if (seenMethods.ContainsKey(key)) break;
                 seenMethods[key] = (methods.Count, method.ReturnType);
 
-                var model = CreateMethodModel(method, ref memberIdCounter, interfaceFqn, compilation: compilation) with
+                var model = CreateMethodModel(method, ref memberIdCounter, interfaceFqn, compilation: compilation, outerTypeParameterNames: state.OuterTypeParameterNames) with
                 {
                     IsStaticAbstract = true
                 };
