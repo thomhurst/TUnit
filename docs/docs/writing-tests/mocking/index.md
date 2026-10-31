@@ -151,7 +151,7 @@ mock.Greet(Any()).Returns("Hello!");
 mock.Greet("Alice").WasCalled();
 ```
 
-The wrapper type is named after the interface with a `Mock` suffix (`IGreeter` → `IGreeterMock`) and lives in the interface's namespace. Declaring a variable, field or property as `Mock<IGreeter>` hides the wrapper. C# never applies user-defined conversions to interface types, so a `Mock<IGreeter>` needs `.Object` wherever an `IGreeter` is expected, and generic type inference, casts and `is`/`as` checks see `Mock<IGreeter>` rather than an `IGreeter`. The **TM011** suggestion flags locals, private fields and private properties declared as `Mock<T>` that only ever hold the wrapper, and its code fix changes the declaration to the wrapper type:
+The wrapper type is named after the interface with a `Mock` suffix (`IGreeter` → `IGreeterMock`) and lives in the interface's namespace. Declaring a variable, field or property as `Mock<IGreeter>` hides the wrapper. C# never applies user-defined conversions to interface types, so a `Mock<IGreeter>` needs `.Object` wherever an `IGreeter` is expected, and generic type inference, casts and `is`/`as` checks see `Mock<IGreeter>` rather than an `IGreeter`. The **TM011** suggestion flags locals, private fields and private properties declared as `Mock<T>` that only ever hold the wrapper, and its code fix changes the declaration to the wrapper type. Public, protected and internal members, and members of partial types split across files, are deliberately not flagged, because code the analyzer can't see could depend on their type:
 
 ```csharp
 Mock<IGreeter> before = IGreeter.Mock(); // TM011: declare 'before' as 'IGreeterMock'

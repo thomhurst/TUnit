@@ -558,4 +558,26 @@ public class PreferGeneratedMockTypeAnalyzerTests
             """,
             Stubs);
     }
+
+    [Test]
+    public async Task One_Disqualified_Declarator_Suppresses_The_Whole_Declaration()
+    {
+        await Verifier.VerifyNoDiagnosticAsync(
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Tests
+            {
+                private Mock<IFoo> _first = IFoo.Mock(), _second = IFoo.Mock();
+
+                public void Test()
+                {
+                    Mock<IFoo> a = IFoo.Mock(), b = Mock.Of<IFoo>();
+                    _second = Mock.Of<IFoo>();
+                }
+            }
+            """,
+            Stubs);
+    }
 }
