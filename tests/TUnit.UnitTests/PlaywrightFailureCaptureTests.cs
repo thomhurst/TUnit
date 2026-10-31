@@ -250,13 +250,24 @@ public class PlaywrightFailureCaptureTests
         await first.BrowserContext.Received(1).CloseAsync(Arg.Any<BrowserContextCloseOptions>());
 
         using var second = new CaptureScope("Second");
+        await second.DiscoverAsync(attribute);
         await ObjectInitializer.InitializeAsync(fixture);
 
         await Assert.That(fixture.ContextFixture.Context).IsNotNull();
         await Assert.That(fixture.Page).IsNotSameReferenceAs(firstPage);
         await first.Browser.Received(2).NewContextAsync(Arg.Any<BrowserNewContextOptions>());
+
+        // The fixture is now shared by two tests, so the second test is not captured and its
+        // context keeps the shared lifetime: open after its test end, closed with the fixture.
+        second.SetResult(TestState.Failed);
+        await attribute.OnTestEnd(second.Context);
+        await Assert.That(second.Context.Output.Artifacts.Count).IsEqualTo(0);
+        await first.Tracing.Received(1).StartAsync(Arg.Any<TracingStartOptions>());
+        await first.BrowserContext.Received(1).CloseAsync(Arg.Any<BrowserContextCloseOptions>());
+
         await fixture.DisposeAsync();
         await fixture.ContextFixture.DisposeAsync();
+        await first.BrowserContext.Received(2).CloseAsync(Arg.Any<BrowserContextCloseOptions>());
     }
 
     [Test]
