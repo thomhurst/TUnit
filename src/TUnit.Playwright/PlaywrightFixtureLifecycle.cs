@@ -43,12 +43,15 @@ internal sealed class PlaywrightFixtureLifecycle
                 throw new InvalidOperationException(
                     "[RecordVideo] requires SharedType.None for ContextFixture and PageFixture. BrowserFixture may be shared.");
             }
-#else
-            const bool declaredShared = false;
-#endif
 
             // A shared fixture has no single owning test, so failure capture skips it instead of failing.
             var capture = !sharedWithOtherTests && !declaredShared && PlaywrightFailureCapture.Options(context) is not null;
+#else
+            // netstandard2.0 cannot read the declared SharedType, and ObjectTracker reports a shared
+            // fixture as private while only one test references it. Capturing would then close a
+            // shared context after the first test, so fixture capture is .NET-only.
+            const bool capture = false;
+#endif
             var perAttempt = recording || capture;
 
             if (_initialization is not null && (!perAttempt || _attempt == context.Execution.CurrentRetryAttempt))
@@ -63,7 +66,7 @@ internal sealed class PlaywrightFixtureLifecycle
             if (perAttempt)
             {
                 // Register before initialization so partial setup still gets cleanup.
-                PlaywrightRecordingScope.For(context).Register(() => CompleteAsync((IAsyncDisposable)fixture), fixture is PageFixture ? 0 : 1);
+                PlaywrightRecordingScope.For(context).Register(SettleAsync, () => CompleteAsync((IAsyncDisposable)fixture), fixture is PageFixture ? 0 : 1);
             }
 
             // Cache failures within an attempt, just like ordinary fixture initialization.
@@ -74,12 +77,14 @@ internal sealed class PlaywrightFixtureLifecycle
 
     private static async Task InvokeAsync(IAsyncInitializer fixture) => await fixture.InitializeAsync().ConfigureAwait(false);
 
-    private async ValueTask CompleteAsync(IAsyncDisposable fixture)
+    /// <summary>
+    /// Waits for setup to finish. Cancellation can stop the caller waiting while asynchronous
+    /// setup continues, and that setup may still create resources or start failure capture.
+    /// </summary>
+    private async Task SettleAsync()
     {
         try
         {
-            // Cancellation can stop the caller waiting while asynchronous setup continues.
-            // Let setup settle before disposing any resources it managed to create.
             if (_initialization is { } initialization)
             {
                 await initialization.ConfigureAwait(false);
@@ -89,7 +94,12 @@ internal sealed class PlaywrightFixtureLifecycle
         {
             // The engine already observes initialization failure. Cleanup must still run.
         }
+    }
 
+    private async ValueTask CompleteAsync(IAsyncDisposable fixture)
+    {
+        // Let setup settle before disposing any resources it managed to create.
+        await SettleAsync().ConfigureAwait(false);
         await fixture.DisposeAsync().ConfigureAwait(false);
     }
 }

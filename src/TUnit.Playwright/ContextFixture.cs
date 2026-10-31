@@ -113,6 +113,11 @@ public class ContextFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptI
 
     ValueTask ITestEndEventReceiver.OnTestEnd(TestContext context)
     {
+        if (BrowserMonitor is { } monitor)
+        {
+            PlaywrightBrowserMonitor.RecordUse(context, monitor);
+        }
+
         PlaywrightBrowserMonitor.ReportIfDisconnected(context);
         return default;
     }

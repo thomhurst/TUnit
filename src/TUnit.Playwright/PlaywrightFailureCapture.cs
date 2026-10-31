@@ -23,6 +23,11 @@ internal sealed class PlaywrightFailureCapture
         _attempt = owner.Execution.CurrentRetryAttempt;
     }
 
+    internal TestContext Owner => _owner;
+
+    /// <summary>Whether the owner's current result asks for artifacts.</summary>
+    internal bool TestHasFailed => _owner.Execution.Result is { State: not (TestState.Passed or TestState.Skipped) };
+
     internal static CaptureOnFailureAttribute? Options(TestContext? context) =>
         context is not null && context.StateBag.TryGetValue<CaptureOnFailureAttribute>(CaptureOnFailureAttribute.StateBagKey, out var options)
             ? options
@@ -66,7 +71,20 @@ internal sealed class PlaywrightFailureCapture
 
     private async Task CompleteCoreAsync()
     {
-        if (_owner.Execution.Result is not { State: not (TestState.Passed or TestState.Skipped) })
+        try
+        {
+            await CaptureAsync().ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            // For example an invalid path. Callers close resources after this, so never throw.
+            Report("save failure artifacts", exception);
+        }
+    }
+
+    private async Task CaptureAsync()
+    {
+        if (!TestHasFailed)
         {
             if (_tracing)
             {

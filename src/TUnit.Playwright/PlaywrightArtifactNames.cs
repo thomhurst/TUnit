@@ -49,13 +49,19 @@ internal static class PlaywrightArtifactNames
         }
     }
 
+    // Path.GetInvalidFileNameChars() returns only '\0' and '/' on Linux and macOS. Artifacts are
+    // often uploaded from CI and opened on Windows, so reject the Windows set on every OS.
+    private static readonly char[] AlwaysInvalidCharacters = ['"', '<', '>', '|', ':', '*', '?', '\\', '/'];
+
     internal static string Sanitize(string value)
     {
         var characters = value.ToCharArray();
         var invalidCharacters = Path.GetInvalidFileNameChars();
         for (var i = 0; i < characters.Length; i++)
         {
-            if (Array.IndexOf(invalidCharacters, characters[i]) >= 0)
+            if (characters[i] < ' ' ||
+                Array.IndexOf(AlwaysInvalidCharacters, characters[i]) >= 0 ||
+                Array.IndexOf(invalidCharacters, characters[i]) >= 0)
             {
                 characters[i] = '_';
             }

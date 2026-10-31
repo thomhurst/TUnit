@@ -48,6 +48,11 @@ public class PageFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptInit
 
     ValueTask ITestEndEventReceiver.OnTestEnd(TestContext context)
     {
+        if (ContextFixture.BrowserMonitor is { } monitor)
+        {
+            PlaywrightBrowserMonitor.RecordUse(context, monitor);
+        }
+
         PlaywrightBrowserMonitor.ReportIfDisconnected(context);
         return default;
     }

@@ -233,7 +233,7 @@ public class CheckoutTests : PageTest
 - `Screenshot` - take a full-page screenshot of each open page. Defaults to `true`.
 - `Trace` - record a trace with screenshots, DOM snapshots and sources. Defaults to `true`.
 
-Capture runs after your `[After(Test)]` hooks and before the context closes. As with `[RecordVideo]`, captured `ContextFixture` and `PageFixture` instances are created again for each retry attempt. Fixtures shared between tests are skipped, because no single test owns them. If a screenshot or trace cannot be saved, for example because the browser crashed, the reason is written to the test's error output and the test result is not changed.
+Capture runs after your `[After(Test)]` hooks and before the context closes, so a test whose body passes but whose teardown hook throws is captured too. As with `[RecordVideo]`, captured `ContextFixture` and `PageFixture` instances are created again for each retry attempt. Fixtures shared between tests are skipped, because no single test owns them. Fixture capture needs .NET 8 or later; on .NET Framework (the `netstandard2.0` build) only `ContextTest` and `PageTest` are captured, because TUnit cannot tell whether a fixture is shared there. If a screenshot or trace cannot be saved, for example because the browser crashed, the reason is written to the test's error output and the test result is not changed.
 
 ## Shared Browser Crashes
 

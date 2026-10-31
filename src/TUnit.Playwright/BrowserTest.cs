@@ -145,15 +145,25 @@ public class BrowserTest : PlaywrightTest
                 continue;
             }
 
-            try
+            var (context, recording, capture) = created;
+            if (capture is not null)
             {
-                var (context, recording, capture) = created;
-                // Capture while the pages are still open; closing the context ends the trace.
-                if (capture is not null)
+                if (!capture.TestHasFailed)
                 {
-                    await capture.CompleteAsync().ConfigureAwait(false);
+                    // A later [After(Test)] hook can still fail the test. The engine records that
+                    // before the late test-end receivers run, so let [CaptureOnFailure] decide then.
+                    PlaywrightRecordingScope.For(capture.Owner).Register(
+                        () => new ValueTask(recording?.CloseAsync() ?? context.CloseAsync()), 2);
+                    continue;
                 }
 
+                // Capture while the pages are still open; closing the context ends the trace.
+                // Capture never throws, so the context below is always closed.
+                await capture.CompleteAsync().ConfigureAwait(false);
+            }
+
+            try
+            {
                 await (recording?.CloseAsync() ?? context.CloseAsync()).ConfigureAwait(false);
             }
             catch (Exception exception)

@@ -43,17 +43,136 @@ public class PlaywrightFailureCaptureTests
     public async Task PassingTestDiscardsTraceAndWritesNoArtifacts(TestState state)
     {
         using var scope = new CaptureScope();
-        await scope.DiscoverAsync(new CaptureOnFailureAttribute(scope.Directory));
+        var attribute = new CaptureOnFailureAttribute(scope.Directory);
+        await scope.DiscoverAsync(attribute);
         var page = scope.AddPage();
         await scope.Test.NewContext(new BrowserNewContextOptions());
         scope.SetResult(state);
 
         await scope.Test.BrowserTearDown(scope.Context);
 
+        // A later teardown hook could still fail the test, so the decision waits for test end.
+        await scope.BrowserContext.DidNotReceive().CloseAsync(Arg.Any<BrowserContextCloseOptions>());
+        await attribute.OnTestEnd(scope.Context);
+
+        await scope.BrowserContext.Received(1).CloseAsync(Arg.Any<BrowserContextCloseOptions>());
         await scope.Tracing.Received(1).StopAsync(Arg.Is<TracingStopOptions?>(options => options == null || options.Path == null));
         await page.DidNotReceive().ScreenshotAsync(Arg.Any<PageScreenshotOptions>());
         await Assert.That(scope.Context.Output.Artifacts.Count).IsEqualTo(0);
         await Assert.That(Directory.GetFiles(scope.Directory)).IsEmpty();
+    }
+
+    [Test]
+    public async Task TeardownFailureAfterBrowserTearDownStillCaptures()
+    {
+        using var scope = new CaptureScope();
+        var attribute = new CaptureOnFailureAttribute(scope.Directory);
+        await scope.DiscoverAsync(attribute);
+        var page = scope.AddPage();
+        await scope.Test.NewContext(new BrowserNewContextOptions());
+        scope.SetResult(TestState.Passed);
+
+        await scope.Test.BrowserTearDown(scope.Context);
+        // The engine marks the test failed when a teardown hook throws, before late receivers run.
+        scope.SetResult(TestState.Failed);
+        await attribute.OnTestEnd(scope.Context);
+
+        var prefix = PlaywrightArtifactNames.ForTest(scope.Context, 0);
+        await Assert.That(scope.ArtifactNames()).IsEquivalentTo(new[] { prefix + ".png", prefix + ".trace.zip" });
+        Received.InOrder(() =>
+        {
+            page.ScreenshotAsync(Arg.Any<PageScreenshotOptions>());
+            scope.Tracing.StopAsync(Arg.Any<TracingStopOptions>());
+            scope.BrowserContext.CloseAsync(Arg.Any<BrowserContextCloseOptions>());
+        });
+    }
+
+    [Test]
+    public async Task InvalidPathIsReportedAndContextsStillClose()
+    {
+        using var scope = new CaptureScope();
+        await scope.DiscoverAsync(new CaptureOnFailureAttribute("bad\0path"));
+        await scope.Test.NewContext(new BrowserNewContextOptions());
+        scope.SetResult(TestState.Failed);
+
+        await scope.Test.BrowserTearDown(scope.Context);
+
+        await scope.BrowserContext.Received(1).CloseAsync(Arg.Any<BrowserContextCloseOptions>());
+        await Assert.That(scope.Context.GetErrorOutput()).Contains("could not save failure artifacts");
+        await Assert.That(scope.Context.Output.Artifacts.Count).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task InvalidPathStillDisposesFixtures()
+    {
+        using var scope = new CaptureScope();
+        var attribute = new CaptureOnFailureAttribute("bad\0path");
+        await scope.DiscoverAsync(attribute);
+        var fixture = scope.CreateFixture();
+        await ObjectInitializer.InitializeAsync(fixture);
+        var page = fixture.Page;
+        scope.SetResult(TestState.Failed);
+
+        await attribute.OnTestEnd(scope.Context);
+
+        await page.Received(1).CloseAsync(Arg.Any<PageCloseOptions>());
+        await scope.BrowserContext.Received(1).CloseAsync(Arg.Any<BrowserContextCloseOptions>());
+        await Assert.That(scope.Context.GetErrorOutput()).Contains("could not save failure artifacts");
+    }
+
+    [Test]
+    public async Task CancelledSetupStillCapturesBeforePagesClose()
+    {
+        using var scope = new CaptureScope();
+        var attribute = new CaptureOnFailureAttribute(scope.Directory);
+        await scope.DiscoverAsync(attribute);
+        var fixture = scope.CreateFixture();
+        var creation = new TaskCompletionSource<IBrowserContext>(TaskCreationOptions.RunContinuationsAsynchronously);
+        scope.Browser.NewContextAsync(Arg.Any<BrowserNewContextOptions>()).Returns(creation.Task);
+        using var cancellation = new CancellationTokenSource();
+        var initialize = ObjectInitializer.InitializeAsync(fixture, cancellation.Token).AsTask();
+        cancellation.Cancel();
+        await Assert.That(async () => await initialize).Throws<OperationCanceledException>();
+        scope.SetResult(TestState.Cancelled);
+        var cleanup = attribute.OnTestEnd(scope.Context).AsTask();
+
+        creation.TrySetResult(scope.BrowserContext);
+        await cleanup;
+
+        var page = scope.Pages.Single();
+        var prefix = PlaywrightArtifactNames.ForTest(scope.Context, 0);
+        await Assert.That(scope.ArtifactNames()).IsEquivalentTo(new[] { prefix + ".png", prefix + ".trace.zip" });
+        Received.InOrder(() =>
+        {
+            page.ScreenshotAsync(Arg.Any<PageScreenshotOptions>());
+            page.CloseAsync(Arg.Any<PageCloseOptions>());
+        });
+    }
+
+    [Test]
+    [Arguments("a:b*c?d<e>f|g\"h", "a_b_c_d_e_f_g_h")]
+    [Arguments("back\\slash/forward", "back_slash_forward")]
+    [Arguments("tab\there", "tab_here")]
+    public async Task SanitizeRejectsWindowsInvalidCharactersOnEveryPlatform(string value, string expected)
+    {
+        await Assert.That(PlaywrightArtifactNames.Sanitize(value)).IsEqualTo(expected);
+    }
+
+    [Test]
+    public async Task TestsReusingASharedFixtureGetTheDisconnectNote()
+    {
+        using var first = new CaptureScope("First");
+        var fixture = first.CreateFixture();
+        await ObjectInitializer.InitializeAsync(fixture);
+        first.Browser.Disconnected += Raise.Event<EventHandler<IBrowser>>(first.Browser, first.Browser);
+
+        using var second = new CaptureScope("Second");
+        second.SetResult(TestState.Failed, new PlaywrightException("Target page, context or browser has been closed"));
+        await ((ITestEndEventReceiver)fixture).OnTestEnd(second.Context);
+
+        await Assert.That(second.Context.GetErrorOutput()).Contains("browser disconnected at");
+        await fixture.DisposeAsync();
+        await fixture.ContextFixture.DisposeAsync();
     }
 
     [Test]
@@ -326,6 +445,8 @@ public class PlaywrightFailureCaptureTests
             Test = new BrowserTest { Browser = Browser };
             TestContext.Current = Context;
         }
+
+        public IReadOnlyList<IPage> Pages => _pages;
 
         public ValueTask DiscoverAsync(CaptureOnFailureAttribute attribute) =>
             attribute.OnTestDiscovered(new DiscoveredTestContext(Context.Metadata.TestName, Context));

@@ -49,9 +49,15 @@ internal sealed class PlaywrightBrowserMonitor
     }
 
     /// <summary>Records that <paramref name="owner"/> depends on <paramref name="browser"/>.</summary>
-    internal static PlaywrightBrowserMonitor RecordUse(TestContext? owner, IBrowser browser)
+    internal static PlaywrightBrowserMonitor RecordUse(TestContext? owner, IBrowser browser) =>
+        RecordUse(owner, For(browser));
+
+    /// <summary>
+    /// Records that <paramref name="owner"/> depends on the monitored browser. Tests that reuse a
+    /// shared fixture call this too, because only the first test created its context.
+    /// </summary>
+    internal static PlaywrightBrowserMonitor RecordUse(TestContext? owner, PlaywrightBrowserMonitor monitor)
     {
-        var monitor = For(browser);
         if (owner is not null)
         {
             var used = (ConcurrentDictionary<PlaywrightBrowserMonitor, byte>)owner.StateBag.Items.GetOrAdd(

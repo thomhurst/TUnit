@@ -25,6 +25,8 @@ namespace TUnit.Playwright;
 /// Apply the attribute to a method, a class or an assembly. The closest one applies.
 /// Fixtures shared between tests are not captured: they have no single test that owns them.
 /// When capture applies, context and page fixtures are created again for each retry attempt.
+/// Fixture capture needs .NET 8 or later; the <c>netstandard2.0</c> build cannot tell whether a
+/// fixture is shared, so it captures only <see cref="ContextTest"/> and <see cref="PageTest"/>.
 /// </para>
 /// </remarks>
 #pragma warning disable TUnit0028 // This framework attribute defines its own targets; it does not override a user-facing attribute.
