@@ -76,6 +76,48 @@ public class CollectionTests
     }
 
     [Test]
+    public async Task HaveSingleItem_returns_the_single_item()
+    {
+        var item = await new int[1] { 1 }.Should().HaveSingleItem();
+        await Assert.That(item).IsEqualTo(1);
+        await (await new int[1] { 1 }.Should().HaveSingleItem()).Should().BeOfType(typeof(int));
+    }
+
+    [Test]
+    public async Task HaveSingleItem_after_And_returns_the_single_item()
+    {
+        var item = await new int[] { 1 }.Should().HaveCount(1).And.HaveSingleItem();
+        await Assert.That(item).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task HaveSingleItem_returns_the_item_for_list_and_hash_set()
+    {
+        var listItem = await new List<int> { 1 }.Should().HaveSingleItem();
+        await Assert.That(listItem).IsEqualTo(1);
+
+        var setItem = await new HashSet<int> { 1 }.Should().HaveSingleItem();
+        await Assert.That(setItem).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task HaveSingleItem_throws_when_not_exactly_one_item()
+    {
+        await Assert.That(async () => await new int[0].Should().HaveSingleItem())
+            .Throws<TUnit.Assertions.Exceptions.AssertionException>();
+        await Assert.That(async () => await new int[] { 1, 2 }.Should().HaveSingleItem())
+            .Throws<TUnit.Assertions.Exceptions.AssertionException>();
+    }
+
+    [Test]
+    public async Task Dictionary_HaveSingleItem_returns_the_dictionary()
+    {
+        var dictionary = new Dictionary<string, int> { ["only"] = 1 };
+        var result = await dictionary.Should().HaveSingleItem();
+        await Assert.That(result).IsSameReferenceAs(dictionary);
+    }
+
+    [Test]
     public async Task HaveSingleItem_with_predicate()
     {
         var list = new List<int> { 1, 2, 3 };
