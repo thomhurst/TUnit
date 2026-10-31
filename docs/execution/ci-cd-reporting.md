@@ -294,6 +294,45 @@ test:
 
 The `trx2junit` tool converts TRX output to JUnit XML that GitLab can parse.
 
+## Unobserved Task Exceptions[​](#unobserved-task-exceptions "Direct link to Unobserved Task Exceptions")
+
+A task that faults when nothing awaits it, such as a fire-and-forget `Task.Run` or the losing branch of a `Task.WhenAny`, raises `TaskScheduler.UnobservedTaskException` when the runtime garbage-collects it. TUnit keeps the process alive and records each of these exceptions for the session:
+
+* The console prints a warning with the count and each exception at the end of the run.
+* The HTML report shows them in an **Unobserved task exceptions** panel in the Overview view.
+* The JUnit report puts them in the test suite's `<system-err>`.
+* `TestSessionContext.UnobservedTaskExceptions` lists the exceptions recorded so far, for example in an `[After(TestSession)]` hook.
+
+The runtime raises the event on the finalizer thread, often after the test that started the task has finished, so TUnit cannot tie the exception to one test. The exception's stack trace usually names the code that started the task.
+
+By default these exceptions do not fail the run. To gate CI on them, pass `--fail-on-unobserved-task-exceptions` or set `context.Settings.Execution.FailOnUnobservedTaskExceptions = true`. With the option, TUnit runs a final garbage collection at the end of the session so late faults are not lost, and reports each exception as a failed result named `Unobserved task exception - <type>: <message>`. That result appears in TRX and every other report, and the run exits with a failure code.
+
+When an IDE runs several test sessions in the same process at once, TUnit cannot tell which session an exception belongs to. Every running session then reports it, but none of them fails because of it.
+
+```
+public static class UnobservedTaskExceptionLog
+
+{
+
+    [After(TestSession)]
+
+    public static void LogUnobservedTaskExceptions(TestSessionContext context)
+
+    {
+
+        foreach (var exception in context.UnobservedTaskExceptions)
+
+        {
+
+            Console.WriteLine($"Unobserved task exception: {exception.Message}");
+
+        }
+
+    }
+
+}
+```
+
 ## Environment Detection[​](#environment-detection "Direct link to Environment Detection")
 
 TUnit reads a small set of CI environment variables to enable platform-specific behavior:

@@ -84,10 +84,11 @@ On Linux and macOS with .NET 8 or later, SIGTERM (sent by `docker stop`, Kuberne
 
 ### `context.Settings.Execution`[​](#contextsettingsexecution "Direct link to contextsettingsexecution")
 
-| Property                  | Type   | Default | Description                                                                                                                                              |
-| ------------------------- | ------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `FailFast`                | `bool` | `false` | Cancels the remaining test run after the first test failure. Tests that had not started are reported as skipped.                                         |
-| `ThreadPoolTuningEnabled` | `bool` | `true`  | Raises the thread pool's minimum worker thread count when blocking tests starve the pool. See [Controlling Parallelism](/docs/execution/parallelism.md). |
+| Property                         | Type   | Default | Description                                                                                                                                                                                                                         |
+| -------------------------------- | ------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FailFast`                       | `bool` | `false` | Cancels the remaining test run after the first test failure. Tests that had not started are reported as skipped.                                                                                                                    |
+| `FailOnUnobservedTaskExceptions` | `bool` | `false` | Fails the run when a task faults and nothing awaits or observes its exception. Each such exception is reported as a failed result. See [Unobserved task exceptions](/docs/execution/ci-cd-reporting.md#unobserved-task-exceptions). |
+| `ThreadPoolTuningEnabled`        | `bool` | `true`  | Raises the thread pool's minimum worker thread count when blocking tests starve the pool. See [Controlling Parallelism](/docs/execution/parallelism.md).                                                                            |
 
 The `TUNIT_DISABLE_THREADPOOL_TUNING` environment variable takes precedence over `ThreadPoolTuningEnabled`.
 

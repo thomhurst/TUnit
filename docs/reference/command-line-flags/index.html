@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.a95f87d4.css">
-<script src="/assets/js/runtime~main.affea2cf.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.c4f3b2b9.js" defer="defer"></script>
 <script src="/assets/js/main.37860cca.js" defer="defer"></script>
 </head>
 <body>
@@ -53,7 +53,9 @@ XML code coverage settings</p><p>--disable-logo
 Disables the TUnit logo when starting a test session.
 Can also be set via TUNIT_DISABLE_LOGO environment variable.</p><p>--fail-fast
 Cancel the test run after the first test failure
-Programmatic equivalent: context.Settings.Execution.FailFast</p><p>--maximum-parallel-tests
+Programmatic equivalent: context.Settings.Execution.FailFast</p><p>--fail-on-unobserved-task-exceptions
+Fail the test run when a task faults and nothing observes its exception
+Programmatic equivalent: context.Settings.Execution.FailOnUnobservedTaskExceptions</p><p>--maximum-parallel-tests
 Maximum Parallel Tests
 Programmatic equivalent: context.Settings.Parallelism.MaximumParallelTests</p><p>--no-ansi
 Disable outputting ANSI escape characters to screen.</p><p>--no-progress
