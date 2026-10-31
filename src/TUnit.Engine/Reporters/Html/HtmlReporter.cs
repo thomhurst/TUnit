@@ -71,6 +71,16 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             return Task.CompletedTask;
         }
 
+        if (value is UnobservedTaskExceptionsData unobserved)
+        {
+            foreach (var exception in unobserved.Exceptions)
+            {
+                _unobservedTaskExceptions.Enqueue(exception);
+            }
+
+            return Task.CompletedTask;
+        }
+
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
         // Keep only the update we'll report per test: a final-state update always wins over a
         // non-final one, otherwise the latest wins. The engine emits a single final update per
@@ -93,7 +103,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     private static bool HasFinalState(TestNodeUpdateMessage update)
         => update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>().IsFinalState();
 
-    public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage)];
+    public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage), typeof(UnobservedTaskExceptionsData)];
+
+    private readonly ConcurrentQueue<Exception> _unobservedTaskExceptions = new();
 
     public Type[] DataTypesProduced { get; } = [typeof(SessionFileArtifact)];
 
@@ -794,6 +806,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             Summary = summary,
             Groups = groups,
             Spans = spans,
+            UnobservedTaskExceptions = MapUnobservedTaskExceptions(),
             CommitSha = ci.CommitSha,
             Branch = ci.Branch,
             PullRequestNumber = ci.PullRequestNumber,
@@ -1017,6 +1030,22 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         TestState.Cancelled => "cancelled",
         _ => "error",
     };
+
+    private ReportExceptionData[]? MapUnobservedTaskExceptions()
+    {
+        if (_unobservedTaskExceptions.IsEmpty)
+        {
+            return null;
+        }
+
+        var mapped = new List<ReportExceptionData>(_unobservedTaskExceptions.Count);
+        foreach (var exception in _unobservedTaskExceptions)
+        {
+            mapped.Add(MapException(exception)!);
+        }
+
+        return mapped.ToArray();
+    }
 
     private static ReportExceptionData? MapException(Exception? ex)
     {

@@ -116,6 +116,23 @@ public class TestSessionContext : Context
 
     internal void MarkFailure() => Interlocked.Increment(ref _failureCount);
 
+    private readonly ConcurrentQueue<Exception> _unobservedTaskExceptions = new();
+
+    /// <summary>
+    /// Exceptions from faulted tasks that nothing awaited or observed, raised through
+    /// <see cref="TaskScheduler.UnobservedTaskException"/> while this session was running.
+    /// </summary>
+    /// <remarks>
+    /// The runtime raises the event from the finalizer thread after the faulted task is garbage
+    /// collected, so an exception appears here some time after the fault, not while the test that
+    /// caused it is running. Read this in an <c>[After(TestSession)]</c> hook to see the exceptions
+    /// recorded so far. With <c>--fail-on-unobserved-task-exceptions</c>, TUnit also runs a final
+    /// garbage collection after the session hooks so late faults are not lost.
+    /// </remarks>
+    public IReadOnlyCollection<Exception> UnobservedTaskExceptions => _unobservedTaskExceptions;
+
+    internal void AddUnobservedTaskException(Exception exception) => _unobservedTaskExceptions.Enqueue(exception);
+
     internal readonly List<Artifact> Artifacts = [];
 
     public void AddArtifact(Artifact artifact)
