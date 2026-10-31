@@ -1741,6 +1741,7 @@ namespace
         public .<.ClassHookContext> TestClasses { get; }
         public .TestDiscoveryContext TestDiscoveryContext { get; }
         public required string? TestFilter { get; init; }
+        public .<> UnobservedTaskExceptions { get; }
         public new static .TestSessionContext? Current { get; }
         public static .TestBuilderContext GlobalStaticPropertyContext { get; }
         public void AddArtifact(.Artifact artifact) { }
@@ -3032,6 +3033,7 @@ namespace .Settings
     public sealed class ExecutionSettings
     {
         public bool FailFast { get; set; }
+        public bool FailOnUnobservedTaskExceptions { get; set; }
         public bool ThreadPoolTuningEnabled { get; set; }
     }
     public sealed class ParallelismSettings

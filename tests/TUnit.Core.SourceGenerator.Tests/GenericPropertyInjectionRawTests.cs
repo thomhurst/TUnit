@@ -735,11 +735,14 @@ internal class GenericPropertyInjectionRawTests
 
     // Generated code switches on NET8_0_OR_GREATER (UnsafeAccessor) and NET9_0_OR_GREATER (generic UnsafeAccessor),
     // so compile it once per branch a consumer can hit: the reflection fallback, .NET 8 and .NET 9+.
+    // The net472 leg references .NET Framework, which has no UnsafeAccessor, so only the fallback applies there.
     private static readonly string[][] TargetFrameworkSymbols =
     [
         [],
+#if !NETFRAMEWORK
         ["NET8_0_OR_GREATER"],
         ["NET8_0_OR_GREATER", "NET9_0_OR_GREATER"]
+#endif
     ];
 
     private static async Task AssertGeneratedCodeCompilesAsync(string source)
@@ -750,7 +753,12 @@ internal class GenericPropertyInjectionRawTests
 
             var compilation = CSharpCompilation.Create(
                     "TestAssembly",
-                    [CSharpSyntaxTree.ParseText(source, parseOptions)],
+                    [
+                        CSharpSyntaxTree.ParseText(source, parseOptions),
+#if NETFRAMEWORK
+                        CSharpSyntaxTree.ParseText(ReferencesHelper.NetFrameworkPolyfills, parseOptions),
+#endif
+                    ],
                     options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
                 )
                 .WithReferences(ReferencesHelper.References);

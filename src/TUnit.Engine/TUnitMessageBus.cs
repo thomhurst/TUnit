@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Platform.CommandLine;
+﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -10,6 +11,7 @@ using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Enums;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
+using TUnit.Engine.Reporters;
 using TUnit.Engine.Services;
 
 #pragma warning disable TPEXP
@@ -18,7 +20,7 @@ namespace TUnit.Engine;
 
 internal class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLineOptions, VerbosityService verbosityService, IServiceProvider serviceProvider, ExecuteRequestContext context) : ITUnitMessageBus, IDataProducer
 {
-    private static readonly Type[] _dataTypesProduced = [typeof(TestNodeUpdateMessage), typeof(SessionFileArtifact)];
+    private static readonly Type[] _dataTypesProduced = [typeof(TestNodeUpdateMessage), typeof(SessionFileArtifact), typeof(UnobservedTaskExceptionsData)];
 
     private readonly SessionUid _sessionSessionUid = context.Request.Session.SessionUid;
 
@@ -130,6 +132,36 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
                 artifact.Description
             )
         ));
+    }
+
+    public ValueTask UnobservedTaskExceptions(IReadOnlyList<Exception> exceptions)
+    {
+        return new ValueTask(context.MessageBus.PublishAsync(this,
+            new UnobservedTaskExceptionsData(_sessionSessionUid, exceptions)));
+    }
+
+    /// <summary>
+    /// Reports an unobserved task exception as a failed result of its own. Used when the run is
+    /// set to fail on these exceptions, so the failure reaches TRX, IDEs and the exit code.
+    /// </summary>
+    public ValueTask UnobservedTaskExceptionFailed(Exception exception)
+    {
+        // Same fold as the unhandled-exception node in TUnitTestFramework: TRX needs a type name
+        // for a node without test method metadata, and an explicit exception property for the cause.
+        var folded = FlattenedException.Wrap(exception);
+
+        var testNode = new TestNode
+        {
+            DisplayName = $"Unobserved task exception - {exception.GetType().Name}: {exception.Message}",
+            Uid = new TestNodeUid(Guid.NewGuid().ToString()),
+            Properties = new PropertyBag(
+                GetFailureStateProperty(exception, timeout: null, TimeSpan.Zero, IsConsole),
+                new TrxFullyQualifiedTypeNameProperty(typeof(TUnitMessageBus).FullName!),
+                new TrxExceptionProperty(folded.Message,
+                    string.IsNullOrEmpty(folded.StackTrace) ? null : folded.StackTrace))
+        };
+
+        return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(_sessionSessionUid, testNode)));
     }
 
     public ValueTask PublishOutputUpdate(TestNode testNode)

@@ -95,6 +95,40 @@ public class ReportDataJsonTests
     }
 
     [Test]
+    public async Task Serialize_Then_Deserialize_RoundTrips_UnobservedTaskExceptions()
+    {
+        var original = TestReportData.Build("My.Tests", unobservedTaskExceptions:
+        [
+            new ReportExceptionData
+            {
+                Type = "System.InvalidOperationException",
+                Message = "leaked",
+                StackTrace = "at Foo.Bar()",
+                InnerException = new ReportExceptionData { Type = "System.Exception", Message = "inner" },
+            },
+        ]);
+
+        var restored = ReportDataJson.TryDeserialize(ReportDataJson.Serialize(original));
+
+        await Assert.That(restored).IsNotNull();
+        await Assert.That(restored!.UnobservedTaskExceptions).HasSingleItem();
+        var exception = restored.UnobservedTaskExceptions![0];
+        await Assert.That(exception.Type).IsEqualTo("System.InvalidOperationException");
+        await Assert.That(exception.Message).IsEqualTo("leaked");
+        await Assert.That(exception.StackTrace).IsEqualTo("at Foo.Bar()");
+        await Assert.That(exception.InnerException!.Message).IsEqualTo("inner");
+    }
+
+    [Test]
+    public async Task Serialize_Omits_UnobservedTaskExceptions_When_None()
+    {
+        var json = ReportDataJson.Serialize(TestReportData.Build("My.Tests"));
+
+        await Assert.That(json).DoesNotContain("unobservedTaskExceptions");
+        await Assert.That(ReportDataJson.TryDeserialize(json)!.UnobservedTaskExceptions).IsNull();
+    }
+
+    [Test]
     public async Task TryDeserialize_Ignores_Unknown_Properties()
     {
         var json = """{"schemaVersion":1,"assemblyName":"A","futureField":{"nested":[1,2,3]},"summary":{"total":1,"passed":1}}""";
@@ -107,6 +141,21 @@ public class ReportDataJsonTests
 
 public class ReportDataMergerTests
 {
+    [Test]
+    public async Task Merge_Concatenates_UnobservedTaskExceptions()
+    {
+        var a = TestReportData.Build("A.Tests", unobservedTaskExceptions:
+            [new ReportExceptionData { Type = "System.Exception", Message = "from A" }]);
+        var b = TestReportData.Build("B.Tests");
+        var c = TestReportData.Build("C.Tests", unobservedTaskExceptions:
+            [new ReportExceptionData { Type = "System.Exception", Message = "from C" }]);
+
+        var merged = ReportDataMerger.Merge([a, b, c]);
+
+        await Assert.That(merged.UnobservedTaskExceptions!.Select(e => e.Message)).IsEquivalentTo(["from A", "from C"]);
+        await Assert.That(ReportDataMerger.Merge([b, TestReportData.Build("D.Tests")]).UnobservedTaskExceptions).IsNull();
+    }
+
     [Test]
     public async Task Merge_SingleSuite_Is_Passthrough()
     {
@@ -483,9 +532,11 @@ internal static class TestReportData
         string runtimeVersion = ".NET 10.0.0",
         string className = "CalculatorTests",
         string commitSha = "abc123",
-        bool withSuiteSpan = false)
+        bool withSuiteSpan = false,
+        ReportExceptionData[]? unobservedTaskExceptions = null)
         => new()
         {
+            UnobservedTaskExceptions = unobservedTaskExceptions,
             AssemblyName = assemblyName,
             MachineName = "test-machine",
             Timestamp = "14 Jul 2026, 10:00:00 UTC",

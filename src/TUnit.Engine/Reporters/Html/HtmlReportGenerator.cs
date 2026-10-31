@@ -224,6 +224,17 @@ internal static class HtmlReportGenerator
             w.WriteNumber("wallMs", wallMs);
             w.WriteNumber("workers", workers);
 
+            if (data.UnobservedTaskExceptions is { Length: > 0 } unobserved)
+            {
+                w.WritePropertyName("unobservedTaskExceptions");
+                w.WriteStartArray();
+                foreach (var exception in unobserved)
+                {
+                    WriteException(w, exception);
+                }
+                w.WriteEndArray();
+            }
+
             var flatTests = new (ReportTestResult Test, ReportTestGroup Group)[totalTests];
             var fi = 0;
             foreach (var g in data.Groups)

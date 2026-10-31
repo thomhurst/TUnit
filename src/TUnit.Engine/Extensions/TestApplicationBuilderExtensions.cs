@@ -44,6 +44,7 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new MaximumParallelTestsCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new FailOnUnobservedTaskExceptionsCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionModeCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new LogLevelCommandProvider(extension));

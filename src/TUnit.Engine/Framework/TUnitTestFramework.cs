@@ -51,6 +51,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     #endif
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
+        TestSessionContext? sessionContext = null;
+
         try
         {
             var serviceProvider = GetOrCreateServiceProvider(context);
@@ -66,6 +68,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             // themselves down.
             serviceProvider.ContextProvider.TestSessionContext.SessionCancellationToken = serviceProvider.CancellationToken.Token;
             TestSessionContext.Current = serviceProvider.ContextProvider.TestSessionContext;
+
+            sessionContext = serviceProvider.ContextProvider.TestSessionContext;
+            UnobservedTaskExceptionTracker.Register(sessionContext);
 
             serviceProvider.Initializer.Initialize();
 
@@ -129,6 +134,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         }
         finally
         {
+            if (sessionContext is not null)
+            {
+                UnobservedTaskExceptionTracker.Unregister(sessionContext);
+            }
+
             context.Complete();
         }
     }

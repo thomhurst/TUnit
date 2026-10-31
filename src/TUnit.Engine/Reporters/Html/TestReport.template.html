@@ -617,6 +617,9 @@
   .run-wrap { max-width: 1280px; margin: 0 auto; padding: 28px 28px 80px; }
   .run-grid-1 { display: grid; grid-template-columns: 320px minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; }
   @media (max-width: 1100px) { .run-grid-1 { grid-template-columns: minmax(0, 1fr); } }
+  .unobserved-card { margin-bottom: 16px; }
+  .unobserved-card[hidden] { display: none; }
+  .unobserved-note { color: var(--text-dim); font-size: 12px; margin-bottom: 12px; }
   .run-grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; margin-bottom: 16px; }
   @media (max-width: 1100px) { .run-grid-2 { grid-template-columns: 1fr; } }
 
@@ -1249,6 +1252,14 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="card unobserved-card" id="unobservedCard" hidden>
+      <div class="panel-head">
+        <h2>Unobserved task exceptions</h2>
+        <span class="count fail" id="unobservedCount">0</span>
+      </div>
+      <div class="panel-body" id="unobservedList"></div>
     </div>
 
     <div class="run-grid-2">
@@ -2938,6 +2949,17 @@ function renderRun() {
   $('#stripStart').textContent = fmtTime(0, REPORT.startMs);
   $('#stripMid').textContent = fmtTime(REPORT.wallMs/2, REPORT.startMs);
   $('#stripEnd').textContent = fmtTime(REPORT.wallMs, REPORT.startMs);
+
+  // Unobserved task exceptions belong to no single test, so they get their own panel.
+  const unobserved = REPORT.unobservedTaskExceptions || [];
+  if (unobserved.length > 0) {
+    $('#unobservedCard').hidden = false;
+    $('#unobservedCount').textContent = unobserved.length;
+    $('#unobservedList').innerHTML = `
+      <div class="unobserved-note">Tasks faulted and nothing awaited or observed their exceptions. The runtime reports these when the task is garbage collected, so they cannot be tied to a single test. The stack trace usually names the code that started the task.</div>
+      ${unobserved.map(errorBlockHTML).join('')}
+    `;
+  }
 
   // failures (grouped into clusters by root cause)
   $('#failuresCount').textContent = failed.length;

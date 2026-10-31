@@ -61,7 +61,8 @@ internal static class JUnitXmlWriter
 
     public static string GenerateXml(
         IEnumerable<TestNodeUpdateMessage> testUpdates,
-        string? filter)
+        string? filter,
+        IReadOnlyList<Exception>? unobservedTaskExceptions = null)
     {
         // Get the last state for each test
         var lastStates = GetLastStates(testUpdates);
@@ -107,7 +108,7 @@ internal static class JUnitXmlWriter
         xmlWriter.WriteAttributeString("timestamp", summary.Timestamp.ToString("o", CultureInfo.InvariantCulture));
 
         // Write test suite
-        WriteTestSuite(xmlWriter, lastStates.Values, assemblyName, targetFramework, summary, filter);
+        WriteTestSuite(xmlWriter, lastStates.Values, assemblyName, targetFramework, summary, filter, unobservedTaskExceptions);
 
         xmlWriter.WriteEndElement(); // testsuites
         xmlWriter.WriteEndDocument();
@@ -121,7 +122,8 @@ internal static class JUnitXmlWriter
         string assemblyName,
         string targetFramework,
         TestSummary summary,
-        string? filter)
+        string? filter,
+        IReadOnlyList<Exception>? unobservedTaskExceptions)
     {
         writer.WriteStartElement("testsuite");
         writer.WriteAttributeString("name", SanitizeForXml(assemblyName));
@@ -140,6 +142,19 @@ internal static class JUnitXmlWriter
         foreach (var test in tests)
         {
             WriteTestCase(writer, test);
+        }
+
+        // Unobserved task exceptions belong to no single test, so they go in the suite-level
+        // system-err, which follows the test cases in the JUnit schema.
+        if (unobservedTaskExceptions is { Count: > 0 })
+        {
+            var builder = new StringBuilder();
+            foreach (var exception in unobservedTaskExceptions)
+            {
+                builder.Append("Unobserved task exception: ").Append(exception).AppendLine();
+            }
+
+            writer.WriteElementString("system-err", SanitizeForXml(builder.ToString()));
         }
 
         writer.WriteEndElement(); // testsuite
