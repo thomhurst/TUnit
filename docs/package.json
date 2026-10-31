@@ -49,11 +49,11 @@
   "resolutions": {
     "lodash": "4.18.1",
     "lodash-es": "4.18.1",
-    "minimatch": "11.0.2",
+    "minimatch": "11.0.3",
     "express/path-to-regexp": "9.0.0",
     "serialize-javascript": "7.1.4",
     "brace-expansion": "5.0.12",
-    "qs": "6.17.0",
+    "qs": "6.17.1",
     "dompurify": "3.4.17",
     "node-forge": "1.4.2",
     "picomatch": "4.0.7",
