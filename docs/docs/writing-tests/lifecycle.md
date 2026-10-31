@@ -44,11 +44,11 @@ flowchart TB
     T0["Create test class instance (constructor)"]
     T0a["Set injected property values on instance"]
     T0b["IAsyncInitializer.InitializeAsync()"]
-    T1["[BeforeEvery(Test)] · ITestStartEventReceiver (Early)"]
+    T1["ITestStartEventReceiver (Early) · [BeforeEvery(Test)]"]
     T2["[Before(Test)] · ITestStartEventReceiver (Late)"]
     T3["Test Body"]
     T4["ITestEndEventReceiver (Early) · [After(Test)]"]
-    T5["ITestEndEventReceiver (Late) · [AfterEvery(Test)]"]
+    T5["[AfterEvery(Test)] · ITestEndEventReceiver (Late)"]
     T6["IDisposable / IAsyncDisposable"]
     T7["Cleanup tracked objects"]
 
@@ -121,8 +121,8 @@ sequenceDiagram
     Engine->>Instance: Set cached property values
     Engine->>Instance: IAsyncInitializer.InitializeAsync()
 
-    Engine->>Hooks: [BeforeEvery(Test)]
     Engine->>Events: ITestStartEventReceiver (Early)
+    Engine->>Hooks: [BeforeEvery(Test)]
     Engine->>Hooks: [Before(Test)]
     Engine->>Events: ITestStartEventReceiver (Late)
 
@@ -130,8 +130,8 @@ sequenceDiagram
 
     Engine->>Events: ITestEndEventReceiver (Early)
     Engine->>Hooks: [After(Test)]
-    Engine->>Events: ITestEndEventReceiver (Late)
     Engine->>Hooks: [AfterEvery(Test)]
+    Engine->>Events: ITestEndEventReceiver (Late)
 
     Engine->>Instance: DisposeAsync() / Dispose()
     Engine->>Engine: Cleanup tracked objects (dispose at ref count 0)
@@ -152,15 +152,15 @@ Exact order of operations for a single test:
 | 7 | **Create test class instance** | Constructor runs |
 | 8 | **Set property values on instance** | Cached values applied |
 | 9 | **`IAsyncInitializer.InitializeAsync()`** | All tracked objects initialized |
-| 10 | `[BeforeEvery(Test)]` | Hook |
-| 11 | `ITestStartEventReceiver` (Early) | Event |
+| 10 | `ITestStartEventReceiver` (Early) | Event |
+| 11 | `[BeforeEvery(Test)]` | Hook |
 | 12 | `[Before(Test)]` | Hook (instance method) |
 | 13 | `ITestStartEventReceiver` (Late) | Event |
 | 14 | **Test Body Execution** | Your test code runs |
 | 15 | `ITestEndEventReceiver` (Early) | Event |
 | 16 | `[After(Test)]` | Hook (instance method) |
-| 17 | `ITestEndEventReceiver` (Late) | Event |
-| 18 | `[AfterEvery(Test)]` | Hook |
+| 17 | `[AfterEvery(Test)]` | Hook |
+| 18 | `ITestEndEventReceiver` (Late) | Event |
 | 19 | **`IAsyncDisposable` / `IDisposable`** | Test instance disposed |
 | 20 | **Cleanup tracked objects** | Ref count decremented, dispose if 0 |
 | 21 | `ILastTestInClassEventReceiver` | Event (after last test in class) |
@@ -305,8 +305,8 @@ For `ITestStartEventReceiver` and `ITestEndEventReceiver`:
 flowchart LR
     subgraph TestStart["Test Start"]
         direction TB
-        A1["[BeforeEvery(Test)]"]
-        A2["ITestStartEventReceiver (Early)"]
+        A1["ITestStartEventReceiver (Early)"]
+        A2["[BeforeEvery(Test)]"]
         A3["[Before(Test)]"]
         A4["ITestStartEventReceiver (Late)"]
         A1 --> A2 --> A3 --> A4
@@ -316,8 +316,8 @@ flowchart LR
         direction TB
         B1["ITestEndEventReceiver (Early)"]
         B2["[After(Test)]"]
-        B3["ITestEndEventReceiver (Late)"]
-        B4["[AfterEvery(Test)]"]
+        B3["[AfterEvery(Test)]"]
+        B4["ITestEndEventReceiver (Late)"]
         B1 --> B2 --> B3 --> B4
     end
 
@@ -327,13 +327,15 @@ flowchart LR
 ```csharp
 public class MyAttribute : Attribute, ITestStartEventReceiver
 {
-    // Early = runs BEFORE [Before(Test)]
-    // Late (default) = runs AFTER [Before(Test)]
+    // Early = runs BEFORE [BeforeEvery(Test)] and [Before(Test)]
+    // Late (default) = runs AFTER them
     public EventReceiverStage Stage => EventReceiverStage.Early;
 
     public ValueTask OnTestStart(TestContext context) => ValueTask.CompletedTask;
 }
 ```
+
+A late `ITestEndEventReceiver` sees the result that will be reported. If the test body passed but an early end receiver, an `[After(Test)]` hook or an `[AfterEvery(Test)]` hook threw, `context.Execution.Result` is already `Failed` when the late receiver runs, unless a hook overrode the result.
 
 ## Hook Attributes Reference
 

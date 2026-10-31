@@ -14,6 +14,8 @@ public class LateReceiverSeesTeardownFailure7289Tests(TestMode testMode) : Invok
     [Test]
     public async Task Test()
     {
+        // FindFile searches the whole repository, so match only this run's files.
+        var runId = Guid.NewGuid().ToString("N");
         await RunTestsWithFilter(
             "/*/TUnit.TestProject.Bugs._7289/LateReceiverSeesTeardownFailure/*",
             [
@@ -21,8 +23,9 @@ public class LateReceiverSeesTeardownFailure7289Tests(TestMode testMode) : Invok
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(0),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1),
-                _ => FindFile(x => x.Name.EndsWith("-LateReceiverSeesTeardownFailure-Failed.txt")).AssertExists(),
-                _ => FindFile(x => x.Name.EndsWith("-LateReceiverSeesTeardownFailure-Passed.txt")).ShouldBeNull()
-            ]);
+                _ => FindFile(x => x.Name == $"{runId}-LateReceiverSeesTeardownFailure-Failed.txt").AssertExists(),
+                _ => FindFile(x => x.Name.StartsWith(runId, StringComparison.Ordinal) && !x.Name.EndsWith("-Failed.txt", StringComparison.Ordinal)).ShouldBeNull()
+            ],
+            new RunOptions().WithEnvironmentVariable("TUNIT_7289_RUN_ID", runId));
     }
 }

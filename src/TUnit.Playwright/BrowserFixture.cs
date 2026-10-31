@@ -22,6 +22,10 @@ public class BrowserFixture : IAsyncInitializer, IAsyncDisposable
     /// When the shared <see cref="Browser"/> disconnected without TUnit closing it (for example
     /// because it crashed), the time it disconnected, in UTC; otherwise <c>null</c>.
     /// </summary>
+    /// <remarks>
+    /// Reflects the current <see cref="Browser"/>, so it returns <c>null</c> again after
+    /// <see cref="TUnitPlaywrightSettings.RelaunchDisconnectedBrowser"/> launched a new browser.
+    /// </remarks>
     public DateTimeOffset? DisconnectedAt => Browser is { } browser ? PlaywrightBrowserMonitor.For(browser).DisconnectedAt : null;
 
     public virtual string BrowserName => Microsoft.Playwright.BrowserType.Chromium;
@@ -58,6 +62,7 @@ public class BrowserFixture : IAsyncInitializer, IAsyncDisposable
             // Another test may have relaunched the browser while this one waited.
             if (ReferenceEquals(Browser, browser))
             {
+                await CloseDisconnectedBrowserAsync(browser).ConfigureAwait(false);
                 await InitializeAsync().ConfigureAwait(false);
             }
 
@@ -66,6 +71,21 @@ public class BrowserFixture : IAsyncInitializer, IAsyncDisposable
         finally
         {
             _relaunch.Release();
+        }
+    }
+
+    // The browser process is gone, but closing releases Playwright's objects and its
+    // Disconnected subscription now instead of at garbage collection.
+    private static async Task CloseDisconnectedBrowserAsync(IBrowser browser)
+    {
+        PlaywrightBrowserMonitor.MarkClosing(browser);
+        try
+        {
+            await browser.CloseAsync().ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            // Best effort: the browser already disconnected.
         }
     }
 

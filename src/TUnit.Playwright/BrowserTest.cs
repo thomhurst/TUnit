@@ -152,8 +152,10 @@ public class BrowserTest : PlaywrightTest
                 {
                     // A later [After(Test)] hook can still fail the test. The engine records that
                     // before the late test-end receivers run, so let [CaptureOnFailure] decide then.
+                    // The worker's browser must stay open until then, so keep the worker out of the pool.
                     PlaywrightRecordingScope.For(capture.Owner).Register(
-                        () => new ValueTask(recording?.CloseAsync() ?? context.CloseAsync()), 2);
+                        () => new ValueTask(recording?.CloseAsync() ?? context.CloseAsync()), PlaywrightCleanupOrder.DeferredContext);
+                    DeferWorkerRelease();
                     continue;
                 }
 

@@ -14,6 +14,7 @@ public class PageFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptInit
 {
     private readonly PlaywrightFixtureLifecycle _lifecycle = new();
     private IPage? _page;
+    private IBrowserContext? _pageContext;
 
     [ClassDataSource<ContextFixture>]
     public required ContextFixture ContextFixture { get; init; }
@@ -32,6 +33,7 @@ public class PageFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptInit
         try
         {
             _page = await context.NewPageAsync().ConfigureAwait(false);
+            _pageContext = context;
         }
         catch (Exception exception) when (ContextFixture.BrowserMonitor?.WrapIfDisconnected(exception, TestContext.Current) is { } wrapped)
         {
@@ -41,8 +43,11 @@ public class PageFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptInit
 
     bool ITestAttemptInitializer.IsInitialized => _lifecycle.IsInitialized;
 
+    // A ContextFixture can be captured and disposed per attempt while this fixture is shared and
+    // kept. The page then belongs to a closed context, so create a new one on the next attempt.
     async ValueTask ITestAttemptInitializer.InitializeForTestAttemptAsync(TestContext context, CancellationToken cancellationToken) =>
-        await _lifecycle.InitializeAsync(this, context).WaitAsync(cancellationToken).ConfigureAwait(false);
+        await _lifecycle.InitializeAsync(this, context, dependencyReset: _pageContext is not null && !ReferenceEquals(_pageContext, ContextFixture.Context))
+            .WaitAsync(cancellationToken).ConfigureAwait(false);
 
     int IEventReceiver.Order => 0;
 
@@ -59,6 +64,7 @@ public class PageFixture : IAsyncInitializer, IAsyncDisposable, ITestAttemptInit
 
     public virtual async ValueTask DisposeAsync()
     {
+        _pageContext = null;
         if (Interlocked.Exchange(ref _page, null) is { } page)
         {
             await page.CloseAsync().ConfigureAwait(false);

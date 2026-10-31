@@ -25,8 +25,10 @@ public class LateReceiverSeesTeardownFailure
 
         public async ValueTask OnTestEnd(TestContext context)
         {
+            // The engine test passes a run id, so it only asserts files written by its own run.
+            var runId = Environment.GetEnvironmentVariable("TUNIT_7289_RUN_ID") ?? Guid.NewGuid().ToString("N");
             var state = context.Execution.Result?.State.ToString() ?? "None";
-            await File.WriteAllTextAsync($"{Guid.NewGuid():N}-LateReceiverSeesTeardownFailure-{state}.txt", state);
+            await File.WriteAllTextAsync($"{runId}-LateReceiverSeesTeardownFailure-{state}.txt", state);
         }
     }
 }

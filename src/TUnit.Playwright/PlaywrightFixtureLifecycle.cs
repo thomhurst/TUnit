@@ -23,7 +23,13 @@ internal sealed class PlaywrightFixtureLifecycle
     /// <summary>Stops a later direct <c>InitializeAsync</c> call from reusing a stale owner.</summary>
     internal void ClearCaptureOwner() => CaptureOwner = null;
 
-    internal Task InitializeAsync(IAsyncInitializer fixture, TestContext context)
+    /// <param name="fixture">The fixture to initialize.</param>
+    /// <param name="context">The test attempt that needs it.</param>
+    /// <param name="dependencyReset">
+    /// Whether a dependency was disposed after the last attempt, so the cached initialization
+    /// refers to closed resources. Applies only once that initialization has completed.
+    /// </param>
+    internal Task InitializeAsync(IAsyncInitializer fixture, TestContext context, bool dependencyReset = false)
     {
         lock (_lock)
         {
@@ -54,7 +60,8 @@ internal sealed class PlaywrightFixtureLifecycle
 #endif
             var perAttempt = recording || capture;
 
-            if (_initialization is not null && (!perAttempt || _attempt == context.Execution.CurrentRetryAttempt))
+            var stale = dependencyReset && _initialization is { IsCompleted: true };
+            if (_initialization is not null && !stale && (!perAttempt || _attempt == context.Execution.CurrentRetryAttempt))
             {
                 return _initialization;
             }
@@ -66,7 +73,7 @@ internal sealed class PlaywrightFixtureLifecycle
             if (perAttempt)
             {
                 // Register before initialization so partial setup still gets cleanup.
-                PlaywrightRecordingScope.For(context).Register(SettleAsync, () => CompleteAsync((IAsyncDisposable)fixture), fixture is PageFixture ? 0 : 1);
+                PlaywrightRecordingScope.For(context).Register(SettleAsync, () => CompleteAsync((IAsyncDisposable)fixture), fixture is PageFixture ? PlaywrightCleanupOrder.Page : PlaywrightCleanupOrder.Context);
             }
 
             // Cache failures within an attempt, just like ordinary fixture initialization.

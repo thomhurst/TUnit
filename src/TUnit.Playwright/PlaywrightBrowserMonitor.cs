@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Microsoft.Playwright;
 using TUnit.Core;
@@ -60,9 +59,7 @@ internal sealed class PlaywrightBrowserMonitor
     {
         if (owner is not null)
         {
-            var used = (ConcurrentDictionary<PlaywrightBrowserMonitor, byte>)owner.StateBag.Items.GetOrAdd(
-                UsedBrowsersKey, static _ => new ConcurrentDictionary<PlaywrightBrowserMonitor, byte>())!;
-            used.TryAdd(monitor, 0);
+            UsedBrowsers.For(owner).Add(monitor);
         }
 
         return monitor;
@@ -100,14 +97,14 @@ internal sealed class PlaywrightBrowserMonitor
     internal static void ReportIfDisconnected(TestContext context)
     {
         if (context.Execution.Result is not { State: not (TestState.Passed or TestState.Skipped) } result ||
-            !context.StateBag.TryGetValue<ConcurrentDictionary<PlaywrightBrowserMonitor, byte>>(UsedBrowsersKey, out var used) ||
+            !context.StateBag.TryGetValue<UsedBrowsers>(UsedBrowsersKey, out var used) ||
             used is null ||
             !IsPlaywrightFailure(result.Exception))
         {
             return;
         }
 
-        foreach (var monitor in used.Keys)
+        foreach (var monitor in used.Snapshot())
         {
             if (monitor.DisconnectedAt is null)
             {
@@ -168,6 +165,35 @@ internal sealed class PlaywrightBrowserMonitor
         catch
         {
             return "Playwright";
+        }
+    }
+
+    /// <summary>The browsers one test depends on.</summary>
+    private sealed class UsedBrowsers
+    {
+        private readonly Lock _lock = new();
+        private readonly List<PlaywrightBrowserMonitor> _monitors = [];
+
+        internal static UsedBrowsers For(TestContext context) =>
+            (UsedBrowsers)context.StateBag.Items.GetOrAdd(UsedBrowsersKey, static _ => new UsedBrowsers())!;
+
+        internal void Add(PlaywrightBrowserMonitor monitor)
+        {
+            lock (_lock)
+            {
+                if (!_monitors.Contains(monitor))
+                {
+                    _monitors.Add(monitor);
+                }
+            }
+        }
+
+        internal PlaywrightBrowserMonitor[] Snapshot()
+        {
+            lock (_lock)
+            {
+                return _monitors.ToArray();
+            }
         }
     }
 }

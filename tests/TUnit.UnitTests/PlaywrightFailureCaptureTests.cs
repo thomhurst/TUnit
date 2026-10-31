@@ -176,6 +176,66 @@ public class PlaywrightFailureCaptureTests
     }
 
     [Test]
+    [Arguments(TestState.Passed, true)]
+    [Arguments(TestState.Failed, false)]
+    public async Task DeferredCaptureKeepsWorkerOutOfPoolUntilTestEnd(TestState finalState, bool returnedToPool)
+    {
+        using var scope = new CaptureScope();
+        var attribute = new CaptureOnFailureAttribute(scope.Directory);
+        await scope.DiscoverAsync(attribute);
+        scope.Test.WorkerSetup();
+        var workerIndex = scope.Test.WorkerIndex;
+        await scope.Test.NewContext(new BrowserNewContextOptions());
+        scope.SetResult(TestState.Passed);
+
+        await scope.Test.BrowserTearDown(scope.Context);
+        await scope.Test.WorkerTeardown(scope.Context);
+
+        // Capture has not run yet, so another test must not get this worker's browser.
+        await Assert.That(TakeWorkerIndex()).IsNotEqualTo(workerIndex);
+
+        scope.SetResult(finalState);
+        await attribute.OnTestEnd(scope.Context);
+
+        await scope.BrowserContext.Received(1).CloseAsync(Arg.Any<BrowserContextCloseOptions>());
+        await Assert.That(TakeWorkerIndex() == workerIndex).IsEqualTo(returnedToPool);
+    }
+
+    // Pops a pooled worker (or creates one) and returns its index without returning it.
+    private static int TakeWorkerIndex()
+    {
+        var probe = new WorkerAwareTest();
+        probe.WorkerSetup();
+        return probe.WorkerIndex;
+    }
+
+    [Test]
+    public async Task SharedPageFixtureGetsNewPageWhenCapturedContextIsRecreated()
+    {
+        using var scope = new CaptureScope();
+        var attribute = new CaptureOnFailureAttribute(scope.Directory);
+        await scope.DiscoverAsync(attribute);
+        var fixture = scope.CreateFixture();
+        TraceScopeRegistry.RegisterFromDataSource(new ClassDataSourceAttribute<PageFixture> { Shared = SharedType.PerClass }, [fixture]);
+
+        await ObjectInitializer.InitializeAsync(fixture);
+        var firstPage = fixture.Page;
+        scope.SetResult(TestState.Failed);
+        await attribute.OnTestEnd(scope.Context);
+        await scope.BrowserContext.Received(1).CloseAsync(Arg.Any<BrowserContextCloseOptions>());
+
+        scope.Context.CurrentRetryAttempt = 1;
+        await ObjectInitializer.InitializeAsync(fixture);
+
+        await Assert.That(fixture.Page).IsNotSameReferenceAs(firstPage);
+        await Assert.That(fixture.ContextFixture.Context).IsNotNull();
+        await scope.Browser.Received(2).NewContextAsync(Arg.Any<BrowserNewContextOptions>());
+        scope.SetResult(TestState.Passed);
+        await attribute.OnTestEnd(scope.Context);
+        await fixture.DisposeAsync();
+    }
+
+    [Test]
     public async Task WithoutAttributeNothingIsTraced()
     {
         using var scope = new CaptureScope();
@@ -389,6 +449,7 @@ public class PlaywrightFailureCaptureTests
         }
 
         await Assert.That(browserFixture.Browser).IsSameReferenceAs(replacement);
+        await scope.Browser.Received(1).CloseAsync(Arg.Any<BrowserCloseOptions>());
         await Assert.That(browserFixture.DisconnectedAt).IsNull();
         await scope.Browser.DidNotReceive().NewContextAsync(Arg.Any<BrowserNewContextOptions>());
         await replacement.Received(1).NewContextAsync(Arg.Any<BrowserNewContextOptions>());

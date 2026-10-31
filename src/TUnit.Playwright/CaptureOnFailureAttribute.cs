@@ -22,6 +22,11 @@ namespace TUnit.Playwright;
 /// parallel tests and <c>[Arguments]</c> variants of one method never share a file.
 /// </para>
 /// <para>
+/// The decision uses the result after every <c>[After(Test)]</c> and <c>[AfterEvery(Test)]</c> hook,
+/// so a failing teardown hook is captured. A test-end event receiver that fails after capture ran
+/// still fails the test, but its artifacts were already discarded.
+/// </para>
+/// <para>
 /// Apply the attribute to a method, a class or an assembly. The closest one applies.
 /// Fixtures shared between tests are not captured: they have no single test that owns them.
 /// When capture applies, context and page fixtures are created again for each retry attempt.
