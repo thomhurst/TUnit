@@ -65,7 +65,7 @@ internal static class MethodSymbolExtensions
 
         foreach (var constraintType in typeParam.ConstraintTypes)
         {
-            constraints.Add(constraintType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+            constraints.Add(MethodTypeParameterRenames.ToDisplayString(constraintType, SymbolDisplayFormat.FullyQualifiedFormat));
         }
 
         if (typeParam.HasConstructorConstraint)
@@ -145,7 +145,7 @@ internal static class MethodSymbolExtensions
     public static string GetTypeParameterList(this IMethodSymbol method)
     {
         if (method.TypeParameters.Length == 0) return "";
-        return "<" + string.Join(", ", method.TypeParameters.Select(tp => tp.Name)) + ">";
+        return "<" + string.Join(", ", method.TypeParameters.Select(MethodTypeParameterRenames.GetName)) + ">";
     }
 
     public static string GetConstraintClauses(this IMethodSymbol method)
@@ -158,7 +158,7 @@ internal static class MethodSymbolExtensions
             var constraints = tp.GetGenericConstraints();
             if (!string.IsNullOrEmpty(constraints))
             {
-                sb.Append($" where {tp.Name} : {constraints}");
+                sb.Append($" where {MethodTypeParameterRenames.GetName(tp)} : {constraints}");
             }
         }
         return sb.ToString();
