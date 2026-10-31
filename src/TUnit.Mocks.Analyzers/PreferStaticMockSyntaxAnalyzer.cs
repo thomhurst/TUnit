@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -86,7 +88,7 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
         // T.Mock() only binds where the TUnit.Mocks namespace is imported. When the fix has to add
         // `using TUnit.Mocks;`, don't report if that would make an existing simple name ambiguous.
         if (!IsNamespaceInScope(method.ContainingNamespace, invocation.SpanStart, context.SemanticModel)
-            && ImportWouldCauseAmbiguity(method.ContainingNamespace, invocation.SpanStart, context.SemanticModel))
+            && ImportWouldCauseAmbiguity(method.ContainingNamespace, invocation.SyntaxTree.GetRoot(context.CancellationToken), context.SemanticModel, context.CancellationToken))
         {
             return;
         }
@@ -282,13 +284,36 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// For interfaces T.Mock() returns the generated wrapper type rather than Mock&lt;T&gt;. Returns
+    /// true when the call sits where its type is inferred (a `var` local, an implicitly typed
+    /// array, a lambda's return type, generic type inference, ...), so the rewrite could change
+    /// a type later code depends on.
+    /// </summary>
     private static bool MayChangeInferredType(
         InvocationExpressionSyntax invocation,
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
-        // Climb through expressions whose type flows from this operand.
-        SyntaxNode node = invocation;
+        var node = ClimbTypeFlow(invocation);
+
+        if (node.Parent is EqualsValueClauseSyntax
+            {
+                Parent: VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Type.IsVar: true } } declarator
+            })
+        {
+            return HasTypeSensitiveReference(declarator, semanticModel, cancellationToken);
+        }
+
+        return !IsTypeInsensitivePosition(node, semanticModel, cancellationToken);
+    }
+
+    /// <summary>
+    /// Climbs through expressions whose type flows from this operand (parentheses, conditional,
+    /// null-coalescing and switch expressions).
+    /// </summary>
+    private static SyntaxNode ClimbTypeFlow(SyntaxNode node)
+    {
         while (node.Parent is { } parent)
         {
             if (parent is ParenthesizedExpressionSyntax
@@ -308,24 +333,106 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
             break;
         }
 
+        return node;
+    }
+
+    /// <summary>
+    /// Whether an expression in this position is converted to, or used through, a type that
+    /// doesn't depend on the expression's own type. Anything not recognised counts as sensitive.
+    /// </summary>
+    private static bool IsTypeInsensitivePosition(SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken)
+    {
         switch (node.Parent)
         {
-            case EqualsValueClauseSyntax { Parent: VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Type.IsVar: true } } declarator }:
-                return IsReassigned(declarator, semanticModel, cancellationToken);
-            case InitializerExpressionSyntax { Parent: ImplicitArrayCreationExpressionSyntax }:
-            case LambdaExpressionSyntax:
-            case ArrowExpressionClauseSyntax { Parent: LocalFunctionStatementSyntax }:
-            case ArgumentSyntax { Parent: TupleExpressionSyntax }:
+            // mock.Member / mock?.Member: the wrapper derives from Mock<T>, so the same members bind.
+            case MemberAccessExpressionSyntax memberAccess:
+                return memberAccess.Expression == node;
+            case ConditionalAccessExpressionSyntax conditionalAccess:
+                return conditionalAccess.Expression == node;
+
+            case ArgumentSyntax argument when argument.RefKindKeyword.IsKind(SyntaxKind.None):
+                return argument.Parent?.Parent switch
+                {
+                    // Generic type inference would pick up the wrapper type.
+                    InvocationExpressionSyntax outer =>
+                        semanticModel.GetSymbolInfo(outer, cancellationToken).Symbol is IMethodSymbol method
+                        && (!method.IsGenericMethod || GetInvokedName(outer) is GenericNameSyntax),
+                    BaseObjectCreationExpressionSyntax or ConstructorInitializerSyntax or PrimaryConstructorBaseTypeSyntax or ElementAccessExpressionSyntax => true,
+                    _ => false,
+                };
+
+            // Explicitly typed targets.
+            case EqualsValueClauseSyntax { Parent: VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Type.IsVar: false } } }:
+            case EqualsValueClauseSyntax { Parent: PropertyDeclarationSyntax or ParameterSyntax }:
                 return true;
+            case AssignmentExpressionSyntax assignment:
+                return assignment.Right == node;
+            case CastExpressionSyntax:
+            case BinaryExpressionSyntax:
+            case IsPatternExpressionSyntax:
+            case InterpolationSyntax:
+            case ExpressionStatementSyntax:
+            case ExpressionElementSyntax:
+            case YieldStatementSyntax:
+                return true;
+            case InitializerExpressionSyntax initializer:
+                return initializer.Parent is not (ImplicitArrayCreationExpressionSyntax or AnonymousObjectCreationExpressionSyntax);
+
+            // Declared return types, except for lambdas whose return type is inferred.
             case ReturnStatementSyntax returnStatement:
                 return returnStatement.Ancestors().FirstOrDefault(static a =>
-                    a is AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax or MemberDeclarationSyntax) is AnonymousFunctionExpressionSyntax;
-            case ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax outer } }:
-                return semanticModel.GetSymbolInfo(outer, cancellationToken).Symbol is IMethodSymbol { IsGenericMethod: true }
-                       && GetInvokedName(outer) is not GenericNameSyntax;
+                    a is AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax or MemberDeclarationSyntax) is not AnonymousFunctionExpressionSyntax;
+            case ArrowExpressionClauseSyntax:
+                return true;
+
             default:
                 return false;
         }
+    }
+
+    /// <summary>
+    /// Whether any use of the `var` local depends on its type staying Mock&lt;T&gt;: a write
+    /// (assignment, tuple deconstruction, ref/out), or a read in a type-sensitive position such
+    /// as <c>Task.FromResult(mock)</c>.
+    /// </summary>
+    private static bool HasTypeSensitiveReference(
+        VariableDeclaratorSyntax declarator,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        if (semanticModel.GetDeclaredSymbol(declarator, cancellationToken) is not ILocalSymbol local)
+        {
+            return true;
+        }
+
+        // Top-level statements have no enclosing block: their locals span the compilation unit.
+        SyntaxNode? scope = declarator.FirstAncestorOrSelf<BlockSyntax>();
+        scope ??= declarator.FirstAncestorOrSelf<CompilationUnitSyntax>();
+
+        if (scope is null)
+        {
+            return true;
+        }
+
+        foreach (var identifier in scope.DescendantNodes().OfType<IdentifierNameSyntax>())
+        {
+            if (identifier.Identifier.ValueText != local.Name
+                || !SymbolEqualityComparer.Default.Equals(semanticModel.GetSymbolInfo(identifier, cancellationToken).Symbol, local))
+            {
+                continue;
+            }
+
+            var reference = ClimbTypeFlow(identifier);
+
+            if (reference != identifier
+                || IsWrite(identifier)
+                || !IsTypeInsensitivePosition(identifier, semanticModel, cancellationToken))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static SimpleNameSyntax? GetInvokedName(InvocationExpressionSyntax invocation)
@@ -388,24 +495,45 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Whether importing <paramref name="mocksNamespace"/> would make a type name the file
-    /// already uses by simple name (e.g. another mocking library's <c>Arg</c>) ambiguous.
+    /// Whether adding <c>using TUnit.Mocks;</c> to the file would make a simple name used
+    /// anywhere in it (e.g. another mocking library's <c>Arg</c>) ambiguous. The fix adds the
+    /// directive to the whole compilation unit, so every use in the file is checked, not just
+    /// the call site.
     /// </summary>
-    private static bool ImportWouldCauseAmbiguity(INamespaceSymbol mocksNamespace, int position, SemanticModel semanticModel)
+    private static bool ImportWouldCauseAmbiguity(
+        INamespaceSymbol mocksNamespace,
+        SyntaxNode root,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
     {
+        var typeNames = new HashSet<string>(StringComparer.Ordinal);
         foreach (var type in mocksNamespace.GetTypeMembers())
         {
-            if (type.DeclaredAccessibility != Accessibility.Public)
+            if (type.DeclaredAccessibility == Accessibility.Public)
+            {
+                typeNames.Add(type.Name);
+            }
+        }
+
+        foreach (var name in root.DescendantNodes().OfType<SimpleNameSyntax>())
+        {
+            if (!typeNames.Contains(name.Identifier.ValueText) || IsQualifiedOrBound(name))
             {
                 continue;
             }
 
-            foreach (var visible in semanticModel.LookupNamespacesAndTypes(position, name: type.Name))
+            if (semanticModel.GetAliasInfo(name, cancellationToken) is not null)
             {
-                if (IsImportedFromOtherNamespace(visible, position, semanticModel))
-                {
-                    return true;
-                }
+                continue;
+            }
+
+            var symbol = semanticModel.GetSymbolInfo(name, cancellationToken).Symbol;
+
+            if (symbol is INamedTypeSymbol type
+                && !SymbolEqualityComparer.Default.Equals(type.ContainingNamespace, mocksNamespace)
+                && IsImportedFromOtherNamespace(type, name.SpanStart, semanticModel))
+            {
+                return true;
             }
         }
 
@@ -413,13 +541,29 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Aliases, nested types of enclosing classes and types of enclosing namespaces all take
-    /// precedence over a <c>using</c> namespace import, so only a type that is itself visible
-    /// through another namespace import can clash.
+    /// Names on the right of a dot (<c>X.Arg</c>, <c>x?.Arg</c>) or alias qualifier are looked up
+    /// in their qualifier, not through using directives.
     /// </summary>
-    private static bool IsImportedFromOtherNamespace(ISymbol visible, int position, SemanticModel semanticModel)
+    private static bool IsQualifiedOrBound(SimpleNameSyntax name)
     {
-        if (visible is not INamedTypeSymbol { ContainingType: null } type)
+        return name.Parent switch
+        {
+            QualifiedNameSyntax qualified => qualified.Right == name,
+            MemberAccessExpressionSyntax memberAccess => memberAccess.Name == name,
+            AliasQualifiedNameSyntax aliasQualified => aliasQualified.Name == name,
+            MemberBindingExpressionSyntax => true,
+            _ => false,
+        };
+    }
+
+    /// <summary>
+    /// Nested types of enclosing classes and types of enclosing namespaces take precedence over a
+    /// <c>using</c> namespace import, so only a type that is itself visible through another
+    /// namespace import can clash.
+    /// </summary>
+    private static bool IsImportedFromOtherNamespace(INamedTypeSymbol type, int position, SemanticModel semanticModel)
+    {
+        if (type.ContainingType is not null)
         {
             return false;
         }
@@ -435,63 +579,20 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
         return true;
     }
 
-    private static bool IsReassigned(
-        VariableDeclaratorSyntax declarator,
-        SemanticModel semanticModel,
-        CancellationToken cancellationToken)
-    {
-        if (semanticModel.GetDeclaredSymbol(declarator, cancellationToken) is not ILocalSymbol local)
-        {
-            return false;
-        }
-
-        // Top-level statements have no enclosing block: their locals span the compilation unit.
-        SyntaxNode? scope = declarator.FirstAncestorOrSelf<BlockSyntax>();
-        scope ??= declarator.FirstAncestorOrSelf<CompilationUnitSyntax>();
-
-        if (scope is null)
-        {
-            return true;
-        }
-
-        foreach (var identifier in scope.DescendantNodes().OfType<IdentifierNameSyntax>())
-        {
-            if (identifier.Identifier.ValueText != local.Name || !IsWrite(identifier))
-            {
-                continue;
-            }
-
-            if (SymbolEqualityComparer.Default.Equals(
-                    semanticModel.GetSymbolInfo(identifier, cancellationToken).Symbol,
-                    local))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private static bool IsWrite(IdentifierNameSyntax identifier)
     {
-        var expression = WalkUpParentheses(identifier);
+        SyntaxNode expression = identifier;
+        while (expression.Parent is ParenthesizedExpressionSyntax parenthesized)
+        {
+            expression = parenthesized;
+        }
 
         return expression.Parent switch
         {
             AssignmentExpressionSyntax assignment => assignment.Left == expression,
-            ArgumentSyntax argument => argument.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) || argument.RefKindKeyword.IsKind(SyntaxKind.OutKeyword),
+            ArgumentSyntax argument => !argument.RefKindKeyword.IsKind(SyntaxKind.None) && !argument.RefKindKeyword.IsKind(SyntaxKind.InKeyword),
             RefExpressionSyntax => true,
             _ => false,
         };
-    }
-
-    private static SyntaxNode WalkUpParentheses(SyntaxNode node)
-    {
-        while (node.Parent is ParenthesizedExpressionSyntax parenthesized)
-        {
-            node = parenthesized;
-        }
-
-        return node;
     }
 }

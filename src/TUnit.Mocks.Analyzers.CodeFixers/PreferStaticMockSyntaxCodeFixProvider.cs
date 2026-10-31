@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Composition;
@@ -120,13 +121,62 @@ public class PreferStaticMockSyntaxCodeFixProvider : CodeFixProvider
         // position (e.g. QualifiedName `App.IFoo` -> SimpleMemberAccessExpression).
         var receiver = SyntaxFactory.ParseExpression(typeArgument.WithoutTrivia().ToFullString());
 
-        return SyntaxFactory.InvocationExpression(
+        var replacement = SyntaxFactory.InvocationExpression(
                 SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     receiver,
                     SyntaxFactory.IdentifierName("Mock")),
                 invocation.ArgumentList)
             .WithTriviaFrom(invocation);
+
+        // Comments between the removed tokens (`Mock . Of < ... >`) would otherwise be lost; keep
+        // them in front of the new call. Comments inside the type argument stay where they are.
+        var removedComments = GetRemovedComments(invocation.Expression, typeArgument.Span);
+
+        return removedComments.Count == 0
+            ? replacement
+            : replacement.WithLeadingTrivia(replacement.GetLeadingTrivia().AddRange(removedComments));
+    }
+
+    private static List<SyntaxTrivia> GetRemovedComments(ExpressionSyntax removed, Microsoft.CodeAnalysis.Text.TextSpan keptSpan)
+    {
+        var comments = new List<SyntaxTrivia>();
+
+        foreach (var trivia in removed.DescendantTrivia())
+        {
+            if (!trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) && !trivia.IsKind(SyntaxKind.MultiLineCommentTrivia))
+            {
+                continue;
+            }
+
+            // Leading trivia of the first token and trailing trivia of the last token are moved
+            // by WithTriviaFrom; trivia inside the kept type argument is kept by its own text.
+            if (!removed.Span.Contains(trivia.Span) || keptSpan.Contains(trivia.Span))
+            {
+                continue;
+            }
+
+            // A `//` comment now sits in front of code on the same line, so turn it into a block comment.
+            var text = trivia.ToString();
+            if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+            {
+                var body = text.Substring(2).Trim();
+                text = body.Contains("*/") ? text : "/* " + body + " */";
+            }
+
+            if (text.StartsWith("//", StringComparison.Ordinal))
+            {
+                // Can't be turned into a block comment; keep it on its own line.
+                comments.Add(SyntaxFactory.Comment(text));
+                comments.Add(SyntaxFactory.ElasticCarriageReturnLineFeed);
+                continue;
+            }
+
+            comments.Add(SyntaxFactory.Comment(text));
+            comments.Add(SyntaxFactory.Space);
+        }
+
+        return comments;
     }
 
     /// <summary>

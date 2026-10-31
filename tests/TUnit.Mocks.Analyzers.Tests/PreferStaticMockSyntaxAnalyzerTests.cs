@@ -63,8 +63,8 @@ public class PreferStaticMockSyntaxAnalyzerTests
             {
                 extension(global::App.IFoo)
                 {
-                    public static global::TUnit.Mocks.Mock<global::App.IFoo> Mock() => null!;
-                    public static global::TUnit.Mocks.Mock<global::App.IFoo> Mock(global::TUnit.Mocks.MockBehavior behavior) => null!;
+                    public static global::TUnit.Mocks.Generated.IFooMock Mock() => null!;
+                    public static global::TUnit.Mocks.Generated.IFooMock Mock(global::TUnit.Mocks.MockBehavior behavior) => null!;
                 }
             }
 
@@ -84,6 +84,13 @@ public class PreferStaticMockSyntaxAnalyzerTests
                     public static global::TUnit.Mocks.Mock<global::App.IGeneric<T>> Mock() => null!;
                 }
             }
+        }
+
+        namespace TUnit.Mocks.Generated
+        {
+            // Like the real generator, an interface's T.Mock() returns a wrapper that derives from
+            // Mock<T> and implements T, so tests catch fixes that change an inferred type.
+            public sealed class IFooMock : global::TUnit.Mocks.Mock<global::App.IFoo>, global::App.IFoo { }
         }
         """;
 
@@ -549,6 +556,194 @@ public class PreferStaticMockSyntaxAnalyzerTests
             """,
             Stubs,
             Verifier.Diagnostic(Rules.TM010_PreferStaticMockSyntax).WithLocation(0).WithArguments("IFoo"));
+    }
+
+    [Test]
+    public async Task Var_Local_With_Only_Type_Insensitive_Uses_Is_Rewritten()
+    {
+        await Verifier.VerifyCodeFixAsync(
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Consumer
+            {
+                public Consumer(Mock<IFoo> foo) { }
+            }
+
+            public class Tests
+            {
+                private Mock<IFoo> _field = null!;
+
+                public void Use(Mock<IFoo> mock) { }
+
+                public Mock<IFoo> Test()
+                {
+                    var mock = {|#0:Mock.Of<IFoo>()|};
+                    _ = mock.ToString();
+                    Use(mock);
+                    new Consumer(mock);
+                    Mock<IFoo> typed = mock;
+                    _field = mock;
+                    return mock;
+                }
+            }
+            """,
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Consumer
+            {
+                public Consumer(Mock<IFoo> foo) { }
+            }
+
+            public class Tests
+            {
+                private Mock<IFoo> _field = null!;
+
+                public void Use(Mock<IFoo> mock) { }
+
+                public Mock<IFoo> Test()
+                {
+                    var mock = IFoo.Mock();
+                    _ = mock.ToString();
+                    Use(mock);
+                    new Consumer(mock);
+                    Mock<IFoo> typed = mock;
+                    _field = mock;
+                    return mock;
+                }
+            }
+            """,
+            Stubs,
+            Verifier.Diagnostic(Rules.TM010_PreferStaticMockSyntax).WithLocation(0).WithArguments("IFoo"));
+    }
+
+    [Test]
+    public async Task Var_Local_With_Type_Sensitive_Uses_Is_Not_Reported()
+    {
+        await Verifier.VerifyNoDiagnosticAsync(
+            """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+            using App;
+
+            public class Tests
+            {
+                public void Test(Mock<IFoo> other)
+                {
+                    var inferred = Mock.Of<IFoo>();
+                    Task<Mock<IFoo>> task = Task.FromResult(inferred);
+
+                    var deconstructed = Mock.Of<IFoo>();
+                    var flag = false;
+                    (deconstructed, flag) = (other, true);
+
+                    var captured = Mock.Of<IFoo>();
+                    System.Func<Mock<IFoo>> factory = () => captured;
+
+                    var conditional = Mock.Of<IFoo>();
+                    var picked = flag ? conditional : other;
+                }
+            }
+            """,
+            Stubs);
+    }
+
+    [Test]
+    public async Task Not_Reported_When_Using_Would_Break_Another_Namespace_In_The_File()
+    {
+        // The call's namespace declares its own Arg, but the added file-level using would make
+        // the sibling namespace's imported Arg ambiguous.
+        await Verifier.VerifyNoDiagnosticAsync(
+            """
+            using OtherLibrary;
+
+            namespace OtherLibrary
+            {
+                public class Tests
+                {
+                    public void Test()
+                    {
+                        TUnit.Mocks.Mock<App.IFoo> mock = TUnit.Mocks.Mock.Of<App.IFoo>();
+                    }
+                }
+            }
+
+            namespace Sibling
+            {
+                public class Other
+                {
+                    public System.Type Type = typeof(Arg);
+                }
+            }
+            """,
+            Stubs);
+    }
+
+    [Test]
+    public async Task Comments_In_Removed_Syntax_Are_Kept()
+    {
+        await Verifier.VerifyCodeFixAsync(
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Tests
+            {
+                public void Test()
+                {
+                    Mock<IFoo> mock = {|#0:Mock /* factory */ .Of<IFoo /* type */>()|};
+                }
+            }
+            """,
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Tests
+            {
+                public void Test()
+                {
+                    Mock<IFoo> mock = /* factory */ /* type */ IFoo.Mock();
+                }
+            }
+            """,
+            Stubs,
+            Verifier.Diagnostic(Rules.TM010_PreferStaticMockSyntax).WithLocation(0).WithArguments("IFoo"));
+    }
+
+    [Test]
+    public async Task Nullable_Nested_Type_Argument_Is_Rewritten()
+    {
+        await Verifier.VerifyCodeFixAsync(
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Tests
+            {
+                public void Test()
+                {
+                    Mock<IGeneric<string?>> mock = {|#0:Mock.Of<IGeneric<string?>>()|};
+                }
+            }
+            """,
+            """
+            using TUnit.Mocks;
+            using App;
+
+            public class Tests
+            {
+                public void Test()
+                {
+                    Mock<IGeneric<string?>> mock = IGeneric<string?>.Mock();
+                }
+            }
+            """,
+            Stubs,
+            Verifier.Diagnostic(Rules.TM010_PreferStaticMockSyntax).WithLocation(0).WithArguments("IGeneric<string?>"));
     }
 
     [Test]
