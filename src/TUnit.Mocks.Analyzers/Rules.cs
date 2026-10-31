@@ -5,7 +5,7 @@ namespace TUnit.Mocks.Analyzers;
 public static class Rules
 {
     public static readonly DiagnosticDescriptor TM001_CannotMockSealedType = new(
-        id: "TM001",
+        id: DiagnosticIds.CannotMockSealedType,
         title: "Cannot mock sealed type",
         messageFormat: "Cannot mock sealed type '{0}'. Consider extracting an interface.",
         category: "TUnit.Mocks",
@@ -15,7 +15,7 @@ public static class Rules
     );
 
     public static readonly DiagnosticDescriptor TM002_CannotMockValueType = new(
-        id: "TM002",
+        id: DiagnosticIds.CannotMockValueType,
         title: "Cannot mock value type",
         messageFormat: "Cannot mock value type '{0}'. Mocking requires reference types.",
         category: "TUnit.Mocks",
@@ -25,7 +25,7 @@ public static class Rules
     );
 
     public static readonly DiagnosticDescriptor TM003_OfDelegateRequiresDelegateType = new(
-        id: "TM003",
+        id: DiagnosticIds.OfDelegateRequiresDelegateType,
         title: "Mock.OfDelegate<T>() requires a delegate type",
         messageFormat: "Mock.OfDelegate<T>() requires T to be a delegate type, but '{0}' is not a delegate.",
         category: "TUnit.Mocks",
@@ -35,7 +35,7 @@ public static class Rules
     );
 
     public static readonly DiagnosticDescriptor TM004_RequiresCSharp14 = new(
-        id: "TM004",
+        id: DiagnosticIds.RequiresCSharp14,
         title: "TUnit.Mocks requires C# 14 or later",
         messageFormat: "TUnit.Mocks requires C# 14 or later (LangVersion 14 or preview). Current language version is '{0}'.",
         category: "TUnit.Mocks",
@@ -46,7 +46,7 @@ public static class Rules
     );
 
     public static readonly DiagnosticDescriptor TM005_ArgIsNullNonNullableValueType = new(
-        id: "TM005",
+        id: DiagnosticIds.ArgIsNullNonNullableValueType,
         title: "Arg.IsNull/IsNotNull used with non-nullable value type",
         messageFormat: "Arg.{0}<{1}>() will never match because '{1}' is a non-nullable value type. Use '{1}?' instead.",
         category: "TUnit.Mocks",
@@ -56,7 +56,7 @@ public static class Rules
     );
 
     public static readonly DiagnosticDescriptor TM006_CannotMockTypeWithoutAccessibleConstructor = new(
-        id: "TM006",
+        id: DiagnosticIds.CannotMockTypeWithoutAccessibleConstructor,
         title: "Cannot mock type without an accessible constructor",
         messageFormat: "Cannot mock '{0}' because it has no accessible constructor. Use a factory method or model-builder the library provides instead.",
         category: "TUnit.Mocks",
@@ -66,12 +66,22 @@ public static class Rules
     );
 
     public static readonly DiagnosticDescriptor TM007_CannotMockInterfaceWithInaccessibleMember = new(
-        id: "TM007",
+        id: DiagnosticIds.CannotMockInterfaceWithInaccessibleMember,
         title: "Cannot mock interface with an inaccessible member",
         messageFormat: "Cannot mock '{0}' because its member '{1}' is not accessible here and cannot be implemented.",
         category: "TUnit.Mocks",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "Since C# 8 an interface may declare non-public abstract members. No type outside the declaring assembly can implement those members, so the interface cannot be mocked — a generated implementation would fail with CS0535. Mock a different abstraction, or wrap the interface in one you own."
+    );
+
+    public static readonly DiagnosticDescriptor TM010_PreferStaticMockSyntax = new(
+        id: DiagnosticIds.PreferStaticMockSyntax,
+        title: "Prefer T.Mock() over Mock.Of<T>()",
+        messageFormat: "Use '{0}.Mock()' instead of 'Mock.Of<{0}>()'",
+        category: "TUnit.Mocks",
+        defaultSeverity: DiagnosticSeverity.Info,
+        isEnabledByDefault: true,
+        description: "T.Mock() is the recommended way to create a single-type mock. Mock.Of<T>() remains available for the cases T.Mock() does not cover, such as multi-interface mocks and custom default value providers."
     );
 }

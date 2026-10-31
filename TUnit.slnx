@@ -49,6 +49,7 @@
     <Project Path="src/TUnit.Assertions.Analyzers/TUnit.Assertions.Analyzers.csproj" />
     <Project Path="src/TUnit.Assertions.Analyzers.CodeFixers/TUnit.Assertions.Analyzers.CodeFixers.csproj" />
     <Project Path="src/TUnit.Mocks.Analyzers/TUnit.Mocks.Analyzers.csproj" />
+    <Project Path="src/TUnit.Mocks.Analyzers.CodeFixers/TUnit.Mocks.Analyzers.CodeFixers.csproj" />
   </Folder>
 
   <!-- Source generators and Roslyn version variants -->
