@@ -12,8 +12,10 @@
     <ItemGroup>
         <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
         <ProjectReference Include="..\TUnit.Mocks.Analyzers\TUnit.Mocks.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\TUnit.Mocks.Analyzers.CodeFixers\TUnit.Mocks.Analyzers.CodeFixers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Mocks.Analyzers\bin\$(Configuration)\netstandard2.0\TUnit.Mocks.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Mocks.Analyzers.CodeFixers\bin\$(Configuration)\netstandard2.0\TUnit.Mocks.Analyzers.CodeFixers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 
     <ItemGroup>

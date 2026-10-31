@@ -4,12 +4,20 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TUnit.Mocks.Analyzers\TUnit.Mocks.Analyzers.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Mocks.Analyzers.CodeFixers\TUnit.Mocks.Analyzers.CodeFixers.csproj" />
     <ProjectReference Include="..\..\src\TUnit.Mocks\TUnit.Mocks.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" />
+    <!-- 4.14+ so the code fix tests can compile the C# 14 extension blocks that T.Mock() binds to. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.14.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\SharedTestHelpers\RulesDecouplingVerifier.cs"
+             Link="Shared\RulesDecouplingVerifier.cs" />
   </ItemGroup>
 
   <Import Project="..\..\eng\TestProject.targets" />

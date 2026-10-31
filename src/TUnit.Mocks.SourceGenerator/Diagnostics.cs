@@ -4,7 +4,7 @@ namespace TUnit.Mocks.SourceGenerator;
 
 /// <summary>
 /// Diagnostics reported by the generator itself. Everything the analyzer can see at a call site
-/// belongs in TUnit.Mocks.Analyzers (TM001-TM007); this file is for failures only the generator
+/// belongs in TUnit.Mocks.Analyzers (TM001-TM007, TM010); this file is for failures only the generator
 /// can observe, such as attribute-only requests, whole-compilation name collisions, and
 /// unexpected generation failures.
 /// </summary>
