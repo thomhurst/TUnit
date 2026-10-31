@@ -20,6 +20,7 @@ Use the SDK selected by `global.json`. Shared build settings live in `Directory.
 ## Git workflow
 
 - Use a feature branch and a ready-for-review PR by default; create drafts only when requested. Trivial documentation, agent-instruction, comment, and typo changes may go directly to `main`.
+- For continuous, unattended issue and PR work, use the [issue-pr-loop skill](.agents/skills/issue-pr-loop/SKILL.md) (`/issue-pr-loop`, or `pwsh scripts/Start-IssuePrLoop.ps1` for a fresh agent per unit). PRs it opens follow its draft review lifecycle.
 - Use `pwsh scripts/Remove-MergedWorktrees.ps1` for squash-safe merged-worktree cleanup; `-WhatIf` reports removal candidates and preserved files.
 - When asked to clean up worktrees, remove those for merged or `[gone]` branches without per-item confirmation. Preserve branches unless deletion is requested.
 - Verify review findings against the code before fixing them. If a reviewer or user reaffirms a disputed finding after one reasoned objection, implement it.
