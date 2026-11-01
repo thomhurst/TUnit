@@ -49,7 +49,9 @@ public class ThrowingGetterSkippedTests
     public void SkippedWithThrowingGetter(SkippedTestThrowingGetterRoot value) => throw new Exception("test ran");
 }
 
-[EngineTest(ExpectedResult.Pass)]
+// Marked Failure (not Pass) despite passing itself: DependsOn pulls FailsDuringRegistration into any
+// filtered run containing this test, which would fail the EngineTest=Pass run.
+[EngineTest(ExpectedResult.Failure)]
 public class ThrowingGetterRootDisposalObserverTests
 {
     [Test]
