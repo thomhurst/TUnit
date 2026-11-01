@@ -1940,20 +1940,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// The failure message for a method-level [GenerateGenericTest] whose type arguments do not match the
     /// method's type parameters or that names a pointer type, or null when it is valid. Source-generated mode
-    /// (<c>DescribeGenerateGenericTestArityError</c> in TUnit.Core.SourceGenerator) reports the same text.
+    /// (<c>DescribeGenerateGenericTestArityError</c> in TUnit.Core.SourceGenerator) builds the text from the same
+    /// <see cref="GenerateGenericTestArityMessages"/>.
     /// </summary>
     private static string? GetGenerateGenericTestArityError(string methodName, Type[] typeArguments, int methodTypeParameterCount)
     {
         if (typeArguments.Length == 0)
         {
-            return $"[GenerateGenericTest] on method '{methodName}' has no type arguments";
+            return GenerateGenericTestArityMessages.NoTypeArguments(methodName);
         }
 
         if (typeArguments.Length != methodTypeParameterCount)
         {
-            return $"[GenerateGenericTest] on method '{methodName}' provides {typeArguments.Length} type argument(s) " +
-                $"but method requires {methodTypeParameterCount}. " +
-                $"Provided: [{string.Join(", ", typeArguments.Select(static t => t.Name))}]";
+            return GenerateGenericTestArityMessages.WrongCount(
+                methodName, typeArguments.Length, methodTypeParameterCount, typeArguments.Select(static t => t.Name));
         }
 
         foreach (var typeArgument in typeArguments)
@@ -1964,7 +1964,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 #endif
                )
             {
-                return $"[GenerateGenericTest] on method '{methodName}' provides type argument '{typeArgument.Name}', which cannot be a generic type argument";
+                return GenerateGenericTestArityMessages.InvalidTypeArgument(methodName, typeArgument.Name);
             }
         }
 

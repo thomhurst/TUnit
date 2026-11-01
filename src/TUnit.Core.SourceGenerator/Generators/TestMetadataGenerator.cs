@@ -1885,20 +1885,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// The failure message for a method-level [GenerateGenericTest] whose type arguments do not match the
     /// method's type parameters or that names a pointer type, or null when it is valid. Reflection mode
-    /// (<c>GetGenerateGenericTestArityError</c> in TUnit.Engine) reports the same text (#7222).
+    /// (<c>GetGenerateGenericTestArityError</c> in TUnit.Engine) builds the text from the same
+    /// <see cref="TUnit.Core.Helpers.GenerateGenericTestArityMessages"/> (#7222).
     /// </summary>
     private static string? DescribeGenerateGenericTestArityError(string methodName, ITypeSymbol[]? typeArguments, int methodTypeParameterCount)
     {
         if (typeArguments is not { Length: > 0 })
         {
-            return $"[GenerateGenericTest] on method '{methodName}' has no type arguments";
+            return TUnit.Core.Helpers.GenerateGenericTestArityMessages.NoTypeArguments(methodName);
         }
 
         if (typeArguments.Length != methodTypeParameterCount)
         {
-            return $"[GenerateGenericTest] on method '{methodName}' provides {typeArguments.Length.ToString(CultureInfo.InvariantCulture)} type argument(s) "
-                + $"but method requires {methodTypeParameterCount.ToString(CultureInfo.InvariantCulture)}. "
-                + $"Provided: [{string.Join(", ", typeArguments.Select(GetRuntimeTypeName))}]";
+            return TUnit.Core.Helpers.GenerateGenericTestArityMessages.WrongCount(
+                methodName, typeArguments.Length, methodTypeParameterCount, typeArguments.Select(GetRuntimeTypeName));
         }
 
         // A pointer cannot be a type argument: a call to M<int*>() would not compile
@@ -1906,7 +1906,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             if (typeArgument.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer)
             {
-                return $"[GenerateGenericTest] on method '{methodName}' provides type argument '{GetRuntimeTypeName(typeArgument)}', which cannot be a generic type argument";
+                return TUnit.Core.Helpers.GenerateGenericTestArityMessages.InvalidTypeArgument(methodName, GetRuntimeTypeName(typeArgument));
             }
         }
 
@@ -2443,10 +2443,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (entry.MethodConstraintViolations is { Count: > 0 } violations)
         {
-            // The failures do not repeat for each class row: reflection mode's violation entry has no class
-            // data sources (GenericConstraintViolationTestMetadata.Create).
-            classDataSources = [];
-
             // Replace the method data sources with ones whose rows fail test building with the
             // constraint message: one failed test per invalid row, as reflection mode reports.
             var dsWriter = new CodeWriter(includeHeader: false);
@@ -2456,12 +2452,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var allMethodDataSources = methodSymbol.GetAttributes()
                 .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
                 .ToList();
+            var wrapsInstanceDataSource = false;
             foreach (var violation in violations)
             {
                 var rowSources = violation.RowSource is { } rowSource
                     ? [rowSource]
                     : violation.AllMethodDataSources ? allMethodDataSources : [];
                 var message = $"\"{EscapeString(violation.Message)}\"";
+                wrapsInstanceDataSource |= rowSources.Any(AccessesInstanceData);
 
                 if (rowSources.Count == 0)
                 {
@@ -2479,6 +2477,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.Unindent();
             dsWriter.Append("}");
             writer.AppendLine($"testDataSources: {dsWriter},");
+
+            // The failures do not repeat for each class row: reflection mode's violation entry has no class
+            // data sources (GenericConstraintViolationTestMetadata.Create). A wrapped instance data source
+            // still reads its rows from a test class instance, so it keeps the class data sources that build
+            // that instance, as reflection mode does when it resolves those rows (#7344).
+            if (!wrapsInstanceDataSource)
+            {
+                classDataSources = [];
+            }
         }
         else if (methodDataSources.Count > 0)
         {
@@ -8799,6 +8806,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Append("MethodMetadata = ");
         SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
     }
+
+    /// <summary>
+    /// Whether the data source reads its rows from the test class instance (<c>IAccessesInstanceData</c>),
+    /// such as <c>[InstanceMethodDataSource]</c>.
+    /// </summary>
+    private static bool AccessesInstanceData(AttributeData attribute)
+        => attribute.AttributeClass?.AllInterfaces.Any(i => i.ToDisplayString() == "TUnit.Core.IAccessesInstanceData") == true;
 
     private static bool AreSameAttribute(AttributeData a1, AttributeData a2)
     {
