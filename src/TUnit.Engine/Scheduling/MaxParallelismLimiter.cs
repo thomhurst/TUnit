@@ -17,10 +17,12 @@ internal sealed class MaxParallelismLimiter
     private readonly Lazy<SemaphoreSlim> _semaphore;
 
     /// <summary>
-    /// The cap used when nothing configures one, and for "unlimited" (0). ProcessorCount * 4
-    /// is empirically sized for async/IO-bound workloads.
+    /// The cap used when nothing configures one, and for "unlimited" (0). A higher cap gains
+    /// throughput only when nothing downstream limits concurrency. When a database pool, a
+    /// container or a blocking call is the bottleneck, extra concurrent tests add no throughput:
+    /// they wait inside their bodies, which inflates body time toward [Timeout].
     /// </summary>
-    public static int DefaultMaxParallelism => Environment.ProcessorCount * 4;
+    public static int DefaultMaxParallelism => Environment.ProcessorCount * 2;
 
     public MaxParallelismLimiter(Func<int> resolveMaxParallelism)
     {

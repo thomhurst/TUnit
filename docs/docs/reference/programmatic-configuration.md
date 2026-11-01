@@ -63,7 +63,7 @@ On Linux and macOS with .NET 8 or later, SIGTERM (sent by `docker stop`, Kuberne
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `MaximumParallelTests` | `int?` | `null` (4 x CPU cores) | Maximum number of tests that can execute concurrently. Set to `null` to use the default heuristic. |
+| `MaximumParallelTests` | `int?` | `null` (2 x CPU cores) | Maximum number of tests that can execute concurrently. Set to `null` to use the default heuristic. |
 
 ### `context.Settings.Display`
 

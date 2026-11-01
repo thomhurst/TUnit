@@ -131,11 +131,11 @@ public class DatabaseTests
 
 ## Configuration
 
-### MSBuild Properties
+### Maximum Parallel Tests
 
-| Property | Default | Description |
-|----------|---------|-------------|
-| `TUnitMaxConcurrency` | `ProcessorCount` | Maximum parallel test execution |
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `--maximum-parallel-tests` / `TUNIT_MAX_PARALLEL_TESTS` | `ProcessorCount * 2` | Maximum number of tests that run at once |
 
 ## Advanced Features
 
@@ -230,7 +230,7 @@ public void Test(int a, int b, int c) { }
 
 1. **Expression Compilation**: TestBuilder uses compiled expressions for fast execution
 2. **Share Data Sources**: Use `Shared = true` for expensive data
-3. **Optimize Parallel Execution**: Adjust `TUnitMaxConcurrency`
+3. **Optimize Parallel Execution**: Adjust `--maximum-parallel-tests`, or use `[ParallelLimiter<T>]` for tests that share a limited resource
 4. **Cache Test Data**: Use lazy initialization for expensive setup
 
 ## Contributing
