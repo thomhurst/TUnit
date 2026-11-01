@@ -141,3 +141,30 @@ public class TypedRowDeclaredTypeWinsOverValueType
         await Assert.That(arg).IsEqualTo((object)1);
     }
 }
+
+// A scalar typed row binds to the first data parameter when the rest are optional: Run<int>(1).
+[EngineTest(ExpectedResult.Pass)]
+public class TypedRowWithOptionalParameter
+{
+    [Test]
+    [Arguments<int>(1)]
+    public async Task Run<TMethod>(TMethod arg, int other = 5)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
+        await Assert.That((int)(object)arg!).IsEqualTo(1);
+        await Assert.That(other).IsEqualTo(5);
+    }
+}
+
+// A T? parameter takes a row of its underlying type: Run<int>(1).
+[EngineTest(ExpectedResult.Pass)]
+public class TypedRowOnNullableParameter
+{
+    [Test]
+    [Arguments<int>(1)]
+    public async Task Run<TMethod>(TMethod? arg) where TMethod : struct
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
+        await Assert.That(arg.HasValue).IsTrue();
+    }
+}

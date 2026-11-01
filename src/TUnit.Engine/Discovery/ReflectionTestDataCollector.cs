@@ -2180,13 +2180,23 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Mirrors the generator's <c>TypedDataSourceInference.InferMethodTypeArgumentsFromRowType</c> (#7214): a
     /// typed row of type <paramref name="rowType"/> binds to the data parameters (any CancellationToken
-    /// excluded), the whole row to a single data parameter, otherwise one tuple element per data parameter.
-    /// Each parameter type is matched against its value type, including type arguments nested in generic
-    /// parameter types. Every type parameter must be inferred, each to one type.
+    /// excluded), the whole row to a single data parameter, otherwise one tuple element per leading data
+    /// parameter, or a scalar row to the first, with omitted trailing parameters optional. A T? parameter
+    /// takes a value of its underlying type. Each parameter type is matched against its value type, including
+    /// type arguments nested in generic parameter types. Every type parameter must be inferred, each to one type.
     /// </summary>
     private static Type[]? InferTypesFromTypedRow(MethodInfo method, Type rowType, int genericParameterCount)
     {
         var dataParameters = Array.FindAll(method.GetParameters(), static parameter => parameter.ParameterType != typeof(CancellationToken));
+        var requiredCount = 0;
+        foreach (var parameter in dataParameters)
+        {
+            if (!parameter.IsOptional && !parameter.HasDefaultValue && !parameter.IsDefined(typeof(ParamArrayAttribute), false))
+            {
+                requiredCount++;
+            }
+        }
+
         var typeArguments = new Type?[genericParameterCount];
 
         if (dataParameters.Length == 1)
@@ -2196,14 +2206,28 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return null;
             }
         }
-        else if (GetValueTupleElementTypes(rowType) is { } tupleElements && tupleElements.Length == dataParameters.Length)
+        else if (GetValueTupleElementTypes(rowType) is { } tupleElements)
         {
-            for (var i = 0; i < dataParameters.Length; i++)
+            // The tuple spreads over the leading data parameters; omitted trailing ones take their defaults.
+            if (tupleElements.Length < requiredCount || tupleElements.Length > dataParameters.Length)
+            {
+                return null;
+            }
+
+            for (var i = 0; i < tupleElements.Length; i++)
             {
                 if (!MapTypedRowParameters(dataParameters[i].ParameterType, tupleElements[i], typeArguments))
                 {
                     return null;
                 }
+            }
+        }
+        else if (dataParameters.Length > 1 && requiredCount <= 1)
+        {
+            // A scalar row binds to the first data parameter; the rest are optional.
+            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments))
+            {
+                return null;
             }
         }
         else
@@ -2244,6 +2268,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             typeArguments[position] = valueType;
             return true;
+        }
+
+        // A T? parameter (Nullable<T>) takes a non-nullable value of its underlying type.
+        if (parameterType.IsGenericType
+            && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>)
+            && Nullable.GetUnderlyingType(valueType) is null)
+        {
+            return MapTypedRowParameters(parameterType.GetGenericArguments()[0], valueType, typeArguments);
         }
 
         if (parameterType.IsGenericType

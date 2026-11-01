@@ -79,7 +79,8 @@ internal static class TypedDataSourceInference
     /// The type arguments of generic test method <paramref name="method"/> inferred from a typed row whose value
     /// has type <paramref name="rowType"/> (<c>[Arguments&lt;T&gt;]</c>, #7214). The row binds to the data
     /// parameters (any <c>CancellationToken</c> excluded): the whole row to a single data parameter, otherwise one
-    /// tuple element per data parameter. Each parameter type is matched against its value type, including type
+    /// tuple element per leading data parameter, or a scalar row to the first, with omitted trailing parameters
+    /// optional. A <c>T?</c> parameter takes a value of its underlying type. Each parameter type is matched against its value type, including type
     /// arguments nested in generic parameter types, so <c>[Arguments&lt;int[]&gt;]</c> on
     /// <c>Run&lt;T&gt;(IEnumerable&lt;T&gt;)</c> infers nothing rather than <c>Run&lt;int[]&gt;</c>, whose
     /// parameter could not take the row. Every type parameter must be inferred, each to one type; otherwise
@@ -88,6 +89,7 @@ internal static class TypedDataSourceInference
     public static ITypeSymbol[]? InferMethodTypeArgumentsFromRowType(IMethodSymbol method, ITypeSymbol rowType)
     {
         var dataParameters = method.Parameters.Where(p => !IsCancellationToken(p.Type)).ToArray();
+        var requiredCount = dataParameters.Count(p => !p.IsOptional && !p.HasExplicitDefaultValue && !p.IsParams);
         var inferred = new ITypeSymbol?[method.TypeParameters.Length];
 
         if (dataParameters.Length == 1)
@@ -97,15 +99,29 @@ internal static class TypedDataSourceInference
                 return null;
             }
         }
-        else if (rowType is INamedTypeSymbol { IsTupleType: true } tupleType
-            && tupleType.TupleElements.Length == dataParameters.Length)
+        else if (rowType is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
-            for (var i = 0; i < dataParameters.Length; i++)
+            // The tuple spreads over the leading data parameters; omitted trailing ones take their defaults.
+            var elements = tupleType.TupleElements;
+            if (elements.Length < requiredCount || elements.Length > dataParameters.Length)
             {
-                if (!MapTypeParameters(method, dataParameters[i].Type, tupleType.TupleElements[i].Type, inferred))
+                return null;
+            }
+
+            for (var i = 0; i < elements.Length; i++)
+            {
+                if (!MapTypeParameters(method, dataParameters[i].Type, elements[i].Type, inferred))
                 {
                     return null;
                 }
+            }
+        }
+        else if (dataParameters.Length > 1 && requiredCount <= 1)
+        {
+            // A scalar row binds to the first data parameter; the rest are optional.
+            if (!MapTypeParameters(method, dataParameters[0].Type, rowType, inferred))
+            {
+                return null;
             }
         }
         else
@@ -145,6 +161,13 @@ internal static class TypedDataSourceInference
 
             inferred[typeParameter.Ordinal] = valueType;
             return true;
+        }
+
+        // A T? parameter (Nullable<T>) takes a non-nullable value of its underlying type.
+        if (parameterType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableParameter
+            && valueType.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T)
+        {
+            return MapTypeParameters(method, nullableParameter.TypeArguments[0], valueType, inferred);
         }
 
         if (parameterType is INamedTypeSymbol { IsGenericType: true } parameterNamed

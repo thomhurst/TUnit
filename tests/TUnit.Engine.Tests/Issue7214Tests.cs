@@ -19,6 +19,8 @@ public class Issue7214Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TwoTypedArgumentsRowsWithGenerateGenericTest", new[] { "Run<int>(1)", "Run<int>(2)" })]
     [Arguments("TypedArgumentsRowOfOtherTypeWithGenerateGenericTest", new[] { "Run<int>(1)", "Run<long>(2)" })]
     [Arguments("TypedRowDeclaredTypeWinsOverValueType", new[] { "Run<object>(1)" })]
+    [Arguments("TypedRowWithOptionalParameter", new[] { "Run<int>(1)" })]
+    [Arguments("TypedRowOnNullableParameter", new[] { "Run<int>(1)" })]
     public async Task Typed_Arguments_Row_Runs_On_Generic_Method(string classFilter, string[] expectedTestNames)
     {
         await RunTestsWithFilter(
