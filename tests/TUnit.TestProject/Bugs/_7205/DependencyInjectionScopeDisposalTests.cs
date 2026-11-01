@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
@@ -11,7 +12,8 @@ namespace TUnit.TestProject.Bugs._7205;
 // fetch that the first test takes (#7205). Each scope owns and disposes the services it resolves, so
 // the object tracker must not dispose them a second time. A scope that is not disposable cannot dispose
 // what Create returns, so the object tracker still does. A row that fails after its scope was created
-// still disposes that scope (#7326), and so does a test skipped because its dependency failed.
+// still disposes that scope (#7326), and so do a test skipped because its dependency failed and a
+// test removed by circular-dependency detection.
 
 public sealed class ProbeScope : IDisposable
 {
@@ -83,6 +85,8 @@ public sealed class SkippedIfEmptyDependencyInjectionAttribute() : ProbeDependen
 public sealed class FailedRowDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(FailedRowScopeTests));
 
 public sealed class DependencySkippedDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(DependencySkippedScopeTests));
+
+public sealed class CircularDependencyDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(CircularDependencyScopeTests));
 
 // A scope that is not disposable, whose Create constructs each service itself: nothing but the object
 // tracker can dispose those services.
@@ -318,6 +322,23 @@ public class DependencySkippedScopeTests
     public void Run(ProbeService service) => throw new InvalidOperationException($"Should have been skipped, but ran with {service}");
 }
 
+// Tests in a circular dependency fail and are removed before execution, so they never reach
+// TestCoordinator either. Their scopes must still be disposed.
+[EngineTest(ExpectedResult.Failure)]
+[UnconditionalSuppressMessage("Usage", "TUnit0033:Conflicting DependsOn attributes")]
+public class CircularDependencyScopeTests
+{
+    [Test]
+    [DependsOn(nameof(Second))]
+    [CircularDependencyDependencyInjection]
+    public void First(ProbeService service) => throw new InvalidOperationException($"Should have failed its circular dependency, but ran with {service}");
+
+    [Test]
+    [DependsOn(nameof(First))]
+    [CircularDependencyDependencyInjection]
+    public void Second(ProbeService service) => throw new InvalidOperationException($"Should have failed its circular dependency, but ran with {service}");
+}
+
 [EngineTest(ExpectedResult.Pass)]
 [NonDisposableScopeDependencyInjection]
 public class NonDisposableScopeTests(UnownedService service)
@@ -378,6 +399,11 @@ public class DependencyInjectionScopeDisposalObserverTests
 
         // The scope of the test skipped because its dependency failed.
         await AssertScopes(nameof(DependencySkippedScopeTests), 1);
+
+        // One scope for each test removed by circular-dependency detection. Depending on those tests would
+        // put this test in their cycle, but the scheduler removes them and disposes their scopes before any
+        // test runs.
+        await AssertScopes(nameof(CircularDependencyScopeTests), 2);
 
         // No scope owns these, so the object tracker disposes each once.
         await Assert.That(UnownedService.Created.Count).IsEqualTo(1);
