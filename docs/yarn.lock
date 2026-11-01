@@ -2042,10 +2042,10 @@
     "@iconify/types" "^2.0.0"
     import-meta-resolve "^4.2.0"
 
-"@isaacs/nonrecursive-glob-match@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@isaacs/nonrecursive-glob-match/-/nonrecursive-glob-match-1.0.2.tgz#aeaab8a9a4bbc3c406f8c12ff674227ea78a6028"
-  integrity sha512-GJPHIgPPtFl+nLhFHyF0zZoFcOFLsZWbHFFzo+Zr+PWDXJbl9hHxb2w+9SiF2fHmLgKaXIpUzQo3SbBBZ9WObw==
+"@isaacs/nonrecursive-glob-match@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@isaacs/nonrecursive-glob-match/-/nonrecursive-glob-match-1.0.3.tgz#7f6724fd8a6ca315d6bb7f63f0e4d079060da246"
+  integrity sha512-SI7kyKHq4XXDRozw+r9GlRZkia1ZkFrpLW98r2IC2Bpr8YkFGE3fvjzmxCG0x78A++69HmDNrDvSMYBZmHGpKA==
 
 "@jest/schemas@^29.6.3":
   version "29.6.3"
@@ -7483,12 +7483,12 @@ minimalistic-assert@^1.0.0:
   resolved "https://registry.yarnpkg.com/minimalistic-assert/-/minimalistic-assert-1.0.1.tgz#2e194de044626d4a10e7f7fbc00ce73e83e4d5c7"
   integrity sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==
 
-minimatch@11.0.2, minimatch@3.1.5:
-  version "11.0.2"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-11.0.2.tgz#c51ab06cf560793fa5472fdd70829e088cd1a218"
-  integrity sha512-pWTgz5CN3tjqyZNSK2tePlSmu9IwM41q8yn8Usdqqwe9TIHh+9dEpLLjF4uApsfPEAZY71qtSiA2B2APEr+1Yw==
+minimatch@11.0.3, minimatch@3.1.5:
+  version "11.0.3"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-11.0.3.tgz#d794539f77c0a98ea4adca473768d1e1357204f5"
+  integrity sha512-iny/40PEGkNJQ5/Pv6z3nm6FbRAby32GeZRjCUJk2WnNDbgPSTcdI+DDvLqsgBdD4cD5sMtMheqPPnehCCa8Nw==
   dependencies:
-    "@isaacs/nonrecursive-glob-match" "^1.0.2"
+    "@isaacs/nonrecursive-glob-match" "^1.0.3"
     brace-expansion "^5.0.12"
 
 minimist@^1.2.0:
@@ -8583,10 +8583,10 @@ pvutils@^1.1.3, pvutils@^1.1.5:
   resolved "https://registry.yarnpkg.com/pvutils/-/pvutils-1.2.0.tgz#4b5487a9cccd52d275b0538775790a3ca982bc22"
   integrity sha512-BbubeCEyTuQjVMakvJQ/Sxbc93F2pwmbsxONT/ZRrwU7Ua38d8unYTwXpTVLAKJ4BDuH9IGztCjQcd/N/39Dvg==
 
-qs@6.17.0, qs@~6.15.1, qs@~6.16.0:
-  version "6.17.0"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.17.0.tgz#317fa93f17a6a735622718a6a5aa00356e7db673"
-  integrity sha512-5LK5BZ2XDHMvcUJaf0CQ5HL3aVgKbpklvByC7qLSxYkfE8COEEbJg5xCHWCTqzqi0Gs4Jn5Mv5v3R38W6edscA==
+qs@6.17.1, qs@~6.15.1, qs@~6.16.0:
+  version "6.17.1"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.17.1.tgz#43ac71d29ca0e9d0eed16a218e35b6cde5628e81"
+  integrity sha512-jd3COkaKVgGUW+ZHyEHCG9bH7RoaaiWuMgzsIBjUMVjLAaWGWpoUAVwljVvBHxRu/2qEHnadLGZrkutYUBPQJA==
   dependencies:
     es-define-property "^1.0.1"
     side-channel "^1.1.1"
