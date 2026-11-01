@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
-using Polly.CircuitBreaker;
 using TUnit.TestProject.Library;
 
 namespace TUnit.Analyzers.Tests.Verifiers;
@@ -45,7 +44,7 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
                 AdditionalReferences =
                 {
                     TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
-                    typeof(CircuitState).Assembly.Location,
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetNet8DllPath("Polly.Core"),
                     TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.TestProject.Library", typeof(ProjectReferenceEnum).Assembly),
                 },
             },

@@ -46,6 +46,26 @@ internal static class AnalyzerTestCompatibility
         return ns20Path;
     }
 
+    /// <summary>
+    /// Resolves a third-party package's net8.0 build that the test csproj copies into the output
+    /// directory as <c>{assemblyName}.net8.0.dll</c>. Packages that ship a net10.0 build (NUnit 5,
+    /// Polly.Core 8.9+) reference System.Runtime 10.0 and raise CS1705 against the Net90 reference
+    /// assemblies when loaded via <c>typeof(...).Assembly.Location</c> on net10.0.
+    /// </summary>
+    public static string GetNet8DllPath(string assemblyName)
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.net8.0.dll");
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException(
+                $"net8.0 build of {assemblyName} not found at '{path}'. " +
+                "Run 'dotnet build' before running analyzer tests.",
+                path);
+        }
+
+        return path;
+    }
+
     public static string GetSystemTextJson9DllPath()
     {
         const string fileName = "System.Text.Json.9.0.dll";

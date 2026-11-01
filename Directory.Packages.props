@@ -26,11 +26,11 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.22" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Grpc.Core.Api" Version="2.84.0" />
-    <PackageVersion Include="MassTransit" Version="9.2.4" />
+    <PackageVersion Include="Grpc.Core.Api" Version="2.85.0" />
+    <PackageVersion Include="MassTransit" Version="9.2.5" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.1.0" />
-    <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.21" />
+    <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.22" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.6.4" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.4" />
     <PackageVersion Include="Azure.Data.Tables" Version="12.13.0" />
@@ -79,7 +79,7 @@
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="2.5.2" />
     <PackageVersion Include="Microsoft.Testing.Platform" Version="2.5.2" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.5.2" />
-    <PackageVersion Include="Imposter" Version="1.0.9"/>
+    <PackageVersion Include="Imposter" Version="1.0.10"/>
     <PackageVersion Include="Mockolate" Version="3.6.0" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="Moq" Version="4.21.0" />
@@ -107,12 +107,13 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="6.3.1" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
-    <PackageVersion Include="Polly" Version="8.8.1" />
+    <PackageVersion Include="Polly" Version="8.9.0" />
+    <PackageVersion Include="Polly.Core" Version="8.9.0" />
     <PackageVersion Include="Polyfill" Version="11.4.5" />
     <PackageVersion Include="PublicApiGenerator" Version="11.5.4" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
-    <PackageVersion Include="StackExchange.Redis" Version="3.4.20" />
+    <PackageVersion Include="StackExchange.Redis" Version="3.4.29" />
     <PackageVersion Include="System.Reactive" Version="7.0.0" />
     <PackageVersion Include="Sourcy.DotNet" Version="1.1.1">
       <PrivateAssets>all</PrivateAssets>
@@ -132,14 +133,14 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.16.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.16.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="TUnit.Assertions.FSharp" Version="1.76.28" />
+    <PackageVersion Include="TUnit.Assertions.FSharp" Version="1.77.0" />
     <PackageVersion Include="Verify" Version="33.3.4" />
     <PackageVersion Include="Verify.NUnit" Version="33.3.4" />
-    <PackageVersion Include="TUnit" Version="1.76.28" />
-    <PackageVersion Include="TUnit.AspNetCore" Version="1.76.28" />
-    <PackageVersion Include="TUnit.Core" Version="1.76.28" />
-    <PackageVersion Include="TUnit.Engine" Version="1.76.28" />
-    <PackageVersion Include="TUnit.Assertions" Version="1.76.28" />
+    <PackageVersion Include="TUnit" Version="1.77.0" />
+    <PackageVersion Include="TUnit.AspNetCore" Version="1.77.0" />
+    <PackageVersion Include="TUnit.Core" Version="1.77.0" />
+    <PackageVersion Include="TUnit.Engine" Version="1.77.0" />
+    <PackageVersion Include="TUnit.Assertions" Version="1.77.0" />
     <PackageVersion Include="Verify.TUnit" Version="33.3.4" />
     <PackageVersion Include="Vogen" Version="8.0.7" />
     <PackageVersion Include="xunit" Version="2.9.3" />
