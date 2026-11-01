@@ -13,6 +13,14 @@
       <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <!-- Central package management disables the SDK's implicit FSharp.Core reference, so without
+           this the compiler binds to the FSharp.Core bundled with whichever SDK builds the project
+           (e.g. 11.0.0.0 on a .NET 11 SDK) and the package does not declare the dependency.
+           Pin the central version so the referenced FSharp.Core is independent of the SDK. -->
+      <PackageReference Include="FSharp.Core" />
+    </ItemGroup>
+
   <Import Project="..\..\eng\Library.targets" />
 
 </Project>
