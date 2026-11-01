@@ -202,3 +202,20 @@ public class OwnClassTypeParameterMethodDataSourceWithArgumentsAndGenerateGeneri
         await Assert.That(value).IsTypeOf<int>();
     }
 }
+
+// An own-class member whose rows are object[] infers no types either, so the [GenerateGenericTest] instantiation
+// that class [Arguments] rows also infer reads it at run time too.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassObjectArrayMethodDataSourceWithArgumentsAndGenerateGenericTest<T>(T value)
+{
+    public static IEnumerable<object[]> Rows() => [[5]];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+    }
+}

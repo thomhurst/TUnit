@@ -7240,8 +7240,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// The class-level [MethodDataSource] attributes of a generic test class that name a member of the class itself
-    /// (no class given) whose declared rows name the class's type parameters (<c>IEnumerable&lt;T&gt;</c>). Only the
-    /// class's [GenerateGenericTest] types can close the class those members are read on, as in reflection mode (#7208).
+    /// (no class given) whose declared rows infer no types: rows that name the class's type parameters
+    /// (<c>IEnumerable&lt;T&gt;</c>), or whose types are only known at run time (<c>object</c>, <c>object[]</c> or a
+    /// non-generic <c>IEnumerable</c>). Only the class's [GenerateGenericTest] types can close the class those members
+    /// are read on, as in reflection mode (#7208).
     /// </summary>
     private static IEnumerable<AttributeData> GetOwnClassMethodDataSourcesWithUninferredRows(TestMethodMetadata testMethod)
     {
@@ -7261,7 +7263,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
 
             var rowType = GetMethodDataSourceRowType(member, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
-            if (rowType != null && CodeGenerationHelpers.ContainsTypeParameter(rowType))
+            if (rowType == null || CodeGenerationHelpers.ContainsTypeParameter(rowType))
             {
                 yield return attribute;
             }
