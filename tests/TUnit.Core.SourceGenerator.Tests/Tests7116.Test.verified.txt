@@ -585,24 +585,54 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        try
+        switch (methodIndex)
         {
-            return new global::System.Threading.Tasks.ValueTask(instance.MixedArityGenerateGenericTestWithObjectRows<global::System.IO.MemoryStream>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.IO.MemoryStream>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1])));
-        }
-        catch (global::System.Exception ex)
-        {
-            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+            case 0:
+            {
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.MixedArityGenerateGenericTestWithObjectRows<global::System.IO.MemoryStream>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.IO.MemoryStream>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1])));
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
+            }
+            case 1:
+            {
+                return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("[GenerateGenericTest] on method 'MixedArityGenerateGenericTestWithObjectRows' provides 2 type argument(s) but method requires 1. Provided: [MemoryStream, Int32]")));
+            }
+            default:
+                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
         }
     }
     private static global::System.Attribute[] __Attributes_0(int groupIndex)
     {
-        return new global::System.Attribute[]
+        switch (groupIndex)
         {
-            new global::TUnit.Core.TestAttribute(),
-            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.IO.MemoryStream)),
-            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.IO.MemoryStream), typeof(int)),
-            new global::TUnit.Core.MethodDataSourceAttribute("Streams")
-        };
+            case 0:
+            {
+                return new global::System.Attribute[]
+                {
+                    new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.IO.MemoryStream)),
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.IO.MemoryStream), typeof(int)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("Streams")
+                };
+            }
+            case 1:
+            {
+                return new global::System.Attribute[]
+                {
+                    new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.IO.MemoryStream)),
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.IO.MemoryStream), typeof(int)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("Streams")
+                };
+            }
+            default:
+                throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
+        }
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests>[]
     {
@@ -626,6 +656,22 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
             methodIndex: 0,
             createAttributes: __Attributes_0,
             attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests>(
+            methodName: "MixedArityGenerateGenericTestWithObjectRows",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.MixedArityGenerateGenericTestWithObjectRows",
+            filePath: "",
+            lineNumber: 79,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.GenericConstraintViolationDataSource.Create("[GenerateGenericTest] on method 'MixedArityGenerateGenericTestWithObjectRows' provides 2 type argument(s) but method requires 1. Provided: [MemoryStream, Int32]"),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 1,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 1),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -749,7 +795,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("Type 'Object' does not implement interface 'IDisposable' required for generic parameter 'T'. 'T' was inferred from the declared type 'object' of the data source, not from the run-time type of its values: source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].")));
+        return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("[GenerateGenericTest] on method 'WrongArityGenerateGenericTestWithObjectRows' provides 2 type argument(s) but method requires 1. Provided: [MemoryStream, Int32]")));
     }
     private static global::System.Attribute[] __Attributes_0(int groupIndex)
     {
@@ -765,16 +811,12 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests>(
             methodName: "WrongArityGenerateGenericTestWithObjectRows",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.WrongArityGenerateGenericTestWithObjectRows",
-            methodTypeArgumentsIdentity: "<object>",
             filePath: "",
             lineNumber: 96,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    global::TUnit.Core.GenericConstraintViolationDataSource.Create("Type 'Object' does not implement interface 'IDisposable' required for generic parameter 'T'. 'T' was inferred from the declared type 'object' of the data source, not from the run-time type of its values: source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].", new global::TUnit.Core.MethodDataSourceAttribute("Streams")
-{
-    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
-}),
+    global::TUnit.Core.GenericConstraintViolationDataSource.Create("[GenerateGenericTest] on method 'WrongArityGenerateGenericTestWithObjectRows' provides 2 type argument(s) but method requires 1. Provided: [MemoryStream, Int32]"),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -824,7 +866,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
-        return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("Type 'Object' does not implement interface 'IDisposable' required for generic parameter 'T'. 'T' was inferred from the declared type 'object' of the data source, not from the run-time type of its values: source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].")));
+        return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("[GenerateGenericTest] on method 'EmptyGenerateGenericTestWithObjectRows' has no type arguments")));
     }
     private static global::System.Attribute[] __Attributes_0(int groupIndex)
     {
@@ -840,16 +882,12 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
         global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests>(
             methodName: "EmptyGenerateGenericTestWithObjectRows",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.EmptyGenerateGenericTestWithObjectRows",
-            methodTypeArgumentsIdentity: "<object>",
             filePath: "",
             lineNumber: 104,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    global::TUnit.Core.GenericConstraintViolationDataSource.Create("Type 'Object' does not implement interface 'IDisposable' required for generic parameter 'T'. 'T' was inferred from the declared type 'object' of the data source, not from the run-time type of its values: source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].", new global::TUnit.Core.MethodDataSourceAttribute("Streams")
-{
-    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
-}),
+    global::TUnit.Core.GenericConstraintViolationDataSource.Create("[GenerateGenericTest] on method 'EmptyGenerateGenericTestWithObjectRows' has no type arguments"),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
