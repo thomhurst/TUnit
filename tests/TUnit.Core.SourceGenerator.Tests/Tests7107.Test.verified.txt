@@ -997,10 +997,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "other", new 
 {
     global::TUnit.Core.GenericConstraintViolationDataSource.Create("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'TValue'"),
 },
-            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
-{
-    new global::TUnit.Core.ArgumentsAttribute(1),
-},
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
