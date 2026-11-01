@@ -1,7 +1,11 @@
+using TUnit.TestProject.Attributes;
+
 namespace TUnit.TestProject;
 
-// Data source class that returns tuples for constructor parameters
-public class TupleDataSource : IDataSourceAttribute
+// Data source attribute that returns tuples for constructor parameters.
+// Applied directly to the class (not via ClassDataSource<T>, which would inject the attribute instance itself).
+[AttributeUsage(AttributeTargets.Class)]
+public class TupleDataSource : Attribute, IDataSourceAttribute
 {
     public bool SkipIfEmpty { get; set; }
 
@@ -19,7 +23,8 @@ public class TupleDataSource : IDataSourceAttribute
 
 // Test class that expects two constructor parameters from tuple unwrapping
 #pragma warning disable TUnit0001 // Attribute argument types don't match - tuple unwrapping is handled at runtime
-[ClassDataSource<TupleDataSource>]
+[EngineTest(ExpectedResult.Pass)]
+[TupleDataSource]
 public class ClassDataSourceTupleTests(int number, string text)
 {
     [Test]
@@ -40,6 +45,7 @@ public class StaticMethodTupleDataSource
 }
 
 #pragma warning disable TUnit0001 // Attribute argument types don't match - tuple unwrapping is handled at runtime
+[EngineTest(ExpectedResult.Pass)]
 [MethodDataSource(typeof(StaticMethodTupleDataSource), nameof(StaticMethodTupleDataSource.GetData))]
 public class StaticMethodClassDataSourceTupleTests(int number, string text)
 {
