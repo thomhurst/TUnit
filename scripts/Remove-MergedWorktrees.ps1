@@ -62,7 +62,10 @@
 #     branch; unknown ignored files are always preserved
 #   - preserve local commits not contained in the merged PR's recorded head (tier 5
 #     removes the checkout but keeps the branch)
-#   - skip a closed work item whose AgentLocks lock is held or unreadable
+#   - save a checkout's work only under a temporary AgentLocks lease on its item: a closed
+#     item (tier 5), or a merged checkout with uncommitted work, is kept while its lock is
+#     held or unreadable; a dirty merged checkout without an item identity is kept too.
+#     Clean merged checkouts are removed without a lease.
 #   - worktrees with NO merge evidence are kept and listed; opt in to reaping old
 #     clean ones with -StaleDays <n>
 #
@@ -214,12 +217,7 @@ try {
 
         # Tier 5: the checkout's work item is closed. Removal retains its work (see header).
         if (-not $why -and $slug) {
-            # An unreadable identity skips this tier; a marker always wins over the directory.
-            try {
-                $item = Get-WorktreeLockName -Worktree $w.Path
-                if (-not $item -and (Split-Path -Leaf $w.Path) -cmatch '^((pr|issue)-\d+)(-|$)') { $item = $Matches[1] }
-            }
-            catch { $item = $null }
+            $item = Get-WorktreeWorkItem -Worktree $w.Path
             if ($item -cmatch '^(pr|issue)-(\d+)$') {
                 # The issues endpoint also serves pull requests; a merged PR is closed.
                 $state = gh api "repos/$slug/issues/$($Matches[2])" --jq .state 2>$null
@@ -245,27 +243,33 @@ try {
             continue
         }
 
-        if ($closedItem) {
-            # A live owner may still use the checkout (for example, reopening the item).
-            $agentLocks = Join-Path $mainRepo 'scripts/AgentLocks.ps1'
-            $owner = Enter-WorkItemCleanupLease -AgentLocks $agentLocks -LockName $closedItem -WhatIf:$WhatIf
+        # Saving a checkout's work needs a temporary lease on its item: a live owner may still
+        # be working in it. A closed item (tier 5) always takes one. A merged PR (tiers 1, 2,
+        # 4) is a closed item too, but only a dirty checkout needs the lease, so a Redis outage
+        # never keeps a clean one; a dirty one without an item identity stays as before, and
+        # one dirtied after this check is preserved by Remove-MergedWorktree.
+        $leaseItem = $null
+        if ($closedItem) { $leaseItem = $closedItem }
+        elseif ($why -like 'merged PR*') {
+            $status = @(git -C $w.Path status --porcelain=v1 --untracked-files=all --ignored=matching 2>$null)
+            if ($LASTEXITCODE -eq 0 -and @(Get-WorktreeUncommittedWork -Status $status).Count -gt 0) {
+                $leaseItem = Get-WorktreeWorkItem -Worktree $w.Path
+            }
+        }
+        $agentLocks = Join-Path $mainRepo 'scripts/AgentLocks.ps1'
+        $owner = $null
+        if ($leaseItem) {
+            $owner = Enter-WorkItemCleanupLease -AgentLocks $agentLocks -LockName $leaseItem -WhatIf:$WhatIf
             if (-not $owner) {
-                Write-Host "sweep: keeping worktree of closed $closedItem (lock held or Redis unavailable): $($w.Path)"
+                Write-Host "sweep: keeping worktree of $leaseItem (lock held or Redis unavailable): $($w.Path)"
                 continue
             }
-            try {
-                Remove-MergedWorktree -Repo $mainRepo -Worktree $w.Path -Label "($why)" -ExpectedHead $sha -RetainWork -WorkItem $closedItem -WhatIf:$WhatIf
-            }
-            finally { Exit-WorkItemCleanupLease -AgentLocks $agentLocks -LockName $closedItem -Owner $owner -WhatIf:$WhatIf }
         }
-        elseif ($why -like 'merged PR*') {
-            # A merged PR is a closed work item too: leftover changes move to a retained
-            # branch named after the item (else the directory) instead of keeping the checkout.
-            try { $item = Get-WorktreeLockName -Worktree $w.Path } catch { $item = $null }
-            Remove-MergedWorktree -Repo $mainRepo -Worktree $w.Path -Label "($why)" -ExpectedHead $sha -RetainWork -WorkItem $item -WhatIf:$WhatIf
+        try {
+            Remove-MergedWorktree -Repo $mainRepo -Worktree $w.Path -Label "($why)" -ExpectedHead $sha -RetainWork:([bool]$leaseItem) -WorkItem $leaseItem -WhatIf:$WhatIf
         }
-        else {
-            Remove-MergedWorktree -Repo $mainRepo -Worktree $w.Path -Label "($why)" -ExpectedHead $sha -WhatIf:$WhatIf
+        finally {
+            if ($owner) { Exit-WorkItemCleanupLease -AgentLocks $agentLocks -LockName $leaseItem -Owner $owner -WhatIf:$WhatIf }
         }
         if ($WhatIf) { continue }
         if (-not (Test-Path -LiteralPath $w.Path)) {

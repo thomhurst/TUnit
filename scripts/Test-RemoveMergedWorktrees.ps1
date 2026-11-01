@@ -39,17 +39,25 @@ try {
     git -C $repo update-ref refs/remotes/origin/main $baseHead
 
     $mergedWorktree = Join-Path $testRoot 'merged'
-    $dirtyWorktree = Join-Path $testRoot 'dirty'
+    $dirtyWorktree = Join-Path $testRoot 'pr-600-dirty'
+    $dirtyHeldWorktree = Join-Path $testRoot 'pr-601-dirty-held'
+    $cleanHeldWorktree = Join-Path $testRoot 'pr-602-clean-held'
+    $mergedIgnoredWorktree = Join-Path $testRoot 'pr-603-merged-ignored'
+    $anonymousDirtyWorktree = Join-Path $testRoot 'dirty'
     $divergentWorktree = Join-Path $testRoot 'divergent'
     $openWorktree = Join-Path $testRoot 'open'
-    $mergedIgnoredWorktree = Join-Path $testRoot 'merged-ignored'
-    foreach ($name in @('merged', 'dirty', 'divergent', 'open', 'merged-ignored')) {
+    $mergedBranches = @('merged', 'pr-600-dirty', 'pr-601-dirty-held', 'pr-602-clean-held', 'pr-603-merged-ignored', 'dirty', 'divergent', 'open')
+    foreach ($name in $mergedBranches) {
         git -C $repo worktree add --quiet -b $name (Join-Path $testRoot $name)
     }
     Set-Content -LiteralPath (Join-Path $mergedWorktree 'build.log') -Value 'evidence'
-    # Leftover changes of a merged PR: saved to a retained branch, not kept forever.
+    # Leftover changes of a merged PR: saved under a lease on its item, not kept forever.
     Set-Content -LiteralPath (Join-Path $dirtyWorktree 'NewFeature.cs') -Value 'untracked source'
     Set-Content -LiteralPath (Join-Path $dirtyWorktree 'README.md') -Value 'leftover edit'
+    # A live owner (held lock) may still be working in a dirty merged checkout.
+    Set-Content -LiteralPath (Join-Path $dirtyHeldWorktree 'InProgress.cs') -Value 'owner still working'
+    # Without an item identity there is no lease to take, so leftover changes stay.
+    Set-Content -LiteralPath (Join-Path $anonymousDirtyWorktree 'NewFeature.cs') -Value 'untracked source'
     # An ignored secret cannot be stashed, so it keeps even a merged checkout.
     Set-Content -LiteralPath (Join-Path $mergedIgnoredWorktree 'signing.pfx') -Value 'secret'
     Set-Content -LiteralPath (Join-Path $divergentWorktree 'README.md') -Value 'unpublished'
@@ -85,18 +93,21 @@ try {
     Set-Content -LiteralPath (Join-Path $ignoredItem 'signing.pfx') -Value 'secret'
     $heldItem = Join-Path $testRoot 'pr-504-held'
     git -C $repo worktree add --quiet -b pr-504-held $heldItem $baseHead
-    # Live Redis semantics are tested separately; pr-504 has a live owner.
+    # Live Redis semantics are tested separately; pr-504, pr-601 and pr-602 have live
+    # owners. Every call is logged.
     New-Item -ItemType Directory -Path (Join-Path $repo 'scripts') | Out-Null
-    Set-Content -LiteralPath (Join-Path $repo 'scripts/AgentLocks.ps1') -Value @'
-param($Verb, [string]$LockName, [string]$OwnerId)
-if (-not $OwnerId) { exit 2 }
-if ($LockName -eq 'pr-504') { if ($Verb -eq 'status') { 'HELD'; exit 0 }; exit 3 }
-if ($Verb -eq 'status') { 'FREE' }
+    $lockLog = Join-Path $testRoot 'locks.log'
+    Set-Content -LiteralPath (Join-Path $repo 'scripts/AgentLocks.ps1') -Value @"
+param(`$Verb, [string]`$LockName, [string]`$OwnerId)
+if (-not `$OwnerId) { exit 2 }
+Add-Content -LiteralPath '$lockLog' -Value "`$Verb `$LockName"
+if (`$LockName -in 'pr-504', 'pr-601', 'pr-602') { if (`$Verb -eq 'status') { 'HELD'; exit 0 }; exit 3 }
+if (`$Verb -eq 'status') { 'FREE' }
 exit 0
-'@
+"@
 
     $mergedJson = @(
-        foreach ($name in @('merged', 'dirty', 'divergent', 'open', 'merged-ignored', 'pr-500-review')) {
+        foreach ($name in ($mergedBranches + 'pr-500-review')) {
             @{ headRefName = $name; headRefOid = $baseHead }
         }
     ) | ConvertTo-Json
@@ -111,25 +122,38 @@ exit 0
 
         $preview = (& $sweep -Repo fixture/repo -WhatIf 6>&1) -join "`n"
         Assert-True ($preview -match 'WOULD remove .*[\\/]merged') 'Preview did not identify merged worktree.'
-        Assert-True ($preview -match 'WOULD remove .*[\\/]dirty -- .*\(saving 2 ') 'Preview did not report saving merged leftover work.'
+        Assert-True ($preview -match 'WOULD remove .*pr-600-dirty -- .*\(saving 2 ') 'Preview did not report saving merged leftover work.'
+        Assert-True ($preview -match 'keeping worktree of pr-601 \(lock held') 'Preview did not keep a dirty merged checkout with a held lock.'
+        Assert-True ($preview -match 'WOULD remove .*pr-602-clean-held') 'Preview kept a clean merged checkout because of its lock.'
         Assert-True ($preview -match '!! signing.pfx') 'Preview did not report the ignored-file blocker.'
-        Assert-True ($preview -notmatch 'WOULD remove .*[\\/]merged-ignored') 'Preview claimed a merged checkout with an ignored file would be removed.'
+        Assert-True ($preview -notmatch 'WOULD remove .*pr-603-merged-ignored') 'Preview claimed a merged checkout with an ignored file would be removed.'
+        Assert-True ($preview -notmatch 'WOULD remove .*[\\/]dirty\b') 'Preview claimed a dirty checkout without an item would be removed.'
         Assert-True (Test-Path -LiteralPath (Join-Path $dirtyWorktree 'NewFeature.cs')) 'Preview saved or removed merged leftover work.'
+        Assert-True (-not (Select-String -LiteralPath $lockLog -Pattern '^(acquire|release) ' -Quiet)) 'Preview took a lock.'
+        Remove-Item -LiteralPath $lockLog
         Assert-True (Test-Path -LiteralPath $mergedWorktree) 'Preview removed worktree.'
         Assert-True ($preview -match 'WOULD remove .*pr-500-review -- \(closed work item pr-500\) \(saving 2 ') 'Preview did not report retained work.'
         Assert-True ($preview -match 'WOULD remove .*closed-detached -- \(closed work item issue-501\)') 'Preview did not resolve the marker identity.'
-        Assert-True ($preview -match 'keeping worktree of closed pr-504') 'Preview did not keep a held item.'
+        Assert-True ($preview -match 'keeping worktree of pr-504') 'Preview did not keep a held item.'
         Assert-True (Test-Path -LiteralPath (Join-Path $review 'Draft.cs')) 'Preview saved or removed closed-item work.'
         Assert-True (@(git -C $repo for-each-ref 'refs/heads/retained-worktrees/').Count -eq 0) 'Preview created a retained branch.'
 
         & $sweep -Repo fixture/repo
         Assert-True (-not (Test-Path -LiteralPath $mergedWorktree)) 'Merged worktree was not removed autonomously.'
         Assert-True (-not (Test-Path -LiteralPath $dirtyWorktree)) 'Merged worktree with leftover changes was not removed.'
-        $dirtyWip = @(git -C $repo for-each-ref --format='%(refname:short)' 'refs/heads/retained-worktrees/dirty-wip-*')
+        $dirtyWip = @(git -C $repo for-each-ref --format='%(refname:short)' 'refs/heads/retained-worktrees/pr-600-wip-*')
         Assert-True ($dirtyWip.Count -eq 1) 'Merged leftover changes were not saved to a retained branch.'
         Assert-True ((git -C $repo show "$($dirtyWip[0]):README.md") -eq 'leftover edit') 'Saved merged tracked change is wrong.'
         Assert-True ((git -C $repo show "$($dirtyWip[0])^3:NewFeature.cs") -eq 'untracked source') 'Saved merged leftover file is wrong.'
+        $calls = @(Get-Content -LiteralPath $lockLog)
+        Assert-True ($calls.IndexOf('acquire pr-600') -ge 0 -and $calls.IndexOf('release pr-600') -gt $calls.IndexOf('acquire pr-600')) "Dirty merged checkout was not saved under a lease: $($calls -join '; ')"
+        Assert-True (Test-Path -LiteralPath (Join-Path $dirtyHeldWorktree 'InProgress.cs')) 'Dirty merged checkout with a held lock was removed or stashed.'
+        Assert-True (@(git -C $repo for-each-ref 'refs/heads/retained-worktrees/pr-601-wip-*').Count -eq 0) 'Work of a held dirty merged checkout was saved.'
+        Assert-True ($calls -notcontains 'release pr-601') 'Released a lock the sweep did not hold.'
+        Assert-True (-not (Test-Path -LiteralPath $cleanHeldWorktree)) 'Clean merged checkout with a held lock was kept.'
+        Assert-True (-not ($calls -match ' pr-602$')) 'A clean merged checkout took a lease.'
         Assert-True (Test-Path -LiteralPath (Join-Path $mergedIgnoredWorktree 'signing.pfx')) 'Ignored file of a merged checkout was removed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $anonymousDirtyWorktree 'NewFeature.cs')) 'Dirty merged checkout without an item was removed.'
         Assert-True (Test-Path -LiteralPath $divergentWorktree) 'Divergent local commit was removed.'
         Assert-True (Test-Path -LiteralPath $openWorktree) 'Open PR worktree was removed.'
         git -C $repo show-ref --verify --quiet refs/heads/merged

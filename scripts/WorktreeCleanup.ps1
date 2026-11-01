@@ -386,6 +386,19 @@ function Get-WorktreeLockName {
     return $null
 }
 
+# The work item a checkout belongs to, for the sweep: Get-WorktreeLockName, else `pr-<N>`
+# or `issue-<N>` from a `pr-<N>[-*]`/`issue-<N>[-*]` directory name (a checkout made
+# before its marker was registered). Returns $null when there is none or Git cannot read it.
+function Get-WorktreeWorkItem {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Worktree)
+
+    try { $item = Get-WorktreeLockName -Worktree $Worktree } catch { return $null }
+    if ($item) { return $item }
+    if ((Split-Path -Leaf $Worktree) -cmatch '^((pr|issue)-\d+)(-|$)') { return $Matches[1] }
+    return $null
+}
+
 # Runs one AgentLocks.ps1 verb in a child process (the script exits). Status returns
 # its state; other output, including an acquired token, is never surfaced.
 function Invoke-AgentLockCommand {
