@@ -264,6 +264,58 @@ function Remove-MergedWorktree {
     }
 }
 
+# Resolves the lock name a worktree works under, exactly as AgentLocks.ps1 does: its
+# agent.lockName marker when agent.lockWorktree records this worktree's root (`git
+# worktree add` copies config.worktree, so a copied marker does not count), otherwise
+# issue-<N> from an issue-<N>-<desc> branch. Returns $null when the worktree names no
+# work item; throws when Git cannot read it.
+function Get-WorktreeLockName {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Worktree)
+
+    $top = git -C $Worktree rev-parse --show-toplevel 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $top) { throw "Cannot resolve worktree root: $Worktree" }
+    # Without this extension `--worktree` aliases shared config, which can hold a legacy
+    # marker of another checkout.
+    $enabled = git -C $Worktree config --local --bool --get extensions.worktreeConfig 2>$null
+    if ($LASTEXITCODE -notin 0, 1) { throw "Cannot inspect worktree lock configuration: $Worktree" }
+    if ($enabled -and $enabled.Trim() -eq 'true') {
+        $marker = git -C $Worktree config --worktree --get agent.lockName 2>$null
+        if ($LASTEXITCODE -notin 0, 1) { throw "Cannot inspect worktree lock marker: $Worktree" }
+        $owner = git -C $Worktree config --worktree --get agent.lockWorktree 2>$null
+        if ($LASTEXITCODE -notin 0, 1) { throw "Cannot inspect worktree lock marker owner: $Worktree" }
+        if ($marker -and $owner -and
+            [IO.Path]::GetFullPath($owner.Trim()).TrimEnd('\', '/') -eq [IO.Path]::GetFullPath($top.Trim()).TrimEnd('\', '/')) {
+            return $marker.Trim()
+        }
+    }
+    $branch = git -C $Worktree rev-parse --abbrev-ref HEAD 2>$null
+    if ($LASTEXITCODE -ne 0) { throw "Cannot resolve worktree branch: $Worktree" }
+    if ($branch -match '^issue-(\d+)-') { return "issue-$($Matches[1])" }
+    return $null
+}
+
+# Runs one AgentLocks.ps1 verb in a child process (the script exits). Status returns
+# its state; other output, including an acquired token, is never surfaced.
+function Invoke-AgentLockCommand {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Script,
+        [Parameter(Mandatory)][string]$Verb,
+        [Parameter(Mandatory)][string]$LockName,
+        [Parameter(Mandatory)][string]$OwnerId
+    )
+
+    $state = $null
+    if ($Verb -eq 'status') {
+        $state = (& pwsh -NoProfile -File $Script $Verb -LockName $LockName -OwnerId $OwnerId 2>$null | Out-String).Trim()
+    }
+    else {
+        & pwsh -NoProfile -File $Script $Verb -LockName $LockName -OwnerId $OwnerId *> $null
+    }
+    return [pscustomobject]@{ ExitCode = $LASTEXITCODE; State = $state }
+}
+
 # Agents keep logs, reports and PR-body drafts for a work item under
 # <main checkout>-evidence/<lock name>/, beside the worktree root, so nothing lands
 # loose in the parent directory. Evidence matters only while its item is active.
@@ -288,35 +340,102 @@ function Remove-StaleAgentEvidence {
     $cutoff = [DateTime]::UtcNow.AddDays(-$RetentionDays)
     $removed = 0
     foreach ($entry in (Get-ChildItem -LiteralPath $Root -Force -ErrorAction SilentlyContinue)) {
-        # Never follow a link out of the evidence root.
-        if (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
-            Write-Host "sweep: skipping evidence entry that is a link: $($entry.FullName)"
-            continue
-        }
         $items = @($entry)
-        if ($entry.PSIsContainer) {
+        if ($entry.PSIsContainer -and ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -eq 0) {
             $items += @(Get-ChildItem -LiteralPath $entry.FullName -Recurse -Force -ErrorAction SilentlyContinue)
         }
         $newest = ($items | Measure-Object -Property LastWriteTimeUtc -Maximum).Maximum
         if ($newest -ge $cutoff) { continue }
-        if ($WhatIf) {
-            Write-Host "sweep: WOULD remove stale evidence $($entry.FullName)"
-            $removed++
-            continue
-        }
-        if ($entry.PSIsContainer) {
-            if (-not (Remove-WorktreeDirectoryLinks -Worktree $entry.FullName -Label '(evidence)')) { continue }
-            Remove-DirectoryTree -Path $entry.FullName
-        }
-        else {
-            Remove-Item -LiteralPath $entry.FullName -Force -ErrorAction SilentlyContinue
-        }
-        if (Test-Path -LiteralPath $entry.FullName) {
-            Write-Host "sweep: WARNING could not remove stale evidence $($entry.FullName)"
-            continue
-        }
-        Write-Host "sweep: removed stale evidence $($entry.FullName)"
-        $removed++
+        if (Remove-AgentEvidenceEntry -Entry $entry -Kind 'stale' -WhatIf:$WhatIf) { $removed++ }
     }
     return $removed
+}
+
+# Removes the evidence of finished work items: each `pr-<N>` or `issue-<N>` folder whose
+# item is closed (merged or not) and that no registered worktree still resolves to.
+# Evidence of an open item survives release, because later units cite it. A temporary
+# AgentLocks lease on the item is held through deletion, so a new owner cannot start
+# writing midway; a held lease, unavailable Redis or an unreadable state keeps the
+# evidence. Returns the number of entries removed (or that would be).
+function Remove-FinishedAgentEvidence {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Root,
+        [Parameter(Mandatory)][string]$AgentLocks,
+        # Receives the lock name; returns $true only when the item is confirmed closed.
+        [Parameter(Mandatory)][scriptblock]$IsClosed,
+        [AllowEmptyCollection()][string[]]$ActiveLockNames = @(),
+        [switch]$WhatIf
+    )
+
+    if (-not (Test-Path -LiteralPath $Root -PathType Container)) { return 0 }
+    if (-not (Test-Path -LiteralPath $AgentLocks)) { return 0 }
+    $active = New-OrdinalStringMap
+    foreach ($name in $ActiveLockNames) { if ($name) { $active[$name] = $true } }
+
+    $removed = 0
+    foreach ($entry in (Get-ChildItem -LiteralPath $Root -Directory -Force -ErrorAction SilentlyContinue)) {
+        $name = $entry.Name
+        if ($name -cnotmatch '^(pr|issue)-\d+$' -or $active.ContainsKey($name)) { continue }
+        try { if (-not (& $IsClosed $name)) { continue } }
+        catch {
+            Write-Host "sweep: could not read the state of $name; keeping its evidence"
+            continue
+        }
+
+        $owner = "evidence-cleanup-$([Guid]::NewGuid().ToString('N'))"
+        $verb = if ($WhatIf) { 'status' } else { 'acquire' }
+        try { $lease = Invoke-AgentLockCommand -Script $AgentLocks -Verb $verb -LockName $name -OwnerId $owner }
+        catch { $lease = [pscustomobject]@{ ExitCode = 1; State = $null } }
+        if ($lease.ExitCode -ne 0 -or ($WhatIf -and $lease.State -ne 'FREE')) {
+            Write-Host "sweep: keeping evidence of $name (lock held or Redis unavailable)"
+            continue
+        }
+        try {
+            if (Remove-AgentEvidenceEntry -Entry $entry -Kind 'finished' -WhatIf:$WhatIf) { $removed++ }
+        }
+        finally {
+            if (-not $WhatIf) {
+                $released = Invoke-AgentLockCommand -Script $AgentLocks -Verb release -LockName $name -OwnerId $owner
+                if ($released.ExitCode -ne 0) {
+                    Write-Host "sweep: WARNING could not release evidence cleanup lock for $name (exit $($released.ExitCode))"
+                }
+            }
+        }
+    }
+    return $removed
+}
+
+# Deletes one top-level evidence entry without following links. Returns whether it is
+# gone (or, with -WhatIf, would be removed).
+function Remove-AgentEvidenceEntry {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][IO.FileSystemInfo]$Entry,
+        [Parameter(Mandatory)][string]$Kind,
+        [switch]$WhatIf
+    )
+
+    # Never follow a link out of the evidence root.
+    if (($Entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        Write-Host "sweep: skipping evidence entry that is a link: $($Entry.FullName)"
+        return $false
+    }
+    if ($WhatIf) {
+        Write-Host "sweep: WOULD remove $Kind evidence $($Entry.FullName)"
+        return $true
+    }
+    if ($Entry -is [IO.DirectoryInfo]) {
+        if (-not (Remove-WorktreeDirectoryLinks -Worktree $Entry.FullName -Label '(evidence)')) { return $false }
+        Remove-DirectoryTree -Path $Entry.FullName
+    }
+    else {
+        Remove-Item -LiteralPath $Entry.FullName -Force -ErrorAction SilentlyContinue
+    }
+    if (Test-Path -LiteralPath $Entry.FullName) {
+        Write-Host "sweep: WARNING could not remove $Kind evidence $($Entry.FullName)"
+        return $false
+    }
+    Write-Host "sweep: removed $Kind evidence $($Entry.FullName)"
+    return $true
 }

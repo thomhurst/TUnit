@@ -88,6 +88,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'WorktreeCleanup.ps1')
 
 # Store absolute paths so release works from any checkout of this repository.
 if ($Worktree) { $Worktree = [IO.Path]::GetFullPath($Worktree) }
@@ -99,25 +100,6 @@ $lockTtlSeconds = 7200 # 2 hours: the dead-man's switch. Longer than nearly ever
 $stateRoot = Join-Path ([System.IO.Path]::GetTempPath()) 'tunit-agent-locks'
 
 function Die([int]$code, [string]$msg) { if ($msg) { [Console]::Error.WriteLine($msg) }; exit $code }
-
-function Get-WorktreeLockMarker {
-    # `git config --worktree` aliases shared local config until this extension is
-    # enabled. Skip legacy shared markers entirely so they cannot shadow issue branch
-    # derivation; every marker written by this version enables the extension first.
-    $enabled = (git config --local --bool --get extensions.worktreeConfig 2>$null)
-    if ($LASTEXITCODE -ne 0 -or -not $enabled -or $enabled.Trim() -ne 'true') { return $null }
-
-    $marker = (git config --worktree --get agent.lockName 2>$null)
-    if ($LASTEXITCODE -ne 0 -or -not $marker) { return $null }
-    # `git worktree add` copies the source checkout's config.worktree into the new
-    # worktree, so a marker counts only in the worktree whose path it records.
-    $owner = (git config --worktree --get agent.lockWorktree 2>$null)
-    if ($LASTEXITCODE -ne 0 -or -not $owner) { return $null }
-    $top = (git rev-parse --show-toplevel 2>$null)
-    if ($LASTEXITCODE -ne 0 -or -not $top) { return $null }
-    if ((Get-MarkerPath $owner) -ne (Get-MarkerPath $top)) { return $null }
-    return $marker.Trim()
-}
 
 function Get-MarkerPath([string]$Path) { return [IO.Path]::GetFullPath($Path.Trim()).TrimEnd('\', '/') }
 
@@ -152,13 +134,11 @@ function Resolve-OwnerIdentity([string]$Explicit) {
 
 function Resolve-LockName([string]$Explicit) {
     if ($Explicit) { return $Explicit }
-    # 1. marker persisted in the current worktree by a prior `acquire`/`renew -Worktree`.
-    $marker = Get-WorktreeLockMarker
-    if ($marker) { return $marker }
-    # 2. derive issue-<N> from an issue-<N>-<desc> branch (never yields pr-<N>).
-    $branch = (git rev-parse --abbrev-ref HEAD 2>$null)
-    if ($LASTEXITCODE -eq 0 -and $branch -match '^issue-(\d+)-') { return "issue-$($Matches[1])" }
-    return $null
+    # The current worktree's marker, else issue-<N> from an issue-<N>-<desc> branch
+    # (never pr-<N>). The sweep resolves every registered worktree the same way.
+    $top = (git rev-parse --show-toplevel 2>$null)
+    if ($LASTEXITCODE -ne 0 -or -not $top) { return $null }
+    try { return Get-WorktreeLockName -Worktree $top } catch { return $null }
 }
 
 if ($Verb -ne 'ping') {

@@ -43,7 +43,7 @@ Immediately after checkout, run `pwsh $agentLocks renew -LockName $lockName -Wor
 
 Never edit the main checkout, and write nothing loose beside it. Every file an agent produces outside a worktree has one home, so cleanup can find it:
 
-- Evidence (build and test logs, reports, PR and comment body drafts, diffs, validation projects) goes in `<repo-parent>/TUnit-evidence/<lock-name>/`, for example `C:/git/TUnit-evidence/issue-1234/build.log`. `pwsh scripts/Remove-MergedWorktrees.ps1` deletes an entry once its newest file is older than `-EvidenceRetentionDays` (default 7).
+- Evidence (build and test logs, reports, PR and comment body drafts, diffs, validation projects) goes in `<repo-parent>/TUnit-evidence/<lock-name>/`, for example `C:/git/TUnit-evidence/issue-1234/build.log`. `pwsh scripts/Remove-MergedWorktrees.ps1` deletes a `pr-<N>` or `issue-<N>` entry once that item is closed (merged or not) and no registered worktree uses it, and any entry once its newest file is older than `-EvidenceRetentionDays` (default 7). Release keeps the evidence of an open item; upload anything that must outlive the item.
 - Worktrees, including throwaway checkouts and baselines, go under the dedicated worktree root `<repo-parent>/TUnit-worktrees/<name>`, never as plain copies. It is the only root whose orphaned directories the sweep cleans.
 - Downloaded SDKs and CLI tools go in `<repo-parent>/toolchains/<name>-<version>/`, shared by every repository.
 - Never write to the repository's parent directory itself or to the main checkout.
