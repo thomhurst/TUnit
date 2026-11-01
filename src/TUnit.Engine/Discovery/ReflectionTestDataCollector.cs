@@ -738,6 +738,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             var dataItems = await GetDataFromSourceAsync(dataSource, null!).ConfigureAwait(false);
 
+            // Inference reads a wrapped factory's values, so tests get those values rather than invoking it again
+            for (var i = 0; i < dataItems.Count; i++)
+            {
+                dataItems[i] = GenericClassRowPartition.EvaluateWrappedFactory(dataItems[i]);
+            }
+
             allClassRows?.Add(new StaticDataSourceAttribute(dataItems.ToArray())
             {
                 PartitionOf = dataSource,

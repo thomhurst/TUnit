@@ -81,6 +81,29 @@ public static class GenericClassRowPartition
     }
 
     /// <summary>
+    /// Invokes the factory of a row holding a <see cref="TestDataRow{T}"/> of <see cref="Func{TResult}"/> once, and
+    /// returns a row that wraps its values with the same settings. Inferring the row's type arguments and building its
+    /// test then read the same values, instead of each invoking the factory (#7210). Other rows are returned as they are.
+    /// </summary>
+    internal static object?[] EvaluateWrappedFactory(object?[] row)
+    {
+        if (row.Length != 1 || row[0] is not ITestDataRow wrapped)
+        {
+            return row;
+        }
+
+        var data = wrapped.GetData();
+        if (data is null || !data.GetType().IsGenericType || data.GetType().GetGenericTypeDefinition() != typeof(Func<>))
+        {
+            return row;
+        }
+
+        // An object?[] is used as the row's values without being invoked or spread again
+        var (values, _) = TestDataRowUnwrapper.UnwrapArray(row);
+        return [new TestDataRow<object?[]>(values, wrapped.DisplayName, wrapped.Skip, wrapped.Categories, wrapped.DataExpression)];
+    }
+
+    /// <summary>
     /// Whether a class row's values infer <paramref name="classTypeArguments"/>, by <see cref="InferClassTypeArguments"/>.
     /// </summary>
     internal static bool InfersTypeArguments(object?[]? row, Type[] classTypeArguments)
@@ -203,7 +226,7 @@ public static class GenericClassRowPartition
                 var rows = new List<EvaluatedRow>();
                 await foreach (var rowFactory in dataSources[index].GetDataRowsAsync(dataGeneratorMetadata).ConfigureAwait(false))
                 {
-                    var row = await rowFactory().ConfigureAwait(false);
+                    var row = await rowFactory().ConfigureAwait(false) is { } fetched ? EvaluateWrappedFactory(fetched) : null;
                     var infers = InfersTypeArguments(row, ClassTypeArguments);
                     anyRowInfers |= infers;
                     rows.Add(new EvaluatedRow(rowFactory, row, infers));
@@ -262,7 +285,10 @@ public static class GenericClassRowPartition
         }
     }
 
-    /// <summary>A row of a partitioned source, evaluated once to read its values' types.</summary>
+    /// <summary>
+    /// A row of a partitioned source, evaluated once to read its values' types. <see cref="Row"/> holds the values
+    /// evaluated from a wrapped factory (<see cref="EvaluateWrappedFactory"/>), so its first fetch does not invoke it again.
+    /// </summary>
     internal readonly record struct EvaluatedRow(Func<Task<object?[]?>> Factory, object?[]? Row, bool InfersTypeArguments);
 
     /// <summary>The evaluated rows of each partitioned source, by data source index, and whether any of them infers the instantiation.</summary>
@@ -295,7 +321,9 @@ internal sealed class GenericClassRowPartitionDataSource : Attribute, IDataSourc
     public IDataSourceAttribute InnerDataSource { get; }
 
     // Whether the last read of this source yielded every row of the inner source: the AllRows fallback, or a
-    // source that is not partitioned and is used because no partitioned row infers the instantiation
+    // source that is not partitioned and is used because no partitioned row infers the instantiation. Shared by
+    // every build of the instantiation: the engine reads SkipIfEmpty right after enumerating this source, and
+    // builds of one instantiation read the same source rows, so they reach the same value
     private volatile bool _yieldsEveryRow;
 
     /// <inheritdoc />
@@ -328,7 +356,8 @@ internal sealed class GenericClassRowPartitionDataSource : Attribute, IDataSourc
             if (_index == 0)
             {
                 // No row supplies the constructor arguments. The first source yields one empty row for all
-                // of them, and the instance factory fails for it once per method row, as in reflection mode
+                // of them, and the instance factory fails for it once per method row, as in reflection mode.
+                // Every source is wrapped under this fallback, so the source at index 0 is always this wrapper
                 yield return static () => Task.FromResult<object?[]?>([]);
             }
 

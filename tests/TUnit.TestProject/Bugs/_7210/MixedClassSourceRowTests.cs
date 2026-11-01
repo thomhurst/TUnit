@@ -17,6 +17,12 @@ public static class Issue7210Sources
     public static IEnumerable<object> SevenAndWrappedEight() => [7, new TestDataRow<int>(8)];
 
     public static IEnumerable<object> NoRows() => [];
+
+    private static int _wrappedFactoryCalls;
+
+    public static int WrappedFactoryCalls => Volatile.Read(ref _wrappedFactoryCalls);
+
+    public static IEnumerable<object> WrappedFactory() => [new TestDataRow<Func<int>>(() => Interlocked.Increment(ref _wrappedFactoryCalls))];
 }
 
 // Rows of an untyped source, whose Skip setting the test should keep in both modes
@@ -43,6 +49,21 @@ public class WrappedRowInfersItsValue<T>(T value)
         await Assert.That(value).IsTypeOf<T>();
         await Assert.That(arg).IsTypeOf<T>();
         await Assert.That((int)(object)value!).IsIn(7, 8);
+    }
+}
+
+// A wrapped factory is invoked once: the value it returned to infer the row's instantiation is the value the test gets
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(typeof(Issue7210Sources), nameof(Issue7210Sources.WrappedFactory))]
+public class WrappedFactoryInvokedOnce<T>(T value)
+{
+    [Test]
+    [Arguments(1)]
+    public async Task Test(T arg)
+    {
+        await Assert.That(value).IsTypeOf<T>();
+        await Assert.That((int)(object)value!).IsEqualTo(1);
+        await Assert.That(Issue7210Sources.WrappedFactoryCalls).IsEqualTo(1);
     }
 }
 
