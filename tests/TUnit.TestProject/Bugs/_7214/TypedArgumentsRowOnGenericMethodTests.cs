@@ -110,3 +110,34 @@ public class TypedArgumentsRowOfOtherTypeWithGenerateGenericTest
         await Assert.That(Convert.ToInt64(arg)).IsEqualTo(typeof(TMethod) == typeof(int) ? 1L : 2L);
     }
 }
+
+// A typed row is matched against the parameter type, not taken as the type argument whole: an [Arguments<int[]>]
+// row on an IEnumerable<T> parameter infers nothing and joins the [GenerateGenericTest] instantiation, so only
+// Run<int> runs (no Run<int[]>, whose parameter could not take the row).
+[EngineTest(ExpectedResult.Pass)]
+public class TypedCollectionRowWithGenerateGenericTest
+{
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [Arguments<int[]>(new[] { 1, 2 })]
+    public async Task Run<TMethod>(IEnumerable<TMethod> values)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
+        await Assert.That(values.Count()).IsEqualTo(2);
+    }
+}
+
+
+// The declared row type wins over the value's run-time type in both modes, without [GenerateGenericTest]:
+// [Arguments<object>(1)] runs Run<object>(1), not Run<int>.
+[EngineTest(ExpectedResult.Pass)]
+public class TypedRowDeclaredTypeWinsOverValueType
+{
+    [Test]
+    [Arguments<object>(1)]
+    public async Task Run<TMethod>(TMethod arg)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(object));
+        await Assert.That(arg).IsEqualTo((object)1);
+    }
+}

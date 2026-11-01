@@ -7117,6 +7117,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Check if it's a typed data source by examining its base types
         var baseType = attrClass.BaseType;
+        var hasGeneratorBase = false;
         while (baseType != null)
         {
             if (baseType.IsGenericType)
@@ -7125,13 +7126,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var baseTypeName = baseTypeDef.Name;
                 var baseTypeNamespace = baseTypeDef.ContainingNamespace?.ToDisplayString();
 
-                // Check for typed data source base classes more precisely. A generic method also takes its
-                // type arguments from [Arguments<T>], whose base is TypedDataSourceAttribute<T>, as on a
-                // non-generic class (#7214).
-                var isGeneratorBase = baseTypeName is "DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute";
-                if ((isGeneratorBase || (method.IsGenericMethod && baseTypeName == "TypedDataSourceAttribute")) &&
+                // A generic method takes its type arguments from an [Arguments<T>] row by matching the row
+                // type against its parameters, as on a non-generic class (#7214). The class type arguments
+                // come from the class's own sources.
+                if (!hasGeneratorBase && method.IsGenericMethod && TypedDataSourceInference.IsTypedRowBase(baseType))
+                {
+                    return TypedDataSourceInference.InferMethodTypeArgumentsFromRowType(method, baseType.TypeArguments[0]);
+                }
+
+                // Check for typed data source base classes more precisely
+                if (baseTypeName is "DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute" &&
                     baseTypeNamespace?.Contains("TUnit.Core") == true)
                 {
+                    hasGeneratorBase = true;
+
                     // Get the type arguments from the base class
                     var typeArgs = baseType.TypeArguments;
 

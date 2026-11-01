@@ -18,6 +18,7 @@ public class Issue7214Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("ArgumentsAndTypedArgumentsRowWithGenerateGenericTest", new[] { "Run<int>(1)", "Run<int>(2)" })]
     [Arguments("TwoTypedArgumentsRowsWithGenerateGenericTest", new[] { "Run<int>(1)", "Run<int>(2)" })]
     [Arguments("TypedArgumentsRowOfOtherTypeWithGenerateGenericTest", new[] { "Run<int>(1)", "Run<long>(2)" })]
+    [Arguments("TypedRowDeclaredTypeWinsOverValueType", new[] { "Run<object>(1)" })]
     public async Task Typed_Arguments_Row_Runs_On_Generic_Method(string classFilter, string[] expectedTestNames)
     {
         await RunTestsWithFilter(
@@ -29,6 +30,23 @@ public class Issue7214Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
                 result => result.Results.Select(x => x.TestName).OrderBy(x => x, StringComparer.Ordinal)
                     .ShouldBe(expectedTestNames.OrderBy(x => x, StringComparer.Ordinal))
+            ]);
+    }
+
+    // The row is matched against the parameter type, so no Run<int[]> instantiation is added. The test bodies
+    // assert the type argument; an array argument's display name is not part of the contract here.
+    [Test]
+    [Arguments("TypedCollectionRowWithGenerateGenericTest")]
+    public async Task Typed_Arguments_Row_Is_Matched_Against_The_Parameter_Type(string classFilter)
+    {
+        await RunTestsWithFilter(
+            $"/*/TUnit.TestProject.Bugs._7214/{classFilter}/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                result => result.Results.ShouldAllBe(x => x.TestName.StartsWith("Run<int>(", StringComparison.Ordinal))
             ]);
     }
 }
