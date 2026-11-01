@@ -7006,8 +7006,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var constructorParam = constructorParams[argIndex];
             var argValue = argumentValues[argIndex];
 
-            // Check if the constructor parameter type is a generic type parameter
-            if (constructorParam.Type is ITypeParameterSymbol typeParam)
+            // A value infers each type parameter its constructor parameter's type mentions, by matching the value's
+            // type against that parameter type: T takes the value's type, T[] its element type, and List<T> its type
+            // argument, as reflection mode infers them (#7223).
+            if (MentionsTypeParameter(constructorParam.Type))
             {
                 // The argument value's type tells us what the generic type should be
                 ITypeSymbol? argType = null;
@@ -7038,7 +7040,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 if (argType != null)
                 {
-                    inferredTypes[typeParam.Name] = argType;
+                    foreach (var typeParameter in typeParameters)
+                    {
+                        if (!inferredTypes.ContainsKey(typeParameter.Name)
+                            && MatchTypeParameter(constructorParam.Type, argType, typeParameter) is { } typeArgument)
+                        {
+                            inferredTypes[typeParameter.Name] = typeArgument;
+                        }
+                    }
                 }
             }
         }
@@ -7071,6 +7080,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// parameter type does not mention the type parameter or the declared type does not have its shape. Reflection
     /// mode maps the declared type of an [Arguments&lt;T&gt;(null)] class row the same way.
     /// </summary>
+    private static bool MentionsTypeParameter(ITypeSymbol type) => type switch
+    {
+        ITypeParameterSymbol => true,
+        IArrayTypeSymbol array => MentionsTypeParameter(array.ElementType),
+        INamedTypeSymbol named => named.TypeArguments.Any(MentionsTypeParameter),
+        _ => false
+    };
+
     private static ITypeSymbol? MatchTypeParameter(ITypeSymbol parameterType, ITypeSymbol declaredType, ITypeParameterSymbol typeParameter)
     {
         if (parameterType is ITypeParameterSymbol parameterTypeParameter)

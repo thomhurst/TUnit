@@ -125,4 +125,54 @@ public class ArgumentsAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    [Arguments("[Arguments<string[]>(new[] { \"x\" })]", "T[] values")]
+    [Arguments("[Arguments<string[]>(null!)]", "T[]? values")]
+    public async Task Generic_Class_Row_Matching_Constructor_After_Inferring_T_No_Error(string row, string parameter)
+    {
+        // #7223: the row infers T through the constructor parameter (T[] gives its element type) as both execution modes
+        // infer it, so its declared type matches.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+
+                {{row}}
+                public class MyClass<T>({{parameter}})
+                {
+                    [Test]
+                    [Arguments("a")]
+                    public void MyTest(T arg)
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Generic_Class_Row_Not_Matching_Constructor_Shape_Error()
+    {
+        // #7223: an int row cannot bind to T[] for any T
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                [{|#0:Arguments<int>(1)|}]
+                public class MyClass<T>(T[] values)
+                {
+                    [Test]
+                    [Arguments("a")]
+                    public void MyTest(T arg)
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("int", "T[]")
+            );
+    }
 }
