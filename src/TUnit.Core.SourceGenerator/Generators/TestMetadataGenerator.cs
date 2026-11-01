@@ -2544,7 +2544,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var attrName = attrClass.GloballyQualifiedNonGeneric();
 
-        if (attrName == "global::TUnit.Core.MethodDataSourceAttribute")
+        // InstanceMethodDataSourceAttribute derives from MethodDataSourceAttribute and needs the
+        // same generated factory; without one, Native AOT falls back to a reflection lookup that
+        // finds no trimmed field or property metadata (#7225).
+        if (attrName is "global::TUnit.Core.MethodDataSourceAttribute" or "global::TUnit.Core.InstanceMethodDataSourceAttribute")
         {
             GenerateMethodDataSourceAttribute(writer, attr, typeSymbol, compilationContext.Compilation);
         }
@@ -2916,7 +2919,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return;
         }
 
-        var attrTypeName = usesTestClassInstance
+        // Keep a declared [InstanceMethodDataSource] as one even when its member is static, so the
+        // engine still sees IAccessesInstanceData as it does in reflection mode.
+        var isDeclaredInstanceAttribute = attr.AttributeClass?.GloballyQualifiedNonGeneric() == "global::TUnit.Core.InstanceMethodDataSourceAttribute";
+        var attrTypeName = usesTestClassInstance || isDeclaredInstanceAttribute
             ? "global::TUnit.Core.InstanceMethodDataSourceAttribute"
             : "global::TUnit.Core.MethodDataSourceAttribute";
 

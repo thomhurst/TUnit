@@ -95,7 +95,10 @@ internal static class TUnit_TestProject_Bugs__1821_Tests__TestSource
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.InstanceMethodDataSourceAttribute("DataSource"),
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("DataSource")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceEnumerable(dataGeneratorMetadata, static instance => ((global::TUnit.TestProject.Bugs._1821.Tests)instance).DataSource()),
+    },
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
