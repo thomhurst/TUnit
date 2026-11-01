@@ -839,7 +839,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // takes the types its declared rows inferred through the constructor, which the member was read
                 // with: a row's value can't infer them, whether it is null or binds to a T[] parameter (#7208).
                 var typeArguments = memberTypeArguments
-                    ?? InferTypeArgumentsFromRowValues(genericTypeDefinition, dataRow)
+                    ?? InferTypeArgumentsFromRowValues(genericTypeDefinition, dataSource, dataRow)
                     ?? InferTypeArgumentsFromNullTypedArgumentsRow(genericTypeDefinition, dataSource, dataRow);
                 if (typeArguments == null || typeArguments.Length == 0 || constraintViolations.TryAddClassViolation(typeArguments))
                 {
@@ -909,13 +909,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// infer <c>C&lt;int&gt;</c>, not <c>C&lt;TestDataRow&lt;int&gt;&gt;</c>; the partition keeps the wrapper for its row
     /// metadata. A <c>Func</c> inside the wrapper is not invoked here, because execution invokes it for each test.
     /// </summary>
-    private static Type[]? InferTypeArgumentsFromRowValues(Type genericTypeDefinition, object?[] dataRow)
+    private static Type[]? InferTypeArgumentsFromRowValues(Type genericTypeDefinition, IDataSourceAttribute dataSource, object?[] dataRow)
     {
         if (dataRow is [ITestDataRow testDataRow])
         {
             if (testDataRow.GetData() is Delegate)
             {
-                return ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
+                return ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataSource, dataRow);
             }
 
             dataRow = TestDataRowUnwrapper.UnwrapArray(dataRow).Data;
@@ -925,7 +925,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
 
-        return ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
+        return ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataSource, dataRow);
     }
 
     /// <summary>
@@ -947,48 +947,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return null;
         }
 
-        return MatchTypeParameter(parameter.ParameterType, sourceType.GetGenericArguments()[0], typeParameter) is { } typeArgument
+        return ReflectionGenericTypeResolver.MatchTypeParameter(parameter.ParameterType, sourceType.GetGenericArguments()[0], typeParameter) is { } typeArgument
             ? [typeArgument]
             : null;
-    }
-
-    /// <summary>
-    /// The type that <paramref name="typeParameter"/> takes when a value of <paramref name="declaredType"/> binds to a
-    /// parameter of <paramref name="parameterType"/>: the declared type itself for a parameter of type T, its element
-    /// type for T[], and the matching type argument for a constructed generic such as List&lt;T&gt;. Null when the
-    /// parameter type does not mention the type parameter or the declared type does not have its shape. Mirrors
-    /// <c>TestMetadataGenerator.MatchTypeParameter</c>.
-    /// </summary>
-    private static Type? MatchTypeParameter(Type parameterType, Type declaredType, Type typeParameter)
-    {
-        if (parameterType.IsGenericParameter)
-        {
-            return parameterType == typeParameter ? declaredType : null;
-        }
-
-        if (parameterType.IsArray)
-        {
-            return declaredType.IsArray && declaredType.GetArrayRank() == parameterType.GetArrayRank()
-                ? MatchTypeParameter(parameterType.GetElementType()!, declaredType.GetElementType()!, typeParameter)
-                : null;
-        }
-
-        if (parameterType.IsGenericType
-            && declaredType.IsGenericType
-            && parameterType.GetGenericTypeDefinition() == declaredType.GetGenericTypeDefinition())
-        {
-            var parameterTypeArguments = parameterType.GetGenericArguments();
-            var declaredTypeArguments = declaredType.GetGenericArguments();
-            for (var i = 0; i < parameterTypeArguments.Length; i++)
-            {
-                if (MatchTypeParameter(parameterTypeArguments[i], declaredTypeArguments[i], typeParameter) is { } match)
-                {
-                    return match;
-                }
-            }
-        }
-
-        return null;
     }
 
     /// <summary>
@@ -2509,7 +2470,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             for (var j = 0; j < parameters.Length && j < rowElements.Length && typeArguments[i] == null; j++)
             {
                 if (rowElements[j] != typeof(object)
-                    && MatchTypeParameter(parameters[j].ParameterType, rowElements[j], typeParameters[i]) is { ContainsGenericParameters: false } typeArgument
+                    && ReflectionGenericTypeResolver.MatchTypeParameter(parameters[j].ParameterType, rowElements[j], typeParameters[i]) is { ContainsGenericParameters: false } typeArgument
                     && typeArgument != typeof(object))
                 {
                     typeArguments[i] = typeArgument;

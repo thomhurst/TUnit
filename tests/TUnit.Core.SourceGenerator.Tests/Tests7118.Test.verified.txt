@@ -1722,7 +1722,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7118.ArrayParameterNullTypedClassRow<string>.Test",
             filePath: "",
-            lineNumber: 249,
+            lineNumber: 247,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
