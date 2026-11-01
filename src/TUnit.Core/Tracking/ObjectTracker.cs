@@ -139,6 +139,10 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             // test does not release references it never took (which could dispose a shared instance
             // that another test still holds).
             RemoveObjectsNotIn(testContext.TrackedObjectsIfCreated, alreadyTrackedSnapshot);
+
+            // The test's root objects already exist, so track and count them; otherwise nothing
+            // disposes them, not even the session-end sweep (#7213). Only nested discovery is dropped.
+            TrackRootObjects(testContext, alreadyTrackedSnapshot);
             throw;
         }
         if (trackableDict.Count == 0 && alreadyTrackedSnapshot is null)
@@ -151,6 +155,33 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         foreach (var kvp in trackableDict)
         {
             foreach (var obj in kvp.Value)
+            {
+                if (alreadyTrackedSnapshot?.Contains(obj) != true)
+                {
+                    TrackObject(obj);
+                }
+            }
+        }
+    }
+
+    private void TrackRootObjects(TestContext testContext, HashSet<object>? alreadyTrackedSnapshot)
+    {
+        SortedList<int, HashSet<object>> tracked;
+        try
+        {
+            tracked = trackableObjectGraphProvider.GetTrackableRootObjects(testContext);
+        }
+        catch
+        {
+            // Best effort: never let this fallback replace the discovery exception the caller rethrows.
+            // Nothing has been counted yet, so dropping what it added keeps the references balanced.
+            RemoveObjectsNotIn(testContext.TrackedObjectsIfCreated, alreadyTrackedSnapshot);
+            return;
+        }
+
+        if (tracked.TryGetValue(0, out var roots))
+        {
+            foreach (var obj in roots)
             {
                 if (alreadyTrackedSnapshot?.Contains(obj) != true)
                 {

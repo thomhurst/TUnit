@@ -65,6 +65,16 @@ internal interface IObjectGraphDiscoverer
     /// use <see cref="DiscoverObjectGraph"/> instead.
     /// </remarks>
     SortedList<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds only the test's root objects (class and method arguments, direct injected property values, and
+    /// unreceived data-row objects) to testContext.TrackedObjects at depth 0, without reading any property
+    /// of them. Used after <see cref="DiscoverAndTrackObjects"/> throws, so objects that already exist are
+    /// still tracked for disposal.
+    /// </summary>
+    /// <param name="testContext">The test context whose root objects to track.</param>
+    /// <returns>The tracked objects dictionary (same as testContext.TrackedObjects).</returns>
+    SortedList<int, HashSet<object>> TrackRootObjects(TestContext testContext);
 }
 
 /// <summary>

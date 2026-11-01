@@ -176,6 +176,14 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>The tracked objects dictionary (same as testContext.TrackedObjects).</returns>
     public SortedList<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default)
+        => TrackObjectsCore(testContext, discoverNested: true, cancellationToken);
+
+    /// <inheritdoc />
+    public SortedList<int, HashSet<object>> TrackRootObjects(TestContext testContext)
+        // No nested traversal: reading the roots' properties is what failed.
+        => TrackObjectsCore(testContext, discoverNested: false, CancellationToken.None);
+
+    private SortedList<int, HashSet<object>> TrackObjectsCore(TestContext testContext, bool discoverNested, CancellationToken cancellationToken)
     {
         var visitedObjects = testContext.TrackedObjects;
 
@@ -190,7 +198,9 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         }
 
         TryAddObjectFunc tryAdd = (obj, depth) => TryAddToHashSet(visitedObjects, depth, obj);
-        RootObjectCallback onRootObjectAdded = obj => DiscoverNestedObjectsForTracking(obj, visitedObjects, 1, cancellationToken);
+        RootObjectCallback onRootObjectAdded = discoverNested
+            ? obj => DiscoverNestedObjectsForTracking(obj, visitedObjects, 1, cancellationToken)
+            : static _ => { };
 
         // Collect root-level objects and discover nested objects for tracking
         CollectRootObjects(testDetails, tryAdd, onRootObjectAdded, cancellationToken);
