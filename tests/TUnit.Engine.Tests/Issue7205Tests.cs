@@ -16,12 +16,13 @@ public class Issue7205Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter(
             "/*/TUnit.TestProject.Bugs._7205/*/*",
             [
-                // FailedRowScopeTests fails to build by design; the observer checks its scope.
+                // FailedRowScopeTests fails to build and DependencySkippedScopeTests.Fails throws, both by
+                // design; the observer checks their scopes.
                 result => result.ResultSummary.Outcome.ShouldBe("Failed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(17),
+                result => result.ResultSummary.Counters.Total.ShouldBe(19),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(14),
-                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
-                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(2)
+                result => result.ResultSummary.Counters.Failed.ShouldBe(2),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(3)
             ]);
     }
 }
