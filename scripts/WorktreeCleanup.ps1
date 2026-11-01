@@ -4,7 +4,9 @@
 #
 # Removal policy (one place, both callers):
 #   - PRESERVE a worktree with uncommitted tracked changes or untracked files outside
-#     known generated directories. Never force-discard possible work.
+#     known generated directories. Never force-discard possible work. Only with
+#     -RetainWork (a closed work item) are such changes saved to a retained branch first;
+#     unknown ignored files (secrets, local settings) always preserve the worktree.
 #   - CLEAR untracked build artifacts (node_modules/bin/obj/etc.) — they are not work.
 #   - CLEAR root-level workflow output covered by the repository's .gitignore.
 #   - DETACH directory junctions and symlinks before deleting, so no delete follows a link.
@@ -165,6 +167,10 @@ function Remove-MergedWorktree {
         [Parameter(Mandatory)][string]$Worktree,   # path to remove
         [string]$Label = '',                       # e.g. "#1234" for log lines
         [string]$ExpectedHead,
+        # The work item is closed: save uncommitted changes and a detached HEAD to
+        # retained branches instead of preserving the checkout. The branch is kept.
+        [switch]$RetainWork,
+        [string]$WorkItem,                         # names the retained branch (default: directory name)
         [switch]$WhatIf
     )
 
@@ -230,19 +236,43 @@ function Remove-MergedWorktree {
         return
     }
 
-    $work = @($status | Where-Object {
-        if ($_ -notmatch '^(\?\?|!!) ') { return $true }
-        return -not (Test-DisposableWorktreePath -Path $_.Substring(3))
-    })
-    if ($work.Count -gt 0) {
+    $work = @(Get-WorktreeUncommittedWork -Status $status)
+    # A stash cannot carry ignored files, so they preserve the checkout even with -RetainWork.
+    if ($work.Count -gt 0 -and (-not $RetainWork -or @($work | Where-Object { $_.StartsWith('!! ') }).Count -gt 0)) {
         Write-Host "Preserving dirty worktree $Label : $Worktree (uncommitted work)"
         foreach ($entry in $work) { Write-Host "  $entry" }
         return
     }
 
     if ($WhatIf) {
-        Write-Host "sweep: WOULD remove $Worktree -- $Label"
+        $retained = if ($work.Count -gt 0) { " (saving $($work.Count) uncommitted entr(ies) to a retained branch)" } else { '' }
+        Write-Host "sweep: WOULD remove $Worktree -- $Label$retained"
         return
+    }
+
+    if ($RetainWork) {
+        # Nothing will come back for a closed item's checkout, so keep everything it holds
+        # reachable from a branch instead of keeping the directory.
+        $name = if ($WorkItem) { $WorkItem } else { [IO.Path]::GetFileName($worktreePath) }
+        try {
+            if ($work.Count -gt 0) {
+                $saved = Save-WorktreeUncommittedWork -Repo $Repo -Worktree $Worktree -Name $name
+                Write-Host "Saved uncommitted work of $Worktree to $saved (restore with: git stash apply $saved)"
+                $status = @(git -C $Worktree status --porcelain=v1 --untracked-files=all --ignored=matching 2>$null)
+                $statusRead = $LASTEXITCODE -eq 0
+                $work = @(Get-WorktreeUncommittedWork -Status $status)
+                if (-not $statusRead -or $work.Count -gt 0) {
+                    Write-Host "Preserving dirty worktree $Label : $Worktree (uncommitted work remains after saving)"
+                    foreach ($entry in $work) { Write-Host "  $entry" }
+                    return
+                }
+            }
+            Save-DetachedWorktreeHead -Repo $Repo -Worktree $Worktree
+        }
+        catch {
+            Write-Host "Preserving worktree $Label : $Worktree (could not retain its work: $_)"
+            return
+        }
     }
 
     if (-not (Remove-WorktreeDirectoryLinks -Worktree $Worktree -Label $Label)) { return }
@@ -261,6 +291,67 @@ function Remove-MergedWorktree {
         Write-Host "WARNING: could not fully remove $Worktree"
     } else {
         Write-Host "Removed worktree $Label : $Worktree"
+    }
+}
+
+# Returns the porcelain status entries that are not disposable generated output.
+function Get-WorktreeUncommittedWork {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][AllowEmptyCollection()][string[]]$Status)
+
+    return @($Status | Where-Object {
+        if ($_ -notmatch '^(\?\?|!!) ') { return $true }
+        return -not (Test-DisposableWorktreePath -Path $_.Substring(3))
+    })
+}
+
+# Saves a worktree's tracked and untracked changes as a stash commit on the branch
+# `retained-worktrees/<name>-wip-<sha12>`, leaving the checkout clean. Restore it anywhere
+# with `git stash apply <branch>`. Ignored files are not saved, so a caller that re-checks
+# the status still preserves them. Returns the branch; throws when nothing was saved.
+function Save-WorktreeUncommittedWork {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Repo,
+        [Parameter(Mandatory)][string]$Worktree,
+        [Parameter(Mandatory)][string]$Name
+    )
+
+    $before = git -C $Repo rev-parse -q --verify refs/stash 2>$null
+    git -C $Worktree stash push --include-untracked --quiet -m "retained worktree $Name" 2>$null | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'git stash failed' }
+    $stash = git -C $Repo rev-parse -q --verify refs/stash 2>$null
+    if (-not $stash -or $stash -eq $before) { throw 'git stash saved nothing' }
+    $branch = "retained-worktrees/$Name-wip-$($stash.Substring(0, 12))"
+    git -C $Repo branch $branch $stash 2>$null | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "could not create $branch; the changes remain in git stash list" }
+    # Every worktree shares one stash stack; drop only the entry created here.
+    if ((git -C $Repo rev-parse -q --verify 'stash@{0}' 2>$null) -eq $stash) {
+        git -C $Repo stash drop --quiet 'stash@{0}' 2>$null | Out-Null
+    }
+    return $branch
+}
+
+# Keeps a detached HEAD reachable from `retained-worktrees/<SHA>` after Git prunes the
+# worktree reflog. Never moves an existing branch. Throws when HEAD cannot be retained.
+function Save-DetachedWorktreeHead {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Repo,
+        [Parameter(Mandatory)][string]$Worktree
+    )
+
+    git -C $Worktree symbolic-ref -q HEAD 2>$null | Out-Null
+    if ($LASTEXITCODE -eq 0) { return }
+    $head = git -C $Worktree rev-parse HEAD 2>$null
+    if ($LASTEXITCODE -ne 0) { throw "Cannot resolve HEAD: $Worktree" }
+    $branch = "retained-worktrees/$head"
+    $existing = git -C $Repo rev-parse -q --verify "refs/heads/$branch" 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        git -C $Repo branch $branch $head 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "Cannot retain detached HEAD: $Worktree" }
+    } elseif ($existing -ne $head) {
+        throw "Retention branch has moved: $branch"
     }
 }
 
@@ -383,27 +474,55 @@ function Remove-FinishedAgentEvidence {
             continue
         }
 
-        $owner = "evidence-cleanup-$([Guid]::NewGuid().ToString('N'))"
-        $verb = if ($WhatIf) { 'status' } else { 'acquire' }
-        try { $lease = Invoke-AgentLockCommand -Script $AgentLocks -Verb $verb -LockName $name -OwnerId $owner }
-        catch { $lease = [pscustomobject]@{ ExitCode = 1; State = $null } }
-        if ($lease.ExitCode -ne 0 -or ($WhatIf -and $lease.State -ne 'FREE')) {
+        $owner = Enter-WorkItemCleanupLease -AgentLocks $AgentLocks -LockName $name -WhatIf:$WhatIf
+        if (-not $owner) {
             Write-Host "sweep: keeping evidence of $name (lock held or Redis unavailable)"
             continue
         }
         try {
             if (Remove-AgentEvidenceEntry -Entry $entry -Kind 'finished' -WhatIf:$WhatIf) { $removed++ }
         }
-        finally {
-            if (-not $WhatIf) {
-                $released = Invoke-AgentLockCommand -Script $AgentLocks -Verb release -LockName $name -OwnerId $owner
-                if ($released.ExitCode -ne 0) {
-                    Write-Host "sweep: WARNING could not release evidence cleanup lock for $name (exit $($released.ExitCode))"
-                }
-            }
-        }
+        finally { Exit-WorkItemCleanupLease -AgentLocks $AgentLocks -LockName $name -Owner $owner -WhatIf:$WhatIf }
     }
     return $removed
+}
+
+# Takes a temporary AgentLocks lease on a work item before the sweep deletes anything of
+# it, so a new owner cannot start midway. Returns the lease's owner id, or $null when the
+# lock is held, Redis is unavailable or the lock script is missing. -WhatIf only checks
+# that the lock is FREE.
+function Enter-WorkItemCleanupLease {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$AgentLocks,
+        [Parameter(Mandatory)][string]$LockName,
+        [switch]$WhatIf
+    )
+
+    if (-not (Test-Path -LiteralPath $AgentLocks)) { return $null }
+    $owner = "sweep-cleanup-$([Guid]::NewGuid().ToString('N'))"
+    $verb = if ($WhatIf) { 'status' } else { 'acquire' }
+    try { $lease = Invoke-AgentLockCommand -Script $AgentLocks -Verb $verb -LockName $LockName -OwnerId $owner }
+    catch { return $null }
+    if ($lease.ExitCode -ne 0 -or ($WhatIf -and $lease.State -ne 'FREE')) { return $null }
+    return $owner
+}
+
+# Releases a lease taken by Enter-WorkItemCleanupLease (nothing to release under -WhatIf).
+function Exit-WorkItemCleanupLease {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$AgentLocks,
+        [Parameter(Mandatory)][string]$LockName,
+        [Parameter(Mandatory)][string]$Owner,
+        [switch]$WhatIf
+    )
+
+    if ($WhatIf) { return }
+    $released = Invoke-AgentLockCommand -Script $AgentLocks -Verb release -LockName $LockName -OwnerId $Owner
+    if ($released.ExitCode -ne 0) {
+        Write-Host "sweep: WARNING could not release cleanup lock for $LockName (exit $($released.ExitCode))"
+    }
 }
 
 # Deletes one top-level evidence entry without following links. Returns whether it is
