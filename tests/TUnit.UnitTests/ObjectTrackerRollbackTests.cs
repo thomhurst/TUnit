@@ -100,6 +100,33 @@ public class ObjectTrackerRollbackTests
     }
 
     [Test]
+    public async Task Failing_Root_Fallback_Keeps_The_Discovery_Exception_And_Rolls_Back()
+    {
+        var discoverer = new FakeDiscoverer();
+        var tracker = new ObjectTracker(new TrackableObjectGraphProvider(discoverer), GlobalContext.Current.Disposer);
+
+        var kept = new TrackedDisposable();
+        var testContext = CreateContext();
+
+        // An earlier registration of this test tracked `kept`
+        discoverer.Discover = context => Add(context, kept);
+        tracker.TrackObjects(testContext);
+
+        discoverer.Discover = _ => throw new InvalidOperationException("getter threw");
+        discoverer.TrackRoots = context =>
+        {
+            Add(context, new TrackedDisposable());
+            throw new NotSupportedException("fallback threw");
+        };
+
+        await Assert.That(() => tracker.TrackObjects(testContext)).Throws<InvalidOperationException>()
+            .WithMessage("getter threw");
+
+        // Nothing the fallback added was counted, so it is dropped again
+        await Assert.That(testContext.TrackedObjects.Values.SelectMany(x => x)).IsEquivalentTo(new object[] { kept });
+    }
+
+    [Test]
     public async Task Failed_First_Discovery_Leaves_Nothing_Tracked()
     {
         var discoverer = new FakeDiscoverer

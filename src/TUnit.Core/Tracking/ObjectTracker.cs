@@ -166,7 +166,18 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     private void TrackRootObjects(TestContext testContext, HashSet<object>? alreadyTrackedSnapshot)
     {
-        var tracked = trackableObjectGraphProvider.GetTrackableRootObjects(testContext);
+        SortedList<int, HashSet<object>> tracked;
+        try
+        {
+            tracked = trackableObjectGraphProvider.GetTrackableRootObjects(testContext);
+        }
+        catch
+        {
+            // Best effort: never let this fallback replace the discovery exception the caller rethrows.
+            // Nothing has been counted yet, so dropping what it added keeps the references balanced.
+            RemoveObjectsNotIn(testContext.TrackedObjectsIfCreated, alreadyTrackedSnapshot);
+            return;
+        }
 
         if (tracked.TryGetValue(0, out var roots))
         {
