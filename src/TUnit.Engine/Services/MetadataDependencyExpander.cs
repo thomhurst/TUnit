@@ -34,7 +34,11 @@ internal sealed class TestMetadataEqualityComparer : IEqualityComparer<TestMetad
                x.MethodTypeArgumentsIdentity == y.MethodTypeArgumentsIdentity &&
                SameTypes(x.GenericMethodTypeArguments, y.GenericMethodTypeArguments) &&
                // Overloads share the class, method name and test name (#7207); their parameters tell them apart.
-               SameParameters(x.MethodMetadata.Parameters, y.MethodMetadata.Parameters);
+               SameParameters(x.MethodMetadata.Parameters, y.MethodMetadata.Parameters) &&
+               // Source generation erases some parameter shapes (M(T[]) and M(object) both emit object), so
+               // the declaration site is what separates overloads whose parameter metadata still matches.
+               x.LineNumber == y.LineNumber &&
+               string.Equals(x.FilePath, y.FilePath, StringComparison.Ordinal);
     }
 
     private static bool SameParameters(ParameterMetadata[] x, ParameterMetadata[] y)

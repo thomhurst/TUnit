@@ -26,4 +26,32 @@ public class Bug7207OverloadedTestMethodsTests(TestMode testMode) : InvokableTes
                     .ShouldBe(["Overloaded(a, 3)", "Overloaded(a, b)"])
             ]);
     }
+
+    [Test]
+    public async Task Overloads_With_Erased_Parameter_Types_Both_Run()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7207/GenericArrayOverloadTests*/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task Filtering_A_Dependent_Pulls_In_Every_Overload_It_Depends_On()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7207/DependsOnOverloadTests/Dependent",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(3),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(3),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                result => result.Results.Select(x => x.TestName).OrderBy(x => x, StringComparer.Ordinal)
+                    .ShouldBe(["Dependent", "Overloaded(a, 3)", "Overloaded(a, b)"])
+            ]);
+    }
 }
