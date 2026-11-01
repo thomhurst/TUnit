@@ -315,6 +315,11 @@ public class SharedInstanceLifetimeTests
         public SortedList<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default)
             => Discover(testContext);
 
+        public Func<TestContext, SortedList<int, HashSet<object>>> TrackRoots { get; set; } = context => context.TrackedObjects;
+
+        public SortedList<int, HashSet<object>> TrackRootObjects(TestContext testContext)
+            => TrackRoots(testContext);
+
         public ObjectGraph DiscoverObjectGraph(TestContext testContext, CancellationToken cancellationToken = default)
             => throw new NotSupportedException();
 

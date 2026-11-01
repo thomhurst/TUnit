@@ -41,6 +41,12 @@ internal class TrackableObjectGraphProvider
     }
 
     /// <summary>
+    /// Adds only the test's root objects to its tracked objects, without traversing their properties.
+    /// </summary>
+    public SortedList<int, HashSet<object>> GetTrackableRootObjects(TestContext testContext)
+        => _discoverer.TrackRootObjects(testContext);
+
+    /// <summary>
     /// Gets trackable objects for static properties (session-level).
     /// </summary>
     public IEnumerable<object> GetStaticPropertyTrackableObjects()

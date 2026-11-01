@@ -207,6 +207,36 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         return visitedObjects;
     }
 
+    /// <inheritdoc />
+    public SortedList<int, HashSet<object>> TrackRootObjects(TestContext testContext)
+    {
+        var testDetails = testContext.Metadata.TestDetails;
+        if (testDetails.TestClassArguments.Length == 0
+            && testDetails.TestMethodArguments.Length == 0
+            && testDetails.TestClassInjectedPropertyArguments.Count == 0
+            && testDetails.UnreceivedDataRowObjects.Length == 0)
+        {
+            return testContext.TrackedObjects;
+        }
+
+        var tracked = testContext.TrackedObjects;
+        TryAddObjectFunc tryAdd = (obj, depth) => TryAddToHashSet(tracked, depth, obj);
+
+        // No nested traversal: reading the roots' properties is what failed.
+        CollectRootObjects(testDetails, tryAdd, static _ => { }, CancellationToken.None);
+
+        // A row object that is not also a received root is never initialized (#7157).
+        foreach (var obj in testDetails.UnreceivedDataRowObjects)
+        {
+            if (obj != null && tryAdd(obj, 0))
+            {
+                (testContext.DisposalOnlyTrackedObjects ??= new HashSet<object>(ReferenceComparer)).Add(obj);
+            }
+        }
+
+        return tracked;
+    }
+
     private static void TrackUnreceivedDataRowObjects(
         TestContext testContext,
         SortedList<int, HashSet<object>> visitedObjects,

@@ -147,8 +147,8 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
                 catch (Exception ex)
                 {
                     // A property getter in the arguments' object graph threw. The test still never
-                    // runs, so it stays skipped rather than failing the whole run: its objects are
-                    // left untracked (and so not disposed), as they were before #7156.
+                    // runs, so it stays skipped rather than failing the whole run. Its root objects
+                    // are still tracked, so they are disposed when it completes (#7213).
                     // Tracking is synchronous and takes no cancellation token, so an
                     // OperationCanceledException here can only come from that user getter, never from
                     // run cancellation; it is contained like any other getter failure.
