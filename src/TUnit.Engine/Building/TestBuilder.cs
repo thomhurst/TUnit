@@ -1112,8 +1112,13 @@ internal sealed class TestBuilder : ITestBuilder
         {
             if (TakeEvents() is { } events)
             {
-                // The context is fresh, so assigning cannot drop a subscription made before the take.
-                System.Diagnostics.Debug.Assert(builderContext.EventsIfCreated is null, "Row events would replace existing subscriptions.");
+                // The context is fresh, so assigning cannot drop a subscription made before the take. Fail
+                // loudly rather than silently drop subscriptions (a scope's disposal) if that ever changes.
+                if (builderContext.EventsIfCreated is not null)
+                {
+                    throw new InvalidOperationException("A class row's events cannot replace events the builder context already has.");
+                }
+
                 builderContext.Events = events;
             }
 

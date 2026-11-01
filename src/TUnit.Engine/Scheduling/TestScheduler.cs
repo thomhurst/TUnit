@@ -193,6 +193,13 @@ internal sealed class TestScheduler : ITestScheduler
     // the success and the exception paths alike, so no test can still be moving between states.
     private async ValueTask ReportIfNotStartedAsync(AbstractExecutableTest test, string? skipReason)
     {
+        if (!test.HasStartedExecution)
+        {
+            // The test never reached TestCoordinator, which raises OnDispose for every test it runs, so
+            // release what its data sources hold here (a dependency injection scope, for example) (#7205).
+            await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
+        }
+
         if (test.State == TestState.Failed && !test.HasStartedExecution)
         {
             // Failed before execution (data source, argument registration or dependency
