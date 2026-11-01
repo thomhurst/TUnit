@@ -28,7 +28,7 @@ Required reviewers are Claude Code Review and Codex. CodeRabbit and Greptile are
 
 Automated review rounds (rework budget): `gh api --paginate "repos/{owner}/{repo}/issues/<N>/comments" --jq '.[] | select(.user.login == "github-actions[bot]") | .id' | wc -l`.
 
-Draft CI: `.NET`, `AOT`, and the other PR workflows run on drafts as well as ready PRs, so a draft head already has CI results when it is promoted.
+Draft CI: since #7345, the `.NET`, `AOT`, and other PR workflows skip draft PRs and run when a PR is marked ready, so a draft head shows skipped checks and gets its first CI results on promotion. `claude-review` still runs on drafts.
 
 ## Merge gate
 
