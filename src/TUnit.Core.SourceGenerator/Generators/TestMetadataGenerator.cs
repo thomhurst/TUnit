@@ -1515,6 +1515,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
+        // A class row fixes the instantiation's types on its own, so an own-class [MethodDataSource] member whose
+        // declared rows infer the same types supplies further class rows for it, with or without [GenerateGenericTest],
+        // as reflection mode groups those rows with the class [Arguments] rows (#7208). A member whose rows infer no
+        // types needs [GenerateGenericTest] to close the class it is read on, so only that path adds it.
+        if (testMethod.IsGenericType && rowInstantiations is not null)
+        {
+            foreach (var instantiation in rowInstantiations.Values)
+            {
+                if (instantiation.HasClassRows)
+                {
+                    foreach (var ownSource in GetOwnClassMethodDataSourcesForInstantiation(testMethod, instantiation.ClassTypeArgs, includeUninferred: false))
+                    {
+                        instantiation.AddRow(ownSource, isClassRow: true);
+                    }
+                }
+            }
+        }
+
         // A class row fixes the instantiation's types on its own, so method rows that infer no type
         // apply to it as they do to any other test of that class. Without them, a method whose
         // parameters use the class's type arguments would get no method data source at all.
@@ -7248,8 +7266,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// so only the class's [GenerateGenericTest] types can close the class those members are read on; and those whose
     /// declared rows infer exactly these types through the constructor (<c>IEnumerable&lt;int&gt;</c> on
     /// <c>C&lt;T&gt;(T value)</c> for <c>C&lt;int&gt;</c>). Reflection mode groups both the same way (#7208).
+    /// With <paramref name="includeUninferred"/> false, only the members whose declared rows infer these types.
     /// </summary>
-    private static IEnumerable<AttributeData> GetOwnClassMethodDataSourcesForInstantiation(TestMethodMetadata testMethod, ITypeSymbol[] classTypeArgs)
+    private static IEnumerable<AttributeData> GetOwnClassMethodDataSourcesForInstantiation(TestMethodMetadata testMethod, ITypeSymbol[] classTypeArgs, bool includeUninferred = true)
     {
         var compilation = testMethod.CompilationContext.Compilation;
         foreach (var attribute in testMethod.TypeSymbol.GetAttributes())
@@ -7273,7 +7292,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var inferred = rowType == null || CodeGenerationHelpers.ContainsTypeParameter(rowType)
                 ? null
                 : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType);
-            if (inferred == null || inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default))
+            if (inferred == null ? includeUninferred : inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default))
             {
                 yield return attribute;
             }

@@ -38,6 +38,7 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("OwnClassObjectTupleMethodDataSourceWithArgumentsAndGenerateGenericTest")]
     [Arguments("OwnClassTestDataRowObjectMethodDataSourceWithArgumentsAndGenerateGenericTest")]
     [Arguments("OwnClassConcreteMethodDataSourceWithArgumentsAndGenerateGenericTest")]
+    [Arguments("OwnClassConcreteMethodDataSourceWithArguments")]
     public async Task Generate_Generic_Test_Instantiation_Inferred_By_Class_Arguments_Reads_The_Own_Class_Member(string className)
     {
         // Both modes run the [Arguments(1)] row and the own-class member's row on the int instantiation,
@@ -48,6 +49,21 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(2),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task Class_Arguments_Instantiation_Reads_A_Matching_Own_Class_Member_With_Method_Rows()
+    {
+        // Without [GenerateGenericTest]: the [Arguments(1)] row and the own-class member's row each run with
+        // both method rows on the int instantiation, in both modes
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7208/OwnClassConcreteMethodDataSourceWithArgumentsAndMethodRows/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(4),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
@@ -95,8 +111,8 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7208/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe(reflection ? "Failed" : "Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 25 : 22),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 24 : 22),
+                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 31 : 28),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 30 : 28),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(reflection ? 1 : 0),
                 result => result.Results
                     .Where(x => x.Outcome == "Failed")

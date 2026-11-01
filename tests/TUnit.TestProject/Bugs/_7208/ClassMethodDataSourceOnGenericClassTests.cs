@@ -319,3 +319,37 @@ public class OwnClassConcreteMethodDataSourceWithArgumentsAndGenerateGenericTest
         await Assert.That(value).IsTypeOf<int>();
     }
 }
+
+// Without [GenerateGenericTest], the instantiation that class [Arguments] rows infer still reads an own-class member
+// whose declared rows infer the same types (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassConcreteMethodDataSourceWithArguments<T>(T value)
+{
+    public static IEnumerable<int> Rows() => [5];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+    }
+}
+
+// The same with a test method that has rows of its own: each class row runs with each method row
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassConcreteMethodDataSourceWithArgumentsAndMethodRows<T>(T value)
+{
+    public static IEnumerable<int> Rows() => [5];
+
+    [Test]
+    [Arguments("a")]
+    [Arguments("b")]
+    public async Task Test(string label)
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(label).IsNotEmpty();
+    }
+}
