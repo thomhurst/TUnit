@@ -65,8 +65,9 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
     /// Resolves an argument of type <paramref name="type"/> from <paramref name="scope"/>.
     /// </summary>
     /// <remarks>
-    /// When the scope is disposable, it owns what this method returns: TUnit disposes the scope, and the
-    /// scope is expected to dispose the objects it resolved, so TUnit does not dispose them itself.
+    /// When the scope is disposable, it owns what this method returns, including the <see cref="Interfaces.IAsyncInitializer"/>
+    /// objects held in their properties: TUnit disposes the scope, and the scope is expected to dispose the
+    /// objects it resolved, so TUnit does not dispose them itself. TUnit still initializes them.
     /// When the scope is not disposable, TUnit disposes disposable returned objects when the test ends.
     /// </remarks>
     public abstract object? Create(TScope scope, Type type);

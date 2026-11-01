@@ -476,8 +476,14 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     private static bool ShouldSkipTracking(object? obj)
     {
         return obj is not IDisposable and not IAsyncDisposable
-            || (s_hasExternallyOwned && s_externallyOwned.TryGetValue(obj, out _));
+            || IsExternallyOwned(obj);
     }
+
+    /// <summary>
+    /// Whether <see cref="MarkExternallyOwned"/> marked <paramref name="obj"/>.
+    /// </summary>
+    internal static bool IsExternallyOwned(object obj)
+        => s_hasExternallyOwned && s_externallyOwned.TryGetValue(obj, out _);
 
     // Objects whose lifetime another owner controls (a dependency injection scope, for example).
     // The tracker never counts or disposes them, so their owner is the only thing that disposes them.
@@ -494,7 +500,8 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// </summary>
     internal static void MarkExternallyOwned(object? obj)
     {
-        if (obj is not IDisposable and not IAsyncDisposable)
+        // A non-disposable object is marked too: the initializer objects it holds belong to the same owner.
+        if (obj is null)
         {
             return;
         }

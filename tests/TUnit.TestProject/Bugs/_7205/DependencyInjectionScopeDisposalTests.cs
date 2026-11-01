@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._7205;
@@ -106,6 +107,65 @@ public sealed class NonDisposableScopeDependencyInjectionAttribute : DependencyI
     public override Scope CreateScope(DataGeneratorMetadata dataGeneratorMetadata) => new();
 
     public override object? Create(Scope scope, Type type) => new UnownedService();
+}
+
+// A scope that resolves a service holding a scope-owned dependency in an IAsyncInitializer property. The
+// object tracker finds the dependency beneath the service, but only the scope may dispose it.
+public sealed class NestedProbeScope : IDisposable
+{
+    public NestedProbeScope()
+    {
+        Created.Add(this);
+    }
+
+    public static ConcurrentBag<NestedProbeScope> Created { get; } = [];
+
+    public List<NestedProbeDependency> Dependencies { get; } = [];
+
+    public NestedProbeService Resolve()
+    {
+        var dependency = new NestedProbeDependency();
+        Dependencies.Add(dependency);
+        return new NestedProbeService(dependency);
+    }
+
+    public void Dispose()
+    {
+        foreach (var dependency in Dependencies)
+        {
+            dependency.Dispose();
+        }
+    }
+}
+
+// Not disposable itself, so nothing but the scope owns what it holds.
+public sealed class NestedProbeService(NestedProbeDependency dependency)
+{
+    public NestedProbeDependency Dependency { get; } = dependency;
+}
+
+public sealed class NestedProbeDependency : IAsyncInitializer, IDisposable
+{
+    private int _disposeCount;
+
+    public bool IsInitialized { get; private set; }
+
+    public int DisposeCount => _disposeCount;
+
+    public Task InitializeAsync()
+    {
+        IsInitialized = true;
+        return Task.CompletedTask;
+    }
+
+    public void Dispose() => Interlocked.Increment(ref _disposeCount);
+}
+
+public sealed class NestedDependencyInjectionAttribute : DependencyInjectionDataSourceAttribute<NestedProbeScope>
+{
+    public override NestedProbeScope CreateScope(DataGeneratorMetadata dataGeneratorMetadata) => new();
+
+    public override object? Create(NestedProbeScope scope, Type type) => scope.Resolve();
 }
 
 [EngineTest(ExpectedResult.Pass)]
@@ -223,6 +283,19 @@ public class NonDisposableScopeTests(UnownedService service)
 }
 
 [EngineTest(ExpectedResult.Pass)]
+[NestedDependencyInjection]
+public class NestedScopeDependencyTests(NestedProbeService service)
+{
+    [Test]
+    public async Task Run()
+    {
+        // The dependency is still found beneath the service and initialized.
+        await Assert.That(service.Dependency.IsInitialized).IsTrue();
+        await Assert.That(service.Dependency.DisposeCount).IsEqualTo(0);
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
 public class DependencyInjectionScopeDisposalObserverTests
 {
     [Test]
@@ -235,6 +308,7 @@ public class DependencyInjectionScopeDisposalObserverTests
     [DependsOn(typeof(SkippedIfEmptyScopeTests), ProceedOnFailure = true)]
     [DependsOn(typeof(FailedRowScopeTests), ProceedOnFailure = true)]
     [DependsOn(typeof(NonDisposableScopeTests))]
+    [DependsOn(typeof(NestedScopeDependencyTests))]
     public async Task Every_Scope_Is_Disposed_When_Its_Test_Ends()
     {
         // One scope per test: two tests, then two method rows run twice each.
@@ -258,6 +332,11 @@ public class DependencyInjectionScopeDisposalObserverTests
         // No scope owns these, so the object tracker disposes each once.
         await Assert.That(UnownedService.Created.Count).IsEqualTo(1);
         await Assert.That(UnownedService.Created.Count(x => x.DisposeCount == 1)).IsEqualTo(1);
+
+        // The scope disposes the dependency it created beneath the service; the object tracker does not.
+        var nestedDependencies = NestedProbeScope.Created.SelectMany(x => x.Dependencies).ToArray();
+        await Assert.That(nestedDependencies.Length).IsEqualTo(1);
+        await Assert.That(nestedDependencies.Count(x => x.DisposeCount == 1)).IsEqualTo(1);
     }
 
     private static async Task AssertScopes(string owner, int expectedCount)
