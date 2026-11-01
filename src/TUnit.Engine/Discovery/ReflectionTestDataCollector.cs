@@ -1943,7 +1943,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// run on the [GenerateGenericTest] types instead, so each one is returned in <c>RowViolations</c>
     /// and fails with the constraint message, as in the source generator (#7153). Sources inferring types that
     /// are already instantiated are dropped, except further [Arguments] rows, which join the instantiation an
-    /// earlier [Arguments] row created. A skipped source other than an [Arguments] row runs on the
+    /// earlier [Arguments] row created, and [Arguments&lt;T&gt;] rows, which join any data source's instantiation. A skipped source other than an [Arguments] row runs on the
     /// [GenerateGenericTest] types instead; when a data source already instantiated those types, the skipped
     /// source joins that instantiation, as the generator's <c>JoinDeferredDataSources</c> does (#7116).
     /// </summary>
@@ -2063,6 +2063,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     rows.Add(row);
                 }
+                // An [Arguments<T>] row is a literal row too: it joins any data source's instantiation of its
+                // types rather than being dropped, as the generator joins it (#7214). Rows keep declaration
+                // order, as the generator emits them.
+                else if (row is not null
+                    && IsTypedArgumentsRow(row)
+                    && instantiations[index].Rows is { } existingRows
+                    && !existingRows.Exists(existing => ReferenceEquals(existing, row)))
+                {
+                    existingRows.Add(row);
+                    existingRows.Sort((x, y) => DeclarationIndex(x).CompareTo(DeclarationIndex(y)));
+                }
 
                 return;
             }
@@ -2099,6 +2110,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
+    private static bool IsTypedArgumentsRow(IDataSourceAttribute dataSource)
+        => dataSource.GetType() is { IsGenericType: true } type && type.GetGenericTypeDefinition() == typeof(ArgumentsAttribute<>);
+
     /// <summary>
     /// Mirrors the generator's <c>InferTypesFromDataSourceAttribute</c> for generic methods: reads the type
     /// arguments of the <c>DataSourceGeneratorAttribute</c> / <c>AsyncDataSourceGeneratorAttribute</c> base.
@@ -2116,10 +2130,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 continue;
             }
 
+            // TypedDataSourceAttribute<T> is the base of [Arguments<T>], whose rows have type T (#7214)
             var definition = baseType.GetGenericTypeDefinition();
             if (definition.Namespace != "TUnit.Core"
                 || !(definition.Name.StartsWith("DataSourceGeneratorAttribute`", StringComparison.Ordinal)
-                     || definition.Name.StartsWith("AsyncDataSourceGeneratorAttribute`", StringComparison.Ordinal)))
+                     || definition.Name.StartsWith("AsyncDataSourceGeneratorAttribute`", StringComparison.Ordinal)
+                     || definition == typeof(TypedDataSourceAttribute<>)))
             {
                 continue;
             }

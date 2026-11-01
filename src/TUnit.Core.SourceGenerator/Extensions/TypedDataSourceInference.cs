@@ -13,8 +13,8 @@ internal static class TypedDataSourceInference
 {
     /// <summary>
     /// Infers the type arguments of a generic test method on a non-generic class from a typed data source, whose
-    /// type arguments come from its <c>DataSourceGeneratorAttribute</c> / <c>AsyncDataSourceGeneratorAttribute</c>
-    /// base. One type parameter takes the first type argument; otherwise a single tuple argument with one element per
+    /// type arguments come from its <c>DataSourceGeneratorAttribute</c> / <c>AsyncDataSourceGeneratorAttribute</c> /
+    /// <c>TypedDataSourceAttribute</c> base. One type parameter takes the first type argument; otherwise a single tuple argument with one element per
     /// type parameter, or one type argument per type parameter. Returns <see langword="null"/> when nothing is inferred.
     /// </summary>
     public static ITypeSymbol[]? InferMethodTypeArguments(INamedTypeSymbol? attributeClass, IMethodSymbol method)
@@ -65,11 +65,12 @@ internal static class TypedDataSourceInference
     }
 
     /// <summary>
-    /// Whether <paramref name="baseType"/> is a constructed <c>DataSourceGeneratorAttribute</c> or
-    /// <c>AsyncDataSourceGeneratorAttribute</c> from TUnit.Core.
+    /// Whether <paramref name="baseType"/> is a constructed <c>DataSourceGeneratorAttribute</c>,
+    /// <c>AsyncDataSourceGeneratorAttribute</c> or <c>TypedDataSourceAttribute</c> from TUnit.Core. The last is the
+    /// base of <c>[Arguments&lt;T&gt;]</c>, whose rows have type <c>T</c> too (#7214).
     /// </summary>
     public static bool IsTypedDataSourceBase(INamedTypeSymbol baseType)
         => baseType.IsGenericType
-            && baseType.OriginalDefinition.Name is "DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute"
+            && baseType.OriginalDefinition.Name is "DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute" or "TypedDataSourceAttribute"
             && baseType.OriginalDefinition.ContainingNamespace?.ToDisplayString() == "TUnit.Core";
 }

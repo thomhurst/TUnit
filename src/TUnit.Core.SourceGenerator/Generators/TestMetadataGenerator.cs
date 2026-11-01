@@ -963,6 +963,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // one (a second [MethodDataSource] declared like the first, say) joins it too.
                     // Otherwise its rows would be reported as uninferable (#7163). Reflection mode drops
                     // such a source when the method has [GenerateGenericTest], so it is dropped here too.
+                    // The name also matches [Arguments<T>], a literal row that joins as well (#7214).
                     if (specificAttr?.AttributeClass?.Name == "ArgumentsAttribute"
                         || (specificAttr is not null && !isClassRow && joinsDuplicateMethodSources))
                     {
@@ -7124,8 +7125,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var baseTypeName = baseTypeDef.Name;
                 var baseTypeNamespace = baseTypeDef.ContainingNamespace?.ToDisplayString();
 
-                // Check for typed data source base classes more precisely
-                if (baseTypeName is "DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute" &&
+                // Check for typed data source base classes more precisely. A generic method also takes its
+                // type arguments from [Arguments<T>], whose base is TypedDataSourceAttribute<T>, as on a
+                // non-generic class (#7214).
+                var isGeneratorBase = baseTypeName is "DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute";
+                if ((isGeneratorBase || (method.IsGenericMethod && baseTypeName == "TypedDataSourceAttribute")) &&
                     baseTypeNamespace?.Contains("TUnit.Core") == true)
                 {
                     // Get the type arguments from the base class
