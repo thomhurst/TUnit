@@ -57,9 +57,9 @@
 #   - skip locked worktrees (an agent session may still own them)
 #   - skip a branch/tip that has an OPEN PR (branch reused for active work)
 #   - PRESERVE tracked changes and untracked files outside known generated directories
-#     or recognized root-level logs/PR notes covered by .gitignore, except that a closed
-#     work item's changes move to a retained branch (tier 5); unknown ignored files
-#     are always preserved
+#     or recognized root-level logs/PR notes covered by .gitignore, except that the changes
+#     of a merged PR (tiers 1, 2, 4) or closed work item (tier 5) move to a retained
+#     branch; unknown ignored files are always preserved
 #   - preserve local commits not contained in the merged PR's recorded head (tier 5
 #     removes the checkout but keeps the branch)
 #   - skip a closed work item whose AgentLocks lock is held or unreadable
@@ -257,6 +257,12 @@ try {
                 Remove-MergedWorktree -Repo $mainRepo -Worktree $w.Path -Label "($why)" -ExpectedHead $sha -RetainWork -WorkItem $closedItem -WhatIf:$WhatIf
             }
             finally { Exit-WorkItemCleanupLease -AgentLocks $agentLocks -LockName $closedItem -Owner $owner -WhatIf:$WhatIf }
+        }
+        elseif ($why -like 'merged PR*') {
+            # A merged PR is a closed work item too: leftover changes move to a retained
+            # branch named after the item (else the directory) instead of keeping the checkout.
+            try { $item = Get-WorktreeLockName -Worktree $w.Path } catch { $item = $null }
+            Remove-MergedWorktree -Repo $mainRepo -Worktree $w.Path -Label "($why)" -ExpectedHead $sha -RetainWork -WorkItem $item -WhatIf:$WhatIf
         }
         else {
             Remove-MergedWorktree -Repo $mainRepo -Worktree $w.Path -Label "($why)" -ExpectedHead $sha -WhatIf:$WhatIf

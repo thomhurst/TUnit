@@ -42,11 +42,16 @@ try {
     $dirtyWorktree = Join-Path $testRoot 'dirty'
     $divergentWorktree = Join-Path $testRoot 'divergent'
     $openWorktree = Join-Path $testRoot 'open'
-    foreach ($name in @('merged', 'dirty', 'divergent', 'open')) {
+    $mergedIgnoredWorktree = Join-Path $testRoot 'merged-ignored'
+    foreach ($name in @('merged', 'dirty', 'divergent', 'open', 'merged-ignored')) {
         git -C $repo worktree add --quiet -b $name (Join-Path $testRoot $name)
     }
     Set-Content -LiteralPath (Join-Path $mergedWorktree 'build.log') -Value 'evidence'
+    # Leftover changes of a merged PR: saved to a retained branch, not kept forever.
     Set-Content -LiteralPath (Join-Path $dirtyWorktree 'NewFeature.cs') -Value 'untracked source'
+    Set-Content -LiteralPath (Join-Path $dirtyWorktree 'README.md') -Value 'leftover edit'
+    # An ignored secret cannot be stashed, so it keeps even a merged checkout.
+    Set-Content -LiteralPath (Join-Path $mergedIgnoredWorktree 'signing.pfx') -Value 'secret'
     Set-Content -LiteralPath (Join-Path $divergentWorktree 'README.md') -Value 'unpublished'
     git -C $divergentWorktree commit --quiet -am 'unpublished'
     Set-Content -LiteralPath (Join-Path $openWorktree 'README.md') -Value 'open PR'
@@ -91,7 +96,7 @@ exit 0
 '@
 
     $mergedJson = @(
-        foreach ($name in @('merged', 'dirty', 'divergent', 'open', 'pr-500-review')) {
+        foreach ($name in @('merged', 'dirty', 'divergent', 'open', 'merged-ignored', 'pr-500-review')) {
             @{ headRefName = $name; headRefOid = $baseHead }
         }
     ) | ConvertTo-Json
@@ -106,8 +111,10 @@ exit 0
 
         $preview = (& $sweep -Repo fixture/repo -WhatIf 6>&1) -join "`n"
         Assert-True ($preview -match 'WOULD remove .*[\\/]merged') 'Preview did not identify merged worktree.'
-        Assert-True ($preview -match 'NewFeature.cs') 'Preview did not report untracked source blocker.'
-        Assert-True ($preview -notmatch 'WOULD remove .*[\\/]dirty') 'Preview claimed a dirty worktree would be removed.'
+        Assert-True ($preview -match 'WOULD remove .*[\\/]dirty -- .*\(saving 2 ') 'Preview did not report saving merged leftover work.'
+        Assert-True ($preview -match '!! signing.pfx') 'Preview did not report the ignored-file blocker.'
+        Assert-True ($preview -notmatch 'WOULD remove .*[\\/]merged-ignored') 'Preview claimed a merged checkout with an ignored file would be removed.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $dirtyWorktree 'NewFeature.cs')) 'Preview saved or removed merged leftover work.'
         Assert-True (Test-Path -LiteralPath $mergedWorktree) 'Preview removed worktree.'
         Assert-True ($preview -match 'WOULD remove .*pr-500-review -- \(closed work item pr-500\) \(saving 2 ') 'Preview did not report retained work.'
         Assert-True ($preview -match 'WOULD remove .*closed-detached -- \(closed work item issue-501\)') 'Preview did not resolve the marker identity.'
@@ -117,7 +124,12 @@ exit 0
 
         & $sweep -Repo fixture/repo
         Assert-True (-not (Test-Path -LiteralPath $mergedWorktree)) 'Merged worktree was not removed autonomously.'
-        Assert-True (Test-Path -LiteralPath $dirtyWorktree) 'Dirty worktree was removed.'
+        Assert-True (-not (Test-Path -LiteralPath $dirtyWorktree)) 'Merged worktree with leftover changes was not removed.'
+        $dirtyWip = @(git -C $repo for-each-ref --format='%(refname:short)' 'refs/heads/retained-worktrees/dirty-wip-*')
+        Assert-True ($dirtyWip.Count -eq 1) 'Merged leftover changes were not saved to a retained branch.'
+        Assert-True ((git -C $repo show "$($dirtyWip[0]):README.md") -eq 'leftover edit') 'Saved merged tracked change is wrong.'
+        Assert-True ((git -C $repo show "$($dirtyWip[0])^3:NewFeature.cs") -eq 'untracked source') 'Saved merged leftover file is wrong.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $mergedIgnoredWorktree 'signing.pfx')) 'Ignored file of a merged checkout was removed.'
         Assert-True (Test-Path -LiteralPath $divergentWorktree) 'Divergent local commit was removed.'
         Assert-True (Test-Path -LiteralPath $openWorktree) 'Open PR worktree was removed.'
         git -C $repo show-ref --verify --quiet refs/heads/merged
