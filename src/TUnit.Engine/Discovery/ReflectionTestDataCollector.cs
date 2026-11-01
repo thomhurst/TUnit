@@ -506,6 +506,27 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return discoveredTests;
         }
 
+        try
+        {
+            await DiscoverGenericTestsAsync(discoveredTests, genericTypeDefinition, testMethods).ConfigureAwait(false);
+            return discoveredTests;
+        }
+        catch (Exception ex)
+        {
+            // A failure while discovering one generic class fails that class's tests only, never the whole
+            // assembly scan (#7208)
+            var failedTests = new List<TestMetadata>(testMethods.Length);
+            foreach (var method in testMethods)
+            {
+                failedTests.Add(CreateFailedTestMetadata(genericTypeDefinition, method, ex));
+            }
+
+            return failedTests;
+        }
+    }
+
+    private static async Task DiscoverGenericTestsAsync(List<TestMetadata> discoveredTests, Type genericTypeDefinition, MethodInfo[] testMethods)
+    {
         // Extract class-level data sources that will determine the generic type arguments
         var classDataSources = ReflectionAttributeExtractor.ExtractDataSources(genericTypeDefinition);
 
@@ -535,7 +556,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // them all as discovery read them rather than reading the sources again (#7161)
         var allClassRows = methodRowClassTypeArguments != null && !HasClassArgumentsRows(classDataSources) ? new List<IDataSourceAttribute>(classDataSources.Length) : null;
         var classRowGroups = methodRowTests == null
-            ? await GroupClassRowsByTypeArgumentsAsync(genericTypeDefinition, classDataSources, constraintViolations, allClassRows).ConfigureAwait(false)
+            ? await GroupClassRowsByTypeArgumentsAsync(genericTypeDefinition, classDataSources, constraintViolations, allClassRows, generateGenericTestAttributes.Length > 0).ConfigureAwait(false)
             : null;
 
         foreach (var typeArguments in generateGenericTestTypeArguments)
@@ -567,7 +588,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             // Return any tests discovered from method rows and GenerateGenericTest attributes
             AddConstraintViolationTests(discoveredTests, constraintViolations);
-            return discoveredTests;
+            return;
         }
 
         // One concrete generic type per distinct set of inferred type arguments, carrying every class row
@@ -596,7 +617,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         AddConstraintViolationTests(discoveredTests, constraintViolations);
-        return discoveredTests;
     }
 
     /// <summary>
@@ -728,7 +748,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         Type genericTypeDefinition,
         IDataSourceAttribute[] classDataSources,
         ReflectionGenericConstraintViolations constraintViolations,
-        List<IDataSourceAttribute>? allClassRows)
+        List<IDataSourceAttribute>? allClassRows,
+        bool hasGenerateGenericTest)
     {
         var typeArgumentGroups = new List<Type[]>();
         var sourcesByGroup = new List<List<IDataSourceAttribute>>();
@@ -736,7 +757,41 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         foreach (var dataSource in classDataSources)
         {
-            var dataItems = await GetDataFromSourceAsync(dataSource, null!).ConfigureAwait(false);
+            // A [MethodDataSource] naming a member of the generic class itself is read on the closed class
+            // its member's declared row type infers (#7208)
+            MethodMetadata? sourceClassMetadata = null;
+            if (ReadsMemberOfOpenClass(dataSource))
+            {
+                var memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, (MethodDataSourceAttribute)dataSource);
+                if (memberTypeArguments == null && hasGenerateGenericTest)
+                {
+                    // [GenerateGenericTest] supplies the types, and its instantiations read this source on the
+                    // closed class at run time
+                    allClassRows?.Add(dataSource);
+                    continue;
+                }
+
+                if (memberTypeArguments == null)
+                {
+                    throw new InvalidOperationException(
+                        $"The class-level [MethodDataSource(\"{((MethodDataSourceAttribute)dataSource).MethodNameProvidingDataSource}\")] on generic class " +
+                        $"{genericTypeDefinition.FullName ?? genericTypeDefinition.Name} names a member of the class itself, so it can only be read " +
+                        "once the class's type arguments are known, but its declared type does not infer them. " +
+                        "Add [GenerateGenericTest], declare the member's rows with " +
+                        "the constructor parameter's type (such as IEnumerable<string> for C<T>(T value)), or move the member " +
+                        "to a non-generic class and name that class in the attribute.");
+                }
+
+                if (constraintViolations.TryAddClassViolation(memberTypeArguments))
+                {
+                    continue;
+                }
+
+                sourceClassMetadata = CreateDummyMethodMetadata(
+                    ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, memberTypeArguments), "Discovery");
+            }
+
+            var dataItems = await GetDataFromSourceAsync(dataSource, sourceClassMetadata!).ConfigureAwait(false);
 
             allClassRows?.Add(new StaticDataSourceAttribute(dataItems.ToArray())
             {
@@ -2214,6 +2269,128 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return typeArguments!;
     }
 
+    /// <summary>
+    /// Whether <paramref name="dataSource"/> is a [MethodDataSource] naming a member of the generic test class
+    /// itself (no class given), which can only be read on a closed instantiation of it (#7208).
+    /// </summary>
+    private static bool ReadsMemberOfOpenClass(IDataSourceAttribute dataSource) =>
+        dataSource is MethodDataSourceAttribute { ClassProvidingDataSource: null };
+
+    /// <summary>
+    /// The class type arguments that the declared row type of a class-level [MethodDataSource] member of the
+    /// generic class itself infers, by matching the row's elements against the parameters of the class's first
+    /// public constructor: <c>IEnumerable&lt;string&gt; Rows()</c> on <c>C&lt;T&gt;(T value)</c> infers
+    /// <c>string</c>. The member may return its rows directly or through <c>Task</c>, <c>ValueTask</c>,
+    /// <c>IAsyncEnumerable</c> or <c>Func</c>. Null when a type argument stays
+    /// unknown, such as for rows declared as <c>object</c>, <c>object[]</c> or with the class's own type parameters.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection mode requires dynamic access to data source members")]
+    private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource)
+    {
+        Type? memberType = null;
+        foreach (var member in genericTypeDefinition.GetMember(
+                     methodDataSource.MethodNameProvidingDataSource,
+                     MemberTypes.Method | MemberTypes.Property | MemberTypes.Field,
+                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+        {
+            memberType = member switch
+            {
+                MethodInfo method => method.ReturnType,
+                PropertyInfo property => property.PropertyType,
+                FieldInfo field => field.FieldType,
+                _ => null
+            };
+
+            if (memberType != null)
+            {
+                break;
+            }
+        }
+
+        if (memberType == null
+            || GetDeclaredRowType(memberType) is not { } rowType
+            || genericTypeDefinition.GetConstructors() is not [var constructor, ..])
+        {
+            return null;
+        }
+
+        var rowElements = GetValueTupleElementTypes(rowType) ?? [rowType];
+        var parameters = constructor.GetParameters();
+        var typeParameters = genericTypeDefinition.GetGenericArguments();
+        var typeArguments = new Type[typeParameters.Length];
+
+        for (var i = 0; i < typeParameters.Length; i++)
+        {
+            for (var j = 0; j < parameters.Length && j < rowElements.Length && typeArguments[i] == null; j++)
+            {
+                if (rowElements[j] != typeof(object)
+                    && MatchTypeParameter(parameters[j].ParameterType, rowElements[j], typeParameters[i]) is { ContainsGenericParameters: false } typeArgument
+                    && typeArgument != typeof(object))
+                {
+                    typeArguments[i] = typeArgument;
+                }
+            }
+
+            if (typeArguments[i] == null)
+            {
+                return null;
+            }
+        }
+
+        return typeArguments;
+    }
+
+    /// <summary>
+    /// The declared type of one row of a data source member of type <paramref name="memberType"/>: <c>X</c> for
+    /// an <c>IEnumerable&lt;X&gt;</c> or <c>IAsyncEnumerable&lt;X&gt;</c>, possibly wrapped in <c>Task</c> or
+    /// <c>ValueTask</c>, with a <c>Func&lt;X&gt;</c> row unwrapped. Null for <c>object[]</c> rows, whose element
+    /// types are unknown, and for members that are not sequences.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
+    private static Type? GetDeclaredRowType(Type memberType)
+    {
+        if (memberType.IsGenericType
+            && (memberType.GetGenericTypeDefinition() == typeof(Task<>) || memberType.GetGenericTypeDefinition() == typeof(ValueTask<>)))
+        {
+            memberType = memberType.GetGenericArguments()[0];
+        }
+
+        Type? rowType = null;
+        if (memberType == typeof(string))
+        {
+            return null;
+        }
+
+        if (memberType.IsArray)
+        {
+            rowType = memberType.GetElementType();
+        }
+        else if (memberType.IsGenericType
+                 && (memberType.GetGenericTypeDefinition() == typeof(IEnumerable<>) || memberType.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>)))
+        {
+            rowType = memberType.GetGenericArguments()[0];
+        }
+        else
+        {
+            foreach (var implemented in memberType.GetInterfaces())
+            {
+                if (implemented.IsGenericType && implemented.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                {
+                    rowType = implemented.GetGenericArguments()[0];
+                    break;
+                }
+            }
+        }
+
+        if (rowType is { IsGenericType: true } && rowType.GetGenericTypeDefinition() == typeof(Func<>))
+        {
+            rowType = rowType.GetGenericArguments()[0];
+        }
+
+        return rowType == null || rowType == typeof(object[]) ? null : rowType;
+    }
+
     /// <summary>Mirrors the generator's <c>ProcessTypeForGenerics</c>.</summary>
     private static void MapGenericParameters(Type parameterType, Type actualType, Type?[] typeArguments)
     {
@@ -2528,9 +2705,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             LineNumber = ExtractLineNumber(method) ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
             AttributeFactory = () => GetFailedTestAttributes(method),
-            DataSources =
-            [
-            ],
+            // An open generic class's test is built only to report its exception. Its single row raises the
+            // exception, so the engine reports it instead of failing to infer the class's type arguments.
+            DataSources = type.ContainsGenericParameters
+                ? [new DiscoveryFailureDataSource(ex)]
+                : [],
             ClassDataSources =
             [
             ],
@@ -2576,6 +2755,23 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             ReturnType = typeof(void),
             TypeInfo = new ConcreteType(type)
         };
+    }
+
+    /// <summary>
+    /// A data source whose single row raises a discovery failure, so a failed test of an open generic class
+    /// reports that failure rather than the type arguments the engine cannot infer for it.
+    /// </summary>
+    private sealed class DiscoveryFailureDataSource(Exception exception) : IDataSourceAttribute
+    {
+        public bool SkipIfEmpty { get; set; }
+
+        public bool DeferEnumeration { get; set; }
+
+        public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+        {
+            await Task.CompletedTask.ConfigureAwait(false);
+            yield return () => Task.FromException<object?[]?>(exception);
+        }
     }
 
     private sealed class FailedTestMetadata : TestMetadata
