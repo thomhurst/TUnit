@@ -3044,9 +3044,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             declaringMethod = overridden;
         }
 
-        var receiverType = declaringMethod != null && IsShadowedOnTargetType(declaringMethod, targetType)
-            ? declaringMethod.ContainingType.GloballyQualified()
+        var callsThroughDeclaringType = declaringMethod != null && IsShadowedOnTargetType(declaringMethod, targetType);
+        var receiverType = callsThroughDeclaringType
+            ? declaringMethod!.ContainingType.GloballyQualified()
             : fullyQualifiedType;
+
+        // An override called through its base declaration binds to that declaration at compile time, so C# would
+        // take the base's parameter names and defaults and its (possibly wider) return type. Reflection invokes the
+        // override itself, so the override's defaults are passed explicitly and its return type is restored.
+        var overrideBoundToBase = callsThroughDeclaringType
+            && !SymbolEqualityComparer.Default.Equals(declaringMethod, dataSourceMethod)
+            ? declaringMethod
+            : null;
         var receiver = isStatic
             ? receiverType
             : usesTestClassInstance
@@ -3091,12 +3100,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (dataSourceMethod != null)
         {
             memberAccess = hasArguments
-                ? $"{IdentifierHelper.Escape(dataSourceMethod.Name)}({BuildDataSourceCallArguments(dataSourceMethod, arguments ?? default, compilation)})"
+                ? $"{IdentifierHelper.Escape(dataSourceMethod.Name)}({BuildDataSourceCallArguments(dataSourceMethod, arguments ?? default, compilation, overrideBoundToBase)})"
                 : $"{IdentifierHelper.Escape(dataSourceMethod.Name)}()";
         }
         else
         {
             memberAccess = IdentifierHelper.Escape(dataSourceMember.Name);
+        }
+
+        var call = $"{receiver}.{memberAccess}";
+        if (overrideBoundToBase != null
+            && !SymbolEqualityComparer.Default.Equals(overrideBoundToBase.ReturnType, dataSourceMethod!.ReturnType))
+        {
+            // A covariant override returns a narrower type than its base declaration, and the helper chosen
+            // from it (FromTask<T>, say) needs that type
+            call = $"(({dataSourceMethod.ReturnType.GloballyQualified()}){call})";
         }
 
         if (hasArguments)
@@ -3114,13 +3132,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.Append("global::System.Array.Empty<object?>()");
             }
             writer.AppendLine(";");
-            writer.AppendLine($"return {receiver}.{memberAccess};");
+            writer.AppendLine($"return {call};");
             writer.Unindent();
             writer.Append("})");
         }
         else
         {
-            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {receiver}.{memberAccess})");
+            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {call})");
         }
     }
 
@@ -7297,8 +7315,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// A required parameter can follow a skipped optional one only in that same case: C# requires every
     /// parameter after an optional one to be optional or <c>params</c>, so a parameter after a skipped one
     /// is itself missing.
+    /// When <paramref name="boundMethod"/> is set, <paramref name="method"/> is an override that the call binds to
+    /// through that base declaration. C# would then fill in the base's defaults, so the override's defaults are
+    /// passed explicitly, as reflection mode's <c>BuildInvokeArgs</c> reads them from the override. A default that
+    /// has no C# expression is still left out, named after the base declaration's parameter.
     /// </summary>
-    private static string BuildDataSourceCallArguments(IMethodSymbol method, TypedConstant arguments, Compilation compilation)
+    private static string BuildDataSourceCallArguments(IMethodSymbol method, TypedConstant arguments, Compilation compilation, IMethodSymbol? boundMethod = null)
     {
         var values = arguments is { Kind: TypedConstantKind.Array, IsNull: false }
             ? arguments.Values
@@ -7323,6 +7345,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     ? $"(({parameterType})({argumentType!.GloballyQualified()})arguments[{i.ToString(CultureInfo.InvariantCulture)}])"
                     : $"(({parameterType})arguments[{i.ToString(CultureInfo.InvariantCulture)}])";
             }
+            else if (boundMethod != null && TupleArgumentHelper.TryFormatDefaultValue(parameter, out var defaultValue))
+            {
+                value = defaultValue;
+            }
             else if (parameter.HasExplicitDefaultValue)
             {
                 useNames = true;
@@ -7341,7 +7367,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     + $": throw new global::System.InvalidOperationException({SymbolDisplay.FormatLiteral(message, quote: true)})))";
             }
 
-            callArguments.Add(useNames ? $"@{parameter.Name}: {value}" : value);
+            var parameterName = boundMethod?.Parameters[i].Name ?? parameter.Name;
+            callArguments.Add(useNames ? $"@{parameterName}: {value}" : value);
         }
 
         return string.Join(", ", callArguments);
