@@ -15,6 +15,7 @@ Use the SDK selected by `global.json`. Shared build settings live in `Directory.
 - Run tests relevant to the change before pushing code.
 - Generator output changes require the affected generator's snapshot tests; public API changes require `tests/TUnit.PublicAPI`. Review snapshot differences, commit intentional updates as `.verified.txt`, and never commit `.received.txt`.
 - Never run `tests/TUnit.TestProject` without a targeted `--treenode-filter`: it contains intentional failures. Run separate filters rather than joining paths with `|`, which can match unintended tests.
+- Do not run `tests/TUnit.Engine.Tests` locally: it takes a long time and uses a lot of resources. Rely on CI for it.
 - C# documentation fences are compiled in CI with warnings as errors. See [workflows](.claude/docs/workflows.md#documentation-snippets) when editing them.
 
 ## Git workflow
