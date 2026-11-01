@@ -353,3 +353,20 @@ public class OwnClassConcreteMethodDataSourceWithArgumentsAndMethodRows<T>(T val
         await Assert.That(label).IsNotEmpty();
     }
 }
+
+// A tuple row whose other column names T still infers T from its concrete column, so both modes read the member on
+// the int instantiation that the [Arguments] row infers (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1, 2)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassPartiallyGenericTupleMethodDataSourceWithArguments<T>(T first, T second)
+{
+    public static IEnumerable<(int, T)> Rows() => [(5, (T)(object)6)];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(first).IsTypeOf<int>();
+        await Assert.That(second).IsTypeOf<int>();
+    }
+}

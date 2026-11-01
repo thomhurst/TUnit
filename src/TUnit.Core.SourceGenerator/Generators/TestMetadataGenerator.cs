@@ -7287,9 +7287,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Like reflection mode, a member whose declared rows infer no types through the constructor belongs on
             // every [GenerateGenericTest] instantiation, whatever the row's shape: IEnumerable<T>, object[], or a
-            // tuple whose generic constructor column is declared as object, such as (object, string).
+            // tuple whose generic constructor column is declared as object, such as (object, string). A row that
+            // names T in one column can still infer it from another: (int, T) on C<T>(T first, T second) infers int.
             var rowType = GetMethodDataSourceRowType(member, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
-            var inferred = rowType == null || CodeGenerationHelpers.ContainsTypeParameter(rowType)
+            var inferred = rowType == null
                 ? null
                 : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType);
             if (inferred == null ? includeUninferred : inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default))
