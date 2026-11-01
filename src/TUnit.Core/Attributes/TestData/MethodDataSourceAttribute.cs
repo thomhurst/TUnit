@@ -366,7 +366,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// <see cref="GetRowsFromRuntimeValueAsync"/> reads its value: a <c>Task</c> or <c>ValueTask</c> is unwrapped; an
     /// <c>IAsyncEnumerable&lt;X&gt;</c>, an array of <c>X</c> or an <c>IEnumerable&lt;X&gt;</c> other than a string
     /// yields rows of <c>X</c>; any other value, such as a string or a tuple, is a single row. A <c>Func&lt;X&gt;</c>
-    /// row is unwrapped. Null for <c>object[]</c> rows and non-generic sequences, whose element types are unknown.
+    /// row is unwrapped, then one <c>TestDataRow&lt;X&gt;</c> and one <c>Func&lt;X&gt;</c> inside it. Null for <c>object[]</c> rows and non-generic sequences, whose element types are unknown.
     /// Reflection discovery uses it to infer a generic class's type arguments from a member it cannot read yet
     /// (#7208). Keep it in step with <see cref="GetRowsFromRuntimeValueAsync"/>; MethodDataSourceDeclaredRowTypeTests
     /// checks the two against each other.
@@ -409,13 +409,21 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             rowType = memberType;
         }
 
-        if (rowType is { IsGenericType: true } && rowType.GetGenericTypeDefinition() == typeof(Func<>))
+        // Peel only the layers the row reader removes: DataSourceHelpers.ToObjectArray invokes one outer Func, then
+        // TestDataRowUnwrapper.UnwrapArray strips one TestDataRow and invokes one Func inside it
+        rowType = UnwrapFunc(rowType);
+        if (rowType != null && TestDataRowUnwrapper.GetInnerDataType(rowType) is { } rowData)
         {
-            rowType = rowType.GetGenericArguments()[0];
+            rowType = UnwrapFunc(rowData);
         }
 
         return rowType == null || rowType == typeof(object[]) ? null : rowType;
     }
+
+    private static Type? UnwrapFunc(Type? type) =>
+        type is { IsGenericType: true } && type.GetGenericTypeDefinition() == typeof(Func<>)
+            ? type.GetGenericArguments()[0]
+            : type;
 
     /// <summary>
     /// <c>X</c> when <paramref name="type"/> is or implements <paramref name="sequenceDefinition"/> of <c>X</c>

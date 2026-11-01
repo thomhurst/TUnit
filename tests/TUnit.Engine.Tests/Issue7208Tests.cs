@@ -33,6 +33,7 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("OwnClassTypeParameterMethodDataSourceWithArgumentsAndGenerateGenericTest")]
     [Arguments("OwnClassTypeParameterMethodDataSourceWithArgumentsAndGenerateGenericTestParameterless")]
     [Arguments("OwnClassObjectArrayMethodDataSourceWithArgumentsAndGenerateGenericTest")]
+    [Arguments("OwnClassTestDataRowObjectMethodDataSourceWithArgumentsAndGenerateGenericTest")]
     public async Task Generate_Generic_Test_Instantiation_Inferred_By_Class_Arguments_Reads_The_Own_Class_Member(string className)
     {
         // Both modes run the [Arguments(1)] row and the own-class member's row on the int instantiation,
@@ -88,8 +89,8 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7208/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe(reflection ? "Failed" : "Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 16 : 14),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 15 : 14),
+                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 18 : 16),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 17 : 16),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(reflection ? 1 : 0),
                 result => result.Results
                     .Where(x => x.Outcome == "Failed")

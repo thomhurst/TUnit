@@ -1,4 +1,5 @@
 using TUnit.Core.Enums;
+using TUnit.Core.Helpers;
 
 namespace TUnit.UnitTests;
 
@@ -23,6 +24,9 @@ public class MethodDataSourceDeclaredRowTypeTests
         yield return () => (new ValueTask<int[]>([1]), typeof(ValueTask<int[]>), typeof(int));
         yield return () => (AsyncRows(), typeof(IAsyncEnumerable<int>), typeof(int));
         yield return () => (new Func<int>[] { () => 3 }, typeof(Func<int>[]), typeof(int));
+        yield return () => (new[] { new TestDataRow<int>(4) }, typeof(TestDataRow<int>[]), typeof(int));
+        yield return () => (new List<TestDataRow<Func<string>>> { new(() => "a") }, typeof(IEnumerable<TestDataRow<Func<string>>>), typeof(string));
+        yield return () => (new Func<TestDataRow<int>>[] { () => new(5) }, typeof(Func<TestDataRow<int>>[]), typeof(int));
     }
 
     [Test]
@@ -40,8 +44,11 @@ public class MethodDataSourceDeclaredRowTypeTests
         await foreach (var factory in MethodDataSourceAttribute.GetRowsFromRuntimeValueAsync(value, CreateMetadata()))
         {
             rowCount++;
-            var row = await factory();
-            await Assert.That(row).IsNotNull();
+            var rawRow = await factory();
+            await Assert.That(rawRow).IsNotNull();
+
+            // Test building strips a TestDataRow (and invokes a Func inside it) after the reader yields the row
+            var (row, _) = TestDataRowUnwrapper.UnwrapArray(rawRow!);
             await Assert.That(row!).Count().IsEqualTo(columnTypes.Length);
             for (var i = 0; i < columnTypes.Length; i++)
             {
@@ -57,6 +64,7 @@ public class MethodDataSourceDeclaredRowTypeTests
     [Arguments(typeof(object[][]))]
     [Arguments(typeof(IEnumerable<object[]>))]
     [Arguments(typeof(System.Collections.ArrayList))]
+    [Arguments(typeof(IEnumerable<TestDataRow<object[]>>))]
     public async Task Rows_Of_Unknown_Type_Have_No_Declared_Row_Type(Type memberType)
     {
         await Assert.That(MethodDataSourceAttribute.GetDeclaredRowType(memberType)).IsNull();

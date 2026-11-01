@@ -219,3 +219,20 @@ public class OwnClassObjectArrayMethodDataSourceWithArgumentsAndGenerateGenericT
         await Assert.That(value).IsTypeOf<int>();
     }
 }
+
+// TestDataRow<object> rows name no type, so they're read on the [GenerateGenericTest] instantiation, not on a
+// TestDataRow<object> one (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassTestDataRowObjectMethodDataSourceWithArgumentsAndGenerateGenericTest<T>(T value)
+{
+    public static IEnumerable<TestDataRow<object>> Rows() => [new(5)];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+    }
+}
