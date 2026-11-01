@@ -77,8 +77,13 @@ public class AotConverterScanTests
             using System;
             using TUnit.Core;
 
-            public readonly record struct Token(string Value)
+            // A plain struct, not a positional record: records need IsExternalInit, which net472 lacks.
+            public readonly struct Token
             {
+                public Token(string value) => Value = value;
+
+                public string Value { get; }
+
                 public static implicit operator Token(string value) => new(value);
 
                 [Obsolete("Use a string.", error: true)]
