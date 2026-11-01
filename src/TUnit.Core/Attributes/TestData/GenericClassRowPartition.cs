@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -58,58 +60,94 @@ public static class GenericClassRowPartition
     {
         var coordinator = new Coordinator(classTypeArguments, fallback, dataSources, partitionedIndices);
         var result = new IDataSourceAttribute[dataSources.Length];
+        var consumerCount = 0;
 
         for (var i = 0; i < dataSources.Length; i++)
         {
             var isPartitioned = Array.IndexOf(partitionedIndices, i) >= 0;
-            result[i] = isPartitioned || fallback != GenericClassRowFallback.None
-                ? new GenericClassRowPartitionDataSource(coordinator, dataSources[i], i, isPartitioned)
-                : dataSources[i];
+            if (isPartitioned || fallback != GenericClassRowFallback.None)
+            {
+                result[i] = new GenericClassRowPartitionDataSource(coordinator, dataSources[i], i, isPartitioned);
+                consumerCount++;
+            }
+            else
+            {
+                result[i] = dataSources[i];
+            }
         }
 
+        coordinator.ConsumerCount = consumerCount;
         return result;
     }
 
     /// <summary>
-    /// Whether a class row's values infer <paramref name="classTypeArguments"/>, as reflection mode infers class
-    /// type arguments (<c>ReflectionGenericTypeResolver.DetermineGenericTypeArguments</c> in TUnit.Engine): with one
-    /// type parameter, from the run-time type of the first non-null value; with several, from the run-time type of
-    /// each leading value in turn. Keep the two in step.
+    /// Whether a class row's values infer <paramref name="classTypeArguments"/>, by <see cref="InferClassTypeArguments"/>.
     /// </summary>
     internal static bool InfersTypeArguments(object?[]? row, Type[] classTypeArguments)
     {
-        if (row is null || row.Length == 0)
+        if (row is null || InferClassTypeArguments(row, classTypeArguments.Length) is not { } inferred)
         {
             return false;
         }
 
-        if (classTypeArguments.Length == 1)
+        for (var i = 0; i < inferred.Length; i++)
         {
-            foreach (var value in row)
-            {
-                if (value is not null)
-                {
-                    return value.GetType() == classTypeArguments[0];
-                }
-            }
-
-            return false;
-        }
-
-        if (row.Length < classTypeArguments.Length)
-        {
-            return false;
-        }
-
-        for (var i = 0; i < classTypeArguments.Length; i++)
-        {
-            if (row[i]?.GetType() != classTypeArguments[i])
+            if (inferred[i] != classTypeArguments[i])
             {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// The class type arguments that a class row's values infer. Both modes use this rule: reflection mode groups
+    /// class rows by it at discovery (<c>ReflectionGenericTypeResolver.DetermineGenericTypeArguments</c> in
+    /// TUnit.Engine), and source-generated mode partitions them by it at run time. A row holding a
+    /// <see cref="TestDataRow{T}"/> infers from the values it wraps, which are the values the test receives. With one
+    /// type parameter, the run-time type of the first non-null value is used; with several, the run-time type of each
+    /// leading value in turn. Returns null when the values cannot infer every type parameter.
+    /// </summary>
+    internal static Type[]? InferClassTypeArguments(object?[] row, int typeParameterCount)
+    {
+        var (values, _) = TestDataRowUnwrapper.UnwrapArray(row);
+
+        if (values.Length == 0 || typeParameterCount == 0)
+        {
+            return null;
+        }
+
+        if (typeParameterCount == 1)
+        {
+            foreach (var value in values)
+            {
+                if (value is not null)
+                {
+                    return [value.GetType()];
+                }
+            }
+
+            return null;
+        }
+
+        if (values.Length < typeParameterCount)
+        {
+            return null;
+        }
+
+        var typeArguments = new Type[typeParameterCount];
+        for (var i = 0; i < typeParameterCount; i++)
+        {
+            if (values[i] is not { } value)
+            {
+                return null;
+            }
+
+            typeArguments[i] = value.GetType();
+        }
+
+        return typeArguments;
     }
 
     /// <summary>
@@ -123,60 +161,99 @@ public static class GenericClassRowPartition
         IDataSourceAttribute[] dataSources,
         int[] partitionedIndices)
     {
-        private readonly object _lock = new();
-        private object? _buildKey;
-        private Task<Evaluation>? _evaluation;
+        // One evaluation per test build, keyed on the build's context accessor. Builds of one instantiation can
+        // overlap (for example, its test methods build in parallel), so each build keeps its own evaluation.
+        // An entry is removed once every wrapper of its build has read it, or when the accessor is collected,
+        // so evaluated rows are not kept after the build.
+        private readonly ConditionalWeakTable<TestBuilderContextAccessor, BuildEvaluation> _evaluations = new();
 
         public Type[] ClassTypeArguments { get; } = classTypeArguments;
 
         public GenericClassRowFallback Fallback { get; } = fallback;
 
+        /// <summary>The number of wrappers that read each build's evaluation.</summary>
+        public int ConsumerCount { get; set; }
+
         public Task<Evaluation> GetEvaluationAsync(DataGeneratorMetadata dataGeneratorMetadata)
         {
-            // Each test build has its own context accessor, so a later build reads the sources again,
-            // as it would without the partition.
-            var buildKey = dataGeneratorMetadata.TestBuilderContext;
+            if (dataGeneratorMetadata.TestBuilderContext is not { } buildKey)
+            {
+                return EvaluateAsync(dataGeneratorMetadata);
+            }
+
+            var consumerCount = ConsumerCount;
+            var buildEvaluation = _evaluations.GetValue(buildKey, _ => new BuildEvaluation(consumerCount));
+            var evaluation = buildEvaluation.GetOrStart(this, dataGeneratorMetadata);
+
+            if (buildEvaluation.ReleaseConsumer())
+            {
+                _evaluations.Remove(buildKey);
+            }
+
+            return evaluation;
+        }
+
+        internal async Task<Evaluation> EvaluateAsync(DataGeneratorMetadata dataGeneratorMetadata)
+        {
+            var rowsByIndex = new List<EvaluatedRow>?[dataSources.Length];
+            var anyRowInfers = false;
+
+            foreach (var index in partitionedIndices)
+            {
+                var rows = new List<EvaluatedRow>();
+                await foreach (var rowFactory in dataSources[index].GetDataRowsAsync(dataGeneratorMetadata).ConfigureAwait(false))
+                {
+                    var row = await rowFactory().ConfigureAwait(false);
+                    var infers = InfersTypeArguments(row, ClassTypeArguments);
+                    anyRowInfers |= infers;
+                    rows.Add(new EvaluatedRow(rowFactory, row, infers));
+                }
+
+                rowsByIndex[index] = rows;
+            }
+
+            return new Evaluation(rowsByIndex, anyRowInfers);
+        }
+    }
+
+    /// <summary>
+    /// One build's evaluation, started by the first wrapper that reads it, and the number of the build's
+    /// wrappers that have not read it yet.
+    /// </summary>
+    internal sealed class BuildEvaluation(int consumerCount)
+    {
+        private readonly object _lock = new();
+        private int _remainingConsumers = consumerCount;
+        private Task<Evaluation>? _evaluation;
+
+        public Task<Evaluation> GetOrStart(Coordinator coordinator, DataGeneratorMetadata dataGeneratorMetadata)
+        {
             TaskCompletionSource<Evaluation> completion;
 
             lock (_lock)
             {
-                if (_evaluation is not null && ReferenceEquals(_buildKey, buildKey))
+                if (_evaluation is not null)
                 {
                     return _evaluation;
                 }
 
                 completion = new TaskCompletionSource<Evaluation>(TaskCreationOptions.RunContinuationsAsynchronously);
-                _buildKey = buildKey;
                 _evaluation = completion.Task;
             }
 
             // Run the sources' code outside the lock
-            _ = EvaluateAsync(dataGeneratorMetadata, completion);
+            _ = CompleteAsync(coordinator, dataGeneratorMetadata, completion);
             return completion.Task;
         }
 
-        private async Task EvaluateAsync(DataGeneratorMetadata dataGeneratorMetadata, TaskCompletionSource<Evaluation> completion)
+        /// <summary>Records that a wrapper has read the evaluation, and returns whether it was the last one.</summary>
+        public bool ReleaseConsumer() => Interlocked.Decrement(ref _remainingConsumers) == 0;
+
+        private static async Task CompleteAsync(Coordinator coordinator, DataGeneratorMetadata dataGeneratorMetadata, TaskCompletionSource<Evaluation> completion)
         {
             try
             {
-                var rowsByIndex = new List<EvaluatedRow>?[dataSources.Length];
-                var anyRowInfers = false;
-
-                foreach (var index in partitionedIndices)
-                {
-                    var rows = new List<EvaluatedRow>();
-                    await foreach (var rowFactory in dataSources[index].GetDataRowsAsync(dataGeneratorMetadata).ConfigureAwait(false))
-                    {
-                        var row = await rowFactory().ConfigureAwait(false);
-                        var infers = InfersTypeArguments(row, ClassTypeArguments);
-                        anyRowInfers |= infers;
-                        rows.Add(new EvaluatedRow(rowFactory, row, infers));
-                    }
-
-                    rowsByIndex[index] = rows;
-                }
-
-                completion.SetResult(new Evaluation(rowsByIndex, anyRowInfers));
+                completion.SetResult(await coordinator.EvaluateAsync(dataGeneratorMetadata).ConfigureAwait(false));
             }
             catch (Exception ex)
             {
@@ -217,14 +294,19 @@ internal sealed class GenericClassRowPartitionDataSource : Attribute, IDataSourc
     /// <summary>The data source whose rows this partition yields a subset of.</summary>
     public IDataSourceAttribute InnerDataSource { get; }
 
+    // Whether the last read of this source yielded every row of the inner source: the AllRows fallback, or a
+    // source that is not partitioned and is used because no partitioned row infers the instantiation
+    private volatile bool _yieldsEveryRow;
+
     /// <inheritdoc />
     /// <remarks>
-    /// A partition may be empty because its rows belong to other instantiations, as in reflection mode, where
-    /// such a partition does not exist; so it never reports a skipped test of its own.
+    /// A partition may be empty because its rows belong to other instantiations. Reflection mode creates no
+    /// partition in that case, so this one reports a skipped test only when it yields every row of the inner
+    /// source, as reflection's fallback to every class row does.
     /// </remarks>
     public bool SkipIfEmpty
     {
-        get => false;
+        get => _yieldsEveryRow && InnerDataSource.SkipIfEmpty;
         set => InnerDataSource.SkipIfEmpty = value;
     }
 
@@ -239,6 +321,7 @@ internal sealed class GenericClassRowPartitionDataSource : Attribute, IDataSourc
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var evaluation = await _coordinator.GetEvaluationAsync(dataGeneratorMetadata).ConfigureAwait(false);
+        _yieldsEveryRow = !evaluation.AnyRowInfers && _coordinator.Fallback == GenericClassRowFallback.AllRows;
 
         if (!evaluation.AnyRowInfers && _coordinator.Fallback == GenericClassRowFallback.NoClassRow)
         {

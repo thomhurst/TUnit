@@ -13,6 +13,7 @@ public class Issue7210Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("ArgumentsRowAndMixedSource", 3)]
     [Arguments("MixedSourceOnly", 2)]
     [Arguments("RowsSplitAcrossSources", 2)]
+    [Arguments("WrappedRowInfersItsValue", 2)]
     public async Task Rows_Run_On_The_Instantiation_They_Infer(string className, int expectedTests)
     {
         await RunTestsWithFilter(
@@ -22,6 +23,22 @@ public class Issue7210Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Total.ShouldBe(expectedTests),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(expectedTests),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    [Arguments("EmptySourceWithSkipIfEmpty", 1)]
+    [Arguments("CustomSourceSettingsKept", 2)]
+    public async Task Rows_Keep_Their_Source_Skip_Settings(string className, int expectedTests)
+    {
+        await RunTestsWithFilter(
+            $"/*/TUnit.TestProject.Bugs._7210/{className}*/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(expectedTests),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(0),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(expectedTests)
             ]);
     }
 
