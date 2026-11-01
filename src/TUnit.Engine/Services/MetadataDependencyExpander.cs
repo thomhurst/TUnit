@@ -18,12 +18,15 @@ internal sealed class TestMetadataEqualityComparer : IEqualityComparer<TestMetad
 
         // For dynamic tests, also compare DynamicTestIndex to distinguish
         // multiple dynamic tests targeting the same method with different arguments
+        var bothDynamic = false;
         if (x is IDynamicTestMetadata xDynamic && y is IDynamicTestMetadata yDynamic)
         {
             if (xDynamic.DynamicTestIndex != yDynamic.DynamicTestIndex)
             {
                 return false;
             }
+
+            bothDynamic = true;
         }
 
         return x.TestClassType == y.TestClassType &&
@@ -36,9 +39,15 @@ internal sealed class TestMetadataEqualityComparer : IEqualityComparer<TestMetad
                // Overloads share the class, method name and test name (#7207); their parameters tell them apart.
                SameParameters(x.MethodMetadata.Parameters, y.MethodMetadata.Parameters) &&
                // Source generation erases some parameter shapes (M(T[]) and M(object) both emit object), so
-               // the declaration site is what separates overloads whose parameter metadata still matches.
-               x.LineNumber == y.LineNumber &&
-               string.Equals(x.FilePath, y.FilePath, StringComparison.Ordinal);
+               // the declaration site is what separates overloads whose parameter metadata still matches. The
+               // column separates such overloads declared on one line.
+               // A dynamic test's location is its creator's, not the method's, and differs between the
+               // discovery paths that can both yield it (reflection mode runs source-generated dynamic
+               // sources and its own builder scan), so it must not split one dynamic test into two.
+               (bothDynamic ||
+                (x.LineNumber == y.LineNumber &&
+                 x.StartColumnNumber == y.StartColumnNumber &&
+                 string.Equals(x.FilePath, y.FilePath, StringComparison.Ordinal)));
     }
 
     private static bool SameParameters(ParameterMetadata[] x, ParameterMetadata[] y)

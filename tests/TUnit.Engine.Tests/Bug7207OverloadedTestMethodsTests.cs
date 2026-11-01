@@ -28,10 +28,12 @@ public class Bug7207OverloadedTestMethodsTests(TestMode testMode) : InvokableTes
     }
 
     [Test]
-    public async Task Overloads_With_Erased_Parameter_Types_Both_Run()
+    [Arguments("GenericArrayOverloadTests*")]
+    [Arguments("SameLineGenericArrayOverloadTests*")]
+    public async Task Overloads_With_Erased_Parameter_Types_Both_Run(string className)
     {
         await RunTestsWithFilter(
-            "/*/TUnit.TestProject.Bugs._7207/GenericArrayOverloadTests*/*",
+            $"/*/TUnit.TestProject.Bugs._7207/{className}/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(2),

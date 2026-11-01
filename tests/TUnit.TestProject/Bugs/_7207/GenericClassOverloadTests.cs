@@ -61,6 +61,13 @@ public class GenericArrayOverloadTests<T>(T value)
     }
 }
 
+// The same erased overloads declared on one line: only the declaration column tells them apart.
+[Arguments(1)]
+public class SameLineGenericArrayOverloadTests<T>(T value)
+{
+    [Test, Arguments(new[] { 1, 2 })] public async Task Overloaded(T[] values) { await Assert.That(value).IsEqualTo((T) (object) 1); await Assert.That(values.Length).IsEqualTo(2); } [Test, Arguments("b")] public async Task Overloaded(object other) { await Assert.That(value).IsEqualTo((T) (object) 1); await Assert.That(other).IsEqualTo("b"); }
+}
+
 // A filter that selects only Dependent must pull in every overload that [DependsOn] names.
 public class DependsOnOverloadTests
 {
