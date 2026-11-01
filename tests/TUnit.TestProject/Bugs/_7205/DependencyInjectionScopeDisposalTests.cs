@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._7205;
@@ -7,7 +7,8 @@ namespace TUnit.TestProject.Bugs._7205;
 // handler that it subscribes on TestBuilderContext.Current.Events while its row is fetched. Those
 // events never reached the test built from the row, so no scope was ever disposed. Every scope must be
 // disposed when its test ends, in both engine modes, including the scope of the class row's first
-// fetch that the first test takes (#7205).
+// fetch that the first test takes (#7205). Each scope owns and disposes the services it resolves, so
+// the object tracker must not dispose them a second time.
 
 public sealed class ProbeScope : IDisposable
 {
@@ -23,19 +24,43 @@ public sealed class ProbeScope : IDisposable
 
     public bool IsDisposed { get; private set; }
 
-    public void Dispose() => IsDisposed = true;
+    public List<ProbeService> Services { get; } = [];
+
+    public ProbeService Resolve()
+    {
+        var service = new ProbeService(this);
+        Services.Add(service);
+        return service;
+    }
+
+    public void Dispose()
+    {
+        IsDisposed = true;
+
+        foreach (var service in Services)
+        {
+            service.Dispose();
+        }
+    }
 }
 
-public sealed class ProbeService(ProbeScope scope)
+// Like a container-owned service whose cleanup is not repeatable.
+public sealed class ProbeService(ProbeScope scope) : IDisposable
 {
+    private int _disposeCount;
+
     public ProbeScope Scope { get; } = scope;
+
+    public int DisposeCount => _disposeCount;
+
+    public void Dispose() => Interlocked.Increment(ref _disposeCount);
 }
 
 public abstract class ProbeDependencyInjectionAttribute(string owner) : DependencyInjectionDataSourceAttribute<ProbeScope>
 {
     public override ProbeScope CreateScope(DataGeneratorMetadata dataGeneratorMetadata) => new(owner);
 
-    public override object? Create(ProbeScope scope, Type type) => new ProbeService(scope);
+    public override object? Create(ProbeScope scope, Type type) => scope.Resolve();
 }
 
 public sealed class ClassRowDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(ClassRowScopeTests));
@@ -175,5 +200,10 @@ public class DependencyInjectionScopeDisposalObserverTests
 
         await Assert.That(scopes.Length).IsEqualTo(expectedCount);
         await Assert.That(scopes.Count(x => x.IsDisposed)).IsEqualTo(expectedCount);
+
+        // Only the scope disposes its services: once each, never again by the object tracker.
+        var services = scopes.SelectMany(x => x.Services).ToArray();
+        await Assert.That(services.Length).IsEqualTo(expectedCount);
+        await Assert.That(services.Count(x => x.DisposeCount == 1)).IsEqualTo(expectedCount);
     }
 }
