@@ -2,6 +2,7 @@ name: Platform smoke tests
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: [main]
   workflow_dispatch:
 
@@ -18,6 +19,7 @@ env:
 
 jobs:
   smoke:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     name: ${{ matrix.platform }} smoke test
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -101,6 +103,7 @@ jobs:
   # installs the workloads once and builds the referenced TUnit libraries once. Each platform
   # still runs after an earlier one fails, so a single run reports all three.
   apple-smoke:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     name: Apple smoke tests
     # The .NET 11 Apple workloads (27.x) require Xcode 27, which only the xcode-27 image has.
     runs-on: xcode-27
