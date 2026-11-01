@@ -301,6 +301,10 @@ internal sealed class TestScheduler : ITestScheduler
                     _testStateManager.MarkCircularDependencyFailed(test, exception);
                     TestSessionContext.Current?.MarkFailure();
                     await _messageBus.Failed(test.Context, exception, DateTimeOffset.UtcNow).ConfigureAwait(false);
+
+                    // Removed before execution, so the test never reaches TestCoordinator. Release what its
+                    // data sources hold (a dependency injection scope, for example) here (#7205).
+                    await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
                 }
             }
         }
