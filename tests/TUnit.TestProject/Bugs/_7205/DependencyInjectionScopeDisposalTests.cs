@@ -46,6 +46,12 @@ public sealed class InstanceSourceDependencyInjectionAttribute() : ProbeDependen
 
 public sealed class MethodParameterDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(MethodParameterScopeTests));
 
+public sealed class RetriedDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(RetriedScopeTests));
+
+public sealed class SkippedDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(SkippedScopeTests));
+
+public sealed class SkippedIfEmptyDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(SkippedIfEmptyScopeTests));
+
 [EngineTest(ExpectedResult.Pass)]
 [ClassRowDependencyInjection]
 public class ClassRowScopeTests(ProbeService service)
@@ -91,6 +97,49 @@ public class MethodParameterScopeTests
     public async Task Run(ProbeService service) => await Assert.That(service.Scope.IsDisposed).IsFalse();
 }
 
+// Every attempt reuses the row's objects, so the scope must outlive a failed attempt and be disposed
+// once, after the last one.
+[EngineTest(ExpectedResult.Pass)]
+[RetriedDependencyInjection]
+public class RetriedScopeTests(ProbeService service)
+{
+    private static int _attempts;
+
+    [Test]
+    [Retry(1)]
+    public async Task Run()
+    {
+        await Assert.That(service.Scope.IsDisposed).IsFalse();
+
+        if (Interlocked.Increment(ref _attempts) == 1)
+        {
+            throw new InvalidOperationException("The first attempt fails, so the test is retried.");
+        }
+    }
+}
+
+// A skipped test never runs, but its class row was still fetched, so its scope must still be disposed.
+[EngineTest(ExpectedResult.Pass)]
+[SkippedDependencyInjection]
+public class SkippedScopeTests(ProbeService service)
+{
+    [Test]
+    [Skip("The scope created for a skipped test is still disposed.")]
+    public void Run() => throw new InvalidOperationException($"Should have been skipped, but ran with {service}");
+}
+
+// An empty method source with SkipIfEmpty reports a skipped test, which takes the class row's first fetch.
+[EngineTest(ExpectedResult.Pass)]
+[SkippedIfEmptyDependencyInjection]
+public class SkippedIfEmptyScopeTests(ProbeService service)
+{
+    public static IEnumerable<int> NoRows() => [];
+
+    [Test]
+    [MethodDataSource(nameof(NoRows), SkipIfEmpty = true)]
+    public void Run(int value) => throw new InvalidOperationException($"Should have been skipped, but ran with {service} and {value}");
+}
+
 [EngineTest(ExpectedResult.Pass)]
 public class DependencyInjectionScopeDisposalObserverTests
 {
@@ -99,6 +148,9 @@ public class DependencyInjectionScopeDisposalObserverTests
     [DependsOn(typeof(ClassRowScopeWithMethodRowsTests))]
     [DependsOn(typeof(ClassRowScopeWithInstanceMethodDataSourceTests))]
     [DependsOn(typeof(MethodParameterScopeTests))]
+    [DependsOn(typeof(RetriedScopeTests))]
+    [DependsOn(typeof(SkippedScopeTests), ProceedOnFailure = true)]
+    [DependsOn(typeof(SkippedIfEmptyScopeTests), ProceedOnFailure = true)]
     public async Task Every_Scope_Is_Disposed_When_Its_Test_Ends()
     {
         // One scope per test: two tests, then two method rows run twice each.
@@ -110,6 +162,11 @@ public class DependencyInjectionScopeDisposalObserverTests
 
         // A method parameter scope per test run.
         await AssertScopes(nameof(MethodParameterScopeTests), 2);
+
+        // One scope for both attempts, and one for each skipped test.
+        await AssertScopes(nameof(RetriedScopeTests), 1);
+        await AssertScopes(nameof(SkippedScopeTests), 1);
+        await AssertScopes(nameof(SkippedIfEmptyScopeTests), 1);
     }
 
     private static async Task AssertScopes(string owner, int expectedCount)
