@@ -535,7 +535,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // infer (#7118)
         var methodRowClassTypeArguments = methodRowTests == null
             ? InferClassTypeArgumentsOfMethodRows(genericTypeDefinition, testMethods, classDataSources.Length + (typeFreeClassRows?.Length ?? 0),
-                nullValuesArrayInfersObject: classDataSources.Length == 0 && generateGenericTestAttributes.Length == 0)
+                classTypeArgumentsSupplied: classDataSources.Length > 0 || generateGenericTestAttributes.Length > 0)
             : null;
 
         // [GenerateGenericTest] types' class constraint violations are reported before the class rows'
@@ -580,7 +580,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             discoveredTests.AddRange(methodRowTests);
 
             // Return any tests discovered from method rows and GenerateGenericTest attributes
-            AddConstraintViolationTests(discoveredTests, constraintViolations);
+            AddConstraintViolationTests(discoveredTests, constraintViolations, classTypeArgumentsSupplied: generateGenericTestAttributes.Length > 0);
             return discoveredTests;
         }
 
@@ -609,7 +609,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             discoveredTests.AddRange(BuildTestsForMethodRowsWithoutClassRow(genericTypeDefinition, testMethods, methodRowClassTypeArguments, classRowGroups!, allClassRows, typeFreeClassRows, generateGenericTestAttributes));
         }
 
-        AddConstraintViolationTests(discoveredTests, constraintViolations);
+        // Type-free class rows were split out of classDataSources, so beside only those, method rows infer the
+        // class type arguments and report the ones that break the class's constraints (#7209)
+        AddConstraintViolationTests(discoveredTests, constraintViolations,
+            classTypeArgumentsSupplied: generateGenericTestAttributes.Length > 0 || classDataSources.Length > 0);
         return discoveredTests;
     }
 
@@ -697,9 +700,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
-    private static void AddConstraintViolationTests(List<TestMetadata> discoveredTests, ReflectionGenericConstraintViolations constraintViolations)
+    private static void AddConstraintViolationTests(List<TestMetadata> discoveredTests, ReflectionGenericConstraintViolations constraintViolations, bool classTypeArgumentsSupplied)
     {
-        constraintViolations.AddMethodRowViolations();
+        constraintViolations.AddMethodRowViolations(classTypeArgumentsSupplied);
         discoveredTests.AddRange(constraintViolations.CreateMetadata());
     }
 
@@ -1074,7 +1077,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// whatever the class data sources are, since it cannot know the types a [MethodDataSource] or other
     /// run-time source yields (#7161).
     /// </summary>
-    private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, int classDataSourceCount, bool nullValuesArrayInfersObject)
+    /// <param name="classTypeArgumentsSupplied">
+    /// False when every class data source is a class row whose values go to no type parameter (#7209). The
+    /// method sources then infer the class type arguments as without a class row: [Arguments(null)] infers
+    /// object, and a [MethodDataSource] member of the test class infers them from its declared type, as in the
+    /// source generator.
+    /// </param>
+    private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, int classDataSourceCount, bool classTypeArgumentsSupplied)
     {
         if (classDataSourceCount == 0)
         {
@@ -1106,8 +1115,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 // Class rows supply the instantiations, so [Arguments(null)] infers none and runs on each (#7141),
                 // unless every class row goes to no type parameter (#7209)
-                if (methodDataSources[i] is ArgumentsAttribute arguments
-                    && InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject) is { } typeArguments)
+                var typeArguments = methodDataSources[i] switch
+                {
+                    ArgumentsAttribute arguments => InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject: !classTypeArgumentsSupplied),
+                    MethodDataSourceAttribute methodDataSource when !classTypeArgumentsSupplied => InferClassTypeArgumentsFromMethodDataSource(genericTypeDefinition, methodDataSource, parameters),
+                    _ => null
+                };
+
+                if (typeArguments != null)
                 {
                     // A plain local, not `(rowTypeArguments ??= ...)[i] = ...`: the .NET 8 trim analyzer
                     // crashes (AD0001) on an array element write through a null-coalescing assignment.
@@ -1120,6 +1135,107 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// The class type arguments that a method-level [MethodDataSource] infers from the declared return type of
+    /// its member, or null. Mirrors the generator's <c>InferClassTypesFromMethodDataSource</c>: only
+    /// <c>[MethodDataSource("Rows")]</c> naming a static parameterless member of the test class that returns
+    /// <c>IEnumerable&lt;T&gt;</c> or <c>IEnumerable&lt;Func&lt;T&gt;&gt;</c>. A tuple <c>T</c> is matched
+    /// element by element against the data parameters, any other <c>T</c> only against a single data parameter.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source methods")]
+    private static Type[]? InferClassTypeArgumentsFromMethodDataSource(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource, ParameterInfo[] parameters)
+    {
+        if (methodDataSource.GetType() != typeof(MethodDataSourceAttribute) || methodDataSource.ClassProvidingDataSource is not null)
+        {
+            return null;
+        }
+
+        var dataMethod = genericTypeDefinition.GetMethod(
+            methodDataSource.MethodNameProvidingDataSource,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly,
+            binder: null,
+            Type.EmptyTypes,
+            modifiers: null);
+
+        if (dataMethod?.ReturnType is not { IsGenericType: true } returnType
+            || returnType.GetGenericTypeDefinition() != typeof(IEnumerable<>))
+        {
+            return null;
+        }
+
+        var dataType = returnType.GetGenericArguments()[0];
+        if (dataType.IsGenericType && dataType.GetGenericTypeDefinition() == typeof(Func<>))
+        {
+            dataType = dataType.GetGenericArguments()[0];
+        }
+
+        // The generator reads only named types: not arrays, pointers or type parameters
+        if (dataType.HasElementType || dataType.IsGenericParameter)
+        {
+            return null;
+        }
+
+        // Row values bind to the data parameters only; the engine supplies any CancellationToken
+        var dataParameters = Array.Exists(parameters, static parameter => parameter.ParameterType == typeof(CancellationToken))
+            ? Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken))
+            : parameters;
+        var typeArguments = new Type?[genericTypeDefinition.GetGenericArguments().Length];
+
+        if (GetValueTupleElementTypes(dataType) is { } tupleElements)
+        {
+            for (var i = 0; i < dataParameters.Length && i < tupleElements.Length; i++)
+            {
+                MapClassGenericParameters(dataParameters[i].ParameterType, tupleElements[i], typeArguments);
+            }
+        }
+        else if (dataParameters.Length == 1)
+        {
+            MapClassGenericParameters(dataParameters[0].ParameterType, dataType, typeArguments);
+        }
+
+        foreach (var typeArgument in typeArguments)
+        {
+            if (typeArgument is null || typeArgument.ContainsGenericParameters)
+            {
+                return null;
+            }
+        }
+
+        return typeArguments!;
+    }
+
+    /// <summary>Mirrors the generator's <c>ProcessTypeForGenerics</c> for the class's type parameters.</summary>
+    private static void MapClassGenericParameters(Type parameterType, Type actualType, Type?[] typeArguments)
+    {
+        if (parameterType.IsGenericParameter)
+        {
+            if (parameterType.DeclaringMethod is null)
+            {
+                typeArguments[parameterType.GenericParameterPosition] = actualType;
+            }
+
+            return;
+        }
+
+        if (parameterType.IsArray && actualType.IsArray && parameterType.GetArrayRank() == actualType.GetArrayRank())
+        {
+            MapClassGenericParameters(parameterType.GetElementType()!, actualType.GetElementType()!, typeArguments);
+            return;
+        }
+
+        if (parameterType.IsGenericType
+            && actualType.IsGenericType
+            && parameterType.GetGenericTypeDefinition() == actualType.GetGenericTypeDefinition())
+        {
+            var parameterArguments = parameterType.GetGenericArguments();
+            var actualArguments = actualType.GetGenericArguments();
+            for (var i = 0; i < parameterArguments.Length && i < actualArguments.Length; i++)
+            {
+                MapClassGenericParameters(parameterArguments[i], actualArguments[i], typeArguments);
+            }
+        }
     }
 
     /// <summary>
