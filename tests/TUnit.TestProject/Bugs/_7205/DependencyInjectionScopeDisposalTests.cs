@@ -138,10 +138,38 @@ public sealed class NestedProbeScope : IDisposable
     }
 }
 
-// Not disposable itself, so nothing but the scope owns what it holds.
+// Not disposable itself, so nothing but the scope owns what it holds. TUnit injects Fixture, so the
+// object tracker owns and disposes it, even though it sits beneath a scope-owned service.
 public sealed class NestedProbeService(NestedProbeDependency dependency)
 {
     public NestedProbeDependency Dependency { get; } = dependency;
+
+    [ClassDataSource<InjectedProbeFixture>(Shared = SharedType.None)]
+    public InjectedProbeFixture Fixture { get; set; } = null!;
+}
+
+public sealed class InjectedProbeFixture : IAsyncInitializer, IDisposable
+{
+    private int _disposeCount;
+
+    public InjectedProbeFixture()
+    {
+        Created.Add(this);
+    }
+
+    public static ConcurrentBag<InjectedProbeFixture> Created { get; } = [];
+
+    public bool IsInitialized { get; private set; }
+
+    public int DisposeCount => _disposeCount;
+
+    public Task InitializeAsync()
+    {
+        IsInitialized = true;
+        return Task.CompletedTask;
+    }
+
+    public void Dispose() => Interlocked.Increment(ref _disposeCount);
 }
 
 public sealed class NestedProbeDependency : IAsyncInitializer, IDisposable
@@ -292,6 +320,8 @@ public class NestedScopeDependencyTests(NestedProbeService service)
         // The dependency is still found beneath the service and initialized.
         await Assert.That(service.Dependency.IsInitialized).IsTrue();
         await Assert.That(service.Dependency.DisposeCount).IsEqualTo(0);
+        await Assert.That(service.Fixture.IsInitialized).IsTrue();
+        await Assert.That(service.Fixture.DisposeCount).IsEqualTo(0);
     }
 }
 
@@ -337,6 +367,10 @@ public class DependencyInjectionScopeDisposalObserverTests
         var nestedDependencies = NestedProbeScope.Created.SelectMany(x => x.Dependencies).ToArray();
         await Assert.That(nestedDependencies.Length).IsEqualTo(1);
         await Assert.That(nestedDependencies.Count(x => x.DisposeCount == 1)).IsEqualTo(1);
+
+        // TUnit injected the fixture beneath the scope-owned service, so the object tracker disposes it once.
+        await Assert.That(InjectedProbeFixture.Created.Count).IsEqualTo(1);
+        await Assert.That(InjectedProbeFixture.Created.Count(x => x.DisposeCount == 1)).IsEqualTo(1);
     }
 
     private static async Task AssertScopes(string owner, int expectedCount)

@@ -367,21 +367,38 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             DiscoverNestedObjectsForTracking(value, visitedObjects, depth, heldByExternalOwner: false, cancellationToken);
         }
 
-        // Traverse injectable properties (useSourceRegistrarCheck = true for tracking mode)
-        TraverseInjectableProperties(obj, TryAddTracking, Recurse, currentDepth, cancellationToken, useSourceRegistrarCheck: true);
-
-        // Also discover nested IAsyncInitializer objects from ALL properties
         if (!externallyOwned)
         {
+            // Traverse injectable properties (useSourceRegistrarCheck = true for tracking mode)
+            TraverseInjectableProperties(obj, TryAddTracking, Recurse, currentDepth, cancellationToken, useSourceRegistrarCheck: true);
+
+            // Also discover nested IAsyncInitializer objects from ALL properties
             TraverseInitializerProperties(obj, TryAddTracking, Recurse, currentDepth, cancellationToken);
             return;
         }
 
-        // The owner of obj (a dependency injection scope) created what obj holds and disposes it, so the
-        // tracker must not dispose it a second time (#7205). The objects are still tracked, so they are
-        // initialized.
+        // TUnit injected these values even though obj is externally owned, so the tracker still owns them.
+        // The initializer traversal below visits the same properties again and must not mark them.
+        HashSet<object>? injectedValues = null;
+
+        bool TryAddInjected(object value, int depth)
+        {
+            (injectedValues ??= new HashSet<object>(ReferenceComparer)).Add(value);
+            return TryAddToHashSet(visitedObjects, depth, value);
+        }
+
+        TraverseInjectableProperties(obj, TryAddInjected, Recurse, currentDepth, cancellationToken, useSourceRegistrarCheck: true);
+
+        // The owner of obj (a dependency injection scope) created the rest of what obj holds and disposes
+        // it, so the tracker must not dispose it a second time (#7205). The objects are still tracked, so
+        // they are initialized.
         bool TryAddOwned(object value, int depth)
         {
+            if (injectedValues?.Contains(value) == true)
+            {
+                return false;
+            }
+
             if (value is IDisposable or IAsyncDisposable)
             {
                 ObjectTracker.MarkExternallyOwned(value);
