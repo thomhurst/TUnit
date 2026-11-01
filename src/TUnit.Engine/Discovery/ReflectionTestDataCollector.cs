@@ -1939,7 +1939,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     /// <summary>
     /// The failure message for a method-level [GenerateGenericTest] whose type arguments do not match the
-    /// method's type parameters, or null when they do. Source-generated mode
+    /// method's type parameters or that names a pointer type, or null when it is valid. Source-generated mode
     /// (<c>DescribeGenerateGenericTestArityError</c> in TUnit.Core.SourceGenerator) reports the same text.
     /// </summary>
     private static string? GetGenerateGenericTestArityError(string methodName, Type[] typeArguments, int methodTypeParameterCount)
@@ -1954,6 +1954,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return $"[GenerateGenericTest] on method '{methodName}' provides {typeArguments.Length} type argument(s) " +
                 $"but method requires {methodTypeParameterCount}. " +
                 $"Provided: [{string.Join(", ", typeArguments.Select(static t => t.Name))}]";
+        }
+
+        foreach (var typeArgument in typeArguments)
+        {
+            if (typeArgument.IsPointer
+#if NET8_0_OR_GREATER
+                || typeArgument.IsFunctionPointer
+#endif
+               )
+            {
+                return $"[GenerateGenericTest] on method '{methodName}' provides type argument '{typeArgument.Name}', which cannot be a generic type argument";
+            }
         }
 
         return null;

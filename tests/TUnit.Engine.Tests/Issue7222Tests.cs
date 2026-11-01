@@ -64,4 +64,53 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Failed.ShouldBe(2)
             ]);
     }
+
+    [Test]
+    public async Task Wrongly_Sized_GenerateGenericTest_Fails_When_None_Is_Valid_On_A_Generic_Class()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/OnlyWronglySizedOnGenericClassTests*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.Results.Single().Output?.ErrorInfo?.Message
+                    .ShouldContain("[GenerateGenericTest] on method 'NoTypeArguments' has no type arguments")
+            ]);
+    }
+
+    [Test]
+    public async Task Arity_And_Constraint_Failures_Both_Fail()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/ArityAndConstraintOrderTests*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(2)
+            ]);
+    }
+
+    [Test]
+    public async Task Wrongly_Sized_GenerateGenericTest_Fails_Once_Beside_Class_Rows()
+    {
+        // Two class rows run MixedArity<string>; the wrongly sized one fails once, not once per class row
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/ClassRowsGenerateGenericTestArityTests*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(3),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1)
+            ]);
+    }
+
+    [Test]
+    public async Task Constructor_Argument_Class_Runs_Valid_And_Fails_Wrongly_Sized()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/ConstructorArgumentGenerateGenericTestArityTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1)
+            ]);
+    }
 }
