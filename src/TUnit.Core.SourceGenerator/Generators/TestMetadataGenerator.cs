@@ -960,11 +960,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     // The class rows' instantiation of a class-level [GenerateGenericTest]'s types stands for both,
                     // so it also reads the own-class [MethodDataSource] members that only [GenerateGenericTest]
-                    // supplies the types of, whether or not the method has rows. AddRow skips a source a repeated
-                    // attribute already added. Reflection mode does the same in AddDeferredOwnSources (#7208).
+                    // supplies the types of, and those whose declared rows infer these types, whether or not the
+                    // method has rows. AddRow skips a source a repeated attribute already added. Reflection mode
+                    // does the same in AddDeferredOwnSources and GroupClassRowsByTypeArgumentsAsync (#7208).
                     if (fromGenerateGenericTest && existing.HasClassRows)
                     {
-                        foreach (var ownSource in GetOwnClassMethodDataSourcesWithUninferredRows(testMethod))
+                        foreach (var ownSource in GetOwnClassMethodDataSourcesForInstantiation(testMethod, classTypeArgs))
                         {
                             existing.AddRow(ownSource, isClassRow: true);
                         }
@@ -7240,12 +7241,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// The class-level [MethodDataSource] attributes of a generic test class that name a member of the class itself
-    /// (no class given) whose declared rows infer no types: rows that name the class's type parameters
-    /// (<c>IEnumerable&lt;T&gt;</c>), or whose types are only known at run time (<c>object</c>, <c>object[]</c> or a
-    /// non-generic <c>IEnumerable</c>). Only the class's [GenerateGenericTest] types can close the class those members
-    /// are read on, as in reflection mode (#7208).
+    /// (no class given) and whose rows belong on the instantiation with <paramref name="classTypeArgs"/>: those whose
+    /// declared rows infer no types, because they name the class's type parameters (<c>IEnumerable&lt;T&gt;</c>) or
+    /// their types are only known at run time (<c>object</c>, <c>object[]</c> or a non-generic <c>IEnumerable</c>),
+    /// so only the class's [GenerateGenericTest] types can close the class those members are read on; and those whose
+    /// declared rows infer exactly these types through the constructor (<c>IEnumerable&lt;int&gt;</c> on
+    /// <c>C&lt;T&gt;(T value)</c> for <c>C&lt;int&gt;</c>). Reflection mode groups both the same way (#7208).
     /// </summary>
-    private static IEnumerable<AttributeData> GetOwnClassMethodDataSourcesWithUninferredRows(TestMethodMetadata testMethod)
+    private static IEnumerable<AttributeData> GetOwnClassMethodDataSourcesForInstantiation(TestMethodMetadata testMethod, ITypeSymbol[] classTypeArgs)
     {
         var compilation = testMethod.CompilationContext.Compilation;
         foreach (var attribute in testMethod.TypeSymbol.GetAttributes())
@@ -7263,11 +7266,72 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
 
             var rowType = GetMethodDataSourceRowType(member, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
-            if (rowType == null || CodeGenerationHelpers.ContainsTypeParameter(rowType))
+            if (rowType == null
+                || CodeGenerationHelpers.ContainsTypeParameter(rowType)
+                || (InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType) is { } inferred
+                    && inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default)))
             {
                 yield return attribute;
             }
         }
+    }
+
+    /// <summary>
+    /// The class type arguments that the declared row type of an own-class [MethodDataSource] member infers, by
+    /// matching the row's elements against the parameters of the constructor the instance is built with: the first
+    /// public one, or, when the class has a parameterless constructor (which ignores the rows), the first public one
+    /// that infers every type argument. Null when a type argument stays unknown or would be <c>object</c>. Mirrors
+    /// reflection mode's <c>InferClassTypeArgumentsFromOwnMemberRowType</c> (#7208).
+    /// </summary>
+    private static ITypeSymbol[]? InferClassTypesFromOwnMemberRowType(INamedTypeSymbol classSymbol, ITypeSymbol rowType)
+    {
+        ITypeSymbol[] rowElements = rowType is INamedTypeSymbol { IsTupleType: true } tupleType
+            ? tupleType.TupleElements.Select(element => element.Type).ToArray()
+            : [rowType];
+        var constructors = classSymbol.InstanceConstructors
+            .Where(constructor => constructor.DeclaredAccessibility == Accessibility.Public)
+            .ToArray();
+
+        if (constructors.Length > 0 && !constructors.Any(constructor => constructor.Parameters.Length == 0))
+        {
+            return InferClassTypesFromConstructorRow(constructors[0], rowElements, classSymbol.TypeParameters);
+        }
+
+        foreach (var constructor in constructors)
+        {
+            if (InferClassTypesFromConstructorRow(constructor, rowElements, classSymbol.TypeParameters) is { } typeArguments)
+            {
+                return typeArguments;
+            }
+        }
+
+        return null;
+    }
+
+    private static ITypeSymbol[]? InferClassTypesFromConstructorRow(IMethodSymbol constructor, ITypeSymbol[] rowElements, ImmutableArray<ITypeParameterSymbol> typeParameters)
+    {
+        var typeArguments = new ITypeSymbol[typeParameters.Length];
+
+        for (var i = 0; i < typeParameters.Length; i++)
+        {
+            for (var j = 0; j < constructor.Parameters.Length && j < rowElements.Length && typeArguments[i] == null; j++)
+            {
+                if (rowElements[j].SpecialType != SpecialType.System_Object
+                    && MatchTypeParameter(constructor.Parameters[j].Type, rowElements[j], typeParameters[i]) is { } typeArgument
+                    && !CodeGenerationHelpers.ContainsTypeParameter(typeArgument)
+                    && typeArgument.SpecialType != SpecialType.System_Object)
+                {
+                    typeArguments[i] = typeArgument;
+                }
+            }
+
+            if (typeArguments[i] == null)
+            {
+                return null;
+            }
+        }
+
+        return typeArguments;
     }
 
     private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)

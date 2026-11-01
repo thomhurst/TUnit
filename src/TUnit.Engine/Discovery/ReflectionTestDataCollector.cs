@@ -817,8 +817,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
 
                 // Determine generic type arguments from the data. The null value of an [Arguments<T>(null)] row
-                // infers its declared T instead, as in the source generator.
-                var typeArguments = InferTypeArgumentsFromRowValues(genericTypeDefinition, dataRow, memberTypeArguments)
+                // infers its declared T instead, as in the source generator. Every row of an own-class member
+                // takes the types its declared rows inferred through the constructor, which the member was read
+                // with: a row's value can't infer them, whether it is null or binds to a T[] parameter (#7208).
+                var typeArguments = memberTypeArguments
+                    ?? InferTypeArgumentsFromRowValues(genericTypeDefinition, dataRow)
                     ?? InferTypeArgumentsFromNullTypedArgumentsRow(genericTypeDefinition, dataSource, dataRow);
                 if (typeArguments == null || typeArguments.Length == 0 || constraintViolations.TryAddClassViolation(typeArguments))
                 {
@@ -873,16 +876,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// The class type arguments a class data row infers from the values the instance is built with. A
     /// <see cref="TestDataRow{T}"/> row is unwrapped as execution unwraps it, so <c>TestDataRow&lt;int&gt;</c> rows
     /// infer <c>C&lt;int&gt;</c>, not <c>C&lt;TestDataRow&lt;int&gt;&gt;</c>; the partition keeps the wrapper for its row
-    /// metadata. A <c>Func</c> inside the wrapper is not invoked here, because execution invokes it for each test, so
-    /// its row takes the types <paramref name="declaredTypeArguments"/> holds for an own-class member (#7208).
+    /// metadata. A <c>Func</c> inside the wrapper is not invoked here, because execution invokes it for each test.
     /// </summary>
-    private static Type[]? InferTypeArgumentsFromRowValues(Type genericTypeDefinition, object?[] dataRow, Type[]? declaredTypeArguments)
+    private static Type[]? InferTypeArgumentsFromRowValues(Type genericTypeDefinition, object?[] dataRow)
     {
         if (dataRow is [ITestDataRow testDataRow])
         {
             if (testDataRow.GetData() is Delegate)
             {
-                return declaredTypeArguments ?? ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
+                return ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
             }
 
             dataRow = TestDataRowUnwrapper.UnwrapArray(dataRow).Data;

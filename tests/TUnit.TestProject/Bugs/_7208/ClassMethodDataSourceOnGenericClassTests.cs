@@ -252,3 +252,52 @@ public class OwnClassTestDataRowIntMethodDataSourceWithGenerateGenericTest<T>(T 
         await Assert.That(value).IsTypeOf<int>();
     }
 }
+
+// The rows of an own-class member take the types its declared rows infer through the constructor: int[] rows bound
+// to a T[] parameter close C<int>, not C<int[]> (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassArrayParameterMethodDataSourceWithGenerateGenericTest<T>(T[] values)
+{
+    public static IEnumerable<int[]> Rows() => [[5]];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(values).IsTypeOf<int[]>();
+        await Assert.That(values[0]!.ToString()).IsEqualTo("5");
+    }
+}
+
+// A null row of an own-class member still takes the type its declared rows infer (Greptile review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassNullTestDataRowMethodDataSource<T>(T value)
+{
+    public static IEnumerable<TestDataRow<string?>> Rows() => [new(null)];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(value).IsNull();
+    }
+}
+
+// An own-class member whose declared rows infer the types of the [GenerateGenericTest] instantiation that class
+// [Arguments] rows also infer is read on it too (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassConcreteMethodDataSourceWithArgumentsAndGenerateGenericTest<T>(T value)
+{
+    public static IEnumerable<int> Rows() => [5];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+    }
+}

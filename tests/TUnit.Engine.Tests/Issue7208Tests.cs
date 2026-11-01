@@ -18,6 +18,7 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("OwnClassSingleRowMethodDataSource")]
     [Arguments("OwnClassAsyncEnumerableMethodDataSource")]
     [Arguments("OwnClassTestDataRowIntMethodDataSourceWithGenerateGenericTest")]
+    [Arguments("OwnClassArrayParameterMethodDataSourceWithGenerateGenericTest")]
     public async Task Instance_Is_Built_From_The_Own_Class_Member(string className)
     {
         await RunTestsWithFilter(
@@ -35,6 +36,7 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("OwnClassTypeParameterMethodDataSourceWithArgumentsAndGenerateGenericTestParameterless")]
     [Arguments("OwnClassObjectArrayMethodDataSourceWithArgumentsAndGenerateGenericTest")]
     [Arguments("OwnClassTestDataRowObjectMethodDataSourceWithArgumentsAndGenerateGenericTest")]
+    [Arguments("OwnClassConcreteMethodDataSourceWithArgumentsAndGenerateGenericTest")]
     public async Task Generate_Generic_Test_Instantiation_Inferred_By_Class_Arguments_Reads_The_Own_Class_Member(string className)
     {
         // Both modes run the [Arguments(1)] row and the own-class member's row on the int instantiation,
@@ -64,13 +66,15 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    public async Task Rows_Infer_Types_From_The_Constructor_The_Instance_Is_Built_With()
+    [Arguments("OwnClassMethodDataSourceWithSeveralConstructors")]
+    [Arguments("OwnClassNullTestDataRowMethodDataSource")]
+    public async Task Rows_Infer_Types_From_The_Constructor_The_Instance_Is_Built_With(string className)
     {
         // Source-gen never infers a generic class's types from its class-level [MethodDataSource] alone (#7333)
         Skip.When(testMode != TestMode.Reflection, "Only reflection mode discovers this class");
 
         await RunTestsWithFilter(
-            "/*/TUnit.TestProject.Bugs._7208/OwnClassMethodDataSourceWithSeveralConstructors/*",
+            $"/*/TUnit.TestProject.Bugs._7208/{className}/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
@@ -82,7 +86,7 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     public async Task Uninferable_Own_Class_Member_Fails_Only_Its_Class()
     {
-        // Source-gen emits no test for this class or the several-constructors class (#7333). Reflection
+        // Source-gen emits no test for this class, the several-constructors class or the null-row class (#7333). Reflection
         // reports one failed test for this class, and the rest of the namespace still runs.
         var reflection = testMode == TestMode.Reflection;
 
@@ -90,8 +94,8 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7208/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe(reflection ? "Failed" : "Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 19 : 17),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 18 : 17),
+                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 23 : 20),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 22 : 20),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(reflection ? 1 : 0),
                 result => result.Results
                     .Where(x => x.Outcome == "Failed")
