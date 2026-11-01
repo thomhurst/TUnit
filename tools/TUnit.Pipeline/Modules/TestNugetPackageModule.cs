@@ -45,8 +45,8 @@ public abstract class AbstractTestNugetPackageModule : TestBaseModule
         {
             yield return "net10.0";
 
-            // See ModernFrameworks: macOS runs net10.0 alone.
-            if (!IsMacOS)
+            // See ModernFrameworks: only Linux covers net8.0.
+            if (IsLinux)
             {
                 yield return "net8.0";
             }
