@@ -7243,7 +7243,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// The class-level [MethodDataSource] attributes of a generic test class that name a member of the class itself
     /// (no class given) and whose rows belong on the instantiation with <paramref name="classTypeArgs"/>: those whose
     /// declared rows infer no types, because they name the class's type parameters (<c>IEnumerable&lt;T&gt;</c>) or
-    /// their types are only known at run time (<c>object</c>, <c>object[]</c> or a non-generic <c>IEnumerable</c>),
+    /// their types are only known at run time (<c>object</c>, <c>object[]</c>, a non-generic <c>IEnumerable</c>, or a
+    /// tuple such as <c>(object, string)</c> whose generic constructor column is <c>object</c>),
     /// so only the class's [GenerateGenericTest] types can close the class those members are read on; and those whose
     /// declared rows infer exactly these types through the constructor (<c>IEnumerable&lt;int&gt;</c> on
     /// <c>C&lt;T&gt;(T value)</c> for <c>C&lt;int&gt;</c>). Reflection mode groups both the same way (#7208).
@@ -7265,11 +7266,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 continue;
             }
 
+            // Like reflection mode, a member whose declared rows infer no types through the constructor belongs on
+            // every [GenerateGenericTest] instantiation, whatever the row's shape: IEnumerable<T>, object[], or a
+            // tuple whose generic constructor column is declared as object, such as (object, string).
             var rowType = GetMethodDataSourceRowType(member, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
-            if (rowType == null
-                || CodeGenerationHelpers.ContainsTypeParameter(rowType)
-                || (InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType) is { } inferred
-                    && inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default)))
+            var inferred = rowType == null || CodeGenerationHelpers.ContainsTypeParameter(rowType)
+                ? null
+                : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType);
+            if (inferred == null || inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default))
             {
                 yield return attribute;
             }

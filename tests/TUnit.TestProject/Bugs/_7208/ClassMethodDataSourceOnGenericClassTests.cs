@@ -220,6 +220,24 @@ public class OwnClassObjectArrayMethodDataSourceWithArgumentsAndGenerateGenericT
     }
 }
 
+// A tuple row whose generic constructor column is declared as object infers no types either, so it's read on the
+// [GenerateGenericTest] instantiation that the class [Arguments] rows also infer (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1, "a")]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassObjectTupleMethodDataSourceWithArgumentsAndGenerateGenericTest<T>(T value, string label)
+{
+    public static IEnumerable<(object, string)> Rows() => [(5, "b")];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(label).IsNotNull();
+    }
+}
+
 // TestDataRow<object> rows name no type, so they're read on the [GenerateGenericTest] instantiation, not on a
 // TestDataRow<object> one (Codex review of #7336)
 [EngineTest(ExpectedResult.Pass)]
