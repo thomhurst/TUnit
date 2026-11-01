@@ -84,11 +84,17 @@ internal class DataUnwrapper
         // The engine supplies CancellationToken parameters wherever they are declared, so the row
         // binds to the data parameters only.
         var dataParameterCount = 0;
+        var firstDataParameterIndex = -1;
         var lastDataParameterIndex = -1;
         for (var i = 0; i < expectedParameters.Length; i++)
         {
             if (expectedParameters[i].Type != typeof(CancellationToken))
             {
+                if (dataParameterCount == 0)
+                {
+                    firstDataParameterIndex = i;
+                }
+
                 dataParameterCount++;
                 lastDataParameterIndex = i;
             }
@@ -107,6 +113,17 @@ internal class DataUnwrapper
             return values;
         }
 
+        // A tuple that is already an instance of the first data parameter's tuple type binds to it
+        // whole when every later data parameter can be omitted (optional or params).
+        var firstDataParameterType = expectedParameters[firstDataParameterIndex].Type;
+        if (dataParameterCount > 1
+            && TupleHelper.IsTupleType(firstDataParameterType)
+            && firstDataParameterType.IsInstanceOfType(values[0])
+            && RemainingDataParametersAreOmittable(expectedParameters, firstDataParameterIndex))
+        {
+            return values;
+        }
+
         var elements = DataSourceHelpers.UnwrapTupleAot(values[0]);
 
         // A trailing array data parameter collects every remaining element. Otherwise extra
@@ -119,5 +136,19 @@ internal class DataUnwrapper
         var capped = new object?[dataParameterCount];
         Array.Copy(elements, capped, dataParameterCount);
         return capped;
+    }
+
+    private static bool RemainingDataParametersAreOmittable(ParameterMetadata[] parameters, int firstDataParameterIndex)
+    {
+        for (var i = firstDataParameterIndex + 1; i < parameters.Length; i++)
+        {
+            var parameter = parameters[i];
+            if (parameter.Type != typeof(CancellationToken) && !parameter.IsOptional && !parameter.IsParams)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
