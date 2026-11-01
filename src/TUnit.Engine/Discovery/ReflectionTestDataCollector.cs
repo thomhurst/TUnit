@@ -1388,7 +1388,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             var group = classRowGroups[i];
             if (AreSameTypeArguments(group.TypeArguments, typeArguments))
             {
-                classRowGroups[i] = group with { ClassDataSources = [.. group.ClassDataSources, .. deferredOwnSources] };
+                // Repeated [GenerateGenericTest] attributes for the same types read the sources once
+                if (Array.IndexOf(group.ClassDataSources, deferredOwnSources[0]) < 0)
+                {
+                    classRowGroups[i] = group with { ClassDataSources = [.. group.ClassDataSources, .. deferredOwnSources] };
+                }
+
                 return;
             }
         }
@@ -2310,9 +2315,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <c>IEnumerable&lt;string&gt; Rows()</c> on <c>C&lt;T&gt;(T value)</c> infers <c>string</c>. The member is
     /// the one invocation reads, so overloads resolve by the attribute's <c>Arguments</c>. It may return its rows
     /// directly, through <c>Task</c> or <c>ValueTask</c>, as a sequence of rows or <c>Func</c>s of rows, or as a
-    /// single row. Every public constructor is tried, and the result is used only when they all agree, so it does
-    /// not depend on the order reflection lists them in. Null when a type argument stays unknown, such as for rows
-    /// declared as <c>object</c>, <c>object[]</c> or with the class's own type parameters.
+    /// single row. The rows are matched against the constructor that instance creation binds them to (see
+    /// <see cref="CreateInstanceFactory"/>), so a constructor the instance is never built with cannot change or
+    /// veto the types. Only when instance creation uses a parameterless constructor, which ignores the rows, is
+    /// the first public constructor that infers the types used. Null when a type argument stays unknown, such as
+    /// for rows declared as <c>object</c>, <c>object[]</c> or with the class's own type parameters.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
     private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource)
@@ -2325,25 +2332,36 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var rowElements = GetValueTupleElementTypes(rowType) ?? [rowType];
         var typeParameters = genericTypeDefinition.GetGenericArguments();
-        Type[]? inferred = null;
+        var constructors = genericTypeDefinition.GetConstructors();
 
-        foreach (var constructor in genericTypeDefinition.GetConstructors())
+        // Instance creation uses a parameterless constructor when there is one, and otherwise the first one
+        if (constructors.Length > 0 && !HasParameterlessConstructor(constructors))
         {
-            if (InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowElements, typeParameters) is not { } typeArguments)
-            {
-                continue;
-            }
-
-            if (inferred != null && !AreSameTypeArguments(inferred, typeArguments))
-            {
-                // Constructors disagree on the types, so the declared rows don't settle them
-                return null;
-            }
-
-            inferred = typeArguments;
+            return InferTypeArgumentsFromConstructorRow(constructors[0].GetParameters(), rowElements, typeParameters);
         }
 
-        return inferred;
+        foreach (var constructor in constructors)
+        {
+            if (InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowElements, typeParameters) is { } typeArguments)
+            {
+                return typeArguments;
+            }
+        }
+
+        return null;
+    }
+
+    private static bool HasParameterlessConstructor(ConstructorInfo[] constructors)
+    {
+        foreach (var constructor in constructors)
+        {
+            if (constructor.GetParameters().Length == 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static Type[]? InferTypeArgumentsFromConstructorRow(ParameterInfo[] parameters, Type[] rowElements, Type[] typeParameters)

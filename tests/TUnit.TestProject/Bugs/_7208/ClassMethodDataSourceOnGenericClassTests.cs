@@ -145,3 +145,43 @@ public class OwnClassTypeParameterMethodDataSourceWithArgumentsAndGenerateGeneri
         await Assert.That(arg!.ToString()).IsEqualTo("2");
     }
 }
+
+// The rows infer the types from the constructor the instance is built with (the first one), so a later
+// constructor that would infer other types does not reject them.
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassMethodDataSourceWithSeveralConstructors<T>
+{
+    private readonly T _value;
+
+    public OwnClassMethodDataSourceWithSeveralConstructors(T value) => _value = value;
+
+    public OwnClassMethodDataSourceWithSeveralConstructors(T[] values) => _value = values[0];
+
+    public static IEnumerable<int[]> Rows() => [[7]];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(_value).IsTypeOf<int[]>();
+    }
+}
+
+// Repeating a [GenerateGenericTest] that class [Arguments] rows also infer reads the own-class member once.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+[MethodDataSource(nameof(Values))]
+public class OwnClassTypeParameterMethodDataSourceWithArgumentsAndRepeatedGenerateGenericTest<T>(T value)
+{
+    public static IEnumerable<T> Values() => [(T)(object)5];
+
+    [Test]
+    [Arguments(2)]
+    public async Task Test(T arg)
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(arg!.ToString()).IsEqualTo("2");
+    }
+}

@@ -48,18 +48,50 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task Repeated_Generate_Generic_Test_Reads_The_Own_Class_Member_Once()
+    {
+        // Same counts as with a single [GenerateGenericTest(typeof(int))]: the repeated attribute adds no rows.
+        var expected = testMode == TestMode.Reflection ? 2 : 1;
+
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7208/OwnClassTypeParameterMethodDataSourceWithArgumentsAndRepeatedGenerateGenericTest/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(expected),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(expected),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task Rows_Infer_Types_From_The_Constructor_The_Instance_Is_Built_With()
+    {
+        // Source-gen never infers a generic class's types from its class-level [MethodDataSource] alone (#7333)
+        Skip.When(testMode != TestMode.Reflection, "Only reflection mode discovers this class");
+
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7208/OwnClassMethodDataSourceWithSeveralConstructors/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
     public async Task Uninferable_Own_Class_Member_Fails_Only_Its_Class()
     {
-        // Source-gen emits no test for this class (#7333). Reflection reports one failed test for it, and
-        // the rest of the namespace still runs.
+        // Source-gen emits no test for this class or the several-constructors class (#7333). Reflection
+        // reports one failed test for this class, and the rest of the namespace still runs.
         var reflection = testMode == TestMode.Reflection;
 
         await RunTestsWithFilter(
             "/*/TUnit.TestProject.Bugs._7208/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe(reflection ? "Failed" : "Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 9 : 7),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 8 : 7),
+                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 12 : 8),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 11 : 8),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(reflection ? 1 : 0),
                 result => result.Results
                     .Where(x => x.Outcome == "Failed")
