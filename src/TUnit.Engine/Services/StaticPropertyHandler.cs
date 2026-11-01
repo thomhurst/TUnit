@@ -4,6 +4,7 @@ using TUnit.Core.Helpers;
 using TUnit.Core.StaticProperties;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.Engine.Services;
 
@@ -97,9 +98,14 @@ internal sealed class StaticPropertyHandler
     /// Goes through the ObjectTracker (decrementing the +1 reference TrackStaticProperties took)
     /// rather than disposing directly, so the tracking entry is removed and the session-end
     /// sweep in TestSessionCoordinator does not dispose the same object a second time.
+    /// The session's static property data sources subscribed their own cleanup, such as disposing a
+    /// dependency injection scope, on the global static property context; that runs first, as a test's
+    /// OnDispose callbacks run before its objects are untracked.
     /// </summary>
     public async Task DisposeStaticPropertiesAsync(List<Exception> cleanupExceptions)
     {
+        await TestOnDisposeRaiser.RaiseForSessionAsync(TestSessionContext.GlobalStaticPropertyContext, cleanupExceptions).ConfigureAwait(false);
+
         var staticProperties = _trackableObjectGraphProvider.GetStaticPropertyTrackableObjects();
 
         foreach (var staticProperty in staticProperties)
