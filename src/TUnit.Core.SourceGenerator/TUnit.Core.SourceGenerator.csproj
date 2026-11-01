@@ -30,6 +30,10 @@
     <Compile Remove="Helpers\GenericTypeInference.cs" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Shared with TUnit.Engine so both modes report the same [GenerateGenericTest] arity message (#7222) -->
+    <Compile Include="..\TUnit.Core\Helpers\GenerateGenericTestArityMessages.cs" Link="Shared\GenerateGenericTestArityMessages.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Folder Include="CodeGenerators\Writers\Hooks\" />
   </ItemGroup>
 </Project>

@@ -103,6 +103,24 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task Failing_Instance_Source_Rows_Keep_The_Class_Constructor_Arguments()
+    {
+        // Each row of the instance data source fails on its own. Without the class data sources, source-generated
+        // mode could not build the instance that the rows come from and reported one constructor error instead.
+        // The message differs by mode: source-generated mode cannot infer the type from [InstanceMethodDataSource].
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/InstanceSourceConstraintViolationTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(2),
+                result => result.Results.ShouldAllBe(x => x.Output != null
+                    && x.Output.ErrorInfo != null
+                    && x.Output.ErrorInfo.Message != null
+                    && !x.Output.ErrorInfo.Message.Contains("Index was outside the bounds of the array"))
+            ]);
+    }
+
+    [Test]
     public async Task Constructor_Argument_Class_Runs_Valid_And_Fails_Wrongly_Sized()
     {
         await RunTestsWithFilter(
