@@ -33,6 +33,11 @@ internal static class TraceScopeRegistry
             return;
         }
 
+        if (dataSource is GenericClassRowPartitionDataSource partition)
+        {
+            dataSource = partition.InnerDataSource;
+        }
+
         if (dataSource is not ITraceScopeProvider traceScopeProvider)
         {
             return;

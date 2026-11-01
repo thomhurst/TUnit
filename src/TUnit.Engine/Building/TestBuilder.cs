@@ -886,10 +886,15 @@ internal sealed class TestBuilder : ITestBuilder
 
     /// <summary>
     /// The object whose properties are injected for a data source: the wrapped source of a
-    /// <see cref="GenericConstraintViolationDataSource"/>, whose rows it enumerates, else the source itself.
+    /// <see cref="GenericConstraintViolationDataSource"/> or <see cref="GenericClassRowPartitionDataSource"/>, whose
+    /// rows it enumerates, else the source itself.
     /// </summary>
-    private static object GetInjectionTarget(IDataSourceAttribute dataSource)
-        => dataSource is GenericConstraintViolationDataSource { InnerDataSource: { } inner } ? inner : dataSource;
+    private static object GetInjectionTarget(IDataSourceAttribute dataSource) => dataSource switch
+    {
+        GenericConstraintViolationDataSource { InnerDataSource: { } inner } => inner,
+        GenericClassRowPartitionDataSource partition => GetInjectionTarget(partition.InnerDataSource),
+        _ => dataSource,
+    };
 
     private ValueTask<IDataSourceAttribute[]> GetDataSourcesAsync(IDataSourceAttribute[] dataSources, CancellationToken cancellationToken = default)
     {
@@ -926,8 +931,12 @@ internal sealed class TestBuilder : ITestBuilder
     /// the test's attributes (see <see cref="ScopeRowAttributesToTest"/>), so that source receives the
     /// property injection the test's other data sources do before its callbacks run.
     /// </summary>
-    private static object SourceToInject(IDataSourceAttribute dataSource) =>
-        dataSource is StaticDataSourceAttribute { PartitionOf: { } partitionedSource } ? partitionedSource : GetInjectionTarget(dataSource);
+    private static object SourceToInject(IDataSourceAttribute dataSource) => dataSource switch
+    {
+        StaticDataSourceAttribute { PartitionOf: { } partitionedSource } => partitionedSource,
+        GenericClassRowPartitionDataSource partition => GetInjectionTarget(partition.InnerDataSource),
+        _ => GetInjectionTarget(dataSource),
+    };
 
     /// <summary>
     /// Ensures a data source is initialized before use and returns data rows.
@@ -1664,6 +1673,12 @@ internal sealed class TestBuilder : ITestBuilder
         if (classDataSource is StaticDataSourceAttribute { PartitionOf: { } partitionedSource })
         {
             classDataSource = partitionedSource;
+        }
+
+        // Source-generated mode partitions those rows at run time instead (#7210)
+        if (classDataSource is GenericClassRowPartitionDataSource partition)
+        {
+            classDataSource = partition.InnerDataSource;
         }
 
         var appendClass = IsRowScopedDataSource(classDataSource);

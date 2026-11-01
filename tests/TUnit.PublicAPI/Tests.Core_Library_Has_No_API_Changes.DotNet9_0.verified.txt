@@ -790,6 +790,16 @@ namespace
         public . ExecuteBeforeTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action) { }
         public . ExecuteTest(.TestContext context, <.> action) { }
     }
+    public enum GenericClassRowFallback
+    {
+        None = 0,
+        AllRows = 1,
+        NoClassRow = 2,
+    }
+    public static class GenericClassRowPartition
+    {
+        public static .IDataSourceAttribute[] Create([] classTypeArguments, .GenericClassRowFallback fallback, .IDataSourceAttribute[] dataSources, params int[] partitionedIndices) { }
+    }
     public class GenericConstraintViolationDataSource : , .IDataSourceAttribute
     {
         public bool DeferEnumeration { get; set; }
