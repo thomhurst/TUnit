@@ -642,6 +642,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
 
                 var methodRows = methodArguments;
+
+                // The generic method definition beside the instantiations that typed sources' declared types
+                // close (#7206) runs the other sources, scoped to these class types like every source below
+                var typedSourceRemainder = methodRows != null && resolvedMethod.IsGenericMethodDefinition;
+                if (typedSourceRemainder)
+                {
+                    methodRows = null;
+                }
+
                 if (methodRows == null && classRowSources == null)
                 {
                     // Method rows inferring these types run on it alone, with the rows inferring none;
@@ -649,10 +658,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     methodRows = InfersTypeArguments(rowTypeArguments, typeArguments)
                         ? ScopeMethodRowsToClassTypeArguments(concreteType, resolvedMethod, rowTypeArguments, typeArguments)
                         : null;
+                    if (typedSourceRemainder)
+                    {
+                        methodRows = methodRows == null ? methodArguments : ExcludeDeclaredTypedSources(resolvedMethod, methodRows);
+                    }
                 }
                 else if (methodRows == null)
                 {
                     methodRows = ScopeMethodRowsToClassTypeArguments(concreteType, resolvedMethod, rowTypeArguments, typeArguments);
+                    if (typedSourceRemainder)
+                    {
+                        methodRows = methodRows == null ? methodArguments : ExcludeDeclaredTypedSources(resolvedMethod, methodRows);
+                    }
+
                     if (methodRows is [])
                     {
                         // Every method row infers another instantiation, so none runs on this one
@@ -1682,9 +1700,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         if (generateGenericTestAttributes.Length == 0)
         {
-            // No [GenerateGenericTest] attributes - yield the generic method definition as-is
-            // TestBuilder will attempt to infer types from data sources later
-            yield return (method, null, null);
+            // Typed data sources close the method over their declared type arguments, as the source
+            // generator does (#7206). The generic method definition runs every other source, and TestBuilder
+            // infers its type arguments from their values later.
+            foreach (var instantiation in ResolveDeclaredTypedSourceInstantiations(concreteClassType, method))
+            {
+                yield return instantiation;
+            }
+
             yield break;
         }
 
@@ -1789,6 +1812,114 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 testAttribute?.File ?? "Unknown",
                 testAttribute?.Line ?? 0,
                 constraintViolations.ToArray()), null);
+        }
+    }
+
+    /// <summary>
+    /// For a generic method without [GenerateGenericTest]: closes the method over the declared type arguments of
+    /// each typed data source (<c>DataSourceGeneratorAttribute&lt;T...&gt;</c>), as the generator's
+    /// <c>InferTypesFromDataSourceAttribute</c> does, so both modes run the same closed method (#7206). Typed
+    /// sources declaring the same types share one instantiation, as the generator joins them (#7163). The
+    /// generic method definition runs the other sources and infers its type arguments from their values, as
+    /// before. A source whose declared types break the method's constraints stays there too, so reflection mode
+    /// still runs it on its values' types (#7116).
+    /// </summary>
+    private static IEnumerable<(MethodInfo Method, TestMetadata? FailedMetadata, IDataSourceAttribute[]? MethodArguments)> ResolveDeclaredTypedSourceInstantiations(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)]
+        Type concreteClassType,
+        MethodInfo method)
+    {
+        // The same extraction BuildTestMetadata uses when it is given no sources, so the remaining sources are
+        // unchanged
+        IDataSourceAttribute[] dataSources;
+        try
+        {
+            dataSources = ReflectionAttributeExtractor.ExtractMethodDataSources(method, concreteClassType);
+        }
+        catch (Exception)
+        {
+            // An attribute that throws (for example from its constructor) must fail only this method, not the
+            // whole assembly: callers enumerate this outside their per-method try. Yielding the open method with
+            // no sources lets BuildTestMetadata repeat the extraction inside its own handler and report the
+            // failure as a failed test, as it did before #7206.
+            dataSources = [];
+        }
+
+        List<(MethodInfo Method, List<IDataSourceAttribute> Rows)>? instantiations = null;
+        List<IDataSourceAttribute>? remaining = null;
+
+        foreach (var dataSource in dataSources)
+        {
+            if (CloseOverDeclaredTypedSourceTypes(method, dataSource) is not { } closedMethod)
+            {
+                (remaining ??= []).Add(dataSource);
+                continue;
+            }
+
+            var typeArguments = closedMethod.GetGenericArguments();
+            var index = instantiations?.FindIndex(x => TypeArrayComparer.Instance.Equals(x.Method.GetGenericArguments(), typeArguments)) ?? -1;
+            if (index >= 0)
+            {
+                instantiations![index].Rows.Add(dataSource);
+            }
+            else
+            {
+                (instantiations ??= []).Add((closedMethod, [dataSource]));
+            }
+        }
+
+        if (instantiations is null)
+        {
+            yield return (method, null, null);
+            yield break;
+        }
+
+        foreach (var (closedMethod, rows) in instantiations)
+        {
+            yield return (closedMethod, null, rows.ToArray());
+        }
+
+        if (remaining is not null)
+        {
+            yield return (method, null, remaining.ToArray());
+        }
+    }
+
+    /// <summary>
+    /// <paramref name="dataSources"/> without the typed sources whose declared types close
+    /// <paramref name="method"/>: those run on their own instantiation (#7206).
+    /// </summary>
+    private static IDataSourceAttribute[] ExcludeDeclaredTypedSources(MethodInfo method, IDataSourceAttribute[] dataSources)
+        => Array.FindAll(dataSources, dataSource => CloseOverDeclaredTypedSourceTypes(method, dataSource) is null);
+
+    /// <summary>
+    /// The generic method <paramref name="method"/> closed over the declared type arguments of the typed data
+    /// source <paramref name="dataSource"/>, or null when the source declares none for it or they break the
+    /// method's constraints.
+    /// </summary>
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT; MakeGenericMethod over a data source's declared type arguments")]
+    private static MethodInfo? CloseOverDeclaredTypedSourceTypes(MethodInfo method, IDataSourceAttribute dataSource)
+    {
+        if (dataSource is ArgumentsAttribute)
+        {
+            return null;
+        }
+
+        var classGenericParameterCount = method.DeclaringType is { IsGenericType: true } declaringType
+            ? declaringType.GetGenericArguments().Length
+            : 0;
+        if (InferTypesFromTypedDataSource(dataSource, method.GetGenericArguments().Length, classGenericParameterCount) is not { } typeArguments)
+        {
+            return null;
+        }
+
+        try
+        {
+            return method.MakeGenericMethod(typeArguments);
+        }
+        catch (ArgumentException)
+        {
+            return null;
         }
     }
 
