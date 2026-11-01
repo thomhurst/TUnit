@@ -71,6 +71,40 @@ public class TypeFreeClassRowWithUninferredMethodSource<T>(int number)
     }
 }
 
+// A [MethodDataSource] member of the test class infers T from its declared type, as without a class row: C<int>
+// runs Run(5), built from the class row (number = 42). Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithInferringMethodSource<T>(int number)
+{
+    public static IEnumerable<int> Rows() => [5];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value).IsEqualTo(5);
+    }
+}
+
+// Beside only a type-free class row, a method row that infers types breaking the class's constraints fails, as
+// without a class row: [Arguments(null)] infers object, which is not a struct. [Arguments(1)] runs on C<int>.
+// No [EngineTest]: TUnit.Engine.Tests targets it by name, because it has a failing row.
+[Arguments(42)]
+public class TypeFreeClassRowConstraintViolation<T>(int number) where T : struct
+{
+    [Test]
+    [Arguments(1)]
+    [Arguments(null)]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That((object?)value).IsEqualTo(1);
+    }
+}
+
 public static class TypeFreeClassRowSources
 {
     public static IEnumerable<int> FortyThree() => [43];

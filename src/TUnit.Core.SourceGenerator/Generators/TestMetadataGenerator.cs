@@ -1250,15 +1250,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // arguments, a method row's values need not infer them: [GenerateGenericTest(typeof(object))]
             // with [Arguments(1)] runs C<object>, so the C<int> inferred here is not reported as a
             // violation. Reflection mode applies the same rule.
+            // A class row whose values go to no type parameter supplies no class type argument (#7209). Beside
+            // only such rows, an [Arguments(null)] row still infers object, and a row inferring types that
+            // break the class's constraints fails, as without a class row.
             var classTypeArgumentsSupplied = testMethod.TypeSymbol.GetAttributes().Any(a =>
-                a.AttributeClass is { } attributeClass
-                && (attributeClass.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute")
-                    || DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)));
-
-            // A class row whose values go to no type parameter supplies no class type argument, so an
-            // [Arguments(null)] row still infers object beside it, as without a class row (#7209).
-            // Reflection mode applies the same rule.
-            var nullArgumentsArrayInfersObject = !testMethod.TypeSymbol.GetAttributes().Any(a =>
                 a.AttributeClass is { } attributeClass
                 && (attributeClass.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute")
                     || (DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
@@ -1267,7 +1262,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
                 var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation,
-                    nullArgumentsArrayInfersObject: nullArgumentsArrayInfersObject);
+                    nullArgumentsArrayInfersObject: !classTypeArgumentsSupplied);
                 if (inferredTypes is { Length: > 0 })
                 {
                     (inferringRows ??= []).Add(methodArgAttr);
