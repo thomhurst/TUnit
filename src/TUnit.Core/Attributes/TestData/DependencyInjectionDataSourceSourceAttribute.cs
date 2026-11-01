@@ -12,6 +12,10 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
             // Create a new scope for each test execution
             var scope = CreateScope(dataGeneratorMetadata);
 
+            // Only a disposable scope can dispose what it resolves. Otherwise the object tracker keeps
+            // disposing the returned objects, as it does for any other data source.
+            var scopeOwnsCreatedObjects = scope is IDisposable or IAsyncDisposable;
+
             // Set up disposal for this specific scope in the current test context
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, _) =>
             {
@@ -36,17 +40,34 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                 })
                 .Select(x =>
                 {
-                    // The scope owns what it resolves and disposes it with itself above, so the
-                    // object tracker must not dispose it a second time when the test ends.
                     var created = Create(scope, x);
-                    ObjectTracker.MarkExternallyOwned(created);
+
+                    if (scopeOwnsCreatedObjects)
+                    {
+                        // The scope owns what it resolves and disposes it with itself above, so the
+                        // object tracker must not dispose it a second time when the test ends.
+                        ObjectTracker.MarkExternallyOwned(created);
+                    }
+
                     return created;
                 })
                 .ToArray();
         };
     }
 
+    /// <summary>
+    /// Creates the scope that resolves one test's arguments. A disposable scope is disposed when the
+    /// test ends, after its last attempt.
+    /// </summary>
     public abstract TScope CreateScope(DataGeneratorMetadata dataGeneratorMetadata);
 
+    /// <summary>
+    /// Resolves an argument of type <paramref name="type"/> from <paramref name="scope"/>.
+    /// </summary>
+    /// <remarks>
+    /// When the scope is disposable, it owns what this method returns: TUnit disposes the scope, and the
+    /// scope is expected to dispose the objects it resolved, so TUnit does not dispose them itself.
+    /// When the scope is not disposable, TUnit disposes disposable returned objects when the test ends.
+    /// </remarks>
     public abstract object? Create(TScope scope, Type type);
 }

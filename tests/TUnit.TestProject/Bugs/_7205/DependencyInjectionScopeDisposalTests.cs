@@ -8,7 +8,9 @@ namespace TUnit.TestProject.Bugs._7205;
 // events never reached the test built from the row, so no scope was ever disposed. Every scope must be
 // disposed when its test ends, in both engine modes, including the scope of the class row's first
 // fetch that the first test takes (#7205). Each scope owns and disposes the services it resolves, so
-// the object tracker must not dispose them a second time.
+// the object tracker must not dispose them a second time. A scope that is not disposable cannot dispose
+// what Create returns, so the object tracker still does. A row that fails after its scope was created
+// still disposes that scope (#7326).
 
 public sealed class ProbeScope : IDisposable
 {
@@ -76,6 +78,35 @@ public sealed class RetriedDependencyInjectionAttribute() : ProbeDependencyInjec
 public sealed class SkippedDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(SkippedScopeTests));
 
 public sealed class SkippedIfEmptyDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(SkippedIfEmptyScopeTests));
+
+public sealed class FailedRowDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(FailedRowScopeTests));
+
+// A scope that is not disposable, whose Create constructs each service itself: nothing but the object
+// tracker can dispose those services.
+public sealed class UnownedService : IDisposable
+{
+    public UnownedService()
+    {
+        Created.Add(this);
+    }
+
+    public static ConcurrentBag<UnownedService> Created { get; } = [];
+
+    private int _disposeCount;
+
+    public int DisposeCount => _disposeCount;
+
+    public void Dispose() => Interlocked.Increment(ref _disposeCount);
+}
+
+public sealed class NonDisposableScopeDependencyInjectionAttribute : DependencyInjectionDataSourceAttribute<NonDisposableScopeDependencyInjectionAttribute.Scope>
+{
+    public sealed class Scope;
+
+    public override Scope CreateScope(DataGeneratorMetadata dataGeneratorMetadata) => new();
+
+    public override object? Create(Scope scope, Type type) => new UnownedService();
+}
 
 [EngineTest(ExpectedResult.Pass)]
 [ClassRowDependencyInjection]
@@ -165,6 +196,32 @@ public class SkippedIfEmptyScopeTests(ProbeService service)
     public void Run(int value) => throw new InvalidOperationException($"Should have been skipped, but ran with {service} and {value}");
 }
 
+// The temporary instance for the instance method rows cannot be constructed, so the class row's first
+// fetch ends in a failed test instead. That test must still dispose the fetch's scope.
+[EngineTest(ExpectedResult.Failure)]
+[FailedRowDependencyInjection]
+public class FailedRowScopeTests
+{
+    public FailedRowScopeTests(ProbeService service)
+    {
+        throw new InvalidOperationException($"The class cannot be constructed with {service}, so its row fails.");
+    }
+
+    public IEnumerable<int> Rows() => [1];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(Rows))]
+    public void Run(int value) => throw new InvalidOperationException($"Should have failed to build, but ran with {value}");
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[NonDisposableScopeDependencyInjection]
+public class NonDisposableScopeTests(UnownedService service)
+{
+    [Test]
+    public async Task Run() => await Assert.That(service.DisposeCount).IsEqualTo(0);
+}
+
 [EngineTest(ExpectedResult.Pass)]
 public class DependencyInjectionScopeDisposalObserverTests
 {
@@ -176,6 +233,8 @@ public class DependencyInjectionScopeDisposalObserverTests
     [DependsOn(typeof(RetriedScopeTests))]
     [DependsOn(typeof(SkippedScopeTests), ProceedOnFailure = true)]
     [DependsOn(typeof(SkippedIfEmptyScopeTests), ProceedOnFailure = true)]
+    [DependsOn(typeof(FailedRowScopeTests), ProceedOnFailure = true)]
+    [DependsOn(typeof(NonDisposableScopeTests))]
     public async Task Every_Scope_Is_Disposed_When_Its_Test_Ends()
     {
         // One scope per test: two tests, then two method rows run twice each.
@@ -192,6 +251,13 @@ public class DependencyInjectionScopeDisposalObserverTests
         await AssertScopes(nameof(RetriedScopeTests), 1);
         await AssertScopes(nameof(SkippedScopeTests), 1);
         await AssertScopes(nameof(SkippedIfEmptyScopeTests), 1);
+
+        // The failed row's scope: only the temporary instance's fetch, which failed to construct.
+        await AssertScopes(nameof(FailedRowScopeTests), 1);
+
+        // No scope owns these, so the object tracker disposes each once.
+        await Assert.That(UnownedService.Created.Count).IsEqualTo(1);
+        await Assert.That(UnownedService.Created.Count(x => x.DisposeCount == 1)).IsEqualTo(1);
     }
 
     private static async Task AssertScopes(string owner, int expectedCount)
