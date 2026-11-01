@@ -958,6 +958,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         }
                     }
 
+                    // The class rows' instantiation of a class-level [GenerateGenericTest]'s types stands for both,
+                    // so it also reads the own-class [MethodDataSource] members that only [GenerateGenericTest]
+                    // supplies the types of. AddRow skips a source a repeated attribute already added. Reflection
+                    // mode does the same in AddDeferredOwnSources (#7208).
+                    if (fromGenerateGenericTest && existing is { HasClassRows: true, HasMethodRows: true })
+                    {
+                        foreach (var ownSource in GetOwnClassMethodDataSourcesWithUninferredRows(testMethod))
+                        {
+                            existing.AddRow(ownSource, isClassRow: true);
+                        }
+                    }
+
                     // A generic method on a non-generic class runs only the sources scoped to its
                     // instantiation, so any method data source that infers the same types as an earlier
                     // one (a second [MethodDataSource] declared like the first, say) joins it too.
@@ -7224,6 +7236,36 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// The class-level [MethodDataSource] attributes of a generic test class that name a member of the class itself
+    /// (no class given) whose declared rows name the class's type parameters (<c>IEnumerable&lt;T&gt;</c>). Only the
+    /// class's [GenerateGenericTest] types can close the class those members are read on, as in reflection mode (#7208).
+    /// </summary>
+    private static IEnumerable<AttributeData> GetOwnClassMethodDataSourcesWithUninferredRows(TestMethodMetadata testMethod)
+    {
+        var compilation = testMethod.CompilationContext.Compilation;
+        foreach (var attribute in testMethod.TypeSymbol.GetAttributes())
+        {
+            if (attribute.AttributeClass is not { Name: "MethodDataSourceAttribute", IsGenericType: false }
+                || attribute.ConstructorArguments is not [{ Value: string memberName }])
+            {
+                continue;
+            }
+
+            var member = ResolveMethodDataSourceMember(testMethod.TypeSymbol, memberName, attribute, compilation);
+            if (member == null)
+            {
+                continue;
+            }
+
+            var rowType = GetMethodDataSourceRowType(member, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
+            if (rowType != null && CodeGenerationHelpers.ContainsTypeParameter(rowType))
+            {
+                yield return attribute;
+            }
+        }
     }
 
     private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)

@@ -32,17 +32,13 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     public async Task Generate_Generic_Test_Instantiation_Inferred_By_Class_Arguments_Reads_The_Own_Class_Member()
     {
-        // Reflection runs the [Arguments(1)] row and the own-class member's row on the int instantiation.
-        // Source-gen runs only the [Arguments(1)] row, since it never reads class-level [MethodDataSource]
-        // members of the generic class itself (#7333).
-        var expected = testMode == TestMode.Reflection ? 2 : 1;
-
+        // Both modes run the [Arguments(1)] row and the own-class member's row on the int instantiation
         await RunTestsWithFilter(
             "/*/TUnit.TestProject.Bugs._7208/OwnClassTypeParameterMethodDataSourceWithArgumentsAndGenerateGenericTest/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(expected),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(expected),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
@@ -51,14 +47,12 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     public async Task Repeated_Generate_Generic_Test_Reads_The_Own_Class_Member_Once()
     {
         // Same counts as with a single [GenerateGenericTest(typeof(int))]: the repeated attribute adds no rows.
-        var expected = testMode == TestMode.Reflection ? 2 : 1;
-
         await RunTestsWithFilter(
             "/*/TUnit.TestProject.Bugs._7208/OwnClassTypeParameterMethodDataSourceWithArgumentsAndRepeatedGenerateGenericTest/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(expected),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(expected),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
@@ -90,8 +84,8 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7208/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe(reflection ? "Failed" : "Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 12 : 8),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 11 : 8),
+                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 12 : 10),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 11 : 10),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(reflection ? 1 : 0),
                 result => result.Results
                     .Where(x => x.Outcome == "Failed")
