@@ -5823,17 +5823,7 @@ public class NUnitMigrationAnalyzerTests
     // verifiers' Net90 reference assemblies when the test runs on net10.0. The csproj copies NUnit's
     // net8.0 build into the output directory; reference that instead of the runtime-loaded assembly.
     private static string GetNUnitDllPath(string assemblyName)
-    {
-        var path = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.net8.0.dll");
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException(
-                $"net8.0 build of {assemblyName} not found at '{path}'. Run 'dotnet build' before running analyzer tests.",
-                path);
-        }
-
-        return path;
-    }
+        => TUnit.Tests.Shared.AnalyzerTestCompatibility.GetNet8DllPath(assemblyName);
 
     private static void ConfigureNUnitTest(Verifier.Test test)
     {

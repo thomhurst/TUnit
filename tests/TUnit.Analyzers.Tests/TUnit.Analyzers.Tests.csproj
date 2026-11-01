@@ -8,6 +8,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.8.0" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
     <PackageReference Include="Polly" />
+    <PackageReference Include="Polly.Core" GeneratePathProperty="true" />
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="NUnit" GeneratePathProperty="true" />
     <PackageReference Include="xunit.v3.extensibility.core" />
@@ -67,6 +68,12 @@
           Visible="false" />
     <None Include="$(PkgNUnit)\lib\net8.0\nunit.framework.legacy.dll"
           Link="nunit.framework.legacy.net8.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <!-- Polly.Core 8.9+ ships a net10.0 build that references System.Runtime 10.0, which raises
+         CS1705 in the Net90 analyzer-test compilation. Use Polly.Core's net8.0 build instead. -->
+    <None Include="$(PkgPolly_Core)\lib\net8.0\Polly.Core.dll"
+          Link="Polly.Core.net8.0.dll"
           CopyToOutputDirectory="PreserveNewest"
           Visible="false" />
     <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"
