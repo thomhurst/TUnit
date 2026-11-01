@@ -69,6 +69,14 @@ public class TupleParameterWithOptionalParameterTests
     }
 
     [Test]
+    [MethodDataSource(nameof(TupleRows))]
+    public async Task Tuple_And_Params_Collection((int, int) pair, params IEnumerable<int> rest)
+    {
+        await Assert.That(pair).IsEqualTo((25, 26));
+        await Assert.That(rest).IsEmpty();
+    }
+
+    [Test]
     [MethodDataSource(nameof(TupleAndValueRows))]
     public async Task Tuple_And_Supplied_Optional((int, int) pair, int extra = 5)
     {

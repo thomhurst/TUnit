@@ -54,7 +54,27 @@ public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedM
 
     internal int ReflectionInfoIndex { get; set; }
 
-    public bool IsParams => CachedIsParams ?? ReflectionInfo.IsDefined(typeof(ParamArrayAttribute), false);
+    public bool IsParams => CachedIsParams ?? IsParamsParameter(ReflectionInfo);
+
+    // C# 13 params collections carry ParamCollectionAttribute instead of ParamArrayAttribute. Match it
+    // by name because the type does not exist on every target framework.
+    private static bool IsParamsParameter(ParameterInfo parameter)
+    {
+        if (parameter.IsDefined(typeof(ParamArrayAttribute), false))
+        {
+            return true;
+        }
+
+        foreach (var attribute in parameter.GetCustomAttributesData())
+        {
+            if (attribute.AttributeType.FullName == "System.Runtime.CompilerServices.ParamCollectionAttribute")
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
     public bool IsOptional => CachedIsOptional ?? ReflectionInfo.IsOptional;
     public bool IsNullable { get; init; }
 
