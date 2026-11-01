@@ -1,4 +1,4 @@
-using Shouldly;
+﻿using Shouldly;
 using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
@@ -17,6 +17,7 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("OwnClassOverloadedMethodDataSource")]
     [Arguments("OwnClassSingleRowMethodDataSource")]
     [Arguments("OwnClassAsyncEnumerableMethodDataSource")]
+    [Arguments("OwnClassTestDataRowIntMethodDataSourceWithGenerateGenericTest")]
     public async Task Instance_Is_Built_From_The_Own_Class_Member(string className)
     {
         await RunTestsWithFilter(
@@ -89,8 +90,8 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7208/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe(reflection ? "Failed" : "Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 18 : 16),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 17 : 16),
+                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 19 : 17),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 18 : 17),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(reflection ? 1 : 0),
                 result => result.Results
                     .Where(x => x.Outcome == "Failed")

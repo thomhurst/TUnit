@@ -764,9 +764,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // A [MethodDataSource] naming a member of the generic class itself is read on the closed class
             // its member's declared row type infers (#7208)
             MethodMetadata? sourceClassMetadata = null;
+            Type[]? memberTypeArguments = null;
             if (ReadsMemberOfOpenClass(dataSource))
             {
-                var memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, (MethodDataSourceAttribute)dataSource);
+                memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, (MethodDataSourceAttribute)dataSource);
                 if (memberTypeArguments == null && deferredOwnSources != null)
                 {
                     // [GenerateGenericTest] supplies the types, and its instantiations read this source on the
@@ -817,7 +818,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 // Determine generic type arguments from the data. The null value of an [Arguments<T>(null)] row
                 // infers its declared T instead, as in the source generator.
-                var typeArguments = ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow)
+                var typeArguments = InferTypeArgumentsFromRowValues(genericTypeDefinition, dataRow, memberTypeArguments)
                     ?? InferTypeArgumentsFromNullTypedArgumentsRow(genericTypeDefinition, dataSource, dataRow);
                 if (typeArguments == null || typeArguments.Length == 0 || constraintViolations.TryAddClassViolation(typeArguments))
                 {
@@ -866,6 +867,32 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// The class type arguments a class data row infers from the values the instance is built with. A
+    /// <see cref="TestDataRow{T}"/> row is unwrapped as execution unwraps it, so <c>TestDataRow&lt;int&gt;</c> rows
+    /// infer <c>C&lt;int&gt;</c>, not <c>C&lt;TestDataRow&lt;int&gt;&gt;</c>; the partition keeps the wrapper for its row
+    /// metadata. A <c>Func</c> inside the wrapper is not invoked here, because execution invokes it for each test, so
+    /// its row takes the types <paramref name="declaredTypeArguments"/> holds for an own-class member (#7208).
+    /// </summary>
+    private static Type[]? InferTypeArgumentsFromRowValues(Type genericTypeDefinition, object?[] dataRow, Type[]? declaredTypeArguments)
+    {
+        if (dataRow is [ITestDataRow testDataRow])
+        {
+            if (testDataRow.GetData() is Delegate)
+            {
+                return declaredTypeArguments ?? ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
+            }
+
+            dataRow = TestDataRowUnwrapper.UnwrapArray(dataRow).Data;
+            if (dataRow.Length == 0)
+            {
+                return null;
+            }
+        }
+
+        return ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
     }
 
     /// <summary>

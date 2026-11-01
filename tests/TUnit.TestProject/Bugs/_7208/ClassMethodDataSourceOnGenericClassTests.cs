@@ -236,3 +236,19 @@ public class OwnClassTestDataRowObjectMethodDataSourceWithArgumentsAndGenerateGe
         await Assert.That(value).IsTypeOf<int>();
     }
 }
+
+// TestDataRow<int> rows infer C<int> from their unwrapped values, not a C<TestDataRow<int>> instantiation that
+// can't be built from the unwrapped row (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassTestDataRowIntMethodDataSourceWithGenerateGenericTest<T>(T value)
+{
+    public static IEnumerable<TestDataRow<int>> Rows() => [new(5)];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+    }
+}
