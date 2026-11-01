@@ -1831,7 +1831,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         // The same extraction BuildTestMetadata uses when it is given no sources, so the remaining sources are
         // unchanged
-        var dataSources = ReflectionAttributeExtractor.ExtractMethodDataSources(method, concreteClassType);
+        IDataSourceAttribute[] dataSources;
+        try
+        {
+            dataSources = ReflectionAttributeExtractor.ExtractMethodDataSources(method, concreteClassType);
+        }
+        catch (Exception)
+        {
+            // An attribute that throws (for example from its constructor) must fail only this method, not the
+            // whole assembly: callers enumerate this outside their per-method try. Yielding the open method with
+            // no sources lets BuildTestMetadata repeat the extraction inside its own handler and report the
+            // failure as a failed test, as it did before #7206.
+            dataSources = [];
+        }
+
         List<(MethodInfo Method, List<IDataSourceAttribute> Rows)>? instantiations = null;
         List<IDataSourceAttribute>? remaining = null;
 
