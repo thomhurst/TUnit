@@ -429,7 +429,9 @@ internal class UnboundGenericAssertionFromTests : TestsBase
             ReferencesHelper.References,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new AssertionMethodGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new AssertionMethodGenerator().AsSourceGenerator()],
+            parseOptions: ParseOptions);
         driver = driver.RunGenerators(compilation);
 
         return driver.GetRunResult().Diagnostics.ToArray();

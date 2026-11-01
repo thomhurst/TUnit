@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.SourceGenerator.Generators;
 using TUnit.Assertions.SourceGenerator.Tests.Options;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
@@ -86,7 +87,7 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             // bugs (mis-paired brackets, wrong default rendering, adjacent generic blocks)
             // regardless of specific diagnostic id.
             var trees = generatedFiles
-                .Select(source => CSharpSyntaxTree.ParseText(source))
+                .Select(source => GeneratorTestInput.Parse(source))
                 .ToArray();
 
             var compilation = CSharpCompilation.Create(

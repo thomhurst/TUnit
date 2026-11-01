@@ -433,9 +433,9 @@ public class ShouldExtensionGeneratorTests
         // Polyfill copy compiled into this test assembly is internal — invisible to the synthetic
         // GeneratorTest compilation. Inject a public copy so the attribute resolves consistently
         // across all TFMs the test multi-targets.
-        var inputTrees = new List<SyntaxTree> { CSharpSyntaxTree.ParseText(userSource) };
+        var inputTrees = new List<SyntaxTree> { GeneratorTestInput.Parse(userSource) };
 #if NET8_0
-        inputTrees.Add(CSharpSyntaxTree.ParseText("""
+        inputTrees.Add(GeneratorTestInput.Parse("""
             namespace System.Runtime.CompilerServices;
             [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.Constructor | System.AttributeTargets.Property, Inherited = false)]
             public sealed class OverloadResolutionPriorityAttribute : System.Attribute
@@ -452,7 +452,11 @@ public class ShouldExtensionGeneratorTests
             references: References,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-        var driver = CSharpGeneratorDriver.Create(new ShouldExtensionGenerator());
+        GeneratorTestInput.ThrowIfInputCannotBeParsed(compilation);
+
+        var driver = CSharpGeneratorDriver.Create(
+            [new ShouldExtensionGenerator().AsSourceGenerator()],
+            parseOptions: GeneratorTestInput.ParseOptions);
         driver = (CSharpGeneratorDriver)driver.RunGeneratorsAndUpdateCompilation(
             compilation, out var updatedCompilation, out var diagnostics);
 

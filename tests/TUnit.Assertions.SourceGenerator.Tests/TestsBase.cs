@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.SourceGenerator.Generators;
 using TUnit.Assertions.SourceGenerator.Tests.Extensions;
 using TUnit.Assertions.SourceGenerator.Tests.Options;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
@@ -90,8 +91,13 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
         // Create an instance of the source generator.
         var generator = new TGenerator();
 
+        // Parse as the repository builds (LangVersion=preview); generated trees must share these options.
+        var parseOptions = runTestOptions.PreprocessorSymbols is { Length: > 0 }
+            ? GeneratorTestInput.ParseOptions.WithPreprocessorSymbols(runTestOptions.PreprocessorSymbols)
+            : GeneratorTestInput.ParseOptions;
+
         // Source generators should be tested using 'GeneratorDriver'.
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create([generator.AsSourceGenerator()], parseOptions: parseOptions);
 
         if (runTestOptions.BuildProperties != null)
         {
@@ -103,10 +109,6 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
 
         // To run generators, we can use an empty compilation.
 
-        var parseOptions = runTestOptions.PreprocessorSymbols is { Length: > 0 }
-            ? CSharpParseOptions.Default.WithPreprocessorSymbols(runTestOptions.PreprocessorSymbols)
-            : CSharpParseOptions.Default;
-
         var compilation = CSharpCompilation.Create(
                 GetType().Name,
                 [
@@ -115,7 +117,7 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
                 options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             )
             .WithReferences(ReferencesHelper.References)
-            .AddSyntaxTrees(additionalSources.Select(x => CSharpSyntaxTree.ParseText(x)));
+            .AddSyntaxTrees(additionalSources.Select(x => CSharpSyntaxTree.ParseText(x, parseOptions)));
 
         foreach (var additionalPackage in runTestOptions.AdditionalPackages)
         {
@@ -123,6 +125,8 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
 
             compilation = compilation.AddReferences(downloaded);
         }
+
+        GeneratorTestInput.ThrowIfInputCannotBeParsed(compilation);
 
         // Run generators. Don't forget to use the new compilation rather than the previous one.
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var diagnostics);

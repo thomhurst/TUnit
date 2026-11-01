@@ -54,7 +54,7 @@ public abstract class SnapshotTestBase
         IEnumerable<MetadataReference>? additionalReferences = null,
         CSharpParseOptions? parseOptions = null)
     {
-        parseOptions ??= CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
+        parseOptions ??= GeneratorTestInput.ParseOptions;
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
 
         IEnumerable<MetadataReference> refs = additionalReferences is null
@@ -66,6 +66,8 @@ public abstract class SnapshotTestBase
             [syntaxTree],
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
         ).WithReferences(refs);
+
+        GeneratorTestInput.ThrowIfInputCannotBeParsed(compilation);
 
         var generator = new MockGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create([generator.AsSourceGenerator()], parseOptions: parseOptions);
@@ -96,7 +98,7 @@ public abstract class SnapshotTestBase
         IEnumerable<MetadataReference>? additionalReferences = null,
         IIncrementalGenerator? generator = null)
     {
-        var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
+        var parseOptions = GeneratorTestInput.ParseOptions;
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
 
         IEnumerable<MetadataReference> refs = additionalReferences is null
@@ -138,7 +140,7 @@ public abstract class SnapshotTestBase
     /// </summary>
     protected static MetadataReference CreateExternalAssemblyReference(string source, string assemblyName = "ExternalLib")
     {
-        var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
+        var parseOptions = GeneratorTestInput.ParseOptions;
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
 
         var compilation = CSharpCompilation.Create(
@@ -265,7 +267,7 @@ public abstract class SnapshotTestBase
         IEnumerable<MetadataReference>? additionalReferences,
         CSharpParseOptions? parseOptions)
     {
-        parseOptions ??= CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
+        parseOptions ??= GeneratorTestInput.ParseOptions;
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
 
         IEnumerable<MetadataReference> refs = additionalReferences is null
@@ -278,6 +280,8 @@ public abstract class SnapshotTestBase
             refs,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
                 .WithNullableContextOptions(NullableContextOptions.Enable));
+
+        GeneratorTestInput.ThrowIfInputCannotBeParsed(inputCompilation);
 
         var generator = new MockGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create([generator.AsSourceGenerator()], parseOptions: parseOptions);

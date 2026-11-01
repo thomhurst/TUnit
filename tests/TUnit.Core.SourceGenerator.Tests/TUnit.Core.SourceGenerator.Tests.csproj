@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <Compile Include="..\SharedTestHelpers\TestHostReferences.cs" Link="Shared\TestHostReferences.cs" />
+    <Compile Include="..\SharedTestHelpers\GeneratorTestInput.cs" Link="Shared\GeneratorTestInput.cs" />
   </ItemGroup>
 
   <ItemGroup>

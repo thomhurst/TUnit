@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.SourceGenerator.Generators;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
@@ -26,7 +27,7 @@ internal static class AssertionMethodGeneratorRunner
 #else
         string[] preprocessorSymbols = [];
 #endif
-        var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols(preprocessorSymbols);
+        var parseOptions = GeneratorTestInput.ParseOptions.WithPreprocessorSymbols(preprocessorSymbols);
 
         var compilation = CSharpCompilation.Create(
                 nameof(AssertionMethodGeneratorRunner),

@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Mocks.SourceGenerator.Discovery;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Mocks.SourceGenerator.Tests;
 
@@ -57,7 +58,7 @@ public class MemberDiscoveryTests : SnapshotTestBase
 
     private static CSharpCompilation CreateCompilation(string source)
     {
-        var syntaxTree = CSharpSyntaxTree.ParseText(source);
+        var syntaxTree = GeneratorTestInput.Parse(source);
         return CSharpCompilation.Create(
                 "TestAssembly",
                 [syntaxTree],

@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Compile Include="..\SharedTestHelpers\TestHostReferences.cs" Link="Shared\TestHostReferences.cs" />
+    <Compile Include="..\SharedTestHelpers\GeneratorTestInput.cs" Link="Shared\GeneratorTestInput.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,7 +29,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" />
+    <!-- Host the generator (built against Roslyn 4.7) on the Roslyn that a current SDK loads.
+         Roslyn 4.7 cannot bind fixtures that use newer syntax, such as collection expressions in
+         attribute arguments, so it would snapshot what the generator does with broken input (#7190). -->
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" VersionOverride="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" VersionOverride="4.14.0" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
     <PackageReference Include="NuGet.Protocol" />
     <PackageReference Include="Sourcy.DotNet">

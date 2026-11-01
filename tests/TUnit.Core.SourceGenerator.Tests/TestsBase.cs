@@ -6,6 +6,7 @@ using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Generators;
 using TUnit.Core.SourceGenerator.Tests.Extensions;
 using TUnit.Core.SourceGenerator.Tests.Options;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
@@ -35,10 +36,8 @@ public class TestsBase
 
 public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new()
 {
-    // TUnit.TestProject builds with LangVersion=preview (Directory.Build.props). The referenced
-    // Roslyn's default parse options reject newer syntax such as collection expressions, so the
-    // generator would see broken trees and the snapshots would not match a real build.
-    private static readonly CSharpParseOptions ParseOptions = new(LanguageVersion.Preview);
+    // TUnit.TestProject builds with LangVersion=preview (Directory.Build.props), so fixtures must be parsed the same way.
+    private static CSharpParseOptions ParseOptions => GeneratorTestInput.ParseOptions;
 
     public Task RunTest(string inputFile, Func<string[], Task> assertions)
     {
@@ -142,7 +141,7 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
             compilation = compilation.AddReferences(downloaded);
         }
 
-        ThrowIfInputCannotBeParsed(compilation);
+        GeneratorTestInput.ThrowIfInputCannotBeParsed(compilation);
 
         // Run generators. Don't forget to use the new compilation rather than the previous one.
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var diagnostics);
@@ -208,34 +207,6 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
         }
 
         await verifyTask;
-    }
-
-    // Fixtures are not required to compile here: some reference packages or types that the harness
-    // does not load. Syntax errors and the binding errors that a too-old compiler reports for valid
-    // newer syntax are different, because the generator then sees a tree a real build never produces
-    // and the snapshot silently records the wrong output (#7162).
-    private static readonly HashSet<string> UnsupportedSyntaxDiagnosticIds =
-    [
-        "CS0182", // attribute argument must be constant: collection expressions in attributes on Roslyn < 4.8
-        "CS0225", // params parameter must be an array: params collections on Roslyn < 4.12
-        "CS8652", // feature is in preview
-    ];
-
-    private static void ThrowIfInputCannotBeParsed(Compilation compilation)
-    {
-        var errors = compilation.SyntaxTrees
-            .SelectMany(tree => tree.GetDiagnostics())
-            .Concat(compilation.GetDeclarationDiagnostics().Where(d => UnsupportedSyntaxDiagnosticIds.Contains(d.Id)))
-            .Where(d => d.Severity == DiagnosticSeverity.Error)
-            .Select(d => d.ToString())
-            .Distinct()
-            .ToArray();
-
-        if (errors.Length > 0)
-        {
-            throw new InvalidOperationException(
-                $"The test input does not parse as a real build would:{Environment.NewLine}{string.Join(Environment.NewLine, errors)}");
-        }
     }
 
     private static bool IsError(Diagnostic x)
