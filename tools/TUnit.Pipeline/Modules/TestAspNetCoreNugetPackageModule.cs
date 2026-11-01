@@ -20,15 +20,7 @@ public class TestAspNetCoreNugetPackageModule : TestBaseModule
         .Build();
 
     // ASP.NET Core only supports .NET Core frameworks, not .NET Framework
-    protected override IEnumerable<string> TestableFrameworks
-    {
-        get
-        {
-            yield return "net10.0";
-            yield return "net9.0";
-            yield return "net8.0";
-        }
-    }
+    protected override IEnumerable<string> TestableFrameworks => ModernFrameworks;
 
     protected override async Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework,
         CancellationToken cancellationToken)

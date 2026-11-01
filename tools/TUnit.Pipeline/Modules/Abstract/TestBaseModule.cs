@@ -11,8 +11,13 @@ namespace TUnit.Pipeline.Modules.Abstract;
 
 public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 {
-    /// <summary>Every modern TFM the repo targets.</summary>
-    protected static IReadOnlyList<string> ModernFrameworks { get; } = ["net10.0", "net9.0", "net8.0"];
+    /// <summary>
+    /// Every modern TFM the repo targets, or net10.0 alone on macOS. The macOS runner has 3 cores and
+    /// 7 GB, and running every test project on all three TFMs there (#7129) doubled its pipeline and
+    /// starved the runner until it lost contact. Linux and Windows still cover net8.0 and net9.0.
+    /// </summary>
+    protected static IReadOnlyList<string> ModernFrameworks { get; } =
+        IsMacOS ? ["net10.0"] : ["net10.0", "net9.0", "net8.0"];
 
     /// <summary>
     /// <see cref="ModernFrameworks"/>, plus net472 on Windows, the only OS that can run .NET Framework tests.
@@ -29,6 +34,9 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 
     /// <summary>True on Windows, where legacy .NET Framework TFMs (net4xx) can be tested.</summary>
     protected static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+    /// <summary>True on macOS, where <see cref="ModernFrameworks"/> narrows to net10.0.</summary>
+    protected static bool IsMacOS => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
     protected sealed override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
