@@ -1281,11 +1281,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // a data source declared with a broad type (object, an interface or int?) supplies more specific
         // values. Reflection mode skips such sources the same way (InferMethodInstantiationsFromDataSources
         // in TUnit.Engine), and TUnit0001 accepts them (#7116).
-        // Only a [GenerateGenericTest] with a full set of type arguments can run those rows: an empty or
-        // wrongly sized one creates no instantiation, so the rows would silently disappear.
-        var reportDataSourceConstraintViolations = !(testMethod.IsGenericMethod
-            && generateGenericTestBucket is not null
-            && generateGenericTestBucket.Any(a => ExtractTypeArgsFromGenerateGenericTestAttribute(a)?.Length == methodTypeArgCount));
+        // An empty or wrongly sized [GenerateGenericTest] creates no instantiation to run those rows on, but it
+        // fails on its own (#7222), so the rows do not silently disappear. Reflection mode skips them the same way.
+        var reportDataSourceConstraintViolations = !(testMethod.IsGenericMethod && generateGenericTestBucket is not null);
 
         // Process typed data source attributes
         foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
@@ -1367,6 +1365,30 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                 }
             }
+        }
+
+        // Adds a failure to the concrete class's violation entry, creating that entry when it has none. All
+        // violations of one concrete class share one entry, so each gets its own data source index and test id.
+        void AddMethodViolation(string concreteClassName, ITypeSymbol[] concreteClassTypeArgs, MethodConstraintViolation violation)
+        {
+            var existing = results.FirstOrDefault(r => r.MethodConstraintViolations != null && r.ConcreteClassName == concreteClassName);
+            if (existing != null)
+            {
+                existing.MethodConstraintViolations!.Add(violation);
+                return;
+            }
+
+            results.Add(new ConcreteInstantiation
+            {
+                ConcreteClassName = concreteClassName,
+                TypeArguments = concreteClassTypeArgs,
+                ClassTypeArgs = concreteClassTypeArgs,
+                MethodTypeArgs = [],
+                TestName = methodName,
+                MethodName = methodName,
+                HasParameterizedConstructor = results.FirstOrDefault(r => r.ConcreteClassName == concreteClassName)?.HasParameterizedConstructor ?? false,
+                MethodConstraintViolations = [violation],
+            });
         }
 
         // Process GenerateGenericTest attributes
@@ -1492,12 +1514,50 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         violationSource: classGenericTest.Attribute,
                         fromGenerateGenericTest: true);
                 }
-                foreach (var methodGenericTest in methodGenericTestAttrs)
+                // Declaration order, with each wrongly sized one failing where it stands, as reflection mode
+                // reports them (#7222)
+                foreach (var attribute in testMethod.IsGenericMethod ? generateGenericTestBucket ?? [] : [])
                 {
-                    JoinDeferredDataSources(methodGenericTest.TypeArgs!);
-                    TryAddInstantiation(methodGenericTest.TypeArgs!,
+                    var typeArgs = ExtractTypeArgsFromGenerateGenericTestAttribute(attribute);
+                    if (DescribeGenerateGenericTestArityError(methodName, typeArgs, methodTypeArgCount) is { } arityError)
+                    {
+                        AddMethodViolation(className, [], new MethodConstraintViolation(arityError, RowSource: null, AllMethodDataSources: false));
+                        continue;
+                    }
+
+                    JoinDeferredDataSources(typeArgs!);
+                    TryAddInstantiation(typeArgs!,
                         reportMethodConstraintViolation: true,
-                        violationSource: methodGenericTest.Attribute);
+                        violationSource: attribute);
+                }
+            }
+
+            // A generic method of a generic class: reflection mode resolves the method on each concrete class,
+            // so a wrongly sized [GenerateGenericTest] fails once on each of them (#7222).
+            if (testMethod is { IsGenericType: true, IsGenericMethod: true } && generateGenericTestBucket is not null)
+            {
+                List<string>? arityErrors = null;
+                foreach (var attribute in generateGenericTestBucket)
+                {
+                    if (DescribeGenerateGenericTestArityError(methodName, ExtractTypeArgsFromGenerateGenericTestAttribute(attribute), methodTypeArgCount) is { } arityError)
+                    {
+                        (arityErrors ??= []).Add(arityError);
+                    }
+                }
+
+                if (arityErrors is not null)
+                {
+                    var concreteClasses = results
+                        .GroupBy(r => r.ConcreteClassName)
+                        .Select(g => (Name: g.Key, g.First().ClassTypeArgs))
+                        .ToList();
+                    foreach (var (concreteClassName, concreteClassTypeArgs) in concreteClasses)
+                    {
+                        foreach (var arityError in arityErrors)
+                        {
+                            AddMethodViolation(concreteClassName, concreteClassTypeArgs, new MethodConstraintViolation(arityError, RowSource: null, AllMethodDataSources: false));
+                        }
+                    }
                 }
             }
         }
@@ -1782,6 +1842,28 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// Extracts type arguments from a GenerateGenericTestAttribute's constructor arguments.
     /// The attribute takes params Type[] in its constructor.
     /// </summary>
+    /// <summary>
+    /// The failure message for a method-level [GenerateGenericTest] whose type arguments do not match the
+    /// method's type parameters, or null when they do. Reflection mode
+    /// (<c>GetGenerateGenericTestArityError</c> in TUnit.Engine) reports the same text (#7222).
+    /// </summary>
+    private static string? DescribeGenerateGenericTestArityError(string methodName, ITypeSymbol[]? typeArguments, int methodTypeParameterCount)
+    {
+        if (typeArguments is not { Length: > 0 })
+        {
+            return $"[GenerateGenericTest] on method '{methodName}' has no type arguments";
+        }
+
+        if (typeArguments.Length != methodTypeParameterCount)
+        {
+            return $"[GenerateGenericTest] on method '{methodName}' provides {typeArguments.Length.ToString(CultureInfo.InvariantCulture)} type argument(s) "
+                + $"but method requires {methodTypeParameterCount.ToString(CultureInfo.InvariantCulture)}. "
+                + $"Provided: [{string.Join(", ", typeArguments.Select(GetRuntimeTypeName))}]";
+        }
+
+        return null;
+    }
+
     private static ITypeSymbol[]? ExtractTypeArgsFromGenerateGenericTestAttribute(AttributeData attr)
     {
         if (attr.ConstructorArguments.Length == 0)
@@ -1794,14 +1876,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // params Type[] can appear as a single array argument or as individual arguments
         if (firstArg.Kind == TypedConstantKind.Array)
         {
+            // Any type, an array such as typeof(int[]) too, as reflection mode reads TypeArguments
             return firstArg.Values
-                .Where(v => v.Value is INamedTypeSymbol)
-                .Select(v => (ITypeSymbol)(INamedTypeSymbol)v.Value!)
+                .Where(v => v.Value is ITypeSymbol)
+                .Select(v => (ITypeSymbol)v.Value!)
                 .ToArray();
         }
 
         // Single Type argument (params expansion)
-        if (firstArg.Value is INamedTypeSymbol singleType)
+        if (firstArg.Value is ITypeSymbol singleType)
         {
             return [singleType];
         }

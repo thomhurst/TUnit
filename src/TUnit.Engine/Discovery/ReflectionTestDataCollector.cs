@@ -1759,26 +1759,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             var typeArguments = genAttr.TypeArguments;
 
-            // Validate type argument count
-            if (typeArguments.Length == 0)
+            // A wrongly sized or empty [GenerateGenericTest] fails like a constraint violation, in declaration
+            // order and with the same message as source-generated mode, so both modes report the same test (#7222).
+            if (GetGenerateGenericTestArityError(method.Name, typeArguments, methodGenericParams.Length) is { } arityError)
             {
-                var failedMetadata = CreateFailedMethodGenericMetadata(
-                    concreteClassType,
-                    method,
-                    $"[GenerateGenericTest] on method '{method.Name}' has no type arguments");
-                yield return (method, failedMetadata, null);
-                continue;
-            }
-
-            if (typeArguments.Length != methodGenericParams.Length)
-            {
-                var failedMetadata = CreateFailedMethodGenericMetadata(
-                    concreteClassType,
-                    method,
-                    $"[GenerateGenericTest] on method '{method.Name}' provides {typeArguments.Length} type argument(s) " +
-                    $"but method requires {methodGenericParams.Length}. " +
-                    $"Provided: [{string.Join(", ", typeArguments.Select(static t => t.Name))}]");
-                yield return (method, failedMetadata, null);
+                (constraintViolations ??= []).Add(GenericConstraintViolationDataSource.Create(arityError));
                 continue;
             }
 
@@ -1950,6 +1935,28 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// The failure message for a method-level [GenerateGenericTest] whose type arguments do not match the
+    /// method's type parameters, or null when they do. Source-generated mode
+    /// (<c>DescribeGenerateGenericTestArityError</c> in TUnit.Core.SourceGenerator) reports the same text.
+    /// </summary>
+    private static string? GetGenerateGenericTestArityError(string methodName, Type[] typeArguments, int methodTypeParameterCount)
+    {
+        if (typeArguments.Length == 0)
+        {
+            return $"[GenerateGenericTest] on method '{methodName}' has no type arguments";
+        }
+
+        if (typeArguments.Length != methodTypeParameterCount)
+        {
+            return $"[GenerateGenericTest] on method '{methodName}' provides {typeArguments.Length} type argument(s) " +
+                $"but method requires {methodTypeParameterCount}. " +
+                $"Provided: [{string.Join(", ", typeArguments.Select(static t => t.Name))}]";
+        }
+
+        return null;
     }
 
     /// <summary>
