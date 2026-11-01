@@ -265,7 +265,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                             if (!instanceResult.Success)
                             {
-                                var failedTest = CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!, classData);
+                                var failedTest = CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!, classData, unclaimedClassRow.TakeEvents());
                                 tests.Add(failedTest);
                                 continue;
                             }
@@ -321,7 +321,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         // constraints: fail this row only, as reflection mode does when it resolves
                                         // the row's type arguments, and keep building the remaining rows.
                                         var (reportedException, rowData) = UnpackConstraintViolation(ex, metadata.MethodMetadata.Parameters);
-                                        tests.Add(CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, unclaimedClassRow.WithLentObjects(classData), rowData));
+                                        tests.Add(CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, unclaimedClassRow.WithLentObjects(classData), rowData, contextAccessor.Current.EventsIfCreated));
                                         continue;
                                     }
 
@@ -408,7 +408,7 @@ internal sealed class TestBuilder : ITestBuilder
                                             catch (Exception innerEx)
                                             {
                                                 // If we still can't resolve, create a failed test
-                                                var failedTest = CreateFailedTestForDataRowError(metadata, innerEx, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, unclaimedClassRow.WithLentObjects(classData), methodData);
+                                                var failedTest = CreateFailedTestForDataRowError(metadata, innerEx, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, unclaimedClassRow.WithLentObjects(classData), methodData, contextAccessor.Current.EventsIfCreated);
                                                 tests.Add(failedTest);
                                                 continue;
                                             }
@@ -416,7 +416,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         catch (Exception ex)
                                         {
                                             // If generic resolution fails, create a failed test
-                                            var failedTest = CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, unclaimedClassRow.WithLentObjects(classData), methodData);
+                                            var failedTest = CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, unclaimedClassRow.WithLentObjects(classData), methodData, contextAccessor.Current.EventsIfCreated);
                                             tests.Add(failedTest);
                                             continue;
                                         }
@@ -530,7 +530,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 // If generic type inference failed, create a failed test instead of skipped
                                 if (genericResolutionException != null)
                                 {
-                                    var failedTest = CreateFailedTestForDataGenerationError(metadata, genericResolutionException, new TestDataCombination(), classData, lentClassRowObjects);
+                                    var failedTest = CreateFailedTestForDataGenerationError(metadata, genericResolutionException, new TestDataCombination(), classData, lentClassRowObjects, classRowEvents);
                                     tests.Add(failedTest);
                                 }
                                 else
@@ -1556,6 +1556,7 @@ internal sealed class TestBuilder : ITestBuilder
     /// </summary>
     /// <param name="classData">The class row's objects, if the row produced them before it failed.</param>
     /// <param name="methodData">The method row's objects, if the row produced them before it failed.</param>
+    /// <param name="rowEvents">The events the row's data sources subscribed while it was fetched, if any.</param>
     private AbstractExecutableTest CreateFailedTestForDataRowError(
         TestMetadata metadata,
         Exception exception,
@@ -1564,8 +1565,9 @@ internal sealed class TestBuilder : ITestBuilder
         int methodDataAttributeIndex,
         int methodDataLoopIndex,
         int repeatIndex,
-        object?[]? classData = null,
-        object?[]? methodData = null)
+        object?[]? classData,
+        object?[]? methodData,
+        TestContextEvents? rowEvents)
     {
         return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination
         {
@@ -1574,7 +1576,7 @@ internal sealed class TestBuilder : ITestBuilder
             MethodDataSourceIndex = methodDataAttributeIndex,
             MethodLoopIndex = methodDataLoopIndex,
             RepeatIndex = repeatIndex
-        }, classData, methodData);
+        }, classData, methodData, rowEvents);
     }
 
     /// <param name="metadata">The test's metadata.</param>
@@ -1582,24 +1584,28 @@ internal sealed class TestBuilder : ITestBuilder
     /// <param name="combination">The row's indexes, which go into the test id.</param>
     /// <param name="classData">The class row's objects, if the row produced them before it failed.</param>
     /// <param name="methodData">The method row's objects, if the row produced them before it failed.</param>
+    /// <param name="rowEvents">The events the row's data sources subscribed while it was fetched, if any.</param>
     /// <remarks>
     /// The failed test never receives the row's objects, but it carries them in
     /// <see cref="TestDetails.UnreceivedDataRowObjects"/>, so the object tracker counts them when the test is
     /// registered for execution and releases them when it completes. Releasing a reference disposes an
     /// object only when no other test still holds it, so shared and keyed instances stay alive (#7123).
+    /// It also takes the row's events, so it raises their <c>OnDispose</c> handlers (a dependency
+    /// injection scope's disposal, for example) as a test built from the row would (#7326).
     /// </remarks>
     private AbstractExecutableTest CreateFailedTestForDataGenerationError(
         TestMetadata metadata,
         Exception exception,
         TestDataCombination combination,
         object?[]? classData = null,
-        object?[]? methodData = null)
+        object?[]? methodData = null,
+        TestContextEvents? rowEvents = null)
     {
         exception = ToReportedException(exception);
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
 
         var testDetails = CreateFailedTestDetails(metadata, testId, CombineRowObjects(classData, methodData));
-        var context = CreateFailedTestContext(metadata, testDetails);
+        var context = CreateFailedTestContext(metadata, testDetails, rowEvents);
         var now = DateTimeOffset.UtcNow;
 
         return new FailedExecutableTest(exception)
@@ -1822,14 +1828,21 @@ internal sealed class TestBuilder : ITestBuilder
         return attributes;
     }
 
-    private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails)
+    private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, TestContextEvents? rowEvents)
     {
+        var builderContext = new TestBuilderContext
+        {
+            TestMetadata = metadata.MethodMetadata
+        };
+
+        if (rowEvents is not null)
+        {
+            builderContext.Events = rowEvents;
+        }
+
         var context = _contextProvider.CreateTestContext(
             metadata.TestClassType,
-            new TestBuilderContext
-            {
-                TestMetadata = metadata.MethodMetadata
-            },
+            builderContext,
             testDetails,
             CancellationToken.None);
 
@@ -1838,9 +1851,9 @@ internal sealed class TestBuilder : ITestBuilder
 
 
 
-    private AbstractExecutableTest CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception, object?[] classData)
+    private AbstractExecutableTest CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception, object?[] classData, TestContextEvents? classRowEvents)
     {
-        return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination(), classData);
+        return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination(), classData, rowEvents: classRowEvents);
     }
 
     private AbstractExecutableTest CreateFailedTestForClassDataSourceCircularDependency(TestMetadata metadata)
@@ -2262,7 +2275,7 @@ internal sealed class TestBuilder : ITestBuilder
                         if (!instanceResult.Success)
                         {
                             // Yield a failed test instead of silently skipping
-                            yield return CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!, classData);
+                            yield return CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!, classData, unclaimedClassRow.TakeEvents());
                             continue;
                         }
 
@@ -2522,12 +2535,12 @@ internal sealed class TestBuilder : ITestBuilder
                 }
                 catch (Exception ex)
                 {
-                    return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, unclaimedClassRow.WithLentObjects(classData), methodData);
+                    return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, unclaimedClassRow.WithLentObjects(classData), methodData, iterationContext.EventsIfCreated);
                 }
             }
             catch (Exception ex)
             {
-                return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, unclaimedClassRow.WithLentObjects(classData), methodData);
+                return CreateFailedTestForDataRowError(metadata, ex, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, unclaimedClassRow.WithLentObjects(classData), methodData, iterationContext.EventsIfCreated);
             }
 
             if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
@@ -2599,7 +2612,7 @@ internal sealed class TestBuilder : ITestBuilder
             // Includes a GenericConstraintViolationDataSource row whose inferred type arguments break the
             // method's constraints. The row's indexes keep its id distinct from the method's other rows.
             var (reportedException, rowData) = UnpackConstraintViolation(ex, metadata.MethodMetadata.Parameters);
-            return CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, unclaimedClassRow.WithLentObjects(classData), rowData ?? methodData);
+            return CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, repeatIndex, unclaimedClassRow.WithLentObjects(classData), rowData ?? methodData, iterationContext.EventsIfCreated);
         }
         finally
         {
