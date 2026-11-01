@@ -320,22 +320,51 @@ internal sealed class GenericClassRowPartitionDataSource : Attribute, IDataSourc
     /// <summary>The data source whose rows this partition yields a subset of.</summary>
     public IDataSourceAttribute InnerDataSource { get; }
 
-    // Whether the last read of this source yielded every row of the inner source: the AllRows fallback, or a
-    // source that is not partitioned and is used because no partitioned row infers the instantiation. Shared by
-    // every build of the instantiation: the engine reads SkipIfEmpty right after enumerating this source, and
-    // builds of one instantiation read the same source rows, so they reach the same value
-    private volatile bool _yieldsEveryRow;
+    // Whether this source yielded every row of the inner source in a build: the AllRows fallback, or a source
+    // that is not partitioned and is used because no partitioned row infers the instantiation. Recorded per
+    // build, keyed on the build's context accessor, because builds of one instantiation can overlap and a
+    // non-deterministic source can give them different rows. An entry is collected with its build's accessor
+    private readonly ConditionalWeakTable<TestBuilderContextAccessor, StrongBox<bool>> _yieldsEveryRowByBuild = new();
+
+    // The same, for an enumeration that has no build context accessor
+    private volatile bool _yieldsEveryRowWithoutBuild;
 
     /// <inheritdoc />
     /// <remarks>
-    /// A partition may be empty because its rows belong to other instantiations. Reflection mode creates no
-    /// partition in that case, so this one reports a skipped test only when it yields every row of the inner
-    /// source, as reflection's fallback to every class row does.
+    /// Reads the value for an enumeration without a build context accessor. The engine reads
+    /// <see cref="SkipIfEmptyFor"/> with the build's accessor instead.
     /// </remarks>
     public bool SkipIfEmpty
     {
-        get => _yieldsEveryRow && InnerDataSource.SkipIfEmpty;
+        get => SkipIfEmptyFor(null);
         set => InnerDataSource.SkipIfEmpty = value;
+    }
+
+    /// <summary>
+    /// Whether the build that enumerated this source with <paramref name="build"/> reports a skipped test when
+    /// the source yielded no rows. A partition may be empty because its rows belong to other instantiations.
+    /// Reflection mode creates no partition in that case, so this one reports a skipped test only when it
+    /// yielded every row of the inner source in that build, as reflection's fallback to every class row does.
+    /// </summary>
+    internal bool SkipIfEmptyFor(TestBuilderContextAccessor? build)
+    {
+        var yieldsEveryRow = build is null
+            ? _yieldsEveryRowWithoutBuild
+            : _yieldsEveryRowByBuild.TryGetValue(build, out var recorded) && recorded.Value;
+
+        return yieldsEveryRow && InnerDataSource.SkipIfEmpty;
+    }
+
+    private void RecordYieldsEveryRow(TestBuilderContextAccessor? build, bool yieldsEveryRow)
+    {
+        if (build is null)
+        {
+            _yieldsEveryRowWithoutBuild = yieldsEveryRow;
+        }
+        else
+        {
+            _yieldsEveryRowByBuild.GetValue(build, static _ => new StrongBox<bool>()).Value = yieldsEveryRow;
+        }
     }
 
     /// <inheritdoc />
@@ -349,7 +378,9 @@ internal sealed class GenericClassRowPartitionDataSource : Attribute, IDataSourc
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var evaluation = await _coordinator.GetEvaluationAsync(dataGeneratorMetadata).ConfigureAwait(false);
-        _yieldsEveryRow = !evaluation.AnyRowInfers && _coordinator.Fallback == GenericClassRowFallback.AllRows;
+        RecordYieldsEveryRow(
+            dataGeneratorMetadata.TestBuilderContext,
+            !evaluation.AnyRowInfers && _coordinator.Fallback == GenericClassRowFallback.AllRows);
 
         if (!evaluation.AnyRowInfers && _coordinator.Fallback == GenericClassRowFallback.NoClassRow)
         {

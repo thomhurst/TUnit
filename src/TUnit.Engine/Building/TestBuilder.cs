@@ -569,7 +569,12 @@ internal sealed class TestBuilder : ITestBuilder
                 }
 
                 // If no class data was yielded and SkipIfEmpty is true, create a skipped test
-                if (!hasAnyClassData && classDataSource.SkipIfEmpty)
+                // A source-generated partition decides per build whether its empty result is a skip (#7210)
+                var skipIfEmpty = classDataSource is GenericClassRowPartitionDataSource partition
+                    ? partition.SkipIfEmptyFor(contextAccessor)
+                    : classDataSource.SkipIfEmpty;
+
+                if (!hasAnyClassData && skipIfEmpty)
                 {
                     const string skipReason = "Data source returned no data";
 
