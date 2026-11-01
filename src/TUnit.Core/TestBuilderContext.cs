@@ -89,7 +89,9 @@ public record TestBuilderContext
 
     public TestContextEvents Events
     {
-        get => _events ??= _eventsSource?.Events ?? new TestContextEvents();
+        // A sharing context resolves the source's container on every read rather than caching it, so a
+        // later assignment to the source's Events reaches this context too.
+        get => _events ?? _eventsSource?.Events ?? (_events = new TestContextEvents());
         set
         {
             _eventsSource = null;
@@ -108,18 +110,11 @@ public record TestBuilderContext
     /// Equivalent to <c>Events = source.Events</c>, except the container is only created
     /// (on the source) when either context first reads it. Data sources subscribe on the
     /// builder's per-iteration context while their row is fetched; sharing its events lets those
-    /// subscriptions reach the test built from the row (#7205). The link is to the container the
-    /// source has when either context first reads it, so a later assignment to the source's
-    /// <see cref="Events"/> does not reach this context; nothing reassigns a shared source.
+    /// subscriptions reach the test built from the row (#7205). Every read resolves through the
+    /// source, so a later assignment to the source's <see cref="Events"/> reaches this context too.
     /// </summary>
     internal void ShareEventsWith(TestBuilderContext source)
     {
-        if (source._events is { } existing)
-        {
-            Events = existing;
-            return;
-        }
-
         _events = null;
         _eventsSource = source;
     }
