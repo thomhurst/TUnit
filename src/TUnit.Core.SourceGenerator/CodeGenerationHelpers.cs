@@ -155,7 +155,11 @@ internal static class CodeGenerationHelpers
             if (hasGenericParameters)
             {
                 // Has generic parameters - use ConstructedGeneric
-                var genericDefType = GetTypeOfExpression(namedType.ConstructUnboundGenericType());
+                // The display format shortens an unbound Nullable<> to "T?", and typeof(T?) does not compile
+                // outside T's scope, so spell the open definition out.
+                var genericDefType = namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T
+                    ? "typeof(global::System.Nullable<>)"
+                    : GetTypeOfExpression(namedType.ConstructUnboundGenericType());
                 var genericArgs = namedType.TypeArguments.Select(GenerateTypeInfo).ToArray();
 
                 using var writer = new CodeWriter("", includeHeader: false);
