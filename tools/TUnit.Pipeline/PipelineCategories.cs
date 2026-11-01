@@ -5,10 +5,13 @@ namespace TUnit.Pipeline;
 /// </summary>
 public static class PipelineCategories
 {
-    /// <summary>Versions, packs and stages the NuGet packages.</summary>
+    /// <summary>Versions, packs and stages the NuGet packages. Only Ubuntu runs these in the matrix (see dotnet.yml).</summary>
     public const string Packaging = "Packaging";
 
-    /// <summary>Consumes the packed packages. Windows runs these in their own job (see dotnet.yml).</summary>
+    /// <summary>
+    /// Consumes the packed packages. Ubuntu runs these in the matrix, Windows in its own job, and
+    /// macOS not at all (see dotnet.yml).
+    /// </summary>
     public const string NuGetPackageTests = "NuGetPackageTests";
 
     /// <summary>

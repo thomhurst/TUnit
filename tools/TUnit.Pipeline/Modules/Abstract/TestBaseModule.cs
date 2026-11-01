@@ -11,8 +11,14 @@ namespace TUnit.Pipeline.Modules.Abstract;
 
 public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 {
-    /// <summary>Every modern TFM the repo targets.</summary>
-    protected static IReadOnlyList<string> ModernFrameworks { get; } = ["net10.0", "net9.0", "net8.0"];
+    /// <summary>
+    /// Every modern TFM the repo targets on Linux, and net10.0 alone on macOS and Windows. Running
+    /// every test project on all three TFMs on every OS (#7129) doubled the macOS pipeline and starved
+    /// its 3-core, 7 GB runner until it lost contact. Earlier TFMs need covering on one OS only, so
+    /// Linux covers net8.0 and net9.0. Windows still adds net472 through <see cref="ModernAndNetFrameworks"/>.
+    /// </summary>
+    protected static IReadOnlyList<string> ModernFrameworks { get; } =
+        IsLinux ? ["net10.0", "net9.0", "net8.0"] : ["net10.0"];
 
     /// <summary>
     /// <see cref="ModernFrameworks"/>, plus net472 on Windows, the only OS that can run .NET Framework tests.
@@ -29,6 +35,9 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 
     /// <summary>True on Windows, where legacy .NET Framework TFMs (net4xx) can be tested.</summary>
     protected static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+    /// <summary>True on Linux, the only OS where <see cref="ModernFrameworks"/> includes net8.0 and net9.0.</summary>
+    protected static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
     protected sealed override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
