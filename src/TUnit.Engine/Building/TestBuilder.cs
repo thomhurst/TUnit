@@ -1112,6 +1112,8 @@ internal sealed class TestBuilder : ITestBuilder
         {
             if (TakeEvents() is { } events)
             {
+                // The context is fresh, so assigning cannot drop a subscription made before the take.
+                System.Diagnostics.Debug.Assert(builderContext.EventsIfCreated is null, "Row events would replace existing subscriptions.");
                 builderContext.Events = events;
             }
 

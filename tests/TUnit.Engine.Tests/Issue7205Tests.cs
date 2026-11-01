@@ -17,9 +17,10 @@ public class Issue7205Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7205/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(11),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(11),
-                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+                result => result.ResultSummary.Counters.Total.ShouldBe(14),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(12),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(2)
             ]);
     }
 }
