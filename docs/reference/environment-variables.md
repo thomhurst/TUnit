@@ -125,12 +125,12 @@ export JUNIT_XML_OUTPUT_PATH=/path/to/output.xml
 
 ### TUNIT\_MAX\_PARALLEL\_TESTS[​](#tunit_max_parallel_tests "Direct link to TUNIT_MAX_PARALLEL_TESTS")
 
-Sets the maximum number of tests that can run in parallel.
+Sets the maximum number of tests that can run in parallel. The default is 2 x the processor count.
 
 ```
 export TUNIT_MAX_PARALLEL_TESTS=4    # Limit to 4 concurrent tests
 
-export TUNIT_MAX_PARALLEL_TESTS=0    # Unlimited parallelism
+export TUNIT_MAX_PARALLEL_TESTS=0    # Use the default limit (2 x CPU cores)
 ```
 
 **Equivalent to:** `--maximum-parallel-tests`

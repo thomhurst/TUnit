@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.a95f87d4.css">
-<script src="/assets/js/runtime~main.c2b0c551.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.81f18134.js" defer="defer"></script>
 <script src="/assets/js/main.37860cca.js" defer="defer"></script>
 </head>
 <body>
@@ -67,8 +67,8 @@ In this case it attempts to upload the report a few times until it eventually ba
 <p>Sets the output path for JUnit XML reports.</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">export JUNIT_XML_OUTPUT_PATH=/path/to/output.xml</span><br></div></code></pre></div></div>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="tunit_max_parallel_tests">TUNIT_MAX_PARALLEL_TESTS<a href="#tunit_max_parallel_tests" class="hash-link" aria-label="Direct link to TUNIT_MAX_PARALLEL_TESTS" title="Direct link to TUNIT_MAX_PARALLEL_TESTS" translate="no">​</a></h3>
-<p>Sets the maximum number of tests that can run in parallel.</p>
-<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">export TUNIT_MAX_PARALLEL_TESTS=4    # Limit to 4 concurrent tests</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">export TUNIT_MAX_PARALLEL_TESTS=0    # Unlimited parallelism</span><br></div></code></pre></div></div>
+<p>Sets the maximum number of tests that can run in parallel. The default is 2 x the processor count.</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">export TUNIT_MAX_PARALLEL_TESTS=4    # Limit to 4 concurrent tests</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">export TUNIT_MAX_PARALLEL_TESTS=0    # Use the default limit (2 x CPU cores)</span><br></div></code></pre></div></div>
 <p><strong>Equivalent to:</strong> <code>--maximum-parallel-tests</code></p>
 <p><strong>Programmatic equivalent:</strong> <code>context.Settings.Parallelism.MaximumParallelTests</code> (see <a class="" href="/docs/reference/programmatic-configuration">Programmatic Configuration</a>)</p>
 <p><strong>Note:</strong> Command-line arguments take precedence over environment variables.</p>
