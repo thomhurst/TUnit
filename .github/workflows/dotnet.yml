@@ -2,6 +2,7 @@ name: .NET
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: ["main"]
   workflow_dispatch:
     inputs:
@@ -20,6 +21,7 @@ concurrency:
 
 jobs:
   modularpipeline:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
     strategy:
       matrix:
@@ -192,6 +194,7 @@ jobs:
   # the matrix jobs): a runner per framework spent a third of each job on setup and took two more
   # of the runners that every push competes for.
   mock-aot:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     name: mock AOT
     runs-on: ubuntu-latest
     permissions:
@@ -234,6 +237,7 @@ jobs:
   # Tests the packed packages on Windows, including every .NET Framework TFM, on a runner of its
   # own. Linux and macOS still test them inside the matrix pipeline.
   nuget-package-tests-windows:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: windows-latest
     permissions:
       contents: read
@@ -324,6 +328,7 @@ jobs:
   # Compiles the C# fences in the documentation against freshly packed packages, alongside the
   # test matrix rather than after the Ubuntu pipeline.
   doc-snippets:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
     permissions:
       contents: read

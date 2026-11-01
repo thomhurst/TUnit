@@ -2,6 +2,7 @@ name: Locale Test
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: ["main"]
 
 concurrency:
@@ -10,6 +11,7 @@ concurrency:
 
 jobs:
   modularpipeline:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     strategy:
       matrix:
         # One locale per formatting hazard; each is a full solution build, so don't add another

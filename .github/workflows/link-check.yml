@@ -2,6 +2,7 @@ name: Documentation Link Check
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - main
     paths:
@@ -30,6 +31,7 @@ permissions:
 
 jobs:
   markdown-links:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     name: Check links in Markdown sources
     runs-on: ubuntu-latest
     steps:
