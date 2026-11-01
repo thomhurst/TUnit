@@ -13,7 +13,7 @@ Parallel execution is a major contributor to TUnit's speed advantage. See the [p
 
 ## Default Behavior
 
-With no attributes, every test is eligible to run concurrently. The .NET thread pool determines how many execute at once. For most test suites this is the fastest option and requires no configuration.
+With no attributes, every test is eligible to run concurrently. At most 2 x the processor count run at once. Change this limit with `--maximum-parallel-tests`, the `TUNIT_MAX_PARALLEL_TESTS` environment variable or `context.Settings.Parallelism.MaximumParallelTests`. For most test suites the default is the fastest option and requires no configuration. If your tests share a resource with limited capacity, such as a database connection pool, lower the limit for those tests with `[ParallelLimiter<T>]`: extra concurrent tests add no throughput and only wait inside their test bodies, which counts toward `[Timeout]`.
 
 :::note Async tests and the thread pool
 TUnit uses the standard .NET thread pool and, like most .NET applications, is susceptible to thread pool starvation. Blocking calls or heavy CPU-bound `Task.Run` work can delay async continuations in other tests and cause timed waits to expire.

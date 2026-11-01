@@ -596,7 +596,7 @@ internal sealed class TestScheduler : ITestScheduler
     {
         // All paths run through the shared limiter so the DOP cap is unified in
         // GetMaxParallelism. "Unlimited" is resolved to the default cap
-        // (ProcessorCount * 4) there rather than being a separate code path.
+        // (ProcessorCount * 2) there rather than being a separate code path.
         return ExecuteWithGlobalLimitAsync(tests, _maxParallelismLimiter.Semaphore, cancellationToken);
     }
 
@@ -757,9 +757,9 @@ internal sealed class TestScheduler : ITestScheduler
             return codeLimit;
         }
 
-        // Default: 4x CPU cores (empirically optimized for async/IO-bound workloads)
+        // Default: 2x CPU cores (see MaxParallelismLimiter.DefaultMaxParallelism)
         // Users can override via --maximum-parallel-tests or TUNIT_MAX_PARALLEL_TESTS
-        logger.LogDebug($"Maximum parallel tests limit defaulting to {defaultLimit} ({Environment.ProcessorCount} processors * 4)");
+        logger.LogDebug($"Maximum parallel tests limit defaulting to {defaultLimit} ({Environment.ProcessorCount} processors * 2)");
         return defaultLimit;
     }
 }
