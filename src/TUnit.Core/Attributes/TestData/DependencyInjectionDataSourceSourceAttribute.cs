@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Tracking;
 
 namespace TUnit.Core;
 
@@ -33,7 +34,14 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                     MethodMetadata method => method.Type,
                     _ => throw new InvalidOperationException($"Unknown member type: {m.GetType()}")
                 })
-                .Select(x => Create(scope, x))
+                .Select(x =>
+                {
+                    // The scope owns what it resolves and disposes it with itself above, so the
+                    // object tracker must not dispose it a second time when the test ends.
+                    var created = Create(scope, x);
+                    ObjectTracker.MarkExternallyOwned(created);
+                    return created;
+                })
                 .ToArray();
         };
     }
