@@ -117,7 +117,8 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         HashSet<(ITestEntrySource, int)>? expandedSet = null;
         if (hasDependencies)
         {
-            var byClassAndMethod = new Dictionary<(string, string), (ITestEntrySource Source, int Index)>();
+            // A list per name: overloads share the class and method name, and [DependsOn(name)] covers all of them.
+            var byClassAndMethod = new Dictionary<(string, string), List<(ITestEntrySource Source, int Index)>>();
             var byClass = new Dictionary<string, List<(ITestEntrySource Source, int Index)>>();
 
             foreach (var kvp in Sources.TestEntries)
@@ -127,7 +128,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 {
                     var fd = source.GetFilterData(i);
                     var pair = (source, i);
-                    byClassAndMethod[(fd.ClassName, fd.MethodName)] = pair;
+                    byClassAndMethod.AddToList((fd.ClassName, fd.MethodName), pair);
 
                     byClass.AddToList(fd.ClassName, pair);
                 }
@@ -151,9 +152,14 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
                     if (depMethod.Length > 0)
                     {
-                        if (byClassAndMethod.TryGetValue((depClass, depMethod), out var depEntry)
-                            && expandedSet.Add(depEntry))
-                            queue.Enqueue(depEntry);
+                        if (byClassAndMethod.TryGetValue((depClass, depMethod), out var methodEntries))
+                        {
+                            foreach (var depEntry in methodEntries)
+                            {
+                                if (expandedSet.Add(depEntry))
+                                    queue.Enqueue(depEntry);
+                            }
+                        }
                     }
                     else
                     {

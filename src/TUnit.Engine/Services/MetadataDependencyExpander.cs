@@ -32,7 +32,42 @@ internal sealed class TestMetadataEqualityComparer : IEqualityComparer<TestMetad
                // The test name drops namespaces, so instantiations over A.Payload and B.Payload share
                // it (#7105). Their type arguments still tell them apart.
                x.MethodTypeArgumentsIdentity == y.MethodTypeArgumentsIdentity &&
-               SameTypes(x.GenericMethodTypeArguments, y.GenericMethodTypeArguments);
+               SameTypes(x.GenericMethodTypeArguments, y.GenericMethodTypeArguments) &&
+               // Overloads share the class, method name and test name (#7207); their parameters tell them apart.
+               SameParameters(x.MethodMetadata.Parameters, y.MethodMetadata.Parameters);
+    }
+
+    private static bool SameParameters(ParameterMetadata[] x, ParameterMetadata[] y)
+    {
+        if (ReferenceEquals(x, y)) return true;
+        if (x.Length != y.Length) return false;
+
+        for (var i = 0; i < x.Length; i++)
+        {
+            // Parameters that use type parameters are emitted with a placeholder Type, so their TypeInfo is
+            // what distinguishes M(T) from M(object).
+            if (x[i].Type != y[i].Type || !SameTypeInfo(x[i].TypeInfo, y[i].TypeInfo)) return false;
+        }
+
+        return true;
+    }
+
+    private static bool SameTypeInfo(TypeInfo? x, TypeInfo? y)
+    {
+        if (x is ConstructedGeneric cx && y is ConstructedGeneric cy)
+        {
+            // Record equality compares the TypeArguments array by reference.
+            if (cx.GenericDefinition != cy.GenericDefinition || cx.TypeArguments.Length != cy.TypeArguments.Length) return false;
+
+            for (var i = 0; i < cx.TypeArguments.Length; i++)
+            {
+                if (!SameTypeInfo(cx.TypeArguments[i], cy.TypeArguments[i])) return false;
+            }
+
+            return true;
+        }
+
+        return Equals(x, y);
     }
 
     private static bool SameTypes(Type[]? x, Type[]? y)
