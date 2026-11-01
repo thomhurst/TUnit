@@ -960,9 +960,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     // The class rows' instantiation of a class-level [GenerateGenericTest]'s types stands for both,
                     // so it also reads the own-class [MethodDataSource] members that only [GenerateGenericTest]
-                    // supplies the types of. AddRow skips a source a repeated attribute already added. Reflection
-                    // mode does the same in AddDeferredOwnSources (#7208).
-                    if (fromGenerateGenericTest && existing is { HasClassRows: true, HasMethodRows: true })
+                    // supplies the types of, whether or not the method has rows. AddRow skips a source a repeated
+                    // attribute already added. Reflection mode does the same in AddDeferredOwnSources (#7208).
+                    if (fromGenerateGenericTest && existing.HasClassRows)
                     {
                         foreach (var ownSource in GetOwnClassMethodDataSourcesWithUninferredRows(testMethod))
                         {

@@ -185,3 +185,20 @@ public class OwnClassTypeParameterMethodDataSourceWithArgumentsAndRepeatedGenera
         await Assert.That(arg!.ToString()).IsEqualTo("2");
     }
 }
+
+// A parameterless test method on such an instantiation reads the own-class member too: the class rows alone
+// make the instantiation, with no method rows.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+[MethodDataSource(nameof(Values))]
+public class OwnClassTypeParameterMethodDataSourceWithArgumentsAndGenerateGenericTestParameterless<T>(T value)
+{
+    public static IEnumerable<T> Values() => [(T)(object)5];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+    }
+}
