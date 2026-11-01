@@ -73,7 +73,7 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
         // generic type inference), that inferred type would change, and later code relying on it
         // being Mock<T> could stop compiling after the fix.
         if (mockedType.TypeKind == TypeKind.Interface
-            && MayChangeInferredType(invocation, context.SemanticModel, context.CancellationToken))
+            && MayChangeInferredType(invocation, typeArgumentSyntax, context.SemanticModel, context.CancellationToken))
         {
             return;
         }
@@ -292,102 +292,47 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
     /// </summary>
     private static bool MayChangeInferredType(
         InvocationExpressionSyntax invocation,
+        TypeSyntax typeArgumentSyntax,
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
-        var node = ClimbTypeFlow(invocation);
+        var node = MockTypeFlow.ClimbTypeFlow(invocation);
+        var wrapperType = GetStaticMockReturnType(invocation, typeArgumentSyntax, semanticModel);
 
         if (node.Parent is EqualsValueClauseSyntax
             {
                 Parent: VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Type.IsVar: true } } declarator
             })
         {
-            return HasTypeSensitiveReference(declarator, semanticModel, cancellationToken);
+            return HasTypeSensitiveReference(declarator, wrapperType, semanticModel, cancellationToken);
         }
 
-        return !IsTypeInsensitivePosition(node, semanticModel, cancellationToken);
+        return !MockTypeFlow.IsTypeInsensitivePosition(node, wrapperType, semanticModel, cancellationToken);
     }
 
     /// <summary>
-    /// Climbs through expressions whose type flows from this operand (parentheses, conditional,
-    /// null-coalescing and switch expressions).
+    /// The type the rewritten <c>T.Mock(...)</c> call would have, or null when it can't be bound
+    /// here (for example because the fix still has to add <c>using TUnit.Mocks;</c>).
     /// </summary>
-    private static SyntaxNode ClimbTypeFlow(SyntaxNode node)
+    private static ITypeSymbol? GetStaticMockReturnType(
+        InvocationExpressionSyntax invocation,
+        TypeSyntax typeArgumentSyntax,
+        SemanticModel semanticModel)
     {
-        while (node.Parent is { } parent)
+        if (typeArgumentSyntax is NullableTypeSyntax nullable)
         {
-            if (parent is ParenthesizedExpressionSyntax
-                || (parent is ConditionalExpressionSyntax conditional && node != conditional.Condition)
-                || parent.IsKind(SyntaxKind.CoalesceExpression))
-            {
-                node = parent;
-                continue;
-            }
-
-            if (parent is SwitchExpressionArmSyntax arm && node == arm.Expression && arm.Parent is { } switchExpression)
-            {
-                node = switchExpression;
-                continue;
-            }
-
-            break;
+            typeArgumentSyntax = nullable.ElementType;
         }
 
-        return node;
-    }
+        var rewritten = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.ParseExpression(typeArgumentSyntax.WithoutTrivia().ToFullString()),
+                SyntaxFactory.IdentifierName("Mock")),
+            invocation.ArgumentList.WithoutTrivia());
 
-    /// <summary>
-    /// Whether an expression in this position is converted to, or used through, a type that
-    /// doesn't depend on the expression's own type. Anything not recognised counts as sensitive.
-    /// </summary>
-    private static bool IsTypeInsensitivePosition(SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken)
-    {
-        switch (node.Parent)
-        {
-            // mock.Member / mock?.Member: the wrapper derives from Mock<T>, so the same members bind.
-            case MemberAccessExpressionSyntax memberAccess:
-                return memberAccess.Expression == node;
-            case ConditionalAccessExpressionSyntax conditionalAccess:
-                return conditionalAccess.Expression == node;
-
-            case ArgumentSyntax argument when argument.RefKindKeyword.IsKind(SyntaxKind.None):
-                return argument.Parent?.Parent switch
-                {
-                    // Generic type inference would pick up the wrapper type.
-                    InvocationExpressionSyntax outer =>
-                        semanticModel.GetSymbolInfo(outer, cancellationToken).Symbol is IMethodSymbol method
-                        && (!method.IsGenericMethod || GetInvokedName(outer) is GenericNameSyntax),
-                    BaseObjectCreationExpressionSyntax or ConstructorInitializerSyntax or PrimaryConstructorBaseTypeSyntax or ElementAccessExpressionSyntax => true,
-                    _ => false,
-                };
-
-            // Explicitly typed targets.
-            case EqualsValueClauseSyntax { Parent: VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Type.IsVar: false } } }:
-            case EqualsValueClauseSyntax { Parent: PropertyDeclarationSyntax or ParameterSyntax }:
-                return true;
-            case AssignmentExpressionSyntax assignment:
-                return assignment.Right == node;
-            case CastExpressionSyntax:
-            case BinaryExpressionSyntax:
-            case IsPatternExpressionSyntax:
-            case InterpolationSyntax:
-            case ExpressionStatementSyntax:
-            case ExpressionElementSyntax:
-            case YieldStatementSyntax:
-                return true;
-            case InitializerExpressionSyntax initializer:
-                return initializer.Parent is not (ImplicitArrayCreationExpressionSyntax or AnonymousObjectCreationExpressionSyntax);
-
-            // Declared return types, except for lambdas whose return type is inferred.
-            case ReturnStatementSyntax returnStatement:
-                return returnStatement.Ancestors().FirstOrDefault(static a =>
-                    a is AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax or MemberDeclarationSyntax) is not AnonymousFunctionExpressionSyntax;
-            case ArrowExpressionClauseSyntax:
-                return true;
-
-            default:
-                return false;
-        }
+        var type = semanticModel.GetSpeculativeTypeInfo(invocation.SpanStart, rewritten, SpeculativeBindingOption.BindAsExpression).Type;
+        return type is null or IErrorTypeSymbol ? null : type;
     }
 
     /// <summary>
@@ -397,6 +342,7 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
     /// </summary>
     private static bool HasTypeSensitiveReference(
         VariableDeclaratorSyntax declarator,
+        ITypeSymbol? wrapperType,
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
@@ -422,28 +368,17 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            var reference = ClimbTypeFlow(identifier);
+            var reference = MockTypeFlow.ClimbTypeFlow(identifier);
 
             if (reference != identifier
-                || IsWrite(identifier)
-                || !IsTypeInsensitivePosition(identifier, semanticModel, cancellationToken))
+                || MockTypeFlow.IsWrite(identifier)
+                || !MockTypeFlow.IsTypeInsensitivePosition(identifier, wrapperType, semanticModel, cancellationToken))
             {
                 return true;
             }
         }
 
         return false;
-    }
-
-    private static SimpleNameSyntax? GetInvokedName(InvocationExpressionSyntax invocation)
-    {
-        return invocation.Expression switch
-        {
-            MemberAccessExpressionSyntax memberAccess => memberAccess.Name,
-            MemberBindingExpressionSyntax memberBinding => memberBinding.Name,
-            SimpleNameSyntax simpleName => simpleName,
-            _ => null,
-        };
     }
 
     private static bool ReceiverBindsToType(
@@ -579,20 +514,4 @@ public class PreferStaticMockSyntaxAnalyzer : DiagnosticAnalyzer
         return true;
     }
 
-    private static bool IsWrite(IdentifierNameSyntax identifier)
-    {
-        SyntaxNode expression = identifier;
-        while (expression.Parent is ParenthesizedExpressionSyntax parenthesized)
-        {
-            expression = parenthesized;
-        }
-
-        return expression.Parent switch
-        {
-            AssignmentExpressionSyntax assignment => assignment.Left == expression,
-            ArgumentSyntax argument => !argument.RefKindKeyword.IsKind(SyntaxKind.None) && !argument.RefKindKeyword.IsKind(SyntaxKind.InKeyword),
-            RefExpressionSyntax => true,
-            _ => false,
-        };
-    }
 }

@@ -151,6 +151,15 @@ mock.Greet(Any()).Returns("Hello!");
 mock.Greet("Alice").WasCalled();
 ```
 
+The wrapper type is named after the interface with a `Mock` suffix (`IGreeter` → `IGreeterMock`) and lives in the interface's namespace. Declaring a variable, field or property as `Mock<IGreeter>` hides the wrapper. C# never applies user-defined conversions to interface types, so a `Mock<IGreeter>` needs `.Object` wherever an `IGreeter` is expected, and generic type inference, casts and `is`/`as` checks see `Mock<IGreeter>` rather than an `IGreeter`. The **TM011** suggestion flags locals, private fields and private properties declared as `Mock<T>` that only ever hold the wrapper, and its code fix changes the declaration to the wrapper type. Public, protected and internal members, and members of partial types split across files, are deliberately not flagged, because code the analyzer can't see could depend on their type:
+
+```csharp
+Mock<IGreeter> before = IGreeter.Mock(); // TM011: declare 'before' as 'IGreeterMock'
+IGreeterMock after = IGreeter.Mock();    // after the fix
+```
+
+Run `dotnet format analyzers --diagnostics TM011 --severity info` to apply it to a whole project.
+
 `T.Mock()` is the recommended syntax for all types — interfaces, abstract classes, and concrete classes. For interfaces it returns a typed wrapper; for classes it returns `Mock<T>`. Constructor arguments are supported as strongly-typed parameters:
 
 ```csharp
@@ -164,11 +173,14 @@ TUnit.Mocks requires C# 14 or later (`LangVersion` 14 or `preview`), because its
 
 ### Implicit Conversion
 
-`Mock<T>` also supports implicit conversion to `T` — so `T.Mock()` works without `.Object`:
+`Mock<T>` declares an implicit conversion to `T`, so a class mock works without `.Object`. C# never applies user-defined conversions to interface types, so for an interface mock either keep the wrapper type that `T.Mock()` returns, which implements the interface, or use `.Object`:
 
 ```csharp
 var mock = IGreeter.Mock();
-IGreeter greeter = mock; // implicit conversion
+IGreeter greeter = mock; // the wrapper implements IGreeter
+
+Mock<IGreeter> baseMock = mock;
+IGreeter viaObject = baseMock.Object; // Mock<IGreeter> needs .Object
 ```
 
 ### Loose vs Strict Mode

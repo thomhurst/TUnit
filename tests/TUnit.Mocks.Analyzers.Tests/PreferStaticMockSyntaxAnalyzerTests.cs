@@ -828,4 +828,28 @@ public class PreferStaticMockSyntaxAnalyzerTests
             CoreStubs,
             LanguageVersion.CSharp13);
     }
+
+    [Test]
+    public async Task Interface_Where_The_Wrapper_Would_Bind_Differently_Is_Not_Reported()
+    {
+        await Verifier.VerifyNoDiagnosticAsync(
+            """
+            using System;
+            using TUnit.Mocks;
+            using App;
+
+            public class Tests
+            {
+                public void Test()
+                {
+                    Use(Mock.Of<IFoo>());
+                    var disposable = Mock.Of<IFoo>() as IDisposable;
+                }
+
+                private static void Use(Mock<IFoo> mock) { }
+                private static void Use(IFoo foo) { }
+            }
+            """,
+            Stubs);
+    }
 }
