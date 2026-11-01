@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
@@ -60,7 +61,7 @@ internal static class CompileChecker
 #if NETFRAMEWORK
             .Append(NetFrameworkPolyfills)
 #endif
-            .Select(source => CSharpSyntaxTree.ParseText(source))
+            .Select(source => GeneratorTestInput.Parse(source))
             .ToArray();
 
         var compilation = CSharpCompilation.Create(

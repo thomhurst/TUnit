@@ -103,7 +103,13 @@ public class AotConverterScanTests
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
         var compilation = CSharpCompilation.Create(
             "ObsoleteConverters",
-            [CSharpSyntaxTree.ParseText(source, parseOptions)],
+            [
+                CSharpSyntaxTree.ParseText(source, parseOptions),
+#if NETFRAMEWORK
+                // The record struct needs IsExternalInit, which .NET Framework lacks.
+                CSharpSyntaxTree.ParseText(ReferencesHelper.NetFrameworkPolyfills, parseOptions),
+#endif
+            ],
             ReferencesHelper.References,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 

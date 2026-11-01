@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.SourceGenerator.Generators;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
@@ -42,7 +43,7 @@ internal class XmlDocsRegressionTests : TestsBase<MethodAssertionGenerator>
             var trees = generatedFiles
                 .Select(source => CSharpSyntaxTree.ParseText(
                     source,
-                    CSharpParseOptions.Default.WithDocumentationMode(DocumentationMode.Diagnose)))
+                    GeneratorTestInput.ParseOptions.WithDocumentationMode(DocumentationMode.Diagnose)))
                 .ToArray();
 
             var compilation = CSharpCompilation.Create(
@@ -68,7 +69,7 @@ internal class XmlDocsRegressionTests : TestsBase<MethodAssertionGenerator>
             await Assert.That(generatedFiles).IsNotEmpty();
 
             var trees = generatedFiles
-                .Select(source => CSharpSyntaxTree.ParseText(source))
+                .Select(source => GeneratorTestInput.Parse(source))
                 .ToArray();
 
             var compilation = CSharpCompilation.Create(

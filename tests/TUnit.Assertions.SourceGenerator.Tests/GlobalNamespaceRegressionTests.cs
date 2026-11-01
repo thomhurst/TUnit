@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.SourceGenerator.Generators;
 using TUnit.Assertions.SourceGenerator.Tests.Options;
+using TUnit.Tests.Shared;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
@@ -59,7 +60,7 @@ internal class GlobalNamespaceCollectionShapeAssertionTests : TestsBase<Collecti
 
             // The emitted forwarders call internal TUnit.Assertions constructors, so the output only compiles
             // inside TUnit.Assertions itself. A syntax check is what catches `global::<global namespace>.X`.
-            var syntaxErrors = CSharpSyntaxTree.ParseText(generated)
+            var syntaxErrors = GeneratorTestInput.Parse(generated)
                 .GetDiagnostics()
                 .Where(d => d.Severity == DiagnosticSeverity.Error)
                 .Select(d => $"{d.Id}: {d.GetMessage()}")
@@ -90,7 +91,7 @@ internal static class GlobalNamespaceCompileCheck
 
         var trees = generatedFiles
             .Prepend(source)
-            .Select(text => CSharpSyntaxTree.ParseText(text))
+            .Select(text => GeneratorTestInput.Parse(text))
             .ToArray();
 
         // TestData files are also compiled into this test assembly, so referencing it would declare
