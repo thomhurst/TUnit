@@ -40,4 +40,35 @@ internal static class TestOnDisposeRaiser
             }
         }
     }
+
+    /// <summary>
+    /// Raises, once, the OnDispose callbacks that data sources subscribed on a builder context that no
+    /// test owns: <see cref="TestSessionContext.GlobalStaticPropertyContext"/>, which static property
+    /// data sources run against. A dependency injection scope created for a static property is disposed
+    /// here, at session end, because the object tracker does not dispose the services the scope owns.
+    /// No test exists, so the callbacks receive the builder context as sender and no test context.
+    /// Handler exceptions are added to <paramref name="exceptions"/>.
+    /// </summary>
+    public static async ValueTask RaiseForSessionAsync(TestBuilderContext context, List<Exception> exceptions)
+    {
+        if (context.EventsIfCreated is not { OnDispose: { } onDispose } events)
+        {
+            return;
+        }
+
+        // Detach first so the callbacks run once even if this is reached again.
+        events.OnDispose = null;
+
+        foreach (var invocation in onDispose.InvocationList)
+        {
+            try
+            {
+                await invocation.InvokeAsync(context, null!).ConfigureAwait(false);
+            }
+            catch (Exception disposeEx)
+            {
+                exceptions.Add(disposeEx);
+            }
+        }
+    }
 }
