@@ -151,9 +151,12 @@ jobs:
           publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
           # The native AOT publishes (the test app with its engine tests, and the NugetTester) run
           # in aot.yml.
-          # Windows tests the packages in the nuget-package-tests-windows job instead: with every
-          # .NET Framework TFM they competed with the engine tests for this runner's CPUs.
-          ignore-categories: ${{ matrix.os == 'windows-latest' && 'Aot NuGetPackageTests' || 'Aot' }}
+          # Only Ubuntu packs and tests the packages: it is the runner that publishes them. Windows
+          # tests them in the nuget-package-tests-windows job instead, where with every .NET
+          # Framework TFM they no longer compete with the engine tests for this runner's CPUs.
+          # macOS skips them: the packages are platform-neutral, and packing and testing them took
+          # CPU from the test modules on the smallest runner.
+          ignore-categories: ${{ matrix.os == 'ubuntu-latest' && 'Aot' || 'Aot Packaging NuGetPackageTests' }}
 
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v7.0.2
@@ -184,7 +187,7 @@ jobs:
 
       - name: NuGet Packages Artifacts
         uses: actions/upload-artifact@v7.0.2
-        if: always()
+        if: always() && matrix.os == 'ubuntu-latest'
         with:
           name: 'NuGetPackages-${{matrix.os}}'
           path: '**/*.*nupkg'
