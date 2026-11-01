@@ -3033,11 +3033,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // CancellationToken or optional parameter is filled in as reflection mode's BuildInvokeArgs does.
         var hasArguments = dataSourceMethod is { Parameters.Length: > 0 };
 
+        // A method declared on a base type is called through that type: on the target type, C# overload
+        // resolution drops a base overload whenever a derived one is applicable, so it could call another
+        // overload than the one ResolveMethodDataSourceMember chose (https://github.com/thomhurst/TUnit/issues/7202).
+        // An override counts as declared where its virtual method is, so it is called through that type and
+        // dispatches to the override at run time.
+        var declaringMethod = dataSourceMethod;
+        while (declaringMethod?.OverriddenMethod is { } overridden)
+        {
+            declaringMethod = overridden;
+        }
+
+        var receiverType = declaringMethod != null && IsShadowedOnTargetType(declaringMethod, targetType)
+            ? declaringMethod.ContainingType.GloballyQualified()
+            : fullyQualifiedType;
         var receiver = isStatic
-            ? fullyQualifiedType
+            ? receiverType
             : usesTestClassInstance
-                ? $"(({fullyQualifiedType})instance)"
-                : $"new {fullyQualifiedType}()";
+                ? $"(({receiverType})instance)"
+                : receiverType == fullyQualifiedType
+                    ? $"new {fullyQualifiedType}()"
+                    : $"(({receiverType})new {fullyQualifiedType}())";
         var lambdaHeader = usesTestClassInstance ? "static instance =>" : "static () =>";
         var metadataArgument = usesTestClassInstance ? "dataGeneratorMetadata, " : "";
 
@@ -3106,6 +3122,35 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             writer.Append($"{helper}({metadataArgument}{lambdaHeader} {receiver}.{memberAccess})");
         }
+    }
+
+    /// <summary>
+    /// Whether a call on <paramref name="targetType"/> might not reach <paramref name="declaringMethod"/>, a method that
+    /// is not an override: some type from the target type down to, but excluding, the method's declaring type
+    /// declares a member of that name other than an override. C# overload resolution then removes the base methods
+    /// once that member applies, so the call must go through the declaring type.
+    /// </summary>
+    private static bool IsShadowedOnTargetType(IMethodSymbol declaringMethod, ITypeSymbol targetType)
+    {
+        for (var type = targetType; type is not null; type = type.BaseType)
+        {
+            if (SymbolEqualityComparer.Default.Equals(type, declaringMethod.ContainingType))
+            {
+                return false;
+            }
+
+            foreach (var member in type.GetMembers(declaringMethod.Name))
+            {
+                if (!member.IsOverride)
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Not reached for a member ResolveMethodDataSourceMember found on the target type's hierarchy; keep the
+        // target type as the receiver, as before
+        return false;
     }
 
     /// <summary>
@@ -7304,14 +7349,30 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// Picks the member a [MethodDataSource] reads, mirroring reflection mode's
-    /// <c>MethodDataSourceAttribute.ResolveDataSourceMethod</c>: the first type in the hierarchy that
-    /// declares the name is searched, and among its methods the overload that accepts the attribute's
-    /// <c>Arguments</c> wins (exact argument types over implicit conversions). A property or field of
-    /// that name is used when no method applies. Both the generated factory and generic type inference
-    /// use this, so the closed test method always matches the rows the factory produces.
+    /// <c>MethodDataSourceAttribute.ResolveDataSourceMethod</c>: like <c>GetMethods</c> with
+    /// <c>FlattenHierarchy</c>, the methods of the target type and of every base type are candidates, except
+    /// private base members and base methods that a more derived type overrides or hides by signature.
+    /// The overload that accepts the attribute's <c>Arguments</c> wins (exact argument types over implicit
+    /// conversions); on an exact tie the most derived declaration wins, as with the reflection binder. When no
+    /// method applies, a property or field of the first type that declares the name is used. Both the
+    /// generated factory and generic type inference use this, so the closed test method always matches the
+    /// rows the factory produces. The factory calls a method through its declaring type, because C# overload
+    /// resolution on the target type would discard a base overload once a derived one is applicable
+    /// (https://github.com/thomhurst/TUnit/issues/7202).
     /// </summary>
     private static ISymbol? ResolveMethodDataSourceMember(ITypeSymbol targetType, string memberName, AttributeData attr, Compilation compilation)
     {
+        var argumentsProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "Arguments");
+        var arguments = argumentsProperty is { Key: not null, Value: { IsNull: false, Kind: TypedConstantKind.Array } }
+            ? argumentsProperty.Value.Values
+            : ImmutableArray<TypedConstant>.Empty;
+
+        ImmutableArray<ISymbol> firstDeclaredMembers = default;
+        IMethodSymbol? bestMethod = null;
+        IMethodSymbol? firstMethod = null;
+        var bestScore = -1;
+        List<IMethodSymbol>? candidates = null;
+
         // Walk base types: with [InheritsTests] (or a data member declared on a base class) the member
         // may not be declared directly on the test class. Missing it would emit a plain
         // MethodDataSourceAttribute without a Factory (https://github.com/thomhurst/TUnit/issues/6162).
@@ -7323,14 +7384,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 continue;
             }
 
-            var argumentsProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "Arguments");
-            var arguments = argumentsProperty is { Key: not null, Value: { IsNull: false, Kind: TypedConstantKind.Array } }
-                ? argumentsProperty.Value.Values
-                : ImmutableArray<TypedConstant>.Empty;
+            var isFirstDeclaringType = firstDeclaredMembers.IsDefault;
+            if (isFirstDeclaringType)
+            {
+                firstDeclaredMembers = members;
+            }
 
-            IMethodSymbol? bestMethod = null;
-            IMethodSymbol? firstMethod = null;
-            var bestScore = -1;
+            var isBaseType = !SymbolEqualityComparer.Default.Equals(searchType, targetType);
             foreach (var member in members)
             {
                 if (member is not IMethodSymbol method)
@@ -7338,13 +7398,28 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     continue;
                 }
 
+                // Reflection never returns a private base member, nor a base method that a derived one overrides
+                // or hides by signature. A base method the generated class cannot call (protected, or internal to
+                // another assembly) is skipped as well, so choosing it cannot break the build.
+                if (isBaseType
+                    && (method.DeclaredAccessibility == Accessibility.Private
+                        || !compilation.IsSymbolAccessibleWithin(method, compilation.Assembly)
+                        || IsHiddenBySignature(method, candidates)))
+                {
+                    continue;
+                }
+
+                (candidates ??= []).Add(method);
+
                 // A generic data method is never a fallback while a non-generic one exists: its type arguments
                 // cannot be inferred from the Arguments, and inference would close the test over its open T
-                if (firstMethod == null || (firstMethod.IsGenericMethod && !method.IsGenericMethod))
+                if (isFirstDeclaringType && (firstMethod == null || (firstMethod.IsGenericMethod && !method.IsGenericMethod)))
                 {
                     firstMethod = method;
                 }
 
+                // Strictly better only, so on an exact tie the earlier, more derived declaration is kept, as the
+                // reflection binder prefers the most derived of otherwise equal methods
                 var score = ScoreDataSourceOverload(method, arguments, compilation);
                 if (score > bestScore
                     || (score == bestScore && score >= 0 && IsMoreSpecificDataSourceOverload(method, bestMethod!, arguments.Length, compilation)))
@@ -7355,30 +7430,72 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     bestMethod = method;
                 }
             }
+        }
 
-            if (bestMethod != null)
+        if (bestMethod != null)
+        {
+            return bestMethod;
+        }
+
+        if (firstDeclaredMembers.IsDefault)
+        {
+            return null;
+        }
+
+        // No overload accepts the arguments: prefer a property or field, else keep the first
+        // method so the generated call reports the mismatch as before. Generic type inference may then
+        // read the row type of a method whose call fails. That is harmless: TUnit0001 reports Arguments
+        // that no overload accepts as a compile error, so this is reached only with it suppressed, and the
+        // data source then fails when it runs, as it does in reflection mode. Returning null instead would
+        // leave a generic test with no inferred type arguments, so it would disappear without an error.
+        foreach (var member in firstDeclaredMembers)
+        {
+            if (member is IPropertySymbol or IFieldSymbol)
             {
-                return bestMethod;
+                return member;
+            }
+        }
+
+        return firstMethod ?? firstDeclaredMembers[0];
+    }
+
+    /// <summary>
+    /// Whether a more derived candidate already declares <paramref name="method"/>'s signature (same type
+    /// parameter count, parameter types and ref kinds), so it overrides or hides this base method and
+    /// reflection's <c>GetMethods</c> would not return it.
+    /// </summary>
+    private static bool IsHiddenBySignature(IMethodSymbol method, List<IMethodSymbol>? derivedCandidates)
+    {
+        if (derivedCandidates is null)
+        {
+            return false;
+        }
+
+        foreach (var derived in derivedCandidates)
+        {
+            if (derived.Arity != method.Arity || derived.Parameters.Length != method.Parameters.Length)
+            {
+                continue;
             }
 
-            // No overload accepts the arguments: prefer a property or field, else keep the first
-            // method so the generated call reports the mismatch as before. Generic type inference may then
-            // read the row type of a method whose call fails. That is harmless: TUnit0001 reports Arguments
-            // that no overload accepts as a compile error, so this is reached only with it suppressed, and the
-            // data source then fails when it runs, as it does in reflection mode. Returning null instead would
-            // leave a generic test with no inferred type arguments, so it would disappear without an error.
-            foreach (var member in members)
+            var sameSignature = true;
+            for (var i = 0; i < method.Parameters.Length; i++)
             {
-                if (member is IPropertySymbol or IFieldSymbol)
+                if (derived.Parameters[i].RefKind != method.Parameters[i].RefKind
+                    || !SymbolEqualityComparer.Default.Equals(derived.Parameters[i].Type, method.Parameters[i].Type))
                 {
-                    return member;
+                    sameSignature = false;
+                    break;
                 }
             }
 
-            return firstMethod ?? members[0];
+            if (sameSignature)
+            {
+                return true;
+            }
         }
 
-        return null;
+        return false;
     }
 
     /// <summary>

@@ -103,6 +103,12 @@ public class AotConverterScanTests
                 [Test, MethodDataSource(nameof(Data))]
                 public void Tuple((Token Token, int Length) value) { }
             }
+
+            // The record's init accessor needs this type, which net472's reference assemblies do not declare
+            namespace System.Runtime.CompilerServices
+            {
+                internal static class IsExternalInit { }
+            }
             """;
 
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);

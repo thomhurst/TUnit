@@ -244,6 +244,12 @@ public class DataSourceOverloadParityTests
     [MethodDataSource(nameof(GenericOverload), Arguments = new object[] { "GenericOverload(string, int)", 1 })]
     // A static overload hidden with `new` on a derived provider: both modes call the derived one
     [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.Hidden), Arguments = new object[] { "Derived.Hidden(string, int)", 1 })]
+    // A better overload declared on a base type wins in both modes, and is called through the base type (#7202)
+    [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.Split), Arguments = new object[] { "Base.Split(string, int)", 1 })]
+    [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.InstanceSplit), Arguments = new object[] { "Base.InstanceSplit(string, int)", 1 })]
+    // A private base overload is invisible to both modes, and an overridden one runs its override
+    [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.PrivateSplit), Arguments = new object[] { "Derived.PrivateSplit(string, long)", 1 })]
+    [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.Overridden), Arguments = new object[] { "Derived.Overridden(string, int)", 1 })]
     // Loose values for a params parameter are rejected by TUnit0001, so the array is passed as one argument
     [MethodDataSource(nameof(Params), Arguments = new object[] { "Params(string, params int[])", new[] { 1, 2 } })]
     [MethodDataSource(nameof(Params), Arguments = new object[] { "Params(string, int)", 1 })]
@@ -279,6 +285,26 @@ public class DataSourceOverloadParityBaseProvider
     {
         yield return (expected, "Base.Hidden(string, int)");
     }
+
+    public static IEnumerable<(string, string)> Split(string expected, int value)
+    {
+        yield return (expected, "Base.Split(string, int)");
+    }
+
+    public IEnumerable<(string, string)> InstanceSplit(string expected, int value)
+    {
+        yield return (expected, "Base.InstanceSplit(string, int)");
+    }
+
+    private static IEnumerable<(string, string)> PrivateSplit(string expected, int value)
+    {
+        yield return (expected, "Base.PrivateSplit(string, int)");
+    }
+
+    public virtual IEnumerable<(string, string)> Overridden(string expected, int value)
+    {
+        yield return (expected, "Base.Overridden(string, int)");
+    }
 }
 
 public class DataSourceOverloadParityDerivedProvider : DataSourceOverloadParityBaseProvider
@@ -286,5 +312,30 @@ public class DataSourceOverloadParityDerivedProvider : DataSourceOverloadParityB
     public new static IEnumerable<(string, string)> Hidden(string expected, int value)
     {
         yield return (expected, "Derived.Hidden(string, int)");
+    }
+
+    public static IEnumerable<(string, string)> Split(string expected, long value)
+    {
+        yield return (expected, "Derived.Split(string, long)");
+    }
+
+    public IEnumerable<(string, string)> InstanceSplit(string expected, long value)
+    {
+        yield return (expected, "Derived.InstanceSplit(string, long)");
+    }
+
+    public static IEnumerable<(string, string)> PrivateSplit(string expected, long value)
+    {
+        yield return (expected, "Derived.PrivateSplit(string, long)");
+    }
+
+    public override IEnumerable<(string, string)> Overridden(string expected, int value)
+    {
+        yield return (expected, "Derived.Overridden(string, int)");
+    }
+
+    public IEnumerable<(string, string)> Overridden(string expected, long value)
+    {
+        yield return (expected, "Derived.Overridden(string, long)");
     }
 }
