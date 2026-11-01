@@ -244,6 +244,14 @@ public class DataSourceOverloadParityTests
     [MethodDataSource(nameof(GenericOverload), Arguments = new object[] { "GenericOverload(string, int)", 1 })]
     // A static overload hidden with `new` on a derived provider: both modes call the derived one
     [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.Hidden), Arguments = new object[] { "Derived.Hidden(string, int)", 1 })]
+    // A better overload declared on a base type wins in both modes, and is called through the base type (#7202)
+    [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.Split), Arguments = new object[] { "Base.Split(string, int)", 1 })]
+    [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.InstanceSplit), Arguments = new object[] { "Base.InstanceSplit(string, int)", 1 })]
+    // A private base overload is invisible to both modes, and an overridden one runs its override
+    [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.PrivateSplit), Arguments = new object[] { "Derived.PrivateSplit(string, long)", 1 })]
+    [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.Overridden), Arguments = new object[] { "Derived.Overridden(string, int)", 1 })]
+    // An override called through its base declaration keeps its narrower (covariant) return type
+    [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.Covariant), Arguments = new object[] { "Derived.Covariant(string, int)", 1 })]
     // Loose values for a params parameter are rejected by TUnit0001, so the array is passed as one argument
     [MethodDataSource(nameof(Params), Arguments = new object[] { "Params(string, params int[])", new[] { 1, 2 } })]
     [MethodDataSource(nameof(Params), Arguments = new object[] { "Params(string, int)", 1 })]
@@ -266,6 +274,8 @@ public class DataSourceOverloadParityTests
     [MethodDataSource(nameof(NullOptional), Arguments = new object?[] { "NullOptional(string, string?, int)", null })]
     [MethodDataSource(nameof(Optional), Arguments = new object[] { "Optional(string, string, int)", "a" })]
     [MethodDataSource(nameof(Token), Arguments = new object[] { "Token(string, int, CancellationToken)", 1 })]
+    // An override called through its base declaration passes its own default, as reflection does, not the base's
+    [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.OverriddenDefault), Arguments = new object?[] { "Derived.OverriddenDefault(string, string?, int = 2)", null })]
     public async Task Chosen_Overload_With_Missing_Or_Null_Arguments(string expected, string chosen)
     {
         await Assert.That(chosen).IsEqualTo(expected);
@@ -279,6 +289,36 @@ public class DataSourceOverloadParityBaseProvider
     {
         yield return (expected, "Base.Hidden(string, int)");
     }
+
+    public static IEnumerable<(string, string)> Split(string expected, int value)
+    {
+        yield return (expected, "Base.Split(string, int)");
+    }
+
+    public IEnumerable<(string, string)> InstanceSplit(string expected, int value)
+    {
+        yield return (expected, "Base.InstanceSplit(string, int)");
+    }
+
+    private static IEnumerable<(string, string)> PrivateSplit(string expected, int value)
+    {
+        yield return (expected, "Base.PrivateSplit(string, int)");
+    }
+
+    public virtual IEnumerable<(string, string)> Overridden(string expected, int value)
+    {
+        yield return (expected, "Base.Overridden(string, int)");
+    }
+
+    public virtual IEnumerable<(string, string)> OverriddenDefault(string expected, string? key, int count = 1)
+    {
+        yield return (expected, $"Base.OverriddenDefault(string, string?, int = {count})");
+    }
+
+    public virtual object Covariant(string expected, int value)
+    {
+        return Task.FromResult<IEnumerable<(string, string)>>([(expected, "Base.Covariant(string, int)")]);
+    }
 }
 
 public class DataSourceOverloadParityDerivedProvider : DataSourceOverloadParityBaseProvider
@@ -286,5 +326,53 @@ public class DataSourceOverloadParityDerivedProvider : DataSourceOverloadParityB
     public new static IEnumerable<(string, string)> Hidden(string expected, int value)
     {
         yield return (expected, "Derived.Hidden(string, int)");
+    }
+
+    public static IEnumerable<(string, string)> Split(string expected, long value)
+    {
+        yield return (expected, "Derived.Split(string, long)");
+    }
+
+    public IEnumerable<(string, string)> InstanceSplit(string expected, long value)
+    {
+        yield return (expected, "Derived.InstanceSplit(string, long)");
+    }
+
+    public static IEnumerable<(string, string)> PrivateSplit(string expected, long value)
+    {
+        yield return (expected, "Derived.PrivateSplit(string, long)");
+    }
+
+    public override IEnumerable<(string, string)> Overridden(string expected, int value)
+    {
+        yield return (expected, "Derived.Overridden(string, int)");
+    }
+
+    public IEnumerable<(string, string)> Overridden(string expected, long value)
+    {
+        yield return (expected, "Derived.Overridden(string, long)");
+    }
+
+    // Renames and re-defaults the parameter: reflection passes this override's default, 2
+    public override IEnumerable<(string, string)> OverriddenDefault(string expected, string? name, int amount = 2)
+    {
+        yield return (expected, $"Derived.OverriddenDefault(string, string?, int = {amount})");
+    }
+
+    // Not applicable to a string, but shadows the base declaration so the override is called through the base type
+    public IEnumerable<(string, string)> OverriddenDefault(int value)
+    {
+        yield return ("OverriddenDefault(int)", "Derived.OverriddenDefault(int)");
+    }
+
+    // A covariant return: the factory awaits the Task, which a call typed as the base's object could not supply
+    public override Task<IEnumerable<(string, string)>> Covariant(string expected, int value)
+    {
+        return Task.FromResult<IEnumerable<(string, string)>>([(expected, "Derived.Covariant(string, int)")]);
+    }
+
+    public Task<IEnumerable<(string, string)>> Covariant(string expected, long value)
+    {
+        return Task.FromResult<IEnumerable<(string, string)>>([(expected, "Derived.Covariant(string, long)")]);
     }
 }

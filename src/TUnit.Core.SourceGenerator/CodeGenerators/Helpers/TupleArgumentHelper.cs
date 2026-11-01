@@ -249,7 +249,7 @@ public static class TupleArgumentHelper
         }
     }
 
-    private static bool TryFormatDefaultValue(IParameterSymbol parameter, out string expression)
+    internal static bool TryFormatDefaultValue(IParameterSymbol parameter, out string expression)
     {
         expression = string.Empty;
 
