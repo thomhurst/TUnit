@@ -409,6 +409,13 @@ public class AotConverterGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Generated code that calls an [Obsolete(..., error: true)] operator fails
+        // with CS0619, which the generated file's #pragma warning disable cannot suppress.
+        if (IsObsoleteAsError(methodSymbol))
+        {
+            return null;
+        }
+
         var sourceType = methodSymbol.Parameters[0].Type;
         var targetType = methodSymbol.ReturnType;
         var isImplicit = methodSymbol.Name == "op_Implicit";
@@ -450,6 +457,22 @@ public class AotConverterGenerator : IIncrementalGenerator
             TargetType = targetType,
             IsImplicit = isImplicit,
         };
+    }
+
+    private static bool IsObsoleteAsError(ISymbol symbol)
+    {
+        foreach (var attribute in symbol.GetAttributes())
+        {
+            if (attribute.AttributeClass is not { Name: "ObsoleteAttribute", ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } })
+            {
+                continue;
+            }
+
+            var args = attribute.ConstructorArguments;
+            return args.Length >= 2 && args[1].Value is true;
+        }
+
+        return false;
     }
 
     private static bool TypeContainsGenericTypeParameters(ITypeSymbol type)

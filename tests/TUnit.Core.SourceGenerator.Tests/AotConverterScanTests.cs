@@ -68,4 +68,55 @@ public class AotConverterScanTests
         await Assert.That(generated).Contains("global::PartialValue");
         await Assert.That(generated).DoesNotContain("global::BodyOnlyValue");
     }
+
+    [Test]
+    public async Task SkipsConversionsBlockedByObsoleteError()
+    {
+        // https://github.com/thomhurst/TUnit/issues/7316
+        const string source = """
+            using System;
+            using TUnit.Core;
+
+            public readonly record struct Token(string Value)
+            {
+                public static implicit operator Token(string value) => new(value);
+
+                [Obsolete("Use a string.", error: true)]
+                public static implicit operator Token(char value) => new(value.ToString());
+
+                [Obsolete("Prefer the string conversion.")]
+                public static explicit operator Token(int value) => new(value.ToString());
+            }
+
+            public class Tests
+            {
+                [Test, Arguments("abc")]
+                public void Scalar(Token token) { }
+
+                public static (Token Token, int Length) Data() => ("abc", 3);
+
+                [Test, MethodDataSource(nameof(Data))]
+                public void Tuple((Token Token, int Length) value) { }
+            }
+            """;
+
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+        var compilation = CSharpCompilation.Create(
+            "ObsoleteConverters",
+            [CSharpSyntaxTree.ParseText(source, parseOptions)],
+            ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new AotConverterGenerator().AsSourceGenerator()], parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+
+        await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+
+        var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
+        await Assert.That(generated).Contains("typeof(string)");
+        await Assert.That(generated).Contains("typeof(int)");
+        await Assert.That(generated).DoesNotContain("typeof(char)");
+    }
 }
