@@ -168,3 +168,41 @@ public class TypedRowOnNullableParameter
         await Assert.That(arg.HasValue).IsTrue();
     }
 }
+
+// An omitted C# 13 params collection is optional, as a params array is: [Arguments<object>(1)] runs
+// Run<object>(1) in both modes.
+[EngineTest(ExpectedResult.Pass)]
+public class TypedRowWithParamsCollection
+{
+    [Test]
+    [Arguments<object>(1)]
+    public async Task Run<TMethod>(TMethod arg, params IEnumerable<string> rest)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(object));
+        await Assert.That(arg).IsEqualTo((object)1);
+        await Assert.That(rest).IsEmpty();
+    }
+}
+
+// A typed source of TestDataRow<int> rows is unwrapped before invocation, so it infers Run<int>, not
+// Run<TestDataRow<int>>: Run<int>(1).
+[EngineTest(ExpectedResult.Pass)]
+public class TypedTestDataRowSource
+{
+    [Test]
+    [IntTestDataRowSource]
+    public async Task Run<TMethod>(TMethod arg)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
+        await Assert.That((int)(object)arg!).IsEqualTo(1);
+    }
+}
+
+public sealed class IntTestDataRowSourceAttribute : TypedDataSourceAttribute<TestDataRow<int>>
+{
+    public override async IAsyncEnumerable<Func<Task<TestDataRow<int>>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await Task.CompletedTask;
+        yield return () => Task.FromResult(new TestDataRow<int>(1));
+    }
+}

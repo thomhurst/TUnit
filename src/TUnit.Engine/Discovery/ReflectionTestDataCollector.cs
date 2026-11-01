@@ -2181,17 +2181,27 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// Mirrors the generator's <c>TypedDataSourceInference.InferMethodTypeArgumentsFromRowType</c> (#7214): a
     /// typed row of type <paramref name="rowType"/> binds to the data parameters (any CancellationToken
     /// excluded), the whole row to a single data parameter, otherwise one tuple element per leading data
-    /// parameter, or a scalar row to the first, with omitted trailing parameters optional. A T? parameter
-    /// takes a value of its underlying type. Each parameter type is matched against its value type, including
+    /// parameter, or a scalar row to the first, with omitted trailing parameters optional (params arrays and
+    /// params collections included). A TestDataRow&lt;T&gt; row binds as its T, since it is unwrapped before
+    /// invocation. A T? parameter takes a value of its underlying type. Each parameter type is matched against its value type, including
     /// type arguments nested in generic parameter types. Every type parameter must be inferred, each to one type.
     /// </summary>
     private static Type[]? InferTypesFromTypedRow(MethodInfo method, Type rowType, int genericParameterCount)
     {
+        // A TestDataRow<T> row is unwrapped before invocation, so its value binds as a T.
+        if (TestDataRowUnwrapper.IsTestDataRowType(rowType))
+        {
+            rowType = rowType.GetGenericArguments()[0];
+        }
+
         var dataParameters = Array.FindAll(method.GetParameters(), static parameter => parameter.ParameterType != typeof(CancellationToken));
         var requiredCount = 0;
         foreach (var parameter in dataParameters)
         {
-            if (!parameter.IsOptional && !parameter.HasDefaultValue && !parameter.IsDefined(typeof(ParamArrayAttribute), false))
+            if (!parameter.IsOptional
+                && !parameter.HasDefaultValue
+                && !parameter.IsDefined(typeof(ParamArrayAttribute), false)
+                && !IsParamCollection(parameter))
             {
                 requiredCount++;
             }

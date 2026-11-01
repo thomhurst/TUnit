@@ -80,7 +80,9 @@ internal static class TypedDataSourceInference
     /// has type <paramref name="rowType"/> (<c>[Arguments&lt;T&gt;]</c>, #7214). The row binds to the data
     /// parameters (any <c>CancellationToken</c> excluded): the whole row to a single data parameter, otherwise one
     /// tuple element per leading data parameter, or a scalar row to the first, with omitted trailing parameters
-    /// optional. A <c>T?</c> parameter takes a value of its underlying type. Each parameter type is matched against its value type, including type
+    /// optional (params arrays and params collections included). A <c>TestDataRow&lt;T&gt;</c> row binds as its
+    /// <c>T</c>, since it is unwrapped before invocation. A <c>T?</c> parameter takes a value of its underlying
+    /// type. Each parameter type is matched against its value type, including type
     /// arguments nested in generic parameter types, so <c>[Arguments&lt;int[]&gt;]</c> on
     /// <c>Run&lt;T&gt;(IEnumerable&lt;T&gt;)</c> infers nothing rather than <c>Run&lt;int[]&gt;</c>, whose
     /// parameter could not take the row. Every type parameter must be inferred, each to one type; otherwise
@@ -88,6 +90,14 @@ internal static class TypedDataSourceInference
     /// </summary>
     public static ITypeSymbol[]? InferMethodTypeArgumentsFromRowType(IMethodSymbol method, ITypeSymbol rowType)
     {
+        // A TestDataRow<T> row is unwrapped before invocation, so its value binds as a T.
+        if (rowType is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } namedRowType
+            && namedRowType.OriginalDefinition.Name == "TestDataRow"
+            && namedRowType.OriginalDefinition.ContainingNamespace?.ToDisplayString() == "TUnit.Core")
+        {
+            rowType = namedRowType.TypeArguments[0];
+        }
+
         var dataParameters = method.Parameters.Where(p => !IsCancellationToken(p.Type)).ToArray();
         var requiredCount = dataParameters.Count(p => !p.IsOptional && !p.HasExplicitDefaultValue && !p.IsParams);
         var inferred = new ITypeSymbol?[method.TypeParameters.Length];
