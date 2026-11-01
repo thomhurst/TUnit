@@ -23,6 +23,15 @@ public static class Issue7210Sources
     public static int WrappedFactoryCalls => Volatile.Read(ref _wrappedFactoryCalls);
 
     public static IEnumerable<object> WrappedFactory() => [new TestDataRow<Func<int>>(() => Interlocked.Increment(ref _wrappedFactoryCalls))];
+
+    public static IEnumerable<object> WrappedCounterFactory() => [new TestDataRow<Func<Issue7210Counter>>(() => new Issue7210Counter())];
+}
+
+public sealed class Issue7210Counter
+{
+    private int _count;
+
+    public int Increment() => Interlocked.Increment(ref _count);
 }
 
 // Rows of an untyped source, whose Skip setting the test should keep in both modes
@@ -64,6 +73,22 @@ public class WrappedFactoryInvokedOnce<T>(T value)
         await Assert.That(value).IsTypeOf<T>();
         await Assert.That((int)(object)value!).IsEqualTo(1);
         await Assert.That(Issue7210Sources.WrappedFactoryCalls).IsEqualTo(1);
+    }
+}
+
+// Every test built from a wrapped factory row gets its own object: only the first reuses the value read to infer the row
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(typeof(Issue7210Sources), nameof(Issue7210Sources.WrappedCounterFactory))]
+public class WrappedFactoryFreshPerTest<T>(T value)
+{
+    public static IEnumerable<Func<Issue7210Counter>> Counters() => [() => new(), () => new(), () => new()];
+
+    [Test]
+    [MethodDataSource(nameof(Counters))]
+    public async Task Test(T arg)
+    {
+        await Assert.That(value).IsTypeOf<Issue7210Counter>();
+        await Assert.That(((Issue7210Counter)(object)value!).Increment()).IsEqualTo(1);
     }
 }
 

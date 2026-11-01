@@ -15,6 +15,7 @@ public class Issue7210Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("RowsSplitAcrossSources", 2)]
     [Arguments("WrappedRowInfersItsValue", 2)]
     [Arguments("WrappedFactoryInvokedOnce", 1)]
+    [Arguments("WrappedFactoryFreshPerTest", 3)]
     public async Task Rows_Run_On_The_Instantiation_They_Infer(string className, int expectedTests)
     {
         await RunTestsWithFilter(
