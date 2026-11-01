@@ -511,10 +511,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             await DiscoverGenericTestsAsync(discoveredTests, genericTypeDefinition, testMethods).ConfigureAwait(false);
             return discoveredTests;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             // A failure while discovering one generic class fails that class's tests only, never the whole
-            // assembly scan (#7208)
+            // assembly scan (#7208). Cancellation still stops discovery.
             var failedTests = new List<TestMetadata>(testMethods.Length);
             foreach (var method in testMethods)
             {
@@ -555,15 +555,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // Method rows that infer types no class row infers build their instance from every class row, so keep
         // them all as discovery read them rather than reading the sources again (#7161)
         var allClassRows = methodRowClassTypeArguments != null && !HasClassArgumentsRows(classDataSources) ? new List<IDataSourceAttribute>(classDataSources.Length) : null;
+        // Own-class sources whose types only [GenerateGenericTest] supplies, read on its instantiations (#7208)
+        var deferredOwnSources = generateGenericTestAttributes.Length > 0 ? new List<IDataSourceAttribute>() : null;
         var classRowGroups = methodRowTests == null
-            ? await GroupClassRowsByTypeArgumentsAsync(genericTypeDefinition, classDataSources, constraintViolations, allClassRows, generateGenericTestAttributes.Length > 0).ConfigureAwait(false)
+            ? await GroupClassRowsByTypeArgumentsAsync(genericTypeDefinition, classDataSources, constraintViolations, allClassRows, deferredOwnSources).ConfigureAwait(false)
             : null;
 
         foreach (var typeArguments in generateGenericTestTypeArguments)
         {
             if (methodRowClassTypeArguments != null && IsInferredByClassRows(classRowGroups!, typeArguments))
             {
-                // The class rows' instantiation of these types stands for both, as in the source generator (#7118)
+                // The class rows' instantiation of these types stands for both, as in the source generator (#7118),
+                // so it also reads the own-class sources this instantiation would have read (#7208)
+                AddDeferredOwnSources(classRowGroups!, typeArguments, deferredOwnSources);
                 continue;
             }
 
@@ -749,7 +753,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         IDataSourceAttribute[] classDataSources,
         ReflectionGenericConstraintViolations constraintViolations,
         List<IDataSourceAttribute>? allClassRows,
-        bool hasGenerateGenericTest)
+        List<IDataSourceAttribute>? deferredOwnSources)
     {
         var typeArgumentGroups = new List<Type[]>();
         var sourcesByGroup = new List<List<IDataSourceAttribute>>();
@@ -763,10 +767,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             if (ReadsMemberOfOpenClass(dataSource))
             {
                 var memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, (MethodDataSourceAttribute)dataSource);
-                if (memberTypeArguments == null && hasGenerateGenericTest)
+                if (memberTypeArguments == null && deferredOwnSources != null)
                 {
                     // [GenerateGenericTest] supplies the types, and its instantiations read this source on the
                     // closed class at run time
+                    deferredOwnSources.Add(dataSource);
                     allClassRows?.Add(dataSource);
                     continue;
                 }
@@ -1364,6 +1369,29 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Adds the own-class sources that only [GenerateGenericTest] types (<paramref name="deferredOwnSources"/>) to
+    /// the class-row group of <paramref name="typeArguments"/>, when that group stands for the [GenerateGenericTest]
+    /// instantiation of the same types (#7208).
+    /// </summary>
+    private static void AddDeferredOwnSources(List<ClassRowGroup> classRowGroups, Type[] typeArguments, List<IDataSourceAttribute>? deferredOwnSources)
+    {
+        if (deferredOwnSources is not { Count: > 0 })
+        {
+            return;
+        }
+
+        for (var i = 0; i < classRowGroups.Count; i++)
+        {
+            var group = classRowGroups[i];
+            if (AreSameTypeArguments(group.TypeArguments, typeArguments))
+            {
+                classRowGroups[i] = group with { ClassDataSources = [.. group.ClassDataSources, .. deferredOwnSources] };
+                return;
+            }
+        }
     }
 
     private static bool IsInferredByClassRows(List<ClassRowGroup> classRowGroups, Type[] typeArguments)
@@ -2278,46 +2306,48 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     /// <summary>
     /// The class type arguments that the declared row type of a class-level [MethodDataSource] member of the
-    /// generic class itself infers, by matching the row's elements against the parameters of the class's first
-    /// public constructor: <c>IEnumerable&lt;string&gt; Rows()</c> on <c>C&lt;T&gt;(T value)</c> infers
-    /// <c>string</c>. The member may return its rows directly or through <c>Task</c>, <c>ValueTask</c>,
-    /// <c>IAsyncEnumerable</c> or <c>Func</c>. Null when a type argument stays
-    /// unknown, such as for rows declared as <c>object</c>, <c>object[]</c> or with the class's own type parameters.
+    /// generic class itself infers, by matching the row's elements against a public constructor's parameters:
+    /// <c>IEnumerable&lt;string&gt; Rows()</c> on <c>C&lt;T&gt;(T value)</c> infers <c>string</c>. The member is
+    /// the one invocation reads, so overloads resolve by the attribute's <c>Arguments</c>. It may return its rows
+    /// directly, through <c>Task</c> or <c>ValueTask</c>, as a sequence of rows or <c>Func</c>s of rows, or as a
+    /// single row. Every public constructor is tried, and the result is used only when they all agree, so it does
+    /// not depend on the order reflection lists them in. Null when a type argument stays unknown, such as for rows
+    /// declared as <c>object</c>, <c>object[]</c> or with the class's own type parameters.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection mode requires dynamic access to data source members")]
     private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource)
     {
-        Type? memberType = null;
-        foreach (var member in genericTypeDefinition.GetMember(
-                     methodDataSource.MethodNameProvidingDataSource,
-                     MemberTypes.Method | MemberTypes.Property | MemberTypes.Field,
-                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
-        {
-            memberType = member switch
-            {
-                MethodInfo method => method.ReturnType,
-                PropertyInfo property => property.PropertyType,
-                FieldInfo field => field.FieldType,
-                _ => null
-            };
-
-            if (memberType != null)
-            {
-                break;
-            }
-        }
-
-        if (memberType == null
-            || GetDeclaredRowType(memberType) is not { } rowType
-            || genericTypeDefinition.GetConstructors() is not [var constructor, ..])
+        if (methodDataSource.GetDeclaredMemberType(genericTypeDefinition) is not { } memberType
+            || GetDeclaredRowType(memberType) is not { } rowType)
         {
             return null;
         }
 
         var rowElements = GetValueTupleElementTypes(rowType) ?? [rowType];
-        var parameters = constructor.GetParameters();
         var typeParameters = genericTypeDefinition.GetGenericArguments();
+        Type[]? inferred = null;
+
+        foreach (var constructor in genericTypeDefinition.GetConstructors())
+        {
+            if (InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowElements, typeParameters) is not { } typeArguments)
+            {
+                continue;
+            }
+
+            if (inferred != null && !AreSameTypeArguments(inferred, typeArguments))
+            {
+                // Constructors disagree on the types, so the declared rows don't settle them
+                return null;
+            }
+
+            inferred = typeArguments;
+        }
+
+        return inferred;
+    }
+
+    private static Type[]? InferTypeArgumentsFromConstructorRow(ParameterInfo[] parameters, Type[] rowElements, Type[] typeParameters)
+    {
         var typeArguments = new Type[typeParameters.Length];
 
         for (var i = 0; i < typeParameters.Length; i++)
@@ -2342,45 +2372,48 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
-    /// The declared type of one row of a data source member of type <paramref name="memberType"/>: <c>X</c> for
-    /// an <c>IEnumerable&lt;X&gt;</c> or <c>IAsyncEnumerable&lt;X&gt;</c>, possibly wrapped in <c>Task</c> or
-    /// <c>ValueTask</c>, with a <c>Func&lt;X&gt;</c> row unwrapped. Null for <c>object[]</c> rows, whose element
-    /// types are unknown, and for members that are not sequences.
+    /// The declared type of one row of a data source member of type <paramref name="memberType"/>, read the way
+    /// <c>MethodDataSourceAttribute</c> reads its value: a <c>Task</c> or <c>ValueTask</c> is unwrapped; an
+    /// <c>IAsyncEnumerable&lt;X&gt;</c>, an array of <c>X</c> or an <c>IEnumerable&lt;X&gt;</c> other than a string
+    /// yields rows of <c>X</c>; any other value, such as a string or a tuple, is a single row. A <c>Func&lt;X&gt;</c>
+    /// row is unwrapped. Null for <c>object[]</c> rows and non-generic sequences, whose element types are unknown.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
     private static Type? GetDeclaredRowType(Type memberType)
     {
+        var awaited = false;
         if (memberType.IsGenericType
             && (memberType.GetGenericTypeDefinition() == typeof(Task<>) || memberType.GetGenericTypeDefinition() == typeof(ValueTask<>)))
         {
             memberType = memberType.GetGenericArguments()[0];
+            awaited = true;
         }
 
-        Type? rowType = null;
+        Type? rowType;
         if (memberType == typeof(string))
         {
-            return null;
+            rowType = memberType;
         }
-
-        if (memberType.IsArray)
+        else if (!awaited && GetSequenceElementType(memberType, typeof(IAsyncEnumerable<>)) is { } asyncElementType)
+        {
+            // An awaited IAsyncEnumerable is not enumerated by invocation, so only a direct one yields rows
+            rowType = asyncElementType;
+        }
+        else if (memberType.IsArray)
         {
             rowType = memberType.GetElementType();
         }
-        else if (memberType.IsGenericType
-                 && (memberType.GetGenericTypeDefinition() == typeof(IEnumerable<>) || memberType.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>)))
+        else if (GetSequenceElementType(memberType, typeof(IEnumerable<>)) is { } elementType)
         {
-            rowType = memberType.GetGenericArguments()[0];
+            rowType = elementType;
+        }
+        else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(memberType))
+        {
+            return null;
         }
         else
         {
-            foreach (var implemented in memberType.GetInterfaces())
-            {
-                if (implemented.IsGenericType && implemented.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                {
-                    rowType = implemented.GetGenericArguments()[0];
-                    break;
-                }
-            }
+            rowType = memberType;
         }
 
         if (rowType is { IsGenericType: true } && rowType.GetGenericTypeDefinition() == typeof(Func<>))
@@ -2389,6 +2422,29 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return rowType == null || rowType == typeof(object[]) ? null : rowType;
+    }
+
+    /// <summary>
+    /// <c>X</c> when <paramref name="type"/> is or implements <paramref name="sequenceDefinition"/> of <c>X</c>
+    /// (<c>IEnumerable&lt;&gt;</c> or <c>IAsyncEnumerable&lt;&gt;</c>), otherwise null.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
+    private static Type? GetSequenceElementType(Type type, Type sequenceDefinition)
+    {
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == sequenceDefinition)
+        {
+            return type.GetGenericArguments()[0];
+        }
+
+        foreach (var implemented in type.GetInterfaces())
+        {
+            if (implemented.IsGenericType && implemented.GetGenericTypeDefinition() == sequenceDefinition)
+            {
+                return implemented.GetGenericArguments()[0];
+            }
+        }
+
+        return null;
     }
 
     /// <summary>Mirrors the generator's <c>ProcessTypeForGenerics</c>.</summary>

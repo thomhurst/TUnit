@@ -14,6 +14,9 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("OwnClassMethodDataSource")]
     [Arguments("OwnClassPropertyDataSource")]
     [Arguments("OwnClassTypeParameterMethodDataSourceWithGenerateGenericTest")]
+    [Arguments("OwnClassOverloadedMethodDataSource")]
+    [Arguments("OwnClassSingleRowMethodDataSource")]
+    [Arguments("OwnClassAsyncEnumerableMethodDataSource")]
     public async Task Instance_Is_Built_From_The_Own_Class_Member(string className)
     {
         await RunTestsWithFilter(
@@ -22,6 +25,24 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task Generate_Generic_Test_Instantiation_Inferred_By_Class_Arguments_Reads_The_Own_Class_Member()
+    {
+        // Reflection runs the [Arguments(1)] row and the own-class member's row on the int instantiation.
+        // Source-gen runs only the [Arguments(1)] row, since it never reads class-level [MethodDataSource]
+        // members of the generic class itself (#7333).
+        var expected = testMode == TestMode.Reflection ? 2 : 1;
+
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7208/OwnClassTypeParameterMethodDataSourceWithArgumentsAndGenerateGenericTest/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(expected),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(expected),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
@@ -37,8 +58,8 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7208/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe(reflection ? "Failed" : "Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 4 : 3),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(3),
+                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 9 : 7),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 8 : 7),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(reflection ? 1 : 0),
                 result => result.Results
                     .Where(x => x.Outcome == "Failed")

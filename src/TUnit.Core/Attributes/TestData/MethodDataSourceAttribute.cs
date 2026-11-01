@@ -361,6 +361,23 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
     }
 
+    /// <summary>
+    /// The declared type of the member this source reads on <paramref name="targetType"/>: the return type of the
+    /// method overload <see cref="GetDataRowsAsync"/> invokes, else the property or field type. Null when no such
+    /// member exists. Reflection discovery uses it to infer a generic class's type arguments before reading the
+    /// member, so it resolves the member exactly as invocation does.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
+    internal Type? GetDeclaredMemberType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type targetType)
+    {
+        var methodInfo = ResolveDataSourceMethod(targetType)
+            ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
+
+        return methodInfo?.ReturnType
+            ?? targetType.GetProperty(MethodNameProvidingDataSource, BindingFlags)?.PropertyType
+            ?? targetType.GetField(MethodNameProvidingDataSource, BindingFlags)?.FieldType;
+    }
+
     // Resolves the data-source method overload that best matches the supplied Arguments.
     //
     // When every argument is non-null we know its runtime type, so we delegate to the runtime
