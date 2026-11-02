@@ -157,6 +157,23 @@ public class TypeFreeClassRowWithTypedMethodSource<T>(int number)
     }
 }
 
+// Beside only a type-free class row, a parameter attribute that infers T (Matrix<int> implements IInfersType<int>)
+// supplies the instantiation, as in the source generator: both matrix values run on C<int>, each instance built from
+// the class row (number = 42). Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithInferringParameterAttribute<T>(int number)
+{
+    [Test]
+    [MatrixDataSource]
+    public async Task Run([Matrix<int>(1, 2)] T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value).IsNotNull();
+    }
+}
+
 // Beside only a type-free class row, a method row whose parameter contains T, not only T itself, still reports the
 // types that break the class's constraints: new int[] { 1 } for T[] infers int, which is not a class. Run(["a"])
 // runs on C<string>. No [EngineTest]: TUnit.Engine.Tests targets it by name, because it has a failing row.
