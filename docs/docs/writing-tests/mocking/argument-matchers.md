@@ -111,7 +111,9 @@ mock.GetUser(Is<int>(id => id > 0)).Returns(new User("Valid"));
 mock.GetUser(Is<int>(id => id <= 0)).Throws<ArgumentException>();
 ```
 
-For a non-nullable reference type, the predicate receives `T`, not `T?`, so `Is<User>(u => u.Name == "Alice")` needs no null guard; a null argument does not match it. Use `Is<User?>(u => ...)` when the predicate should handle null itself.
+For a non-nullable reference type, the predicate receives `T`, not `T?`, so `Is<User>(u => u.Name == "Alice")` needs no null guard. Use `Is<User?>(u => ...)` when the predicate should handle null itself, including when matching a parameter declared as `User?`.
+
+Nullability annotations do not distinguish `Is<User>` from `Is<User?>` at runtime: both pass null to the predicate. A predicate that explicitly accepts null can match it in either form. If the predicate throws `NullReferenceException` while its argument is null, the argument is treated as a non-match. This also suppresses a `NullReferenceException` caused by unrelated predicate logic, and throwing and catching an exception adds cost on that path. Other exceptions, and all exceptions for non-null arguments, propagate. Use an explicit null guard when you need to avoid that exception path or distinguish failures inside your predicate.
 
 ### Inline Lambda Predicates
 

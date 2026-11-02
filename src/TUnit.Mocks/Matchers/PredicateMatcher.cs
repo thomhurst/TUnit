@@ -22,8 +22,8 @@ internal sealed class PredicateMatcher<T> : IArgumentMatcher<T>
         }
 
         // Is<T> and Is<T?> share one runtime type, so a null argument still reaches the predicate:
-        // a nullable-aware predicate can match it. A predicate written for non-nullable T dereferences
-        // it instead, and that null argument does not match rather than failing the mocked call.
+        // a null-aware predicate can match it in either form. Any NRE on this null-only path becomes
+        // a non-match, including one from unrelated predicate logic; see Arg.Is<T>'s remarks.
         try
         {
             return _predicate(value!);
