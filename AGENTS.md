@@ -53,5 +53,18 @@ Never edit the main checkout, and write nothing loose beside it. Every file an a
 Treat every problem you notice as work to act on, whether you find it while testing, developing, reading code, reviewing, or doing anything else. Examples include bugs, flaky or failing tests, incorrect docs, misleading comments, broken tooling, and gaps in these instructions.
 
 - If the fix is trivial and low-risk, fix it as part of the current work and mention it in the PR description.
-- If the fix is out of scope for the current work, raise a GitHub issue at the point you discover it so it can be fixed later. Include what you saw, where you saw it (file and line, command, or CI run), how to reproduce it, and the expected behavior. Search existing issues first, and add to a matching issue instead of opening a duplicate.
+- If the fix is out of scope for the current work, raise a GitHub issue at the point you discover it so it can be fixed later. Include what you saw, where you saw it (file and line, command, or CI run), how to reproduce it, and the expected behavior. Search existing issues first, and add to a matching issue instead of opening a duplicate. Write it as [Writing issues](#writing-issues) describes.
 - Do not ignore a problem because it existed before your change or is unrelated to it.
+
+### Writing issues
+
+Every issue must be understood by a reader who has never seen TUnit, from its title and first paragraph alone. This matters most in another project's repository: its maintainers do not know our code, terms or constraints, and an issue they cannot follow gets ignored or closed.
+
+- **Title:** the observed problem or the requested capability in that project's own API terms, for example "`BasicPublishAsync` rejects `ReadOnlyMemory<byte>` header values". No TUnit names or shorthand.
+- **Summary first:** open with two or three plain sentences: what happens, what you expected, and why a user of that project would care. Details come after.
+- **Their vocabulary, not ours:** do not use TUnit's internal type, component or decision names, or our own targets and budgets; say what the code does instead. Use the project's issue template when it has one.
+- **Short sections:** Summary, Reproduction, Expected and actual, Environment (exact versions); for a feature, Proposal instead of Expected and actual. The reproduction is minimal and self-contained, never needs TUnit, and source links are pinned to the tag you checked.
+- **One ask, stated once:** one problem per issue. End with a direct question or request, not a menu of options.
+- **Cut what the maintainer does not need to act:** investigation narrative, hedging, our workarounds, local paths, worktree names, internal CI details. Mention TUnit once, at the end, with a link to the tracking issue.
+- **Check before filing:** search the project's open and closed issues, and its `main` branch and unreleased release notes, not only the version we use.
+- **Reread as the maintainer:** could they tell within 30 seconds what is wrong and what you are asking? If a maintainer says an issue is unclear, rewrite the body in place, then reply with a short plain summary.
