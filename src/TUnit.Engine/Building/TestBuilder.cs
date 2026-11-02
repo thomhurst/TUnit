@@ -13,6 +13,7 @@ using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
+using TUnit.Engine.Services.TestExecution;
 using TUnit.Engine.Utilities;
 
 namespace TUnit.Engine.Building;
@@ -1039,7 +1040,9 @@ internal sealed class TestBuilder : ITestBuilder
     /// Fetches a class row before its method data sources are evaluated, against a context of its own,
     /// so the events the data source subscribes while it creates the row's objects can travel with them
     /// to the test that takes them (#7205). The context shares the state bag of the context the fetch used
-    /// to run against, which is current again once the fetch returns.
+    /// to run against, which is current again once the fetch returns. When the fetch fails, no test takes
+    /// its events, so the OnDispose callbacks it subscribed (the disposal of a scope created before
+    /// resolving a service threw, for example) are raised before the failure propagates.
     /// </summary>
     private static async ValueTask<(object?[] Data, TestDataRowMetadata? Metadata, TestContextEvents? Events)> FetchFirstClassRowAsync(
         Func<Task<object?[]?>> classDataFactory,
@@ -1069,6 +1072,18 @@ internal sealed class TestBuilder : ITestBuilder
         {
             var (data, rowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
             return (data, rowMetadata, fetchContext.EventsIfCreated);
+        }
+        catch (Exception fetchException) when (fetchContext.EventsIfCreated?.OnDispose is not null)
+        {
+            var cleanupExceptions = new List<Exception>();
+            await TestOnDisposeRaiser.RaiseForSessionAsync(fetchContext, cleanupExceptions).ConfigureAwait(false);
+
+            if (cleanupExceptions.Count == 0)
+            {
+                throw;
+            }
+
+            throw new AggregateException([fetchException, .. cleanupExceptions]);
         }
         finally
         {

@@ -496,12 +496,14 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// <summary>
     /// Marks <paramref name="obj"/> as disposed by another owner, so the tracker never counts or disposes it.
     /// Dependency injection data sources mark the services they resolve, because the scope that created
-    /// them disposes them when the test ends (#7205).
+    /// them disposes them when the test ends (#7205). An object the tracker already counts is left
+    /// unmarked: it existed before the scope returned it, so the scope did not create it and does not
+    /// dispose it, and marking it would stop the tracker from releasing the references it already holds.
     /// </summary>
     internal static void MarkExternallyOwned(object? obj)
     {
         // A non-disposable object is marked too: the initializer objects it holds belong to the same owner.
-        if (obj is null)
+        if (obj is null || s_trackedObjects.ContainsKey(obj))
         {
             return;
         }
