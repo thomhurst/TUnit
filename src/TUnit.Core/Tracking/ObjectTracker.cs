@@ -500,6 +500,12 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// unmarked: it existed before the scope returned it, so the scope did not create it and does not
     /// dispose it, and marking it would stop the tracker from releasing the references it already holds.
     /// </summary>
+    /// <remarks>
+    /// The mark lasts for the object's lifetime and applies to every data source that later supplies the
+    /// object, because the object still belongs to the container that resolved it: a root singleton is
+    /// disposed by its root container, not by a test. Only a newly created object is expected here, which no
+    /// other source can be tracking concurrently.
+    /// </remarks>
     internal static void MarkExternallyOwned(object? obj)
     {
         // A non-disposable object is marked too: the initializer objects it holds belong to the same owner.
