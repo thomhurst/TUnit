@@ -10,6 +10,9 @@ namespace TUnit.Core.Helpers;
 /// </summary>
 internal static class GenerateGenericTestArityMessages
 {
+    /// <summary>How a null type argument, such as <c>[GenerateGenericTest((Type)null!)]</c>, is named.</summary>
+    public const string NullTypeName = "null";
+
     public static string NoTypeArguments(string methodName)
         => $"[GenerateGenericTest] on method '{methodName}' has no type arguments";
 

@@ -2153,7 +2153,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     /// <summary>
     /// The failure message for a method-level [GenerateGenericTest] whose type arguments do not match the
-    /// method's type parameters or that names a pointer type, or null when it is valid. Source-generated mode
+    /// method's type parameters or that names a null or pointer type, or null when it is valid. Source-generated mode
     /// (<c>DescribeGenerateGenericTestArityError</c> in TUnit.Core.SourceGenerator) builds the text from the same
     /// <see cref="GenerateGenericTestArityMessages"/>.
     /// </summary>
@@ -2167,11 +2167,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         if (typeArguments.Length != methodTypeParameterCount)
         {
             return GenerateGenericTestArityMessages.WrongCount(
-                methodName, typeArguments.Length, methodTypeParameterCount, typeArguments.Select(static t => t.Name));
+                methodName, typeArguments.Length, methodTypeParameterCount, typeArguments.Select(static t => t?.Name ?? GenerateGenericTestArityMessages.NullTypeName));
         }
 
         foreach (var typeArgument in typeArguments)
         {
+            // [GenerateGenericTest((Type)null!)] stores a null element
+            if (typeArgument is null)
+            {
+                return GenerateGenericTestArityMessages.InvalidTypeArgument(methodName, GenerateGenericTestArityMessages.NullTypeName);
+            }
+
             if (typeArgument.IsPointer
 #if NET8_0_OR_GREATER
                 || typeArgument.IsFunctionPointer

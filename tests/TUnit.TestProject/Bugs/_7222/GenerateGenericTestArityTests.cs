@@ -101,3 +101,54 @@ public class ConstructorArgumentGenerateGenericTestArityTests(int value)
     public async Task MixedArity<T>()
         => await Assert.That(value).IsEqualTo(1);
 }
+
+// A null type argument fails on its own, and it counts towards the arity, so a list with a null in it never
+// passes as one of the right size.
+public class NullTypeArgumentGenerateGenericTestTests
+{
+    [Test]
+    [GenerateGenericTest((Type)null!)]
+    public void NullTypeArgument<T>()
+    {
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(int), null!)]
+    public void NullBesideType<T>()
+    {
+    }
+}
+
+// On a generic class too, a data source whose declared type (object) breaks the method's constraints defers to the
+// method-level [GenerateGenericTest]: only the arity failure is reported, as in reflection mode.
+[Arguments(1)]
+public class BroadSourceOnGenericClassRowTests<TClass>(TClass value)
+{
+    public TClass Value => value;
+
+    [Test]
+    [GenerateGenericTest]
+    [ObjectValues]
+    public void EmptyGenerateGenericTest<TMethod>(TMethod item) where TMethod : struct
+    {
+    }
+}
+
+[GenerateGenericTest(typeof(int))]
+public class BroadSourceOnGenericClassTypeTests<TClass>
+{
+    [Test]
+    [GenerateGenericTest]
+    [ObjectValues]
+    public void EmptyGenerateGenericTest<TMethod>(TMethod item) where TMethod : struct
+    {
+    }
+}
+
+public class ObjectValuesAttribute : DataSourceGeneratorAttribute<object>
+{
+    protected override IEnumerable<Func<object>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return () => 1;
+    }
+}

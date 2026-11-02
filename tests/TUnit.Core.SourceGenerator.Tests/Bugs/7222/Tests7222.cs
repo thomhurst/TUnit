@@ -31,6 +31,17 @@ internal class Tests7222 : TestsBase
                     {
                     }
                 }
+
+                // On a generic class, too, the pointer is not paired with the class type arguments
+                [GenerateGenericTest(typeof(int))]
+                public unsafe class PointerOnGenericClassTests<TClass>
+                {
+                    [Test]
+                    [GenerateGenericTest(typeof(int*))]
+                    public void PointerTypeArgument<TMethod>()
+                    {
+                    }
+                }
                 """
             ]
         },
@@ -90,5 +101,27 @@ internal class Tests7222 : TestsBase
             await Assert.That(pointer).DoesNotContain("PointerTypeArgument<int*>");
             await Assert.That(pointer)
                 .Contains(violation + "\"[GenerateGenericTest] on method 'PointerTypeArgument' provides type argument 'Int32*', which cannot be a generic type argument\")");
+
+            var pointerOnGenericClass = SourceFor("PointerOnGenericClassTests", "PointerTypeArgument");
+            await Assert.That(pointerOnGenericClass).DoesNotContain("PointerTypeArgument<int*>");
+            await Assert.That(pointerOnGenericClass)
+                .Contains(violation + "\"[GenerateGenericTest] on method 'PointerTypeArgument' provides type argument 'Int32*', which cannot be a generic type argument\")");
+
+            // A null type argument is counted and rejected, as reflection mode reads TypeArguments.
+            await Assert.That(SourceFor("NullTypeArgumentGenerateGenericTestTests", "NullTypeArgument"))
+                .Contains(violation + "\"[GenerateGenericTest] on method 'NullTypeArgument' provides type argument 'null', which cannot be a generic type argument\")");
+            var nullBesideType = SourceFor("NullTypeArgumentGenerateGenericTestTests", "NullBesideType");
+            await Assert.That(nullBesideType).DoesNotContain("NullBesideType<int>");
+            await Assert.That(nullBesideType)
+                .Contains(violation + "\"[GenerateGenericTest] on method 'NullBesideType' provides 2 type argument(s) but method requires 1. Provided: [Int32, null]\")");
+
+            // A broad data source on a generic class defers to the method-level [GenerateGenericTest]: only the
+            // arity failure is reported.
+            foreach (var className in new[] { "BroadSourceOnGenericClassRowTests", "BroadSourceOnGenericClassTypeTests" })
+            {
+                var broad = SourceFor(className, "EmptyGenerateGenericTest");
+                await Assert.That(broad).Contains(violation + "\"[GenerateGenericTest] on method 'EmptyGenerateGenericTest' has no type arguments\")");
+                await Assert.That(broad).DoesNotContain("does not satisfy");
+            }
         });
 }

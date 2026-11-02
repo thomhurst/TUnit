@@ -925,7 +925,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 if (!reportMethodConstraintViolation || methodTypeArgs.Length != testMethod.MethodSymbol.TypeParameters.Length)
                 {
-                    if (deferToGenerateGenericTest && specificAttr is not null)
+                    // A source paired with several class sources is deferred once
+                    if (deferToGenerateGenericTest && specificAttr is not null && deferredDataSources?.Contains(specificAttr) is not true)
                     {
                         (deferredDataSources ??= []).Add(specificAttr);
                     }
@@ -1089,10 +1090,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // the row's inferred method type arguments fail to resolve.
         // A method data source other than an [Arguments] row (such as [MethodDataSource]) may yield
         // several rows, so a method violation is reported once per row it yields instead.
-        void TryAddCombinedArgumentsInstantiation(ITypeSymbol[] classTypes, ITypeSymbol[] combinedTypes, AttributeData classAttr, AttributeData methodAttr)
+        void TryAddCombinedArgumentsInstantiation(ITypeSymbol[] classTypes, ITypeSymbol[] combinedTypes, AttributeData classAttr, AttributeData methodAttr, bool reportMethodConstraintViolation = true)
         {
             TryAddInstantiation(combinedTypes, classAttr,
-                reportMethodConstraintViolation: true,
+                reportMethodConstraintViolation: reportMethodConstraintViolation,
                 reportClassViolationAs: ClassViolationSource.ClassArguments,
                 violationSource: ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes, compilation) ? methodAttr : classAttr,
                 isClassRow: true,
@@ -1416,10 +1417,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Process GenerateGenericTest attributes
         // GenerateGenericTestAttribute takes params Type[] in its constructor, so extract from constructor args
         {
+            // A wrongly sized one, or one naming a null or pointer type, fails on its own further down instead (#7222)
             var methodGenericTestAttrs = testMethod.IsGenericMethod && generateGenericTestBucket is not null
                 ? generateGenericTestBucket
+                    .Where(a => DescribeGenerateGenericTestArityError(methodName, ExtractDeclaredTypeArgsFromGenerateGenericTestAttribute(a), methodTypeArgCount) is null)
                     .Select(a => (Attribute: a, TypeArgs: ExtractTypeArgsFromGenerateGenericTestAttribute(a)))
-                    .Where(t => t.TypeArgs is { Length: > 0 })
                     .ToList()
                 : [];
 
@@ -1471,13 +1473,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                 }
 
+                // With a method-level [GenerateGenericTest], a typed data source or [MethodDataSource] whose
+                // declared type breaks the method's constraints is not reported, as on a non-generic class
+                // (reportDataSourceConstraintViolations) and as reflection mode skips it on each concrete class.
+                bool ReportsMethodSourceViolation(AttributeData? source)
+                    => reportDataSourceConstraintViolations || source is null || source.AttributeClass?.Name == "ArgumentsAttribute";
+
                 foreach (var classGenericTest in classGenericTestAttrs)
                 {
                     var classIsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, classGenericTest.TypeArgs!, compilation);
                     foreach (var (methodTypes, source) in methodSources)
                     {
+                        var reportsViolation = ReportsMethodSourceViolation(source);
                         TryAddInstantiation(CloseOverClass(classGenericTest.TypeArgs!, methodTypes), source,
-                            reportMethodConstraintViolation: true,
+                            reportMethodConstraintViolation: reportsViolation,
+                            deferToGenerateGenericTest: !reportsViolation,
                             reportClassViolationAs: ClassViolationSource.GenerateGenericTest,
                             violationSource: classIsValid ? null : classGenericTest.Attribute);
                     }
@@ -1496,7 +1506,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     {
                         if (source is not null)
                         {
-                            TryAddCombinedArgumentsInstantiation(classTypes, CloseOverClass(classTypes, methodTypes), classAttr, source);
+                            TryAddCombinedArgumentsInstantiation(classTypes, CloseOverClass(classTypes, methodTypes), classAttr, source,
+                                reportMethodConstraintViolation: ReportsMethodSourceViolation(source));
                         }
                         else
                         {
@@ -1540,8 +1551,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // reports them (#7222)
                 foreach (var attribute in testMethod.IsGenericMethod ? generateGenericTestBucket ?? [] : [])
                 {
-                    var typeArgs = ExtractTypeArgsFromGenerateGenericTestAttribute(attribute);
-                    if (DescribeGenerateGenericTestArityError(methodName, typeArgs, methodTypeArgCount) is { } arityError)
+                    if (DescribeGenerateGenericTestArityError(methodName, ExtractDeclaredTypeArgsFromGenerateGenericTestAttribute(attribute), methodTypeArgCount) is { } arityError)
                     {
                         AddMethodViolation(className, [], new MethodConstraintViolation(arityError, RowSource: null, AllMethodDataSources: false)
                         {
@@ -1550,8 +1560,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         continue;
                     }
 
-                    JoinDeferredDataSources(typeArgs!);
-                    TryAddInstantiation(typeArgs!,
+                    var typeArgs = ExtractTypeArgsFromGenerateGenericTestAttribute(attribute)!;
+                    JoinDeferredDataSources(typeArgs);
+                    TryAddInstantiation(typeArgs,
                         reportMethodConstraintViolation: true,
                         violationSource: attribute);
                 }
@@ -1565,7 +1576,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 List<(AttributeData Attribute, string Message)>? arityErrors = null;
                 foreach (var attribute in generateGenericTestBucket)
                 {
-                    if (DescribeGenerateGenericTestArityError(methodName, ExtractTypeArgsFromGenerateGenericTestAttribute(attribute), methodTypeArgCount) is { } arityError)
+                    if (DescribeGenerateGenericTestArityError(methodName, ExtractDeclaredTypeArgsFromGenerateGenericTestAttribute(attribute), methodTypeArgCount) is { } arityError)
                     {
                         (arityErrors ??= []).Add((attribute, arityError));
                     }
@@ -1938,11 +1949,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// The failure message for a method-level [GenerateGenericTest] whose type arguments do not match the
-    /// method's type parameters or that names a pointer type, or null when it is valid. Reflection mode
+    /// method's type parameters or that names a null or pointer type, or null when it is valid. Reflection mode
     /// (<c>GetGenerateGenericTestArityError</c> in TUnit.Engine) builds the text from the same
     /// <see cref="TUnit.Core.Helpers.GenerateGenericTestArityMessages"/> (#7222).
     /// </summary>
-    private static string? DescribeGenerateGenericTestArityError(string methodName, ITypeSymbol[]? typeArguments, int methodTypeParameterCount)
+    private static string? DescribeGenerateGenericTestArityError(string methodName, ITypeSymbol?[]? typeArguments, int methodTypeParameterCount)
     {
         if (typeArguments is not { Length: > 0 })
         {
@@ -1952,12 +1963,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (typeArguments.Length != methodTypeParameterCount)
         {
             return TUnit.Core.Helpers.GenerateGenericTestArityMessages.WrongCount(
-                methodName, typeArguments.Length, methodTypeParameterCount, typeArguments.Select(GetRuntimeTypeName));
+                methodName, typeArguments.Length, methodTypeParameterCount,
+                typeArguments.Select(static t => t is null ? TUnit.Core.Helpers.GenerateGenericTestArityMessages.NullTypeName : GetRuntimeTypeName(t)));
         }
 
-        // A pointer cannot be a type argument: a call to M<int*>() would not compile
+        // A null or a pointer cannot be a type argument: a call to M<int*>() would not compile
         foreach (var typeArgument in typeArguments)
         {
+            if (typeArgument is null)
+            {
+                return TUnit.Core.Helpers.GenerateGenericTestArityMessages.InvalidTypeArgument(methodName, TUnit.Core.Helpers.GenerateGenericTestArityMessages.NullTypeName);
+            }
+
             if (typeArgument.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer)
             {
                 return TUnit.Core.Helpers.GenerateGenericTestArityMessages.InvalidTypeArgument(methodName, GetRuntimeTypeName(typeArgument));
@@ -1990,6 +2007,26 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             violations[slots[i]] = ordered[i].Violation;
         }
+    }
+
+    /// <summary>
+    /// The type arguments a GenerateGenericTestAttribute declares, with a null element where it lists null,
+    /// as reflection mode reads TypeArguments, so the arity check counts and rejects it (#7222).
+    /// </summary>
+    private static ITypeSymbol?[]? ExtractDeclaredTypeArgsFromGenerateGenericTestAttribute(AttributeData attr)
+    {
+        if (attr.ConstructorArguments.Length == 0)
+        {
+            return null;
+        }
+
+        var firstArg = attr.ConstructorArguments[0];
+        if (firstArg.Kind == TypedConstantKind.Array)
+        {
+            return firstArg.IsNull ? null : firstArg.Values.Select(static v => v.Value as ITypeSymbol).ToArray();
+        }
+
+        return [firstArg.Value as ITypeSymbol];
     }
 
     /// <summary>

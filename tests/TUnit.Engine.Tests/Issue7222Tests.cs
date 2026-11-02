@@ -133,6 +133,38 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    [Arguments("NullTypeArgument", "[GenerateGenericTest] on method 'NullTypeArgument' provides type argument 'null', which cannot be a generic type argument")]
+    [Arguments("NullBesideType", "[GenerateGenericTest] on method 'NullBesideType' provides 2 type argument(s) but method requires 1. Provided: [Int32, null]")]
+    public async Task Null_Type_Argument_Fails(string methodName, string message)
+    {
+        // Reflection mode used to throw a NullReferenceException out of discovery; source-generated mode dropped the
+        // null and ran NullBesideType<int>.
+        await RunTestsWithFilter(
+            $"/*/TUnit.TestProject.Bugs._7222/NullTypeArgumentGenerateGenericTestTests/{methodName}*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.Results.Single().Output?.ErrorInfo?.Message.ShouldContain(message)
+            ]);
+    }
+
+    [Test]
+    [Arguments("BroadSourceOnGenericClassRowTests")]
+    [Arguments("BroadSourceOnGenericClassTypeTests")]
+    public async Task Broad_Source_On_Generic_Class_Defers_To_GenerateGenericTest(string className)
+    {
+        // Only the arity failure, not a second one for the object data source's declared type
+        await RunTestsWithFilter(
+            $"/*/TUnit.TestProject.Bugs._7222/{className}*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.Results.Single().Output?.ErrorInfo?.Message
+                    .ShouldContain("[GenerateGenericTest] on method 'EmptyGenerateGenericTest' has no type arguments")
+            ]);
+    }
+
+    [Test]
     public async Task Constraint_Violation_Without_GenerateGenericTest_Fails_Once_Per_Class_Row()
     {
         // Without a method-level [GenerateGenericTest], reflection mode keeps the class rows on the failing
