@@ -82,7 +82,8 @@ internal static class TypedDataSourceInference
     /// as <c>ToObjectArray</c> spreads it, an <c>object[]</c> or <c>System.Tuple</c> row infers nothing, and any other
     /// row binds whole to a single data parameter, or to the first of several, with omitted trailing parameters
     /// optional (params arrays and params collections included). A <c>Func&lt;T&gt;</c>, <c>TestDataRow&lt;T&gt;</c> or
-    /// <c>TestDataRow&lt;Func&lt;T&gt;&gt;</c> row binds as its <c>T</c>, since it is invoked and unwrapped before invocation. A <c>T?</c> parameter takes a value of its underlying
+    /// <c>TestDataRow&lt;Func&lt;T&gt;&gt;</c> row binds as its <c>T</c>, since it is invoked and unwrapped before invocation, and
+    /// a reference-type array <c>T</c> there spreads, so its element binds to the data parameter. A <c>T?</c> parameter takes a value of its underlying
     /// type. Each parameter type is matched against its value type, including type
     /// arguments nested in generic parameter types, so <c>[Arguments&lt;int[]&gt;]</c> on
     /// <c>Run&lt;T&gt;(IEnumerable&lt;T&gt;)</c> infers nothing rather than <c>Run&lt;int[]&gt;</c>, whose
@@ -96,16 +97,33 @@ internal static class TypedDataSourceInference
         // once, so the value binds as that T.
         rowType = UnwrapSingleArgument(rowType, "Func", "System");
         var unwrappedRow = UnwrapSingleArgument(rowType, "TestDataRow", "TUnit.Core");
+        var spreadsReferenceArray = false;
         if (!SymbolEqualityComparer.Default.Equals(unwrappedRow, rowType))
         {
             rowType = UnwrapSingleArgument(unwrappedRow, "Func", "System");
+
+            // UnwrapArray spreads a TestDataRow value that is an object?[], which a reference-type array
+            // is through array covariance (ToObjectArray keeps a bare one whole). The elements bind as
+            // their declared type; an object or dynamic element type declares nothing, so leave it to
+            // runtime inference.
+            if (rowType is IArrayTypeSymbol { Rank: 1, ElementType.IsReferenceType: true } spreadArray)
+            {
+                if (spreadArray.ElementType.SpecialType == SpecialType.System_Object
+                    || spreadArray.ElementType.TypeKind == TypeKind.Dynamic)
+                {
+                    return null;
+                }
+
+                rowType = spreadArray.ElementType;
+                spreadsReferenceArray = true;
+            }
         }
 
         var dataParameters = method.Parameters.Where(p => !IsCancellationToken(p.Type)).ToArray();
         var requiredCount = dataParameters.Count(p => !p.IsOptional && !p.HasExplicitDefaultValue && !p.IsParams);
         var inferred = new ITypeSymbol?[method.TypeParameters.Length];
 
-        if (rowType is INamedTypeSymbol { IsTupleType: true } tupleType)
+        if (!spreadsReferenceArray && rowType is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
             // ToObjectArray always spreads a tuple row, a one-element tuple included, so the tuple spreads
             // over the leading data parameters; omitted trailing ones take their defaults.
@@ -123,7 +141,7 @@ internal static class TypedDataSourceInference
                 }
             }
         }
-        else if (IsSpreadWithoutElementTypes(rowType))
+        else if (!spreadsReferenceArray && IsSpreadWithoutElementTypes(rowType))
         {
             // ToObjectArray also spreads an object[] row, whose value types the row type does not declare,
             // and a System.Tuple row; leave both to runtime inference.

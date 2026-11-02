@@ -2184,7 +2184,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// object[] or System.Tuple row infers nothing, and any other row binds whole to a single data parameter, or
     /// to the first of several, with omitted trailing parameters optional (params arrays and
     /// params collections included). A Func&lt;T&gt; row, a TestDataRow&lt;T&gt; row and a TestDataRow&lt;Func&lt;T&gt;&gt; row bind as their
-    /// T, since they are invoked and unwrapped before invocation. A T? parameter takes a value of its underlying type. Each parameter type is matched against its value type, including
+    /// T, since they are invoked and unwrapped before invocation, and a reference-type array T there spreads, so its element binds. A T? parameter takes a value of its underlying type. Each parameter type is matched against its value type, including
     /// type arguments nested in generic parameter types. Every type parameter must be inferred, each to one type.
     /// </summary>
     private static Type[]? InferTypesFromTypedRow(MethodInfo method, Type rowType, int genericParameterCount)
@@ -2193,9 +2193,24 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // Func<T> row is invoked once, a TestDataRow<T> row is unwrapped, and a Func<T> inside it is invoked
         // once, so the value binds as that T.
         rowType = UnwrapFunc(rowType);
+        var spreadsReferenceArray = false;
         if (TestDataRowUnwrapper.IsTestDataRowType(rowType))
         {
             rowType = UnwrapFunc(rowType.GetGenericArguments()[0]);
+
+            // UnwrapArray spreads a TestDataRow value that is an object?[], which a reference-type array
+            // is through array covariance (ToObjectArray keeps a bare one whole). The elements bind as
+            // their declared type; an object element type declares nothing, so leave it to runtime inference.
+            if (rowType.IsSZArray && rowType.GetElementType() is { IsValueType: false, IsPointer: false } elementType)
+            {
+                if (elementType == typeof(object))
+                {
+                    return null;
+                }
+
+                rowType = elementType;
+                spreadsReferenceArray = true;
+            }
         }
 
         var dataParameters = Array.FindAll(method.GetParameters(), static parameter => parameter.ParameterType != typeof(CancellationToken));
@@ -2213,7 +2228,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var typeArguments = new Type?[genericParameterCount];
 
-        if (GetValueTupleElementTypes(rowType) is { } tupleElements)
+        if (!spreadsReferenceArray && GetValueTupleElementTypes(rowType) is { } tupleElements)
         {
             // ToObjectArray always spreads a tuple row, a one-element tuple included, so the tuple spreads
             // over the leading data parameters; omitted trailing ones take their defaults.
@@ -2230,7 +2245,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
             }
         }
-        else if (rowType == typeof(object[])
+        else if (!spreadsReferenceArray && rowType == typeof(object[])
             || rowType is { IsGenericType: true, Namespace: "System" } && rowType.Name.StartsWith("Tuple`", StringComparison.Ordinal))
         {
             // ToObjectArray also spreads an object[] row, whose value types the row type does not declare,

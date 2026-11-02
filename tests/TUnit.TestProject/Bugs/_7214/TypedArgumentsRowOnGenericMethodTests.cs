@@ -274,3 +274,27 @@ public sealed class IntOneElementTupleRowSourceAttribute : TypedDataSourceAttrib
         yield return () => Task.FromResult(ValueTuple.Create(1));
     }
 }
+
+// TestDataRowUnwrapper.UnwrapArray spreads a string[] inside a TestDataRow (array covariance makes it an
+// object?[]), so a typed source of TestDataRow<string[]> rows infers Run<string>, not Run<string[]>:
+// Run<string>("a").
+[EngineTest(ExpectedResult.Pass)]
+public class TypedTestDataRowOfReferenceArraySource
+{
+    [Test]
+    [StringArrayTestDataRowSource]
+    public async Task Run<TMethod>(TMethod arg)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(string));
+        await Assert.That((string)(object)arg!).IsEqualTo("a");
+    }
+}
+
+public sealed class StringArrayTestDataRowSourceAttribute : TypedDataSourceAttribute<TestDataRow<string[]>>
+{
+    public override async IAsyncEnumerable<Func<Task<TestDataRow<string[]>>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await Task.CompletedTask;
+        yield return () => Task.FromResult(new TestDataRow<string[]>(["a"]));
+    }
+}
