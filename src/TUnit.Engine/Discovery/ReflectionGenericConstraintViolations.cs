@@ -28,6 +28,12 @@ internal sealed class ReflectionGenericConstraintViolations(
     private Dictionary<MethodInfo, List<string>>? _messagesByMethod;
 
     /// <summary>
+    /// Whether <see cref="TryAddClassViolation"/> recorded a violation: some source supplied class type
+    /// arguments, even though they break the class's constraints.
+    /// </summary>
+    public bool HasClassViolation { get; private set; }
+
+    /// <summary>
     /// Records <paramref name="typeArguments"/> as a violation for every test method when they break
     /// the class's constraints. Returns <c>true</c> when they do, so the caller skips the instantiation.
     /// </summary>
@@ -44,6 +50,7 @@ internal sealed class ReflectionGenericConstraintViolations(
             Add(testMethod, message);
         }
 
+        HasClassViolation = true;
         return true;
     }
 
@@ -55,12 +62,12 @@ internal sealed class ReflectionGenericConstraintViolations(
     /// <remarks>
     /// Only invalid rows are reported here. Running the valid rows of such methods is tracked by #7106.
     /// When <see cref="GenerateGenericTestAttribute"/> or a class-level data source already supplies the
-    /// class type arguments, method rows do not infer them, so nothing is reported.
+    /// class type arguments (<paramref name="classTypeArgumentsSupplied"/>), method rows do not infer them, so
+    /// nothing is reported. Class-level [Arguments] rows whose values go to no type parameter supply none (#7209).
     /// </remarks>
-    public void AddMethodRowViolations()
+    public void AddMethodRowViolations(bool classTypeArgumentsSupplied)
     {
-        if (genericTypeDefinition.IsDefined(typeof(GenerateGenericTestAttribute), inherit: false)
-            || ReflectionAttributeExtractor.ExtractDataSources(genericTypeDefinition).Length > 0)
+        if (classTypeArgumentsSupplied)
         {
             return;
         }
@@ -78,9 +85,11 @@ internal sealed class ReflectionGenericConstraintViolations(
 
             foreach (var argumentsAttribute in testMethod.GetCustomAttributes<ArgumentsAttribute>(inherit: false))
             {
-                // [Arguments(null)] (a null params array) stores one null value, which infers object
-                // here, as in the source generator (#7141)
-                var typeArguments = InferClassTypeArguments(classGenericParameters, parameters, argumentsAttribute.Values);
+                // The type mapping discovery uses, so a parameter that contains a type parameter (T[]) reports
+                // the row it drops. [Arguments(null)] (a null params array) infers object, as in the source
+                // generator (#7141)
+                var typeArguments = ReflectionTestDataCollector.InferClassTypeArgumentsFromMethodRow(
+                    classGenericParameters, parameters, argumentsAttribute, nullValuesArrayInfersObject: true);
                 if (typeArguments == null)
                 {
                     continue;
@@ -134,39 +143,5 @@ internal sealed class ReflectionGenericConstraintViolations(
         }
 
         messages.Add(message);
-    }
-
-    private static Type[]? InferClassTypeArguments(Type[] classGenericParameters, ParameterInfo[] parameters, object?[] values)
-    {
-        var typeArguments = new Type?[classGenericParameters.Length];
-
-        for (var i = 0; i < parameters.Length && i < values.Length; i++)
-        {
-            var parameterType = parameters[i].ParameterType;
-            if (!parameterType.IsGenericParameter || parameterType.DeclaringMethod != null)
-            {
-                continue;
-            }
-
-            // Match the source generator: Roslyn types a null element of the params object?[] argument
-            // as object, and a Type value as System.Type rather than its RuntimeType instance.
-            var position = parameterType.GenericParameterPosition;
-            typeArguments[position] ??= values[i] switch
-            {
-                null => typeof(object),
-                Type => typeof(Type),
-                var value => value.GetType()
-            };
-        }
-
-        foreach (var typeArgument in typeArguments)
-        {
-            if (typeArgument == null)
-            {
-                return null;
-            }
-        }
-
-        return typeArguments!;
     }
 }
