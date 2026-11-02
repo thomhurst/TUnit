@@ -103,6 +103,12 @@ public class BrowserTest : PlaywrightTest
         return (context, recording, capture);
     }
 
+    /// <summary>
+    /// The options <see cref="BrowserSetup"/> launches with: the constructor's options with
+    /// the <c>HEADED</c> environment variable applied, read at the time of the call.
+    /// </summary>
+    internal BrowserTypeLaunchOptions ResolveLaunchOptions() => PlaywrightEnvironment.ApplyHeaded(_options);
+
     [Before(HookType.Test, "", 0)]
     public async Task BrowserSetup()
     {
@@ -111,7 +117,7 @@ public class BrowserTest : PlaywrightTest
             throw new InvalidOperationException($"BrowserType is not initialized. This may indicate that {nameof(PlaywrightTest)}.{nameof(Playwright)} is not initialized or {nameof(PlaywrightTest)}.{nameof(PlaywrightSetup)} did not execute properly.");
         }
 
-        var service = await BrowserService.Register(this, BrowserType, PlaywrightEnvironment.ApplyHeaded(_options)).ConfigureAwait(false);
+        var service = await BrowserService.Register(this, BrowserType, ResolveLaunchOptions()).ConfigureAwait(false);
         lock (_contextsLock)
         {
             Browser = service.Browser;

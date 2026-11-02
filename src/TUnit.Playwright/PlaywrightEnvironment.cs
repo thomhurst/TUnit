@@ -57,7 +57,7 @@ internal static class PlaywrightEnvironment
     /// Returns a copy of <paramref name="options"/> with <c>Headless = false</c> when
     /// <paramref name="headed"/> is <c>1</c> or <c>true</c> and the options leave
     /// <see cref="BrowserTypeLaunchOptions.Headless"/> unset; otherwise returns
-    /// <paramref name="options"/> unchanged. An explicit <c>Headless</c> always wins, and the
+    /// <paramref name="options"/> unchanged. An explicit <c>Headless</c> wins over <c>HEADED</c>, and the
     /// options are copied so shared settings objects are never mutated.
     /// </summary>
     internal static BrowserTypeLaunchOptions ApplyHeaded(BrowserTypeLaunchOptions options, string? headed)

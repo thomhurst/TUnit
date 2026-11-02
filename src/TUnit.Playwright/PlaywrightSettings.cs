@@ -25,8 +25,9 @@ public class TUnitPlaywrightSettings
     /// </summary>
     /// <remarks>
     /// Leave <see cref="BrowserTypeLaunchOptions.Headless"/> unset so the <c>HEADED=1</c>
-    /// environment variable and Playwright's <c>PWDEBUG=1</c> can open visible browsers; an
-    /// explicit value always wins over both.
+    /// environment variable can open visible browsers; an explicit value wins over <c>HEADED</c>.
+    /// Playwright's <c>PWDEBUG=1</c> opens a visible browser even when <c>Headless</c> is
+    /// <c>true</c>.
     /// </remarks>
     public BrowserTypeLaunchOptions? DefaultBrowserTypeLaunchOptions { get; set; } = null;
 

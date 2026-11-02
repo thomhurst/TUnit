@@ -44,8 +44,9 @@ public class BrowserFixture : IAsyncInitializer, IAsyncDisposable
 
     public virtual async Task InitializeAsync()
     {
-        var browserType = PlaywrightFixture.Playwright[BrowserName]
-            ?? throw new InvalidOperationException($"Unknown BrowserName '{BrowserName}'.");
+        var browserName = BrowserName;
+        var browserType = PlaywrightFixture.Playwright[browserName]
+            ?? throw new InvalidOperationException($"Unknown BrowserName '{browserName}'.");
 
         Browser = await PlaywrightServiceConnector.LaunchAsync(browserType, PlaywrightEnvironment.ApplyHeaded(GetLaunchOptions())).ConfigureAwait(false);
         // Watch from launch, so a crash before the first context is created is still reported.
