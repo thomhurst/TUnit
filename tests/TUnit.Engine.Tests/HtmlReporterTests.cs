@@ -542,7 +542,8 @@ public class HtmlReporterTests
         // must rebuild the per-attempt history from TUnitRetryAttemptsProperty carried on the
         // final node — failed attempts stitched in front of the surviving final attempt — rather
         // than from the (single) update stream. Without this the flaky/retry UI stays empty.
-        var reporter = new HtmlReporter(new MockExtension());
+        using var reporter = new HtmlReporter(new MockExtension());
+        await reporter.OnTestSessionStartingAsync(Session);
 
         var start = DateTimeOffset.UtcNow;
         var finalNode = new TestNode
@@ -590,6 +591,7 @@ public class HtmlReporterTests
         // TimingInfo whose StartTime is 0001-01-01. Neither the run duration nor the per-test
         // StartTime may be derived from it, or the report shows ~17,757,303 hours.
         using var reporter = new HtmlReporter(new MockExtension());
+        await reporter.OnTestSessionStartingAsync(Session);
 
         var start = DateTimeOffset.UtcNow;
         var ranNode = CreateTimedNode("ran-1", "RanTest", PassedTestNodeStateProperty.CachedInstance,
