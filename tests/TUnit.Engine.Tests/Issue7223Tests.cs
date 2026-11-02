@@ -13,6 +13,7 @@ public class Issue7223Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("ArrayParameterClassRowInference", 1)]
     [Arguments("MixedNullAndValueArrayClassRows", 2)]
     [Arguments("ArrayParameterAfterOtherClassRowInference", 1)]
+    [Arguments("NullBeforeValueClassRowInference", 1)]
     public async Task Class_Row_Infers_T_Through_Constructor_Parameter(string className, int expectedTests)
     {
         await RunTestsWithFilter(
