@@ -78,9 +78,11 @@ internal sealed class ReflectionGenericConstraintViolations(
 
             foreach (var argumentsAttribute in testMethod.GetCustomAttributes<ArgumentsAttribute>(inherit: false))
             {
-                // [Arguments(null)] (a null params array) stores one null value, which infers object
-                // here, as in the source generator (#7141)
-                var typeArguments = InferClassTypeArguments(classGenericParameters, parameters, argumentsAttribute.Values);
+                // The type mapping discovery uses, so a parameter that contains a type parameter (T[]) reports
+                // the row it drops. [Arguments(null)] (a null params array) infers object, as in the source
+                // generator (#7141)
+                var typeArguments = ReflectionTestDataCollector.InferClassTypeArgumentsFromMethodRow(
+                    classGenericParameters, parameters, argumentsAttribute, nullValuesArrayInfersObject: true);
                 if (typeArguments == null)
                 {
                     continue;
@@ -134,46 +136,5 @@ internal sealed class ReflectionGenericConstraintViolations(
         }
 
         messages.Add(message);
-    }
-
-    private static Type[]? InferClassTypeArguments(Type[] classGenericParameters, ParameterInfo[] parameters, object?[] values)
-    {
-        var typeArguments = new Type?[classGenericParameters.Length];
-
-        // Row values bind to the data parameters only; the engine supplies any CancellationToken, wherever it
-        // is, as in InferClassTypeArgumentsFromMethodRow and the generator's GetDataParameters
-        if (Array.Exists(parameters, static parameter => parameter.ParameterType == typeof(CancellationToken)))
-        {
-            parameters = Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
-        }
-
-        for (var i = 0; i < parameters.Length && i < values.Length; i++)
-        {
-            var parameterType = parameters[i].ParameterType;
-            if (!parameterType.IsGenericParameter || parameterType.DeclaringMethod != null)
-            {
-                continue;
-            }
-
-            // Match the source generator: Roslyn types a null element of the params object?[] argument
-            // as object, and a Type value as System.Type rather than its RuntimeType instance.
-            var position = parameterType.GenericParameterPosition;
-            typeArguments[position] ??= values[i] switch
-            {
-                null => typeof(object),
-                Type => typeof(Type),
-                var value => value.GetType()
-            };
-        }
-
-        foreach (var typeArgument in typeArguments)
-        {
-            if (typeArgument == null)
-            {
-                return null;
-            }
-        }
-
-        return typeArguments!;
     }
 }

@@ -19,6 +19,7 @@ public class Issue7209Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypeFreeClassRowWithInferringMethodSource", 1, 1)]
     [Arguments("TypeFreeClassRowWithInferringRowAndMethodSource", 2, 2)]
     [Arguments("TypeFreeClassRowWithCancellationToken", 1, 1)]
+    [Arguments("TypeFreeClassRowWithTypedMethodSource", 1, 1)]
     public async Task Rows_Run_On_The_Instantiation_They_Infer(string className, int expectedTests, int expectedDistinctNames)
     {
         await RunTestsWithFilter(
@@ -35,17 +36,19 @@ public class Issue7209Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    public async Task Method_Row_Inferring_An_Invalid_Class_Type_Beside_A_Type_Free_Class_Row_Fails()
+    [Arguments("TypeFreeClassRowConstraintViolation", "Type 'Object' does not satisfy the 'struct' constraint for generic parameter 'T'")]
+    [Arguments("TypeFreeClassRowArrayConstraintViolation", "Type 'Int32' does not satisfy the 'class' constraint for generic parameter 'T'")]
+    public async Task Method_Row_Inferring_An_Invalid_Class_Type_Beside_A_Type_Free_Class_Row_Fails(string className, string expectedMessage)
     {
         await RunTestsWithFilter(
-            $"{Namespace}/TypeFreeClassRowConstraintViolation*/*",
+            $"{Namespace}/{className}*/*",
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(2),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(1),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1),
                 result => result.Results.Single(x => x.Outcome == "Failed").TestName.ShouldBe("Run"),
                 result => result.Results.Single(x => x.Outcome == "Failed").Output?.ErrorInfo?.Message
-                    .ShouldContain("Type 'Object' does not satisfy the 'struct' constraint for generic parameter 'T'")
+                    .ShouldContain(expectedMessage)
             ]);
     }
 }

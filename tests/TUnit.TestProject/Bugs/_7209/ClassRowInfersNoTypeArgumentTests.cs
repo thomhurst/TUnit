@@ -141,6 +141,39 @@ public class TypeFreeClassRowWithCancellationToken<T>(int number) where T : stru
     }
 }
 
+// A typed data source infers T from its declared type, as without a class row: ClassDataSource<int> runs on C<int>,
+// built from the class row (number = 42). Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithTypedMethodSource<T>(int number)
+{
+    [Test]
+    [ClassDataSource<int>]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value).IsEqualTo(0);
+    }
+}
+
+// Beside only a type-free class row, a method row whose parameter contains T, not only T itself, still reports the
+// types that break the class's constraints: new int[] { 1 } for T[] infers int, which is not a class. Run(["a"])
+// runs on C<string>. No [EngineTest]: TUnit.Engine.Tests targets it by name, because it has a failing row.
+[Arguments(42)]
+public class TypeFreeClassRowArrayConstraintViolation<T>(int number) where T : class
+{
+    [Test]
+    [Arguments(new object[] { new[] { "a" } })]
+    [Arguments(new object[] { new[] { 1 } })]
+    public async Task Run(T[] values)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(values.Length).IsEqualTo(1);
+    }
+}
+
 public static class TypeFreeClassRowSources
 {
     public static IEnumerable<int> FortyThree() => [43];
