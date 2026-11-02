@@ -14,6 +14,18 @@ namespace TUnit.UnitTests;
 /// </summary>
 public class ExternallyOwnedSingletonTests
 {
+    // Synthetic contexts never reach the engine's cleanup, so each test removes its own from the registry.
+    private readonly List<TestContext> _contexts = [];
+
+    [After(Test)]
+    public void RemoveContextsFromRegistry()
+    {
+        foreach (var context in _contexts)
+        {
+            context.RemoveFromRegistry();
+        }
+    }
+
     [Test]
     public async Task Marked_Before_Another_Source_Supplies_It_Is_Never_Disposed_By_The_Tracker()
     {
@@ -93,12 +105,13 @@ public class ExternallyOwnedSingletonTests
     private static ObjectTracker CreateTracker()
         => new(new TrackableObjectGraphProvider(new RootsOnlyDiscoverer()), GlobalContext.Current.Disposer);
 
-    private static TestContext CreateContext(object root)
+    private TestContext CreateContext(object root)
     {
         var currentContext = TestContext.Current!;
         var context = new TestContext(nameof(ExternallyOwnedSingletonTests), currentContext.ServiceProvider, currentContext.ClassContext,
             new TestBuilderContext { TestMetadata = currentContext.TestDetails.MethodMetadata }, CancellationToken.None);
         Roots.Add(context, root);
+        _contexts.Add(context);
         return context;
     }
 
