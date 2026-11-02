@@ -66,6 +66,12 @@ public static class DataSourceFactories
     {
         var result = invoke();
 
+        // A null task is a source with no rows, as the attribute's reflection path reads it, so SkipIfEmpty skips the test.
+        if (result is null)
+        {
+            yield break;
+        }
+
         var taskResult = await result;
         if (taskResult is IEnumerable enumerable && !(taskResult is string))
         {
@@ -103,6 +109,12 @@ public static class DataSourceFactories
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromAsyncEnumerable<T>(Func<IAsyncEnumerable<T>> invoke)
     {
         var result = invoke();
+
+        // A null source has no rows, as the attribute's reflection path reads it, so SkipIfEmpty skips the test.
+        if (result is null)
+        {
+            yield break;
+        }
 
         await foreach (var item in result)
         {
@@ -143,6 +155,12 @@ public static class DataSourceFactories
     {
         var result = invoke(GetRequiredInstance(dataGeneratorMetadata));
 
+        // A null task is a source with no rows, as the attribute's reflection path reads it, so SkipIfEmpty skips the test.
+        if (result is null)
+        {
+            yield break;
+        }
+
         var taskResult = await result;
         if (taskResult is IEnumerable enumerable && !(taskResult is string))
         {
@@ -180,6 +198,12 @@ public static class DataSourceFactories
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromInstanceAsyncEnumerable<T>(DataGeneratorMetadata dataGeneratorMetadata, Func<object, IAsyncEnumerable<T>> invoke)
     {
         var result = invoke(GetRequiredInstance(dataGeneratorMetadata));
+
+        // A null source has no rows, as the attribute's reflection path reads it, so SkipIfEmpty skips the test.
+        if (result is null)
+        {
+            yield break;
+        }
 
         await foreach (var item in result)
         {

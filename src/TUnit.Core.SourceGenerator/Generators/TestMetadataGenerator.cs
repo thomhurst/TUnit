@@ -3090,7 +3090,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // [InstanceMethodDataSource] read its member by reflection before #7225, and that path, still used in
         // reflection mode, treats a null value as a source with no rows, so SkipIfEmpty skips the test. The factory
-        // helpers would turn null into one row holding null, so a null value becomes an empty source here.
+        // helpers would turn null into one row holding null, so a null value becomes an empty source here. A null Task or
+        // IAsyncEnumerable needs no guard: FromTask and FromAsyncEnumerable already read it as a source with no rows.
         var nullAsEmpty = decidesRowsFromRuntimeValue && kind is "Value" or "Enumerable"
             ? " ?? global::System.Array.Empty<object>()"
             : "";

@@ -49,6 +49,17 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                 Getter = o => ((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests)o).NullRows,
                 ClassMetadata = null!,
                 ContainingTypeMetadata = null!
+            },
+            new global::TUnit.Core.PropertyMetadata
+            {
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests).GetProperty("NullAsyncRows", typeof(global::System.Collections.Generic.IAsyncEnumerable<int>)),
+                Type = typeof(global::System.Collections.Generic.IAsyncEnumerable<int>),
+                Name = "NullAsyncRows",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = o => ((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests)o).NullAsyncRows,
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
             }
         },
         Parent = null
@@ -143,6 +154,32 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
+                case 6:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                instance.Null_Async_Source_With_SkipIfEmpty_Is_Skipped(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                case 7:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                instance.Null_Task_Source_With_SkipIfEmpty_Is_Skipped(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
                 default:
                     throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
@@ -177,7 +214,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             methodName: "Object_Property",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Object_Property",
             filePath: "",
-            lineNumber: 28,
+            lineNumber: 32,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -201,7 +238,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             methodName: "Object_Method",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Object_Method",
             filePath: "",
-            lineNumber: 35,
+            lineNumber: 39,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -225,7 +262,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             methodName: "Tuple_Single_Parameter",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Tuple_Single_Parameter",
             filePath: "",
-            lineNumber: 42,
+            lineNumber: 46,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -249,7 +286,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             methodName: "Private_Method",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Private_Method",
             filePath: "",
-            lineNumber: 49,
+            lineNumber: 53,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -273,7 +310,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             methodName: "Private_Method_With_Generic_Overload",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Private_Method_With_Generic_Overload",
             filePath: "",
-            lineNumber: 56,
+            lineNumber: 60,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -297,7 +334,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             methodName: "Null_Source_With_SkipIfEmpty_Is_Skipped",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Null_Source_With_SkipIfEmpty_Is_Skipped",
             filePath: "",
-            lineNumber: 63,
+            lineNumber: 67,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -315,6 +352,54 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             createInstance: __createInstance,
             invokeBody: __invoke,
             methodIndex: 5,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+            methodName: "Null_Async_Source_With_SkipIfEmpty_Is_Skipped",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Null_Async_Source_With_SkipIfEmpty_Is_Skipped",
+            filePath: "",
+            lineNumber: 74,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("NullAsyncRows")
+    {
+        SkipIfEmpty = true,
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceAsyncEnumerable(dataGeneratorMetadata, static instance => ((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests)instance).NullAsyncRows),
+    },
+},
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests), "Null_Async_Source_With_SkipIfEmpty_Is_Skipped", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 6,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+            methodName: "Null_Task_Source_With_SkipIfEmpty_Is_Skipped",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Null_Task_Source_With_SkipIfEmpty_Is_Skipped",
+            filePath: "",
+            lineNumber: 81,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("NullTaskRows")
+    {
+        SkipIfEmpty = true,
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceTask(dataGeneratorMetadata, static instance => ((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests)instance).NullTaskRows()),
+    },
+},
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests), "Null_Task_Source_With_SkipIfEmpty_Is_Skipped", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 7,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
