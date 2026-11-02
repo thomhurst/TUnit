@@ -1259,6 +1259,33 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             var testMethod = testMethods[methodIndex];
             if (testMethod.IsGenericMethodDefinition)
             {
+                // Beside only type-free class rows, a typed data source whose type arguments cover the class type
+                // parameters and the method's (ClassDataSource<int, long> on Run<U>(T, U)) infers the class
+                // instantiation from its leading type arguments, as the generator's combined branch of
+                // InferTypesFromDataSourceAttribute does. That instantiation runs only that source, and the method
+                // closes over the source's values as it does on any closed class (#7209).
+                if (methodSourcesInferClassTypeArguments)
+                {
+                    classGenericParameters ??= genericTypeDefinition.GetGenericArguments();
+                    var combinedCount = classGenericParameters.Length + testMethod.GetGenericArguments().Length;
+                    var genericMethodDataSources = ReflectionAttributeExtractor.ExtractDataSources(testMethod);
+                    List<SourceInstantiation>? combinedInstantiations = null;
+                    for (var i = 0; i < genericMethodDataSources.Length; i++)
+                    {
+                        if (genericMethodDataSources[i] is not (ArgumentsAttribute or MethodDataSourceAttribute)
+                            && InferTypesFromTypedDataSource(genericMethodDataSources[i], combinedCount, classGenericParameterCount: 0) is { } combinedTypes)
+                        {
+                            AddSourceInstantiation(ref combinedInstantiations, combinedTypes[..classGenericParameters.Length], sourceIndex: i);
+                        }
+                    }
+
+                    if (combinedInstantiations != null)
+                    {
+                        sourceInstantiations ??= new List<SourceInstantiation>?[testMethods.Length];
+                        sourceInstantiations[methodIndex] = combinedInstantiations;
+                    }
+                }
+
                 continue;
             }
 

@@ -32,6 +32,7 @@ public class Issue7209Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypeFreeClassRowWithGenerateGenericTestAndTypedSource", 2, 1)]
     [Arguments("TypeFreeClassRowWithGenerateGenericTestAndMethodSource", 2, 1)]
     [Arguments("TypeFreeClassRowTestConstructorTakesTypeParameter", 1, 1)]
+    [Arguments("TypeFreeClassRowWithCombinedTypedSource", 1, 1)]
     public async Task Rows_Run_On_The_Instantiation_They_Infer(string className, int expectedTests, int expectedDistinctNames)
     {
         await RunTestsWithFilter(

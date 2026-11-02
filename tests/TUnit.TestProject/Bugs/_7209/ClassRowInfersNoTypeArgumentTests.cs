@@ -446,6 +446,23 @@ public class TypeFreeClassRowTestConstructorTakesTypeParameter<T>
     }
 }
 
+// A typed data source on a generic method whose type arguments cover the class type parameter and the method's
+// (ClassDataSource<int, long> on Run<U>(T, U)) closes both: C<int>.Run<long>, built from the class row (number = 42).
+// Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithCombinedTypedSource<T>(int number)
+{
+    [Test]
+    [ClassDataSource<int, long>]
+    public async Task Run<U>(T value, U other)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(typeof(U)).IsEqualTo(typeof(long));
+    }
+}
+
 public static class TypeFreeClassRowSources
 {
     public static IEnumerable<int> None() => [];
