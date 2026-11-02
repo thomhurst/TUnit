@@ -44,7 +44,8 @@ internal static class TestOnDisposeRaiser
     /// <summary>
     /// Raises, once, the OnDispose callbacks that data sources subscribed on a builder context that no
     /// test owns: <see cref="TestSessionContext.GlobalStaticPropertyContext"/>, which static property
-    /// data sources run against and which also holds the callbacks <see cref="DeferToSessionEnd"/> moved, or the context of a class row fetch that failed before any test took it.
+    /// data sources run against (and which receives the callbacks <see cref="DeferToSessionEnd"/> moves when
+    /// no session is current), or the context of a class row fetch that failed before any test took it.
     /// A dependency injection scope created for a static property is disposed here, at session end,
     /// because the object tracker does not dispose the services the scope owns.
     /// No test exists, so the callbacks receive the builder context as sender and no test context.
@@ -67,11 +68,13 @@ internal static class TestOnDisposeRaiser
     private static readonly object s_sessionCallbacksLock = new();
 
     /// <summary>
-    /// Moves the OnDispose callbacks subscribed on <paramref name="context"/> to
-    /// <see cref="TestSessionContext.GlobalStaticPropertyContext"/>, so they are raised once at session end
-    /// by <see cref="RaiseForSessionAsync"/>. Reflection discovery evaluates a generic class's data sources
+    /// Moves the OnDispose callbacks subscribed on <paramref name="context"/> to the current session's
+    /// <see cref="TestSessionContext.DeferredDiscoveryOnDispose"/>, so <see cref="RaiseDeferredForSessionAsync"/>
+    /// raises them once when that session ends. Reflection discovery evaluates a generic class's data sources
     /// to infer its type arguments, and every test built from that partition receives the same objects, so
     /// a dependency injection scope created there lives for the session rather than for one test (#7205).
+    /// Without a current session they go to <see cref="TestSessionContext.GlobalStaticPropertyContext"/>,
+    /// which the session's static property cleanup raises.
     /// </summary>
     public static void DeferToSessionEnd(TestBuilderContext context)
     {
@@ -84,13 +87,50 @@ internal static class TestOnDisposeRaiser
 
         lock (s_sessionCallbacksLock)
         {
-            var sessionEvents = TestSessionContext.GlobalStaticPropertyContext.Events;
-            var sessionOnDispose = sessionEvents.OnDispose ??= new AsyncEvent<TestContext>();
+            AsyncEvent<TestContext> target;
+            if (TestSessionContext.Current is { } session)
+            {
+                target = session.DeferredDiscoveryOnDispose ??= new AsyncEvent<TestContext>();
+            }
+            else
+            {
+                var globalEvents = TestSessionContext.GlobalStaticPropertyContext.Events;
+                target = globalEvents.OnDispose ??= new AsyncEvent<TestContext>();
+            }
 
             foreach (var invocation in onDispose.InvocationList)
             {
-                sessionOnDispose.Add(invocation.InvokeAsync, invocation.Order);
+                target.Add(invocation.InvokeAsync, invocation.Order);
             }
+        }
+    }
+
+    /// <summary>
+    /// Raises, once, the callbacks <see cref="DeferToSessionEnd"/> moved to <paramref name="session"/>.
+    /// Called from the session's unconditional final cleanup, so they run even when no test executes
+    /// (every test filtered out or removed by circular-dependency detection), and again when the session's
+    /// services are disposed, which covers discovery-only sessions. Handler errors are logged.
+    /// </summary>
+    public static async ValueTask RaiseDeferredForSessionAsync(TestSessionContext session, TUnitFrameworkLogger logger)
+    {
+        AsyncEvent<TestContext>? onDispose;
+        lock (s_sessionCallbacksLock)
+        {
+            onDispose = session.DeferredDiscoveryOnDispose;
+            session.DeferredDiscoveryOnDispose = null;
+        }
+
+        if (onDispose is null)
+        {
+            return;
+        }
+
+        var exceptions = new List<Exception>();
+        await RaiseDetachedAsync(session, onDispose.InvocationList, exceptions).ConfigureAwait(false);
+
+        foreach (var exception in exceptions)
+        {
+            await logger.LogErrorAsync($"Error during OnDispose for data that discovery shared across a session: {exception}").ConfigureAwait(false);
         }
     }
 
