@@ -7000,6 +7000,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return nullValueTypeArgument == null ? null : [nullValueTypeArgument];
         }
 
+        // Type parameters inferred through a T[] or List<T> parameter, and bare type parameters bound by an untyped null
+        HashSet<string>? shapeInferredTypeParameters = null;
+        HashSet<string>? nullOnlyTypeParameters = null;
+
         // For each value in the params array
         for (var argIndex = 0; argIndex < argumentValues.Length && argIndex < constructorParams.Length; argIndex++)
         {
@@ -7039,9 +7043,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
 
                 // An untyped null (typed as object) says nothing about T, so a later value infers it, as reflection
-                // mode skips null values.
+                // mode skips null values. A bare T that only nulls bind still falls back to object below.
                 if (argValue.IsNull && argType?.SpecialType == SpecialType.System_Object)
                 {
+                    if (constructorParam.Type is ITypeParameterSymbol nullTypeParam)
+                    {
+                        (nullOnlyTypeParameters ??= []).Add(nullTypeParam.Name);
+                    }
+
                     argType = null;
                 }
 
@@ -7050,20 +7059,41 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (constructorParam.Type is ITypeParameterSymbol typeParam)
                     {
                         // A bare T keeps its earlier rule, the last value's type: [Arguments(1, 2L)] on
-                        // C<T>(T first, T second) infers long, which both values bind to.
-                        inferredTypes[typeParam.Name] = argType;
+                        // C<T>(T first, T second) infers long, which both values bind to. A type that a T[] or
+                        // List<T> value inferred wins, because that value cannot bind to any other T.
+                        if (shapeInferredTypeParameters?.Contains(typeParam.Name) != true)
+                        {
+                            inferredTypes[typeParam.Name] = argType;
+                        }
                     }
                     else
                     {
+                        // The first T[] or List<T> value fixes T, replacing a type a bare T inferred:
+                        // [Arguments((short)2, new[] { 1 })] on C<T>(T count, T[] values) infers int, which the
+                        // short also binds to.
                         foreach (var typeParameter in typeParameters)
                         {
-                            if (!inferredTypes.ContainsKey(typeParameter.Name)
+                            if (shapeInferredTypeParameters?.Contains(typeParameter.Name) != true
                                 && MatchTypeParameter(constructorParam.Type, argType, typeParameter) is { } typeArgument)
                             {
                                 inferredTypes[typeParameter.Name] = typeArgument;
+                                (shapeInferredTypeParameters ??= []).Add(typeParameter.Name);
                             }
                         }
                     }
+                }
+            }
+        }
+
+        // A bare T that only untyped nulls bind is object: [Arguments(null, null)] on C<T>(T first, T second) runs on
+        // C<object>, as before #7223
+        if (nullOnlyTypeParameters != null)
+        {
+            foreach (var name in nullOnlyTypeParameters)
+            {
+                if (!inferredTypes.ContainsKey(name))
+                {
+                    inferredTypes[name] = compilation.GetSpecialType(SpecialType.System_Object);
                 }
             }
         }

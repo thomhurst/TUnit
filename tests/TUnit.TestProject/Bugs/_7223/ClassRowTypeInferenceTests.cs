@@ -66,3 +66,46 @@ public class NullBeforeValueClassRowInference<T>(T? first, T second) where T : c
         await Assert.That((object)second).IsEqualTo("x");
     }
 }
+
+// The int[] fixes T as int, because it cannot bind to a short[]; the short after it binds to the int parameter. A
+// later bare T used to replace the array's type in source generation, so construction failed.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(new[] { 1 }, (short)2)]
+public class ArrayBeforeBareClassRowInference<T>(T[] values, T count)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values.Length).IsEqualTo(1);
+        await Assert.That((object?)count).IsEqualTo(2);
+    }
+}
+
+// The same row with the bare T first: the array still fixes T as int, which the short binds to.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments((short)2, new[] { 1 })]
+public class BareBeforeArrayClassRowInference<T>(T count, T[] values)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)count).IsEqualTo(2);
+        await Assert.That(values.Length).IsEqualTo(1);
+    }
+}
+
+// A bare T that only untyped nulls bind runs on object in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(null, null)]
+public class AllNullClassRowInference<T>(T? first, T? second)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(object));
+        await Assert.That((object?)first).IsNull();
+        await Assert.That((object?)second).IsNull();
+    }
+}
