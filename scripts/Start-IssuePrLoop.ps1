@@ -10,12 +10,15 @@
 #   2. Runs the merged-worktree sweep and surveys open PRs and issues with `gh`. When
 #      the latest push CI run of any workflow on main failed, fixing main comes first.
 #   3. Includes draft PRs for review processing. Skips `needs-human` and `on-hold`
-#      items, PRs whose checks are still running, and items whose GitHub state is
+#      items, PRs whose checks are still running (unless they conflict, have unresolved
+#      review threads, or have a changes-requested review newer than the last push), and items whose GitHub state is
 #      unchanged since an agent last deferred them. Also skips issues that cannot be worked yet: issues with open native
 #      sub-issues or open `blocked_by` dependencies, issues that already have an open
 #      closing PR, and bot-owned tracking issues. Stranded branches follow the same
 #      rules. Ranks local `issue-*` branches with unpublished commits and no open PR
-#      above new issues. Takes issues by `priority:*` tier (critical, high, medium or
+#      above new issues. Starts no new issue while -MaxOpenPrs or more of the loop's
+#      PRs are open and not parked, because every PR in flight is another chance of a
+#      conflict; existing PRs, stranded branches, and stale claims still run. Takes issues by `priority:*` tier (critical, high, medium or
 #      unlabelled, low), `ci` first within a tier, then parents whose sub-issues are all
 #      closed, then issues that block the most other issues. An item that a deferral
 #      named as its blocker goes first, so the next unit works the blocker instead of
@@ -61,7 +64,7 @@
 #
 # Stop:   create the stop file printed at startup (checked between units), or Ctrl+C.
 # Usage:  pwsh scripts/Start-IssuePrLoop.ps1 [-Agent auto|claude|codex] [-IdleSeconds n] [-MaxUnits n]
-#           [-DeferSeconds n] [-MaxDeferSeconds n] [-LightEffort level] [-HeavyEffort level]
+#           [-DeferSeconds n] [-MaxDeferSeconds n] [-MaxOpenPrs n] [-LightEffort level] [-HeavyEffort level]
 #           [-TriageEvery n] [-TriageBatch n] [-AuditDays n] [-ParkedAuditHours n] [-DiscoveryHours n] [-DryRun]
 #         pwsh scripts/Start-IssuePrLoop.ps1 -Report [-ReportHours n]
 
@@ -80,6 +83,9 @@ param(
     # Upper bound for a repeatedly deferred item's backoff.
     [ValidateRange(60, 604800)]
     [int]$MaxDeferSeconds = 259200,
+    # Open, unparked loop PRs at which no new issue is started. 0 means no limit.
+    [ValidateRange(0, 1000)]
+    [int]$MaxOpenPrs = 8,
     # Reasoning effort for PRs that look ready to merge, and for all other units.
     # An empty value keeps the agent's configured default.
     [string]$LightEffort = 'medium',
@@ -261,6 +267,62 @@ function Get-PrFingerprint($Pr) {
     Get-Hash ((@($Pr.headRefOid, $Pr.isDraft, $Pr.mergeable, ($labels -join ','), $review, $comment) + $checks + $codexReactions) -join '|')
 }
 
+function ConvertTo-Instant($Value) {
+    if ($Value -is [datetime]) { return [DateTimeOffset]$Value }
+    if ($Value) { return [DateTimeOffset]::Parse([string]$Value, [Globalization.CultureInfo]::InvariantCulture) }
+    return $null
+}
+
+# True when a PR has review feedback that no unit has dispositioned: an unresolved review
+# thread (units resolve each thread they disposition), or a changes-requested review newer
+# than both the last push and the loop's last reply. Such feedback can be handled while
+# checks still run. Conversation comments do not count: a finished review with no
+# findings is also a comment, and would send units to PRs with nothing to do.
+function Test-HasNewFeedback($Pr, $Activity) {
+    if (-not $Activity) { return $false }
+    if ($Activity.UnresolvedThreads -gt 0) { return $true }
+    $since = ConvertTo-Instant $Activity.HeadCommittedAt
+    if (-not $since) { return $false }
+    $requested = [Collections.Generic.List[object]]::new()
+    foreach ($review in @($Pr.reviews)) {
+        if (-not $review -or -not $review.submittedAt) { continue }
+        $at = ConvertTo-Instant $review.submittedAt
+        # The loop replies to review threads as the PR author, which GitHub records as reviews.
+        if ($review.author.login -eq $Pr.author.login) { if ($at -gt $since) { $since = $at } }
+        elseif ($review.state -eq 'CHANGES_REQUESTED') { $requested.Add($at) }
+    }
+    foreach ($comment in @($Pr.comments)) {
+        if ($comment -and $comment.createdAt -and ([string]$comment.body).Contains($loopMarker)) {
+            $at = ConvertTo-Instant $comment.createdAt
+            if ($at -gt $since) { $since = $at }
+        }
+    }
+    @($requested | Where-Object { $_ -gt $since }).Count -gt 0
+}
+
+# Returns PR number -> head commit time and unresolved review thread count for open PRs.
+# `gh pr list --json commits` asks for every commit's authors and exceeds GitHub's
+# GraphQL node limit, so this asks only for the head commit.
+function Get-PrActivity {
+    $query = 'query($owner: String!, $name: String!, $cursor: String) { repository(owner: $owner, name: $name) { ' +
+        'pullRequests(states: OPEN, first: 100, after: $cursor) { pageInfo { hasNextPage endCursor } ' +
+        'nodes { number commits(last: 1) { nodes { commit { committedDate } } } reviewThreads(first: 100) { nodes { isResolved } } } } } }'
+    $activity = @{}
+    $cursor = $null
+    do {
+        $variables = if ($cursor) { @('-f', "cursor=$cursor") } else { @() }
+        $page = (Invoke-GraphQl $query $variables).pullRequests
+        foreach ($node in @($page.nodes)) {
+            $activity[[int]$node.number] = [pscustomobject]@{
+                HeadCommittedAt   = @($node.commits.nodes)[0].commit.committedDate
+                UnresolvedThreads = @($node.reviewThreads.nodes | Where-Object { -not $_.isResolved }).Count
+            }
+        }
+        $cursor = $page.pageInfo.endCursor
+    } while ($page.pageInfo.hasNextPage)
+    return $activity
+}
+
 function Get-IssueFingerprint($Issue) {
     $labels = @($Issue.labels.nodes | ForEach-Object { $_.name } | Sort-Object)
     $assignees = @($Issue.assignees.nodes | ForEach-Object { $_.login } | Sort-Object)
@@ -327,7 +389,7 @@ $deferCategories = @('human', 'upstream', 'credentials', 'locked')
 $surveyStats = [ordered]@{}
 
 function Reset-SurveyStats {
-    foreach ($key in 'issues', 'issue-deferred', 'issue-locked', 'issue-excluded', 'issue-parent', 'issue-blocked', 'issue-has-pr', 'issue-claimed',
+    foreach ($key in 'issues', 'issue-wip', 'issue-deferred', 'issue-locked', 'issue-excluded', 'issue-parent', 'issue-blocked', 'issue-has-pr', 'issue-claimed',
         'prs', 'pr-deferred', 'pr-locked', 'pr-pending', 'pr-excluded', 'pr-draft') {
         $surveyStats[$key] = 0
     }
@@ -335,10 +397,10 @@ function Reset-SurveyStats {
 
 function Format-SurveyStats {
     $s = $surveyStats
-    ('issues: {0} open, {1} deferred, {2} locked, {3} excluded by label/assignee/bot, {4} with open sub-issues, {5} blocked, {6} with open PR, {7} claimed; ' +
-        'PRs: {8} open, {9} deferred, {10} locked, {11} pending checks, {12} needs-human/on-hold, {13} draft') -f `
+    ('issues: {0} open, {1} deferred, {2} locked, {3} excluded by label/assignee/bot, {4} with open sub-issues, {5} blocked, {6} with open PR, {7} claimed, ' +
+        '{14} held by the open-PR limit; PRs: {8} open, {9} deferred, {10} locked, {11} pending checks, {12} needs-human/on-hold, {13} draft') -f `
         $s['issues'], $s['issue-deferred'], $s['issue-locked'], $s['issue-excluded'], $s['issue-parent'], $s['issue-blocked'], $s['issue-has-pr'], $s['issue-claimed'],
-        $s['prs'], $s['pr-deferred'], $s['pr-locked'], $s['pr-pending'], $s['pr-excluded'], $s['pr-draft']
+        $s['prs'], $s['pr-deferred'], $s['pr-locked'], $s['pr-pending'], $s['pr-excluded'], $s['pr-draft'], $s['issue-wip']
 }
 
 function Invoke-GraphQl([string]$Query, [string[]]$Variables) {
@@ -487,21 +549,30 @@ function Get-Candidates {
     $prs = gh pr list --repo $repoSlug --author '@me' --state open --limit 500 --json $prFields | ConvertFrom-Json
     if ($LASTEXITCODE -ne 0) { throw 'gh pr list failed.' }
     $surveyStats['prs'] = @($prs).Count
+    $inFlight = 0
+    $prActivity = if (@($prs).Count -gt 0) { Get-PrActivity } else { @{} }
     $ranked = foreach ($pr in $prs) {
         if ($pr.isDraft) { $surveyStats['pr-draft']++ }
         if (@($pr.labels | Where-Object { $_.name -in $excludedPrLabels }).Count -gt 0) { $surveyStats['pr-excluded']++; continue }
+        $inFlight++
         $checks = @($pr.statusCheckRollup)
         $pending = @($checks | Where-Object { (Get-CheckState $_) -in 'PENDING', 'EXPECTED', 'QUEUED', 'IN_PROGRESS', 'WAITING', 'REQUESTED', '' })
         $failed = @($checks | Where-Object { (Get-CheckState $_) -in 'FAILURE', 'ERROR', 'TIMED_OUT', 'CANCELLED', 'ACTION_REQUIRED', 'STARTUP_FAILURE' })
         $conflicting = $pr.mergeable -eq 'CONFLICTING'
-        # Running checks leave nothing to do yet; the next survey picks the PR up.
-        if ($pending.Count -gt 0 -and -not $conflicting) { $surveyStats['pr-pending']++; continue }
-        $rank = if (-not $pr.isDraft -and $pr.mergeStateStatus -eq 'CLEAN' -and $failed.Count -eq 0) { 0 }
+        $feedback = Test-HasNewFeedback $pr $prActivity[[int]$pr.number]
+        # Running checks leave nothing to do yet, unless the PR conflicts or has new review
+        # feedback: finishing open PRs beats starting new ones. The next survey picks it up.
+        if ($pending.Count -gt 0 -and -not $conflicting -and -not $feedback) { $surveyStats['pr-pending']++; continue }
+        $rank = if (-not $pr.isDraft -and $pr.mergeStateStatus -eq 'CLEAN' -and $failed.Count -eq 0 -and -not $feedback) { 0 }
         elseif ($conflicting) { 1 }
-        elseif ($failed.Count -gt 0) { 2 }
+        elseif ($failed.Count -gt 0 -or $feedback) { 2 }
         else { 3 }
+        $hint = if ($feedback -and $pending.Count -gt 0) {
+            "PR #$($pr.number) has review feedback without a disposition while checks are still running. Handle the feedback now instead of waiting for the checks."
+        }
+        else { '' }
         # A green, clean PR usually needs only the merge gate or a disposition reply.
-        New-Candidate 'pr' ([int]$pr.number) $rank (Get-PrFingerprint $pr) ($rank -eq 0)
+        New-Candidate 'pr' ([int]$pr.number) $rank (Get-PrFingerprint $pr) ($rank -eq 0) $hint
     }
     foreach ($c in @($ranked | Sort-Object Rank, Number)) { $candidates.Add($c) }
 
@@ -510,6 +581,9 @@ function Get-Candidates {
     $openIssues = @{}
     foreach ($issue in $issues) { $openIssues[[int]$issue.number] = $issue }
     $script:lastIssues = $issues
+    # Every open PR is another chance of a conflict, so finish existing work before
+    # starting more once enough PRs are in flight.
+    $atPrLimit = $MaxOpenPrs -gt 0 -and $inFlight -ge $MaxOpenPrs
     $stranded = Get-StrandedBranches $openIssues
     foreach ($number in @($stranded.Keys | Sort-Object)) {
         $s = $stranded[$number]
@@ -561,6 +635,7 @@ function Get-Candidates {
             New-Candidate 'issue' $number 5 $fingerprint $true $hint
             continue
         }
+        if ($atPrLimit) { $surveyStats['issue-wip']++; continue }
         $candidate = New-Candidate 'issue' $number 6 $fingerprint $false
         $candidate.Blocking = [int]$issue.issueDependenciesSummary.blocking
         $candidate.Comments = [int]$issue.comments.totalCount
