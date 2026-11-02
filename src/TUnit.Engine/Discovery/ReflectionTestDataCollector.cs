@@ -1125,15 +1125,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
             }
 
-            // Beside only type-free class rows, a [MethodDataSource] infers the class type arguments only when no
-            // [Arguments] row of the method does. Otherwise it runs on the instantiations those rows infer, as in
-            // the source generator, which drops the instantiation such a source alone infers (#7209).
+            // Beside only type-free class rows, when no [Arguments] row of the method infers the class type arguments,
+            // a [MethodDataSource] or a typed data source (ClassDataSource<int>, read as the generator's
+            // InferTypesFromDataSourceAttribute reads it) infers them, as in the source generator. Beside such a row,
+            // a [MethodDataSource] runs on the instantiations the rows infer, since the generator drops the
+            // instantiation that source alone infers (#7209).
             if (!classTypeArgumentsSupplied && rowTypeArguments == null)
             {
                 for (var i = 0; i < methodDataSources.Length; i++)
                 {
-                    if (methodDataSources[i] is MethodDataSourceAttribute methodDataSource
-                        && InferClassTypeArgumentsFromMethodDataSource(genericTypeDefinition, methodDataSource, parameters) is { } typeArguments)
+                    var typeArguments = methodDataSources[i] is MethodDataSourceAttribute methodDataSource
+                        ? InferClassTypeArgumentsFromMethodDataSource(genericTypeDefinition, methodDataSource, parameters)
+                        : InferTypesFromTypedDataSource(methodDataSources[i], classGenericParameters.Length, classGenericParameterCount: 0);
+                    if (typeArguments != null)
                     {
                         rowTypeArguments ??= new Type[]?[methodDataSources.Length];
                         rowTypeArguments[i] = typeArguments;
@@ -1615,7 +1619,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         && methodRowTypeArguments.TryGetValue(genericMethod, out var groups)
         && IndexOfTypeArguments(groups, typeArguments) >= 0;
 
-    private static Type[]? InferClassTypeArgumentsFromMethodRow(Type[] classGenericParameters, ParameterInfo[] parameters, ArgumentsAttribute arguments, bool nullValuesArrayInfersObject)
+    internal static Type[]? InferClassTypeArgumentsFromMethodRow(Type[] classGenericParameters, ParameterInfo[] parameters, ArgumentsAttribute arguments, bool nullValuesArrayInfersObject)
     {
         // [Arguments(null)] (a null params array) infers no type when [GenerateGenericTest] supplies the
         // instantiations it runs on. Otherwise its one null value infers object, as in the source generator.
