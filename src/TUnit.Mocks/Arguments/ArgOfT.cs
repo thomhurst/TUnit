@@ -41,7 +41,7 @@ public readonly struct Arg<T>
 
     /// <summary>Implicitly converts a predicate to an <see cref="Arg{T}"/> using predicate matching.</summary>
     /// <param name="predicate">The predicate that determines whether an argument matches.</param>
-    public static implicit operator Arg<T>(Func<T, bool> predicate) => new(new PredicateMatcher<T>(predicate!));
+    public static implicit operator Arg<T>(Func<T, bool> predicate) => new(new PredicateMatcher<T>(predicate));
 
     public static implicit operator Arg<T>(AnyArg _) => new(AnyMatcher<T>.Instance);
 
