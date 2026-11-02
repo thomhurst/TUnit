@@ -165,6 +165,18 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task Deferred_Broad_Source_Joins_Method_Row_Instantiation_On_Class_Row()
+    {
+        // The [Arguments] row creates Test<int> first; the object source's row joins it and both run
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/BroadSourceJoinsClassRowTests*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2)
+            ]);
+    }
+
+    [Test]
     public async Task Constraint_Violation_Without_GenerateGenericTest_Fails_Once_Per_Class_Row()
     {
         // Without a method-level [GenerateGenericTest], reflection mode keeps the class rows on the failing

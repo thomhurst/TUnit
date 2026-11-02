@@ -925,10 +925,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 if (!reportMethodConstraintViolation || methodTypeArgs.Length != testMethod.MethodSymbol.TypeParameters.Length)
                 {
-                    // A source paired with several class sources is deferred once
-                    if (deferToGenerateGenericTest && specificAttr is not null && deferredDataSources?.Contains(specificAttr) is not true)
+                    // A source paired with several class sources is deferred once. Paired with a class row,
+                    // the method source is methodRow (specificAttr is the class row).
+                    if (deferToGenerateGenericTest && (methodRow ?? specificAttr) is { } deferredSource && deferredDataSources?.Contains(deferredSource) is not true)
                     {
-                        (deferredDataSources ??= []).Add(specificAttr);
+                        (deferredDataSources ??= []).Add(deferredSource);
                     }
 
                     return;
@@ -1090,10 +1091,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // the row's inferred method type arguments fail to resolve.
         // A method data source other than an [Arguments] row (such as [MethodDataSource]) may yield
         // several rows, so a method violation is reported once per row it yields instead.
+        // An unreported method violation defers the method source to the method-level [GenerateGenericTest].
         void TryAddCombinedArgumentsInstantiation(ITypeSymbol[] classTypes, ITypeSymbol[] combinedTypes, AttributeData classAttr, AttributeData methodAttr, bool reportMethodConstraintViolation = true)
         {
             TryAddInstantiation(combinedTypes, classAttr,
                 reportMethodConstraintViolation: reportMethodConstraintViolation,
+                deferToGenerateGenericTest: !reportMethodConstraintViolation,
                 reportClassViolationAs: ClassViolationSource.ClassArguments,
                 violationSource: ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes, compilation) ? methodAttr : classAttr,
                 isClassRow: true,
@@ -1517,7 +1520,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     foreach (var methodGenericTest in methodGenericTestAttrs)
                     {
-                        TryAddClassRowInstantiationWithEveryMethodSource(classTypes, classTypes.Concat(methodGenericTest.TypeArgs!).ToArray(), classAttr, methodGenericTest.Attribute, typedDataSourceBucket);
+                        var combined = classTypes.Concat(methodGenericTest.TypeArgs!).ToArray();
+                        TryAddClassRowInstantiationWithEveryMethodSource(classTypes, combined, classAttr, methodGenericTest.Attribute, typedDataSourceBucket);
+
+                        // After the add, so the deferred sources also join an entry that a method row created
+                        // earlier, which the add above leaves unchanged
+                        JoinDeferredDataSources(combined);
                     }
                 }
 

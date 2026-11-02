@@ -145,6 +145,22 @@ public class BroadSourceOnGenericClassTypeTests<TClass>
     }
 }
 
+// A deferred broad source joins the instantiation that a method [Arguments] row already created on a class
+// row: both rows run on BroadSourceJoinsClassRowTests<int>.Test<int>, as in reflection mode.
+[Arguments(1)]
+public class BroadSourceJoinsClassRowTests<TClass>(TClass value)
+{
+    public TClass Value => value;
+
+    [Test]
+    [Arguments(1)]
+    [GenerateGenericTest(typeof(int))]
+    [ObjectValues]
+    public void Test<TMethod>(TMethod item) where TMethod : struct
+    {
+    }
+}
+
 public class ObjectValuesAttribute : DataSourceGeneratorAttribute<object>
 {
     protected override IEnumerable<Func<object>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
