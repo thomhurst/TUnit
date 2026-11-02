@@ -2265,30 +2265,30 @@ namespace .Helpers
     }
     public static class DataSourceFactories
     {
-        [.(typeof(..<FromAsyncEnumerable>d__4<T>))]
         public static .<<.<object?[]?>>> FromAsyncEnumerable<T>(<.<T>> invoke) { }
-        [.(typeof(..<FromEnumerable>d__1))]
+        public static .<<.<object?[]?>>> FromAsyncEnumerable<T>(.DataGeneratorMetadata dataGeneratorMetadata, <.<T>> invoke) { }
         public static .<<.<object?[]?>>> FromEnumerable(<object?> invoke) { }
-        [.(typeof(..<FromInstanceAsyncEnumerable>d__9<T>))]
+        public static .<<.<object?[]?>>> FromEnumerable(.DataGeneratorMetadata dataGeneratorMetadata, <object?> invoke) { }
+        [.(typeof(..<FromInstanceAsyncEnumerable>d__19<T>))]
         public static .<<.<object?[]?>>> FromInstanceAsyncEnumerable<T>(.DataGeneratorMetadata dataGeneratorMetadata, <object, .<T>> invoke) { }
-        [.(typeof(..<FromInstanceEnumerable>d__6))]
+        [.(typeof(..<FromInstanceEnumerable>d__16))]
         public static .<<.<object?[]?>>> FromInstanceEnumerable(.DataGeneratorMetadata dataGeneratorMetadata, <object, object?> invoke) { }
-        [.(typeof(..<FromInstanceRuntimeValue>d__11))]
+        [.(typeof(..<FromInstanceRuntimeValue>d__21))]
         public static .<<.<object?[]?>>> FromInstanceRuntimeValue(.DataGeneratorMetadata dataGeneratorMetadata, <object, object?> invoke) { }
-        [.(typeof(..<FromInstanceTask>d__7<T>))]
+        [.(typeof(..<FromInstanceTask>d__17<T>))]
         public static .<<.<object?[]?>>> FromInstanceTask<T>(.DataGeneratorMetadata dataGeneratorMetadata, <object, .<T>> invoke) { }
-        [.(typeof(..<FromInstanceValue>d__5))]
+        [.(typeof(..<FromInstanceValue>d__15))]
         public static .<<.<object?[]?>>> FromInstanceValue(.DataGeneratorMetadata dataGeneratorMetadata, <object, object?> invoke) { }
-        [.(typeof(..<FromInstanceValueTask>d__8<T>))]
+        [.(typeof(..<FromInstanceValueTask>d__18<T>))]
         public static .<<.<object?[]?>>> FromInstanceValueTask<T>(.DataGeneratorMetadata dataGeneratorMetadata, <object, .<T>> invoke) { }
-        [.(typeof(..<FromRuntimeValue>d__10))]
+        [.(typeof(..<FromRuntimeValue>d__20))]
         public static .<<.<object?[]?>>> FromRuntimeValue(.DataGeneratorMetadata dataGeneratorMetadata, <object?> invoke) { }
-        [.(typeof(..<FromTask>d__2<T>))]
         public static .<<.<object?[]?>>> FromTask<T>(<.<T>> invoke) { }
-        [.(typeof(..<FromValue>d__0))]
+        public static .<<.<object?[]?>>> FromTask<T>(.DataGeneratorMetadata dataGeneratorMetadata, <.<T>> invoke) { }
         public static .<<.<object?[]?>>> FromValue(<object?> invoke) { }
-        [.(typeof(..<FromValueTask>d__3<T?>?))]
+        public static .<<.<object?[]?>>> FromValue(.DataGeneratorMetadata dataGeneratorMetadata, <object?> invoke) { }
         public static .<<.<object?[]?>>> FromValueTask<T>(<.<T>> invoke) { }
+        public static .<<.<object?[]?>>> FromValueTask<T>(.DataGeneratorMetadata dataGeneratorMetadata, <.<T>> invoke) { }
     }
     public static class DataSourceHelpers
     {

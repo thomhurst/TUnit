@@ -23,6 +23,10 @@ public class InstanceMethodDataSourceMemberShapeTests
 
     public IEnumerable<Tuple<int>> OneElementReferenceTupleRows => [Tuple.Create(7)];
 
+    public IEnumerable<Tuple<string?>> OneElementReferenceTupleOfNullRows => [Tuple.Create<string?>(null)];
+
+    public static IEnumerable<Tuple<string?>> StaticOneElementReferenceTupleOfNullRows() => [Tuple.Create<string?>(null)];
+
     private IEnumerable<int> PrivateRows() => [65, 66];
 
     private IEnumerable<int> OverloadedRows() => [67, 68];
@@ -75,6 +79,22 @@ public class InstanceMethodDataSourceMemberShapeTests
     public async Task One_Element_Reference_Tuple_Single_Parameter(Tuple<int> value)
     {
         await Assert.That(value.Item1).IsEqualTo(7);
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(OneElementReferenceTupleOfNullRows))]
+    public async Task One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple(Tuple<string?>? value)
+    {
+        await Assert.That(value).IsNotNull();
+        await Assert.That(value!.Item1).IsNull();
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(StaticOneElementReferenceTupleOfNullRows))]
+    public async Task Static_One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple(Tuple<string?>? value)
+    {
+        await Assert.That(value).IsNotNull();
+        await Assert.That(value!.Item1).IsNull();
     }
 
     [Test]

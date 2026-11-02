@@ -18,7 +18,7 @@ internal class Tests7225 : TestsBase
             const string testClass = "global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceFieldTests";
             await Assert.That(source).Contains($"FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)(({testClass})instance).Rows ?? global::System.Array.Empty<object>())");
             await Assert.That(source).Contains($"FromInstanceEnumerable(dataGeneratorMetadata, static instance => (object?)(({testClass})instance).PropertyRows ?? global::System.Array.Empty<object>())");
-            await Assert.That(source).Contains($"FromEnumerable(static () => (object?){testClass}.StaticRows() ?? global::System.Array.Empty<object>())");
+            await Assert.That(source).Contains($"FromEnumerable(dataGeneratorMetadata, static () => (object?){testClass}.StaticRows() ?? global::System.Array.Empty<object>())");
             await Assert.That(source).DoesNotContain("new global::TUnit.Core.InstanceMethodDataSourceAttribute(\"Rows\"),");
         });
 

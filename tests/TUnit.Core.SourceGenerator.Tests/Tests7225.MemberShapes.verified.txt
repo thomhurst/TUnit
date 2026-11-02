@@ -63,6 +63,17 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             },
             new global::TUnit.Core.PropertyMetadata
             {
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests).GetProperty("OneElementReferenceTupleOfNullRows", typeof(global::System.Collections.Generic.IEnumerable<global::System.Tuple<string>>)),
+                Type = typeof(global::System.Collections.Generic.IEnumerable<global::System.Tuple<string>>),
+                Name = "OneElementReferenceTupleOfNullRows",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = o => ((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests)o).OneElementReferenceTupleOfNullRows,
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            },
+            new global::TUnit.Core.PropertyMetadata
+            {
                 ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests).GetProperty("NullRows", typeof(object)),
                 Type = typeof(object),
                 Name = "NullRows",
@@ -204,6 +215,46 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                     // Special handling for single reference tuple parameter
                     if (args.Length == 1 && args[0] is not null && args[0] is not global::System.Tuple<string>)
                     {
+                        return new global::System.Threading.Tasks.ValueTask(instance.One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple(new global::System.Tuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]))));
+                    }
+                    else
+                    {
+                        switch (args.Length)
+                        {
+                            case 1:
+                                {
+                                    return new global::System.Threading.Tasks.ValueTask(instance.One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<string>>(args[0])));
+                                }
+                            default:
+                                throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                        }
+                    }
+                }
+                case 7:
+                {
+                    // Special handling for single reference tuple parameter
+                    if (args.Length == 1 && args[0] is not null && args[0] is not global::System.Tuple<string>)
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Static_One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple(new global::System.Tuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]))));
+                    }
+                    else
+                    {
+                        switch (args.Length)
+                        {
+                            case 1:
+                                {
+                                    return new global::System.Threading.Tasks.ValueTask(instance.Static_One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<string>>(args[0])));
+                                }
+                            default:
+                                throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                        }
+                    }
+                }
+                case 8:
+                {
+                    // Special handling for single reference tuple parameter
+                    if (args.Length == 1 && args[0] is not null && args[0] is not global::System.Tuple<string>)
+                    {
                         return new global::System.Threading.Tasks.ValueTask(instance.One_Element_Reference_Tuple_Null_Argument_Stays_Null(new global::System.Tuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]))));
                     }
                     else
@@ -219,7 +270,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                         }
                     }
                 }
-                case 7:
+                case 9:
                 {
                     // Special handling for single reference tuple parameter
                     if (args.Length == 2)
@@ -243,7 +294,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                         }
                     }
                 }
-                case 8:
+                case 10:
                 {
                     switch (args.Length)
                     {
@@ -255,7 +306,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                case 9:
+                case 11:
                 {
                     switch (args.Length)
                     {
@@ -267,7 +318,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                case 10:
+                case 12:
                 {
                     switch (args.Length)
                     {
@@ -280,7 +331,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                case 11:
+                case 13:
                 {
                     switch (args.Length)
                     {
@@ -293,7 +344,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
-                case 12:
+                case 14:
                 {
                     switch (args.Length)
                     {
@@ -337,7 +388,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>[] Entries = __CreateEntries();
     private static global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>[] __CreateEntries()
     {
-        var entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>[13];
+        var entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>[15];
         __FillEntries0(entries);
         __FillEntries1(entries);
         return entries;
@@ -348,7 +399,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             methodName: "Object_Property",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Object_Property",
             filePath: "",
-            lineNumber: 38,
+            lineNumber: 42,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -372,7 +423,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             methodName: "Object_Method",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Object_Method",
             filePath: "",
-            lineNumber: 45,
+            lineNumber: 49,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -396,7 +447,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             methodName: "Tuple_Single_Parameter",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Tuple_Single_Parameter",
             filePath: "",
-            lineNumber: 52,
+            lineNumber: 56,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -420,7 +471,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             methodName: "Reference_Tuple_Single_Parameter",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Reference_Tuple_Single_Parameter",
             filePath: "",
-            lineNumber: 59,
+            lineNumber: 63,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -444,7 +495,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             methodName: "Static_Reference_Tuple_Single_Parameter",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Static_Reference_Tuple_Single_Parameter",
             filePath: "",
-            lineNumber: 66,
+            lineNumber: 70,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -468,7 +519,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             methodName: "One_Element_Reference_Tuple_Single_Parameter",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.One_Element_Reference_Tuple_Single_Parameter",
             filePath: "",
-            lineNumber: 73,
+            lineNumber: 77,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -489,10 +540,58 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             createAttributes: __attributes,
             attributeGroupIndex: 0);
         entries[6] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+            methodName: "One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple",
+            filePath: "",
+            lineNumber: 84,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("OneElementReferenceTupleOfNullRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceEnumerable(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests)instance).OneElementReferenceTupleOfNullRows ?? global::System.Array.Empty<object>()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests), "One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Tuple<string>), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<string>)), true)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 6,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[7] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+            methodName: "Static_One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Static_One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple",
+            filePath: "",
+            lineNumber: 92,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("StaticOneElementReferenceTupleOfNullRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => (object?)global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.StaticOneElementReferenceTupleOfNullRows() ?? global::System.Array.Empty<object>()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests), "Static_One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Tuple<string>), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<string>)), true)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 7,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[8] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
             methodName: "One_Element_Reference_Tuple_Null_Argument_Stays_Null",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.One_Element_Reference_Tuple_Null_Argument_Stays_Null",
             filePath: "",
-            lineNumber: 80,
+            lineNumber: 100,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -506,14 +605,14 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 6,
+            methodIndex: 8,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[7] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+        entries[9] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
             methodName: "Optional_Reference_Tuple_Gets_Its_Default",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Optional_Reference_Tuple_Gets_Its_Default",
             filePath: "",
-            lineNumber: 87,
+            lineNumber: 107,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -527,14 +626,17 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 7,
+            methodIndex: 9,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[8] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+    }
+    private static void __FillEntries1(global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>[] entries)
+    {
+        entries[10] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
             methodName: "Private_Method",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Private_Method",
             filePath: "",
-            lineNumber: 94,
+            lineNumber: 114,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -551,14 +653,14 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 8,
+            methodIndex: 10,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[9] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+        entries[11] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
             methodName: "Private_Method_With_Generic_Overload",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Private_Method_With_Generic_Overload",
             filePath: "",
-            lineNumber: 101,
+            lineNumber: 121,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -575,17 +677,14 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 9,
+            methodIndex: 11,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-    }
-    private static void __FillEntries1(global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>[] entries)
-    {
-        entries[10] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+        entries[12] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
             methodName: "Null_Source_With_SkipIfEmpty_Is_Skipped",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Null_Source_With_SkipIfEmpty_Is_Skipped",
             filePath: "",
-            lineNumber: 108,
+            lineNumber: 128,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -602,14 +701,14 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 10,
+            methodIndex: 12,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[11] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+        entries[13] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
             methodName: "Null_Async_Source_With_SkipIfEmpty_Is_Skipped",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Null_Async_Source_With_SkipIfEmpty_Is_Skipped",
             filePath: "",
-            lineNumber: 115,
+            lineNumber: 135,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -626,14 +725,14 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 11,
+            methodIndex: 13,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[12] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+        entries[14] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
             methodName: "Null_Task_Source_With_SkipIfEmpty_Is_Skipped",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Null_Task_Source_With_SkipIfEmpty_Is_Skipped",
             filePath: "",
-            lineNumber: 122,
+            lineNumber: 142,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -650,7 +749,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 12,
+            methodIndex: 14,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
     }

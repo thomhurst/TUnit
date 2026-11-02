@@ -3071,7 +3071,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     ? $"new {fullyQualifiedType}()"
                     : $"(({receiverType})new {fullyQualifiedType}())";
         var lambdaHeader = usesTestClassInstance ? "static instance =>" : "static () =>";
-        var metadataArgument = usesTestClassInstance ? "dataGeneratorMetadata, " : "";
+        // The instance helpers take the metadata anyway. [InstanceMethodDataSource] read its member by reflection before
+        // #7225, and that path keeps a tuple row whole when the test takes a single tuple, so its static helpers get the
+        // metadata too: without the parameter types, a one-element tuple holding null would reach the test as null.
+        var metadataArgument = usesTestClassInstance || decidesRowsFromRuntimeValue ? "dataGeneratorMetadata, " : "";
 
         // A declared type such as object does not say whether the value is one row or many. Reflection mode, and the
         // attribute's reflection fallback that read every field and every private or protected property before the

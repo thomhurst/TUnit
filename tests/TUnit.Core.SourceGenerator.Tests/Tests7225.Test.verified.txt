@@ -166,7 +166,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceField
 {
     new global::TUnit.Core.InstanceMethodDataSourceAttribute("StaticRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => (object?)global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceFieldTests.StaticRows() ?? global::System.Array.Empty<object>()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => (object?)global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceFieldTests.StaticRows() ?? global::System.Array.Empty<object>()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
