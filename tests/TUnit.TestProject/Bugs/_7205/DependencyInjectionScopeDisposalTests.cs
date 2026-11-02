@@ -1,6 +1,7 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.TestProject.Attributes;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject.Bugs._7205;
 
@@ -86,6 +87,140 @@ public sealed class SkippedIfEmptyDependencyInjectionAttribute() : ProbeDependen
 public sealed class DependencySkippedDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(DependencySkippedScopeTests));
 
 public sealed class CircularDependencyDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(CircularDependencyScopeTests));
+
+// A scope that is not disposable, whose Create constructs each service itself: nothing but the object
+// tracker can dispose those services.
+public sealed class UnownedService : IDisposable
+{
+    public UnownedService()
+    {
+        Created.Add(this);
+    }
+
+    public static ConcurrentBag<UnownedService> Created { get; } = [];
+
+    private int _disposeCount;
+
+    public int DisposeCount => _disposeCount;
+
+    public void Dispose() => Interlocked.Increment(ref _disposeCount);
+}
+
+public sealed class NonDisposableScopeDependencyInjectionAttribute : DependencyInjectionDataSourceAttribute<NonDisposableScopeDependencyInjectionAttribute.Scope>
+{
+    public sealed class Scope;
+
+    public override Scope CreateScope(DataGeneratorMetadata dataGeneratorMetadata) => new();
+
+    public override object? Create(Scope scope, Type type) => new UnownedService();
+}
+
+// A scope that resolves a service holding a scope-owned dependency in an IAsyncInitializer property. The
+// object tracker finds the dependency beneath the service, but only the scope may dispose it.
+public sealed class NestedProbeScope : IDisposable
+{
+    public NestedProbeScope()
+    {
+        Created.Add(this);
+    }
+
+    public static ConcurrentBag<NestedProbeScope> Created { get; } = [];
+
+    public List<NestedProbeDependency> Dependencies { get; } = [];
+
+    public NestedProbeService Resolve()
+    {
+        var dependency = new NestedProbeDependency();
+        Dependencies.Add(dependency);
+        return new NestedProbeService(dependency);
+    }
+
+    public void Dispose()
+    {
+        foreach (var dependency in Dependencies)
+        {
+            dependency.Dispose();
+        }
+    }
+}
+
+// Not disposable itself, so nothing but the scope owns what it holds. TUnit injects Fixture, so the
+// object tracker owns and disposes it, even though it sits beneath a scope-owned service.
+public sealed class NestedProbeService(NestedProbeDependency dependency)
+{
+    public NestedProbeDependency Dependency { get; } = dependency;
+
+    [ClassDataSource<InjectedProbeFixture>(Shared = SharedType.None)]
+    public InjectedProbeFixture Fixture { get; set; } = null!;
+}
+
+public sealed class InjectedProbeFixture : IAsyncInitializer, IDisposable
+{
+    private int _disposeCount;
+
+    public InjectedProbeFixture()
+    {
+        Created.Add(this);
+    }
+
+    public static ConcurrentBag<InjectedProbeFixture> Created { get; } = [];
+
+    public bool IsInitialized { get; private set; }
+
+    public int DisposeCount => _disposeCount;
+
+    public Task InitializeAsync()
+    {
+        IsInitialized = true;
+        return Task.CompletedTask;
+    }
+
+    public void Dispose() => Interlocked.Increment(ref _disposeCount);
+}
+
+public sealed class NestedProbeDependency : IAsyncInitializer, IDisposable
+{
+    private int _disposeCount;
+    public NestedProbeIntermediate Child { get; } = new();
+    public bool IsInitialized { get; private set; }
+    public int DisposeCount => _disposeCount;
+    public Task InitializeAsync()
+    {
+        IsInitialized = true;
+        return Task.CompletedTask;
+    }
+    public void Dispose()
+    {
+        Interlocked.Increment(ref _disposeCount);
+        Child.Leaf.Dispose();
+    }
+}
+
+// Ownership must survive a non-disposable initializer between two disposable dependencies.
+public sealed class NestedProbeIntermediate : IAsyncInitializer
+{
+    public NestedProbeLeaf Leaf { get; } = new();
+    public Task InitializeAsync() => Task.CompletedTask;
+}
+
+public sealed class NestedProbeLeaf : IAsyncInitializer, IDisposable
+{
+    public bool IsInitialized { get; private set; }
+    public int DisposeCount { get; private set; }
+    public Task InitializeAsync()
+    {
+        IsInitialized = true;
+        return Task.CompletedTask;
+    }
+    public void Dispose() => DisposeCount++;
+}
+
+public sealed class NestedDependencyInjectionAttribute : DependencyInjectionDataSourceAttribute<NestedProbeScope>
+{
+    public override NestedProbeScope CreateScope(DataGeneratorMetadata dataGeneratorMetadata) => new();
+
+    public override object? Create(NestedProbeScope scope, Type type) => scope.Resolve();
+}
 
 [EngineTest(ExpectedResult.Pass)]
 [ClassRowDependencyInjection]
@@ -206,6 +341,31 @@ public class CircularDependencyScopeTests
     public void Second(ProbeService service) => throw new InvalidOperationException($"Should have failed its circular dependency, but ran with {service}");
 }
 
+[EngineTest(ExpectedResult.Pass)]
+[NonDisposableScopeDependencyInjection]
+public class NonDisposableScopeTests(UnownedService service)
+{
+    [Test]
+    public async Task Run() => await Assert.That(service.DisposeCount).IsEqualTo(0);
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[NestedDependencyInjection]
+public class NestedScopeDependencyTests(NestedProbeService service)
+{
+    [Test]
+    public async Task Run()
+    {
+        // The dependency is still found beneath the service and initialized.
+        await Assert.That(service.Dependency.IsInitialized).IsTrue();
+        await Assert.That(service.Dependency.Child.Leaf.IsInitialized).IsTrue();
+        await Assert.That(service.Dependency.Child.Leaf.DisposeCount).IsEqualTo(0);
+        await Assert.That(service.Dependency.DisposeCount).IsEqualTo(0);
+        await Assert.That(service.Fixture.IsInitialized).IsTrue();
+        await Assert.That(service.Fixture.DisposeCount).IsEqualTo(0);
+    }
+}
+
 // Not tagged [EngineTest]: it depends on DependencySkippedScopeTests, whose Fails test fails by design,
 // and asserts the scopes of CircularDependencyScopeTests, so it only holds when the whole _7205 folder
 // runs together. Issue7205Tests runs it that way; the [EngineTest=Pass] sweep must not pull it in.
@@ -220,6 +380,8 @@ public class DependencyInjectionScopeDisposalObserverTests
     [DependsOn(typeof(SkippedScopeTests), ProceedOnFailure = true)]
     [DependsOn(typeof(SkippedIfEmptyScopeTests), ProceedOnFailure = true)]
     [DependsOn(typeof(DependencySkippedScopeTests), ProceedOnFailure = true)]
+    [DependsOn(typeof(NonDisposableScopeTests))]
+    [DependsOn(typeof(NestedScopeDependencyTests))]
     public async Task Every_Scope_Is_Disposed_When_Its_Test_Ends()
     {
         // One scope per test: two tests, then two method rows run twice each.
@@ -245,6 +407,15 @@ public class DependencyInjectionScopeDisposalObserverTests
         // put this test in their cycle, but the scheduler removes them and disposes their scopes before any
         // test runs.
         await AssertScopes(nameof(CircularDependencyScopeTests), 2);
+
+        await Assert.That(UnownedService.Created.Count).IsEqualTo(1);
+        await Assert.That(UnownedService.Created.Count(x => x.DisposeCount == 1)).IsEqualTo(1);
+        var dependencies = NestedProbeScope.Created.SelectMany(x => x.Dependencies).ToArray();
+        await Assert.That(dependencies.Length).IsEqualTo(1);
+        await Assert.That(dependencies.Count(x => x.DisposeCount == 1)).IsEqualTo(1);
+        await Assert.That(dependencies.Count(x => x.Child.Leaf.DisposeCount == 1)).IsEqualTo(1);
+        await Assert.That(InjectedProbeFixture.Created.Count).IsEqualTo(1);
+        await Assert.That(InjectedProbeFixture.Created.Count(x => x.DisposeCount == 1)).IsEqualTo(1);
     }
 
     private static async Task AssertScopes(string owner, int expectedCount, int? expectedDisposed = null)
@@ -256,5 +427,8 @@ public class DependencyInjectionScopeDisposalObserverTests
         // Disposed once each: a test raises its OnDispose once, not once per attempt or per raising path.
         await Assert.That(scopes.Count(x => x.DisposeCount == 1)).IsEqualTo(expectedDisposed ?? expectedCount);
         await Assert.That(scopes.Count(x => x.DisposeCount > 1)).IsEqualTo(0);
+        var services = scopes.SelectMany(x => x.Services).ToArray();
+        await Assert.That(services.Count(x => x.DisposeCount == 1)).IsEqualTo(expectedDisposed ?? expectedCount);
+        await Assert.That(services.Count(x => x.DisposeCount > 1)).IsEqualTo(0);
     }
 }
