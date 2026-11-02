@@ -30,7 +30,9 @@
     <Compile Remove="Helpers\GenericTypeInference.cs" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Shared with TUnit.Engine so both modes report the same [GenerateGenericTest] arity message (#7222) -->
+    <!-- Shared with TUnit.Engine so both modes report the same [GenerateGenericTest] arity message (#7222).
+         The Roslyn44/47/414 variant projects do not compile this csproj's items, so eng/Roslyn.props adds the same
+         link for them; no project imports both, so the file is compiled once per project. -->
     <Compile Include="..\TUnit.Core\Helpers\GenerateGenericTestArityMessages.cs" Link="Shared\GenerateGenericTestArityMessages.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1494,7 +1494,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // declared type breaks the method's constraints is not reported, as on a non-generic class
                 // (reportDataSourceConstraintViolations) and as reflection mode skips it on each concrete class.
                 bool ReportsMethodSourceViolation(AttributeData? source)
-                    => reportDataSourceConstraintViolations || source is null || source.AttributeClass?.Name == "ArgumentsAttribute";
+                    => reportDataSourceConstraintViolations || source is null
+                        || source.GetFullyQualifiedAttributeTypeName() == "global::TUnit.Core.ArgumentsAttribute";
 
                 foreach (var classGenericTest in classGenericTestAttrs)
                 {
