@@ -22,6 +22,7 @@ namespace TUnit.Core.SourceGenerator.Generators;
 public sealed class TestMetadataGenerator : IIncrementalGenerator
 {
     private const string GeneratedNamespace = "TUnit.Generated";
+    private const string InstanceMethodDataSourceAttributeName = "global::TUnit.Core.InstanceMethodDataSourceAttribute";
 
     private static readonly DiagnosticDescriptor GenerationErrorDescriptor = new(
         "TUNIT0999",
@@ -2547,7 +2548,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // InstanceMethodDataSourceAttribute derives from MethodDataSourceAttribute and needs the
         // same generated factory; without one, Native AOT falls back to a reflection lookup that
         // finds no trimmed field or property metadata (#7225).
-        if (attrName is "global::TUnit.Core.MethodDataSourceAttribute" or "global::TUnit.Core.InstanceMethodDataSourceAttribute")
+        if (attrName is "global::TUnit.Core.MethodDataSourceAttribute" or InstanceMethodDataSourceAttributeName)
         {
             GenerateMethodDataSourceAttribute(writer, attr, typeSymbol, compilationContext.Compilation);
         }
@@ -2891,7 +2892,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (dataSourceMember == null
             || (dataSourceMethod == null && dataSourceProperty == null && dataSourceField == null)
-            || (dataSourceMethod == null && !CanReadDataSourceMember(dataSourceMember, compilation)))
+            || !CanReadDataSourceMember(dataSourceMember, compilation))
         {
             // Still generate the attribute even if method not found - it will fail at runtime with proper error
             // Use CodeGenerationHelpers to properly handle any generics on the attribute
@@ -2921,9 +2922,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Keep a declared [InstanceMethodDataSource] as one even when its member is static, so the
         // engine still sees IAccessesInstanceData as it does in reflection mode.
-        var isDeclaredInstanceAttribute = attr.AttributeClass?.GloballyQualifiedNonGeneric() == "global::TUnit.Core.InstanceMethodDataSourceAttribute";
+        var isDeclaredInstanceAttribute = attr.AttributeClass?.GloballyQualifiedNonGeneric() == InstanceMethodDataSourceAttributeName;
         var attrTypeName = usesTestClassInstance || isDeclaredInstanceAttribute
-            ? "global::TUnit.Core.InstanceMethodDataSourceAttribute"
+            ? InstanceMethodDataSourceAttributeName
             : "global::TUnit.Core.MethodDataSourceAttribute";
 
         if (attr.ConstructorArguments is
@@ -2983,7 +2984,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // a per-data-source compiler-generated state machine class (#6227). Only the per-test-unique
         // invocation is emitted, as a static lambda.
         writer.Append("Factory = static dataGeneratorMetadata => ");
-        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null, compilation);
+        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null, compilation, isDeclaredInstanceAttribute);
         writer.AppendLine(",");
 
         writer.Unindent();
@@ -2996,7 +2997,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// member's declared return type (mirroring the previous inline-iterator branch order)
     /// and whether the member is static or instance-based.
     /// </summary>
-    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, bool usesTestClassInstance, TypedConstant? arguments, Compilation compilation)
+    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, bool usesTestClassInstance, TypedConstant? arguments, Compilation compilation, bool decidesRowsFromRuntimeValue)
     {
         var dataSourceMethod = dataSourceMember as IMethodSymbol;
 
@@ -3075,10 +3076,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // A declared type such as object does not say whether the value is one row or many. Reflection mode, and the
         // attribute's reflection fallback that read every field and every private or protected property before the
         // generator could, decide from the runtime value, so these factories hand the value to that same logic
-        // instead of FromValue. Accessible properties and methods keep FromValue, as their generated code always has
-        // (https://github.com/thomhurst/TUnit/issues/7178).
-        var isAccessibleMember = dataSourceMethod != null || IsAccessibleDataSourceMember(dataSourceMember, compilation);
-        if (kind == "Value" && (dataSourceMember is IFieldSymbol || !isAccessibleMember))
+        // instead of FromValue. Accessible properties and methods of [MethodDataSource] keep FromValue, as their
+        // generated code always has (https://github.com/thomhurst/TUnit/issues/7178). [InstanceMethodDataSource] had no
+        // generated factory before #7225, so every member it names keeps the runtime-value behavior it always had.
+        var isAccessibleMember = IsAccessibleDataSourceMember(dataSourceMember, compilation);
+        if (kind == "Value" && (decidesRowsFromRuntimeValue || dataSourceMember is IFieldSymbol || !isAccessibleMember))
         {
             helper = isStatic || !usesTestClassInstance
                 ? "global::TUnit.Core.Helpers.DataSourceFactories.FromRuntimeValue"
@@ -3088,17 +3090,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (!isAccessibleMember)
         {
-            // The generated class cannot name a private or protected field or property, so the factory reads it by
-            // reflection. GetField/GetProperty on a typeof() with a constant name and binding flags is understood
+            // The generated class cannot name a private or protected member, so the factory reads it by
+            // reflection. GetField/GetProperty/GetMethod on a typeof() with a constant name and binding flags is understood
             // by the trimmer and the AOT compiler, which keep that member, so this works under native AOT
             // without any trimming warning. The attribute's own reflection fallback finds the member from the
             // test class type at run time, which neither of them can see.
-            var lookup = dataSourceMember is IFieldSymbol ? "GetField" : "GetProperty";
             var bindingFlags = (isStatic ? "global::System.Reflection.BindingFlags.Static" : "global::System.Reflection.BindingFlags.Instance")
                 + " | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly";
             var target = isStatic ? "null" : usesTestClassInstance ? "instance" : $"new {fullyQualifiedType}()";
+            // CanReadDataSourceMember only lets a parameterless, non-generic method through, so it is looked up with no
+            // parameter types, which also picks it out from any overloads
+            var read = dataSourceMember switch
+            {
+                IFieldSymbol => $"GetField(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target})",
+                IPropertySymbol => $"GetProperty(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target})",
+                _ => $"GetMethod(\"{dataSourceMember.Name}\", {bindingFlags}, null, global::System.Type.EmptyTypes, null)!.Invoke({target}, null)"
+            };
             var cast = kind is "Value" or "Enumerable" ? "" : $"({returnType.GloballyQualified()})";
-            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {cast}typeof({dataSourceMember.ContainingType.GloballyQualified()}).{lookup}(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target}))");
+            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {cast}typeof({dataSourceMember.ContainingType.GloballyQualified()}).{read})");
             return;
         }
 
@@ -3178,7 +3187,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Whether the generated class can read the data source field or property directly: the member and its getter
+    /// Whether the generated class can read the data source member directly: the member, and a property's getter,
     /// are accessible from the test assembly, so not private or protected.
     /// </summary>
     private static bool IsAccessibleDataSourceMember(ISymbol member, Compilation compilation)
@@ -3189,10 +3198,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Whether a generated factory can read the data source field or property, directly or, for a private or
-    /// protected member, by reflection on its declaring type. That needs a declaring type that the generated class
-    /// can name without type parameters, a getter for a property, and a member type it can name when the factory
-    /// casts the value. Otherwise the attribute keeps its reflection fallback.
+    /// Whether a generated factory can read the data source member, directly or, for a private or protected member,
+    /// by reflection on its declaring type. That needs a declaring type that the generated class can name without
+    /// type parameters, a getter for a property, a method without parameters or type parameters, and a member type it
+    /// can name when the factory casts the value. Otherwise the attribute keeps its reflection fallback.
     /// </summary>
     private static bool CanReadDataSourceMember(ISymbol member, Compilation compilation)
     {
@@ -3206,8 +3215,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return true;
         }
 
+        if (member is IMethodSymbol { Parameters.Length: > 0 } or IMethodSymbol { IsGenericMethod: true })
+        {
+            return false;
+        }
+
         // EmitDataSourceFactoryInvocation casts the value for the async helpers, which take a typed delegate
-        var memberType = member is IPropertySymbol property ? property.Type : ((IFieldSymbol)member).Type;
+        var memberType = member switch
+        {
+            IPropertySymbol property => property.Type,
+            IMethodSymbol method => method.ReturnType,
+            _ => ((IFieldSymbol)member).Type
+        };
         var castsValue = IsAsyncEnumerable(memberType) || IsValueTask(memberType) || IsTask(memberType);
         return compilation.IsSymbolAccessibleWithin(member.ContainingType, compilation.Assembly)
             && !CodeGenerationHelpers.ContainsTypeParameter(member.ContainingType)
