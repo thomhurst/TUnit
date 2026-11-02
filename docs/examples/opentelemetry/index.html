@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.a95f87d4.css">
-<script src="/assets/js/runtime~main.81f18134.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.481c20c4.js" defer="defer"></script>
 <script src="/assets/js/main.37860cca.js" defer="defer"></script>
 </head>
 <body>
@@ -66,6 +66,11 @@ TUnit tags such as <code>tunit.test.id</code>.</p>
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">TUnit</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">test case (root span per test invocation)</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  └── test body</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">        └── HttpClient / ASP.NET Core / EF Core / custom spans</span><br></div></code></pre></div></div>
 <p>Optional lifecycle spans are emitted separately:</p>
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">TUnit.Lifecycle</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">test session</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  ├── test discovery</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">  └── test assembly</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">        └── test suite (one per test class)</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">              └── shared setup / teardown / hooks</span><br></div></code></pre></div></div>
+<p>Shared data-source objects (<code>SharedType.PerClass</code>, <code>PerAssembly</code>, <code>PerTestSession</code>, or <code>Keyed</code>) get an
+<code>initialize &lt;Type&gt;</code> span when they are initialized and a <code>dispose &lt;Type&gt;</code> span when they are disposed.
+Per-class objects sit under their <code>test suite</code> span; the others sit under the <code>test assembly</code> span.
+The <code>tunit.trace.scope</code> tag gives the object&#x27;s lifetime, so you can see how long a fixture takes to
+tear down as well as to start.</p>
 <p>Each <code>test case</code> starts its own trace on purpose, so every test invocation gets a unique W3C
 TraceId. That keeps downstream service spans and logs correlated to a single test in Seq, Jaeger,
 Aspire, and similar backends. Parent-child relationships stay within the per-test trace; runner
