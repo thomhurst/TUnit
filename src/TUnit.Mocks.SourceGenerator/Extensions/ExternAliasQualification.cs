@@ -120,7 +120,9 @@ internal static class ExternAliasQualification
             }
 
             byAssembly ??= new Dictionary<IAssemblySymbol, string>(SymbolEqualityComparer.Default);
-            byAssembly[assembly] = aliases[0];
+            // Any one of the reference's aliases reaches the assembly. Store its C# spelling
+            // once so both qualified type names and extern directives escape reserved words.
+            byAssembly[assembly] = IdentifierEscaping.EscapeIdentifier(aliases[0]);
         }
 
         if (byAssembly is null)

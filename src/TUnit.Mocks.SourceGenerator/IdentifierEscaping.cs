@@ -53,7 +53,7 @@ internal static class IdentifierEscaping
             return name;
         }
 
-        for (var i = 0; i < separator; i++)
+        for (var i = name[0] == '@' ? 1 : 0; i < separator; i++)
         {
             if (!char.IsLetterOrDigit(name[i]) && name[i] != '_')
             {

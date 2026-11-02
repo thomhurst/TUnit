@@ -75,6 +75,20 @@ public class Issue7300Tests : SnapshotTestBase
         => VerifyGeneratorOutput(Source, AliasedLibrary());
 
     [Test]
+    public async Task Keyword_Alias_Produces_Equivalent_Generated_Code()
+    {
+        var expected = RunGenerator(Source, AliasedLibrary());
+        var actual = RunGenerator(Source.Replace("LibAlias", "@class"),
+            [CreateExternalAssemblyReference(LibrarySource, "Lib").WithAliases(["class"])])
+            .Select(source => source.Replace("@class", "LibAlias"))
+            .ToArray();
+
+        // Includes declarations, qualified type names, and generated names: escaping the alias
+        // must not change the mock's identity or its closed-generic factory registrations.
+        await Assert.That(actual).IsEquivalentTo(expected);
+    }
+
+    [Test]
     public async Task Extern_Aliased_Types_Resolve_In_Generated_Code()
     {
         var errors = GetGeneratedCompilationErrors(Source, AliasedLibrary());
