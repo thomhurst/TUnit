@@ -59,6 +59,11 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
     /// Creates the scope that resolves one test's arguments. A disposable scope is disposed when the
     /// test ends, after its last attempt.
     /// </summary>
+    /// <remarks>
+    /// A scope that implements <see cref="IDisposable"/> or <see cref="IAsyncDisposable"/> owns the objects
+    /// <see cref="Create"/> returns: TUnit disposes the scope and does not dispose those objects itself, so
+    /// the scope's disposal must dispose them.
+    /// </remarks>
     public abstract TScope CreateScope(DataGeneratorMetadata dataGeneratorMetadata);
 
     /// <summary>

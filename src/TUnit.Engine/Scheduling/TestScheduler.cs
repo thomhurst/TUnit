@@ -101,7 +101,22 @@ internal sealed class TestScheduler : ITestScheduler
         using var starvationMonitor = ThreadPoolStarvationMonitor.Start(_maxParallelismLimiter.MaxParallelism, _logger);
 
         // Initialize static properties before tests run
-        await _staticPropertyHandler.InitializeStaticPropertiesAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await _staticPropertyHandler.InitializeStaticPropertiesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            // The session ends here, before any test reaches TestCoordinator or the cleanup below, so
+            // release what each test's data sources hold (a dependency injection scope, for example) now.
+            // The object tracker does not dispose the services such a scope owns (#7205).
+            foreach (var test in executableTests)
+            {
+                await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
+            }
+
+            throw;
+        }
 
         // Track static properties for disposal at session end
         _staticPropertyHandler.TrackStaticProperties();

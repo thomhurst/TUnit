@@ -60,11 +60,25 @@ internal static class TestOnDisposeRaiser
         // Detach first so the callbacks run once even if this is reached again.
         events.OnDispose = null;
 
-        foreach (var invocation in onDispose.InvocationList)
+        await RaiseDetachedAsync(context, onDispose.InvocationList, exceptions).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Raises OnDispose callbacks that the caller already detached from their events, so no test raises
+    /// them again: those of a builder context that no test owns, or those that a row which no test
+    /// takes subscribed. No test exists, so the callbacks receive <paramref name="sender"/> and no test
+    /// context. Handler exceptions are added to <paramref name="exceptions"/>.
+    /// </summary>
+    public static async ValueTask RaiseDetachedAsync(
+        object sender,
+        IReadOnlyList<AsyncEvent<TestContext>.Invocation> invocations,
+        List<Exception> exceptions)
+    {
+        foreach (var invocation in invocations)
         {
             try
             {
-                await invocation.InvokeAsync(context, null!).ConfigureAwait(false);
+                await invocation.InvokeAsync(sender, null!).ConfigureAwait(false);
             }
             catch (Exception disposeEx)
             {

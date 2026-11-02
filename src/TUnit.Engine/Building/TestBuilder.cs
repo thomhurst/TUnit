@@ -310,6 +310,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                                     var (classDataUnwrapped, classRowMetadata) = await unclaimedClassRow.TakeOrFetchAsync(classDataFactory, contextAccessor.Current);
                                     classData = classDataUnwrapped;
+                                    var classRowDisposeCallbacks = UnclaimedClassRow.SnapshotClassRowDisposeCallbacks(metadata, contextAccessor.Current);
 
                                     object?[] methodRow;
                                     try
@@ -354,8 +355,9 @@ internal sealed class TestBuilder : ITestBuilder
                                         {
                                             // Skip this data source as it's not compatible with the expected types.
                                             // No test holds the class row's objects, so the next test takes them,
-                                            // with the events subscribed while this row was fetched.
-                                            unclaimedClassRow.Return(classData, classRowMetadata, contextAccessor.Current.EventsIfCreated);
+                                            // with the events subscribed while the class row was fetched. No test
+                                            // takes the method row, so its cleanup runs now.
+                                            await unclaimedClassRow.ReturnWithoutMethodRowAsync(classData, classRowMetadata, contextAccessor.Current, classRowDisposeCallbacks);
                                             continue;
                                         }
                                     }
@@ -578,6 +580,7 @@ internal sealed class TestBuilder : ITestBuilder
                     finally
                     {
                         await DisposeInstanceForMethodDataSourcesAsync(instanceForMethodDataSources);
+                        await unclaimedClassRow.ReleaseUnclaimedAsync(testBuilderContext);
                     }
                 }
 
@@ -1159,6 +1162,65 @@ internal sealed class TestBuilder : ITestBuilder
             _data = data;
             _metadata = metadata;
             _events = events;
+        }
+
+        /// <summary>
+        /// The OnDispose callbacks that <paramref name="builderContext"/> holds once the class row was
+        /// taken or fetched against it, before the method row is fetched. Taken only for a generic method's
+        /// concrete instantiation, the one case in which a fetched method row can be discarded.
+        /// </summary>
+        public static AsyncEvent<TestContext>.Invocation[]? SnapshotClassRowDisposeCallbacks(TestMetadata metadata, TestBuilderContext builderContext)
+            => metadata.GenericMethodTypeArguments is { Length: > 0 }
+                && builderContext.EventsIfCreated?.OnDispose?.InvocationList is { Count: > 0 } callbacks
+                    ? [.. callbacks]
+                    : null;
+
+        /// <summary>
+        /// Hands back a class row whose method row is discarded because it does not fit the generic
+        /// method's type arguments, so the next test takes the class row. The method row's OnDispose
+        /// callbacks (those not in <paramref name="classRowDisposeCallbacks"/>) are raised now, because no
+        /// test takes that row; only the class row's callbacks travel on with its objects.
+        /// </summary>
+        public async ValueTask ReturnWithoutMethodRowAsync(
+            object?[] data,
+            TestDataRowMetadata? metadata,
+            TestBuilderContext builderContext,
+            AsyncEvent<TestContext>.Invocation[]? classRowDisposeCallbacks)
+        {
+            var events = builderContext.EventsIfCreated;
+            Return(data, metadata, events);
+
+            if (events?.OnDispose?.DetachAllExcept(classRowDisposeCallbacks) is { } methodRowCallbacks)
+            {
+                await RaiseAsync(builderContext, methodRowCallbacks).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Raises the OnDispose callbacks of a class row that no test took or tracked, once its method
+        /// rows are all read: for example a row fetched again for a method row that was then discarded,
+        /// or a row whose method data sources yielded nothing. Otherwise nothing would ever release them.
+        /// </summary>
+        public async ValueTask ReleaseUnclaimedAsync(TestBuilderContext sender)
+        {
+            if (TakeEvents() is not { OnDispose: { } onDispose } events)
+            {
+                return;
+            }
+
+            events.OnDispose = null;
+            await RaiseAsync(sender, onDispose.InvocationList).ConfigureAwait(false);
+        }
+
+        private static async ValueTask RaiseAsync(TestBuilderContext sender, IReadOnlyList<AsyncEvent<TestContext>.Invocation> callbacks)
+        {
+            var exceptions = new List<Exception>();
+            await TestOnDisposeRaiser.RaiseDetachedAsync(sender, callbacks, exceptions).ConfigureAwait(false);
+
+            if (exceptions.Count > 0)
+            {
+                throw new AggregateException(exceptions);
+            }
         }
 
         /// <summary>
@@ -2346,6 +2408,7 @@ internal sealed class TestBuilder : ITestBuilder
                 finally
                 {
                     await DisposeInstanceForMethodDataSourcesAsync(instanceForMethodDataSources);
+                    await unclaimedClassRow.ReleaseUnclaimedAsync(contextAccessor.Current);
                 }
             }
         }
@@ -2497,6 +2560,7 @@ internal sealed class TestBuilder : ITestBuilder
         try
         {
             (classData, var classRowMetadata) = await unclaimedClassRow.TakeOrFetchAsync(classDataFactory, iterationContext);
+            var classRowDisposeCallbacks = UnclaimedClassRow.SnapshotClassRowDisposeCallbacks(metadata, iterationContext);
             (methodData, var methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
             // Extract and merge metadata from data source attributes and TestDataRow wrappers
@@ -2514,8 +2578,9 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 if (!IsDataCompatibleWithExpectedTypes(metadata, methodData))
                 {
-                    // Skip incompatible data. No test holds the class row's objects, so the next test takes them.
-                    unclaimedClassRow.Return(classData, classRowMetadata, iterationContext.EventsIfCreated);
+                    // Skip incompatible data. No test holds the class row's objects, so the next test takes
+                    // them, with the class row's events; the discarded method row's cleanup runs now.
+                    await unclaimedClassRow.ReturnWithoutMethodRowAsync(classData, classRowMetadata, iterationContext, classRowDisposeCallbacks);
                     return null;
                 }
             }

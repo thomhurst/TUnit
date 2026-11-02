@@ -180,6 +180,34 @@ public class AsyncEvent<TEventArgs>
         return e;
     }
 
+    /// <summary>
+    /// Removes every handler that is not in <paramref name="kept"/> and returns the removed handlers in
+    /// invocation order, or <see langword="null"/> when none was removed.
+    /// </summary>
+    internal List<Invocation>? DetachAllExcept(IReadOnlyCollection<Invocation>? kept)
+    {
+        if (_handlers is null)
+        {
+            return null;
+        }
+
+        List<Invocation>? detached = null;
+        foreach (var handler in _handlers)
+        {
+            if (kept is null || !kept.Contains(handler))
+            {
+                (detached ??= []).Add(handler);
+            }
+        }
+
+        if (detached is not null)
+        {
+            _handlers.RemoveAll(detached.Contains);
+        }
+
+        return detached;
+    }
+
     private int FindInsertionIndex(int order)
     {
         int left = 0, right = (_handlers ??= []).Count;
