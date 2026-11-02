@@ -104,11 +104,16 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    public async Task Tuple_Rows_Split_By_The_Test_Constructor_Parameters()
+    [Arguments("OwnClassTupleMethodDataSourceWithTestConstructor")]
+    [Arguments("OwnClassReferenceTupleMethodDataSourceWithGenerateGenericTest")]
+    [Arguments("OwnClassMethodDataSourceWithTestConstructorAfterObjectConstructor")]
+    public async Task Rows_Reach_The_Test_Constructor_Parameters(string className)
     {
-        // The class parameter metadata comes from the [TestConstructor], so the label column reaches it in both modes
+        // The class parameter metadata comes from the [TestConstructor] and resolves its ParameterInfo there, and a
+        // System.Tuple row spreads over the constructor like a value tuple, so each class runs one passing test in
+        // both modes
         await RunTestsWithFilter(
-            "/*/TUnit.TestProject.Bugs._7208/OwnClassTupleMethodDataSourceWithTestConstructor/*",
+            $"/*/TUnit.TestProject.Bugs._7208/{className}/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
@@ -142,8 +147,8 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7208/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe(reflection ? "Failed" : "Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 41 : 37),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 40 : 37),
+                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 43 : 39),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 42 : 39),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(reflection ? 1 : 0),
                 result => result.Results
                     .Where(x => x.Outcome == "Failed")

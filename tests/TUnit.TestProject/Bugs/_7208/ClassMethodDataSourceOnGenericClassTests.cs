@@ -470,3 +470,50 @@ public class OwnClassOverloadedMethodDataSourcesWithArguments<T>(T value)
     }
 }
 #pragma warning restore TUnit0001
+
+// A System.Tuple row spreads over the constructor like a value tuple, as the runtime unwraps it through ITuple, so it
+// infers T = int rather than T = Tuple<int, string> (Codex review of #7336).
+// TUnit0001 does not spread System.Tuple rows (#7374).
+#pragma warning disable TUnit0001
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassReferenceTupleMethodDataSourceWithGenerateGenericTest<T>(T value, string label)
+{
+    public static IEnumerable<Tuple<int, string>> Rows() => [Tuple.Create(5, "b")];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(label).IsEqualTo("b");
+    }
+}
+#pragma warning restore TUnit0001
+
+// The class parameter metadata of a [TestConstructor] resolves its ParameterInfo on that constructor, not on an earlier
+// one of the same shape once its T parameter is emitted as object (CodeRabbit review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassMethodDataSourceWithTestConstructorAfterObjectConstructor<T>
+{
+    private readonly object? _value;
+
+    public OwnClassMethodDataSourceWithTestConstructorAfterObjectConstructor(object other) => _value = other;
+
+    [TestConstructor]
+    public OwnClassMethodDataSourceWithTestConstructorAfterObjectConstructor(T value) => _value = value;
+
+    public static IEnumerable<T> Rows() => [(T)(object)5];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(_value).IsEqualTo(5);
+
+        var parameters = TestContext.Current!.Metadata.TestDetails.MethodMetadata.Class.Parameters;
+        await Assert.That(parameters).Count().IsEqualTo(1);
+        await Assert.That(parameters[0].ReflectionInfo.Name).IsEqualTo("value");
+    }
+}

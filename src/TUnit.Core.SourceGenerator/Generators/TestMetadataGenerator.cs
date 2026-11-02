@@ -7341,10 +7341,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static ITypeSymbol[]? InferClassTypesFromConstructorRow(IMethodSymbol constructor, ITypeSymbol rowType, ImmutableArray<ITypeParameterSymbol> typeParameters)
     {
         // A tuple row fills one tuple parameter whole, as the runtime passes it, and otherwise spreads one column
-        // per parameter
-        ITypeSymbol[] rowElements = constructor.Parameters is not [{ Type: INamedTypeSymbol { IsTupleType: true } }]
-            && rowType is INamedTypeSymbol { IsTupleType: true } tupleType
-            ? tupleType.TupleElements.Select(element => element.Type).ToArray()
+        // per parameter. Like the runtime, which unwraps any ITuple, this treats a System.Tuple row as a value tuple one.
+        ITypeSymbol[] rowElements = (constructor.Parameters is not [{ Type: var single }] || GetTupleElementTypes(single) == null)
+            && GetTupleElementTypes(rowType) is { } tupleElements
+            ? tupleElements
             : [rowType];
         var typeArguments = new ITypeSymbol[typeParameters.Length];
 
@@ -7368,6 +7368,38 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return typeArguments;
+    }
+
+    /// <summary>
+    /// The logical element types of a value tuple or <see cref="System.Tuple"/> type, or null for any other type.
+    /// Mirrors reflection mode's <c>GetTupleElementTypes</c>: a System.Tuple nests elements past the seventh in a
+    /// <c>TRest</c> System.Tuple.
+    /// </summary>
+    private static ITypeSymbol[]? GetTupleElementTypes(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+        {
+            return null;
+        }
+
+        if (namedType.IsTupleType)
+        {
+            return namedType.TupleElements.Select(element => element.Type).ToArray();
+        }
+
+        if (namedType is not { Name: "Tuple", Arity: >= 1 and <= 8, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } })
+        {
+            return null;
+        }
+
+        if (namedType.Arity < 8)
+        {
+            return namedType.TypeArguments.ToArray();
+        }
+
+        return GetTupleElementTypes(namedType.TypeArguments[7]) is { } rest
+            ? namedType.TypeArguments.Take(7).Concat(rest).ToArray()
+            : null;
     }
 
     private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)
@@ -8651,16 +8683,65 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Named arguments tell attributes apart too: [MethodDataSource(nameof(Rows), Arguments = ...)] twice can
-        // name different overloads of Rows, each scoping its own instantiation (#7208).
+        // name different overloads of Rows, each scoping its own instantiation (#7208). They are matched by name,
+        // since their written order carries no meaning, and array values by content.
         if (a1.NamedArguments.Length != a2.NamedArguments.Length)
         {
             return false;
         }
 
-        for (var i = 0; i < a1.NamedArguments.Length; i++)
+        foreach (var named in a1.NamedArguments)
         {
-            if (a1.NamedArguments[i].Key != a2.NamedArguments[i].Key
-                || !a1.NamedArguments[i].Value.Equals(a2.NamedArguments[i].Value))
+            var found = false;
+            foreach (var other in a2.NamedArguments)
+            {
+                if (other.Key == named.Key)
+                {
+                    found = AreSameTypedConstant(named.Value, other.Value);
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Compares typed constants by value, and array constants element by element: Roslyn's
+    /// <see cref="TypedConstant.Equals(TypedConstant)"/> compares an array's backing storage, so two separately
+    /// written arrays with the same elements differ under it. The type is compared too, so empty arrays of
+    /// different element types stay distinct.
+    /// </summary>
+    private static bool AreSameTypedConstant(TypedConstant first, TypedConstant second)
+    {
+        if (first.Kind != second.Kind || !SymbolEqualityComparer.Default.Equals(first.Type, second.Type))
+        {
+            return false;
+        }
+
+        if (first.Kind != TypedConstantKind.Array)
+        {
+            return first.Equals(second);
+        }
+
+        if (first.IsNull || second.IsNull)
+        {
+            return first.IsNull == second.IsNull;
+        }
+
+        if (first.Values.Length != second.Values.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < first.Values.Length; i++)
+        {
+            if (!AreSameTypedConstant(first.Values[i], second.Values[i]))
             {
                 return false;
             }

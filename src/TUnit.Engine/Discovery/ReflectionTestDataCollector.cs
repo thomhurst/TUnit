@@ -2468,10 +2468,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static Type[]? InferTypeArgumentsFromConstructorRow(ParameterInfo[] parameters, Type rowType, Type[] typeParameters)
     {
         // A tuple row fills one tuple parameter whole, as DataSourceHelpers.ToObjectArrayWithTypes passes it, and
-        // otherwise spreads one column per parameter
-        Type[] rowElements = parameters is [{ ParameterType: var single }] && GetValueTupleElementTypes(single) != null
+        // otherwise spreads one column per parameter. Like that reader, which unwraps any ITuple, this treats a
+        // System.Tuple row as a value tuple one.
+        Type[] rowElements = parameters is [{ ParameterType: var single }] && GetTupleElementTypes(single) != null
             ? [rowType]
-            : GetValueTupleElementTypes(rowType) ?? [rowType];
+            : GetTupleElementTypes(rowType) ?? [rowType];
         var typeArguments = new Type[typeParameters.Length];
 
         for (var i = 0; i < typeParameters.Length; i++)
@@ -2519,6 +2520,39 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 MapGenericParameters(parameterArguments[i], actualArguments[i], typeArguments);
             }
         }
+    }
+
+    /// <summary>
+    /// Returns the logical element types of a <see cref="ValueTuple"/> or <see cref="Tuple"/> type, or null for any
+    /// other type. Both nest elements past the seventh in a <c>TRest</c> tuple of their own kind.
+    /// </summary>
+    private static Type[]? GetTupleElementTypes(Type type)
+    {
+        if (GetValueTupleElementTypes(type) is { } valueTupleElements)
+        {
+            return valueTupleElements;
+        }
+
+        if (!type.IsGenericType || type.Namespace != "System" || !type.Name.StartsWith("Tuple`", StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        var arguments = type.GetGenericArguments();
+        if (arguments.Length < 8)
+        {
+            return arguments;
+        }
+
+        if (GetTupleElementTypes(arguments[7]) is not { } rest)
+        {
+            return null;
+        }
+
+        var elements = new Type[7 + rest.Length];
+        Array.Copy(arguments, elements, 7);
+        Array.Copy(rest, 0, elements, 7, rest.Length);
+        return elements;
     }
 
     /// <summary>
