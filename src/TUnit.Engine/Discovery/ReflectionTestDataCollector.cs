@@ -1115,19 +1115,29 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 // Class rows supply the instantiations, so [Arguments(null)] infers none and runs on each (#7141),
                 // unless every class row goes to no type parameter (#7209)
-                var typeArguments = methodDataSources[i] switch
-                {
-                    ArgumentsAttribute arguments => InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject: !classTypeArgumentsSupplied),
-                    MethodDataSourceAttribute methodDataSource when !classTypeArgumentsSupplied => InferClassTypeArgumentsFromMethodDataSource(genericTypeDefinition, methodDataSource, parameters),
-                    _ => null
-                };
-
-                if (typeArguments != null)
+                if (methodDataSources[i] is ArgumentsAttribute arguments
+                    && InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject: !classTypeArgumentsSupplied) is { } typeArguments)
                 {
                     // A plain local, not `(rowTypeArguments ??= ...)[i] = ...`: the .NET 8 trim analyzer
                     // crashes (AD0001) on an array element write through a null-coalescing assignment.
                     rowTypeArguments ??= new Type[]?[methodDataSources.Length];
                     rowTypeArguments[i] = typeArguments;
+                }
+            }
+
+            // Beside only type-free class rows, a [MethodDataSource] infers the class type arguments only when no
+            // [Arguments] row of the method does. Otherwise it runs on the instantiations those rows infer, as in
+            // the source generator, which drops the instantiation such a source alone infers (#7209).
+            if (!classTypeArgumentsSupplied && rowTypeArguments == null)
+            {
+                for (var i = 0; i < methodDataSources.Length; i++)
+                {
+                    if (methodDataSources[i] is MethodDataSourceAttribute methodDataSource
+                        && InferClassTypeArgumentsFromMethodDataSource(genericTypeDefinition, methodDataSource, parameters) is { } typeArguments)
+                    {
+                        rowTypeArguments ??= new Type[]?[methodDataSources.Length];
+                        rowTypeArguments[i] = typeArguments;
+                    }
                 }
             }
 

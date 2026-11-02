@@ -17,6 +17,8 @@ public class Issue7209Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypeFreeClassRowBesideOtherSource", 2, 1)]
     [Arguments("TypeFreeClassRowWithUninferredMethodSource", 2, 2)]
     [Arguments("TypeFreeClassRowWithInferringMethodSource", 1, 1)]
+    [Arguments("TypeFreeClassRowWithInferringRowAndMethodSource", 2, 2)]
+    [Arguments("TypeFreeClassRowWithCancellationToken", 1, 1)]
     public async Task Rows_Run_On_The_Instantiation_They_Infer(string className, int expectedTests, int expectedDistinctNames)
     {
         await RunTestsWithFilter(
