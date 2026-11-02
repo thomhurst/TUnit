@@ -7007,8 +7007,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             argumentValues = argAttr.ConstructorArguments[0].Values;
         }
 
-        // Find the primary constructor
-        var primaryConstructor = classSymbol.Constructors
+        // The row binds to the constructor the instance is built with: one marked [TestConstructor], as the instance
+        // factory reads it, and otherwise the primary constructor. Mirrors reflection mode's
+        // ReflectionGenericTypeResolver.InferTypeArgumentsFromConstructor.
+        var primaryConstructor = classSymbol.InstanceConstructors
+            .FirstOrDefault(c => c.GetAttributes().Any(attribute =>
+                attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
+            ?? classSymbol.Constructors
             .FirstOrDefault(c => c.DeclaringSyntaxReferences.Any(sr =>
                 sr.GetSyntax() is ConstructorDeclarationSyntax cds &&
                 cds.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword))))
@@ -7035,14 +7040,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return nullValueTypeArgument == null ? null : [nullValueTypeArgument];
         }
 
+        // Type parameters inferred through a T[] or List<T> parameter, and bare type parameters bound by an untyped null
+        HashSet<string>? shapeInferredTypeParameters = null;
+        HashSet<string>? nullOnlyTypeParameters = null;
+
         // For each value in the params array
         for (var argIndex = 0; argIndex < argumentValues.Length && argIndex < constructorParams.Length; argIndex++)
         {
             var constructorParam = constructorParams[argIndex];
             var argValue = argumentValues[argIndex];
 
-            // Check if the constructor parameter type is a generic type parameter
-            if (constructorParam.Type is ITypeParameterSymbol typeParam)
+            // A value infers each type parameter its constructor parameter's type mentions, by matching the value's
+            // type against that parameter type: T takes the value's type, T[] its element type, and List<T> its type
+            // argument, as reflection mode infers them (#7223).
+            if (MentionsTypeParameter(constructorParam.Type))
             {
                 // The argument value's type tells us what the generic type should be
                 ITypeSymbol? argType = null;
@@ -7071,9 +7082,59 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     };
                 }
 
+                // A null says nothing about T, even when it is cast, so a later value infers it, as reflection mode
+                // skips null values: [Arguments((int[])null!, "x")] on C<T>(T[]? values, T other) infers string. A
+                // bare T that only nulls bind still falls back to object below.
+                if (argValue.IsNull)
+                {
+                    if (constructorParam.Type is ITypeParameterSymbol nullTypeParam)
+                    {
+                        (nullOnlyTypeParameters ??= []).Add(nullTypeParam.Name);
+                    }
+
+                    argType = null;
+                }
+
                 if (argType != null)
                 {
-                    inferredTypes[typeParam.Name] = argType;
+                    if (constructorParam.Type is ITypeParameterSymbol typeParam)
+                    {
+                        // A bare T keeps its earlier rule, the last value's type: [Arguments(1, 2L)] on
+                        // C<T>(T first, T second) infers long, which both values bind to. A type that a T[] or
+                        // List<T> value inferred wins, because that value cannot bind to any other T.
+                        if (shapeInferredTypeParameters?.Contains(typeParam.Name) != true)
+                        {
+                            inferredTypes[typeParam.Name] = argType;
+                        }
+                    }
+                    else
+                    {
+                        // The first T[] or List<T> value fixes T, replacing a type a bare T inferred:
+                        // [Arguments((short)2, new[] { 1 })] on C<T>(T count, T[] values) infers int, which the
+                        // short also binds to.
+                        foreach (var typeParameter in typeParameters)
+                        {
+                            if (shapeInferredTypeParameters?.Contains(typeParameter.Name) != true
+                                && MatchTypeParameter(constructorParam.Type, argType, typeParameter) is { } typeArgument)
+                            {
+                                inferredTypes[typeParameter.Name] = typeArgument;
+                                (shapeInferredTypeParameters ??= []).Add(typeParameter.Name);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // A bare T that only untyped nulls bind is object: [Arguments(null, null)] on C<T>(T first, T second) runs on
+        // C<object>, as before #7223
+        if (nullOnlyTypeParameters != null)
+        {
+            foreach (var name in nullOnlyTypeParameters)
+            {
+                if (!inferredTypes.ContainsKey(name))
+                {
+                    inferredTypes[name] = compilation.GetSpecialType(SpecialType.System_Object);
                 }
             }
         }
@@ -7098,6 +7159,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         return null;
     }
+
+    private static bool MentionsTypeParameter(ITypeSymbol type) => type switch
+    {
+        ITypeParameterSymbol => true,
+        IArrayTypeSymbol array => MentionsTypeParameter(array.ElementType),
+        INamedTypeSymbol named => named.TypeArguments.Any(MentionsTypeParameter),
+        _ => false
+    };
 
     /// <summary>
     /// The type that <paramref name="typeParameter"/> takes when a value of <paramref name="declaredType"/> binds to a
