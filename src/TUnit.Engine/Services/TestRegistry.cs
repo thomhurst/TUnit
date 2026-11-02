@@ -367,6 +367,9 @@ internal sealed class TestRegistry : ITestRegistry
     // value of its body, such as the Task of an async test method (#7249). Re-type the body as the
     // lambda's return value and box it, so the invoker can await it.
     [RequiresUnreferencedCode("Dynamic test invocation requires LambdaExpression.Compile() which is not supported in native AOT scenarios.")]
+    // Native AOT keeps no reflection metadata for ValueTask<T>.AsTask unless something asks for it, so
+    // the GetMethod lookup below returns null there. This keeps it for every ValueTask<T> instantiation.
+    [DynamicDependency(nameof(ValueTask<object>.AsTask), typeof(ValueTask<>))]
     private static Func<object, object?> CompileRuntimeTestInvoker(LambdaExpression lambdaExpression)
     {
         if (lambdaExpression.Parameters.Count != 1)
