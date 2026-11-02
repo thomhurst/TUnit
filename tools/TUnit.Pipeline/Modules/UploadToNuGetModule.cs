@@ -21,8 +21,21 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<PackTUnitFilesModule>]
 [DependsOn<TestNugetPackageModule>]
 // The engine tests, in both modes, run in aot.yml, not in this pipeline. ExecuteAsync waits for
-// that workflow to pass for the commit before it pushes anything.
-// The engine modules no longer wait for these, so a release has to.
+// that workflow to pass for the commit before it pushes anything (WaitForAotWorkflowAsync fails
+// closed). Do not drop that wait: it is the only release gate for the engine tests.
+// The engine modules no longer wait for the test suites below, and aot.yml does not run them,
+// so a release has to.
+[DependsOn<RunAnalyzersTestsModule>]
+[DependsOn<RunUnitTestsModule>]
+[DependsOn<RunTemplateTestsModule>]
+[DependsOn<RunAspNetTestsModule>(Optional = true)]
+[DependsOn<RunAssertionsTestsModule>]
+[DependsOn<RunAssertionsShouldTestsModule>]
+[DependsOn<RunAssertionsShouldSourceGeneratorTestsModule>]
+[DependsOn<RunAssertionsAnalyzersTestsModule>]
+[DependsOn<RunPublicAPITestsModule>]
+[DependsOn<RunSourceGeneratorTestsModule>]
+[DependsOn<RunAssertionsCodeFixersTestsModule>]
 [DependsOn<RunRpcTestsModule>(Optional = true)]
 [DependsOn<RunPlaywrightTestsModule>(Optional = true)]
 [DependsOn<TestFSharpNugetPackageModule>]
