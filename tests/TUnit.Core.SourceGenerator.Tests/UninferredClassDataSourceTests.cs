@@ -7,7 +7,9 @@ internal class UninferredClassDataSourceTests : TestsBase
             "TUnit.TestProject", "Bugs", "_7355", "Tests.cs"),
         async generatedFiles =>
         {
-            var failure = generatedFiles.Single(f => f.Contains("cannot be inferred at compile time"));
+            var failures = generatedFiles.Where(f => f.Contains("cannot be inferred at compile time")).ToArray();
+            await Assert.That(failures.Length).IsEqualTo(2);
+            var failure = failures.Single(f => f.Contains("InheritedUntypedClassSource"));
             await Assert.That(failure).Contains("RegisterGenericConstraintViolations");
             await Assert.That(failure).Contains("Use [GenerateGenericTest]");
             await Assert.That(failure).Contains("or a typed class data source");

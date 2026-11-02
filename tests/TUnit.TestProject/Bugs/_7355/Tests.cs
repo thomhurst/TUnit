@@ -36,3 +36,12 @@ public class OpenTemplate<T>
     [Test]
     public void Test() { }
 }
+
+[MethodDataSource(typeof(Sources), nameof(Sources.Counters))]
+public abstract class InheritedClassSourceBase;
+
+public class InheritedUntypedClassSource<T>(T value) : InheritedClassSourceBase
+{
+    [Test]
+    public void Test() { }
+}

@@ -502,7 +502,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 // An open generic template without data is not a runnable test. A class with data,
                 // however, must not silently disappear when only its runtime rows reveal the types.
-                if (!testMethod.TypeSymbol.GetAttributes().Any(a =>
+                if (!testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
                         a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)))
                 {
                     return;
