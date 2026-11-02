@@ -368,5 +368,28 @@ public class OwnClassPartiallyGenericTupleMethodDataSourceWithArguments<T>(T fir
     {
         await Assert.That(first).IsTypeOf<int>();
         await Assert.That(second).IsTypeOf<int>();
+
+        // Each row reaches the constructor whole: the member's row isn't cut to its first column
+        var row = ((int)(object)first!, (int)(object)second!);
+        await Assert.That(row == (1, 2) || row == (5, 6)).IsTrue();
+    }
+}
+
+// A tuple row of an own-class member passes every column to the constructor, not only the one that infers T
+// (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1, "a")]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassTupleMethodDataSourceWithArguments<T>(T value, string label)
+{
+    public static IEnumerable<(int, string)> Rows() => [(5, "b")];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+
+        var row = ((int)(object)value!, label);
+        await Assert.That(row == (1, "a") || row == (5, "b")).IsTrue();
     }
 }

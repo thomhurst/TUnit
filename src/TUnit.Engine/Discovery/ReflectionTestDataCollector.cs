@@ -764,10 +764,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // A [MethodDataSource] naming a member of the generic class itself is read on the closed class
             // its member's declared row type infers (#7208)
             MethodMetadata? sourceClassMetadata = null;
+            ParameterMetadata[]? sourceConstructorParameters = null;
             Type[]? memberTypeArguments = null;
             if (ReadsMemberOfOpenClass(dataSource))
             {
-                memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, (MethodDataSourceAttribute)dataSource);
+                memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, (MethodDataSourceAttribute)dataSource, out var inferenceConstructor);
                 if (memberTypeArguments == null && deferredOwnSources != null)
                 {
                     // [GenerateGenericTest] supplies the types, and its instantiations read this source on the
@@ -793,11 +794,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     continue;
                 }
 
-                sourceClassMetadata = CreateDummyMethodMetadata(
-                    ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, memberTypeArguments), "Discovery");
+                var closedType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, memberTypeArguments);
+                sourceClassMetadata = CreateDummyMethodMetadata(closedType, "Discovery");
+                sourceConstructorParameters = GetClosedConstructorParameters(closedType, inferenceConstructor!);
             }
 
-            var dataItems = await GetDataFromSourceAsync(dataSource, sourceClassMetadata!).ConfigureAwait(false);
+            var dataItems = await GetDataFromSourceAsync(dataSource, sourceClassMetadata!, sourceConstructorParameters).ConfigureAwait(false);
 
             allClassRows?.Add(new StaticDataSourceAttribute(dataItems.ToArray())
             {
@@ -1537,7 +1539,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return typeArguments;
     }
 
-    private static async Task<List<object?[]>> GetDataFromSourceAsync(IDataSourceAttribute dataSource, MethodMetadata methodMetadata)
+    private static async Task<List<object?[]>> GetDataFromSourceAsync(IDataSourceAttribute dataSource, MethodMetadata methodMetadata, ParameterMetadata[]? membersToGenerate = null)
     {
         var data = new List<object?[]>(16);
 
@@ -1549,6 +1551,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 dataSource,
                 methodMetadata,
                 ReflectionInstanceFactory.CreateInstanceWithPropertyInjectionAsync);
+
+            // Rows read for a known constructor unwrap a tuple into one value per parameter, rather than keeping
+            // only the value for the single placeholder parameter that discovery uses otherwise
+            if (membersToGenerate is { Length: > 0 })
+            {
+                metadata = metadata with { MembersToGenerate = membersToGenerate };
+            }
 
             // Get data rows from the source
             await foreach (var rowFactory in dataSource.GetDataRowsAsync(metadata))
@@ -2350,10 +2359,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// veto the types. Only when instance creation uses a parameterless constructor, which ignores the rows, is
     /// the first public constructor that infers the types used. Null when a type argument stays unknown, such as
     /// for rows declared as <c>object</c>, <c>object[]</c> or with the class's own type parameters.
+    /// <paramref name="constructor"/> receives the constructor of the generic type definition that inferred the
+    /// types, whose parameters the rows are read against.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
-    private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource)
+    private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource, out ConstructorInfo? constructor)
     {
+        constructor = null;
         if (methodDataSource.GetDeclaredMemberType(genericTypeDefinition) is not { } memberType
             || MethodDataSourceAttribute.GetDeclaredRowType(memberType) is not { } rowType)
         {
@@ -2367,18 +2379,52 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // Instance creation uses a parameterless constructor when there is one, and otherwise the first one
         if (constructors.Length > 0 && !HasParameterlessConstructor(constructors))
         {
-            return InferTypeArgumentsFromConstructorRow(constructors[0].GetParameters(), rowElements, typeParameters);
+            constructor = constructors[0];
+            return InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowElements, typeParameters);
         }
 
-        foreach (var constructor in constructors)
+        foreach (var candidate in constructors)
         {
-            if (InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowElements, typeParameters) is { } typeArguments)
+            if (InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowElements, typeParameters) is { } typeArguments)
             {
+                constructor = candidate;
                 return typeArguments;
             }
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// The parameters of <paramref name="openConstructor"/> on the closed <paramref name="closedType"/>, as the
+    /// members an own-class data source generates. Reading the member's rows against them unwraps a tuple row
+    /// into one value per constructor parameter, as reading the rows for an instance does (#7208).
+    /// </summary>
+    private static ParameterMetadata[] GetClosedConstructorParameters(Type closedType, ConstructorInfo openConstructor)
+    {
+        foreach (var closedConstructor in closedType.GetConstructors())
+        {
+            if (closedConstructor.MetadataToken != openConstructor.MetadataToken)
+            {
+                continue;
+            }
+
+            var parameters = closedConstructor.GetParameters();
+            var result = new ParameterMetadata[parameters.Length];
+            for (var i = 0; i < parameters.Length; i++)
+            {
+                result[i] = new ParameterMetadata(parameters[i].ParameterType)
+                {
+                    Name = parameters[i].Name ?? $"param{i}",
+                    TypeInfo = new ConcreteType(parameters[i].ParameterType),
+                    ReflectionInfo = parameters[i]
+                };
+            }
+
+            return result;
+        }
+
+        return [];
     }
 
     private static bool HasParameterlessConstructor(ConstructorInfo[] constructors)
