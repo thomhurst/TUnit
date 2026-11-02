@@ -12,8 +12,9 @@ namespace TUnit.TestProject.Bugs._7205;
 // fetch that the first test takes (#7205). Each scope owns and disposes the services it resolves, so
 // the object tracker must not dispose them a second time. A scope that is not disposable cannot dispose
 // what Create returns, so the object tracker still does. A row that fails after its scope was created
-// still disposes that scope (#7326), and so do a test skipped because its dependency failed and a
-// test removed by circular-dependency detection.
+// still disposes that scope (#7326), and so do a class row whose service fails to resolve after its
+// scope was created, a test skipped because its dependency failed, a test removed by circular-dependency
+// detection and a test a property filter excluded after it was built.
 
 public sealed class ProbeScope : IDisposable
 {
@@ -87,6 +88,14 @@ public sealed class FailedRowDependencyInjectionAttribute() : ProbeDependencyInj
 public sealed class DependencySkippedDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(DependencySkippedScopeTests));
 
 public sealed class CircularDependencyDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(CircularDependencyScopeTests));
+
+public sealed class ThrowingCreateDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(ThrowingCreateScopeTests))
+{
+    public override object? Create(ProbeScope scope, Type type) =>
+        throw new InvalidOperationException("Resolving the service fails by design, after its scope was created.");
+}
+
+public sealed class FilterExcludedDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(FilterExcluded.FilterExcludedScopeTests));
 
 // A scope that is not disposable, whose Create constructs each service itself: nothing but the object
 // tracker can dispose those services.
@@ -308,6 +317,16 @@ public class FailedRowScopeTests
     public void Run(int value) => throw new InvalidOperationException($"Should have failed to build, but ran with {value}");
 }
 
+// Resolving the class row's service throws after its scope was created, so the class row's first fetch
+// fails and no test takes the events it subscribed. The scope must still be disposed.
+[EngineTest(ExpectedResult.Failure)]
+[ThrowingCreateDependencyInjection]
+public class ThrowingCreateScopeTests(ProbeService service)
+{
+    [Test]
+    public void Run() => throw new InvalidOperationException($"Should have failed to build, but ran with {service}");
+}
+
 // A test skipped because its dependency failed never reaches TestCoordinator. The scope created for
 // it must still be disposed, because the object tracker no longer disposes the services the scope owns.
 [EngineTest(ExpectedResult.Failure)]
@@ -362,7 +381,9 @@ public class NestedScopeDependencyTests(NestedProbeService service)
     }
 }
 
-[EngineTest(ExpectedResult.Pass)]
+// Marked Failure (not Pass) despite passing itself: DependsOn pulls the failing classes into any
+// filtered run containing this test. Verified by Issue7205Tests in TUnit.Engine.Tests.
+[EngineTest(ExpectedResult.Failure)]
 public class DependencyInjectionScopeDisposalObserverTests
 {
     [Test]
@@ -397,6 +418,12 @@ public class DependencyInjectionScopeDisposalObserverTests
         // The failed row's scope: only the temporary instance's fetch, which failed to construct.
         await AssertScopes(nameof(FailedRowScopeTests), 1);
 
+        // The scope of the class row whose service failed to resolve: disposed during discovery, and it
+        // never resolved a service.
+        var throwingCreateScopes = ProbeScope.Created.Where(x => x.Owner == nameof(ThrowingCreateScopeTests)).ToArray();
+        await Assert.That(throwingCreateScopes.Length).IsEqualTo(1);
+        await Assert.That(throwingCreateScopes.Count(x => x.IsDisposed)).IsEqualTo(1);
+
         // The scope of the test skipped because its dependency failed.
         await AssertScopes(nameof(DependencySkippedScopeTests), 1);
 
@@ -419,7 +446,7 @@ public class DependencyInjectionScopeDisposalObserverTests
         await Assert.That(InjectedProbeFixture.Created.Count(x => x.DisposeCount == 1)).IsEqualTo(1);
     }
 
-    private static async Task AssertScopes(string owner, int expectedCount)
+    internal static async Task AssertScopes(string owner, int expectedCount)
     {
         var scopes = ProbeScope.Created.Where(x => x.Owner == owner).ToArray();
 

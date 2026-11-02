@@ -44,8 +44,9 @@ internal static class TestOnDisposeRaiser
     /// <summary>
     /// Raises, once, the OnDispose callbacks that data sources subscribed on a builder context that no
     /// test owns: <see cref="TestSessionContext.GlobalStaticPropertyContext"/>, which static property
-    /// data sources run against. A dependency injection scope created for a static property is disposed
-    /// here, at session end, because the object tracker does not dispose the services the scope owns.
+    /// data sources run against, or the context of a class row fetch that failed before any test took it.
+    /// A dependency injection scope created for a static property is disposed here, at session end,
+    /// because the object tracker does not dispose the services the scope owns.
     /// No test exists, so the callbacks receive the builder context as sender and no test context.
     /// Handler exceptions are added to <paramref name="exceptions"/>.
     /// </summary>

@@ -9,6 +9,11 @@ public interface ITestEvents
     /// <summary>
     /// Gets the event that is raised when the test context is disposed.
     /// </summary>
+    /// <remarks>
+    /// Raised once per test, after its final attempt and after the test class instance is disposed, so a
+    /// handler must not use the instance. It is also raised for a test that never runs: one that is
+    /// skipped, cancelled before it starts, fails while its data is built, or is excluded by a filter.
+    /// </remarks>
     AsyncEvent<TestContext>? OnDispose { get; }
 
     /// <summary>

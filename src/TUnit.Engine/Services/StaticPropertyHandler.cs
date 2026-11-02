@@ -79,8 +79,24 @@ internal sealed class StaticPropertyHandler
             }
             catch (Exception ex)
             {
+                // The session ends with this exception, before DisposeStaticPropertiesAsync runs, so release
+                // the cleanup that static property data sources already subscribed (a dependency injection
+                // scope's disposal, for example) now (#7205).
+                await ReleaseSessionCallbacksAsync().ConfigureAwait(false);
+
                 throw new InvalidOperationException($"Failed to initialize static property {property.DeclaringType.Name}.{property.PropertyName}", ex);
             }
+        }
+    }
+
+    private async ValueTask ReleaseSessionCallbacksAsync()
+    {
+        var cleanupExceptions = new List<Exception>();
+        await TestOnDisposeRaiser.RaiseForSessionAsync(TestSessionContext.GlobalStaticPropertyContext, cleanupExceptions).ConfigureAwait(false);
+
+        foreach (var cleanupException in cleanupExceptions)
+        {
+            await _logger.LogErrorAsync($"Error during static property cleanup after a failed initialization: {cleanupException}").ConfigureAwait(false);
         }
     }
 
