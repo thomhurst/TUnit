@@ -145,4 +145,41 @@ public class InstanceMethodDataSourceMemberShapeTests
     {
         throw new InvalidOperationException($"Should have been skipped, but ran with '{value}'");
     }
+
+    public Task NonGenericTaskRows() => Task.Delay(1);
+
+    public ValueTask NonGenericValueTaskRows => default;
+
+    public static Task StaticNonGenericTaskRows => Task.Delay(1);
+
+    public static ValueTask StaticNonGenericValueTaskRows() => default;
+
+    [Test]
+    [InstanceMethodDataSource(nameof(NonGenericTaskRows))]
+    public async Task Non_Generic_Task(object? value)
+    {
+        await Assert.That(value).IsNull();
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(NonGenericValueTaskRows))]
+    public async Task Non_Generic_ValueTask(ValueTask value)
+    {
+        await Assert.That(value.IsCompletedSuccessfully).IsTrue();
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(StaticNonGenericTaskRows))]
+    public async Task Static_Non_Generic_Task(object? value)
+    {
+        await Assert.That(value).IsNull();
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(StaticNonGenericValueTaskRows))]
+    public async Task Static_Non_Generic_ValueTask(ValueTask value)
+    {
+        await Assert.That(value.IsCompletedSuccessfully).IsTrue();
+    }
+
 }

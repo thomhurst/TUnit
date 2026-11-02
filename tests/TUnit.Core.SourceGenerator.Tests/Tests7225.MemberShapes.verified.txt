@@ -93,6 +93,28 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                 Getter = o => ((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests)o).NullAsyncRows,
                 ClassMetadata = null!,
                 ContainingTypeMetadata = null!
+            },
+            new global::TUnit.Core.PropertyMetadata
+            {
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests).GetProperty("NonGenericValueTaskRows", typeof(global::System.Threading.Tasks.ValueTask)),
+                Type = typeof(global::System.Threading.Tasks.ValueTask),
+                Name = "NonGenericValueTaskRows",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = o => ((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests)o).NonGenericValueTaskRows,
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            },
+            new global::TUnit.Core.PropertyMetadata
+            {
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests).GetProperty("StaticNonGenericTaskRows", typeof(global::System.Threading.Tasks.Task)),
+                Type = typeof(global::System.Threading.Tasks.Task),
+                Name = "StaticNonGenericTaskRows",
+                IsStatic = true,
+                IsNullable = false,
+                Getter = _ => global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.StaticNonGenericTaskRows,
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
             }
         },
         Parent = null
@@ -357,6 +379,54 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
+                case 15:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Non_Generic_Task(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0])));
+                            }
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                case 16:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Non_Generic_ValueTask(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Threading.Tasks.ValueTask>(args[0])));
+                            }
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                case 17:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Static_Non_Generic_Task(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0])));
+                            }
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                case 18:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Static_Non_Generic_ValueTask(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Threading.Tasks.ValueTask>(args[0])));
+                            }
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
                 default:
                     throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
@@ -388,7 +458,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>[] Entries = __CreateEntries();
     private static global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>[] __CreateEntries()
     {
-        var entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>[15];
+        var entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>[19];
         __FillEntries0(entries);
         __FillEntries1(entries);
         return entries;
@@ -750,6 +820,102 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
             createInstance: __createInstance,
             invokeBody: __invoke,
             methodIndex: 14,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[15] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+            methodName: "Non_Generic_Task",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Non_Generic_Task",
+            filePath: "",
+            lineNumber: 157,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("NonGenericTaskRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests)instance).NonGenericTaskRows() ?? global::System.Array.Empty<object>()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests), "Non_Generic_Task", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.ConcreteType(typeof(object)), true)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 15,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[16] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+            methodName: "Non_Generic_ValueTask",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Non_Generic_ValueTask",
+            filePath: "",
+            lineNumber: 164,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("NonGenericValueTaskRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests)instance).NonGenericValueTaskRows ?? global::System.Array.Empty<object>()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests), "Non_Generic_ValueTask", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.Tasks.ValueTask), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.ValueTask)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 16,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[17] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+            methodName: "Static_Non_Generic_Task",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Static_Non_Generic_Task",
+            filePath: "",
+            lineNumber: 171,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("StaticNonGenericTaskRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromRuntimeValue(dataGeneratorMetadata, static () => (object?)global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.StaticNonGenericTaskRows ?? global::System.Array.Empty<object>()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests), "Static_Non_Generic_Task", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.ConcreteType(typeof(object)), true)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 17,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[18] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests>(
+            methodName: "Static_Non_Generic_ValueTask",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.Static_Non_Generic_ValueTask",
+            filePath: "",
+            lineNumber: 178,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("StaticNonGenericValueTaskRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromRuntimeValue(dataGeneratorMetadata, static () => (object?)global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.StaticNonGenericValueTaskRows() ?? global::System.Array.Empty<object>()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests), "Static_Non_Generic_ValueTask", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.Tasks.ValueTask), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.ValueTask)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 18,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
     }

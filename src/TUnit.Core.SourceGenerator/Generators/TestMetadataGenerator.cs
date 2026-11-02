@@ -3010,8 +3010,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var isStatic = dataSourceMember.IsStatic;
         var fullyQualifiedType = targetType.GloballyQualified();
 
+        // Non-generic tasks have no T for the typed task helpers. Read them through the same
+        // runtime-value path as reflection mode, preserving its existing row semantics.
+        var isNonGenericTask = returnType is INamedTypeSymbol { Arity: 0 }
+            && (IsTask(returnType) || IsValueTask(returnType));
         string kind;
-        if (IsAsyncEnumerable(returnType))
+        if (isNonGenericTask)
+        {
+            kind = "Value";
+        }
+        else if (IsAsyncEnumerable(returnType))
         {
             kind = "AsyncEnumerable";
         }
@@ -3083,7 +3091,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // generated code always has (https://github.com/thomhurst/TUnit/issues/7178). [InstanceMethodDataSource] had no
         // generated factory before #7225, so every member it names keeps the runtime-value behavior it always had.
         var isAccessibleMember = IsAccessibleDataSourceMember(dataSourceMember, compilation);
-        if (kind == "Value" && (decidesRowsFromRuntimeValue || dataSourceMember is IFieldSymbol || !isAccessibleMember))
+        if (kind == "Value" && (isNonGenericTask || decidesRowsFromRuntimeValue || dataSourceMember is IFieldSymbol || !isAccessibleMember))
         {
             helper = isStatic || !usesTestClassInstance
                 ? "global::TUnit.Core.Helpers.DataSourceFactories.FromRuntimeValue"
