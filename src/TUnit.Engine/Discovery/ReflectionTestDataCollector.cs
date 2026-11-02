@@ -533,7 +533,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // With class-level [Arguments] rows, method rows run only on the class instantiation their own values
         // infer (#7118)
-        List<Type[]>?[]? methodSourceInstantiations = null;
+        List<SourceInstantiation>?[]? methodSourceInstantiations = null;
         var methodRowClassTypeArguments = methodRowTests == null
             ? InferClassTypeArgumentsOfMethodRows(genericTypeDefinition, testMethods, classDataSources.Length + (typeFreeClassRows?.Length ?? 0),
                 classTypeArgumentsSupplied: classDataSources.Length > 0 || generateGenericTestAttributes.Length > 0, out methodSourceInstantiations)
@@ -1087,10 +1087,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <param name="sourceInstantiations">
     /// For each test method, the class instantiations that its other data sources infer beside only type-free
     /// class rows (#7209): a typed data source, a [MethodDataSource] member of the test class, or a parameter
-    /// attribute. Unlike an [Arguments] row, such a source is not scoped to the instantiation it infers: every
-    /// instantiation runs it, as in the source generator. Null when no method has one.
+    /// attribute, in the source generator's order, the first source to infer a type keeping it. A typed data
+    /// source's instantiation runs only that source; the others run every method data source that infers no
+    /// type, as in the source generator. Unlike an [Arguments] row, none of these sources is kept off the other
+    /// instantiations. Null when no method has one.
     /// </param>
-    private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, int classDataSourceCount, bool classTypeArgumentsSupplied, out List<Type[]>?[]? sourceInstantiations)
+    private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, int classDataSourceCount, bool classTypeArgumentsSupplied, out List<SourceInstantiation>?[]? sourceInstantiations)
     {
         sourceInstantiations = null;
         if (classDataSourceCount == 0)
@@ -1134,40 +1136,42 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
 
             // Beside only type-free class rows, a typed data source (ClassDataSource<int>, read as the generator's
-            // InferTypesFromDataSourceAttribute reads it) infers an instantiation, and so does a [MethodDataSource]
-            // when no [Arguments] row of the method infers one: beside such a row, the generator drops the
-            // instantiation that a [MethodDataSource] alone infers, so that source runs on the rows' instantiations.
-            // Neither source is scoped to the instantiation it infers: each instantiation runs every source that
-            // infers no type, as in the source generator (#7209).
+            // InferTypesFromDataSourceAttribute reads it) infers an instantiation that runs only that source. A
+            // [MethodDataSource] infers one too when no [Arguments] row of the method infers one: beside such a
+            // row, the generator drops the instantiation that a [MethodDataSource] alone infers, so that source
+            // runs on the rows' instantiations. A [MethodDataSource]'s instantiation runs every method data source
+            // that infers no type, and no source is kept off another source's instantiation, as in the source
+            // generator (#7209). The generator adds typed sources first, then [MethodDataSource]s.
             if (!classTypeArgumentsSupplied)
             {
-                List<Type[]>? instantiations = null;
+                List<SourceInstantiation>? instantiations = null;
                 for (var i = 0; i < methodDataSources.Length; i++)
                 {
-                    var typeArguments = methodDataSources[i] switch
+                    if (methodDataSources[i] is not (ArgumentsAttribute or MethodDataSourceAttribute))
                     {
-                        ArgumentsAttribute => null,
-                        MethodDataSourceAttribute methodDataSource => rowTypeArguments == null
-                            ? InferClassTypeArgumentsFromMethodDataSource(genericTypeDefinition, methodDataSource, parameters)
-                            : null,
-                        var dataSource => InferTypesFromTypedDataSource(dataSource, classGenericParameters.Length, classGenericParameterCount: 0),
-                    };
-                    AddDistinctTypeArguments(ref instantiations, typeArguments);
+                        AddSourceInstantiation(ref instantiations, InferTypesFromTypedDataSource(methodDataSources[i], classGenericParameters.Length, classGenericParameterCount: 0), sourceIndex: i);
+                    }
                 }
 
-                // Failing those, parameter attributes ([Matrix<int>] on a T parameter) infer them, as the generator's
-                // InferTypesFromTypedDataSourceForClass does. That instantiation runs every method data source.
-                if (rowTypeArguments == null
-                    && instantiations == null
-                    && methodDataSources.Length > 0
-                    && InferClassTypeArgumentsFromParameterAttributes(classGenericParameters.Length, parameters) is { } parameterTypeArguments)
+                for (var i = 0; rowTypeArguments == null && i < methodDataSources.Length; i++)
                 {
-                    instantiations = [parameterTypeArguments];
+                    if (methodDataSources[i] is MethodDataSourceAttribute methodDataSource)
+                    {
+                        AddSourceInstantiation(ref instantiations, InferClassTypeArgumentsFromMethodDataSource(genericTypeDefinition, methodDataSource, parameters), sourceIndex: -1);
+                    }
+                }
+
+                // Parameter attributes ([Matrix<int>] on a T parameter) infer an instantiation too, beside those of
+                // the sources above, as the generator's InferTypesFromTypedDataSourceForClass does. It runs every
+                // method data source.
+                if (rowTypeArguments == null && methodDataSources.Length > 0)
+                {
+                    AddSourceInstantiation(ref instantiations, InferClassTypeArgumentsFromParameterAttributes(classGenericParameters.Length, parameters), sourceIndex: -1);
                 }
 
                 if (instantiations != null)
                 {
-                    sourceInstantiations ??= new List<Type[]>?[testMethods.Length];
+                    sourceInstantiations ??= new List<SourceInstantiation>?[testMethods.Length];
                     sourceInstantiations[methodIndex] = instantiations;
                 }
             }
@@ -1176,6 +1180,35 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// A class instantiation that a method data source other than an [Arguments] row infers beside only type-free
+    /// class rows (#7209). <see cref="SourceIndex"/> is the index, among the method's data sources, of the only
+    /// source that runs on it (a typed data source), or -1 when every method data source that infers no type does.
+    /// </summary>
+    private readonly record struct SourceInstantiation(Type[] TypeArguments, int SourceIndex);
+
+    /// <summary>Adds <paramref name="instantiation"/> to <paramref name="list"/> unless its type arguments are already listed.</summary>
+    private static void AddSourceInstantiation(ref List<SourceInstantiation>? list, SourceInstantiation instantiation)
+    {
+        foreach (var existing in list ?? [])
+        {
+            if (AreSameTypeArguments(existing.TypeArguments, instantiation.TypeArguments))
+            {
+                return;
+            }
+        }
+
+        (list ??= []).Add(instantiation);
+    }
+
+    private static void AddSourceInstantiation(ref List<SourceInstantiation>? list, Type[]? typeArguments, int sourceIndex)
+    {
+        if (typeArguments != null)
+        {
+            AddSourceInstantiation(ref list, new SourceInstantiation(typeArguments, sourceIndex));
+        }
     }
 
     /// <summary>
@@ -1414,13 +1447,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// the source generator (#7209). A class-level [GenerateGenericTest] listing those type arguments runs
     /// the rows instead. Rows whose type arguments break the class's constraints are skipped, as the source
     /// generator skips them. The instantiations that other method sources infer beside only type-free class rows
-    /// (<paramref name="methodSourceInstantiations"/>) are built the same way, without scoping those sources.
+    /// (<paramref name="methodSourceInstantiations"/>) are built the same way: one that a typed data source infers
+    /// runs only that source, as in the source generator.
     /// </summary>
     private static List<TestMetadata> BuildTestsForMethodRowsWithoutClassRow(
         Type genericTypeDefinition,
         MethodInfo[] testMethods,
         Type[]?[]?[] methodRowClassTypeArguments,
-        List<Type[]>?[]? methodSourceInstantiations,
+        List<SourceInstantiation>?[]? methodSourceInstantiations,
         List<ClassRowGroup> classRowGroups,
         List<IDataSourceAttribute>? allClassRows,
         IDataSourceAttribute[]? typeFreeClassRows,
@@ -1440,21 +1474,22 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 continue;
             }
 
-            // Distinct type arguments, in row order and then in source order, that no class row infers
-            List<Type[]>? unmatchedGroups = null;
+            // Distinct type arguments, in row order and then in source order, that no class row infers. A row's
+            // instantiation runs every source that infers no type; a typed data source's runs only that source.
+            List<SourceInstantiation>? unmatchedGroups = null;
             foreach (var typeArguments in rowTypeArguments ?? [])
             {
                 if (typeArguments != null && !IsSuppliedByClass(typeArguments))
                 {
-                    AddDistinctTypeArguments(ref unmatchedGroups, typeArguments);
+                    AddSourceInstantiation(ref unmatchedGroups, typeArguments, sourceIndex: -1);
                 }
             }
 
-            foreach (var typeArguments in sourceInstantiations ?? [])
+            foreach (var instantiation in sourceInstantiations ?? [])
             {
-                if (!IsSuppliedByClass(typeArguments))
+                if (!IsSuppliedByClass(instantiation.TypeArguments))
                 {
-                    AddDistinctTypeArguments(ref unmatchedGroups, typeArguments);
+                    AddSourceInstantiation(ref unmatchedGroups, instantiation);
                 }
             }
 
@@ -1464,7 +1499,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
 
             var genericMethod = testMethods[methodIndex];
-            foreach (var typeArguments in unmatchedGroups)
+            foreach (var (typeArguments, sourceIndex) in unmatchedGroups)
             {
                 Type concreteType;
                 try
@@ -1491,7 +1526,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     // Type-free class rows make this a class row instantiation, so the method sources that infer
                     // no type run on it too, as in the source generator (#7209)
-                    var methodRows = ScopeMethodRowsToClassTypeArguments(concreteType, concreteMethod, rowTypeArguments, typeArguments, onlyInferringRows: typeFreeClassRows == null);
+                    // A typed data source's instantiation runs only that source. Its index lines up with the closed
+                    // method's sources, as in ScopeMethodRowsToClassTypeArguments, which keeps every source should
+                    // the two lists ever differ.
+                    var closedDataSources = sourceIndex >= 0 ? ReflectionAttributeExtractor.ExtractMethodDataSources(concreteMethod, concreteType) : null;
+                    IDataSourceAttribute[]? methodRows = closedDataSources != null && sourceIndex < closedDataSources.Length
+                        ? [closedDataSources[sourceIndex]]
+                        : ScopeMethodRowsToClassTypeArguments(concreteType, concreteMethod, rowTypeArguments, typeArguments, onlyInferringRows: typeFreeClassRows == null);
                     (tests ??= []).Add(allClassRowSources == null
                         ? BuildTestMetadata(
                             concreteType,
@@ -1512,15 +1553,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         bool IsSuppliedByClass(Type[] typeArguments) =>
             IsInferredByClassRows(classRowGroups, typeArguments) || IsListedByGenerateGenericTest(generateGenericTestAttributes, typeArguments);
-    }
-
-    /// <summary>Adds <paramref name="typeArguments"/> to <paramref name="list"/> unless it is null or already listed.</summary>
-    private static void AddDistinctTypeArguments(ref List<Type[]>? list, Type[]? typeArguments)
-    {
-        if (typeArguments != null && (list == null || IndexOfTypeArguments(list, typeArguments) < 0))
-        {
-            (list ??= []).Add(typeArguments);
-        }
     }
 
     /// <summary>

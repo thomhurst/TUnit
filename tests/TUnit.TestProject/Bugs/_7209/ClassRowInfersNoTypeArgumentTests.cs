@@ -230,6 +230,41 @@ public class TypeFreeClassRowWithTwoInferringMethodSources<T>(int number)
     public static IEnumerable<object> Objects() => [2];
 }
 
+// A parameter attribute infers T beside a typed data source that infers another type, and both instantiations run:
+// ClassDataSource<long> infers C<long>, which runs only that source (Run(0)), and Matrix<int> infers C<int>, which runs
+// every method data source (Run(0), Run(1) and Run(2)), each built from the class row (number = 42), as in the source
+// generator. Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithTypedSourceAndInferringParameterAttribute<T>(int number)
+{
+    [Test]
+    [ClassDataSource<long>]
+    [MatrixDataSource]
+    public async Task Run([Matrix<int>(1, 2)] T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(value is long ? typeof(long) : typeof(int));
+        await Assert.That((object?)value is 0L or 0 or 1 or 2).IsTrue();
+    }
+}
+
+// Two typed data sources that infer different types: each instantiation runs only the source that infers it, as in
+// the source generator, so C<int> runs ClassDataSource<int> and C<long> runs ClassDataSource<long>. Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithTwoTypedSources<T>(int number)
+{
+    [Test]
+    [ClassDataSource<int>]
+    [ClassDataSource<long>]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(value!.GetType()).IsEqualTo(typeof(T));
+    }
+}
+
 public static class TypeFreeClassRowSources
 {
     public static IEnumerable<int> FortyThree() => [43];
