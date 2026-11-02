@@ -11,6 +11,12 @@ public class DynamicTestIndexTests
 {
     private static int _builderInvocations;
 
+    [Before(TestDiscovery)]
+    public static void ResetBuilderInvocations()
+    {
+        Interlocked.Exchange(ref _builderInvocations, 0);
+    }
+
     public async Task TestMethod(int value)
     {
         Console.WriteLine($"TestMethod called with value: {value}");

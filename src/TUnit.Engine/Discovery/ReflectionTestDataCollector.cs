@@ -3898,8 +3898,28 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var dynamicTests = new List<TestMetadata>(50);
 
-        // Reflection discovery owns builder invocation in this mode. Generated sources can also be
-        // registered for these assemblies; invoking both would run each builder twice.
+        // Generated wrappers call the same builders that the reflection scan invokes below.
+        // Custom sources have no corresponding builder and must still be collected.
+        foreach (var source in Sources.DynamicTestSources)
+        {
+            if (source.GetType().GetCustomAttribute<System.CodeDom.Compiler.GeneratedCodeAttribute>()?.Tool == "TUnit")
+            {
+                continue;
+            }
+
+            try
+            {
+                foreach (var dynamicTest in source.CollectDynamicTests(testSessionId))
+                {
+                    dynamicTests.AddRange(await ConvertDynamicTestToMetadata(dynamicTest).ConfigureAwait(false));
+                }
+            }
+            catch (Exception ex)
+            {
+                dynamicTests.Add(CreateFailedTestMetadataForDynamicSource(source, ex));
+            }
+        }
+
         var allAssemblies = Assemblies;
         var assembliesList = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
@@ -4118,6 +4138,26 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 ExceptionDispatchInfo.Capture(tie.InnerException ?? tie).Throw();
                 throw;
             }
+        };
+    }
+
+    private static TestMetadata CreateFailedTestMetadataForDynamicSource(IDynamicTestSource source, Exception ex)
+    {
+        var testName = $"[DYNAMIC SOURCE FAILED] {source.GetType().Name}";
+        var displayName = $"{testName} - {ex.Message}";
+
+        return new FailedTestMetadata(ex, displayName)
+        {
+            TestName = testName,
+            TestClassType = source.GetType(),
+            TestMethodName = "CollectDynamicTests",
+            FilePath = "Unknown",
+            LineNumber = 0,
+            MethodMetadata = CreateDummyMethodMetadata(source.GetType(), "CollectDynamicTests"),
+            AttributeFactory = static () => [],
+            DataSources = [],
+            ClassDataSources = [],
+            PropertyDataSources = []
         };
     }
 
