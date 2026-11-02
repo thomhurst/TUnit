@@ -335,6 +335,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        // A discovery-only session never reaches TestSessionCoordinator's final cleanup, so release what
+        // reflection discovery shared across the session here. A no-op when the coordinator already did.
+        await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(ContextProvider.TestSessionContext, Logger).ConfigureAwait(false);
+
         foreach (var service in _services.Values)
         {
             if (service is IAsyncDisposable asyncDisposable)
