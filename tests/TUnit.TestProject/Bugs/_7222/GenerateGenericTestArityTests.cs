@@ -161,6 +161,23 @@ public class BroadSourceJoinsClassRowTests<TClass>(TClass value)
     }
 }
 
+// A source deferred on one concrete class joins only that class's [GenerateGenericTest] instantiation. The
+// object source breaks `TMethod : TClass` on the int class only, so it joins DeferredSourcePerConcreteClassTests<int>.Test<int>
+// and not DeferredSourcePerConcreteClassTests<object>.Test<int>, where it already runs as Test<object>: four tests,
+// as in reflection mode.
+[GenerateGenericTest(typeof(int))]
+[GenerateGenericTest(typeof(object))]
+public class DeferredSourcePerConcreteClassTests<TClass>
+{
+    [Test]
+    [Arguments(1)]
+    [GenerateGenericTest(typeof(int))]
+    [ObjectValues]
+    public void Test<TMethod>(TMethod item) where TMethod : TClass
+    {
+    }
+}
+
 public class ObjectValuesAttribute : DataSourceGeneratorAttribute<object>
 {
     protected override IEnumerable<Func<object>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)

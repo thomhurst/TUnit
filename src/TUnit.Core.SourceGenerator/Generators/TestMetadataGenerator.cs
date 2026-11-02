@@ -848,8 +848,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Method data sources whose declared types break the method's constraints while a method-level
         // [GenerateGenericTest] supplies the type arguments. Their rows run on the attribute's types, also
-        // when another data source already created that instantiation (#7116).
-        List<AttributeData>? deferredDataSources = null;
+        // when another data source already created that instantiation (#7116). Keyed by the class type
+        // arguments: a constraint that names a class type parameter can defer a source on one concrete class
+        // but not another, and reflection mode collects the skipped sources per concrete class.
+        Dictionary<string, List<AttributeData>>? deferredDataSources = null;
 
         // A generic method on a non-generic class without [GenerateGenericTest]: every method data source
         // that infers an existing instantiation's types joins it (#7163). With [GenerateGenericTest], a later
@@ -925,11 +927,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 if (!reportMethodConstraintViolation || methodTypeArgs.Length != testMethod.MethodSymbol.TypeParameters.Length)
                 {
-                    // A source paired with several class sources is deferred once. Paired with a class row,
-                    // the method source is methodRow (specificAttr is the class row).
-                    if (deferToGenerateGenericTest && (methodRow ?? specificAttr) is { } deferredSource && deferredDataSources?.Contains(deferredSource) is not true)
+                    // A source paired with several class sources of one concrete class is deferred once there.
+                    // Paired with a class row, the method source is methodRow (specificAttr is the class row).
+                    if (deferToGenerateGenericTest && (methodRow ?? specificAttr) is { } deferredSource)
                     {
-                        (deferredDataSources ??= []).Add(deferredSource);
+                        var classKey = BuildTypeKey(classTypeArgs);
+                        deferredDataSources ??= new Dictionary<string, List<AttributeData>>();
+                        if (!deferredDataSources.TryGetValue(classKey, out var deferredForClass))
+                        {
+                            deferredDataSources[classKey] = deferredForClass = [];
+                        }
+
+                        if (!deferredForClass.Contains(deferredSource))
+                        {
+                            deferredForClass.Add(deferredSource);
+                        }
                     }
 
                     return;
@@ -1147,14 +1159,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // A [GenerateGenericTest] instantiation that another data source already created runs only that
         // source's rows, so the deferred sources' rows join it rather than being dropped. Reflection mode
-        // does the same in InferMethodInstantiationsFromDataSources (#7116).
+        // does the same in InferMethodInstantiationsFromDataSources (#7116). Only the sources deferred on
+        // this instantiation's concrete class join it.
         void JoinDeferredDataSources(ITypeSymbol[] typeArguments)
         {
             if (deferredDataSources is not null
                 && rowInstantiations is not null
+                && deferredDataSources.TryGetValue(BuildTypeKey(typeArguments.Take(classTypeArgCount)), out var deferredForClass)
                 && rowInstantiations.TryGetValue(BuildTypeKey(typeArguments), out var existing))
             {
-                foreach (var deferred in deferredDataSources)
+                foreach (var deferred in deferredForClass)
                 {
                     existing.AddRow(deferred, isClassRow: false);
                 }

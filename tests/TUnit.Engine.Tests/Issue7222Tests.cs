@@ -177,6 +177,19 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task Deferred_Source_Joins_Only_Its_Own_Concrete_Class()
+    {
+        // int class: Test<int> runs the [Arguments] row and the deferred object row. object class: Test<int>
+        // runs the [Arguments] row and Test<object> the object row, which is not deferred there.
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/DeferredSourcePerConcreteClassTests*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(4)
+            ]);
+    }
+
+    [Test]
     public async Task Constraint_Violation_Without_GenerateGenericTest_Fails_Once_Per_Class_Row()
     {
         // Without a method-level [GenerateGenericTest], reflection mode keeps the class rows on the failing
