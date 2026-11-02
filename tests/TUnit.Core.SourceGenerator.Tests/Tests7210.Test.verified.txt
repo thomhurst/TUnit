@@ -57,7 +57,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.WrappedRowInfersItsValue<int>.Test",
             filePath: "",
-            lineNumber: 54,
+            lineNumber: 61,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -145,7 +145,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.WrappedFactoryInvokedOnce<int>.Test",
             filePath: "",
-            lineNumber: 69,
+            lineNumber: 76,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -233,7 +233,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.WrappedFactoryFreshPerTest<Issue7210Counter>.Test",
             filePath: "",
-            lineNumber: 86,
+            lineNumber: 93,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -326,7 +326,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.EmptySourceWithSkipIfEmpty<int>.Test",
             filePath: "",
-            lineNumber: 100,
+            lineNumber: 107,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -417,7 +417,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.CustomSourceSettingsKept<int>.Test",
             filePath: "",
-            lineNumber: 113,
+            lineNumber: 120,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -468,7 +468,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.CustomSourceSettingsKept<string>.Test",
             filePath: "",
-            lineNumber: 113,
+            lineNumber: 120,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -558,7 +558,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.ArgumentsRowAndMixedSource<int>.Test",
             filePath: "",
-            lineNumber: 128,
+            lineNumber: 135,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -611,7 +611,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.ArgumentsRowAndMixedSource<string>.Test",
             filePath: "",
-            lineNumber: 128,
+            lineNumber: 135,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -703,7 +703,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.MixedSourceOnly<int>.Test",
             filePath: "",
-            lineNumber: 152,
+            lineNumber: 159,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -754,7 +754,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.MixedSourceOnly<string>.Test",
             filePath: "",
-            lineNumber: 152,
+            lineNumber: 159,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -847,7 +847,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.RowsSplitAcrossSources<int>.Test",
             filePath: "",
-            lineNumber: 170,
+            lineNumber: 177,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -903,7 +903,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.RowsSplitAcrossSources<string>.Test",
             filePath: "",
-            lineNumber: 170,
+            lineNumber: 177,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -999,7 +999,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.MethodRowTypeNoClassRowInfers<int>.Test",
             filePath: "",
-            lineNumber: 188,
+            lineNumber: 195,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1052,7 +1052,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7210.MethodRowTypeNoClassRowInfers<double>.Test",
             filePath: "",
-            lineNumber: 188,
+            lineNumber: 195,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
