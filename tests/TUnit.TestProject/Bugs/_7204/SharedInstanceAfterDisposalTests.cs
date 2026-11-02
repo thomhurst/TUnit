@@ -24,7 +24,6 @@ public sealed class SharedAfterDisposalDynamicConsumer
     [ClassDataSource<SharedAfterDisposalFixture>(Shared = SharedType.Keyed, Key = SharedInstanceAfterDisposalTests.DynamicKey)]
     public required SharedAfterDisposalFixture Fixture { get; init; }
 
-    // Synchronous: the dynamic test's Action<T> expression would discard a returned Task, and with it any failure.
     public void Receives_A_Live_Instance()
     {
         if (Fixture.IsDisposed || ReferenceEquals(Fixture, Disposed))
