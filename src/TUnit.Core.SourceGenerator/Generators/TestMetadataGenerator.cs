@@ -3880,6 +3880,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// Formats the argument list for a method with one data parameter, placing each
     /// CancellationToken at its declared position.
     /// </summary>
+    // System.Tuple<T1..T7>. An eight-element Tuple nests its rest in TRest, which DataSourceHelpers flattens, so it is left alone.
+    private static bool IsReferenceTuple(INamedTypeSymbol type)
+    {
+        return type is { Name: "Tuple", IsGenericType: true, TypeArguments.Length: >= 1 and <= 7, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } };
+    }
+
     private static string FormatSingleArgumentCall(string argument, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
     {
         if (!hasCancellationToken)
@@ -3946,6 +3952,38 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine($"throw new global::System.ArgumentException($\"Expected {singleTupleParam.TupleElements.Length.ToString(CultureInfo.InvariantCulture)} unwrapped elements or 1 wrapped tuple, but got {{args.Length}} arguments\");");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else if (parametersFromArgs is [{ Type: INamedTypeSymbol singleReferenceTupleParam }]
+                 && IsReferenceTuple(singleReferenceTupleParam))
+        {
+            // A generated data source factory unwraps a System.Tuple row into its elements, as it does a value tuple,
+            // so rebuild it here. Reflection mode keeps the row whole because it reads the parameter types.
+            var arity = singleReferenceTupleParam.TypeArguments.Length;
+            writer.AppendLine("// Special handling for single reference tuple parameter");
+            // With one element, a lone argument is either that element or the whole tuple, so check its type.
+            var alreadyWrapped = arity == 1 ? $" && args[0] is not {singleReferenceTupleParam.GloballyQualified()}" : "";
+            writer.AppendLine($"if (args.Length == {arity.ToString(CultureInfo.InvariantCulture)}{alreadyWrapped})");
+            writer.AppendLine("{");
+            writer.Indent();
+            var tupleElements = singleReferenceTupleParam.TypeArguments.Select((elementType, i) =>
+                $"global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
+            var tupleConstruction = $"new {singleReferenceTupleParam.GloballyQualified()}({string.Join(", ", tupleElements)})";
+            GenerateReturnHandling(writer, $"instance.{methodName}({FormatSingleArgumentCall(tupleConstruction, hasCancellationToken, parametersFromArgs)})", returnPattern);
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else if (args.Length == 1)");
+            writer.AppendLine("{");
+            writer.Indent();
+            var methodCallDirect = $"instance.{methodName}({FormatSingleArgumentCall($"global::TUnit.Core.Helpers.CastHelper.Cast<{singleReferenceTupleParam.GloballyQualified()}>(args[0])", hasCancellationToken, parametersFromArgs)})";
+            GenerateReturnHandling(writer, methodCallDirect, returnPattern);
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"throw new global::System.ArgumentException($\"Expected {arity.ToString(CultureInfo.InvariantCulture)} unwrapped elements or 1 wrapped tuple, but got {{args.Length}} arguments\");");
             writer.Unindent();
             writer.AppendLine("}");
         }
