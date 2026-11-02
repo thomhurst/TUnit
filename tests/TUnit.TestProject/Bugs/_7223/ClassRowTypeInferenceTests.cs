@@ -109,3 +109,18 @@ public class AllNullClassRowInference<T>(T? first, T? second)
         await Assert.That((object?)second).IsNull();
     }
 }
+
+// A null says nothing about T even when it is cast to an array type, so the later string infers T in both modes:
+// source generation used to fix T as int from the null int[], so construction failed.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments((int[])null!, "x")]
+public class NullArrayBeforeValueClassRowInference<T>(T[]? values, T other)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(values).IsNull();
+        await Assert.That((object?)other).IsEqualTo("x");
+    }
+}

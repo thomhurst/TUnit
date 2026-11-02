@@ -17,6 +17,7 @@ public class Issue7223Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("ArrayBeforeBareClassRowInference", 1)]
     [Arguments("BareBeforeArrayClassRowInference", 1)]
     [Arguments("AllNullClassRowInference", 1)]
+    [Arguments("NullArrayBeforeValueClassRowInference", 1)]
     public async Task Class_Row_Infers_T_Through_Constructor_Parameter(string className, int expectedTests)
     {
         await RunTestsWithFilter(

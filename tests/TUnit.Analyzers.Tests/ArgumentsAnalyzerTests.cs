@@ -175,4 +175,42 @@ public class ArgumentsAnalyzerTests
                     .WithArguments("int", "T[]")
             );
     }
+
+    [Test]
+    [Arguments("Outer<int>.Inner<string>", "Outer<int>.Inner<string>")]
+    [Arguments("Outer<int>.Inner<string>", "Outer<T>.Inner<string>")]
+    public async Task Generic_Class_Row_With_Nested_Generic_Parameter_No_Error(string declared, string parameter)
+    {
+        // A nested type keeps its containing type's arguments when the class's inferred type arguments are substituted
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class Outer<TOuter>
+                {
+                    public class Inner<TInner>;
+                }
+
+                public class NestedRowAttribute : DataSourceGeneratorAttribute<int, {{declared}}>
+                {
+                    protected override IEnumerable<Func<(int, {{declared}})>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+                    {
+                        yield return () => (1, new {{declared}}());
+                    }
+                }
+
+                [NestedRow]
+                public class MyClass<T>(T value, {{parameter}} other)
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """
+            );
+    }
 }

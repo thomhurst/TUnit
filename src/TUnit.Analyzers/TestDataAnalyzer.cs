@@ -1104,7 +1104,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         ITypeParameterSymbol typeParameter => typeParameters.Contains(typeParameter, SymbolEqualityComparer.Default),
         IArrayTypeSymbol array => MentionsAnyTypeParameter(array.ElementType, typeParameters),
-        INamedTypeSymbol named => named.TypeArguments.Any(t => MentionsAnyTypeParameter(t, typeParameters)),
+        INamedTypeSymbol named => named.TypeArguments.Any(t => MentionsAnyTypeParameter(t, typeParameters))
+                                  || named.ContainingType is { } containingType && MentionsAnyTypeParameter(containingType, typeParameters),
         _ => false
     };
 
@@ -1147,7 +1148,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     }
                 }
 
-                return true;
+                // Outer<T>.Inner<U> mentions T through its containing type
+                return parameterNamed.ContainingType is not { } parameterContaining
+                       || declaredNamed.ContainingType is not { } declaredContaining
+                       || TryMatchTypeParameters(parameterContaining, declaredContaining, typeParameters, inferred);
             default:
                 return false;
         }
@@ -1163,7 +1167,31 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return Substitute(compilation, array.ElementType, inferred) is { } elementType
                     ? compilation.CreateArrayTypeSymbol(elementType, array.Rank)
                     : null;
-            case INamedTypeSymbol { IsGenericType: true } named:
+            case INamedTypeSymbol named:
+                // A type that mentions no inferred type parameter is kept whole, including a nested type such as
+                // Outer<int>.Inner<string>, whose containing type's arguments OriginalDefinition would drop
+                if (!MentionsAnyTypeParameter(named, inferred.Keys.ToImmutableArray()))
+                {
+                    return type;
+                }
+
+                var definition = named.OriginalDefinition;
+                if (named.ContainingType is { } containingType)
+                {
+                    if (Substitute(compilation, containingType, inferred) is not INamedTypeSymbol substitutedContaining
+                        || substitutedContaining.GetTypeMembers(named.Name, named.Arity).FirstOrDefault() is not { } member)
+                    {
+                        return null;
+                    }
+
+                    definition = member;
+                }
+
+                if (named.Arity == 0)
+                {
+                    return definition;
+                }
+
                 var typeArguments = new ITypeSymbol[named.TypeArguments.Length];
                 for (var i = 0; i < typeArguments.Length; i++)
                 {
@@ -1175,7 +1203,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     typeArguments[i] = substituted;
                 }
 
-                return named.OriginalDefinition.Construct(typeArguments);
+                return definition.Construct(typeArguments);
             default:
                 return type;
         }

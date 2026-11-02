@@ -7073,9 +7073,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     };
                 }
 
-                // An untyped null (typed as object) says nothing about T, so a later value infers it, as reflection
-                // mode skips null values. A bare T that only nulls bind still falls back to object below.
-                if (argValue.IsNull && argType?.SpecialType == SpecialType.System_Object)
+                // A null says nothing about T, even when it is cast, so a later value infers it, as reflection mode
+                // skips null values: [Arguments((int[])null!, "x")] on C<T>(T[]? values, T other) infers string. A
+                // bare T that only nulls bind still falls back to object below.
+                if (argValue.IsNull)
                 {
                     if (constructorParam.Type is ITypeParameterSymbol nullTypeParam)
                     {
