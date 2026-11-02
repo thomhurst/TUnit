@@ -1791,7 +1791,7 @@ internal static class MockImplBuilder
     }
 
     private static string StripGlobalPrefix(string name)
-        => name.StartsWith("global::", StringComparison.Ordinal) ? name.Substring("global::".Length) : name;
+        => IdentifierEscaping.StripAliasQualifier(name);
 
     private static string SanitizeIdentifier(string name)
         => IdentifierEscaping.SanitizeIdentifier(name);

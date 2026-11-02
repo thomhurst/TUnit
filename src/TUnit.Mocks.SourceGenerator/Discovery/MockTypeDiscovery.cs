@@ -48,6 +48,7 @@ internal static class MockTypeDiscovery
     /// </summary>
     public static ImmutableArray<MockTypeModel> TransformToModels(GeneratorSyntaxContext context, CancellationToken ct)
     {
+        using var aliasScope = ExternAliasQualification.Enter(context.SemanticModel.Compilation);
         var invocation = (InvocationExpressionSyntax)context.Node;
 
         var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation, ct);
@@ -682,6 +683,7 @@ internal static class MockTypeDiscovery
     /// </summary>
     public static ClosedGenericMockRegistration? TransformToClosedGenericRegistration(GeneratorSyntaxContext context, CancellationToken ct)
     {
+        using var aliasScope = ExternAliasQualification.Enter(context.SemanticModel.Compilation);
         var invocation = (InvocationExpressionSyntax)context.Node;
 
         if (context.SemanticModel.GetSymbolInfo(invocation, ct).Symbol is not IMethodSymbol
@@ -704,6 +706,7 @@ internal static class MockTypeDiscovery
     public static EquatableArray<ClosedGenericMockRegistration> TransformGenerateMockAttributeToClosedGenericRegistrations(
         GeneratorAttributeSyntaxContext context, CancellationToken ct)
     {
+        using var aliasScope = ExternAliasQualification.Enter(context.SemanticModel.Compilation);
         var registrations = ImmutableArray.CreateBuilder<ClosedGenericMockRegistration>();
         foreach (var attr in context.Attributes)
         {
@@ -829,6 +832,7 @@ internal static class MockTypeDiscovery
     public static ImmutableArray<MockTypeModel> TransformMockExtensionInvocation(
         GeneratorSyntaxContext context, CancellationToken ct)
     {
+        using var aliasScope = ExternAliasQualification.Enter(context.SemanticModel.Compilation);
         var invocation = (InvocationExpressionSyntax)context.Node;
         var memberAccess = (MemberAccessExpressionSyntax)invocation.Expression;
 
@@ -882,6 +886,7 @@ internal static class MockTypeDiscovery
     public static EquatableArray<MockGenerationRequest> TransformGenerateMockAttribute(
         GeneratorAttributeSyntaxContext context, CancellationToken ct)
     {
+        using var aliasScope = ExternAliasQualification.Enter(context.SemanticModel.Compilation);
         // The target symbol for an assembly attribute is the assembly itself
         // The attribute constructor argument is typeof(T)
         var compilation = context.SemanticModel.Compilation;

@@ -16,6 +16,10 @@ namespace TUnit.Mocks.SourceGenerator.Extensions;
 /// type parameters' display parts while a <see cref="Scope"/> is active. Renames apply only while
 /// the scope is active, so every model string for a method must be rendered eagerly inside it;
 /// anything rendered later (for example by a deferred LINQ query) keeps the original names.
+/// <para>
+/// The same pass replaces <c>global</c> with a reference's extern alias while an
+/// <see cref="ExternAliasQualification.Scope"/> is active (#7300).
+/// </para>
 /// </summary>
 internal static class MethodTypeParameterRenames
 {
@@ -62,20 +66,33 @@ internal static class MethodTypeParameterRenames
 
     public static string ToDisplayString(ISymbol symbol, SymbolDisplayFormat format)
     {
-        if (_active is not { } renames)
+        var renames = _active;
+        var qualifyAliases = ExternAliasQualification.IsActive;
+        if (renames is null && !qualifyAliases)
         {
             return symbol.ToDisplayString(format);
         }
 
         var parts = symbol.ToDisplayParts(format);
         var builder = new StringBuilder();
-        foreach (var part in parts)
+        for (var i = 0; i < parts.Length; i++)
         {
-            if (part.Kind == SymbolDisplayPartKind.TypeParameterName
+            var part = parts[i];
+            if (renames is not null
+                && part.Kind == SymbolDisplayPartKind.TypeParameterName
                 && part.Symbol is ITypeParameterSymbol typeParameter
                 && renames.TryGetValue(typeParameter, out var renamed))
             {
                 builder.Append(renamed);
+            }
+            else if (qualifyAliases
+                && part.Kind == SymbolDisplayPartKind.Keyword
+                && part.ToString() == "global"
+                && GetQualifiedType(parts, i) is { } qualifiedType
+                && ExternAliasQualification.GetAlias(qualifiedType) is { } alias)
+            {
+                // global::Lib.IFoo -> LibAlias::Lib.IFoo for a type of an extern-aliased reference (#7300).
+                builder.Append(alias);
             }
             else
             {
@@ -84,6 +101,29 @@ internal static class MethodTypeParameterRenames
         }
 
         return builder.ToString();
+    }
+
+    /// <summary>
+    /// The outermost type named by the qualified name that starts with the <c>global</c> keyword at
+    /// <paramref name="globalIndex"/>: the first named type after its namespace segments.
+    /// </summary>
+    private static INamedTypeSymbol? GetQualifiedType(System.Collections.Immutable.ImmutableArray<SymbolDisplayPart> parts, int globalIndex)
+    {
+        for (var i = globalIndex + 1; i < parts.Length; i++)
+        {
+            var part = parts[i];
+            if (part.Symbol is INamedTypeSymbol type)
+            {
+                return type;
+            }
+
+            if (part.Kind is not (SymbolDisplayPartKind.Punctuation or SymbolDisplayPartKind.Operator or SymbolDisplayPartKind.NamespaceName))
+            {
+                return null;
+            }
+        }
+
+        return null;
     }
 
     private static string CreateUniqueName(

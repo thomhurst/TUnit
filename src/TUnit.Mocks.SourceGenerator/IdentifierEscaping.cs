@@ -40,9 +40,34 @@ internal static class IdentifierEscaping
     /// <c>A_B_IFoo</c> — see issue #6505.
     /// </para>
     /// </summary>
+    /// <summary>
+    /// Drops the leading alias qualifier of a fully qualified name: <c>global::</c>, or an extern
+    /// alias such as <c>LibAlias::</c> (#7300), so generated names do not depend on how the mocked
+    /// type's reference is aliased.
+    /// </summary>
+    internal static string StripAliasQualifier(string name)
+    {
+        var separator = name.IndexOf("::", StringComparison.Ordinal);
+        if (separator <= 0)
+        {
+            return name;
+        }
+
+        for (var i = 0; i < separator; i++)
+        {
+            if (!char.IsLetterOrDigit(name[i]) && name[i] != '_')
+            {
+                // The first '::' belongs to a type argument, not to this name.
+                return name;
+            }
+        }
+
+        return name.Substring(separator + 2);
+    }
+
     internal static string SanitizeIdentifier(string name)
     {
-        name = name.Replace("global::", "");
+        name = StripAliasQualifier(name).Replace("global::", "");
 
         var sb = new StringBuilder(name.Length);
         var lastWasSeparator = false;
