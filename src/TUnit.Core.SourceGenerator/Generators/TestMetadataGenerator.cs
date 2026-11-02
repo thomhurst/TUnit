@@ -2478,11 +2478,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.Append("}");
             writer.AppendLine($"testDataSources: {dsWriter},");
 
-            // The failures do not repeat for each class row: reflection mode's violation entry has no class
-            // data sources (GenericConstraintViolationTestMetadata.Create). A wrapped instance data source
-            // still reads its rows from a test class instance, so it keeps the class data sources that build
-            // that instance, as reflection mode does when it resolves those rows (#7344).
-            if (!wrapsInstanceDataSource)
+            // With a method-level [GenerateGenericTest], the failures do not repeat for each class row:
+            // reflection mode reports them in one entry with no class data sources
+            // (GenericConstraintViolationTestMetadata.Create in ResolveMethodInstantiations). Without one,
+            // reflection mode keeps the class data sources and fails each method row once per class row, so
+            // this entry keeps them too. A wrapped instance data source still reads its rows from a test class
+            // instance, so it keeps the class data sources that build that instance, as reflection mode does
+            // when it resolves those rows (#7344).
+            var hasMethodGenerateGenericTest = methodSymbol.GetAttributes()
+                .Any(static a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
+            if (hasMethodGenerateGenericTest && !wrapsInstanceDataSource)
             {
                 classDataSources = [];
             }

@@ -2139,6 +2139,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     global::TUnit.Core.GenericConstraintViolationDataSource.Create("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'TMethod'"),
 },
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(1),
+},
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
@@ -2267,6 +2271,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     global::TUnit.Core.GenericConstraintViolationDataSource.Create("Type 'String' does not implement interface 'IComparable`1' required for generic parameter 'TMethod'"),
+},
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(1),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
