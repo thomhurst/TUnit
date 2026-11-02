@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'WorktreeCleanup.ps1')
 $tempBase = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())

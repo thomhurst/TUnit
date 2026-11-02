@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 # Local regression suite: requires Git, PowerShell 7 and Docker.
 $ErrorActionPreference = 'Stop'
 $agentLocks = Join-Path $PSScriptRoot 'AgentLocks.ps1'

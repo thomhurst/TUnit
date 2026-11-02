@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 # AgentLocks.ps1
 # Reusable Redis work-item locks for the issue-pr-loop skill (concurrent agents).
 #

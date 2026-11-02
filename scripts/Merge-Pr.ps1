@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 # Merge-Pr.ps1
 # One-command, fail-closed merge for the issue-pr-loop skill:
 #   1. runs the pure gate  Assert-PrGreen.ps1  (read-only; exits 0 only when green)

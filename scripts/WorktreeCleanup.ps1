@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 # WorktreeCleanup.ps1
 # Shared worktree-removal helper, dot-sourced by Merge-Pr.ps1 and
 # Remove-MergedWorktrees.ps1. Not meant to be run directly.

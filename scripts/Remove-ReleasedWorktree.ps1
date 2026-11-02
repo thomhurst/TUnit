@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 # Local checkout lifecycle. Keep branches; retain detached commits before removal.
 # Called while AgentLocks still owns the lock, before another worker can acquire it.
 function Remove-ReleasedWorktree {

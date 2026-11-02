@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 # Enable-AutoMerge.ps1
 # Arms GitHub native auto-merge (squash) for PR #<N>, pinned to the reviewed head.
 #

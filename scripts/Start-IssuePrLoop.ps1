@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 # Start-IssuePrLoop.ps1
 # Runs the issue-pr-loop skill one unit at a time, each in a fresh agent process.
 # A long-lived agent session keeps growing its context, and model latency grows with

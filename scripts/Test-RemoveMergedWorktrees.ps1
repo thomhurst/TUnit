@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 $ErrorActionPreference = 'Stop'
 $sweep = Join-Path $PSScriptRoot 'Remove-MergedWorktrees.ps1'
 $tempBase = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())

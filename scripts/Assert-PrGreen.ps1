@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 # Assert-PrGreen.ps1
 # Fail-closed merge gate for the issue-pr-loop skill.
 #
