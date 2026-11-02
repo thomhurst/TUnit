@@ -127,22 +127,22 @@ internal sealed class TestScheduler : ITestScheduler
         // Track static properties for disposal at session end
         _staticPropertyHandler.TrackStaticProperties();
 
-        // Group tests by their parallel constraints
-        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
-
-        if (hasDependencies)
-        {
-            MarkDependencyRelatedTestsForExecutionDedup(executableTests);
-        }
-
-        // Suites with no global [NotInParallel] tests skip the runtime exclusion
-        // lock entirely. Once enabled, the flag is monotonic — dynamic batches
-        // that introduce NIP later (see ExecuteDynamicBatchAsync) keep it on.
-        MarkGlobalNotInParallelTests(groupedTests);
-
         bool sessionHooksSucceeded;
         try
         {
+            // Group tests by their parallel constraints
+            var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
+
+            if (hasDependencies)
+            {
+                MarkDependencyRelatedTestsForExecutionDedup(executableTests);
+            }
+
+            // Suites with no global [NotInParallel] tests skip the runtime exclusion
+            // lock entirely. Once enabled, the flag is monotonic — dynamic batches
+            // that introduce NIP later (see ExecuteDynamicBatchAsync) keep it on.
+            MarkGlobalNotInParallelTests(groupedTests);
+
             // Execute tests according to their grouping
             await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
         }
