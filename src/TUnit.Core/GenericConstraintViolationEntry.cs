@@ -84,7 +84,8 @@ internal sealed class GenericConstraintViolationTestMetadata : TestMetadata
         MethodMetadata methodMetadata,
         string filePath,
         int lineNumber,
-        IDataSourceAttribute[] dataSources)
+        IDataSourceAttribute[] dataSources,
+        Func<Attribute[]>? attributeFactory = null)
     {
         return new GenericConstraintViolationTestMetadata
         {
@@ -94,7 +95,7 @@ internal sealed class GenericConstraintViolationTestMetadata : TestMetadata
             FilePath = filePath,
             LineNumber = lineNumber,
             MethodMetadata = methodMetadata,
-            AttributeFactory = static () => [],
+            AttributeFactory = attributeFactory ?? (static () => []),
             DataSources = dataSources,
             ClassDataSources = [],
             PropertyDataSources = [],

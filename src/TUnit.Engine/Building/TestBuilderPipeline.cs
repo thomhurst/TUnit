@@ -270,7 +270,8 @@ internal sealed class TestBuilderPipeline
         var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = $"{metadata.TestClassType.Name}.{metadata.TestName}";
 
-        var testDetails = new TestDetails([])
+        var attributes = TestBuilder.GetFailedTestAttributes(metadata);
+        var testDetails = new TestDetails(attributes)
         {
             TestId = testId,
             TestName = metadata.TestName,
@@ -286,7 +287,7 @@ internal sealed class TestBuilderPipeline
             TestEndColumnNumber = metadata.EndColumnNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
-            AttributesByType = AttributeDictionaryHelper.Empty
+            AttributesByType = attributes.Length == 0 ? AttributeDictionaryHelper.Empty : new LazyAttributeDictionary(attributes)
         };
 
         var context = _contextProvider.CreateTestContext(

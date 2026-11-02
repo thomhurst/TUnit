@@ -52,6 +52,7 @@ public class Issue7116Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result =>
                 {
                     var message = result.Results.Single().Output?.ErrorInfo?.Message;
+                    message.ShouldNotBeNull();
                     foreach (var phrase in SharedExplanationPhrases)
                     {
                         message.ShouldContain(phrase);

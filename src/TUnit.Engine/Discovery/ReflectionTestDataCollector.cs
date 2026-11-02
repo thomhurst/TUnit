@@ -2039,7 +2039,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 ReflectionMetadataBuilder.CreateMethodMetadata(concreteClassType, method),
                 testAttribute?.File ?? "Unknown",
                 testAttribute?.Line ?? 0,
-                constraintViolations.ToArray()), null);
+                constraintViolations.ToArray(),
+                () => GetFailedTestAttributes(method)), null);
         }
     }
 

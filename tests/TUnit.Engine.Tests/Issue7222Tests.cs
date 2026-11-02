@@ -12,6 +12,32 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     private const string ClassFilter = "/*/TUnit.TestProject.Bugs._7222/GenerateGenericTestArityTests";
 
     [Test]
+    public async Task Explicit_Arity_Failures_Are_Excluded_Beside_Normal_Tests()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/ExplicitGenerateGenericTestArityTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.Results.Single().TestName.ShouldBe("NormalTest")
+            ]);
+    }
+
+    [Test]
+    [Arguments("EmptyTypeArguments")]
+    [Arguments("WrongTypeArgumentCount")]
+    public async Task Explicit_Arity_Failure_Runs_When_Selected(string methodName)
+    {
+        await RunTestsWithFilter(
+            $"/*/TUnit.TestProject.Bugs._7222/ExplicitGenerateGenericTestArityTests/{methodName}",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.Results.Single().Output?.ErrorInfo?.Message.ShouldContain("[GenerateGenericTest]")
+            ]);
+    }
+
+    [Test]
     [Arguments("TooManyTypeArguments", "[GenerateGenericTest] on method 'TooManyTypeArguments' provides 2 type argument(s) but method requires 1. Provided: [Int32, String]")]
     [Arguments("NoTypeArguments", "[GenerateGenericTest] on method 'NoTypeArguments' has no type arguments")]
     [Arguments("TooFewTypeArguments", "[GenerateGenericTest] on method 'TooFewTypeArguments' provides 1 type argument(s) but method requires 2. Provided: [Int32]")]
