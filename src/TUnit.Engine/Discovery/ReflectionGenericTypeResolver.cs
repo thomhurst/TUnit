@@ -118,7 +118,11 @@ internal static class ReflectionGenericTypeResolver
         return inferredCount == genericParameters.Length ? (Type[]) typeArguments! : null;
     }
 
-    private static ConstructorInfo? FindRowConstructor(Type genericTypeDefinition)
+    /// <summary>
+    /// The constructor a class data row binds to for type inference: the one marked <c>[TestConstructor]</c>, as
+    /// <see cref="ConstructorHelper.FindSuitableConstructor"/> picks it, and otherwise the first public one.
+    /// </summary>
+    internal static ConstructorInfo? FindRowConstructor(Type genericTypeDefinition)
     {
         foreach (var candidate in genericTypeDefinition.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
         {

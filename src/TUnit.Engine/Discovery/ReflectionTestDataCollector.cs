@@ -931,7 +931,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// The class type argument that an <see cref="ArgumentsAttribute{T}"/> row with a null value infers, for a class
     /// with one type parameter, as the source generator infers it. The null value binds to the first parameter of the
-    /// class's first public constructor, so the declared T is mapped through that parameter's type:
+    /// constructor the instance is built with (<see cref="ReflectionGenericTypeResolver.FindRowConstructor"/>: one
+    /// marked <c>[TestConstructor]</c>, and otherwise the first public one), so the declared T is mapped through that
+    /// parameter's type:
     /// <c>[Arguments&lt;string[]&gt;(null)]</c> on <c>C&lt;T&gt;(T[] values)</c> infers <c>string</c>, not
     /// <c>string[]</c>. Null for any other row, or when the parameter type does not match the declared type.
     /// </summary>
@@ -941,7 +943,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             || dataSource.GetType() is not { IsGenericType: true } sourceType
             || sourceType.GetGenericTypeDefinition() != typeof(ArgumentsAttribute<>)
             || genericTypeDefinition.GetGenericArguments() is not [var typeParameter]
-            || genericTypeDefinition.GetConstructors() is not [var constructor, ..]
+            || ReflectionGenericTypeResolver.FindRowConstructor(genericTypeDefinition) is not { } constructor
             || constructor.GetParameters() is not [var parameter, ..])
         {
             return null;

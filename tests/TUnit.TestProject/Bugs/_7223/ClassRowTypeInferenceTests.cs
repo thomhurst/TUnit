@@ -153,6 +153,37 @@ public class TestConstructorClassRowInference<T>
     }
 }
 
+// A typed null row also infers T through the [TestConstructor]: the declared string[] binds to the bare T, so T is
+// string[] in both modes. Reflection used to read the null through the first constructor's T[] and infer string. The
+// first constructor takes two parameters so that building the instance from a null argument is not ambiguous (#7365).
+// The analyzer still checks the row against the first constructor (#7377).
+#pragma warning disable TUnit0001
+[EngineTest(ExpectedResult.Pass)]
+[Arguments<string[]>(null!)]
+public class TestConstructorNullTypedClassRowInference<T>
+#pragma warning restore TUnit0001
+{
+    private readonly T? _value;
+
+    public TestConstructorNullTypedClassRowInference(T[] values, int index)
+    {
+        _value = values[index];
+    }
+
+    [TestConstructor]
+    public TestConstructorNullTypedClassRowInference(T? value)
+    {
+        _value = value;
+    }
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string[]));
+        await Assert.That(_value).IsNull();
+    }
+}
+
 // With several public constructors and no [TestConstructor], the row infers T through the first declared one, the
 // constructor both modes build the instance with when the constructors take the same number of parameters: the
 // string[] binds to T[], so T is string. Constructors with different parameter counts are #7365.
