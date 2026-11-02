@@ -556,12 +556,13 @@ internal static class MockMembersBuilder
                 writer.AppendLine($"public {wrapperTypeName} Returns({spanReturnType} value) {{ EnsureSetup().SetsOutParameter(global::TUnit.Mocks.Setup.OutRefContext.SpanReturnValueIndex, value.ToArray()); return this; }}");
             }
 
+            string? asyncTaskType = null;
             if (isAsync)
             {
-                var taskType = isValueTask
+                asyncTaskType = isValueTask
                     ? "global::System.Threading.Tasks.ValueTask"
                     : "global::System.Threading.Tasks.Task";
-                EmitReturnsAsyncOverloads(writer, wrapperTypeName, taskType, isValueTask, GetAsyncAliasTypeParamName(model, method), GetDefaultableTypeParameterNames(model, method), GetTypeParameterNames(model, method));
+                EmitReturnsAsyncOverloads(writer, wrapperTypeName, asyncTaskType, isValueTask, GetAsyncAliasTypeParamName(model, method), GetDefaultableTypeParameterNames(model, method), GetTypeParameterNames(model, method));
             }
 
             // Typed parameter overloads (only for methods with typed params within the arity limit).
@@ -571,20 +572,14 @@ internal static class MockMembersBuilder
                 if (hasRefStructParams)
                 {
                     writer.AppendLine("#if NET9_0_OR_GREATER");
-                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperTypeName, allNonOutParams);
-                    writer.AppendLine();
-                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperTypeName, allNonOutParams);
+                    EmitVoidTypedOverloads(writer, nonOutParams, wrapperTypeName, asyncTaskType, allNonOutParams);
                     writer.AppendLine("#else");
-                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperTypeName);
-                    writer.AppendLine();
-                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperTypeName);
+                    EmitVoidTypedOverloads(writer, nonOutParams, wrapperTypeName, asyncTaskType);
                     writer.AppendLine("#endif");
                 }
                 else
                 {
-                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperTypeName);
-                    writer.AppendLine();
-                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperTypeName);
+                    EmitVoidTypedOverloads(writer, nonOutParams, wrapperTypeName, asyncTaskType);
                 }
             }
 
@@ -633,6 +628,37 @@ internal static class MockMembersBuilder
         GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName, allNonOutParams);
         writer.AppendLine();
         GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName, allNonOutParams);
+    }
+
+    private static void EmitVoidTypedOverloads(CodeWriter writer, List<MockParameterModel> nonOutParams,
+        string wrapperName, string? asyncTaskType, List<MockParameterModel>? allNonOutParams = null)
+    {
+        if (asyncTaskType is not null)
+        {
+            GenerateTypedNonGenericTaskReturnsOverloads(writer, nonOutParams, asyncTaskType, wrapperName, allNonOutParams);
+            writer.AppendLine();
+        }
+        GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName, allNonOutParams);
+        writer.AppendLine();
+        GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName, allNonOutParams);
+    }
+
+    // Argument-aware task factories for members returning bare Task/ValueTask (#7301), matching
+    // what Task<T>/ValueTask<T> members get from GenerateTypedReturnsAsyncOverload. Both spellings
+    // hand the factory's task back as-is. Bare Task/ValueTask wrappers have no synchronous
+    // Returns(Func<...>) sibling, so the Returns alias needs neither the generic shape nor ORP.
+    private static void GenerateTypedNonGenericTaskReturnsOverloads(CodeWriter writer, List<MockParameterModel> nonOutParams,
+        string taskType, string wrapperName, List<MockParameterModel>? allNonOutParams)
+    {
+        var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
+        var funcType = $"global::System.Func<{typeList}, {taskType}>";
+        var castArgs = BuildCastArgs(nonOutParams, allNonOutParams);
+        var body = $"{{ EnsureSetup().ReturnsRaw(args => (object?)factory({castArgs})); return this; }}";
+
+        writer.AppendLine("/// <summary>Configure a typed computed async return value using the actual method parameters.</summary>");
+        writer.AppendLine($"public {wrapperName} ReturnsAsync({funcType} factory) {body}");
+        writer.AppendLine("/// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>");
+        writer.AppendLine($"public {wrapperName} Returns({funcType} factory) {body}");
     }
 
     private static void GenerateTypedReturnsAsyncOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,

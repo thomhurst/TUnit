@@ -448,6 +448,11 @@ namespace TUnit.Mocks.Generated
         /// <summary>Return a ValueTask from a factory, invoked on each call. The ValueTask is returned as-is, so an async factory stays pending until it completes.</summary>
         public IAsyncService_InitializeAsync_M3_MockCall Returns(global::System.Func<global::System.Threading.Tasks.ValueTask> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
 
+        /// <summary>Configure a typed computed async return value using the actual method parameters.</summary>
+        public IAsyncService_InitializeAsync_M3_MockCall ReturnsAsync(global::System.Func<global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> factory) { EnsureSetup().ReturnsRaw(args => (object?)factory((global::System.Threading.CancellationToken)args[0]!)); return this; }
+        /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
+        public IAsyncService_InitializeAsync_M3_MockCall Returns(global::System.Func<global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> factory) { EnsureSetup().ReturnsRaw(args => (object?)factory((global::System.Threading.CancellationToken)args[0]!)); return this; }
+
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public IAsyncService_InitializeAsync_M3_MockCall Callback(global::System.Action<global::System.Threading.CancellationToken> callback)
         {
