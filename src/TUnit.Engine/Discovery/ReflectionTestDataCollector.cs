@@ -942,7 +942,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// The class type argument that an <see cref="ArgumentsAttribute{T}"/> row with a null value infers, for a class
     /// with one type parameter, as the source generator infers it. The null value binds to the first parameter of the
-    /// class row's constructor (<see cref="GetClassRowConstructor"/>), so the declared T is mapped through that parameter's type:
+    /// class row's constructor (<see cref="ReflectionGenericTypeResolver.FindRowConstructor"/>), so the declared T is mapped through that parameter's type:
     /// <c>[Arguments&lt;string[]&gt;(null)]</c> on <c>C&lt;T&gt;(T[] values)</c> infers <c>string</c>, not
     /// <c>string[]</c>. Null for any other row, or when the parameter type does not match the declared type.
     /// </summary>
@@ -952,7 +952,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             || dataSource.GetType() is not { IsGenericType: true } sourceType
             || sourceType.GetGenericTypeDefinition() != typeof(ArgumentsAttribute<>)
             || genericTypeDefinition.GetGenericArguments() is not [var typeParameter]
-            || GetClassRowConstructor(genericTypeDefinition) is not { } constructor
+            || ReflectionGenericTypeResolver.FindRowConstructor(genericTypeDefinition) is not { } constructor
             || constructor.GetParameters() is not [var parameter, ..])
         {
             return null;
@@ -1426,7 +1426,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
-        if (GetClassRowConstructor(genericTypeDefinition) is not { } constructor)
+        if (ReflectionGenericTypeResolver.FindRowConstructor(genericTypeDefinition) is not { } constructor)
         {
             return false;
         }
@@ -1448,26 +1448,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// The constructor a class-level data row binds to when classifying it or inferring the class's type arguments
-    /// from it: the public one marked <c>[TestConstructor]</c>, which the instance is built with (see
-    /// <see cref="SelectInstanceConstructor"/>), else the first public one. Null when there is none. Mirrors
-    /// <c>TestMetadataGenerator.GetClassRowConstructor</c> (#7209).
-    /// </summary>
-    private static ConstructorInfo? GetClassRowConstructor(Type genericTypeDefinition)
-    {
-        var constructors = genericTypeDefinition.GetConstructors();
-        foreach (var constructor in constructors)
-        {
-            if (constructor.IsDefined(typeof(TestConstructorAttribute), inherit: false))
-            {
-                return constructor;
-            }
-        }
-
-        return constructors.Length > 0 ? constructors[0] : null;
     }
 
     /// <summary>

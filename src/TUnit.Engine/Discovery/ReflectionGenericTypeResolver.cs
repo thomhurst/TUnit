@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
@@ -119,12 +119,15 @@ internal static class ReflectionGenericTypeResolver
     }
 
     /// <summary>
-    /// The constructor a class data row binds to for type inference: the one marked <c>[TestConstructor]</c>, as
-    /// <see cref="ConstructorHelper.FindSuitableConstructor"/> picks it, and otherwise the first public one.
+    /// The constructor a class-level data row binds to when classifying it or inferring the class's type arguments
+    /// from it: the public one marked <c>[TestConstructor]</c>, which the instance is built with, else the first
+    /// public one. Null when there is none. Instances are only built with public constructors, so a non-public
+    /// constructor is never chosen. Mirrors <c>TestMetadataGenerator.GetClassRowConstructor</c> (#7209).
     /// </summary>
     internal static ConstructorInfo? FindRowConstructor(Type genericTypeDefinition)
     {
-        foreach (var candidate in genericTypeDefinition.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+        var constructors = genericTypeDefinition.GetConstructors();
+        foreach (var candidate in constructors)
         {
             if (candidate.IsDefined(typeof(TestConstructorAttribute), inherit: false))
             {
@@ -132,7 +135,7 @@ internal static class ReflectionGenericTypeResolver
             }
         }
 
-        return genericTypeDefinition.GetConstructors() is [var first, ..] ? first : null;
+        return constructors is [var first, ..] ? first : null;
     }
 
     /// <summary>

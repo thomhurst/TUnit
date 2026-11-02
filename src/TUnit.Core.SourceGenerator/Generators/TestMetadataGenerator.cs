@@ -6816,7 +6816,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// The constructor a class-level data row binds to when inferring the class's type arguments: the public one
     /// marked <c>[TestConstructor]</c>, which the rows are for, else the first public instance constructor in
     /// declaration order, else null. This matches reflection mode's
-    /// <c>GetClassRowConstructor</c>, whose <c>GetConstructors()</c> returns the public constructors in metadata
+    /// <c>ReflectionGenericTypeResolver.FindRowConstructor</c>, whose <c>GetConstructors()</c> returns the public constructors in metadata
     /// (declaration) order, a C# primary constructor included (#7361, #7209).
     /// </summary>
     private static IMethodSymbol? GetClassRowConstructor(INamedTypeSymbol classSymbol)
