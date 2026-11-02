@@ -30,7 +30,6 @@ public class Issue7214Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypedTestDataRowOfReferenceArraySource", new[] { "Run<string>([\"a\"])" })]
     [Arguments("TypedOneElementTupleOfTestDataRowSource", new[] { "Run<int>(1)" })]
     [Arguments("TypedNullArrayRow", new[] { "Run<string[]>(null)" })]
-    [Arguments("TypedNullableTupleRowSource", new[] { "Run<int>(1)" })]
     public async Task Typed_Arguments_Row_Runs_On_Generic_Method(string classFilter, string[] expectedTestNames)
     {
         await RunTestsWithFilter(
@@ -64,6 +63,30 @@ public class Issue7214Tests(TestMode testMode) : InvokableTestBase(testMode)
                     result => result.ResultSummary.Counters.Failed.ShouldBe(1),
                     result => result.Results.ShouldAllBe(x => x.Output!.ErrorInfo!.Message!.Contains(
                         "Could not infer the type arguments of generic test method 'Run' from data source [ITupleRowSource]")),
+                ]);
+    }
+
+    // A nullable tuple row spreads when non-null and binds whole when null, so neither mode closes the method
+    // from the row type: Run<int> would turn the null row into 0.
+    [Test]
+    public async Task Typed_Nullable_Tuple_Row_Is_Left_To_Runtime_Inference()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7214/TypedNullableTupleRowSource/*",
+            testMode == TestMode.Reflection
+                ?
+                [
+                    result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                    result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                    result => result.Results.Select(x => x.TestName).OrderBy(x => x, StringComparer.Ordinal)
+                        .ShouldBe(new[] { "Run<int>(1)", "Run<object>(null)" }),
+                ]
+                :
+                [
+                    result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                    result => result.ResultSummary.Counters.Failed.ShouldBe(2),
+                    result => result.Results.ShouldAllBe(x => x.Output!.ErrorInfo!.Message!.Contains(
+                        "Could not infer the type arguments of generic test method 'Run' from data source [IntNullableOneElementTupleRowSource]")),
                 ]);
     }
 

@@ -388,17 +388,25 @@ public class TypedNullArrayRow
     }
 }
 
-// A non-null ValueTuple<int>? row boxes to ValueTuple<int>, which ToObjectArray spreads, so a typed source of
-// nullable one-element tuple rows infers Run<int>, not Run<ValueTuple<int>?>: Run<int>(1).
-[EngineTest(ExpectedResult.Pass)]
+// A ValueTuple<int>? row's shape depends on its value: a non-null one boxes to ValueTuple<int>, which
+// ToObjectArray spreads to an int, but a null one binds whole as null. No single instantiation fits both, so
+// neither mode closes the method from the row type: Run<int> would turn the null into 0, and
+// Run<ValueTuple<int>?> could not take the spread int. Reflection mode infers each row from its value;
+// source-generated mode reports that it cannot infer the type arguments (#7163). The class carries no
+// [EngineTest] attribute because its outcome differs between the modes; TUnit.Engine.Tests targets it by name.
 public class TypedNullableTupleRowSource
 {
     [Test]
     [IntNullableOneElementTupleRowSource]
     public async Task Run<TMethod>(TMethod arg)
     {
+        if (arg is null)
+        {
+            return;
+        }
+
         await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
-        await Assert.That((int)(object)arg!).IsEqualTo(1);
+        await Assert.That((int)(object)arg).IsEqualTo(1);
     }
 }
 
@@ -408,5 +416,6 @@ public sealed class IntNullableOneElementTupleRowSourceAttribute : TypedDataSour
     {
         await Task.CompletedTask;
         yield return () => Task.FromResult<ValueTuple<int>?>(ValueTuple.Create(1));
+        yield return () => Task.FromResult<ValueTuple<int>?>(null);
     }
 }
