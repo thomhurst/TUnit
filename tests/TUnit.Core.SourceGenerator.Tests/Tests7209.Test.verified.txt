@@ -1032,34 +1032,34 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal static class TUnit_TestProject_Bugs__7209_ConstrainedClassWithTypeFreeClassRowAndLeadingToken_T_Run_4B33C07C_TestSource
+internal static class TUnit_TestProject_Bugs__7209_TypeFreeClassRowConstrainedWithLeadingToken_T_Run__Cancel_ED951A15_TestSource
 {
-    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<>", new global::TUnit.Core.ClassMetadata
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<>", new global::TUnit.Core.ClassMetadata
     {
-        Type = typeof(global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<>),
-        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
-        Name = "ConstrainedClassWithTypeFreeClassRowAndLeadingToken",
+        Type = typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "TypeFreeClassRowConstrainedWithLeadingToken",
         Namespace = "TUnit.TestProject.Bugs._7209",
         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<>), false, new global::TUnit.Core.ParameterMetadata[]
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<>), false, new global::TUnit.Core.ParameterMetadata[]
         {
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new global::TUnit.Core.ConcreteType(typeof(int)), false)
         }),
         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
         Parent = null
     });
-    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<>);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Run", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<>), "Run", false, 0, new global::TUnit.Core.ParameterMetadata[]
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Run", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<>), "Run", false, 0, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "extra", new global::TUnit.Core.ConcreteType(typeof(object)), false)
 }));
-    private static global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    private static global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<int>), args)!;
+        return (global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int>), args)!;
     }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {
@@ -1079,11 +1079,11 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "extra", new 
             new global::TUnit.Core.ArgumentsAttribute(42)
         };
     }
-    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<int>>[]
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int>>[]
     {
-        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<int>>(
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int>>(
             methodName: "Run",
-            fullyQualifiedName: "TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<int>.Run",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int>.Run",
             filePath: "",
             lineNumber: 189,
             hasDataSource: true,
@@ -1105,5 +1105,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "extra", new 
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__7209_ConstrainedClassWithTypeFreeClassRowAndLeadingToken_T_Run_4B33C07C_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRowAndLeadingToken<int>>(static () => TUnit_TestProject_Bugs__7209_ConstrainedClassWithTypeFreeClassRowAndLeadingToken_T_Run_4B33C07C_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__7209_TypeFreeClassRowConstrainedWithLeadingToken_T_Run__Cancel_ED951A15_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int>>(static () => TUnit_TestProject_Bugs__7209_TypeFreeClassRowConstrainedWithLeadingToken_T_Run__Cancel_ED951A15_TestSource.Entries_0);
 }

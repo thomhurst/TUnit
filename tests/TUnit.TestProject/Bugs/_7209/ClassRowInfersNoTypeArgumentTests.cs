@@ -184,7 +184,7 @@ public class ConstrainedClassWithTypeFreeClassRow<T>(int number) where T : struc
 // row must skip the token too, or it reads "s" as T's value and reports a false failure. Same in both modes.
 [EngineTest(ExpectedResult.Pass)]
 [Arguments(42)]
-public class ConstrainedClassWithTypeFreeClassRowAndLeadingToken<T>(int number) where T : struct
+public class TypeFreeClassRowConstrainedWithLeadingToken<T>(int number) where T : struct
 {
     [Test]
     [Arguments(1, "s")]
