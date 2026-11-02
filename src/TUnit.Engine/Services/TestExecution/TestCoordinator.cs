@@ -227,6 +227,21 @@ internal sealed class TestCoordinator : ITestCoordinator
             test.Context.StopHoldingSharedReferences();
             var cleanupExceptions = await _objectTracker.UntrackObjects(test.Context).ConfigureAwait(false);
 
+            if (test.Context.InternalEventsIfCreated?.OnDataRowDispose is { } onDataRowDispose)
+            {
+                foreach (var handler in onDataRowDispose.InvocationList)
+                {
+                    try
+                    {
+                        await handler.InvokeAsync(this, test.Context).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        (cleanupExceptions ??= []).Add(ex);
+                    }
+                }
+            }
+
 #if NET
             // Per-test cleanup has completed. Keep the test activity open for final status
             // and export, but detach it from the ambient async-local context so shared

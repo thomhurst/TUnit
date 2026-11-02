@@ -7,6 +7,8 @@ namespace TUnit.Core;
 /// </summary>
 public class TestContextEvents : ITestEvents
 {
+    internal AsyncEvent<TestContext>? OnDataRowDispose { get; set; }
+
     public AsyncEvent<TestContext>? OnDispose { get; set; }
     public AsyncEvent<TestContext>? OnTestRegistered { get; set; }
     public AsyncEvent<TestContext>? OnInitialize { get; set; }

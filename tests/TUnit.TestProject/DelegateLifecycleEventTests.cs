@@ -4,25 +4,30 @@ namespace TUnit.TestProject;
 
 public class DelegateLifecycleEventTests
 {
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     public sealed class SubscribeAttribute : DataSourceGeneratorAttribute<int>
     {
+        public int Rows { get; set; } = 1;
+
         protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata metadata)
         {
-            yield return () =>
+            for (var i = 0; i < Rows; i++)
             {
-                var events = metadata.TestBuilderContext.Current.Events;
-                events.OnTestRegistered += Record("registered");
-                events.OnTestStart += Record("start");
-                events.OnTestEnd += Record("end");
-                events.OnTestSkipped += Record("skipped");
-                events.OnTestRetry += (_, args) =>
+                yield return () =>
                 {
-                    args.TestContext.StateBag.Items["retry"] = args.RetryAttempt;
-                    return default;
+                    var events = metadata.TestBuilderContext.Current.Events;
+                    events.OnTestRegistered += Record("registered");
+                    events.OnTestStart += Record("start");
+                    events.OnTestEnd += Record("end");
+                    events.OnTestSkipped += Record("skipped");
+                    events.OnTestRetry += (_, args) =>
+                    {
+                        args.TestContext.StateBag.Items["retry"] = args.RetryAttempt;
+                        return default;
+                    };
+                    return 1;
                 };
-                return 1;
-            };
+            }
         }
 
         private static Func<object, TestContext, ValueTask> Record(string name) => (_, context) =>
@@ -81,6 +86,65 @@ public class DelegateLifecycleEventTests
                 var expected = test.Metadata.TestDetails.MethodName == nameof(Retried) ? 2 : 1;
                 await Assert.That(test.StateBag.Items["end"]).IsEqualTo(expected);
             }
+        }
+    }
+}
+
+[DelegateLifecycleEventTests.Subscribe(Rows = 2)]
+public class ClassDelegateLifecycleEventTests(int value)
+{
+    [Test, Repeat(1), EngineTest(ExpectedResult.Pass)]
+    public async Task FirstRow()
+    {
+        await Assert.That(value).IsEqualTo(1);
+        await Assert.That(TestContext.Current!.StateBag.Items["registered"]).IsEqualTo(1);
+        await Assert.That(TestContext.Current.StateBag.Items["start"]).IsEqualTo(1);
+    }
+
+    [After(Class)]
+    public static async Task Verify(ClassHookContext context)
+    {
+        foreach (var test in context.Tests)
+        {
+            await Assert.That(test.StateBag.Items["end"]).IsEqualTo(1);
+        }
+    }
+}
+
+public class DataScopeRetryLifecycleTests
+{
+    public sealed class Scope : IDisposable
+    {
+        public int DisposeCount;
+        public void Dispose() => DisposeCount++;
+    }
+
+    public sealed record Service(Scope Scope);
+
+    public sealed class ScopeDataAttribute : DependencyInjectionDataSourceAttribute<Scope>
+    {
+        public override Scope CreateScope(DataGeneratorMetadata metadata) => new();
+        public override object Create(Scope scope, Type type) => new Service(scope);
+    }
+
+    [Test, ScopeData, Retry(1), EngineTest(ExpectedResult.Pass)]
+    public async Task ScopeSurvivesRetry(Service service)
+    {
+        var context = TestContext.Current!;
+        context.StateBag.Items["scope"] = service.Scope;
+        await Assert.That(service.Scope.DisposeCount).IsEqualTo(0);
+        if (context.StateBag.Items.TryAdd("firstAttempt", true))
+        {
+            throw new InvalidOperationException("Exercise scope lifetime across retries");
+        }
+    }
+
+    [After(Class)]
+    public static async Task Verify(ClassHookContext context)
+    {
+        foreach (var test in context.Tests)
+        {
+            await Assert.That(((Scope)test.StateBag.Items["scope"]!).DisposeCount).IsEqualTo(1);
         }
     }
 }

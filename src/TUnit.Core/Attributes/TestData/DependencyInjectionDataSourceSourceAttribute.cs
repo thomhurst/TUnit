@@ -11,8 +11,8 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
             // Create a new scope for each test execution
             var scope = CreateScope(dataGeneratorMetadata);
 
-            // Set up disposal for this specific scope in the current test context
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, _) =>
+            // Method and class arguments are reused by retries; dispose their scope after the final attempt.
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDataRowDispose += async (_, _) =>
             {
                 if (scope is IAsyncDisposable asyncDisposable)
                 {
