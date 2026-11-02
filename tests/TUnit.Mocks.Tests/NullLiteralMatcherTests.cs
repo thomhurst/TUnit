@@ -1,5 +1,3 @@
-#pragma warning error CS8625
-
 namespace TUnit.Mocks.Tests;
 
 public interface INullLiteralService
