@@ -149,6 +149,13 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IVoidSetupChain ReturnsRaw(Func<object?[], object?> factory)
+    {
+        _setup.AddBehavior(new ComputedRawReturnWithArgsBehavior(factory));
+        return this;
+    }
+
     public IVoidMethodSetup Then()
     {
         _setup.Then();

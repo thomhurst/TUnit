@@ -170,6 +170,8 @@ repository.GetByIdAsync(1).Returns(new User(1, "Alice"));
 
 TUnit.Mocks also has `ReturnsAsync`, but it takes a task, for example one from a `TaskCompletionSource`. Use it when the test controls when the task completes.
 
+For methods that return `Task` or `ValueTask` without a result, `Returns` and `ReturnsAsync` also accept a factory that receives the call's arguments, such as Moq's `.Returns((string u, Func<string, ValueTask> send) => send(u))`. The mock returns the factory's task unchanged, so an `async` lambda stays pending until it completes.
+
 ### Sequences
 
 `SetupSequence` maps to `ReturnsSequentially` for values and to `.Then()` for mixed behavior.
