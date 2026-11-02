@@ -17,7 +17,7 @@ git config --local core.longpaths true
 git config --local --get core.longpaths  # should print true
 ```
 
-Template snapshots contain paths that can exceed Windows' `MAX_PATH` once placed under `<repo-parent>/TUnit-worktrees/<name>/`. Git for Windows needs `core.longpaths=true` to check them out. The local configuration is shared by this repository's worktrees, so this is a one-time setup and does not change the global Git configuration. Setting it after checkout fails is too late to prevent a partial checkout and a leftover branch.
+Template snapshots contain paths that can exceed Windows' `MAX_PATH` once placed under `<repo-parent>/TUnit-worktrees/<name>/`. Git for Windows needs `core.longpaths=true` to check them out. The local configuration is shared by this repository's worktrees, so this is a one-time setup and does not change the global Git configuration. Enable it before the first checkout to avoid a partial checkout and a leftover branch. If checkout has already failed, the recovery steps below still apply.
 
 If checkout already failed with `Filename too long`, enable the setting above before retrying. Inspect `git worktree list` and `git branch --list <branch>` first: the failed command may have left the branch behind even if it did not register a worktree. Reuse that branch with `git worktree add <path> <branch>` rather than repeating `-b <branch>`; preserve any existing checkout or work before retrying.
 
