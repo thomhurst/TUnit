@@ -110,6 +110,20 @@ public class AllNullClassRowInference<T>(T? first, T? second)
     }
 }
 
+// A Type value infers System.Type, the attribute argument's declared type, in both modes: reflection used to take the
+// value's private RuntimeType as T.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(typeof(int))]
+public class TypeValueClassRowInference<T>(T value)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(Type));
+        await Assert.That((object?)value).IsEqualTo(typeof(int));
+    }
+}
+
 // A null says nothing about T even when it is cast to an array type, so the later string infers T in both modes:
 // source generation used to fix T as int from the null int[], so construction failed.
 [EngineTest(ExpectedResult.Pass)]

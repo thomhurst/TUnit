@@ -2697,7 +2697,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// private RuntimeType instance, but the attribute argument is typed <see cref="Type"/>, which is what the
     /// source generator infers.
     /// </summary>
-    private static Type GetArgumentInferenceType(object value) => value is Type ? typeof(Type) : value.GetType();
+    internal static Type GetArgumentInferenceType(object value) => value is Type ? typeof(Type) : value.GetType();
 
     private sealed class TypeArrayComparer : IEqualityComparer<Type[]>
     {

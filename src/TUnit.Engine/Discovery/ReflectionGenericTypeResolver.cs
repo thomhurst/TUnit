@@ -87,7 +87,7 @@ internal static class ReflectionGenericTypeResolver
                     continue;
                 }
 
-                var valueType = value.GetType();
+                var valueType = ReflectionTestDataCollector.GetArgumentInferenceType(value);
                 for (var j = 0; j < genericParameters.Length; j++)
                 {
                     if (typeArguments[j] == null
