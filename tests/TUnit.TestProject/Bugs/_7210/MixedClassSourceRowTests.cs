@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._7210;
@@ -37,6 +38,12 @@ public sealed class Issue7210Counter
 // Rows of an untyped source, whose Skip setting the test should keep in both modes
 public sealed class SkippedMixedRowsAttribute : UntypedDataSourceGeneratorAttribute
 {
+    // The engine reads Skip through reflection, so a Native AOT build must keep its getter (see DataSourceMetadataExtractor)
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(SkippedMixedRowsAttribute))]
+    public SkippedMixedRowsAttribute()
+    {
+    }
+
     public string? Skip { get; set; }
 
     protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
