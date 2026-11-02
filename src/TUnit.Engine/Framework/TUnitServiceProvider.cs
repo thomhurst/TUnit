@@ -207,7 +207,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var dependencyExpander = Register(new MetadataDependencyExpander(filterMatcher));
 
         var testBuilder = Register<ITestBuilder>(
-            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, ObjectLifecycleService, hookDiscoveryService, filterMatcher));
+            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, ObjectLifecycleService, hookDiscoveryService, filterMatcher, Logger));
 
         TestBuilderPipeline = Register(
             new TestBuilderPipeline(
@@ -216,7 +216,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 ContextProvider,
                 EventReceiverOrchestrator));
 
-        DiscoveryService = Register(new TestDiscoveryService(TestExecutor, TestBuilderPipeline, TestFilterService, dependencyExpander));
+        DiscoveryService = Register(new TestDiscoveryService(TestExecutor, TestBuilderPipeline, TestFilterService, dependencyExpander, Logger));
 
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
@@ -335,6 +335,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        // A discovery-only session never reaches TestSessionCoordinator's final cleanup, so release what
+        // reflection discovery shared across the session here. A no-op when the coordinator already did.
+        await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(ContextProvider.TestSessionContext, Logger).ConfigureAwait(false);
+
         foreach (var service in _services.Values)
         {
             if (service is IAsyncDisposable asyncDisposable)

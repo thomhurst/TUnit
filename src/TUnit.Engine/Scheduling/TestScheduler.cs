@@ -101,7 +101,25 @@ internal sealed class TestScheduler : ITestScheduler
         using var starvationMonitor = ThreadPoolStarvationMonitor.Start(_maxParallelismLimiter.MaxParallelism, _logger);
 
         // Initialize static properties before tests run
-        await _staticPropertyHandler.InitializeStaticPropertiesAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await _staticPropertyHandler.InitializeStaticPropertiesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            // The session ends here, before any test reaches TestCoordinator or the cleanup below, so
+            // release what each test's data sources hold (a dependency injection scope, for example) now.
+            // The object tracker does not dispose the services such a scope owns (#7205).
+            foreach (var test in executableTests)
+            {
+                await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
+            }
+
+            // Last, because the tests' callbacks may still use services that static properties hold.
+            await _staticPropertyHandler.ReleaseSessionCallbacksAfterFailedInitializationAsync().ConfigureAwait(false);
+
+            throw;
+        }
 
         // Track static properties for disposal at session end
         _staticPropertyHandler.TrackStaticProperties();
@@ -193,6 +211,13 @@ internal sealed class TestScheduler : ITestScheduler
     // the success and the exception paths alike, so no test can still be moving between states.
     private async ValueTask ReportIfNotStartedAsync(AbstractExecutableTest test, string? skipReason)
     {
+        if (!test.HasStartedExecution)
+        {
+            // The test never reached TestCoordinator, which raises OnDispose for every test it runs, so
+            // release what its data sources hold here (a dependency injection scope, for example) (#7205).
+            await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
+        }
+
         if (test.State == TestState.Failed && !test.HasStartedExecution)
         {
             // Failed before execution (data source, argument registration or dependency
@@ -294,6 +319,10 @@ internal sealed class TestScheduler : ITestScheduler
                     _testStateManager.MarkCircularDependencyFailed(test, exception);
                     TestSessionContext.Current?.MarkFailure();
                     await _messageBus.Failed(test.Context, exception, DateTimeOffset.UtcNow).ConfigureAwait(false);
+
+                    // Removed before execution, so the test never reaches TestCoordinator. Release what its
+                    // data sources hold (a dependency injection scope, for example) here (#7205).
+                    await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
                 }
             }
         }

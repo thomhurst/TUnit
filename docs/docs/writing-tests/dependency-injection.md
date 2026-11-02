@@ -92,6 +92,14 @@ public class UserServiceTests(IUserRepository repo, IEmailService email)
 
 The same pattern works with any DI container. Replace `IServiceScope` with whatever scope type the container uses (e.g., `ILifetimeScope` for Autofac) and implement `CreateScope` / `Create` accordingly.
 
+### Scope Lifetime and Disposal
+
+- **When the scope is disposed.** TUnit disposes a disposable scope (`IDisposable` or `IAsyncDisposable`) once, when its test ends. A retried test keeps the same scope and the same resolved services for every attempt, and the scope is disposed after the last attempt. Each `[Repeat]` iteration is a separate test with its own scope, so services and their state do not carry over between repeats. A test that is skipped, cancelled before it starts, or fails while its data is built still has its scope disposed. A scope created for a static property is disposed when the test session ends.
+- **Who disposes resolved services.** A disposable scope owns what `Create` returns. TUnit disposes the scope and expects the scope to dispose the services it resolved, so TUnit does not dispose those services itself. The same goes for `IAsyncInitializer` objects in their properties: TUnit initializes them but leaves their disposal to the scope. Singletons that come from the root container are left to the root container.
+- **Non-disposable scopes.** A scope that is not disposable cannot dispose anything, so TUnit disposes the disposable objects that `Create` returns when the test ends, as it does for other data sources.
+
+If your scope type is disposable but does not dispose the services it resolves, dispose them in the scope's own `Dispose` or `DisposeAsync`.
+
 ## Choosing Between the Two
 
 | Need | Use |

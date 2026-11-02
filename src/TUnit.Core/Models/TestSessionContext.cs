@@ -69,6 +69,13 @@ public class TestSessionContext : Context
     /// </remarks>
     public CancellationToken SessionCancellationToken { get; internal set; }
 
+    /// <summary>
+    /// OnDispose callbacks that reflection discovery subscribed while it evaluated a generic class's data
+    /// sources to infer its type arguments, raised once when this session ends (#7205). They belong to this
+    /// session, not the process, so a concurrent session in server mode never raises them.
+    /// </summary>
+    internal AsyncEvent<TestContext>? DeferredDiscoveryOnDispose { get; set; }
+
     private readonly Lock _lock = new();
     private readonly List<AssemblyHookContext> _assemblies = [];
     private ClassHookContext[]? _cachedTestClasses;

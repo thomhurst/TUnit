@@ -41,6 +41,16 @@ public abstract class AbstractExecutableTest
     // published, because their State is already Failed (#7119).
     internal bool HasStartedExecution { get; set; }
 
+    // 0 until the test's OnDispose callbacks have been raised. They are raised once per test, by
+    // TestCoordinator for a test that reached it and by the scheduler paths that skip or cancel a test
+    // before it does (#7205).
+    private int _onDisposeRaised;
+
+    /// <summary>
+    /// Returns true for the first caller only, which then raises the test's OnDispose callbacks.
+    /// </summary>
+    internal bool TryClaimOnDispose() => Interlocked.Exchange(ref _onDisposeRaised, 1) == 0;
+
     public required TestContext Context
     {
         get;

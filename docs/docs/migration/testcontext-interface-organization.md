@@ -68,7 +68,7 @@ Several properties have been moved from the main `TestContext` class into their 
 #### `ITestEvents` - Test Event Integration
 
 **New interface** exposing nullable event properties for lazy initialization:
-- `OnDispose` - Event raised when test context is disposed
+- `OnDispose` - Event raised once when the test context is disposed: after the test's final attempt and after its class instance is disposed, including for tests that never run (skipped, cancelled, failed while building, or excluded by a filter)
 - `OnTestRegistered` - Event raised when test is registered
 - `OnInitialize` - Event raised before test initialization
 - `OnTestStart` - Event raised before test method execution

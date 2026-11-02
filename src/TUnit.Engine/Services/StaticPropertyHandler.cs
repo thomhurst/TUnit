@@ -4,6 +4,7 @@ using TUnit.Core.Helpers;
 using TUnit.Core.StaticProperties;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.Engine.Services;
 
@@ -78,8 +79,27 @@ internal sealed class StaticPropertyHandler
             }
             catch (Exception ex)
             {
+                // The session ends with this exception, before DisposeStaticPropertiesAsync runs. The scheduler
+                // releases the tests' cleanup and then calls ReleaseSessionCallbacksAfterFailedInitializationAsync.
                 throw new InvalidOperationException($"Failed to initialize static property {property.DeclaringType.Name}.{property.PropertyName}", ex);
             }
+        }
+    }
+
+    /// <summary>
+    /// Raises the cleanup that static property data sources already subscribed (a dependency injection
+    /// scope's disposal, for example) when static property initialization fails, because
+    /// <see cref="DisposeStaticPropertiesAsync"/> never runs then (#7205). Call it after the tests' own
+    /// OnDispose callbacks, which may still use the session's services.
+    /// </summary>
+    public async ValueTask ReleaseSessionCallbacksAfterFailedInitializationAsync()
+    {
+        var cleanupExceptions = new List<Exception>();
+        await TestOnDisposeRaiser.RaiseForSessionAsync(TestSessionContext.GlobalStaticPropertyContext, cleanupExceptions).ConfigureAwait(false);
+
+        foreach (var cleanupException in cleanupExceptions)
+        {
+            await _logger.LogErrorAsync($"Error during static property cleanup after a failed initialization: {cleanupException}").ConfigureAwait(false);
         }
     }
 
@@ -97,9 +117,14 @@ internal sealed class StaticPropertyHandler
     /// Goes through the ObjectTracker (decrementing the +1 reference TrackStaticProperties took)
     /// rather than disposing directly, so the tracking entry is removed and the session-end
     /// sweep in TestSessionCoordinator does not dispose the same object a second time.
+    /// The session's static property data sources subscribed their own cleanup, such as disposing a
+    /// dependency injection scope, on the global static property context; that runs first, as a test's
+    /// OnDispose callbacks run before its objects are untracked.
     /// </summary>
     public async Task DisposeStaticPropertiesAsync(List<Exception> cleanupExceptions)
     {
+        await TestOnDisposeRaiser.RaiseForSessionAsync(TestSessionContext.GlobalStaticPropertyContext, cleanupExceptions).ConfigureAwait(false);
+
         var staticProperties = _trackableObjectGraphProvider.GetStaticPropertyTrackableObjects();
 
         foreach (var staticProperty in staticProperties)

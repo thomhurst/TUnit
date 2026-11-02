@@ -7,7 +7,9 @@ using TUnit.Core;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Constants;
+using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
+using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.Engine;
 
@@ -30,6 +32,7 @@ internal sealed class TestDiscoveryService : IDataProducer
     private readonly TestBuilderPipeline _testBuilderPipeline;
     private readonly TestFilterService _testFilterService;
     private readonly MetadataDependencyExpander _dependencyExpander;
+    private readonly TUnitFrameworkLogger _logger;
     private readonly ConcurrentQueue<AbstractExecutableTest> _cachedTests = new();
     private readonly TestDependencyResolver _dependencyResolver = new();
 
@@ -45,12 +48,14 @@ internal sealed class TestDiscoveryService : IDataProducer
         TestExecutor testExecutor,
         TestBuilderPipeline testBuilderPipeline,
         TestFilterService testFilterService,
-        MetadataDependencyExpander dependencyExpander)
+        MetadataDependencyExpander dependencyExpander,
+        TUnitFrameworkLogger logger)
     {
         _testExecutor = testExecutor;
         _testBuilderPipeline = testBuilderPipeline ?? throw new ArgumentNullException(nameof(testBuilderPipeline));
         _testFilterService = testFilterService;
         _dependencyExpander = dependencyExpander ?? throw new ArgumentNullException(nameof(dependencyExpander));
+        _logger = logger;
     }
 
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken, bool isForExecution)
@@ -119,6 +124,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         if (isForExecution && finalTests.Count != allTests.Count)
         {
             RemoveExcludedTestsFromHookContexts(allTests, finalTests);
+            await RaiseOnDisposeForExcludedTestsAsync(allTests, finalTests).ConfigureAwait(false);
         }
 
         await _testFilterService.RegisterTestsAsync(finalTests, isForExecution).ConfigureAwait(false);
@@ -148,6 +154,24 @@ internal sealed class TestDiscoveryService : IDataProducer
             if (!testsToKeep.Contains(test.Context) && visitedClasses.Add(classContext))
             {
                 classContext.RetainTests(testsToKeep);
+            }
+        }
+    }
+
+    // A filter that can only be evaluated after building (e.g. on properties) leaves built tests that
+    // will never run. Their data sources already ran and subscribed OnDispose (a dependency injection
+    // scope's disposal, for example), and no test executor will ever raise it for them, so release what
+    // they hold now (#7205).
+    private async ValueTask RaiseOnDisposeForExcludedTestsAsync(
+        List<AbstractExecutableTest> allTests,
+        List<AbstractExecutableTest> finalTests)
+    {
+        var testsToKeep = new HashSet<AbstractExecutableTest>(finalTests);
+        foreach (var test in allTests)
+        {
+            if (!testsToKeep.Contains(test))
+            {
+                await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
             }
         }
     }
