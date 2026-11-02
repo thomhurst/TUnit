@@ -958,6 +958,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         }
                     }
 
+                    // The class rows' instantiation of a class-level [GenerateGenericTest]'s types stands for both,
+                    // so it also reads the own-class [MethodDataSource] members that only [GenerateGenericTest]
+                    // supplies the types of, and those whose declared rows infer these types, whether or not the
+                    // method has rows. AddRow skips a source a repeated attribute already added. Reflection mode
+                    // does the same in AddDeferredOwnSources and GroupClassRowsByTypeArgumentsAsync (#7208).
+                    if (fromGenerateGenericTest && existing.HasClassRows)
+                    {
+                        foreach (var ownSource in GetOwnClassMethodDataSourcesForInstantiation(testMethod, classTypeArgs))
+                        {
+                            existing.AddRow(ownSource, isClassRow: true);
+                        }
+                    }
+
                     // A generic method on a non-generic class runs only the sources scoped to its
                     // instantiation, so any method data source that infers the same types as an earlier
                     // one (a second [MethodDataSource] declared like the first, say) joins it too.
@@ -1498,6 +1511,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     TryAddInstantiation(methodGenericTest.TypeArgs!,
                         reportMethodConstraintViolation: true,
                         violationSource: methodGenericTest.Attribute);
+                }
+            }
+        }
+
+        // A class row fixes the instantiation's types on its own, so an own-class [MethodDataSource] member whose
+        // declared rows infer the same types supplies further class rows for it, with or without [GenerateGenericTest],
+        // as reflection mode groups those rows with the class [Arguments] rows (#7208). A member whose rows infer no
+        // types needs [GenerateGenericTest] to close the class it is read on, so only that path adds it.
+        if (testMethod.IsGenericType && rowInstantiations is not null)
+        {
+            foreach (var instantiation in rowInstantiations.Values)
+            {
+                if (instantiation.HasClassRows)
+                {
+                    foreach (var ownSource in GetOwnClassMethodDataSourcesForInstantiation(testMethod, instantiation.ClassTypeArgs, includeUninferred: false))
+                    {
+                        instantiation.AddRow(ownSource, isClassRow: true);
+                    }
                 }
             }
         }
@@ -7375,6 +7406,151 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return null;
     }
 
+    /// <summary>
+    /// The class-level [MethodDataSource] attributes of a generic test class that name a member of the class itself
+    /// (no class given) and whose rows belong on the instantiation with <paramref name="classTypeArgs"/>: those whose
+    /// declared rows infer no types, because they name the class's type parameters (<c>IEnumerable&lt;T&gt;</c>) or
+    /// their types are only known at run time (<c>object</c>, <c>object[]</c>, a non-generic <c>IEnumerable</c>, or a
+    /// tuple such as <c>(object, string)</c> whose generic constructor column is <c>object</c>),
+    /// so only the class's [GenerateGenericTest] types can close the class those members are read on; and those whose
+    /// declared rows infer exactly these types through the constructor (<c>IEnumerable&lt;int&gt;</c> on
+    /// <c>C&lt;T&gt;(T value)</c> for <c>C&lt;int&gt;</c>). Reflection mode groups both the same way (#7208).
+    /// With <paramref name="includeUninferred"/> false, only the members whose declared rows infer these types.
+    /// </summary>
+    private static IEnumerable<AttributeData> GetOwnClassMethodDataSourcesForInstantiation(TestMethodMetadata testMethod, ITypeSymbol[] classTypeArgs, bool includeUninferred = true)
+    {
+        var compilation = testMethod.CompilationContext.Compilation;
+        foreach (var attribute in testMethod.TypeSymbol.GetAttributes())
+        {
+            if (attribute.AttributeClass is not { Name: "MethodDataSourceAttribute", IsGenericType: false }
+                || attribute.ConstructorArguments is not [{ Value: string memberName }])
+            {
+                continue;
+            }
+
+            var member = ResolveMethodDataSourceMember(testMethod.TypeSymbol, memberName, attribute, compilation);
+            if (member == null)
+            {
+                continue;
+            }
+
+            // Like reflection mode, a member whose declared rows infer no types through the constructor belongs on
+            // every [GenerateGenericTest] instantiation, whatever the row's shape: IEnumerable<T>, object[], or a
+            // tuple whose generic constructor column is declared as object, such as (object, string). A row that
+            // names T in one column can still infer it from another: (int, T) on C<T>(T first, T second) infers int.
+            var rowType = GetMethodDataSourceRowType(member, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
+            var inferred = rowType == null
+                ? null
+                : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType);
+            if (inferred == null ? includeUninferred : inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default))
+            {
+                yield return attribute;
+            }
+        }
+    }
+
+    /// <summary>
+    /// The class type arguments that the declared row type of an own-class [MethodDataSource] member infers, by
+    /// matching the row's elements against the parameters of the constructor the instance is built with: the one
+    /// marked <c>[TestConstructor]</c>, the first public one, or, when the class has a parameterless constructor
+    /// (which ignores the rows), the first public one that infers every type argument. A tuple row fills a
+    /// constructor's single tuple parameter whole. Null when a type argument stays unknown or would be
+    /// <c>object</c>. Mirrors reflection mode's <c>InferClassTypeArgumentsFromOwnMemberRowType</c> (#7208).
+    /// </summary>
+    private static ITypeSymbol[]? InferClassTypesFromOwnMemberRowType(INamedTypeSymbol classSymbol, ITypeSymbol rowType)
+    {
+        var constructors = classSymbol.InstanceConstructors
+            .Where(constructor => constructor.DeclaredAccessibility == Accessibility.Public)
+            .ToArray();
+
+        // A [TestConstructor] names the constructor the rows are for, as the instance factory reads it
+        var testConstructor = constructors.FirstOrDefault(constructor => constructor.GetAttributes().Any(attribute =>
+            attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix));
+        if (testConstructor != null)
+        {
+            return InferClassTypesFromConstructorRow(testConstructor, rowType, classSymbol.TypeParameters);
+        }
+
+        if (constructors.Length > 0 && !constructors.Any(constructor => constructor.Parameters.Length == 0))
+        {
+            return InferClassTypesFromConstructorRow(constructors[0], rowType, classSymbol.TypeParameters);
+        }
+
+        foreach (var constructor in constructors)
+        {
+            if (InferClassTypesFromConstructorRow(constructor, rowType, classSymbol.TypeParameters) is { } typeArguments)
+            {
+                return typeArguments;
+            }
+        }
+
+        return null;
+    }
+
+    private static ITypeSymbol[]? InferClassTypesFromConstructorRow(IMethodSymbol constructor, ITypeSymbol rowType, ImmutableArray<ITypeParameterSymbol> typeParameters)
+    {
+        // A tuple row fills one tuple parameter whole, as the runtime passes it, and otherwise spreads one column
+        // per parameter. Like the runtime, which unwraps any ITuple, this treats a System.Tuple row as a value tuple one.
+        ITypeSymbol[] rowElements = (constructor.Parameters is not [{ Type: var single }] || GetTupleElementTypes(single) == null)
+            && GetTupleElementTypes(rowType) is { } tupleElements
+            ? tupleElements
+            : [rowType];
+        var typeArguments = new ITypeSymbol[typeParameters.Length];
+
+        for (var i = 0; i < typeParameters.Length; i++)
+        {
+            for (var j = 0; j < constructor.Parameters.Length && j < rowElements.Length && typeArguments[i] == null; j++)
+            {
+                if (rowElements[j].SpecialType != SpecialType.System_Object
+                    && MatchTypeParameter(constructor.Parameters[j].Type, rowElements[j], typeParameters[i]) is { } typeArgument
+                    && !CodeGenerationHelpers.ContainsTypeParameter(typeArgument)
+                    && typeArgument.SpecialType != SpecialType.System_Object)
+                {
+                    typeArguments[i] = typeArgument;
+                }
+            }
+
+            if (typeArguments[i] == null)
+            {
+                return null;
+            }
+        }
+
+        return typeArguments;
+    }
+
+    /// <summary>
+    /// The logical element types of a value tuple or <see cref="System.Tuple"/> type, or null for any other type.
+    /// Mirrors reflection mode's <c>GetTupleElementTypes</c>: a System.Tuple nests elements past the seventh in a
+    /// <c>TRest</c> System.Tuple.
+    /// </summary>
+    private static ITypeSymbol[]? GetTupleElementTypes(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+        {
+            return null;
+        }
+
+        if (namedType.IsTupleType)
+        {
+            return namedType.TupleElements.Select(element => element.Type).ToArray();
+        }
+
+        if (namedType is not { Name: "Tuple", Arity: >= 1 and <= 8, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } })
+        {
+            return null;
+        }
+
+        if (namedType.Arity < 8)
+        {
+            return namedType.TypeArguments.ToArray();
+        }
+
+        return GetTupleElementTypes(namedType.TypeArguments[7]) is { } rest
+            ? namedType.TypeArguments.Take(7).Concat(rest).ToArray()
+            : null;
+    }
+
     private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
         if (mdsAttr.ConstructorArguments.Length == 0)
@@ -8650,6 +8826,71 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         for (var i = 0; i < a1.ConstructorArguments.Length; i++)
         {
             if (!a1.ConstructorArguments[i].Equals(a2.ConstructorArguments[i]))
+            {
+                return false;
+            }
+        }
+
+        // Named arguments tell attributes apart too: [MethodDataSource(nameof(Rows), Arguments = ...)] twice can
+        // name different overloads of Rows, each scoping its own instantiation (#7208). They are matched by name,
+        // since their written order carries no meaning, and array values by content.
+        if (a1.NamedArguments.Length != a2.NamedArguments.Length)
+        {
+            return false;
+        }
+
+        foreach (var named in a1.NamedArguments)
+        {
+            var found = false;
+            foreach (var other in a2.NamedArguments)
+            {
+                if (other.Key == named.Key)
+                {
+                    found = AreSameTypedConstant(named.Value, other.Value);
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Compares typed constants by value, and array constants element by element: Roslyn's
+    /// <see cref="TypedConstant.Equals(TypedConstant)"/> compares an array's backing storage, so two separately
+    /// written arrays with the same elements differ under it. The type is compared too, so empty arrays of
+    /// different element types stay distinct.
+    /// </summary>
+    private static bool AreSameTypedConstant(TypedConstant first, TypedConstant second)
+    {
+        if (first.Kind != second.Kind || !SymbolEqualityComparer.Default.Equals(first.Type, second.Type))
+        {
+            return false;
+        }
+
+        if (first.Kind != TypedConstantKind.Array)
+        {
+            return first.Equals(second);
+        }
+
+        if (first.IsNull || second.IsNull)
+        {
+            return first.IsNull == second.IsNull;
+        }
+
+        if (first.Values.Length != second.Values.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < first.Values.Length; i++)
+        {
+            if (!AreSameTypedConstant(first.Values[i], second.Values[i]))
             {
                 return false;
             }

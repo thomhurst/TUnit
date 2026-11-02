@@ -1,0 +1,519 @@
+using TUnit.TestProject.Attributes;
+
+namespace TUnit.TestProject.Bugs._7208;
+
+// A class-level [MethodDataSource] that names a member of the generic test class itself (#7208).
+
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(Strings))]
+public class OwnClassMethodDataSource<T>(T value)
+{
+    public static IEnumerable<string> Strings() => ["s"];
+
+    [Test]
+    [Arguments("a")]
+    public async Task Test(T arg)
+    {
+        await Assert.That(arg).IsTypeOf<string>();
+        await Assert.That(value).IsTypeOf<string>();
+        await Assert.That(value!.ToString()).IsEqualTo("s");
+        await Assert.That(arg!.ToString()).IsEqualTo("a");
+    }
+}
+
+// The member may be a property, and its rows may be declared as an array.
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(Numbers))]
+public class OwnClassPropertyDataSource<T>(T value)
+{
+    public static int[] Numbers => [7];
+
+    [Test]
+    [Arguments(2)]
+    public async Task Test(T arg)
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(value!.ToString()).IsEqualTo("7");
+        await Assert.That(arg!.ToString()).IsEqualTo("2");
+    }
+}
+
+// [GenerateGenericTest] supplies the types of a member whose declared rows name the class's own type parameter.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(Values))]
+public class OwnClassTypeParameterMethodDataSourceWithGenerateGenericTest<T>(T value)
+{
+    public static IEnumerable<T> Values() => [(T)(object)5];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(value!.ToString()).IsEqualTo("5");
+    }
+}
+
+// Nothing supplies the types of a member whose declared rows name the class's own type parameter, so the
+// class's tests fail, while the rest of the assembly still runs.
+[EngineTest(ExpectedResult.Failure)]
+[MethodDataSource(nameof(Values))]
+public class OwnClassTypeParameterMethodDataSource<T>(T value)
+{
+    public static IEnumerable<T> Values() => [];
+
+    [Test]
+    public void Test()
+    {
+        _ = value;
+    }
+}
+
+// Discovery reads the overload invocation reads: the parameterless non-generic one, not the overloads declared
+// before it.
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassOverloadedMethodDataSource<T>(T value)
+{
+    public static IEnumerable<U> Rows<U>() => [];
+
+    public static IEnumerable<T> Rows(int count) => [];
+
+    public static IEnumerable<string> Rows() => ["s"];
+
+    [Test]
+    [Arguments("a")]
+    public async Task Test(T arg)
+    {
+        await Assert.That(value).IsTypeOf<string>();
+        await Assert.That(value!.ToString()).IsEqualTo("s");
+        await Assert.That(arg!.ToString()).IsEqualTo("a");
+    }
+}
+
+// A member that returns a single value, not a sequence, is one row.
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(Row))]
+public class OwnClassSingleRowMethodDataSource<T>(T value)
+{
+    public static string Row() => "s";
+
+    [Test]
+    [Arguments("a")]
+    public async Task Test(T arg)
+    {
+        await Assert.That(value).IsTypeOf<string>();
+        await Assert.That(value!.ToString()).IsEqualTo("s");
+    }
+}
+
+// An IAsyncEnumerable member's rows infer the class's types too.
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassAsyncEnumerableMethodDataSource<T>(T value)
+{
+    public static async IAsyncEnumerable<int> Rows()
+    {
+        await Task.Yield();
+        yield return 7;
+    }
+
+    [Test]
+    [Arguments(2)]
+    public async Task Test(T arg)
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(value!.ToString()).IsEqualTo("7");
+    }
+}
+
+// A [GenerateGenericTest] instantiation that class [Arguments] rows also infer still reads the own-class member
+// whose rows name the class's type parameter.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+[MethodDataSource(nameof(Values))]
+public class OwnClassTypeParameterMethodDataSourceWithArgumentsAndGenerateGenericTest<T>(T value)
+{
+    public static IEnumerable<T> Values() => [(T)(object)5];
+
+    [Test]
+    [Arguments(2)]
+    public async Task Test(T arg)
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(arg!.ToString()).IsEqualTo("2");
+    }
+}
+
+// The rows infer the types from the constructor the instance is built with (the first one), so a later
+// constructor that would infer other types does not reject them.
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassMethodDataSourceWithSeveralConstructors<T>
+{
+    private readonly T _value;
+
+    public OwnClassMethodDataSourceWithSeveralConstructors(T value) => _value = value;
+
+    public OwnClassMethodDataSourceWithSeveralConstructors(T[] values) => _value = values[0];
+
+    public static IEnumerable<int[]> Rows() => [[7]];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(_value).IsTypeOf<int[]>();
+    }
+}
+
+// Repeating a [GenerateGenericTest] that class [Arguments] rows also infer reads the own-class member once.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+[MethodDataSource(nameof(Values))]
+public class OwnClassTypeParameterMethodDataSourceWithArgumentsAndRepeatedGenerateGenericTest<T>(T value)
+{
+    public static IEnumerable<T> Values() => [(T)(object)5];
+
+    [Test]
+    [Arguments(2)]
+    public async Task Test(T arg)
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(arg!.ToString()).IsEqualTo("2");
+    }
+}
+
+// A parameterless test method on such an instantiation reads the own-class member too: the class rows alone
+// make the instantiation, with no method rows.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+[MethodDataSource(nameof(Values))]
+public class OwnClassTypeParameterMethodDataSourceWithArgumentsAndGenerateGenericTestParameterless<T>(T value)
+{
+    public static IEnumerable<T> Values() => [(T)(object)5];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+    }
+}
+
+// An own-class member whose rows are object[] infers no types either, so the [GenerateGenericTest] instantiation
+// that class [Arguments] rows also infer reads it at run time too.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassObjectArrayMethodDataSourceWithArgumentsAndGenerateGenericTest<T>(T value)
+{
+    public static IEnumerable<object[]> Rows() => [[5]];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+    }
+}
+
+// A tuple row whose generic constructor column is declared as object infers no types either, so it's read on the
+// [GenerateGenericTest] instantiation that the class [Arguments] rows also infer (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1, "a")]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassObjectTupleMethodDataSourceWithArgumentsAndGenerateGenericTest<T>(T value, string label)
+{
+    public static IEnumerable<(object, string)> Rows() => [(5, "b")];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(label).IsNotNull();
+    }
+}
+
+// TestDataRow<object> rows name no type, so they're read on the [GenerateGenericTest] instantiation, not on a
+// TestDataRow<object> one (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassTestDataRowObjectMethodDataSourceWithArgumentsAndGenerateGenericTest<T>(T value)
+{
+    public static IEnumerable<TestDataRow<object>> Rows() => [new(5)];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+    }
+}
+
+// TestDataRow<int> rows infer C<int> from their unwrapped values, not a C<TestDataRow<int>> instantiation that
+// can't be built from the unwrapped row (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassTestDataRowIntMethodDataSourceWithGenerateGenericTest<T>(T value)
+{
+    public static IEnumerable<TestDataRow<int>> Rows() => [new(5)];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+    }
+}
+
+// The rows of an own-class member take the types its declared rows infer through the constructor: int[] rows bound
+// to a T[] parameter close C<int>, not C<int[]> (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassArrayParameterMethodDataSourceWithGenerateGenericTest<T>(T[] values)
+{
+    public static IEnumerable<int[]> Rows() => [[5]];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(values).IsTypeOf<int[]>();
+        await Assert.That(values[0]!.ToString()).IsEqualTo("5");
+    }
+}
+
+// A null row of an own-class member still takes the type its declared rows infer (Greptile review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassNullTestDataRowMethodDataSource<T>(T value)
+{
+    public static IEnumerable<TestDataRow<string?>> Rows() => [new(null)];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(value).IsNull();
+    }
+}
+
+// An own-class member whose declared rows infer the types of the [GenerateGenericTest] instantiation that class
+// [Arguments] rows also infer is read on it too (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassConcreteMethodDataSourceWithArgumentsAndGenerateGenericTest<T>(T value)
+{
+    public static IEnumerable<int> Rows() => [5];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+    }
+}
+
+// Without [GenerateGenericTest], the instantiation that class [Arguments] rows infer still reads an own-class member
+// whose declared rows infer the same types (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassConcreteMethodDataSourceWithArguments<T>(T value)
+{
+    public static IEnumerable<int> Rows() => [5];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+    }
+}
+
+// The same with a test method that has rows of its own: each class row runs with each method row
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassConcreteMethodDataSourceWithArgumentsAndMethodRows<T>(T value)
+{
+    public static IEnumerable<int> Rows() => [5];
+
+    [Test]
+    [Arguments("a")]
+    [Arguments("b")]
+    public async Task Test(string label)
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(label).IsNotEmpty();
+    }
+}
+
+// A tuple row whose other column names T still infers T from its concrete column, so both modes read the member on
+// the int instantiation that the [Arguments] row infers (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1, 2)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassPartiallyGenericTupleMethodDataSourceWithArguments<T>(T first, T second)
+{
+    public static IEnumerable<(int, T)> Rows() => [(5, (T)(object)6)];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(first).IsTypeOf<int>();
+        await Assert.That(second).IsTypeOf<int>();
+
+        // Each row reaches the constructor whole: the member's row isn't cut to its first column
+        var row = ((int)(object)first!, (int)(object)second!);
+        await Assert.That(row == (1, 2) || row == (5, 6)).IsTrue();
+    }
+}
+
+// A tuple row of an own-class member passes every column to the constructor, not only the one that infers T
+// (Codex review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1, "a")]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassTupleMethodDataSourceWithArguments<T>(T value, string label)
+{
+    public static IEnumerable<(int, string)> Rows() => [(5, "b")];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+
+        var row = ((int)(object)value!, label);
+        await Assert.That(row == (1, "a") || row == (5, "b")).IsTrue();
+    }
+}
+
+// The rows infer the types through the [TestConstructor], not through the first constructor (Claude review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassMethodDataSourceWithTestConstructor<T>
+{
+    private readonly object? _value;
+
+    public OwnClassMethodDataSourceWithTestConstructor(T[] values) => _value = values[0];
+
+    [TestConstructor]
+    public OwnClassMethodDataSourceWithTestConstructor(T value) => _value = value;
+
+    public static IEnumerable<int[]> Rows() => [[7]];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int[]));
+        await Assert.That(_value).IsTypeOf<int[]>();
+    }
+}
+
+// The class parameter metadata that splits a tuple row comes from the [TestConstructor], the constructor the instance
+// is built with, not from the first constructor: each row keeps its label (Codex and Greptile review of #7336).
+// TUnit0001 checks the rows against the first constructor, not the [TestConstructor] (#7370).
+#pragma warning disable TUnit0001
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassTupleMethodDataSourceWithTestConstructor<T>
+{
+    private readonly T _value;
+    private readonly string? _label;
+
+    public OwnClassTupleMethodDataSourceWithTestConstructor(T value) => _value = value;
+
+    [TestConstructor]
+    public OwnClassTupleMethodDataSourceWithTestConstructor(T value, string label)
+    {
+        _value = value;
+        _label = label;
+    }
+
+    public static IEnumerable<(T, string)> Rows() => [((T)(object)5, "b")];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(_value).IsTypeOf<int>();
+        await Assert.That(_label).IsEqualTo("b");
+    }
+}
+#pragma warning restore TUnit0001
+
+// Two own-class sources naming overloads of one member, told apart only by Arguments, each read on the instantiation
+// their own rows infer: Rows(int) on C<int> and Rows(string) on C<string>, never the other's rows (CodeRabbit review
+// of #7336)
+#pragma warning disable TUnit0001
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+[Arguments("y")]
+[MethodDataSource(nameof(Rows), Arguments = new object[] { "x" })]
+[MethodDataSource(nameof(Rows), Arguments = new object[] { 2 })]
+public class OwnClassOverloadedMethodDataSourcesWithArguments<T>(T value)
+{
+    public static IEnumerable<string> Rows(string row) => [row];
+
+    public static IEnumerable<int> Rows(int row) => [row];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<T>();
+    }
+}
+#pragma warning restore TUnit0001
+
+// A System.Tuple row spreads over the constructor like a value tuple, as the runtime unwraps it through ITuple, so it
+// infers T = int rather than T = Tuple<int, string> (Codex review of #7336).
+// TUnit0001 does not spread System.Tuple rows (#7374).
+#pragma warning disable TUnit0001
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassReferenceTupleMethodDataSourceWithGenerateGenericTest<T>(T value, string label)
+{
+    public static IEnumerable<Tuple<int, string>> Rows() => [Tuple.Create(5, "b")];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<int>();
+        await Assert.That(label).IsEqualTo("b");
+    }
+}
+#pragma warning restore TUnit0001
+
+// The class parameter metadata of a [TestConstructor] resolves its ParameterInfo on that constructor, not on an earlier
+// one of the same shape once its T parameter is emitted as object (CodeRabbit review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassMethodDataSourceWithTestConstructorAfterObjectConstructor<T>
+{
+    private readonly object? _value;
+
+    public OwnClassMethodDataSourceWithTestConstructorAfterObjectConstructor(object other) => _value = other;
+
+    [TestConstructor]
+    public OwnClassMethodDataSourceWithTestConstructorAfterObjectConstructor(T value) => _value = value;
+
+    public static IEnumerable<T> Rows() => [(T)(object)5];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(_value).IsEqualTo(5);
+
+        var parameters = TestContext.Current!.Metadata.TestDetails.MethodMetadata.Class.Parameters;
+        await Assert.That(parameters).Count().IsEqualTo(1);
+        await Assert.That(parameters[0].ReflectionInfo.Name).IsEqualTo("value");
+    }
+}
