@@ -179,6 +179,23 @@ public class ConstrainedClassWithTypeFreeClassRow<T>(int number) where T : struc
     }
 }
 
+// A CancellationToken declared before the data parameters is supplied by the engine, so [Arguments(1, "s")] binds
+// 1 to value and infers C<int>, which meets the struct constraint. The constraint check beside the type-free class
+// row must skip the token too, or it reads "s" as T's value and reports a false failure. Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class ConstrainedClassWithTypeFreeClassRowAndLeadingToken<T>(int number) where T : struct
+{
+    [Test]
+    [Arguments(1, "s")]
+    public async Task Run(CancellationToken token, T value, object extra)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(value).IsEqualTo((T)(object)1);
+        await Assert.That(extra).IsEqualTo("s");
+    }
+}
+
 public static class TypeFreeClassRowSources
 {
     public static IEnumerable<object> Values() => [2, 3];

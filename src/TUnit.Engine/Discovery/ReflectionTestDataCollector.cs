@@ -1589,7 +1589,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         && methodRowTypeArguments.TryGetValue(genericMethod, out var groups)
         && IndexOfTypeArguments(groups, typeArguments) >= 0;
 
-    private static Type[]? InferClassTypeArgumentsFromMethodRow(Type[] classGenericParameters, ParameterInfo[] parameters, ArgumentsAttribute arguments, bool nullValuesArrayInfersObject)
+    internal static Type[]? InferClassTypeArgumentsFromMethodRow(Type[] classGenericParameters, ParameterInfo[] parameters, ArgumentsAttribute arguments, bool nullValuesArrayInfersObject)
     {
         // [Arguments(null)] (a null params array) infers no type when [GenerateGenericTest] supplies the
         // instantiations it runs on. Otherwise its one null value infers object, as in the source generator.
