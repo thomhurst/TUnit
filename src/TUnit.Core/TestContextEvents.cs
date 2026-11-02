@@ -7,6 +7,18 @@ namespace TUnit.Core;
 /// </summary>
 public class TestContextEvents : ITestEvents
 {
+    internal TestContextEvents Clone() => new()
+    {
+        OnDataRowDispose = OnDataRowDispose?.Clone(),
+        OnDispose = OnDispose?.Clone(),
+        OnTestRegistered = OnTestRegistered?.Clone(),
+        OnInitialize = OnInitialize?.Clone(),
+        OnTestStart = OnTestStart?.Clone(),
+        OnTestEnd = OnTestEnd?.Clone(),
+        OnTestSkipped = OnTestSkipped?.Clone(),
+        OnTestRetry = OnTestRetry?.Clone()
+    };
+
     internal AsyncEvent<TestContext>? OnDataRowDispose { get; set; }
 
     public AsyncEvent<TestContext>? OnDispose { get; set; }

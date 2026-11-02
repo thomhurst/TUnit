@@ -15,6 +15,7 @@ public class DelegateLifecycleEventTests
             {
                 yield return () =>
                 {
+                    metadata.TestBuilderContext.Current.StateBag["factoryState"] = "preserved";
                     var events = metadata.TestBuilderContext.Current.Events;
                     events.OnTestRegistered += Record("registered");
                     events.OnTestStart += Record("start");
@@ -97,6 +98,7 @@ public class ClassDelegateLifecycleEventTests(int value)
     public async Task FirstRow()
     {
         await Assert.That(value).IsEqualTo(1);
+        await Assert.That(TestContext.Current!.StateBag.Items["factoryState"]).IsEqualTo("preserved");
         await Assert.That(TestContext.Current!.StateBag.Items["registered"]).IsEqualTo(1);
         await Assert.That(TestContext.Current.StateBag.Items["start"]).IsEqualTo(1);
     }

@@ -49,6 +49,11 @@ public class AsyncEvent<TEventArgs>
 {
     private List<Invocation>? _handlers;
 
+    internal AsyncEvent<TEventArgs> Clone() => new()
+    {
+        _handlers = _handlers is null ? null : [.. _handlers]
+    };
+
     /// <summary>
     /// Represents a single invocation of an async event handler.
     /// </summary>

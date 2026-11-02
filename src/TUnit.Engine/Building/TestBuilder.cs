@@ -241,7 +241,7 @@ internal sealed class TestBuilder : ITestBuilder
                     // No test holds this first fetch yet. The first test built from this class row takes it
                     // instead of calling the factory again, so a non-shared source does not create an extra
                     // instance that nothing tracks or disposes (#7157).
-                    var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, contextAccessor.Current.EventsIfCreated);
+                    var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, contextAccessor.Current);
 
 #if NET
                     // Register scope for class data objects from the simple path.
@@ -306,6 +306,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 {
                                     // Update context BEFORE calling data factories so they track objects in the right context
                                     // StateBag and Events are lazy-initialized for performance
+                                    var enumerationContext = contextAccessor.Current;
                                     contextAccessor.Current = new TestBuilderContext
                                     {
                                         TestMetadata = metadata.MethodMetadata,
@@ -315,7 +316,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         ClassConstructor = testBuilderContext.ClassConstructor
                                     };
 
-                                    testBuilderContext.CopyStateBagTo(contextAccessor.Current);
+                                    enumerationContext.CopyStateBagTo(contextAccessor.Current);
 
                                     var (classDataUnwrapped, classRowMetadata) = await unclaimedClassRow.TakeOrFetchAsync(classDataFactory, contextAccessor.Current);
                                     classData = classDataUnwrapped;
@@ -363,7 +364,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         {
                                             // Skip this data source as it's not compatible with the expected types.
                                             // No test holds the class row's objects, so the next test takes them.
-                                            unclaimedClassRow.Return(classData, classRowMetadata, contextAccessor.Current.EventsIfCreated);
+                                            unclaimedClassRow.Return(classData, classRowMetadata);
                                             continue;
                                         }
                                     }
@@ -1055,12 +1056,14 @@ internal sealed class TestBuilder : ITestBuilder
     /// are lent to the instance instead, and the next test built from the row tracks them without
     /// receiving them, so they are still disposed.
     /// </remarks>
-    private sealed class UnclaimedClassRow(object?[] data, TestDataRowMetadata? metadata, TestContextEvents? events)
+    private sealed class UnclaimedClassRow(object?[] data, TestDataRowMetadata? metadata, TestBuilderContext rowContext)
     {
         private object?[]? _data = data;
         private TestDataRowMetadata? _metadata = metadata;
         private object?[]? _lent;
-        private TestContextEvents? _events = events;
+        private TestBuilderContext _rowContext = rowContext;
+        // Snapshot before any method factory can mutate the class subscriptions.
+        private TestContextEvents? _events = rowContext.EventsIfCreated?.Clone();
 
         /// <summary>
         /// Takes the unclaimed objects, or fetches a new row from <paramref name="classDataFactory"/> when a
@@ -1068,33 +1071,37 @@ internal sealed class TestBuilder : ITestBuilder
         /// </summary>
         public ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> TakeOrFetchAsync(Func<Task<object?[]?>> classDataFactory, TestBuilderContext context)
         {
-            if (_events is { } savedEvents)
-            {
-                context.Events = savedEvents;
-                _events = null;
-            }
-
             if (_data is { } data)
             {
+                _rowContext.CopyStateBagTo(context);
+                if (_events is { } savedEvents)
+                {
+                    context.Events = savedEvents.Clone();
+                }
                 var row = (data, _metadata);
                 Clear();
                 return new ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)>(row);
             }
 
-            return FetchAsync(classDataFactory);
+            return FetchAsync(classDataFactory, context);
 
-            static async ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> FetchAsync(Func<Task<object?[]?>> factory)
-                => DataUnwrapper.UnwrapWithMetadata(await factory() ?? []);
+            async ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> FetchAsync(Func<Task<object?[]?>> factory, TestBuilderContext target)
+            {
+                var row = DataUnwrapper.UnwrapWithMetadata(await factory() ?? []);
+                _rowContext = target with { };
+                target.CopyStateBagTo(_rowContext);
+                _events = target.EventsIfCreated?.Clone();
+                return row;
+            }
         }
 
         /// <summary>
         /// Hands back objects that were taken but that no test ended up holding, so the next test takes them.
         /// </summary>
-        public void Return(object?[] data, TestDataRowMetadata? metadata, TestContextEvents? events)
+        public void Return(object?[] data, TestDataRowMetadata? metadata)
         {
             _data = data;
             _metadata = metadata;
-            _events = events;
         }
 
         /// <summary>
@@ -2191,7 +2198,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                 // The first test built from this class row takes this fetch instead of calling the factory
                 // again, so a non-shared source does not create an extra, untracked instance (#7157).
-                var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, contextAccessor.Current.EventsIfCreated);
+                var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, contextAccessor.Current);
 
                 // Initialize objects before method data sources are evaluated (ObjectInitializer is phase-aware)
                 await InitializeClassDataAsync(classData);
@@ -2251,6 +2258,7 @@ internal sealed class TestBuilder : ITestBuilder
                             {
                                 cancellationToken.ThrowIfCancellationRequested();
 
+                                var enumerationContext = contextAccessor.Current;
                                 contextAccessor.Current = new TestBuilderContext
                                 {
                                     TestMetadata = metadata.MethodMetadata,
@@ -2259,7 +2267,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     ClassDataSourceAttribute = classDataSource,
                                     DataSourceAttribute = methodDataSource
                                 };
-                                baseContext.CopyStateBagTo(contextAccessor.Current);
+                                enumerationContext.CopyStateBagTo(contextAccessor.Current);
 
                                 // Build and yield single test
                                 var test = await BuildSingleTestAsync(
@@ -2436,7 +2444,7 @@ internal sealed class TestBuilder : ITestBuilder
                 if (!IsDataCompatibleWithExpectedTypes(metadata, methodData))
                 {
                     // Skip incompatible data. No test holds the class row's objects, so the next test takes them.
-                    unclaimedClassRow.Return(classData, classRowMetadata, contextAccessor.Current.EventsIfCreated);
+                    unclaimedClassRow.Return(classData, classRowMetadata);
                     return null;
                 }
             }
