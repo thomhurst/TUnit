@@ -50,8 +50,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         foreach (var kvp in s_trackedObjects)
         {
             // TryRemove guards against racing disposals (e.g. a late UntrackObject call)
-            if (!s_trackedObjects.TryRemove(kvp.Key, out _))
+            if (!s_trackedObjects.TryRemove(kvp.Key, out _) || IsExternallyOwned(kvp.Key))
             {
+                // An object marked after it was counted belongs to its external owner, which disposes it.
                 continue;
             }
 
@@ -336,7 +337,10 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     private async ValueTask UntrackObject(object? obj)
     {
-        if (obj == null || ShouldSkipTracking(obj))
+        // Not ShouldSkipTracking: an object can be marked externally owned after another source counted it
+        // (MarkExternallyOwned races with tracking), and that count must still be released. An object
+        // marked before anything counted it has no counter, so the lookup below finds nothing.
+        if (obj is not IDisposable and not IAsyncDisposable)
         {
             return;
         }
@@ -362,7 +366,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             }
         }
 
-        if (shouldDispose)
+        if (shouldDispose && !IsExternallyOwned(obj))
         {
             // TODO: Add disposal span for shared objects here to match the init spans
             // created in ObjectLifecycleService.InitializeWithSpanAsync. Currently only
@@ -503,8 +507,10 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// <remarks>
     /// The mark lasts for the object's lifetime and applies to every data source that later supplies the
     /// object, because the object still belongs to the container that resolved it: a root singleton is
-    /// disposed by its root container, not by a test. Only a newly created object is expected here, which no
-    /// other source can be tracking concurrently.
+    /// disposed by its root container, not by a test. The check and the mark are not atomic, so another source
+    /// can count the object in between (a root singleton that a non-owning source supplies at the same moment).
+    /// That count is still released, and the tracker leaves the object to its owner rather than disposing it
+    /// when the count reaches zero or at session end.
     /// </remarks>
     internal static void MarkExternallyOwned(object? obj)
     {

@@ -115,6 +115,9 @@ internal sealed class TestScheduler : ITestScheduler
                 await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
             }
 
+            // Last, because the tests' callbacks may still use services that static properties hold.
+            await _staticPropertyHandler.ReleaseSessionCallbacksAfterFailedInitializationAsync().ConfigureAwait(false);
+
             throw;
         }
 

@@ -16,6 +16,7 @@ using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
+using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.Engine.Discovery;
 
@@ -1588,14 +1589,23 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 metadata = metadata with { MembersToGenerate = membersToGenerate };
             }
 
-            // Get data rows from the source
-            await foreach (var rowFactory in dataSource.GetDataRowsAsync(metadata))
+            try
             {
-                var dataArray = await rowFactory().ConfigureAwait(false);
-                if (dataArray != null)
+                // Get data rows from the source
+                await foreach (var rowFactory in dataSource.GetDataRowsAsync(metadata))
                 {
-                    data.Add(dataArray);
+                    var dataArray = await rowFactory().ConfigureAwait(false);
+                    if (dataArray != null)
+                    {
+                        data.Add(dataArray);
+                    }
                 }
+            }
+            finally
+            {
+                // The rows read here are shared by every test of their partition, so the cleanup their
+                // data source subscribed (a dependency injection scope's disposal) runs at session end.
+                TestOnDisposeRaiser.DeferToSessionEnd(metadata.TestBuilderContext.Current);
             }
         }
         catch (Exception ex)
