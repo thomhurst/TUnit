@@ -345,23 +345,57 @@ internal sealed class TestRegistry : ITestRegistry
         var lambdaExpression = result.TestMethod as LambdaExpression
             ?? throw new InvalidOperationException("Dynamic test method must be a lambda expression");
 
-        var compiledExpression = lambdaExpression.Compile();
-        var invokeMethod = compiledExpression.GetType().GetMethod("Invoke")!;
+        var invoker = CompileRuntimeTestInvoker(lambdaExpression);
 
         return async (instance, args) =>
         {
             var testInstance = instance ?? throw new InvalidOperationException("Test instance is null");
-            var invokeResult = invokeMethod.Invoke(compiledExpression, [testInstance]);
+            var invokeResult = invoker(testInstance);
 
             if (invokeResult is Task task)
             {
-                await task;
+                await task.ConfigureAwait(false);
             }
             else if (invokeResult is ValueTask valueTask)
             {
-                await valueTask;
+                await valueTask.ConfigureAwait(false);
             }
         };
+    }
+
+    // DynamicTest<T>.TestMethod is an Expression<Action<T>>, so compiling it as-is would discard the
+    // value of its body, such as the Task of an async test method (#7249). Re-type the body as the
+    // lambda's return value and box it, so the invoker can await it.
+    [RequiresUnreferencedCode("Dynamic test invocation requires LambdaExpression.Compile() which is not supported in native AOT scenarios.")]
+    private static Func<object, object?> CompileRuntimeTestInvoker(LambdaExpression lambdaExpression)
+    {
+        if (lambdaExpression.Parameters.Count != 1)
+        {
+            throw new InvalidOperationException("Dynamic test method must be a lambda expression with a single test class parameter");
+        }
+
+        var testClassParameter = lambdaExpression.Parameters[0];
+        var instanceParameter = Expression.Parameter(typeof(object), "instance");
+        var typedInstance = Expression.Variable(testClassParameter.Type, "testClass");
+        var testBody = new ParameterReplacer(testClassParameter, typedInstance).Visit(lambdaExpression.Body);
+
+        Expression result = testBody.Type == typeof(void)
+            ? Expression.Block(testBody, Expression.Constant(null, typeof(object)))
+            : Expression.Convert(testBody, typeof(object));
+
+        var body = Expression.Block(
+            typeof(object),
+            [typedInstance],
+            Expression.Assign(typedInstance, Expression.Convert(instanceParameter, testClassParameter.Type)),
+            result);
+
+        return Expression.Lambda<Func<object, object?>>(body, instanceParameter).Compile();
+    }
+
+    private sealed class ParameterReplacer(ParameterExpression parameter, Expression replacement) : ExpressionVisitor
+    {
+        protected override Expression VisitParameter(ParameterExpression node)
+            => node == parameter ? replacement : base.VisitParameter(node);
     }
 
     private sealed class PendingDynamicTest
