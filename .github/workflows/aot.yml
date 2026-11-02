@@ -1,11 +1,13 @@
 name: AOT
 
-# The native AOT publishes: the test app with the AOT-mode engine tests that run against it, and the
-# NugetTester against freshly packed packages. Inside the .NET matrix they competed with the test
-# modules for CPUs, and the test-app publish was the critical path on every OS (12-25 minutes, with
-# the Reflection-mode engine tests held back until it finished). Here they need no full solution
-# build: TUnit.Engine.Tests builds the test projects it launches, packing needs only the libraries,
-# and the test-app publish compiles into its own artifacts tree.
+# The engine tests, and the native AOT publishes: the test app with the AOT-mode engine tests that
+# run against it, and the NugetTester against freshly packed packages. UploadToNuGetModule waits for
+# this workflow to pass on the commit before it publishes.
+#
+# Inside the .NET matrix the publishes competed with the test modules for CPUs, and the test-app
+# publish was the critical path on every OS (12-25 minutes). Here they need no full solution build:
+# TUnit.Engine.Tests builds the test projects it launches, packing needs only the libraries, and the
+# test-app publish compiles into its own artifacts tree.
 
 on:
   pull_request:
@@ -131,4 +133,68 @@ jobs:
         if: always()
         with:
           name: HangDump-aot-${{ matrix.os }}
+          path: '**/hangdump*'
+
+  # The Reflection-mode engine tests, plus the tests that don't run per mode. In the dotnet.yml
+  # pipeline they waited for every other test module, then ran alone for 3-7 minutes at the end of
+  # the job. They need only TUnit.Engine.Tests and the test projects it launches, and no versioning.
+  engine-tests:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    name: Engine tests (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Dev Drive (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: samypr100/setup-dev-drive@v4
+        with:
+          drive-size: 10GB
+          trusted-dev-drive: true
+          env-mapping: |
+            NUGET_PACKAGES,{{ DEV_DRIVE }}/.nuget/packages
+            TEMP,{{ DEV_DRIVE }}/tmp
+            TMP,{{ DEV_DRIVE }}/tmp
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+
+      - name: Enable Long Paths on Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+        shell: pwsh
+
+      - name: Build
+        shell: bash
+        run: |
+          dotnet build tests/TUnit.Engine.Tests/TUnit.Engine.Tests.csproj -c Release
+          dotnet build tools/TUnit.Pipeline/TUnit.Pipeline.csproj -c Release
+
+      - name: Run Pipeline
+        uses: ./.github/actions/execute-pipeline
+        with:
+          categories: EngineTests
+          admin-token: ${{ github.token }}
+
+      - name: Upload Diagnostic Logs
+        uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: TestingPlatformDiagnosticLogs-engine-tests-${{ matrix.os }}
+          path: '**/log_*.diag'
+
+      - name: Upload Hang Dumps
+        uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: HangDump-engine-tests-${{ matrix.os }}
           path: '**/hangdump*'

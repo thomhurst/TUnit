@@ -10,8 +10,8 @@ namespace TUnit.Engine.Tests;
 /// so this exercises the same engine code path in both reflection and source-generated modes.
 ///
 /// Note: this drives the built test-project executable directly rather than using
-/// <see cref="InvokableTestBase"/>, because that harness always attaches <c>--report-trx</c> and
-/// asserts a TRX, which <c>--list-tests</c> does not produce. We assert on stdout instead.
+/// <see cref="InvokableTestBase"/>, because that harness always asserts a TRX, which
+/// <c>--list-tests</c> does not produce. We assert on stdout instead.
 /// </summary>
 public class ListTestsFilterTests
 {

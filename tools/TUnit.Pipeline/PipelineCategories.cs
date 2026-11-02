@@ -19,4 +19,10 @@ public static class PipelineCategories
     /// against the packed packages. aot.yml runs them with Packaging.
     /// </summary>
     public const string Aot = "Aot";
+
+    /// <summary>
+    /// The Reflection-mode engine tests. aot.yml runs them on runners of their own, where they no
+    /// longer wait for, or compete with, the other test modules (see dotnet.yml).
+    /// </summary>
+    public const string EngineTests = "EngineTests";
 }

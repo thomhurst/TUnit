@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using CliWrap;
 using CliWrap.Buffered;
@@ -62,25 +61,25 @@ public abstract class InvokableTestBase(TestMode testMode)
         var executable = binDir.EnumerateFiles(projectName).FirstOrDefault()
                       ?? binDir.EnumerateFiles(projectName + ".exe").First();
 
-        var guid = Guid.NewGuid().ToString("N");
-        var trxFilename = guid + ".trx";
+        var trxPath = NewTrxPath();
         var command = Cli.Wrap(executable.FullName)
             .WithArguments(
                 [
                     "--treenode-filter", filter,
-                    "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_",
-                    "--hangdump", "--hangdump-filename", $"hangdump.{RuntimeInformation.RuntimeIdentifier}.tests-{guid}.dmp", "--hangdump-timeout", "5m",
+                    // Bounds a hung run. --hangdump would also dump it, but like --report-trx it
+                    // starts the test host as a second process on every run.
+                    "--timeout", "10m",
 
                     ..runOptions.AdditionalArguments
                 ]
             )
             .WithWorkingDirectory(testProject.DirectoryName!)
-            .WithEnvironmentVariables(BuildEnvironmentVariables(runOptions))
+            .WithEnvironmentVariables(BuildEnvironmentVariables(runOptions, trxPath))
             .WithValidation(CommandResultValidation.None);
 
-        await RunWithFailureLogging(command, runOptions, trxFilename, assertions, assertionExpression);
+        await RunWithFailureLogging(command, runOptions, trxPath, assertions, assertionExpression);
     }
 
     private async Task RunWithAot(string filter, List<Action<TestRun>> assertions,
@@ -89,21 +88,12 @@ public abstract class InvokableTestBase(TestMode testMode)
         Skip.When(Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != "true",
             "AOT tests are only run in GitHub Actions CI. Set GITHUB_ACTIONS=true to run locally.");
 
-        var files = FindFolder(x => x.Name == "TESTPROJECT_AOT")!
-            .EnumerateFiles("*", SearchOption.AllDirectories)
-            .ToArray();
+        var trxPath = NewTrxPath();
 
-        var aotApp = files.FirstOrDefault(x => x.Name == "TUnit.TestProject")
-                     ?? files.First(x => x.Name == "TUnit.TestProject.exe");
-
-        var guid = Guid.NewGuid().ToString("N");
-        var trxFilename = guid + ".trx";
-
-        var command = Cli.Wrap(aotApp.FullName)
+        var command = Cli.Wrap(AotApp.Value.FullName)
             .WithArguments(
                 [
                     "--treenode-filter", filter,
-                    "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_AOT_",
                     // A whole-session budget, not a hang detector. The [EngineTest=Pass] run takes
@@ -113,15 +103,35 @@ public abstract class InvokableTestBase(TestMode testMode)
                     ..runOptions.AdditionalArguments
                 ]
             )
-            .WithEnvironmentVariables(BuildEnvironmentVariables(runOptions))
+            .WithEnvironmentVariables(BuildEnvironmentVariables(runOptions, trxPath))
             .WithValidation(CommandResultValidation.None);
 
-        await RunWithFailureLogging(command, runOptions, trxFilename, assertions, assertionExpression);
+        await RunWithFailureLogging(command, runOptions, trxPath, assertions, assertionExpression);
     }
 
-    private static Dictionary<string, string?> BuildEnvironmentVariables(RunOptions runOptions)
+    // Searched for once: walking the repository for it on every run cost seconds each time.
+    private static readonly Lazy<FileInfo> AotApp = new(() =>
+    {
+        var files = FindFolder(x => x.Name == "TESTPROJECT_AOT")!
+            .EnumerateFiles("*", SearchOption.AllDirectories)
+            .ToArray();
+
+        return files.FirstOrDefault(x => x.Name == "TUnit.TestProject")
+               ?? files.First(x => x.Name == "TUnit.TestProject.exe");
+    });
+
+    private static readonly string TrxDirectory = Path.Combine(
+        Sourcy.DotNet.Projects.TUnit_TestProject.DirectoryName!, "TestResults", "engine-tests");
+
+    private static string NewTrxPath() => Path.Combine(TrxDirectory, Guid.NewGuid().ToString("N") + ".trx");
+
+    private static Dictionary<string, string?> BuildEnvironmentVariables(RunOptions runOptions, string trxPath)
     {
         var environmentVariables = EnvironmentVariables.DisableHtmlReporterForChildProcess();
+
+        // The test project writes its TRX in-process when this is set (see InProcessTrxReporter
+        // there). --report-trx would start the test host as a second process on every run.
+        environmentVariables["TUNIT_ENGINE_TESTS_TRX_PATH"] = trxPath;
 
         foreach (var (key, value) in runOptions.EnvironmentVariables)
         {
@@ -142,7 +152,7 @@ public abstract class InvokableTestBase(TestMode testMode)
     }
 
     private async Task<CommandTask<BufferedCommandResult>> RunWithFailureLogging(Command command, RunOptions runOptions,
-        string trxFilename, List<Action<TestRun>> assertions, string assertionExpression)
+        string trxPath, List<Action<TestRun>> assertions, string assertionExpression)
     {
         var commandTask = command.ExecuteBufferedAsync
         (
@@ -163,7 +173,7 @@ public abstract class InvokableTestBase(TestMode testMode)
 
             commandResult = await commandTask;
 
-            await TrxAsserter.AssertTrx(testMode, command, commandResult, assertions, trxFilename, assertionExpression: assertionExpression);
+            await TrxAsserter.AssertTrxAtPath(trxPath, assertions);
         }
         catch (Exception e)
         {
