@@ -357,7 +357,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         ActivitySource activitySource,
         CancellationToken cancellationToken)
     {
-        var parentContext = GetParentActivityContext(testContext, sharedType);
+        var parentContext = TUnitActivitySource.GetSharedObjectParentContext(testContext, sharedType);
 
         var scopeTag = TUnitActivitySource.GetScopeTag(sharedType);
         var isShared = sharedType is not null and not SharedType.None;
@@ -383,23 +383,6 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             () => ObjectInitializer.InitializeAsync(obj, cancellationToken).AsTask());
     }
 
-    /// <summary>
-    /// Returns the parent activity context for an initialization span.
-    /// Session/keyed/assembly-scoped objects are parented under the assembly activity so they
-    /// appear as siblings of suite spans in both OTel backends and the HTML timeline.
-    /// The <c>tunit.trace.scope</c> tag carries the precise lifetime semantics.
-    /// </summary>
-    private static ActivityContext GetParentActivityContext(TestContext testContext, SharedType? sharedType)
-    {
-        return sharedType switch
-        {
-            SharedType.PerTestSession or SharedType.PerAssembly or SharedType.Keyed
-                => testContext.ClassContext.AssemblyContext.Activity?.Context ?? default,
-            SharedType.PerClass => testContext.ClassContext.Activity?.Context ?? default,
-            // Per-test objects and the test class instance go under the test case activity
-            _ => testContext.Activity?.Context ?? testContext.ClassContext.Activity?.Context ?? default
-        };
-    }
 #endif
 
     /// <summary>

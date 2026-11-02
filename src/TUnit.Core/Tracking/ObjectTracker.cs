@@ -227,10 +227,10 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return new ValueTask<List<Exception>?>((List<Exception>?)null);
         }
 
-        return UntrackObjectsAsync(trackedObjects, heldSharedInstances);
+        return UntrackObjectsAsync(testContext, trackedObjects, heldSharedInstances);
     }
 
-    private async ValueTask<List<Exception>?> UntrackObjectsAsync(SortedList<int, HashSet<object>>? trackedObjects, HashSet<object>? heldSharedInstances)
+    private async ValueTask<List<Exception>?> UntrackObjectsAsync(TestContext testContext, SortedList<int, HashSet<object>>? trackedObjects, HashSet<object>? heldSharedInstances)
     {
         // SortedList keeps keys in ascending order; iterate in ascending order (shallowest depth first).
         // This ensures disposal happens in reverse order of initialization (which goes deepest first).
@@ -243,20 +243,20 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
             for (var i = 0; i < values.Count; i++)
             {
-                cleanupExceptions = await UntrackBucketAsync(values[i], cleanupExceptions).ConfigureAwait(false);
+                cleanupExceptions = await UntrackBucketAsync(testContext, values[i], cleanupExceptions).ConfigureAwait(false);
             }
         }
 
         // Released last: the test's own objects may depend on the shared instances it fetched.
         if (heldSharedInstances is { Count: > 0 })
         {
-            cleanupExceptions = await UntrackBucketAsync(heldSharedInstances, cleanupExceptions).ConfigureAwait(false);
+            cleanupExceptions = await UntrackBucketAsync(testContext, heldSharedInstances, cleanupExceptions).ConfigureAwait(false);
         }
 
         return cleanupExceptions;
     }
 
-    private async ValueTask<List<Exception>?> UntrackBucketAsync(HashSet<object> bucket, List<Exception>? cleanupExceptions)
+    private async ValueTask<List<Exception>?> UntrackBucketAsync(TestContext testContext, HashSet<object> bucket, List<Exception>? cleanupExceptions)
     {
         List<Task>? disposalTasks = null;
 
@@ -264,7 +264,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         {
             try
             {
-                var task = UntrackObject(obj);
+                var task = UntrackObject(obj, testContext);
 
                 if (!task.IsCompletedSuccessfully)
                 {
@@ -331,9 +331,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// instead of bypassing it — a direct dispose would leave a stale entry that the session-end
     /// sweep would dispose a second time.
     /// </summary>
-    public ValueTask UntrackObjectAsync(object? obj) => UntrackObject(obj);
+    public ValueTask UntrackObjectAsync(object? obj) => UntrackObject(obj, testContext: null);
 
-    private async ValueTask UntrackObject(object? obj)
+    private async ValueTask UntrackObject(object? obj, TestContext? testContext)
     {
         if (obj == null || ShouldSkipTracking(obj))
         {
@@ -363,12 +363,61 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         if (shouldDispose)
         {
-            // TODO: Add disposal span for shared objects here to match the init spans
-            // created in ObjectLifecycleService.InitializeWithSpanAsync. Currently only
-            // per-test disposal gets a span (via TestCoordinator.DisposeTestInstanceWithSpanAsync).
+#if NET
+            if (TryGetSharedDisposeScope(obj, out var sharedType))
+            {
+                await DisposeWithSpanAsync(obj, testContext, sharedType).ConfigureAwait(false);
+                return;
+            }
+#endif
             await disposer.DisposeAsync(obj).ConfigureAwait(false);
         }
     }
+
+#if NET
+    /// <summary>
+    /// Whether disposing <paramref name="obj"/> should get a span: it is a disposable shared
+    /// data-source object (its scope registered in <see cref="TraceScopeRegistry"/>) and the
+    /// lifecycle source has a listener. Mirrors the <c>initialize</c> spans emitted by the engine.
+    /// </summary>
+    private static bool TryGetSharedDisposeScope(object obj, out SharedType sharedType)
+    {
+        sharedType = SharedType.None;
+
+        if (obj is not (IAsyncDisposable or IDisposable)
+            || !TUnitActivitySource.LifecycleSource.HasListeners()
+            || TraceScopeRegistry.GetSharedType(obj) is not { } registered
+            || registered == SharedType.None)
+        {
+            return false;
+        }
+
+        sharedType = registered;
+        return true;
+    }
+
+    /// <summary>
+    /// Disposes a shared object inside a <c>dispose &lt;Type&gt;</c> span, parented by the same rules as
+    /// its <c>initialize</c> span, so the timeline shows fixture teardown cost next to its setup cost.
+    /// </summary>
+    private Task DisposeWithSpanAsync(object obj, TestContext? testContext, SharedType sharedType)
+    {
+        KeyValuePair<string, object?>[] tags = testContext is null
+            ? [new(TUnitActivitySource.TagTraceScope, TUnitActivitySource.GetScopeTag(sharedType))]
+            :
+            [
+                new(TUnitActivitySource.TagTestClass, testContext.ClassContext.ClassType.FullName),
+                new(TUnitActivitySource.TagTraceScope, TUnitActivitySource.GetScopeTag(sharedType))
+            ];
+
+        return TUnitActivitySource.RunWithSpanAsync(
+            TUnitActivitySource.LifecycleSource,
+            $"dispose {TUnitActivitySource.GetReadableTypeName(obj.GetType())}",
+            TUnitActivitySource.GetSharedObjectParentContext(testContext, sharedType),
+            tags,
+            () => disposer.DisposeAsync(obj).AsTask());
+    }
+#endif
 
     /// <summary>
     /// Removes <paramref name="counter"/> from the tracking dictionary (preventing a memory leak),
