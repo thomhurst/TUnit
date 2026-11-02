@@ -44,15 +44,16 @@ internal static class ReflectionGenericTypeResolver
     }
 
     /// <summary>
-    /// The class type arguments a data row infers through the first public constructor, as the source generator
-    /// infers them: each non-null value is matched against its constructor parameter's type, so a <c>string[]</c>
+    /// The class type arguments a data row infers through the constructor the instance is built with (one marked
+    /// <c>[TestConstructor]</c>, as <see cref="ConstructorHelper.FindSuitableConstructor"/> picks it, and otherwise
+    /// the first public one), as the source generator infers them: each non-null value is matched against its constructor parameter's type, so a <c>string[]</c>
     /// value for a <c>T[]</c> parameter infers <c>string</c> and a <c>List&lt;int&gt;</c> value for a
     /// <c>List&lt;T&gt;</c> parameter infers <c>int</c> (#7223). Null when the parameters leave a type parameter
     /// uninferred.
     /// </summary>
     private static Type[]? InferTypeArgumentsFromConstructor(Type genericTypeDefinition, Type[] genericParameters, object?[] dataRow)
     {
-        if (genericTypeDefinition.GetConstructors() is not [var constructor, ..])
+        if (FindRowConstructor(genericTypeDefinition) is not { } constructor)
         {
             return null;
         }
@@ -115,6 +116,19 @@ internal static class ReflectionGenericTypeResolver
         }
 
         return inferredCount == genericParameters.Length ? (Type[]) typeArguments! : null;
+    }
+
+    private static ConstructorInfo? FindRowConstructor(Type genericTypeDefinition)
+    {
+        foreach (var candidate in genericTypeDefinition.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+        {
+            if (candidate.IsDefined(typeof(TestConstructorAttribute), inherit: false))
+            {
+                return candidate;
+            }
+        }
+
+        return genericTypeDefinition.GetConstructors() is [var first, ..] ? first : null;
     }
 
     /// <summary>

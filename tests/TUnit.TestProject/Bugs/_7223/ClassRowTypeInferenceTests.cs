@@ -124,3 +124,31 @@ public class NullArrayBeforeValueClassRowInference<T>(T[]? values, T other)
         await Assert.That((object?)other).IsEqualTo("x");
     }
 }
+
+// The row infers T through the [TestConstructor] the instance is built with, not through the first constructor: the
+// string[] binds to the bare T, so T is string[] in both modes. Inferring through the T[] constructor gave string, and
+// the array then could not bind to the marked constructor's parameter.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments<string[]>(["x"])]
+public class TestConstructorClassRowInference<T>
+{
+    private readonly T _value;
+
+    public TestConstructorClassRowInference(T[] values)
+    {
+        _value = values[0];
+    }
+
+    [TestConstructor]
+    public TestConstructorClassRowInference(T value)
+    {
+        _value = value;
+    }
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string[]));
+        await Assert.That(_value is string[] { Length: 1 } array && array[0] == "x").IsTrue();
+    }
+}

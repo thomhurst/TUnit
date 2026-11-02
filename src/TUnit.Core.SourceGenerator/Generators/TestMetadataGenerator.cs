@@ -7003,8 +7003,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             argumentValues = argAttr.ConstructorArguments[0].Values;
         }
 
-        // Find the primary constructor
-        var primaryConstructor = classSymbol.Constructors
+        // The row binds to the constructor the instance is built with: one marked [TestConstructor], as the instance
+        // factory reads it, and otherwise the primary constructor. Mirrors reflection mode's
+        // ReflectionGenericTypeResolver.InferTypeArgumentsFromConstructor.
+        var primaryConstructor = classSymbol.InstanceConstructors
+            .FirstOrDefault(c => c.GetAttributes().Any(attribute =>
+                attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
+            ?? classSymbol.Constructors
             .FirstOrDefault(c => c.DeclaringSyntaxReferences.Any(sr =>
                 sr.GetSyntax() is ConstructorDeclarationSyntax cds &&
                 cds.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword))))
