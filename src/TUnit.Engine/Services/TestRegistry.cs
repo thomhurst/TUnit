@@ -379,6 +379,14 @@ internal sealed class TestRegistry : ITestRegistry
         var typedInstance = Expression.Variable(testClassParameter.Type, "testClass");
         var testBody = new ParameterReplacer(testClassParameter, typedInstance).Visit(lambdaExpression.Body);
 
+        if (testBody.Type.IsGenericType && testBody.Type.GetGenericTypeDefinition() == typeof(ValueTask<>))
+        {
+            // A boxed ValueTask<T> matches neither Task nor ValueTask in the invoker, so convert it
+            // to its Task<T>. AsTask is a member of the closed type the test method already returns,
+            // so this needs no runtime generic instantiation.
+            testBody = Expression.Call(testBody, testBody.Type.GetMethod(nameof(ValueTask<object>.AsTask), Type.EmptyTypes)!);
+        }
+
         Expression result = testBody.Type == typeof(void)
             ? Expression.Block(testBody, Expression.Constant(null, typeof(object)))
             : Expression.Convert(testBody, typeof(object));

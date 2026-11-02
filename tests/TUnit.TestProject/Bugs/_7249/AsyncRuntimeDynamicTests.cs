@@ -4,7 +4,7 @@ using TUnit.Core.Extensions;
 
 namespace TUnit.TestProject.Bugs._7249;
 
-// A dynamic test added with AddDynamicTest must await the Task or ValueTask its method returns,
+// A dynamic test added with AddDynamicTest must await the Task, ValueTask or ValueTask<T> its method returns,
 // so a failure after the first await fails the test (#7249). Run only by
 // TUnit.Engine.Tests/Bug7249AsyncRuntimeDynamicTests: it contains intentional failures.
 
@@ -21,6 +21,12 @@ public sealed class AsyncRuntimeDynamicConsumer
     {
         await Task.Yield();
         throw new InvalidOperationException("ValueTask dynamic test failed after await");
+    }
+
+    public async ValueTask<int> ValueTaskOfT_Fails_After_Await()
+    {
+        await Task.Yield();
+        throw new InvalidOperationException("ValueTask<T> dynamic test failed after await");
     }
 
     public async Task Task_Passes()
@@ -49,6 +55,12 @@ public class AsyncRuntimeDynamicTests
         await context.AddDynamicTest(new DynamicTest<AsyncRuntimeDynamicConsumer>
         {
             TestMethod = consumer => consumer.ValueTask_Fails_After_Await(),
+            Attributes = []
+        });
+
+        await context.AddDynamicTest(new DynamicTest<AsyncRuntimeDynamicConsumer>
+        {
+            TestMethod = consumer => consumer.ValueTaskOfT_Fails_After_Await(),
             Attributes = []
         });
 
