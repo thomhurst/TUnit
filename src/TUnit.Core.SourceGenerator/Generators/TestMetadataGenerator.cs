@@ -6902,7 +6902,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var typeParams = classSymbol.TypeParameters;
 
+        // A pointer cannot be a type argument: C<int*> would not compile (CS0306), and reflection mode's
+        // MakeGenericType throws, so it fails with the same fallback message (#7222)
         return typeParams.Length == typeArguments.Length
+            && !typeArguments.Any(static t => t.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer)
             && !HasConstraintViolation(typeParams, typeArguments, compilation);
     }
 

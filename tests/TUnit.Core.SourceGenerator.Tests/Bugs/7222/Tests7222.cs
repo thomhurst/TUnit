@@ -42,6 +42,27 @@ internal class Tests7222 : TestsBase
                     {
                     }
                 }
+
+                // A class-level pointer fails rather than closing the class as C<int*>, which would not compile
+                [GenerateGenericTest(typeof(int*))]
+                public unsafe class PointerClassTypeArgumentTests<T>
+                {
+                    [Test]
+                    public void NonGenericMethod()
+                    {
+                    }
+                }
+
+                [GenerateGenericTest(typeof(int*))]
+                [GenerateGenericTest(typeof(int))]
+                public unsafe class PointerClassTypeArgumentGenericMethodTests<TClass>
+                {
+                    [Test]
+                    [GenerateGenericTest(typeof(string))]
+                    public void GenericMethod<TMethod>()
+                    {
+                    }
+                }
                 """
             ]
         },
@@ -106,6 +127,17 @@ internal class Tests7222 : TestsBase
             await Assert.That(pointerOnGenericClass).DoesNotContain("PointerTypeArgument<int*>");
             await Assert.That(pointerOnGenericClass)
                 .Contains(violation + "\"[GenerateGenericTest] on method 'PointerTypeArgument' provides type argument 'Int32*', which cannot be a generic type argument\")");
+
+            // A class-level pointer fails with reflection mode's MakeGenericType message instead of closing the class over it.
+            foreach (var (className, methodName) in new[] { ("PointerClassTypeArgumentTests_T", "NonGenericMethod"), ("PointerClassTypeArgumentGenericMethodTests_TClass", "GenericMethod") })
+            {
+                var pointerClass = generatedFiles.Single(f => f.Contains($"class TUnit_TestProject_Bugs__7222_{className}_{methodName}_TestSource"));
+                await Assert.That(pointerClass).DoesNotContain("<int*>");
+                await Assert.That(pointerClass)
+                    .Contains($"Messages = new string[] {{ \"Type arguments 'Int32*' do not satisfy the generic constraints of type '{className.Substring(0, className.LastIndexOf('_'))}`1'\" }}");
+            }
+
+            await Assert.That(SourceFor("PointerClassTypeArgumentGenericMethodTests", "GenericMethod")).Contains("GenericMethod<string>(");
 
             // A null type argument is counted and rejected, as reflection mode reads TypeArguments.
             await Assert.That(SourceFor("NullTypeArgumentGenerateGenericTestTests", "NullTypeArgument"))
