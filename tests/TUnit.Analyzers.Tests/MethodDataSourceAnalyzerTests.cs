@@ -1301,6 +1301,127 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    public async Task Method_Data_Source_With_Func_TestDataRow_Func_No_Error()
+    {
+        // The runtime invokes one outer Func, strips one TestDataRow, then invokes one Func inside it,
+        // so all three layers are removed before the value reaches the test (#7227).
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(GetData))]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<Func<TestDataRow<Func<int>>>> GetData()
+                    {
+                        yield return () => new(() => 1);
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Method_Data_Source_With_Nested_Func_Reports_Mismatch()
+    {
+        // The runtime invokes only the outer Func, so the test receives a Func<int>, not an int (#7227).
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(GetData))|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<Func<Func<int>>> GetData()
+                    {
+                        yield return () => () => 1;
+                    }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("Func<int>", "int")
+            );
+    }
+
+    [Test]
+    public async Task Method_Data_Source_With_Nested_Func_For_Func_Parameter_No_Error()
+    {
+        // The inner Func<int> reaches the test as a value, so a Func<int> parameter matches.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(GetData))]
+                    [Test]
+                    public void MyTest(Func<int> value)
+                    {
+                    }
+
+                    public static IEnumerable<Func<Func<int>>> GetData()
+                    {
+                        yield return () => () => 1;
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Method_Data_Source_With_Nested_TestDataRow_Reports_Mismatch()
+    {
+        // The runtime strips only one TestDataRow, so the test receives a TestDataRow<int> (#7227).
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource(nameof(GetData))|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+
+                    public static IEnumerable<TestDataRow<TestDataRow<int>>> GetData()
+                    {
+                        yield return new(new(1));
+                    }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("TestDataRow<int>", "int")
+            );
+    }
+
+    [Test]
     public async Task No_Warning_For_Immutable_Record()
     {
         await Verifier

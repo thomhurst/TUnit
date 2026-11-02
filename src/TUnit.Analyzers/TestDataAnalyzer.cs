@@ -857,32 +857,31 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return ImmutableArray.Create(type);
         }
 
-        // Unwrap Func<T> and TestDataRow<T> wrappers in any nesting order, so that Func<T>,
-        // TestDataRow<T>, Func<TestDataRow<T>>, and TestDataRow<Func<T>> all reduce to the inner T
-        // before the tuple check below. Looping handles either order without assuming which wraps which.
+        // Peel only the layers the runtime row reader removes: DataSourceHelpers.ToObjectArray invokes
+        // one outer Func<T>, then TestDataRowUnwrapper.UnwrapArray strips one TestDataRow<T> and invokes
+        // one Func<T> inside it. So Func<T>, TestDataRow<T>, Func<TestDataRow<T>>, TestDataRow<Func<T>>
+        // and Func<TestDataRow<Func<T>>> reduce to T, but anything nested deeper (e.g. Func<Func<T>>)
+        // reaches the test as a wrapper value and must be checked as such.
         var testDataRowTypeSymbol = context.Compilation.GetTypeByMetadataName("TUnit.Core.TestDataRow`1");
-        bool unwrappedLayer;
-        do
-        {
-            unwrappedLayer = false;
 
-            if (type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } genericType
-                && genericType.ToDisplayString().StartsWith("System.Func<", StringComparison.Ordinal))
+        if (TryUnwrapFunc(type, out var funcResult))
+        {
+            isFunc = true;
+            type = funcResult;
+        }
+
+        if (testDataRowTypeSymbol != null
+            && type is INamedTypeSymbol { IsGenericType: true } testDataRowType
+            && SymbolEqualityComparer.Default.Equals(testDataRowType.OriginalDefinition, testDataRowTypeSymbol))
+        {
+            type = testDataRowType.TypeArguments[0];
+
+            if (TryUnwrapFunc(type, out var rowFuncResult))
             {
                 isFunc = true;
-                type = genericType.TypeArguments[0];
-                unwrappedLayer = true;
-            }
-
-            if (testDataRowTypeSymbol != null
-                && type is INamedTypeSymbol { IsGenericType: true } testDataRowType
-                && SymbolEqualityComparer.Default.Equals(testDataRowType.OriginalDefinition, testDataRowTypeSymbol))
-            {
-                type = testDataRowType.TypeArguments[0];
-                unwrappedLayer = true;
+                type = rowFuncResult;
             }
         }
-        while (unwrappedLayer);
 
         if (type is INamedTypeSymbol namedType && namedType.IsTupleType)
         {
@@ -1188,6 +1187,19 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return type1?.TypeKind == TypeKind.Enum;
         }
 
+        return false;
+    }
+
+    private static bool TryUnwrapFunc(ITypeSymbol type, [NotNullWhen(true)] out ITypeSymbol? innerType)
+    {
+        if (type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } genericType
+            && genericType.ToDisplayString().StartsWith("System.Func<", StringComparison.Ordinal))
+        {
+            innerType = genericType.TypeArguments[0];
+            return true;
+        }
+
+        innerType = null;
         return false;
     }
 
