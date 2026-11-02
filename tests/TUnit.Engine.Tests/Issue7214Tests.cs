@@ -23,7 +23,7 @@ public class Issue7214Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypedRowOnNullableParameter", new[] { "Run<int>(1)" })]
     [Arguments("TypedRowWithParamsCollection", new[] { "Run<object>(1)" })]
     [Arguments("TypedTestDataRowSource", new[] { "Run<int>(1)" })]
-    [Arguments("TypedDerivedTestDataRowSource", new[] { "Run<int>(1)" })]
+    [Arguments("TypedDerivedTestDataRowSource", new[] { "Run<int>(Value)" })]
     [Arguments("TypedFuncRowSource", new[] { "Run<int>(1)" })]
     [Arguments("TypedTestDataRowOfFuncSource", new[] { "Run<int>(() => 1)" })]
     [Arguments("TypedOneElementTupleRowSource", new[] { "Run<int>(1)" })]
@@ -41,6 +41,28 @@ public class Issue7214Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.Results.Select(x => x.TestName).OrderBy(x => x, StringComparer.Ordinal)
                     .ShouldBe(expectedTestNames.OrderBy(x => x, StringComparer.Ordinal))
             ]);
+    }
+
+    // An ITuple row type is spread at run time but declares no element types, so neither mode infers Run<ITuple>.
+    [Test]
+    public async Task Typed_ITuple_Row_Is_Left_To_Runtime_Inference()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7214/TypedITupleRowSource/*",
+            testMode == TestMode.Reflection
+                ?
+                [
+                    result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                    result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                    result => result.Results.ShouldAllBe(x => x.TestName == "Run<int>(1)"),
+                ]
+                :
+                [
+                    result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                    result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                    result => result.Results.ShouldAllBe(x => x.Output!.ErrorInfo!.Message!.Contains(
+                        "Could not infer the type arguments of generic test method 'Run' from data source [ITupleRowSource]")),
+                ]);
     }
 
     // The row is matched against the parameter type, so no Run<int[]> instantiation is added. The test bodies

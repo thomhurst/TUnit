@@ -79,7 +79,7 @@ internal static class TypedDataSourceInference
     /// The type arguments of generic test method <paramref name="method"/> inferred from a typed row whose value
     /// has type <paramref name="rowType"/> (<c>[Arguments&lt;T&gt;]</c>, #7214). The row binds to the data
     /// parameters (any <c>CancellationToken</c> excluded): a tuple row spreads one element per leading data parameter,
-    /// as <c>ToObjectArray</c> spreads it, an <c>object[]</c> or <c>System.Tuple</c> row infers nothing, and any other
+    /// as <c>ToObjectArray</c> spreads it, an <c>object[]</c>, <c>System.Tuple</c> or other <c>ITuple</c> row infers nothing, and any other
     /// row binds whole to a single data parameter, or to the first of several, with omitted trailing parameters
     /// optional (params arrays and params collections included). A <c>Func&lt;T&gt;</c>, <c>TestDataRow&lt;T&gt;</c> or
     /// <c>TestDataRow&lt;Func&lt;T&gt;&gt;</c> row binds as its <c>T</c>, since it is invoked and unwrapped before invocation, and
@@ -154,7 +154,7 @@ internal static class TypedDataSourceInference
         else if (!spreadsReferenceArray && IsSpreadWithoutElementTypes(rowType))
         {
             // ToObjectArray also spreads an object[] row, whose value types the row type does not declare,
-            // and a System.Tuple row; leave both to runtime inference.
+            // and a System.Tuple or other ITuple row; leave them to runtime inference.
             return null;
         }
         else if (dataParameters.Length == 1)
@@ -267,7 +267,15 @@ internal static class TypedDataSourceInference
     private static bool IsSpreadWithoutElementTypes(ITypeSymbol type)
         => type is IArrayTypeSymbol { Rank: 1, ElementType.SpecialType: SpecialType.System_Object }
             || type is INamedTypeSymbol { IsGenericType: true, Name: "Tuple", ContainingNamespace: { } tupleNamespace }
-                && tupleNamespace.ToDisplayString() == "System";
+                && tupleNamespace.ToDisplayString() == "System"
+            || IsITuple(type)
+            || type.AllInterfaces.Any(IsITuple);
+
+    // DataSourceHelpers.IsTuple spreads any runtime ITuple, so an ITuple row type, or one implementing it (other
+    // than the ValueTuple rows matched above), declares no element types.
+    private static bool IsITuple(ITypeSymbol type)
+        => type is { Name: "ITuple", ContainingNamespace: { } containingNamespace }
+            && containingNamespace.ToDisplayString() == "System.Runtime.CompilerServices";
 
     private static bool IsCancellationToken(ITypeSymbol type)
         => type is { Name: "CancellationToken", ContainingNamespace: { } containingNamespace }

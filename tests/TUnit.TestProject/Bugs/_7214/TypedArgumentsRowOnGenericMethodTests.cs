@@ -208,7 +208,8 @@ public sealed class IntTestDataRowSourceAttribute : TypedDataSourceAttribute<Tes
 }
 
 // A record deriving from TestDataRow<int> is unwrapped through ITestDataRow like TestDataRow<int> itself, so a
-// typed source of such rows infers Run<int>, not Run<DerivedIntTestDataRow>: Run<int>(1).
+// typed source of such rows infers Run<int>, not Run<DerivedIntTestDataRow>. Its name is Run<int>(Value), since
+// the base constructor call captures the expression "Value".
 [EngineTest(ExpectedResult.Pass)]
 public class TypedDerivedTestDataRowSource
 {
@@ -345,5 +346,30 @@ public sealed class IntTestDataRowOneElementTupleSourceAttribute : TypedDataSour
     {
         await Task.CompletedTask;
         yield return () => Task.FromResult(ValueTuple.Create(new TestDataRow<int>(1)));
+    }
+}
+
+// DataSourceHelpers.IsTuple spreads any runtime ITuple, but an ITuple row type declares no element types, so a
+// typed source of ITuple rows infers nothing from its declared type, never Run<ITuple>, which could not take the
+// spread int. Reflection mode infers Run<int> from the value; source-generated mode reports that it cannot infer
+// the type arguments (#7163). The class carries no [EngineTest] attribute because its outcome differs between
+// the modes; TUnit.Engine.Tests targets it by name.
+public class TypedITupleRowSource
+{
+    [Test]
+    [ITupleRowSource]
+    public async Task Run<TMethod>(TMethod arg)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
+        await Assert.That((int)(object)arg!).IsEqualTo(1);
+    }
+}
+
+public sealed class ITupleRowSourceAttribute : TypedDataSourceAttribute<System.Runtime.CompilerServices.ITuple>
+{
+    public override async IAsyncEnumerable<Func<Task<System.Runtime.CompilerServices.ITuple>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await Task.CompletedTask;
+        yield return () => Task.FromResult<System.Runtime.CompilerServices.ITuple>(ValueTuple.Create(1));
     }
 }

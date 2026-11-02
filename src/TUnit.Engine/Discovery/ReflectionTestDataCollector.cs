@@ -2181,7 +2181,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// Mirrors the generator's <c>TypedDataSourceInference.InferMethodTypeArgumentsFromRowType</c> (#7214): a
     /// typed row of type <paramref name="rowType"/> binds to the data parameters (any CancellationToken
     /// excluded): a tuple row spreads one element per leading data parameter, as ToObjectArray spreads it, an
-    /// object[] or System.Tuple row infers nothing, and any other row binds whole to a single data parameter, or
+    /// object[], System.Tuple or other ITuple row infers nothing, and any other row binds whole to a single data parameter, or
     /// to the first of several, with omitted trailing parameters optional (params arrays and
     /// params collections included). A Func&lt;T&gt; row, a TestDataRow&lt;T&gt; row and a TestDataRow&lt;Func&lt;T&gt;&gt; row bind as their
     /// T, since they are invoked and unwrapped before invocation, and a reference-type array T there spreads, so its element binds. A T? parameter takes a value of its underlying type. Each parameter type is matched against its value type, including
@@ -2257,10 +2257,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
         else if (!spreadsReferenceArray
             && (rowType == typeof(object[])
-                || rowType is { IsGenericType: true, Namespace: "System" } && rowType.Name.StartsWith("Tuple`", StringComparison.Ordinal)))
+                || rowType is { IsGenericType: true, Namespace: "System" } && rowType.Name.StartsWith("Tuple`", StringComparison.Ordinal)
+                || typeof(System.Runtime.CompilerServices.ITuple).IsAssignableFrom(rowType)))
         {
             // ToObjectArray also spreads an object[] row, whose value types the row type does not declare,
-            // and a System.Tuple row; leave both to runtime inference.
+            // and a System.Tuple or other ITuple row (DataSourceHelpers.IsTuple spreads any runtime ITuple);
+            // leave them to runtime inference.
             return null;
         }
         else if (dataParameters.Length == 1)
