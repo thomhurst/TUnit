@@ -87,6 +87,7 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     [Arguments("OwnClassMethodDataSourceWithSeveralConstructors")]
     [Arguments("OwnClassNullTestDataRowMethodDataSource")]
+    [Arguments("OwnClassMethodDataSourceWithTestConstructor")]
     public async Task Rows_Infer_Types_From_The_Constructor_The_Instance_Is_Built_With(string className)
     {
         // Source-gen never infers a generic class's types from its class-level [MethodDataSource] alone (#7333)
@@ -105,7 +106,7 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     public async Task Uninferable_Own_Class_Member_Fails_Only_Its_Class()
     {
-        // Source-gen emits no test for this class, the several-constructors class or the null-row class (#7333). Reflection
+        // Source-gen emits no test for this class or the classes that only reflection discovers (#7333). Reflection
         // reports one failed test for this class, and the rest of the namespace still runs.
         var reflection = testMode == TestMode.Reflection;
 
@@ -113,8 +114,8 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7208/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe(reflection ? "Failed" : "Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 35 : 32),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 34 : 32),
+                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 36 : 32),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 35 : 32),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(reflection ? 1 : 0),
                 result => result.Results
                     .Where(x => x.Outcome == "Failed")

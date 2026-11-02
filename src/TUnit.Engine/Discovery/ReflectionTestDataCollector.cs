@@ -1742,8 +1742,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return (_, _) => Activator.CreateInstance(testClass)!;
             }
 
-            var constructedTypeCtor = constructedTypeConstructors.FirstOrDefault(static c => c.GetParameters().Length == 0) ?? constructedTypeConstructors.First();
-            var constructedTypeFactory = CreateReflectionInstanceFactory(constructedTypeCtor);
+            var constructedTypeFactory = CreateReflectionInstanceFactory(SelectInstanceConstructor(constructedTypeConstructors));
 
             // Return a factory that ignores type arguments since the type is already closed
             return (_, args) => constructedTypeFactory(args);
@@ -1756,10 +1755,25 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return (_, _) => Activator.CreateInstance(testClass)!;
         }
 
-        var ctor = constructors.FirstOrDefault(static c => c.GetParameters().Length == 0) ?? constructors.First();
-
-        var factory = CreateReflectionInstanceFactory(ctor);
+        var factory = CreateReflectionInstanceFactory(SelectInstanceConstructor(constructors));
         return (_, args) => factory(args);
+    }
+
+    /// <summary>
+    /// The public constructor a test instance is built with: the one marked <c>[TestConstructor]</c>, as the
+    /// generator's instance factory picks it, otherwise a parameterless one, otherwise the first one.
+    /// </summary>
+    private static ConstructorInfo SelectInstanceConstructor(ConstructorInfo[] constructors)
+    {
+        foreach (var constructor in constructors)
+        {
+            if (constructor.IsDefined(typeof(TestConstructorAttribute), inherit: false))
+            {
+                return constructor;
+            }
+        }
+
+        return constructors.FirstOrDefault(static c => c.GetParameters().Length == 0) ?? constructors[0];
     }
 
     private static Func<object, object?[], Task> CreateTestInvoker(Type testClass, MethodInfo testMethod)
@@ -2356,8 +2370,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// directly, through <c>Task</c> or <c>ValueTask</c>, as a sequence of rows or <c>Func</c>s of rows, or as a
     /// single row. The rows are matched against the constructor that instance creation binds them to (see
     /// <see cref="CreateInstanceFactory"/>), so a constructor the instance is never built with cannot change or
-    /// veto the types. Only when instance creation uses a parameterless constructor, which ignores the rows, is
-    /// the first public constructor that infers the types used. Null when a type argument stays unknown, such as
+    /// veto the types. A constructor marked <c>[TestConstructor]</c> is the one the rows are for. Otherwise, only
+    /// when instance creation uses a parameterless constructor, which ignores the rows, is the first public
+    /// constructor that infers the types used. A tuple row fills a constructor's single tuple parameter whole.
+    /// Null when a type argument stays unknown, such as
     /// for rows declared as <c>object</c>, <c>object[]</c> or with the class's own type parameters.
     /// <paramref name="constructor"/> receives the constructor of the generic type definition that inferred the
     /// types, whose parameters the rows are read against.
@@ -2372,20 +2388,29 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return null;
         }
 
-        var rowElements = GetValueTupleElementTypes(rowType) ?? [rowType];
         var typeParameters = genericTypeDefinition.GetGenericArguments();
         var constructors = genericTypeDefinition.GetConstructors();
+
+        // A [TestConstructor] names the constructor the rows are for, as the generator's instance factory reads it
+        foreach (var candidate in constructors)
+        {
+            if (candidate.IsDefined(typeof(TestConstructorAttribute), inherit: false))
+            {
+                constructor = candidate;
+                return InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters);
+            }
+        }
 
         // Instance creation uses a parameterless constructor when there is one, and otherwise the first one
         if (constructors.Length > 0 && !HasParameterlessConstructor(constructors))
         {
             constructor = constructors[0];
-            return InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowElements, typeParameters);
+            return InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowType, typeParameters);
         }
 
         foreach (var candidate in constructors)
         {
-            if (InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowElements, typeParameters) is { } typeArguments)
+            if (InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters) is { } typeArguments)
             {
                 constructor = candidate;
                 return typeArguments;
@@ -2440,8 +2465,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return false;
     }
 
-    private static Type[]? InferTypeArgumentsFromConstructorRow(ParameterInfo[] parameters, Type[] rowElements, Type[] typeParameters)
+    private static Type[]? InferTypeArgumentsFromConstructorRow(ParameterInfo[] parameters, Type rowType, Type[] typeParameters)
     {
+        // A tuple row fills one tuple parameter whole, as DataSourceHelpers.ToObjectArrayWithTypes passes it, and
+        // otherwise spreads one column per parameter
+        Type[] rowElements = parameters is [{ ParameterType: var single }] && GetValueTupleElementTypes(single) != null
+            ? [rowType]
+            : GetValueTupleElementTypes(rowType) ?? [rowType];
         var typeArguments = new Type[typeParameters.Length];
 
         for (var i = 0; i < typeParameters.Length; i++)

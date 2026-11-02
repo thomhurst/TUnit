@@ -7302,28 +7302,34 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// The class type arguments that the declared row type of an own-class [MethodDataSource] member infers, by
-    /// matching the row's elements against the parameters of the constructor the instance is built with: the first
-    /// public one, or, when the class has a parameterless constructor (which ignores the rows), the first public one
-    /// that infers every type argument. Null when a type argument stays unknown or would be <c>object</c>. Mirrors
-    /// reflection mode's <c>InferClassTypeArgumentsFromOwnMemberRowType</c> (#7208).
+    /// matching the row's elements against the parameters of the constructor the instance is built with: the one
+    /// marked <c>[TestConstructor]</c>, the first public one, or, when the class has a parameterless constructor
+    /// (which ignores the rows), the first public one that infers every type argument. A tuple row fills a
+    /// constructor's single tuple parameter whole. Null when a type argument stays unknown or would be
+    /// <c>object</c>. Mirrors reflection mode's <c>InferClassTypeArgumentsFromOwnMemberRowType</c> (#7208).
     /// </summary>
     private static ITypeSymbol[]? InferClassTypesFromOwnMemberRowType(INamedTypeSymbol classSymbol, ITypeSymbol rowType)
     {
-        ITypeSymbol[] rowElements = rowType is INamedTypeSymbol { IsTupleType: true } tupleType
-            ? tupleType.TupleElements.Select(element => element.Type).ToArray()
-            : [rowType];
         var constructors = classSymbol.InstanceConstructors
             .Where(constructor => constructor.DeclaredAccessibility == Accessibility.Public)
             .ToArray();
 
+        // A [TestConstructor] names the constructor the rows are for, as the instance factory reads it
+        var testConstructor = constructors.FirstOrDefault(constructor => constructor.GetAttributes().Any(attribute =>
+            attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix));
+        if (testConstructor != null)
+        {
+            return InferClassTypesFromConstructorRow(testConstructor, rowType, classSymbol.TypeParameters);
+        }
+
         if (constructors.Length > 0 && !constructors.Any(constructor => constructor.Parameters.Length == 0))
         {
-            return InferClassTypesFromConstructorRow(constructors[0], rowElements, classSymbol.TypeParameters);
+            return InferClassTypesFromConstructorRow(constructors[0], rowType, classSymbol.TypeParameters);
         }
 
         foreach (var constructor in constructors)
         {
-            if (InferClassTypesFromConstructorRow(constructor, rowElements, classSymbol.TypeParameters) is { } typeArguments)
+            if (InferClassTypesFromConstructorRow(constructor, rowType, classSymbol.TypeParameters) is { } typeArguments)
             {
                 return typeArguments;
             }
@@ -7332,8 +7338,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return null;
     }
 
-    private static ITypeSymbol[]? InferClassTypesFromConstructorRow(IMethodSymbol constructor, ITypeSymbol[] rowElements, ImmutableArray<ITypeParameterSymbol> typeParameters)
+    private static ITypeSymbol[]? InferClassTypesFromConstructorRow(IMethodSymbol constructor, ITypeSymbol rowType, ImmutableArray<ITypeParameterSymbol> typeParameters)
     {
+        // A tuple row fills one tuple parameter whole, as the runtime passes it, and otherwise spreads one column
+        // per parameter
+        ITypeSymbol[] rowElements = constructor.Parameters is not [{ Type: INamedTypeSymbol { IsTupleType: true } }]
+            && rowType is INamedTypeSymbol { IsTupleType: true } tupleType
+            ? tupleType.TupleElements.Select(element => element.Type).ToArray()
+            : [rowType];
         var typeArguments = new ITypeSymbol[typeParameters.Length];
 
         for (var i = 0; i < typeParameters.Length; i++)

@@ -393,3 +393,25 @@ public class OwnClassTupleMethodDataSourceWithArguments<T>(T value, string label
         await Assert.That(row == (1, "a") || row == (5, "b")).IsTrue();
     }
 }
+
+// The rows infer the types through the [TestConstructor], not through the first constructor (Claude review of #7336)
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassMethodDataSourceWithTestConstructor<T>
+{
+    private readonly object? _value;
+
+    public OwnClassMethodDataSourceWithTestConstructor(T[] values) => _value = values[0];
+
+    [TestConstructor]
+    public OwnClassMethodDataSourceWithTestConstructor(T value) => _value = value;
+
+    public static IEnumerable<int[]> Rows() => [[7]];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int[]));
+        await Assert.That(_value).IsTypeOf<int[]>();
+    }
+}
