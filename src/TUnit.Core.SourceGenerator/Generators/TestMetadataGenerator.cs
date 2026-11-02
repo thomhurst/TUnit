@@ -976,6 +976,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // one (a second [MethodDataSource] declared like the first, say) joins it too.
                     // Otherwise its rows would be reported as uninferable (#7163). Reflection mode drops
                     // such a source when the method has [GenerateGenericTest], so it is dropped here too.
+                    // The name also matches [Arguments<T>], a literal row that joins as well (#7214).
                     if (specificAttr?.AttributeClass?.Name == "ArgumentsAttribute"
                         || (specificAttr is not null && !isClassRow && joinsDuplicateMethodSources))
                     {
@@ -6776,9 +6777,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// True when an [Arguments] attribute carries its <c>params object?[]</c> constructor argument as an array.
+    /// A typed <c>[Arguments&lt;T[]&gt;]</c> row also has one array constructor argument, but it is a single
+    /// <c>T[]</c> value whose type the typed-row inference reads, so it is excluded.
     /// </summary>
     private static bool HasArgumentsArray(AttributeData argAttr) =>
-        argAttr.ConstructorArguments is [{ Kind: TypedConstantKind.Array }];
+        argAttr.AttributeClass is { IsGenericType: false }
+        && argAttr.ConstructorArguments is [{ Kind: TypedConstantKind.Array }];
 
     /// <summary>
     /// True for <c>[Arguments(null)]</c>: a null params array, which ArgumentsAttribute stores as one null value.
@@ -7296,6 +7300,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Check if it's a typed data source by examining its base types
         var baseType = attrClass.BaseType;
+        var hasGeneratorBase = false;
         while (baseType != null)
         {
             if (baseType.IsGenericType)
@@ -7304,10 +7309,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var baseTypeName = baseTypeDef.Name;
                 var baseTypeNamespace = baseTypeDef.ContainingNamespace?.ToDisplayString();
 
+                // A generic method takes its type arguments from an [Arguments<T>] row by matching the row
+                // type against its parameters, as on a non-generic class (#7214). The class type arguments
+                // come from the class's own sources.
+                if (!hasGeneratorBase && method.IsGenericMethod && TypedDataSourceInference.IsTypedRowBase(baseType))
+                {
+                    return TypedDataSourceInference.InferMethodTypeArgumentsFromRowType(method, baseType.TypeArguments[0]);
+                }
+
                 // Check for typed data source base classes more precisely
                 if (baseTypeName is "DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute" &&
                     baseTypeNamespace?.Contains("TUnit.Core") == true)
                 {
+                    hasGeneratorBase = true;
+
                     // Get the type arguments from the base class
                     var typeArgs = baseType.TypeArguments;
 
