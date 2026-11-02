@@ -35,7 +35,9 @@ internal readonly record struct ClosedGenericFactoryEmission(
 /// <param name="Model">The open mock generated for the registration.</param>
 /// <param name="ClosedTypeFullyQualifiedName">The closed interface, e.g. <c>global::Ns.IRepository&lt;int&gt;</c>.</param>
 /// <param name="TypeArguments">Every type argument, in model type-parameter order.</param>
+/// <param name="Methods">The collision-checked methods, computed once per registration.</param>
 internal sealed record ClosedGenericMethodSetupEmission(
     MockTypeModel Model,
     string ClosedTypeFullyQualifiedName,
-    EquatableArray<string> TypeArguments);
+    EquatableArray<string> TypeArguments,
+    EquatableArray<MockMemberModel> Methods);

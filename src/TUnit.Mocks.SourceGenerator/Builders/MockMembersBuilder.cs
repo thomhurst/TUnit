@@ -981,10 +981,15 @@ internal static class MockMembersBuilder
     {
         private readonly Dictionary<string, TypeSyntax> _substitutions = new(System.StringComparer.Ordinal);
 
+        private ClosedSignatureRewriter() { }
+
         public ClosedSignatureRewriter(MockTypeModel model, EquatableArray<string> arguments, MockMemberModel method)
         {
+            // Closed arguments contain no model or method parameters. Normalize them separately
+            // so a canonical method name can never capture a name inside a replacement.
+            var normalizer = new ClosedSignatureRewriter();
             for (var i = 0; i < model.TypeParameters.Length; i++)
-                _substitutions[model.TypeParameters[i].Name] = SyntaxFactory.ParseTypeName(arguments[i]);
+                _substitutions[model.TypeParameters[i].Name] = (TypeSyntax)normalizer.Visit(SyntaxFactory.ParseTypeName(arguments[i]))!;
             for (var i = 0; i < method.TypeParameters.Length; i++)
                 _substitutions[method.TypeParameters[i].Name] = SyntaxFactory.IdentifierName("__MethodType" + i.ToString(CultureInfo.InvariantCulture));
         }
@@ -994,7 +999,7 @@ internal static class MockMembersBuilder
             if (node.Parent is QualifiedNameSyntax or AliasQualifiedNameSyntax)
                 return base.VisitIdentifierName(node);
             if (_substitutions.TryGetValue(node.Identifier.ValueText, out var replacement))
-                return Visit(replacement);
+                return replacement;
             return node.Identifier.ValueText switch
             {
                 "dynamic" => SyntaxFactory.ParseTypeName("global::System.Object"),

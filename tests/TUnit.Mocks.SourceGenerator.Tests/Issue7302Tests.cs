@@ -42,6 +42,58 @@ public class Issue7302Tests : SnapshotTestBase
     private const string SetupsFileMarker = "_ClosedMockMemberExtensions_";
 
     [Test]
+    public async Task Nullable_Containers_Are_Kept_And_Nullable_Model_Elements_Are_Skipped()
+    {
+        var setups = GetSetupsSource("""
+            #nullable enable
+            namespace TestNamespace
+            {
+                public interface INullable<T>
+                {
+                    U List<U>(System.Collections.Generic.List<T>? value);
+                    U Array<U>(T[]? value);
+                    U Dictionary<U>(System.Collections.Generic.Dictionary<T, U?> value);
+                    U Elements<U>(System.Collections.Generic.IEnumerable<T?> value);
+                }
+                public class Usage
+                {
+                    void M() => _ = TUnit.Mocks.Mock.Of<INullable<int>>();
+                }
+            }
+            """);
+        await Assert.That(setups).IsNotNull();
+        await Assert.That(setups!).Contains(" List<U>(");
+        await Assert.That(setups).Contains(" Array<U>(");
+        await Assert.That(setups).Contains(" Dictionary<U>(");
+        await Assert.That(setups).DoesNotContain(" Elements<U>(");
+    }
+
+    [Test]
+    public async Task Canonical_Method_Type_Parameter_Names_Do_Not_Recurse_Or_Capture()
+    {
+        var setups = GetSetupsSource("""
+            namespace TestNamespace
+            {
+                public interface ICanonical<T>
+                {
+                    U Map<U>(U value);
+                    __MethodType0 Map<__MethodType0>(int key, __MethodType0 value);
+                    U Collapse<U>(T value);
+                    __MethodType0 Collapse<__MethodType0>(int value);
+                }
+                public class Usage
+                {
+                    void M() => _ = TUnit.Mocks.Mock.Of<ICanonical<int>>();
+                }
+            }
+            """);
+        await Assert.That(setups).IsNotNull();
+        await Assert.That(setups!).Contains(" Map<U>(");
+        await Assert.That(setups).Contains(" Map<__MethodType0>(");
+        await Assert.That(setups).DoesNotContain(" Collapse<");
+    }
+
+    [Test]
     public async Task Overloads_That_Collapse_After_Substitution_Are_Omitted()
     {
         var source = """

@@ -78,9 +78,10 @@ internal static class ClosedGenericRegistrationBuilder
         var emissions = new List<ClosedGenericMethodSetupEmission>();
         foreach (var (registration, model) in Pair(registrations, models))
         {
-            if (MockMembersBuilder.GetClosedReceiverGenericMethods(model, registration.TypeArguments).Count > 0)
+            var methods = MockMembersBuilder.GetClosedReceiverGenericMethods(model, registration.TypeArguments);
+            if (methods.Count > 0)
             {
-                emissions.Add(new ClosedGenericMethodSetupEmission(model, registration.ClosedTypeFullyQualifiedName, registration.TypeArguments));
+                emissions.Add(new ClosedGenericMethodSetupEmission(model, registration.ClosedTypeFullyQualifiedName, registration.TypeArguments, new EquatableArray<MockMemberModel>(methods.ToImmutableArray())));
             }
         }
 
@@ -105,6 +106,13 @@ internal static class ClosedGenericRegistrationBuilder
         writer.AppendLine("#pragma warning disable");
         writer.AppendLine("#nullable enable");
 
+        // Keep aliases out of the member-surface namespace, where user types can share
+        // their names. Global imports preserve the setup surface for every consuming file.
+        for (var i = 0; i < emissions.Length; i++)
+        {
+            writer.AppendLine($"global using {MockImplBuilder.MemberSurfaceNamespace}.ClosedGenericMethodSetups_{i.ToString(CultureInfo.InvariantCulture)};");
+        }
+
         var index = 0;
         foreach (var emission in emissions)
         {
@@ -112,7 +120,7 @@ internal static class ClosedGenericRegistrationBuilder
             var safeName = MockImplBuilder.GetCompositeSafeName(model);
 
             writer.AppendLine();
-            using (writer.Block($"namespace {MockImplBuilder.MemberSurfaceNamespace}"))
+            using (writer.Block($"namespace {MockImplBuilder.MemberSurfaceNamespace}.ClosedGenericMethodSetups_{index.ToString(CultureInfo.InvariantCulture)}"))
             {
                 for (var i = 0; i < model.TypeParameters.Length; i++)
                 {
@@ -125,7 +133,7 @@ internal static class ClosedGenericRegistrationBuilder
                     using (writer.Block($"extension(global::TUnit.Mocks.Mock<{MockImplBuilder.GetMockableTypeName(model)}> mock)"))
                     {
                         var first = true;
-                        foreach (var method in MockMembersBuilder.GetClosedReceiverGenericMethods(model, emission.TypeArguments))
+                        foreach (var method in emission.Methods)
                         {
                             if (!first) writer.AppendLine();
                             first = false;

@@ -25,6 +25,14 @@ public interface IOverloadedInvoker7302<T>
     TResult Keep<TResult>(T value);
 }
 
+public interface ICanonicalInvoker7302<T>
+{
+    U Map<U>(U value);
+    __MethodType0 Map<__MethodType0>(int key, __MethodType0 value);
+    U Collapse<U>(T value);
+    __MethodType0 Collapse<__MethodType0>(int value);
+}
+
 public class Outer7302<TOuter>
 {
     public interface IInner<TInner>
@@ -45,6 +53,16 @@ public struct Point7302
 /// </summary>
 public class Issue7302Tests
 {
+    [Test]
+    public async Task Canonical_Method_Type_Parameter_Names_Compile_And_Keep_Distinct_Setups()
+    {
+        var mock = Mock.Of<ICanonicalInvoker7302<int>>();
+        mock.Map<string>(Arg.Any<string>()).Returns("first");
+        mock.Map<string>(1, Arg.Any<string>()).Returns("second");
+        await Assert.That(mock.Object.Map("x")).IsEqualTo("first");
+        await Assert.That(mock.Object.Map(1, "x")).IsEqualTo("second");
+    }
+
     [Test]
     public async Task Closing_Overloads_Does_Not_Break_Compilation_Or_Unrelated_Setups()
     {
