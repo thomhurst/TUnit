@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
@@ -78,6 +79,8 @@ public class ClassDataSourceSharedNoneRegressionTests
 /// Regression tests for GitHub Issue #3855 - Verify no instance leakage across tests.
 /// Tests that multiple test methods in the same class each receive their own unique instance
 /// with SharedType.None (no sharing or leakage across tests).
+/// The order in which instances are constructed relative to test execution is not fixed,
+/// so these tests assert distinct instance IDs rather than specific values (#7250).
 /// </summary>
 public class ClassDataSourceSharedNoneNoLeakageTests
 {
@@ -93,64 +96,42 @@ public class ClassDataSourceSharedNoneNoLeakageTests
             InstanceId = Interlocked.Increment(ref _nextId);
             MutationValue = 0; // Initial value
         }
-
-        public static void ResetIdCounter()
-        {
-            _nextId = 0;
-        }
     }
 
-    [Before(TestSession)]
-    public static void ResetCounters()
+    // Instance ID -> name of the test that received it
+    private static readonly ConcurrentDictionary<int, string> ReceivedInstanceIds = new();
+
+    private static async Task AssertUniqueUnmutatedInstance(UniqueInstanceClass instance, string testName)
     {
-        UniqueInstanceClass.ResetIdCounter();
+        // Another test receiving the same instance would mean the instance was shared
+        var owner = ReceivedInstanceIds.GetOrAdd(instance.InstanceId, testName);
+        await Assert.That(owner).IsEqualTo(testName);
+
+        // MutationValue should be 0 (not affected by another test's mutation)
+        await Assert.That(instance.MutationValue).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// First test - should get instance ID 1, mutate it, and not affect other tests
-    /// </summary>
     [Test]
     [ClassDataSource<UniqueInstanceClass>(Shared = SharedType.None)]
     public async Task Test1_GetsUniqueInstance(UniqueInstanceClass instance)
     {
-        // This is the first test, should have InstanceId = 1
-        await Assert.That(instance.InstanceId).IsEqualTo(1);
-        await Assert.That(instance.MutationValue).IsEqualTo(0);
-
-        // Mutate the instance
+        await AssertUniqueUnmutatedInstance(instance, nameof(Test1_GetsUniqueInstance));
         instance.MutationValue = 100;
     }
 
-    /// <summary>
-    /// Second test - should get instance ID 2, with fresh MutationValue = 0
-    /// (proves no leakage from Test1)
-    /// </summary>
     [Test]
     [ClassDataSource<UniqueInstanceClass>(Shared = SharedType.None)]
     public async Task Test2_GetsUniqueInstance(UniqueInstanceClass instance)
     {
-        // This is the second test, should have InstanceId = 2
-        await Assert.That(instance.InstanceId).IsEqualTo(2);
-
-        // MutationValue should be 0 (not affected by Test1's mutation to 100)
-        await Assert.That(instance.MutationValue).IsEqualTo(0);
-
-        // Mutate the instance
+        await AssertUniqueUnmutatedInstance(instance, nameof(Test2_GetsUniqueInstance));
         instance.MutationValue = 200;
     }
 
-    /// <summary>
-    /// Third test - should get instance ID 3, with fresh MutationValue = 0
-    /// (proves no leakage from Test1 or Test2)
-    /// </summary>
     [Test]
     [ClassDataSource<UniqueInstanceClass>(Shared = SharedType.None)]
     public async Task Test3_GetsUniqueInstance(UniqueInstanceClass instance)
     {
-        // This is the third test, should have InstanceId = 3
-        await Assert.That(instance.InstanceId).IsEqualTo(3);
-
-        // MutationValue should be 0 (not affected by Test1 or Test2)
-        await Assert.That(instance.MutationValue).IsEqualTo(0);
+        await AssertUniqueUnmutatedInstance(instance, nameof(Test3_GetsUniqueInstance));
+        instance.MutationValue = 300;
     }
 }
