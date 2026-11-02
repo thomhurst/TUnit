@@ -11,6 +11,8 @@ namespace TUnit.Engine.Tests;
 [NotInParallel]
 public class HtmlReporterConfigurationTests
 {
+    private static readonly TestSessionContextStub Session = new("session");
+
     private bool _htmlReportEnabled;
     private bool _jsonReportEnabled;
     private bool _artifactUploadEnabled;
@@ -81,7 +83,7 @@ public class HtmlReporterConfigurationTests
     {
         using var reporter = new HtmlReporter(new MockExtension());
         cancellationToken.ThrowIfCancellationRequested();
-        await reporter.OnTestSessionStartingAsync(null!);
+        await reporter.OnTestSessionStartingAsync(Session);
         reporter.HasActivityCollector.ShouldBeTrue();
 
         TUnitSettings.Default.Reporting.HtmlReportEnabled = false;
@@ -96,12 +98,12 @@ public class HtmlReporterConfigurationTests
         using var reporter = new HtmlReporter(new MockExtension());
 
         cancellationToken.ThrowIfCancellationRequested();
-        await reporter.OnTestSessionStartingAsync(null!);
+        await reporter.OnTestSessionStartingAsync(Session);
         TUnitSettings.Default.Reporting.HtmlReportEnabled = false;
         reporter.IsHtmlReportEnabledForRun().ShouldBeFalse();
 
         cancellationToken.ThrowIfCancellationRequested();
-        await reporter.OnTestSessionStartingAsync(null!);
+        await reporter.OnTestSessionStartingAsync(Session);
         TUnitSettings.Default.Reporting.HtmlReportEnabled = true;
         reporter.IsHtmlReportEnabledForRun().ShouldBeTrue();
     }
@@ -113,7 +115,7 @@ public class HtmlReporterConfigurationTests
         using var reporter = new HtmlReporter(new MockExtension());
 
         cancellationToken.ThrowIfCancellationRequested();
-        await reporter.OnTestSessionStartingAsync(null!);
+        await reporter.OnTestSessionStartingAsync(Session);
         reporter.HasActivityCollector.ShouldBeTrue();
 
         var activity = TUnitActivitySource.StartLifecycleActivity(TUnitActivitySource.SpanTestSession);
@@ -122,7 +124,7 @@ public class HtmlReporterConfigurationTests
         TUnitActivitySource.StopActivity(activity);
 
         reporter.StopActivityCollection();
-        var spans = reporter.BuildReportData().Spans;
+        var spans = reporter.BuildReportData(Session.SessionUid.Value).Spans;
         spans.ShouldNotBeNull();
         spans.ShouldContain(span => span.SpanType == TUnitActivitySource.SpanTestSession);
     }
@@ -134,21 +136,21 @@ public class HtmlReporterConfigurationTests
         using var reporter = new HtmlReporter(new MockExtension());
 
         cancellationToken.ThrowIfCancellationRequested();
-        await reporter.OnTestSessionStartingAsync(null!);
+        await reporter.OnTestSessionStartingAsync(Session);
         reporter.HasActivityCollector.ShouldBeTrue();
 
         cancellationToken.ThrowIfCancellationRequested();
-        await reporter.OnTestSessionFinishingAsync(null!);
+        await reporter.OnTestSessionFinishingAsync(Session);
         reporter.HasActivityCollector.ShouldBeFalse();
 
         cancellationToken.ThrowIfCancellationRequested();
-        await reporter.OnTestSessionStartingAsync(null!);
+        await reporter.OnTestSessionStartingAsync(Session);
         reporter.HasActivityCollector.ShouldBeTrue();
 
         var activity = TUnitActivitySource.StartLifecycleActivity(TUnitActivitySource.SpanTestSession);
         TUnitActivitySource.StopActivity(activity);
         reporter.StopActivityCollection();
-        var spans = reporter.BuildReportData().Spans;
+        var spans = reporter.BuildReportData(Session.SessionUid.Value).Spans;
         spans.ShouldNotBeNull();
         spans.ShouldContain(span => span.SpanType == TUnitActivitySource.SpanTestSession);
     }
@@ -158,14 +160,72 @@ public class HtmlReporterConfigurationTests
     {
         using var reporter = new HtmlReporter(new MockExtension());
 
-        await reporter.OnTestSessionStartingAsync(null!);
+        await reporter.OnTestSessionStartingAsync(Session);
         await reporter.ConsumeAsync(reporter, CreatePassedUpdate("first"), cancellationToken);
-        reporter.BuildReportData().Groups.SelectMany(x => x.Tests).Single().Id.ShouldBe("first");
+        reporter.BuildReportData(Session.SessionUid.Value).Groups.SelectMany(x => x.Tests).Single().Id.ShouldBe("first");
 
-        await reporter.OnTestSessionStartingAsync(null!);
+        await reporter.OnTestSessionStartingAsync(Session);
         await reporter.ConsumeAsync(reporter, CreatePassedUpdate("second"), cancellationToken);
 
-        reporter.BuildReportData().Groups.SelectMany(x => x.Tests).Single().Id.ShouldBe("second");
+        reporter.BuildReportData(Session.SessionUid.Value).Groups.SelectMany(x => x.Tests).Single().Id.ShouldBe("second");
+    }
+
+    [Test]
+    public async Task Overlapping_Sessions_Keep_Separate_Test_Results(CancellationToken cancellationToken)
+    {
+        // #7298: MTP server mode can run sessions that overlap in one process. Starting the
+        // second session must not wipe the first one's results, and neither report may contain
+        // the other session's tests.
+        TUnitSettings.Default.Reporting.HtmlReportEnabled = true;
+        using var reporter = new HtmlReporter(new MockExtension());
+        var first = new TestSessionContextStub("first-session");
+        var second = new TestSessionContextStub("second-session");
+
+        await reporter.OnTestSessionStartingAsync(first);
+        await reporter.ConsumeAsync(reporter, CreatePassedUpdate("first", first.SessionUid), cancellationToken);
+        await reporter.OnTestSessionStartingAsync(second);
+        await reporter.ConsumeAsync(reporter, CreatePassedUpdate("second", second.SessionUid), cancellationToken);
+
+        reporter.BuildReportData(first.SessionUid.Value).Groups.SelectMany(x => x.Tests).Single().Id.ShouldBe("first");
+        reporter.BuildReportData(second.SessionUid.Value).Groups.SelectMany(x => x.Tests).Single().Id.ShouldBe("second");
+    }
+
+    [Test]
+    public async Task Overlapping_Sessions_Keep_Separate_Unobserved_Task_Exceptions(CancellationToken cancellationToken)
+    {
+        TUnitSettings.Default.Reporting.HtmlReportEnabled = true;
+        using var reporter = new HtmlReporter(new MockExtension());
+        var first = new TestSessionContextStub("first-session");
+        var second = new TestSessionContextStub("second-session");
+
+        await reporter.OnTestSessionStartingAsync(first);
+        await reporter.OnTestSessionStartingAsync(second);
+        await reporter.ConsumeAsync(
+            reporter,
+            new UnobservedTaskExceptionsData(first.SessionUid, [new InvalidOperationException("first session only")]),
+            cancellationToken);
+
+        reporter.BuildReportData(first.SessionUid.Value).UnobservedTaskExceptions.ShouldNotBeNull().Single().Message.ShouldBe("first session only");
+        reporter.BuildReportData(second.SessionUid.Value).UnobservedTaskExceptions.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task Activity_Collection_Outlives_A_Finished_Session_While_Another_Overlaps(CancellationToken cancellationToken)
+    {
+        TUnitSettings.Default.Reporting.HtmlReportEnabled = true;
+        TUnitSettings.Default.Reporting.JsonReportEnabled = true;
+        using var reporter = new HtmlReporter(new MockExtension());
+        var first = new TestSessionContextStub("first-session", cancellationToken);
+        var second = new TestSessionContextStub("second-session", cancellationToken);
+
+        await reporter.OnTestSessionStartingAsync(first);
+        await reporter.OnTestSessionStartingAsync(second);
+
+        await reporter.OnTestSessionFinishingAsync(first);
+        reporter.HasActivityCollector.ShouldBeTrue();
+
+        await reporter.OnTestSessionFinishingAsync(second);
+        reporter.HasActivityCollector.ShouldBeFalse();
     }
 
     [Test]
@@ -190,7 +250,7 @@ public class HtmlReporterConfigurationTests
             githubReporter.ArtifactUrl = "https://example.com/old-artifact";
             githubReporter.ShowArtifactUploadTip = true;
 
-            await reporter.OnTestSessionStartingAsync(null!);
+            await reporter.OnTestSessionStartingAsync(Session);
 
             githubReporter.SuppressPerSuiteSummary.ShouldBeFalse();
             githubReporter.ArtifactUrl.ShouldBeNull();
@@ -359,14 +419,14 @@ public class HtmlReporterConfigurationTests
             using var reporter = new HtmlReporter(new MockExtension());
             var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
             reporter.SetOutputPath(disabledHtmlPath);
-            var disabledAssemblyName = reporter.BuildReportData().AssemblyName;
+            var disabledAssemblyName = reporter.BuildReportData(Session.SessionUid.Value).AssemblyName;
 
             TUnitSettings.Default.Reporting.JsonReportEnabled = true;
             await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(disabledAssemblyName), disabledHtmlPath, cancellationToken);
             await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData("RemainingSuiteMarker"), remainingHtmlPath, cancellationToken);
 
             TUnitSettings.Default.Reporting.HtmlReportEnabled = false;
-            await reporter.OnTestSessionFinishingAsync(null!);
+            await reporter.OnTestSessionFinishingAsync(Session);
 
             File.Exists(HtmlReporter.GetSidecarPath(disabledHtmlPath)).ShouldBeFalse();
             Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(2);
@@ -441,12 +501,12 @@ public class HtmlReporterConfigurationTests
             using var reporter = new HtmlReporter(new MockExtension());
             var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
             reporter.SetOutputPath(htmlPath);
-            var assemblyName = reporter.BuildReportData().AssemblyName;
+            var assemblyName = reporter.BuildReportData(Session.SessionUid.Value).AssemblyName;
 
             await reporter.TryWriteSidecarAndAggregateAsync(CreateReportData(assemblyName), htmlPath, cancellationToken);
             TUnitSettings.Default.Reporting.JsonReportEnabled = false;
 
-            await reporter.OnTestSessionFinishingAsync(null!);
+            await reporter.OnTestSessionFinishingAsync(Session);
 
             File.Exists(HtmlReporter.GetSidecarPath(htmlPath)).ShouldBeFalse();
             Directory.GetFiles(aggregationDirectory, $"*{ReportDataJson.SidecarExtension}").Length.ShouldBe(1);
@@ -744,8 +804,10 @@ public class HtmlReporterConfigurationTests
         Groups = [],
     };
 
-    private static TestNodeUpdateMessage CreatePassedUpdate(string id) => new(
-        new SessionUid("session"),
+    private static TestNodeUpdateMessage CreatePassedUpdate(string id) => CreatePassedUpdate(id, Session.SessionUid);
+
+    private static TestNodeUpdateMessage CreatePassedUpdate(string id, SessionUid sessionUid) => new(
+        sessionUid,
         new TestNode
         {
             Uid = new TestNodeUid(id),
