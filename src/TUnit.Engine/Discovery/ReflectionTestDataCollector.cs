@@ -2212,7 +2212,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // UnwrapArray spreads a TestDataRow value that is an object?[], which a reference-type array
             // is through array covariance (ToObjectArray keeps a bare one whole). The elements bind as
             // their declared type; an object element type declares nothing, so leave it to runtime inference.
-            if (rowType.IsSZArray && rowType.GetElementType() is { IsValueType: false, IsPointer: false } elementType)
+            if (IsSingleDimensionalZeroBasedArray(rowType) && rowType.GetElementType() is { IsValueType: false, IsPointer: false } elementType)
             {
                 if (elementType == typeof(object))
                 {
@@ -2267,7 +2267,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         else if (!spreadsReferenceArray
             && (rowType == typeof(object[])
                 || rowType is { IsGenericType: true, Namespace: "System" } && rowType.Name.StartsWith("Tuple`", StringComparison.Ordinal)
-                || typeof(System.Runtime.CompilerServices.ITuple).IsAssignableFrom(rowType)))
+#if NET
+                || typeof(System.Runtime.CompilerServices.ITuple).IsAssignableFrom(rowType)
+#endif
+                ))
         {
             // ToObjectArray also spreads an object[] row, whose value types the row type does not declare,
             // and a System.Tuple or other ITuple row (DataSourceHelpers.IsTuple spreads any runtime ITuple);
@@ -2380,6 +2383,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return true;
+    }
+
+    private static bool IsSingleDimensionalZeroBasedArray(Type type)
+    {
+#if NET
+        return type.IsSZArray;
+#else
+        return type.IsArray && type.Name.EndsWith("[]", StringComparison.Ordinal);
+#endif
     }
 
     /// <summary>
