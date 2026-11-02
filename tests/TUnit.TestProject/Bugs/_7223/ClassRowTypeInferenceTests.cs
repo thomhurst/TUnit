@@ -51,3 +51,18 @@ public class ArrayParameterAfterOtherClassRowInference<T>(int count, T[] values)
         await Assert.That((object?)arg).IsEqualTo("a");
     }
 }
+
+// An untyped null says nothing about T, so the later value infers it in both modes: source generation used to take
+// the null's object type as T once a bare T was inferred from the first value only.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(null, "x")]
+public class NullBeforeValueClassRowInference<T>(T? first, T second) where T : class, IComparable
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(first).IsNull();
+        await Assert.That((object)second).IsEqualTo("x");
+    }
+}

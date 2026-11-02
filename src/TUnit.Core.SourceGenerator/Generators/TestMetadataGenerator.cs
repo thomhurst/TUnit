@@ -7038,14 +7038,30 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     };
                 }
 
+                // An untyped null (typed as object) says nothing about T, so a later value infers it, as reflection
+                // mode skips null values.
+                if (argValue.IsNull && argType?.SpecialType == SpecialType.System_Object)
+                {
+                    argType = null;
+                }
+
                 if (argType != null)
                 {
-                    foreach (var typeParameter in typeParameters)
+                    if (constructorParam.Type is ITypeParameterSymbol typeParam)
                     {
-                        if (!inferredTypes.ContainsKey(typeParameter.Name)
-                            && MatchTypeParameter(constructorParam.Type, argType, typeParameter) is { } typeArgument)
+                        // A bare T keeps its earlier rule, the last value's type: [Arguments(1, 2L)] on
+                        // C<T>(T first, T second) infers long, which both values bind to.
+                        inferredTypes[typeParam.Name] = argType;
+                    }
+                    else
+                    {
+                        foreach (var typeParameter in typeParameters)
                         {
-                            inferredTypes[typeParameter.Name] = typeArgument;
+                            if (!inferredTypes.ContainsKey(typeParameter.Name)
+                                && MatchTypeParameter(constructorParam.Type, argType, typeParameter) is { } typeArgument)
+                            {
+                                inferredTypes[typeParameter.Name] = typeArgument;
+                            }
                         }
                     }
                 }
@@ -7073,13 +7089,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return null;
     }
 
-    /// <summary>
-    /// The type that <paramref name="typeParameter"/> takes when a value of <paramref name="declaredType"/> binds to a
-    /// parameter of <paramref name="parameterType"/>: the declared type itself for a parameter of type T, its element
-    /// type for T[], and the matching type argument for a constructed generic such as List&lt;T&gt;. Null when the
-    /// parameter type does not mention the type parameter or the declared type does not have its shape. Reflection
-    /// mode maps the declared type of an [Arguments&lt;T&gt;(null)] class row the same way.
-    /// </summary>
     private static bool MentionsTypeParameter(ITypeSymbol type) => type switch
     {
         ITypeParameterSymbol => true,
@@ -7088,6 +7097,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         _ => false
     };
 
+    /// <summary>
+    /// The type that <paramref name="typeParameter"/> takes when a value of <paramref name="declaredType"/> binds to a
+    /// parameter of <paramref name="parameterType"/>: the declared type itself for a parameter of type T, its element
+    /// type for T[], and the matching type argument for a constructed generic such as List&lt;T&gt;. Null when the
+    /// parameter type does not mention the type parameter or the declared type does not have its shape. Reflection
+    /// mode maps the declared type of an [Arguments&lt;T&gt;(null)] class row the same way.
+    /// </summary>
     private static ITypeSymbol? MatchTypeParameter(ITypeSymbol parameterType, ITypeSymbol declaredType, ITypeParameterSymbol typeParameter)
     {
         if (parameterType is ITypeParameterSymbol parameterTypeParameter)
