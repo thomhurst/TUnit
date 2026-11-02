@@ -1301,7 +1301,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         reportClassViolationAs: classTypeArgumentsSupplied ? null : ClassViolationSource.MethodArguments);
                 }
             }
+        }
 
+        // Class rows also need method sources when no method [Arguments] rows exist.
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false })
+        {
             foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
             {
                 if (inferringRows is null || !inferringRows.Contains(dataSourceAttr))
@@ -7770,7 +7774,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var rowType = GetDeclaredMethodDataSourceRowType(testMethod, attribute);
         var types = rowType is null ? null : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType);
-        return types is not null && FindInaccessibleType(types, testMethod.CompilationContext.Compilation) is null
+        // External members infer from runtime values in reflection mode. An interface or
+        // unsealed reference type cannot fix those values' types; retain runtime partitioning.
+        var isExternal = attribute.ConstructorArguments is [{ Value: INamedTypeSymbol }, ..]
+            || attribute.AttributeClass is { IsGenericType: true };
+        return types is not null
+            && (!isExternal || types.All(type => type.IsValueType || type is INamedTypeSymbol { IsSealed: true }))
+            && FindInaccessibleType(types, testMethod.CompilationContext.Compilation) is null
             ? types
             : null;
     }

@@ -85,3 +85,37 @@ public class UnmatchedMethodRows<T>(T value)
         _ = value;
     }
 }
+
+// A class-inferred entry must retain its method source without any method [Arguments].
+[MethodDataSource(nameof(Integers))]
+public class ClassAndMethodSources<T>(T value)
+{
+    public static IEnumerable<int> Integers() => [3, 4];
+
+    [Test]
+    [MethodDataSource(nameof(Integers))]
+    public async Task Test(T methodValue)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value).IsNotNull();
+        await Assert.That((object?)methodValue).IsNotNull();
+    }
+}
+
+public static class PolymorphicRows
+{
+    public static IEnumerable<IComparable> Integers() => [2];
+}
+
+// The declared interface must not replace inference from the integer row value.
+[Arguments(1)]
+[MethodDataSource(typeof(PolymorphicRows), nameof(PolymorphicRows.Integers))]
+public class PolymorphicExternalRows<T>(T value)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value).IsNotNull();
+    }
+}

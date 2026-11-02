@@ -7,11 +7,12 @@ internal class Tests7333 : TestsBase
         "TUnit.TestProject", "Bugs", "_7333", "ClassMethodDataSourceInferenceTests.cs"),
         async generatedFiles =>
         {
-            foreach (var className in new[] { "ExternalRows<int>", "OwnRows<int>", "AsyncFactoryRows<string>", "MultipleSources<int>", "GenericMethod<int>", "MethodRows<int>" })
+            foreach (var className in new[] { "ExternalRows<int>", "OwnRows<int>", "AsyncFactoryRows<string>", "MultipleSources<int>", "GenericMethod<int>", "MethodRows<int>", "ClassAndMethodSources<int>", "PolymorphicExternalRows<int>" })
             {
                 await Assert.That(generatedFiles.Any(file => file.Contains($"global::TUnit.TestProject.Bugs._7333.{className}"))).IsTrue();
             }
             await Assert.That(generatedFiles.Any(file => file.Contains("global::TUnit.TestProject.Bugs._7333.UnmatchedMethodRows<int>"))).IsFalse();
+            await Assert.That(generatedFiles.Any(file => file.Contains("global::TUnit.TestProject.Bugs._7333.PolymorphicExternalRows<global::System.IComparable>"))).IsFalse();
             await Assert.That(generatedFiles.Any(file => file.Contains("Could not infer the type arguments of generic class 'UninferableOwnRows`1'"))).IsTrue();
         });
 }
