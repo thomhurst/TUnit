@@ -206,3 +206,46 @@ public sealed class IntTestDataRowSourceAttribute : TypedDataSourceAttribute<Tes
         yield return () => Task.FromResult(new TestDataRow<int>(1));
     }
 }
+
+// A typed source of Func<int> rows is invoked before invocation, so it infers Run<int>, not Run<Func<int>>:
+// Run<int>(1).
+public class TypedFuncRowSource
+{
+    [Test]
+    [IntFuncRowSource]
+    public async Task Run<TMethod>(TMethod arg)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
+        await Assert.That((int)(object)arg!).IsEqualTo(1);
+    }
+}
+
+public sealed class IntFuncRowSourceAttribute : TypedDataSourceAttribute<Func<int>>
+{
+    public override async IAsyncEnumerable<Func<Task<Func<int>>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await Task.CompletedTask;
+        yield return () => Task.FromResult<Func<int>>(() => 1);
+    }
+}
+
+// A Func<int> inside a TestDataRow is invoked after unwrapping, so it infers Run<int> too: Run<int>(1).
+public class TypedTestDataRowOfFuncSource
+{
+    [Test]
+    [IntFuncTestDataRowSource]
+    public async Task Run<TMethod>(TMethod arg)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
+        await Assert.That((int)(object)arg!).IsEqualTo(1);
+    }
+}
+
+public sealed class IntFuncTestDataRowSourceAttribute : TypedDataSourceAttribute<TestDataRow<Func<int>>>
+{
+    public override async IAsyncEnumerable<Func<Task<TestDataRow<Func<int>>>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await Task.CompletedTask;
+        yield return () => Task.FromResult(new TestDataRow<Func<int>>(() => 1));
+    }
+}

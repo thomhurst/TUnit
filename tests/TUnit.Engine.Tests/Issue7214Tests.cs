@@ -23,6 +23,8 @@ public class Issue7214Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypedRowOnNullableParameter", new[] { "Run<int>(1)" })]
     [Arguments("TypedRowWithParamsCollection", new[] { "Run<object>(1)" })]
     [Arguments("TypedTestDataRowSource", new[] { "Run<int>(1)" })]
+    [Arguments("TypedFuncRowSource", new[] { "Run<int>(1)" })]
+    [Arguments("TypedTestDataRowOfFuncSource", new[] { "Run<int>(() => 1)" })]
     public async Task Typed_Arguments_Row_Runs_On_Generic_Method(string classFilter, string[] expectedTestNames)
     {
         await RunTestsWithFilter(

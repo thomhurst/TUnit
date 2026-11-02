@@ -2182,16 +2182,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// typed row of type <paramref name="rowType"/> binds to the data parameters (any CancellationToken
     /// excluded), the whole row to a single data parameter, otherwise one tuple element per leading data
     /// parameter, or a scalar row to the first, with omitted trailing parameters optional (params arrays and
-    /// params collections included). A TestDataRow&lt;T&gt; row binds as its T, since it is unwrapped before
-    /// invocation. A T? parameter takes a value of its underlying type. Each parameter type is matched against its value type, including
+    /// params collections included). A Func&lt;T&gt; row, a TestDataRow&lt;T&gt; row and a TestDataRow&lt;Func&lt;T&gt;&gt; row bind as their
+    /// T, since they are invoked and unwrapped before invocation. A T? parameter takes a value of its underlying type. Each parameter type is matched against its value type, including
     /// type arguments nested in generic parameter types. Every type parameter must be inferred, each to one type.
     /// </summary>
     private static Type[]? InferTypesFromTypedRow(MethodInfo method, Type rowType, int genericParameterCount)
     {
-        // A TestDataRow<T> row is unwrapped before invocation, so its value binds as a T.
+        // The row reaches the method as ToObjectArray and TestDataRowUnwrapper.UnwrapArray produce it: a
+        // Func<T> row is invoked once, a TestDataRow<T> row is unwrapped, and a Func<T> inside it is invoked
+        // once, so the value binds as that T.
+        rowType = UnwrapFunc(rowType);
         if (TestDataRowUnwrapper.IsTestDataRowType(rowType))
         {
-            rowType = rowType.GetGenericArguments()[0];
+            rowType = UnwrapFunc(rowType.GetGenericArguments()[0]);
         }
 
         var dataParameters = Array.FindAll(method.GetParameters(), static parameter => parameter.ParameterType != typeof(CancellationToken));
@@ -2255,6 +2258,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         return typeArguments!;
     }
+
+    private static Type UnwrapFunc(Type type)
+        => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>) ? type.GetGenericArguments()[0] : type;
 
     /// <summary>
     /// Matches <paramref name="parameterType"/> against <paramref name="valueType"/> for
