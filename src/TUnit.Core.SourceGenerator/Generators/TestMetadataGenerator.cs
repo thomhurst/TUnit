@@ -3092,7 +3092,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // reflection mode, treats a null value as a source with no rows, so SkipIfEmpty skips the test. The factory
         // helpers would turn null into one row holding null, so a null value becomes an empty source here. A null Task or
         // IAsyncEnumerable needs no guard: FromTask and FromAsyncEnumerable already read it as a source with no rows.
-        var nullAsEmpty = decidesRowsFromRuntimeValue && kind is "Value" or "Enumerable"
+        var nullAsEmpty = decidesRowsFromRuntimeValue && (kind is "Value" or "Enumerable")
             ? " ?? global::System.Array.Empty<object>()"
             : "";
 
@@ -3876,16 +3876,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    /// <summary>
-    /// Formats the argument list for a method with one data parameter, placing each
-    /// CancellationToken at its declared position.
-    /// </summary>
     // System.Tuple<T1..T7>. An eight-element Tuple nests its rest in TRest, which DataSourceHelpers flattens, so it is left alone.
     private static bool IsReferenceTuple(INamedTypeSymbol type)
     {
         return type is { Name: "Tuple", IsGenericType: true, TypeArguments.Length: >= 1 and <= 7, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } };
     }
 
+    /// <summary>
+    /// Formats the argument list for a method with one data parameter, placing each
+    /// CancellationToken at its declared position.
+    /// </summary>
     private static string FormatSingleArgumentCall(string argument, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
     {
         if (!hasCancellationToken)
@@ -3955,38 +3955,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
         }
-        else if (parametersFromArgs is [{ Type: INamedTypeSymbol singleReferenceTupleParam }]
-                 && IsReferenceTuple(singleReferenceTupleParam))
-        {
-            // A generated data source factory unwraps a System.Tuple row into its elements, as it does a value tuple,
-            // so rebuild it here. Reflection mode keeps the row whole because it reads the parameter types.
-            var arity = singleReferenceTupleParam.TypeArguments.Length;
-            writer.AppendLine("// Special handling for single reference tuple parameter");
-            // With one element, a lone argument is either that element or the whole tuple, so check its type.
-            var alreadyWrapped = arity == 1 ? $" && args[0] is not {singleReferenceTupleParam.GloballyQualified()}" : "";
-            writer.AppendLine($"if (args.Length == {arity.ToString(CultureInfo.InvariantCulture)}{alreadyWrapped})");
-            writer.AppendLine("{");
-            writer.Indent();
-            var tupleElements = singleReferenceTupleParam.TypeArguments.Select((elementType, i) =>
-                $"global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
-            var tupleConstruction = $"new {singleReferenceTupleParam.GloballyQualified()}({string.Join(", ", tupleElements)})";
-            GenerateReturnHandling(writer, $"instance.{methodName}({FormatSingleArgumentCall(tupleConstruction, hasCancellationToken, parametersFromArgs)})", returnPattern);
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("else if (args.Length == 1)");
-            writer.AppendLine("{");
-            writer.Indent();
-            var methodCallDirect = $"instance.{methodName}({FormatSingleArgumentCall($"global::TUnit.Core.Helpers.CastHelper.Cast<{singleReferenceTupleParam.GloballyQualified()}>(args[0])", hasCancellationToken, parametersFromArgs)})";
-            GenerateReturnHandling(writer, methodCallDirect, returnPattern);
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("else");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine($"throw new global::System.ArgumentException($\"Expected {arity.ToString(CultureInfo.InvariantCulture)} unwrapped elements or 1 wrapped tuple, but got {{args.Length}} arguments\");");
-            writer.Unindent();
-            writer.AppendLine("}");
-        }
         else if (parametersFromArgs.Length == 0)
         {
             var typedMethodCall = $"instance.{methodName}({string.Join(", ", Enumerable.Repeat("cancellationToken", cancellationTokenCount))})";
@@ -3994,6 +3962,34 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
+            // A generated data source factory unwraps a System.Tuple row into its elements, as it does a value tuple,
+            // so rebuild it here. Reflection mode keeps the row whole because it reads the parameter types.
+            // Any other argument shape (the whole tuple, null, or an omitted optional) falls through to the
+            // argument-count switch below, as it does for every other single parameter.
+            var singleReferenceTupleParam = parametersFromArgs is [{ Type: INamedTypeSymbol referenceTupleType }]
+                                            && IsReferenceTuple(referenceTupleType)
+                ? referenceTupleType
+                : null;
+            if (singleReferenceTupleParam is not null)
+            {
+                var arity = singleReferenceTupleParam.TypeArguments.Length;
+                writer.AppendLine("// Special handling for single reference tuple parameter");
+                // With one element, a lone argument is either that element or the whole tuple (or null), so check it.
+                var unwrappedCheck = arity == 1 ? $" && args[0] is not null && args[0] is not {singleReferenceTupleParam.GloballyQualified()}" : "";
+                writer.AppendLine($"if (args.Length == {arity.ToString(CultureInfo.InvariantCulture)}{unwrappedCheck})");
+                writer.AppendLine("{");
+                writer.Indent();
+                var tupleElements = singleReferenceTupleParam.TypeArguments.Select((elementType, i) =>
+                    $"global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
+                var tupleConstruction = $"new {singleReferenceTupleParam.GloballyQualified()}({string.Join(", ", tupleElements)})";
+                GenerateReturnHandling(writer, $"instance.{methodName}({FormatSingleArgumentCall(tupleConstruction, hasCancellationToken, parametersFromArgs)})", returnPattern);
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+            }
+
             // A trailing array parameter (params OR a plain `T[]`) binds like a params array:
             // it accepts any number of remaining arguments collected into the array (issue #6120).
             var lastIndex = parametersFromArgs.Length - 1;
@@ -4094,6 +4090,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             writer.Unindent();
             writer.AppendLine("}");
+
+            if (singleReferenceTupleParam is not null)
+            {
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
         }
 
         if (wrapInTryCatch)

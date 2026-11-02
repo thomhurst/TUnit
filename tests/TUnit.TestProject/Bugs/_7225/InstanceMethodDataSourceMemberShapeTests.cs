@@ -6,7 +6,7 @@ namespace TUnit.TestProject.Bugs._7225;
 /// [InstanceMethodDataSource] read every member by reflection in source-gen mode before #7225, so its generated
 /// factory must keep that behavior: an <c>object</c> value holding many rows supplies each row, a private method
 /// is still callable (even beside a generic overload of the same name), a single tuple parameter (value or reference tuple)
-/// still receives the whole tuple, and a null value (including a null Task or IAsyncEnumerable) is an empty source, so SkipIfEmpty skips the test.
+/// still receives the whole tuple (a null or omitted optional tuple argument stays null), and a null value (including a null Task or IAsyncEnumerable) is an empty source, so SkipIfEmpty skips the test.
 /// </summary>
 [EngineTest(ExpectedResult.Pass)]
 public class InstanceMethodDataSourceMemberShapeTests
@@ -75,6 +75,20 @@ public class InstanceMethodDataSourceMemberShapeTests
     public async Task One_Element_Reference_Tuple_Single_Parameter(Tuple<int> value)
     {
         await Assert.That(value.Item1).IsEqualTo(7);
+    }
+
+    [Test]
+    [Arguments(null)]
+    public async Task One_Element_Reference_Tuple_Null_Argument_Stays_Null(Tuple<string?>? value)
+    {
+        await Assert.That(value).IsNull();
+    }
+
+    [Test]
+    [Arguments]
+    public async Task Optional_Reference_Tuple_Gets_Its_Default(Tuple<int, int>? value = null)
+    {
+        await Assert.That(value).IsNull();
     }
 
     [Test]
