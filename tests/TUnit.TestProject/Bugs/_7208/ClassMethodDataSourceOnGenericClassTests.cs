@@ -415,3 +415,58 @@ public class OwnClassMethodDataSourceWithTestConstructor<T>
         await Assert.That(_value).IsTypeOf<int[]>();
     }
 }
+
+// The class parameter metadata that splits a tuple row comes from the [TestConstructor], the constructor the instance
+// is built with, not from the first constructor: each row keeps its label (Codex and Greptile review of #7336).
+// TUnit0001 checks the rows against the first constructor, not the [TestConstructor] (#7370).
+#pragma warning disable TUnit0001
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class OwnClassTupleMethodDataSourceWithTestConstructor<T>
+{
+    private readonly T _value;
+    private readonly string? _label;
+
+    public OwnClassTupleMethodDataSourceWithTestConstructor(T value) => _value = value;
+
+    [TestConstructor]
+    public OwnClassTupleMethodDataSourceWithTestConstructor(T value, string label)
+    {
+        _value = value;
+        _label = label;
+    }
+
+    public static IEnumerable<(T, string)> Rows() => [((T)(object)5, "b")];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(_value).IsTypeOf<int>();
+        await Assert.That(_label).IsEqualTo("b");
+    }
+}
+#pragma warning restore TUnit0001
+
+// Two own-class sources naming overloads of one member, told apart only by Arguments, each read on the instantiation
+// their own rows infer: Rows(int) on C<int> and Rows(string) on C<string>, never the other's rows (CodeRabbit review
+// of #7336)
+#pragma warning disable TUnit0001
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+[Arguments("y")]
+[MethodDataSource(nameof(Rows), Arguments = new object[] { "x" })]
+[MethodDataSource(nameof(Rows), Arguments = new object[] { 2 })]
+public class OwnClassOverloadedMethodDataSourcesWithArguments<T>(T value)
+{
+    public static IEnumerable<string> Rows(string row) => [row];
+
+    public static IEnumerable<int> Rows(int row) => [row];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(value).IsTypeOf<T>();
+    }
+}
+#pragma warning restore TUnit0001

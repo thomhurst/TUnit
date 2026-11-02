@@ -8650,6 +8650,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
+        // Named arguments tell attributes apart too: [MethodDataSource(nameof(Rows), Arguments = ...)] twice can
+        // name different overloads of Rows, each scoping its own instantiation (#7208).
+        if (a1.NamedArguments.Length != a2.NamedArguments.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < a1.NamedArguments.Length; i++)
+        {
+            if (a1.NamedArguments[i].Key != a2.NamedArguments[i].Key
+                || !a1.NamedArguments[i].Value.Equals(a2.NamedArguments[i].Value))
+            {
+                return false;
+            }
+        }
+
         return true;
     }
 

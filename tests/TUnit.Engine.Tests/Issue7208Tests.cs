@@ -104,6 +104,34 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task Tuple_Rows_Split_By_The_Test_Constructor_Parameters()
+    {
+        // The class parameter metadata comes from the [TestConstructor], so the label column reaches it in both modes
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7208/OwnClassTupleMethodDataSourceWithTestConstructor/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task Overloads_Told_Apart_By_Arguments_Each_Read_On_Their_Own_Instantiation()
+    {
+        // Each instantiation runs its [Arguments] row and its own overload's row, not the other overload's, in both modes
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7208/OwnClassOverloadedMethodDataSourcesWithArguments/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(4),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
     public async Task Uninferable_Own_Class_Member_Fails_Only_Its_Class()
     {
         // Source-gen emits no test for this class or the classes that only reflection discovers (#7333). Reflection
@@ -114,8 +142,8 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7208/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe(reflection ? "Failed" : "Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 36 : 32),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 35 : 32),
+                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 41 : 37),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 40 : 37),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(reflection ? 1 : 0),
                 result => result.Results
                     .Where(x => x.Outcome == "Failed")
