@@ -373,3 +373,40 @@ public sealed class ITupleRowSourceAttribute : TypedDataSourceAttribute<System.R
         yield return () => Task.FromResult<System.Runtime.CompilerServices.ITuple>(ValueTuple.Create(1));
     }
 }
+
+// A null [Arguments<string[]>] row is one string[] value, not a null params array, so it infers only
+// Run<string[]>, never also Run<object> from the untyped [Arguments] inference.
+[EngineTest(ExpectedResult.Pass)]
+public class TypedNullArrayRow
+{
+    [Test]
+    [Arguments<string[]>(null!)]
+    public async Task Run<TMethod>(TMethod arg)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(string[]));
+        await Assert.That(arg).IsNull();
+    }
+}
+
+// A non-null ValueTuple<int>? row boxes to ValueTuple<int>, which ToObjectArray spreads, so a typed source of
+// nullable one-element tuple rows infers Run<int>, not Run<ValueTuple<int>?>: Run<int>(1).
+[EngineTest(ExpectedResult.Pass)]
+public class TypedNullableTupleRowSource
+{
+    [Test]
+    [IntNullableOneElementTupleRowSource]
+    public async Task Run<TMethod>(TMethod arg)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
+        await Assert.That((int)(object)arg!).IsEqualTo(1);
+    }
+}
+
+public sealed class IntNullableOneElementTupleRowSourceAttribute : TypedDataSourceAttribute<ValueTuple<int>?>
+{
+    public override async IAsyncEnumerable<Func<Task<ValueTuple<int>?>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await Task.CompletedTask;
+        yield return () => Task.FromResult<ValueTuple<int>?>(ValueTuple.Create(1));
+    }
+}

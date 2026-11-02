@@ -6597,9 +6597,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// True when an [Arguments] attribute carries its <c>params object?[]</c> constructor argument as an array.
+    /// A typed <c>[Arguments&lt;T[]&gt;]</c> row also has one array constructor argument, but it is a single
+    /// <c>T[]</c> value whose type the typed-row inference reads, so it is excluded.
     /// </summary>
     private static bool HasArgumentsArray(AttributeData argAttr) =>
-        argAttr.ConstructorArguments is [{ Kind: TypedConstantKind.Array }];
+        argAttr.AttributeClass is { IsGenericType: false }
+        && argAttr.ConstructorArguments is [{ Kind: TypedConstantKind.Array }];
 
     /// <summary>
     /// True for <c>[Arguments(null)]</c>: a null params array, which ArgumentsAttribute stores as one null value.

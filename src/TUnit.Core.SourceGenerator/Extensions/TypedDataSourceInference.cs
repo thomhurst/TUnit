@@ -81,7 +81,8 @@ internal static class TypedDataSourceInference
     /// parameters (any <c>CancellationToken</c> excluded): a tuple row spreads one element per leading data parameter,
     /// as <c>ToObjectArray</c> spreads it, an <c>object[]</c>, <c>System.Tuple</c> or other <c>ITuple</c> row infers nothing, and any other
     /// row binds whole to a single data parameter, or to the first of several, with omitted trailing parameters
-    /// optional (params arrays and params collections included). A <c>Func&lt;T&gt;</c>, <c>TestDataRow&lt;T&gt;</c> or
+    /// optional (params arrays and params collections included). A nullable tuple row boxes to its tuple, so it
+    /// spreads the same way. A <c>Func&lt;T&gt;</c>, <c>TestDataRow&lt;T&gt;</c> or
     /// <c>TestDataRow&lt;Func&lt;T&gt;&gt;</c> row binds as its <c>T</c>, since it is invoked and unwrapped before invocation, and
     /// a reference-type array <c>T</c> there spreads, so its element binds to the data parameter. A <c>T?</c> parameter takes a value of its underlying
     /// type. Each parameter type is matched against its value type, including type
@@ -95,13 +96,13 @@ internal static class TypedDataSourceInference
         // The row reaches the method as ToObjectArray and TestDataRowUnwrapper.UnwrapArray produce it: a
         // Func<T> row is invoked once, a TestDataRow<T> row is unwrapped, and a Func<T> inside it is invoked
         // once, so the value binds as that T.
-        rowType = UnwrapSingleArgument(rowType, "Func", "System");
+        rowType = UnwrapNullableTuple(UnwrapSingleArgument(rowType, "Func", "System"));
         var testDataRowType = FindTestDataRowType(rowType);
         var spreadsReferenceArray = false;
         var isTestDataRow = testDataRowType is not null;
         if (testDataRowType is not null)
         {
-            rowType = UnwrapSingleArgument(testDataRowType.TypeArguments[0], "Func", "System");
+            rowType = UnwrapNullableTuple(UnwrapSingleArgument(testDataRowType.TypeArguments[0], "Func", "System"));
 
             // UnwrapArray spreads a TestDataRow value that is an object?[], which a reference-type array
             // is through array covariance (ToObjectArray keeps a bare one whole). The elements bind as
@@ -233,6 +234,15 @@ internal static class TypedDataSourceInference
 
         return true;
     }
+
+    /// <summary>
+    /// A non-null <c>ValueTuple&lt;...&gt;?</c> value boxes to its underlying tuple, which <c>ToObjectArray</c> and
+    /// <c>UnwrapArray</c> then spread, so the row binds as that tuple. Other nullable rows bind whole.
+    /// </summary>
+    private static ITypeSymbol UnwrapNullableTuple(ITypeSymbol type)
+        => type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T, TypeArguments: [INamedTypeSymbol { IsTupleType: true } tupleType] }
+            ? tupleType
+            : type;
 
     private static ITypeSymbol UnwrapSingleArgument(ITypeSymbol type, string name, string containingNamespace)
         => type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } namedType

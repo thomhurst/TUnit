@@ -2192,13 +2192,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // The row reaches the method as ToObjectArray and TestDataRowUnwrapper.UnwrapArray produce it: a
         // Func<T> row is invoked once, a TestDataRow<T> row is unwrapped, and a Func<T> inside it is invoked
         // once, so the value binds as that T.
-        rowType = UnwrapFunc(rowType);
+        rowType = UnwrapNullableTuple(UnwrapFunc(rowType));
         var spreadsReferenceArray = false;
         var testDataRowType = FindTestDataRowType(rowType);
         var isTestDataRow = testDataRowType is not null;
         if (testDataRowType is not null)
         {
-            rowType = UnwrapFunc(testDataRowType.GetGenericArguments()[0]);
+            rowType = UnwrapNullableTuple(UnwrapFunc(testDataRowType.GetGenericArguments()[0]));
 
             // UnwrapArray spreads a TestDataRow value that is an object?[], which a reference-type array
             // is through array covariance (ToObjectArray keeps a bare one whole). The elements bind as
@@ -2298,6 +2298,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static Type UnwrapFunc(Type type)
         => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>) ? type.GetGenericArguments()[0] : type;
+
+    // A non-null ValueTuple<...>? value boxes to its underlying tuple, which ToObjectArray and UnwrapArray then
+    // spread, so the row binds as that tuple. Other nullable rows bind whole.
+    private static Type UnwrapNullableTuple(Type type)
+        => Nullable.GetUnderlyingType(type) is { } underlyingType && GetValueTupleElementTypes(underlyingType) is not null
+            ? underlyingType
+            : type;
 
     /// <summary>
     /// The constructed <see cref="TestDataRow{T}"/> that <paramref name="type"/> is or derives from, or null.

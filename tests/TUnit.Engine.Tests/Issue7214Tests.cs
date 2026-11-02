@@ -29,6 +29,8 @@ public class Issue7214Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypedOneElementTupleRowSource", new[] { "Run<int>(1)" })]
     [Arguments("TypedTestDataRowOfReferenceArraySource", new[] { "Run<string>([\"a\"])" })]
     [Arguments("TypedOneElementTupleOfTestDataRowSource", new[] { "Run<int>(1)" })]
+    [Arguments("TypedNullArrayRow", new[] { "Run<string[]>(null)" })]
+    [Arguments("TypedNullableTupleRowSource", new[] { "Run<int>(1)" })]
     public async Task Typed_Arguments_Row_Runs_On_Generic_Method(string classFilter, string[] expectedTestNames)
     {
         await RunTestsWithFilter(
