@@ -500,10 +500,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (concreteInstantiations.Count == 0 && classConstraintViolations.Count == 0)
             {
-                // No concrete types could be resolved for a generic class — skip this method. A
-                // generic method on a non-generic class always gets an entry: rows whose type
-                // arguments cannot be inferred fail instead (#7163).
-                return;
+                // An open generic template without data is not a runnable test. A class with data,
+                // however, must not silently disappear when only its runtime rows reveal the types.
+                if (!testMethod.TypeSymbol.GetAttributes().Any(a =>
+                        a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)))
+                {
+                    return;
+                }
+
+                classConstraintViolations.Add(
+                    "The generic test class type arguments cannot be inferred at compile time from its data sources. " +
+                    "Source-generated mode requires concrete types to preserve Native AOT compatibility. " +
+                    "Use [GenerateGenericTest] to specify the class type arguments, or a typed class data source.");
             }
         }
 
