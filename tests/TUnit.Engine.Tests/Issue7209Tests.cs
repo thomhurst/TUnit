@@ -41,6 +41,20 @@ public class Issue7209Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task Method_Source_Infers_Beside_A_Type_Free_Class_Row_And_An_Empty_Class_Source()
+    {
+        // C<int> from the method source, built from the class row, plus the empty source's skipped test
+        await RunTestsWithFilter(
+            $"{Namespace}/TypeFreeClassRowBesideEmptySourceWithInferringMethodSource*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
     [Arguments("TypeFreeClassRowConstraintViolation", "Type 'Object' does not satisfy the 'struct' constraint for generic parameter 'T'")]
     [Arguments("TypeFreeClassRowArrayConstraintViolation", "Type 'Int32' does not satisfy the 'class' constraint for generic parameter 'T'")]
     public async Task Method_Row_Inferring_An_Invalid_Class_Type_Beside_A_Type_Free_Class_Row_Fails(string className, string expectedMessage)

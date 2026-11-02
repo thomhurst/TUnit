@@ -28,6 +28,12 @@ internal sealed class ReflectionGenericConstraintViolations(
     private Dictionary<MethodInfo, List<string>>? _messagesByMethod;
 
     /// <summary>
+    /// Whether <see cref="TryAddClassViolation"/> recorded a violation: some source supplied class type
+    /// arguments, even though they break the class's constraints.
+    /// </summary>
+    public bool HasClassViolation { get; private set; }
+
+    /// <summary>
     /// Records <paramref name="typeArguments"/> as a violation for every test method when they break
     /// the class's constraints. Returns <c>true</c> when they do, so the caller skips the instantiation.
     /// </summary>
@@ -44,6 +50,7 @@ internal sealed class ReflectionGenericConstraintViolations(
             Add(testMethod, message);
         }
 
+        HasClassViolation = true;
         return true;
     }
 

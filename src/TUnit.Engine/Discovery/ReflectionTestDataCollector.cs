@@ -531,21 +531,32 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             ? SplitTypeFreeClassRows(genericTypeDefinition, ref classDataSources)
             : null;
 
-        // With class-level [Arguments] rows, method rows run only on the class instantiation their own values
-        // infer (#7118)
-        List<SourceInstantiation>?[]? methodSourceInstantiations = null;
-        var methodRowClassTypeArguments = methodRowTests == null
-            ? InferClassTypeArgumentsOfMethodRows(genericTypeDefinition, testMethods, classDataSources.Length + (typeFreeClassRows?.Length ?? 0),
-                classTypeArgumentsSupplied: classDataSources.Length > 0 || generateGenericTestAttributes.Length > 0, out methodSourceInstantiations)
-            : null;
+        var classDataSourceCount = classDataSources.Length + (typeFreeClassRows?.Length ?? 0);
 
         // [GenerateGenericTest] types' class constraint violations are reported before the class rows'
         var generateGenericTestTypeArguments = GetValidGenerateGenericTestTypeArguments(generateGenericTestAttributes, constraintViolations);
         // Method rows that infer types no class row infers build their instance from every class row, so keep
         // them all as discovery read them rather than reading the sources again (#7161)
-        var allClassRows = methodRowClassTypeArguments != null && !HasClassArgumentsRows(classDataSources) ? new List<IDataSourceAttribute>(classDataSources.Length) : null;
+        var allClassRows = methodRowTests == null && classDataSourceCount > 0 && !HasClassArgumentsRows(classDataSources) ? new List<IDataSourceAttribute>(classDataSources.Length) : null;
         var classRowGroups = methodRowTests == null
             ? await GroupClassRowsByTypeArgumentsAsync(genericTypeDefinition, classDataSources, constraintViolations, allClassRows).ConfigureAwait(false)
+            : null;
+
+        // With class-level [Arguments] rows, method rows run only on the class instantiation their own values
+        // infer (#7118). Beside type-free class rows, the other method sources infer the class type arguments
+        // unless another class source supplies them: a class [Arguments] row, [GenerateGenericTest], or a run-time
+        // source whose rows inferred an instantiation. A run-time source that yields no such row supplies none, so
+        // the method sources still infer theirs, as in the source generator, which cannot see that source's rows (#7209).
+        List<SourceInstantiation>?[]? methodSourceInstantiations = null;
+        var methodRowClassTypeArguments = methodRowTests == null
+            ? InferClassTypeArgumentsOfMethodRows(genericTypeDefinition, testMethods, classDataSourceCount,
+                classTypeArgumentsSupplied: classDataSources.Length > 0 || generateGenericTestAttributes.Length > 0,
+                methodSourcesInferClassTypeArguments: typeFreeClassRows != null
+                    && generateGenericTestAttributes.Length == 0
+                    && !HasClassArgumentsRows(classDataSources)
+                    && classRowGroups!.Count == 0
+                    && !constraintViolations.HasClassViolation,
+                out methodSourceInstantiations)
             : null;
 
         if (typeFreeClassRows != null)
@@ -1079,10 +1090,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// run-time source yields (#7161).
     /// </summary>
     /// <param name="classTypeArgumentsSupplied">
-    /// False when every class data source is a class row whose values go to no type parameter (#7209). The
-    /// method sources then infer the class type arguments as without a class row: [Arguments(null)] infers
-    /// object, and a [MethodDataSource] member of the test class infers them from its declared type, as in the
-    /// source generator.
+    /// False when every class data source is a class row whose values go to no type parameter (#7209). An
+    /// [Arguments(null)] method row then infers object, as without a class row and as in the source generator.
+    /// </param>
+    /// <param name="methodSourcesInferClassTypeArguments">
+    /// True beside type-free class rows when no other class source supplies an instantiation (#7209). A
+    /// [MethodDataSource] member of the test class then infers the class type arguments from its declared type,
+    /// as do typed data sources and parameter attributes, as in the source generator.
     /// </param>
     /// <param name="sourceInstantiations">
     /// For each test method, the class instantiations that its other data sources infer beside only type-free
@@ -1092,7 +1106,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// type, as in the source generator. Unlike an [Arguments] row, none of these sources is kept off the other
     /// instantiations. Null when no method has one.
     /// </param>
-    private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, int classDataSourceCount, bool classTypeArgumentsSupplied, out List<SourceInstantiation>?[]? sourceInstantiations)
+    private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, int classDataSourceCount, bool classTypeArgumentsSupplied, bool methodSourcesInferClassTypeArguments, out List<SourceInstantiation>?[]? sourceInstantiations)
     {
         sourceInstantiations = null;
         if (classDataSourceCount == 0)
@@ -1142,7 +1156,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // runs on the rows' instantiations. A [MethodDataSource]'s instantiation runs every method data source
             // that infers no type, and no source is kept off another source's instantiation, as in the source
             // generator (#7209). The generator adds typed sources first, then [MethodDataSource]s.
-            if (!classTypeArgumentsSupplied)
+            if (methodSourcesInferClassTypeArguments)
             {
                 List<SourceInstantiation>? instantiations = null;
                 for (var i = 0; i < methodDataSources.Length; i++)
