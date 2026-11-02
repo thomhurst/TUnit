@@ -538,8 +538,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // Method rows that infer types no class row infers build their instance from every class row, so keep
         // them all as discovery read them rather than reading the sources again (#7161)
         var allClassRows = methodRowTests == null && classDataSourceCount > 0 && !HasClassArgumentsRows(classDataSources) ? new List<IDataSourceAttribute>(classDataSources.Length) : null;
+        // Beside type-free class rows, a run-time class row whose values also go to no type parameter infers no
+        // instantiation either, rather than one from its values' run-time types. The source generator cannot see
+        // that row, so it keeps the source on every instantiation the method sources infer; allClassRows supplies
+        // the row to those instantiations here (#7209).
         var classRowGroups = methodRowTests == null
-            ? await GroupClassRowsByTypeArgumentsAsync(genericTypeDefinition, classDataSources, constraintViolations, allClassRows).ConfigureAwait(false)
+            ? await GroupClassRowsByTypeArgumentsAsync(genericTypeDefinition, classDataSources, constraintViolations, allClassRows,
+                typeFreeRowsInferNone: typeFreeClassRows != null && allClassRows != null).ConfigureAwait(false)
             : null;
 
         // With class-level [Arguments] rows, method rows run only on the class instantiation their own values
@@ -752,13 +757,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// Rows whose type arguments break the class's constraints go to <paramref name="constraintViolations"/>
     /// instead of a group (#7107). When <paramref name="allClassRows"/> is given, it also receives one static
     /// data source per original source holding every row that source yielded, whatever its types (#7161).
+    /// When <paramref name="typeFreeRowsInferNone"/> is true, a row whose values all go to constructor parameters
+    /// that do not use the class's type parameters joins no group (#7209).
     /// </summary>
     private static async Task<List<ClassRowGroup>> GroupClassRowsByTypeArgumentsAsync(
         Type genericTypeDefinition,
         IDataSourceAttribute[] classDataSources,
         ReflectionGenericConstraintViolations constraintViolations,
-        List<IDataSourceAttribute>? allClassRows)
+        List<IDataSourceAttribute>? allClassRows,
+        bool typeFreeRowsInferNone)
     {
+        var constructorParameters = typeFreeRowsInferNone && genericTypeDefinition.GetConstructors() is [var constructor, ..]
+            ? constructor.GetParameters()
+            : null;
+
         var typeArgumentGroups = new List<Type[]>();
         var sourcesByGroup = new List<List<IDataSourceAttribute>>();
         var rowCounts = new List<int>();
@@ -779,7 +791,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             foreach (var dataRow in dataItems)
             {
-                if (dataRow == null || dataRow.Length == 0)
+                if (dataRow == null || dataRow.Length == 0
+                    || (constructorParameters != null && ValuesBindNoTypeParameter(constructorParameters, dataRow.Length)))
                 {
                     continue;
                 }
@@ -1663,12 +1676,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
-        if (genericTypeDefinition.GetConstructors() is not [var constructor, ..])
-        {
-            return false;
-        }
+        return genericTypeDefinition.GetConstructors() is [var constructor, ..]
+            && ValuesBindNoTypeParameter(constructor.GetParameters(), valueCount);
+    }
 
-        var parameters = constructor.GetParameters();
+    /// <summary>
+    /// True when <paramref name="valueCount"/> constructor arguments, bound in order to <paramref name="parameters"/>,
+    /// all go to parameters that do not use the class's type parameters, and at least one is bound.
+    /// </summary>
+    private static bool ValuesBindNoTypeParameter(ParameterInfo[] parameters, int valueCount)
+    {
         var boundCount = Math.Min(valueCount, parameters.Length);
         if (boundCount == 0)
         {

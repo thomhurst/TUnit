@@ -285,6 +285,26 @@ public class TypeFreeClassRowBesideEmptySourceWithInferringMethodSource<T>(int n
     }
 }
 
+// A type-free class row beside a class data source whose row also goes to no type parameter: that row's long value
+// infers no C<long>, so the method's [MethodDataSource] member still infers T, as in the source generator. C<int> runs
+// Run(1), built from both class sources (number = 42, then 43). Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+[MethodDataSource(typeof(TypeFreeClassRowSources), nameof(TypeFreeClassRowSources.FortyThreeLong))]
+public class TypeFreeClassRowBesideInferringSourceWithInferringMethodSource<T>(long number)
+{
+    public static IEnumerable<int> Rows() => [1];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task Run(T value)
+    {
+        await Assert.That(number is 42 or 43).IsTrue();
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value).IsEqualTo(1);
+    }
+}
+
 public static class TypeFreeClassRowSources
 {
     public static IEnumerable<int> None() => [];
@@ -292,4 +312,6 @@ public static class TypeFreeClassRowSources
     public static IEnumerable<int> FortyThree() => [43];
 
     public static IEnumerable<int> Two() => [2];
+
+    public static IEnumerable<long> FortyThreeLong() => [43L];
 }
