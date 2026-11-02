@@ -898,6 +898,108 @@ internal static class MockMembersBuilder
         EmitAnyArgsOverload(writer, method, model, safeName, captureModelTypeParameters: true, receiverIsThis: false);
     }
 
+    /// <summary>
+    /// The generic methods of a generic mocked type whose setups can be re-emitted on a closed
+    /// receiver (<c>extension(Mock&lt;IFoo&lt;int&gt;&gt; mock)</c>) where the model's type parameters are
+    /// file aliases for the closed type arguments. C# does not bind a member of a generic extension
+    /// block when the call supplies explicit method type arguments, so without these copies
+    /// <c>Mock.Of&lt;IFoo&lt;int&gt;&gt;().Invoke&lt;T&gt;()</c> fails with CS1061 (#7302).
+    /// </summary>
+    /// <remarks>
+    /// Methods are skipped where an alias would change the meaning of the emitted code: a
+    /// constraint naming a model type parameter (<c>where TOther : T</c> is invalid once <c>T</c>
+    /// is a struct or sealed class), or an unconstrained model type parameter written as
+    /// <c>T?</c> (which becomes <c>Nullable&lt;T&gt;</c> for a value-type argument). Those keep the
+    /// typed wrapper (<c>IFoo&lt;int&gt;.Mock()</c>) and inferred calls on <c>Mock&lt;T&gt;</c>.
+    /// </remarks>
+    internal static List<MockMemberModel> GetClosedReceiverGenericMethods(MockTypeModel model)
+    {
+        var result = new List<MockMemberModel>();
+        if (model.TypeParameters.Length == 0)
+        {
+            return result;
+        }
+
+        var instanceMethods = new EquatableArray<MockMemberModel>(
+            model.Methods.Where(IsConfigurableMethod).ToImmutableArray());
+        foreach (var method in ApplyOutDisambiguation(instanceMethods))
+        {
+            if (method.TypeParameters.Length > 0 && CanAliasModelTypeParameters(method, model))
+            {
+                result.Add(method);
+            }
+        }
+
+        return result;
+    }
+
+    internal static void GenerateClosedReceiverGenericMethodMembers(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
+        => GenerateGenericMethodMembersInCurrentBlock(writer, method, model, safeName);
+
+    private static bool CanAliasModelTypeParameters(MockMemberModel method, MockTypeModel model)
+    {
+        foreach (var typeParameter in method.TypeParameters)
+        {
+            foreach (var modelTypeParameter in model.TypeParameters)
+            {
+                if (ContainsIdentifier(typeParameter.Constraints, modelTypeParameter.Name, requireNullableSuffix: false))
+                {
+                    return false;
+                }
+            }
+        }
+
+        foreach (var modelTypeParameter in model.TypeParameters)
+        {
+            if (modelTypeParameter.HasReferenceTypeConstraint || modelTypeParameter.HasValueTypeConstraint)
+            {
+                continue;
+            }
+
+            if (ContainsIdentifier(method.ReturnType, modelTypeParameter.Name, requireNullableSuffix: true)
+                || method.Parameters.Any(p => ContainsIdentifier(p.FullyQualifiedType, modelTypeParameter.Name, requireNullableSuffix: true)))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool ContainsIdentifier(string text, string identifier, bool requireNullableSuffix)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        for (var index = text.IndexOf(identifier, System.StringComparison.Ordinal); index >= 0; index = text.IndexOf(identifier, index + 1, System.StringComparison.Ordinal))
+        {
+            var end = index + identifier.Length;
+            if (index > 0 && IsIdentifierOrQualifierChar(text[index - 1]))
+            {
+                continue;
+            }
+
+            if (end < text.Length && IsIdentifierChar(text[end]))
+            {
+                continue;
+            }
+
+            if (!requireNullableSuffix || (end < text.Length && text[end] == '?'))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsIdentifierChar(char c) => char.IsLetterOrDigit(c) || c == '_';
+
+    // A '.' or ':' before the name means a member or namespace-qualified type that merely shares it.
+    private static bool IsIdentifierOrQualifierChar(char c) => IsIdentifierChar(c) || c == '.' || c == ':';
+
     internal static void GenerateGenericMethodMembersForWrapper(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
     {
         if (method.HasRefStructParams)

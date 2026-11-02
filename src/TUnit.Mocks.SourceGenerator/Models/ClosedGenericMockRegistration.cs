@@ -27,3 +27,15 @@ internal sealed record ClosedGenericMockRegistration(
 internal readonly record struct ClosedGenericFactoryEmission(
     string ClosedTypeFullyQualifiedName,
     string FactoryMethod);
+
+/// <summary>
+/// A closed registration whose open mock has generic methods, ready to emit closed-receiver setups
+/// that accept explicit method type arguments. See issue #7302.
+/// </summary>
+/// <param name="Model">The open mock generated for the registration.</param>
+/// <param name="ClosedTypeFullyQualifiedName">The closed interface, e.g. <c>global::Ns.IRepository&lt;int&gt;</c>.</param>
+/// <param name="TypeArguments">Every type argument, in model type-parameter order.</param>
+internal sealed record ClosedGenericMethodSetupEmission(
+    MockTypeModel Model,
+    string ClosedTypeFullyQualifiedName,
+    EquatableArray<string> TypeArguments);

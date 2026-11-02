@@ -132,16 +132,36 @@ public class MockGenerator : IIncrementalGenerator
                 transform: MockTypeDiscovery.TransformGenerateMockAttributeToClosedGenericRegistrations)
             .SelectMany((registrations, _) => registrations.AsImmutableArray());
 
-        var closedEmissions = closedFromMockOf
+        var closedInputs = closedFromMockOf
             .Collect()
             .Combine(closedFromAttributes.Collect())
-            .Combine(distinctRequests.Select(static (request, _) => request.Model).Collect())
+            .Combine(distinctRequests.Select(static (request, _) => request.Model).Collect());
+
+        var closedEmissions = closedInputs
             .Select(static (input, _) =>
             {
                 var ((mockOf, attributes), models) = input;
                 return ClosedGenericRegistrationBuilder.Resolve(mockOf.AddRange(attributes), models);
             })
             .WithTrackingName(MockTrackingNames.ClosedGenericEmissions);
+
+        // Step 3c: generic-method setups on Mock<IFoo<int>> need a closed receiver to accept explicit
+        // method type arguments, which members of the open extension<T> block cannot. See issue #7302.
+        var closedMethodSetups = closedInputs
+            .Select(static (input, _) =>
+            {
+                var ((mockOf, attributes), models) = input;
+                return ClosedGenericRegistrationBuilder.ResolveMethodSetups(mockOf.AddRange(attributes), models);
+            })
+            .WithTrackingName(MockTrackingNames.ClosedGenericMethodSetupEmissions);
+
+        context.RegisterSourceOutput(closedMethodSetups, static (spc, emissions) =>
+        {
+            if (emissions.Length > 0)
+            {
+                spc.AddSource(ClosedGenericRegistrationBuilder.MethodSetupsHintName, ClosedGenericRegistrationBuilder.BuildMethodSetups(emissions));
+            }
+        });
 
         context.RegisterSourceOutput(closedEmissions, static (spc, emissions) =>
         {
