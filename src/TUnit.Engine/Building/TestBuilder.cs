@@ -1104,7 +1104,8 @@ internal sealed class TestBuilder : ITestBuilder
     /// <para>
     /// The events that the data source subscribed on the builder context while the row was first fetched
     /// (such as the disposal of a dependency injection scope) travel with these objects, so the test
-    /// that takes or tracks them also raises those events (#7205).
+    /// that takes them also raises those events (#7205). Lent objects do not carry their events: see
+    /// <see cref="LendToTemporaryInstance"/>.
     /// </para>
     /// </remarks>
     private sealed class UnclaimedClassRow(object?[] data, TestDataRowMetadata? metadata, TestContextEvents? events)
@@ -1116,7 +1117,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         /// <summary>
         /// Takes the unclaimed objects, or fetches a new row from <paramref name="classDataFactory"/> when a
-        /// test already holds them. Any events of the unclaimed or lent objects move to
+        /// test already holds them. Any events of the unclaimed objects move to
         /// <paramref name="builderContext"/> first, the context the row is fetched against, so a new fetch
         /// adds its own subscriptions to the same container.
         /// </summary>
@@ -1161,8 +1162,8 @@ internal sealed class TestBuilder : ITestBuilder
         }
 
         /// <summary>
-        /// Takes the events subscribed while the unclaimed or lent objects were fetched, for the test that
-        /// holds or tracks those objects.
+        /// Takes the events subscribed while the unclaimed objects were fetched, for the test that holds
+        /// those objects.
         /// </summary>
         public TestContextEvents? TakeEvents()
         {
@@ -1191,6 +1192,12 @@ internal sealed class TestBuilder : ITestBuilder
             _lent = _data;
             _data = null;
             _metadata = null;
+
+            // The temporary instance also returns the later method rows, which can hold services the lent
+            // objects' scope resolved, so no single test may raise the lent row's events: the first test's
+            // OnDispose would dispose that scope under the later tests. Their session-lifetime disposal is
+            // tracked by #7383; until then they stay unraised, as they were before #7205.
+            _events = null;
         }
 
         /// <summary>
