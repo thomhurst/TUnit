@@ -361,6 +361,110 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
     }
 
+    /// <summary>
+    /// The declared type of one row of a data source member of type <paramref name="memberType"/>, read the way
+    /// <see cref="GetRowsFromRuntimeValueAsync"/> reads its value: a <c>Task</c> or <c>ValueTask</c> is unwrapped; an
+    /// <c>IAsyncEnumerable&lt;X&gt;</c>, an array of <c>X</c> or an <c>IEnumerable&lt;X&gt;</c> other than a string
+    /// yields rows of <c>X</c>; any other value, such as a string or a tuple, is a single row. A <c>Func&lt;X&gt;</c>
+    /// row is unwrapped, then one <c>TestDataRow&lt;X&gt;</c> and one <c>Func&lt;X&gt;</c> inside it. Null for <c>object[]</c> rows and non-generic sequences, whose element types are unknown.
+    /// Reflection discovery uses it to infer a generic class's type arguments from a member it cannot read yet
+    /// (#7208). Keep it in step with <see cref="GetRowsFromRuntimeValueAsync"/>; MethodDataSourceDeclaredRowTypeTests
+    /// checks the two against each other.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
+    internal static Type? GetDeclaredRowType(Type memberType)
+    {
+        var awaited = false;
+        if (memberType.IsGenericType
+            && (memberType.GetGenericTypeDefinition() == typeof(Task<>) || memberType.GetGenericTypeDefinition() == typeof(ValueTask<>)))
+        {
+            memberType = memberType.GetGenericArguments()[0];
+            awaited = true;
+        }
+
+        Type? rowType;
+        if (memberType == typeof(string))
+        {
+            rowType = memberType;
+        }
+        else if (!awaited && GetSequenceElementType(memberType, typeof(IAsyncEnumerable<>)) is { } asyncElementType)
+        {
+            // An awaited IAsyncEnumerable is not enumerated by invocation, so only a direct one yields rows
+            rowType = asyncElementType;
+        }
+        else if (memberType.IsArray)
+        {
+            rowType = memberType.GetElementType();
+        }
+        else if (GetSequenceElementType(memberType, typeof(IEnumerable<>)) is { } elementType)
+        {
+            rowType = elementType;
+        }
+        else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(memberType))
+        {
+            return null;
+        }
+        else
+        {
+            rowType = memberType;
+        }
+
+        // Peel only the layers the row reader removes: DataSourceHelpers.ToObjectArray invokes one outer Func, then
+        // TestDataRowUnwrapper.UnwrapArray strips one TestDataRow and invokes one Func inside it
+        rowType = UnwrapFunc(rowType);
+        if (rowType != null && TestDataRowUnwrapper.GetInnerDataType(rowType) is { } rowData)
+        {
+            rowType = UnwrapFunc(rowData);
+        }
+
+        return rowType == null || rowType == typeof(object[]) ? null : rowType;
+    }
+
+    private static Type? UnwrapFunc(Type? type) =>
+        type is { IsGenericType: true } && type.GetGenericTypeDefinition() == typeof(Func<>)
+            ? type.GetGenericArguments()[0]
+            : type;
+
+    /// <summary>
+    /// <c>X</c> when <paramref name="type"/> is or implements <paramref name="sequenceDefinition"/> of <c>X</c>
+    /// (<c>IEnumerable&lt;&gt;</c> or <c>IAsyncEnumerable&lt;&gt;</c>), otherwise null.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
+    private static Type? GetSequenceElementType(Type type, Type sequenceDefinition)
+    {
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == sequenceDefinition)
+        {
+            return type.GetGenericArguments()[0];
+        }
+
+        foreach (var implemented in type.GetInterfaces())
+        {
+            if (implemented.IsGenericType && implemented.GetGenericTypeDefinition() == sequenceDefinition)
+            {
+                return implemented.GetGenericArguments()[0];
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The declared type of the member this source reads on <paramref name="targetType"/>: the return type of the
+    /// method overload <see cref="GetDataRowsAsync"/> invokes, else the property or field type. Null when no such
+    /// member exists. Reflection discovery uses it to infer a generic class's type arguments before reading the
+    /// member, so it resolves the member exactly as invocation does.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
+    internal Type? GetDeclaredMemberType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type targetType)
+    {
+        var methodInfo = ResolveDataSourceMethod(targetType)
+            ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
+
+        return methodInfo?.ReturnType
+            ?? targetType.GetProperty(MethodNameProvidingDataSource, BindingFlags)?.PropertyType
+            ?? targetType.GetField(MethodNameProvidingDataSource, BindingFlags)?.FieldType;
+    }
+
     // Resolves the data-source method overload that best matches the supplied Arguments.
     //
     // When every argument is non-null we know its runtime type, so we delegate to the runtime

@@ -24,8 +24,7 @@ internal static class ClassMetadataHelper
     {
         return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () =>
         {
-            var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
-            var constructor = constructors.FirstOrDefault();
+            var constructor = GetParameterConstructor(type.GetConstructors(BindingFlags.Public | BindingFlags.Instance));
 
             var constructorParameters = constructor?.GetParameters().Select((p, i) => new ParameterMetadata(p.ParameterType)
             {
@@ -51,5 +50,23 @@ internal static class ClassMetadataHelper
                 Parent = type.DeclaringType != null ? GetOrCreateClassMetadata(type.DeclaringType) : null
             };
         });
+    }
+
+    /// <summary>
+    /// The public constructor whose parameters describe a class's <see cref="ClassMetadata.Parameters"/>: the one
+    /// marked <c>[TestConstructor]</c>, which the test instance is built with, otherwise the first one. Every
+    /// reflection-mode builder of <see cref="ClassMetadata"/> shares one cache entry per type, so they must agree.
+    /// </summary>
+    public static ConstructorInfo? GetParameterConstructor(ConstructorInfo[] publicConstructors)
+    {
+        foreach (var constructor in publicConstructors)
+        {
+            if (constructor.IsDefined(typeof(TestConstructorAttribute), inherit: false))
+            {
+                return constructor;
+            }
+        }
+
+        return publicConstructors.Length > 0 ? publicConstructors[0] : null;
     }
 }

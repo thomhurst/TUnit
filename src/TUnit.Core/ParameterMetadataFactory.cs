@@ -228,11 +228,30 @@ internal sealed class ParameterInfoResolver
                 ?? FindNonPublicMethod(),
             Kind.MethodByShape => FindBestMatch(_declaringType!.GetMethods(PublicMethods)) ?? FindNonPublicMethod(),
             Kind.Constructor => _declaringType!.GetConstructor(GetParameterTypes()),
-            Kind.ConstructorByParameterCount => FindBestMatch(_declaringType!.GetConstructors()),
+            Kind.ConstructorByParameterCount => FindConstructorByParameterCount(_declaringType!.GetConstructors()),
             _ => FindDeclaredNonPublicMethod(),
         };
 
         return member?.GetParameters() ?? [];
+    }
+
+    /// <summary>
+    /// The generator describes the <c>[TestConstructor]</c> when the class marks one, so that constructor owns the
+    /// parameters. Matching by shape alone could pick an earlier overload such as <c>Foo(object)</c> for
+    /// <c>[TestConstructor] Foo(T)</c>, whose <c>T</c> parameter is emitted as <c>object</c> (#7208).
+    /// </summary>
+    private MethodBase? FindConstructorByParameterCount(ConstructorInfo[] candidates)
+    {
+        foreach (var candidate in candidates)
+        {
+            if (candidate.IsDefined(typeof(TestConstructorAttribute), inherit: false)
+                && candidate.GetParameters().Length == _parameters.Length)
+            {
+                return candidate;
+            }
+        }
+
+        return FindBestMatch(candidates);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2080",

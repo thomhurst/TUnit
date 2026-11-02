@@ -308,8 +308,7 @@ internal static class DataGeneratorMetadataCreator
     {
         return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () =>
         {
-            var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
-            var constructor = constructors.FirstOrDefault();
+            var constructor = PropertyInjection.ClassMetadataHelper.GetParameterConstructor(type.GetConstructors(BindingFlags.Public | BindingFlags.Instance));
 
             var constructorParameters = constructor?.GetParameters().Select((p, i) => new ParameterMetadata(p.ParameterType)
             {
