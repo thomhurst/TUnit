@@ -131,4 +131,17 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1)
             ]);
     }
+
+    [Test]
+    public async Task Constraint_Violation_Without_GenerateGenericTest_Fails_Once_Per_Class_Row()
+    {
+        // Without a method-level [GenerateGenericTest], reflection mode keeps the class rows on the failing
+        // entry, so source-generated mode must not drop them: two class rows give two failures in both modes.
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/ClassRowsConstraintViolationTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(2)
+            ]);
+    }
 }
