@@ -2180,8 +2180,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Mirrors the generator's <c>TypedDataSourceInference.InferMethodTypeArgumentsFromRowType</c> (#7214): a
     /// typed row of type <paramref name="rowType"/> binds to the data parameters (any CancellationToken
-    /// excluded), the whole row to a single data parameter, otherwise one tuple element per leading data
-    /// parameter, or a scalar row to the first, with omitted trailing parameters optional (params arrays and
+    /// excluded): a tuple row spreads one element per leading data parameter, as ToObjectArray spreads it, an
+    /// object[] or System.Tuple row infers nothing, and any other row binds whole to a single data parameter, or
+    /// to the first of several, with omitted trailing parameters optional (params arrays and
     /// params collections included). A Func&lt;T&gt; row, a TestDataRow&lt;T&gt; row and a TestDataRow&lt;Func&lt;T&gt;&gt; row bind as their
     /// T, since they are invoked and unwrapped before invocation. A T? parameter takes a value of its underlying type. Each parameter type is matched against its value type, including
     /// type arguments nested in generic parameter types. Every type parameter must be inferred, each to one type.
@@ -2212,16 +2213,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var typeArguments = new Type?[genericParameterCount];
 
-        if (dataParameters.Length == 1)
+        if (GetValueTupleElementTypes(rowType) is { } tupleElements)
         {
-            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments))
-            {
-                return null;
-            }
-        }
-        else if (GetValueTupleElementTypes(rowType) is { } tupleElements)
-        {
-            // The tuple spreads over the leading data parameters; omitted trailing ones take their defaults.
+            // ToObjectArray always spreads a tuple row, a one-element tuple included, so the tuple spreads
+            // over the leading data parameters; omitted trailing ones take their defaults.
             if (tupleElements.Length < requiredCount || tupleElements.Length > dataParameters.Length)
             {
                 return null;
@@ -2233,6 +2228,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     return null;
                 }
+            }
+        }
+        else if (rowType == typeof(object[])
+            || rowType is { IsGenericType: true, Namespace: "System" } && rowType.Name.StartsWith("Tuple`", StringComparison.Ordinal))
+        {
+            // ToObjectArray also spreads an object[] row, whose value types the row type does not declare,
+            // and a System.Tuple row; leave both to runtime inference.
+            return null;
+        }
+        else if (dataParameters.Length == 1)
+        {
+            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments))
+            {
+                return null;
             }
         }
         else if (dataParameters.Length > 1 && requiredCount <= 1)

@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
@@ -78,8 +78,9 @@ internal static class TypedDataSourceInference
     /// <summary>
     /// The type arguments of generic test method <paramref name="method"/> inferred from a typed row whose value
     /// has type <paramref name="rowType"/> (<c>[Arguments&lt;T&gt;]</c>, #7214). The row binds to the data
-    /// parameters (any <c>CancellationToken</c> excluded): the whole row to a single data parameter, otherwise one
-    /// tuple element per leading data parameter, or a scalar row to the first, with omitted trailing parameters
+    /// parameters (any <c>CancellationToken</c> excluded): a tuple row spreads one element per leading data parameter,
+    /// as <c>ToObjectArray</c> spreads it, an <c>object[]</c> or <c>System.Tuple</c> row infers nothing, and any other
+    /// row binds whole to a single data parameter, or to the first of several, with omitted trailing parameters
     /// optional (params arrays and params collections included). A <c>Func&lt;T&gt;</c>, <c>TestDataRow&lt;T&gt;</c> or
     /// <c>TestDataRow&lt;Func&lt;T&gt;&gt;</c> row binds as its <c>T</c>, since it is invoked and unwrapped before invocation. A <c>T?</c> parameter takes a value of its underlying
     /// type. Each parameter type is matched against its value type, including type
@@ -104,16 +105,10 @@ internal static class TypedDataSourceInference
         var requiredCount = dataParameters.Count(p => !p.IsOptional && !p.HasExplicitDefaultValue && !p.IsParams);
         var inferred = new ITypeSymbol?[method.TypeParameters.Length];
 
-        if (dataParameters.Length == 1)
+        if (rowType is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
-            if (!MapTypeParameters(method, dataParameters[0].Type, rowType, inferred))
-            {
-                return null;
-            }
-        }
-        else if (rowType is INamedTypeSymbol { IsTupleType: true } tupleType)
-        {
-            // The tuple spreads over the leading data parameters; omitted trailing ones take their defaults.
+            // ToObjectArray always spreads a tuple row, a one-element tuple included, so the tuple spreads
+            // over the leading data parameters; omitted trailing ones take their defaults.
             var elements = tupleType.TupleElements;
             if (elements.Length < requiredCount || elements.Length > dataParameters.Length)
             {
@@ -126,6 +121,19 @@ internal static class TypedDataSourceInference
                 {
                     return null;
                 }
+            }
+        }
+        else if (IsSpreadWithoutElementTypes(rowType))
+        {
+            // ToObjectArray also spreads an object[] row, whose value types the row type does not declare,
+            // and a System.Tuple row; leave both to runtime inference.
+            return null;
+        }
+        else if (dataParameters.Length == 1)
+        {
+            if (!MapTypeParameters(method, dataParameters[0].Type, rowType, inferred))
+            {
+                return null;
             }
         }
         else if (dataParameters.Length > 1 && requiredCount <= 1)
@@ -204,6 +212,11 @@ internal static class TypedDataSourceInference
             && namedType.OriginalDefinition.ContainingNamespace?.ToDisplayString() == containingNamespace
                 ? namedType.TypeArguments[0]
                 : type;
+
+    private static bool IsSpreadWithoutElementTypes(ITypeSymbol type)
+        => type is IArrayTypeSymbol { Rank: 1, ElementType.SpecialType: SpecialType.System_Object }
+            || type is INamedTypeSymbol { IsGenericType: true, Name: "Tuple", ContainingNamespace: { } tupleNamespace }
+                && tupleNamespace.ToDisplayString() == "System";
 
     private static bool IsCancellationToken(ITypeSymbol type)
         => type is { Name: "CancellationToken", ContainingNamespace: { } containingNamespace }
