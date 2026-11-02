@@ -1262,8 +1262,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 continue;
             }
 
+            // Only a method whose parameters use the class's type parameters has rows, [MethodDataSource]s or
+            // parameter attributes that infer them. A typed data source infers them from its declared type
+            // whatever the parameters are, as the generator's InferTypesFromDataSourceAttribute does (#7209).
             var parameters = testMethod.GetParameters();
-            if (!Array.Exists(parameters, static p => p.ParameterType.ContainsGenericParameters))
+            var parametersUseClassTypeParameters = Array.Exists(parameters, static p => p.ParameterType.ContainsGenericParameters);
+            if (!parametersUseClassTypeParameters && !methodSourcesInferClassTypeArguments)
             {
                 continue;
             }
@@ -1272,7 +1276,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             var methodDataSources = ReflectionAttributeExtractor.ExtractDataSources(testMethod);
             Type[]?[]? rowTypeArguments = null;
 
-            for (var i = 0; i < methodDataSources.Length; i++)
+            for (var i = 0; parametersUseClassTypeParameters && i < methodDataSources.Length; i++)
             {
                 // Class rows supply the instantiations, so [Arguments(null)] infers none and runs on each (#7141),
                 // unless every class row goes to no type parameter (#7209)
@@ -1304,7 +1308,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     }
                 }
 
-                for (var i = 0; rowTypeArguments == null && i < methodDataSources.Length; i++)
+                for (var i = 0; parametersUseClassTypeParameters && rowTypeArguments == null && i < methodDataSources.Length; i++)
                 {
                     if (methodDataSources[i] is MethodDataSourceAttribute methodDataSource)
                     {
@@ -1315,7 +1319,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // Parameter attributes ([Matrix<int>] on a T parameter) infer an instantiation too, beside those of
                 // the sources above, as the generator's InferTypesFromTypedDataSourceForClass does. It runs every
                 // method data source.
-                if (rowTypeArguments == null && methodDataSources.Length > 0)
+                if (parametersUseClassTypeParameters && rowTypeArguments == null && methodDataSources.Length > 0)
                 {
                     AddSourceInstantiation(ref instantiations, InferClassTypeArgumentsFromParameterAttributes(classGenericParameters.Length, parameters), sourceIndex: -1);
                 }

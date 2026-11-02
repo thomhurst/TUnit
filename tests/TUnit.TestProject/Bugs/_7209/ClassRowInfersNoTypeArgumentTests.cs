@@ -157,6 +157,22 @@ public class TypeFreeClassRowWithTypedMethodSource<T>(int number)
     }
 }
 
+// A typed data source infers T from its declared type even when no method parameter uses T: ClassDataSource<int> runs
+// on C<int>, built from the class row (number = 42), as the source generator infers it. Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithTypedSourceAndNonGenericParameter<T>(int number)
+{
+    [Test]
+    [ClassDataSource<int>]
+    public async Task Run(int value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo(0);
+    }
+}
+
 // Beside only a type-free class row, a parameter attribute that infers T (Matrix<int> implements IInfersType<int>)
 // supplies the instantiation, as in the source generator: both matrix values run on C<int>, each instance built from
 // the class row (number = 42). Same in both modes.
