@@ -1822,6 +1822,26 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             writer.AppendLine($"throw new global::System.InvalidOperationException(\"{EscapeString(NoClassRowForMethodRowMessage)}\");");
         }
+        else if (entry.HasParameterizedConstructor && GetClassDataSourcePartition(testMethod, entry) is { } partition)
+        {
+            // Some class rows come from data sources whose row types are known only at run time, so every
+            // test's row reaches the constructor through args (#7210)
+            if (partition.Fallback == ClassRowFallback.NoClassRow)
+            {
+                // No row of any class data source inferred these types, so the partition yields one empty row
+                writer.AppendLine($"if (args.Length == 0) throw new global::System.InvalidOperationException(\"{EscapeString(NoClassRowForMethodRowMessage)}\");");
+            }
+
+            if (partition.Fallback == ClassRowFallback.AllRows || !entry.HasClassRows)
+            {
+                // Rows of other types may build the instance, converted to the parameter types (#7161)
+                writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol.Construct(entry.ClassTypeArgs)));
+            }
+            else
+            {
+                writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
+            }
+        }
         // Bake the row's values in only when it is the instantiation's only class row. When several
         // class rows share it, each test's row reaches the constructor through args instead. A method
         // row's values are never constructor arguments: an instantiation that only method rows infer
@@ -2202,6 +2222,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Method data sources
         List<AttributeData> methodDataSources;
         AttributeData[] classDataSources;
+        ClassDataSourcePartition? classDataSourcePartition = null;
 
         if (entry.SpecificArgumentsAttribute != null)
         {
@@ -2233,7 +2254,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
 
-            classDataSources = entry.HasClassRows || entry.HasNoClassRow
+            classDataSourcePartition = GetClassDataSourcePartition(testMethod, entry);
+            classDataSources = classDataSourcePartition is not null
+                ? classDataSourcePartition.DataSources
+                : entry.HasClassRows || entry.HasNoClassRow
                 ? typeSymbol.GetAttributesIncludingBaseTypes()
                     .Where(entry.IsSpecificClassDataSource)
                     .ToArray()
@@ -2308,6 +2332,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (classDataSources.Length > 0)
         {
             var dsWriter = new CodeWriter(includeHeader: false);
+            if (classDataSourcePartition is not null)
+            {
+                // Splits the rows of the sources whose row types the generator cannot see by the class type
+                // arguments they infer, as reflection mode does at discovery (#7210)
+                var typeArguments = string.Join(", ", entry.ClassTypeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})"));
+                dsWriter.Append($"global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] {{ {typeArguments} }}, global::TUnit.Core.GenericClassRowFallback.{classDataSourcePartition.Fallback}, ");
+            }
             dsWriter.AppendLine("new global::TUnit.Core.IDataSourceAttribute[]");
             dsWriter.AppendLine("{");
             dsWriter.Indent();
@@ -2317,8 +2348,126 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             dsWriter.Unindent();
             dsWriter.Append("}");
+            if (classDataSourcePartition is not null)
+            {
+                dsWriter.Append($", {string.Join(", ", classDataSourcePartition.PartitionedIndices.Select(i => i.ToString(CultureInfo.InvariantCulture)))})");
+            }
             writer.AppendLine($"classDataSources: {dsWriter},");
         }
+    }
+
+    /// <summary>
+    /// Mirrors <c>TUnit.Core.GenericClassRowFallback</c>: what an instantiation uses when no row of its partitioned
+    /// class data sources infers its class type arguments.
+    /// </summary>
+    private enum ClassRowFallback
+    {
+        None,
+        AllRows,
+        NoClassRow,
+    }
+
+    /// <summary>
+    /// The class data sources of an instantiation whose rows are split at run time by the class type arguments they
+    /// infer. <paramref name="PartitionedIndices"/> are the sources whose row types the generator cannot see.
+    /// </summary>
+    private sealed record ClassDataSourcePartition(AttributeData[] DataSources, int[] PartitionedIndices, ClassRowFallback Fallback);
+
+    /// <summary>
+    /// For an instantiation of a generic class whose class-level data sources include one whose row types the
+    /// generator cannot see (a [MethodDataSource] returning <c>IEnumerable&lt;object&gt;</c>, say), the class data
+    /// sources to give its tests. Reflection mode groups class rows by the types of their values at discovery,
+    /// so each such source joins every instantiation and yields, at run time, only the rows whose values infer
+    /// its class type arguments (#7210). When no row infers them and no class row known at compile time does, the
+    /// instantiation falls back as reflection mode does: with class-level [Arguments] rows, no class row supplies
+    /// its constructor arguments (#7118); otherwise every class row does, converted (#7161). Null when the class
+    /// has no such source, or the instantiation's class data sources are not scoped to it.
+    /// </summary>
+    private static ClassDataSourcePartition? GetClassDataSourcePartition(TestMethodMetadata testMethod, ConcreteInstantiation entry)
+    {
+        if (!testMethod.IsGenericType || entry.ClassTypeArgs.Length == 0 || entry.SpecificArgumentsAttribute is null)
+        {
+            return null;
+        }
+
+        var typeSymbol = testMethod.TypeSymbol;
+        var allClassDataSources = typeSymbol.GetAttributesIncludingBaseTypes()
+            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+            .ToArray();
+
+        // A class-level [Arguments] row is typed by its values; other sources by their declared type arguments
+        var hasClassArgumentsRows = false;
+        var isUntyped = new bool[allClassDataSources.Length];
+        var classTypes = new ITypeSymbol[]?[allClassDataSources.Length];
+        for (var i = 0; i < allClassDataSources.Length; i++)
+        {
+            var attributeClass = allClassDataSources[i].AttributeClass!;
+            if (attributeClass.Name == "ArgumentsAttribute")
+            {
+                hasClassArgumentsRows = true;
+                continue;
+            }
+
+            classTypes[i] = InferClassTypesFromTypedClassDataSource(typeSymbol, attributeClass);
+            isUntyped[i] = classTypes[i] is null;
+        }
+
+        if (Array.IndexOf(isUntyped, true) < 0)
+        {
+            return null;
+        }
+
+        var dataSources = new List<AttributeData>(allClassDataSources.Length);
+        var partitionedIndices = new List<int>();
+        var hasCompileTimeClassRow = false;
+
+        if (entry.HasClassRows || entry.HasNoClassRow)
+        {
+            // The class rows scoped to this instantiation, with every untyped source, in declaration order
+            for (var i = 0; i < allClassDataSources.Length; i++)
+            {
+                if (isUntyped[i])
+                {
+                    partitionedIndices.Add(dataSources.Count);
+                    dataSources.Add(allClassDataSources[i]);
+                }
+                else if (entry.IsSpecificClassDataSource(allClassDataSources[i]))
+                {
+                    hasCompileTimeClassRow = true;
+                    dataSources.Add(allClassDataSources[i]);
+                }
+            }
+        }
+        else
+        {
+            // Only method rows inferred this instantiation. A typed source of these types supplies its class rows;
+            // without one, every class data source may build the instance (#7161).
+            var matchesTypedSource = new bool[allClassDataSources.Length];
+            for (var i = 0; i < allClassDataSources.Length; i++)
+            {
+                matchesTypedSource[i] = classTypes[i] is { } types && InferredTypesMatch(types, entry.ClassTypeArgs);
+                hasCompileTimeClassRow |= matchesTypedSource[i];
+            }
+
+            for (var i = 0; i < allClassDataSources.Length; i++)
+            {
+                if (isUntyped[i])
+                {
+                    partitionedIndices.Add(dataSources.Count);
+                    dataSources.Add(allClassDataSources[i]);
+                }
+                else if (!hasCompileTimeClassRow || matchesTypedSource[i])
+                {
+                    dataSources.Add(allClassDataSources[i]);
+                }
+            }
+        }
+
+        var fallback = hasCompileTimeClassRow ? ClassRowFallback.None
+            : hasClassArgumentsRows ? ClassRowFallback.NoClassRow
+            : ClassRowFallback.AllRows;
+
+        return new ClassDataSourcePartition(dataSources.ToArray(), partitionedIndices.ToArray(), fallback);
     }
 
     /// <summary>

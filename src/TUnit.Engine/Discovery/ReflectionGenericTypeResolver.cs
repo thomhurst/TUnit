@@ -25,54 +25,8 @@ internal static class ReflectionGenericTypeResolver
         }
 #endif
 
-        var genericParameters = genericTypeDefinition.GetGenericArguments();
-
-        // If no data row or empty data, can't determine types
-        if (dataRow.Length == 0)
-        {
-            return null;
-        }
-
-        var typeArguments = new Type[genericParameters.Length];
-
-        // For generic classes with constructors, we need to infer types from constructor parameters
-        // We should match the number of generic parameters, not the number of data items
-        if (genericParameters.Length == 1 && dataRow.Length >= 1)
-        {
-            // Single generic parameter - use first non-null argument's type
-            for (var i = 0; i < dataRow.Length; i++)
-            {
-                if (dataRow[i] != null)
-                {
-                    typeArguments[0] = dataRow[i]!.GetType();
-                    break;
-                }
-            }
-
-            // If we couldn't determine the type, return null
-            if (typeArguments[0] == null)
-            {
-                return null;
-            }
-        }
-        else
-        {
-            // Multiple generic parameters - try to match one-to-one with data
-            for (var i = 0; i < genericParameters.Length; i++)
-            {
-                if (i < dataRow.Length && dataRow[i] != null)
-                {
-                    typeArguments[i] = dataRow[i]!.GetType();
-                }
-                else
-                {
-                    // Can't determine all generic types
-                    return null;
-                }
-            }
-        }
-
-        return typeArguments;
+        // Source-generated mode partitions class rows by the same rule at run time (#7210)
+        return GenericClassRowPartition.InferClassTypeArguments(dataRow, genericTypeDefinition.GetGenericArguments().Length);
     }
 
     /// <summary>

@@ -738,18 +738,34 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             var dataItems = await GetDataFromSourceAsync(dataSource, null!).ConfigureAwait(false);
 
+            // Inference reads a wrapped factory's values. The first test built from that row gets those values
+            // rather than invoking the factory again; later tests invoke it for their own objects, as in
+            // source-generated mode. Every source built from this one shares a row's box, so one test gets those
+            // values whichever instantiation it runs on. Null when no row holds a wrapped factory
+            StrongBox<object?[]?>?[]? evaluatedItems = null;
+            for (var i = 0; i < dataItems.Count; i++)
+            {
+                if (dataItems[i] is { } item && GenericClassRowPartition.EvaluateWrappedFactory(item) is var evaluated && !ReferenceEquals(evaluated, item))
+                {
+                    evaluatedItems ??= new StrongBox<object?[]?>?[dataItems.Count];
+                    evaluatedItems[i] = new StrongBox<object?[]?>(evaluated);
+                }
+            }
+
             allClassRows?.Add(new StaticDataSourceAttribute(dataItems.ToArray())
             {
                 PartitionOf = dataSource,
                 DeferEnumeration = dataSource.DeferEnumeration,
-                SkipIfEmpty = dataSource.SkipIfEmpty
+                SkipIfEmpty = dataSource.SkipIfEmpty,
+                FirstFetchRows = evaluatedItems
             });
 
-            // Rows from this source, per group index, in row order
-            var rowsByGroup = new Dictionary<int, List<object?[]>>();
+            // Indices of the rows from this source, per group index, in row order
+            var rowsByGroup = new Dictionary<int, List<int>>();
 
-            foreach (var dataRow in dataItems)
+            for (var rowIndex = 0; rowIndex < dataItems.Count; rowIndex++)
             {
+                var dataRow = evaluatedItems?[rowIndex]?.Value ?? dataItems[rowIndex];
                 if (dataRow == null || dataRow.Length == 0)
                 {
                     continue;
@@ -779,7 +795,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     rowsByGroup[groupIndex] = rows;
                 }
 
-                rows.Add(dataRow);
+                rows.Add(rowIndex);
             }
 
             // Tests receive the rows evaluated here rather than the source itself, so the source is read
@@ -790,10 +806,23 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // rows expand at runtime from this partition, without reading the source again.
             foreach (var entry in rowsByGroup)
             {
-                sourcesByGroup[entry.Key].Add(new StaticDataSourceAttribute(entry.Value.ToArray())
+                var rowIndices = entry.Value;
+                var groupRows = new object?[rowIndices.Count][];
+                var groupFirstFetchRows = evaluatedItems is null ? null : new StrongBox<object?[]?>?[rowIndices.Count];
+                for (var i = 0; i < rowIndices.Count; i++)
+                {
+                    groupRows[i] = dataItems[rowIndices[i]];
+                    if (groupFirstFetchRows is not null)
+                    {
+                        groupFirstFetchRows[i] = evaluatedItems![rowIndices[i]];
+                    }
+                }
+
+                sourcesByGroup[entry.Key].Add(new StaticDataSourceAttribute(groupRows)
                 {
                     PartitionOf = dataSource,
-                    DeferEnumeration = dataSource.DeferEnumeration
+                    DeferEnumeration = dataSource.DeferEnumeration,
+                    FirstFetchRows = groupFirstFetchRows
                 });
                 rowCounts[entry.Key] += entry.Value.Count;
             }

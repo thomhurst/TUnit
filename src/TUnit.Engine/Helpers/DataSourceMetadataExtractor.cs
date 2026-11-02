@@ -34,6 +34,16 @@ internal static class DataSourceMetadataExtractor
             return null;
         }
 
+        // A generic class's class rows, partitioned by the class type arguments they infer, keep the settings of
+        // the source they came from: reflection mode partitions them at discovery, source-generated mode at run time
+        switch (dataSource)
+        {
+            case StaticDataSourceAttribute { PartitionOf: { } partitionedSource }:
+                return ExtractFromAttribute(partitionedSource);
+            case GenericClassRowPartitionDataSource partition:
+                return ExtractFromAttribute(partition.InnerDataSource);
+        }
+
         // ArgumentsAttribute is sealed, so these reads have the same semantics as reflection.
         if (dataSource is ArgumentsAttribute arguments)
         {
