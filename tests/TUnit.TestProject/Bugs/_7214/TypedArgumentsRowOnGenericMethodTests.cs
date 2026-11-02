@@ -298,3 +298,27 @@ public sealed class StringArrayTestDataRowSourceAttribute : TypedDataSourceAttri
         yield return () => Task.FromResult(new TestDataRow<string[]>(["a"]));
     }
 }
+
+// ToObjectArray spreads a one-element tuple row first, and UnwrapArray then unwraps the TestDataRow<int> it
+// held, so a typed source of ValueTuple<TestDataRow<int>> rows infers Run<int>, not Run<TestDataRow<int>>:
+// Run<int>(1).
+[EngineTest(ExpectedResult.Pass)]
+public class TypedOneElementTupleOfTestDataRowSource
+{
+    [Test]
+    [IntTestDataRowOneElementTupleSource]
+    public async Task Run<TMethod>(TMethod arg)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
+        await Assert.That((int)(object)arg!).IsEqualTo(1);
+    }
+}
+
+public sealed class IntTestDataRowOneElementTupleSourceAttribute : TypedDataSourceAttribute<ValueTuple<TestDataRow<int>>>
+{
+    public override async IAsyncEnumerable<Func<Task<ValueTuple<TestDataRow<int>>>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await Task.CompletedTask;
+        yield return () => Task.FromResult(ValueTuple.Create(new TestDataRow<int>(1)));
+    }
+}

@@ -98,7 +98,8 @@ internal static class TypedDataSourceInference
         rowType = UnwrapSingleArgument(rowType, "Func", "System");
         var unwrappedRow = UnwrapSingleArgument(rowType, "TestDataRow", "TUnit.Core");
         var spreadsReferenceArray = false;
-        if (!SymbolEqualityComparer.Default.Equals(unwrappedRow, rowType))
+        var isTestDataRow = !SymbolEqualityComparer.Default.Equals(unwrappedRow, rowType);
+        if (isTestDataRow)
         {
             rowType = UnwrapSingleArgument(unwrappedRow, "Func", "System");
 
@@ -128,6 +129,15 @@ internal static class TypedDataSourceInference
             // ToObjectArray always spreads a tuple row, a one-element tuple included, so the tuple spreads
             // over the leading data parameters; omitted trailing ones take their defaults.
             var elements = tupleType.TupleElements;
+
+            // UnwrapArray runs after ToObjectArray, so the TestDataRow<T> element of a one-element tuple
+            // row that is not itself a TestDataRow is unwrapped (and its Func invoked, its tuple or
+            // reference array spread) like a whole TestDataRow<T> row.
+            if (!isTestDataRow && elements.Length == 1 && IsTestDataRow(elements[0].Type))
+            {
+                return InferMethodTypeArgumentsFromRowType(method, elements[0].Type);
+            }
+
             if (elements.Length < requiredCount || elements.Length > dataParameters.Length)
             {
                 return null;
@@ -230,6 +240,9 @@ internal static class TypedDataSourceInference
             && namedType.OriginalDefinition.ContainingNamespace?.ToDisplayString() == containingNamespace
                 ? namedType.TypeArguments[0]
                 : type;
+
+    private static bool IsTestDataRow(ITypeSymbol type)
+        => !SymbolEqualityComparer.Default.Equals(UnwrapSingleArgument(type, "TestDataRow", "TUnit.Core"), type);
 
     private static bool IsSpreadWithoutElementTypes(ITypeSymbol type)
         => type is IArrayTypeSymbol { Rank: 1, ElementType.SpecialType: SpecialType.System_Object }

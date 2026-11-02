@@ -2194,7 +2194,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // once, so the value binds as that T.
         rowType = UnwrapFunc(rowType);
         var spreadsReferenceArray = false;
-        if (TestDataRowUnwrapper.IsTestDataRowType(rowType))
+        var isTestDataRow = TestDataRowUnwrapper.IsTestDataRowType(rowType);
+        if (isTestDataRow)
         {
             rowType = UnwrapFunc(rowType.GetGenericArguments()[0]);
 
@@ -2232,6 +2233,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             // ToObjectArray always spreads a tuple row, a one-element tuple included, so the tuple spreads
             // over the leading data parameters; omitted trailing ones take their defaults.
+            // UnwrapArray runs after ToObjectArray, so the TestDataRow<T> element of a one-element tuple
+            // row that is not itself a TestDataRow is unwrapped (and its Func invoked, its tuple or
+            // reference array spread) like a whole TestDataRow<T> row.
+            if (!isTestDataRow && tupleElements.Length == 1 && TestDataRowUnwrapper.IsTestDataRowType(tupleElements[0]))
+            {
+                return InferTypesFromTypedRow(method, tupleElements[0], genericParameterCount);
+            }
+
             if (tupleElements.Length < requiredCount || tupleElements.Length > dataParameters.Length)
             {
                 return null;
@@ -2245,8 +2254,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
             }
         }
-        else if (!spreadsReferenceArray && rowType == typeof(object[])
-            || rowType is { IsGenericType: true, Namespace: "System" } && rowType.Name.StartsWith("Tuple`", StringComparison.Ordinal))
+        else if (!spreadsReferenceArray
+            && (rowType == typeof(object[])
+                || rowType is { IsGenericType: true, Namespace: "System" } && rowType.Name.StartsWith("Tuple`", StringComparison.Ordinal)))
         {
             // ToObjectArray also spreads an object[] row, whose value types the row type does not declare,
             // and a System.Tuple row; leave both to runtime inference.
