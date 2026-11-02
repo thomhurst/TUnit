@@ -59,24 +59,58 @@ internal static class ReflectionGenericTypeResolver
 
         var parameters = constructor.GetParameters();
         var typeArguments = new Type?[genericParameters.Length];
-        var inferredCount = 0;
+        var nullOnly = new bool[genericParameters.Length];
 
-        for (var i = 0; i < dataRow.Length && i < parameters.Length && inferredCount < genericParameters.Length; i++)
+        // A T[] or List<T> value fixes T first, because it cannot bind to any other T: [Arguments((short)2, new[] { 1 })]
+        // on C<T>(T count, T[] values) infers int, which the short also binds to. A bare T then takes the first
+        // non-null value's type. Mirrors TestMetadataGenerator.InferTypesFromClassArgumentsAttribute, apart from its
+        // last-value rule for a repeated bare T (#7366).
+        for (var pass = 0; pass < 2; pass++)
         {
-            if (dataRow[i] is not { } value)
+            var bareParameters = pass == 1;
+            for (var i = 0; i < dataRow.Length && i < parameters.Length; i++)
             {
-                continue;
+                var parameterType = parameters[i].ParameterType;
+                if (parameterType.IsGenericParameter != bareParameters)
+                {
+                    continue;
+                }
+
+                if (dataRow[i] is not { } value)
+                {
+                    if (bareParameters && Array.IndexOf(genericParameters, parameterType) is var nullIndex and >= 0)
+                    {
+                        nullOnly[nullIndex] = true;
+                    }
+
+                    continue;
+                }
+
+                var valueType = value.GetType();
+                for (var j = 0; j < genericParameters.Length; j++)
+                {
+                    if (typeArguments[j] == null
+                        && MatchTypeParameter(parameterType, valueType, genericParameters[j]) is { } typeArgument)
+                    {
+                        typeArguments[j] = typeArgument;
+                    }
+                }
+            }
+        }
+
+        var inferredCount = 0;
+        for (var j = 0; j < genericParameters.Length; j++)
+        {
+            // A bare T that only nulls bind is object, as in the source generator. A one-value row is skipped, because
+            // [Arguments(null)] reads as one null value here and the source generator infers nothing from it.
+            if (typeArguments[j] == null && nullOnly[j] && dataRow.Length > 1)
+            {
+                typeArguments[j] = typeof(object);
             }
 
-            var valueType = value.GetType();
-            for (var j = 0; j < genericParameters.Length; j++)
+            if (typeArguments[j] != null)
             {
-                if (typeArguments[j] == null
-                    && MatchTypeParameter(parameters[i].ParameterType, valueType, genericParameters[j]) is { } typeArgument)
-                {
-                    typeArguments[j] = typeArgument;
-                    inferredCount++;
-                }
+                inferredCount++;
             }
         }
 
