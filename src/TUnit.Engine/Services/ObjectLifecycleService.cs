@@ -113,7 +113,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         }
     }
 
-    private void TrackObjectsAfterFailedResolution(TestContext testContext)
+    internal void TrackObjectsAfterFailedResolution(TestContext testContext)
     {
         try
         {
