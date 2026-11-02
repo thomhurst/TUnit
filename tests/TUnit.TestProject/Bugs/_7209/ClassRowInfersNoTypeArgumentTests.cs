@@ -265,8 +265,30 @@ public class TypeFreeClassRowWithTwoTypedSources<T>(int number)
     }
 }
 
+// A class data source that yields no rows supplies no class type argument either, so beside it and a type-free
+// class row the method's [MethodDataSource] member still infers T: C<int> runs Run(1), built from the class row
+// (number = 42), and the empty source adds a skipped test, as in the source generator. Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+[MethodDataSource(typeof(TypeFreeClassRowSources), nameof(TypeFreeClassRowSources.None), SkipIfEmpty = true)]
+public class TypeFreeClassRowBesideEmptySourceWithInferringMethodSource<T>(int number)
+{
+    public static IEnumerable<int> Rows() => [1];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value).IsEqualTo(1);
+    }
+}
+
 public static class TypeFreeClassRowSources
 {
+    public static IEnumerable<int> None() => [];
+
     public static IEnumerable<int> FortyThree() => [43];
 
     public static IEnumerable<int> Two() => [2];
