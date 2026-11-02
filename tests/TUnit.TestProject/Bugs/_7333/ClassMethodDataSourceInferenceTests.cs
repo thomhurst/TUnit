@@ -71,3 +71,17 @@ public class UninferableOwnRows<T>(T value)
     [Test]
     public void Test() => _ = value;
 }
+
+// The int class row has no matching method row and must not create an argument-free test.
+[MethodDataSource(typeof(Rows), nameof(Rows.Integers))]
+public class UnmatchedMethodRows<T>(T value)
+{
+    [Test]
+    [Arguments("method")]
+    public async Task Test(T methodValue)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(methodValue).IsEqualTo((T)(object)"method");
+        _ = value;
+    }
+}

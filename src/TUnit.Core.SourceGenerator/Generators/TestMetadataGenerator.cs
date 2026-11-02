@@ -1676,6 +1676,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 && (otherClassDataSources is null || !otherClassDataSources.Any(source => source.ClassTypes is null || InferredTypesMatch(source.ClassTypes, instantiation.ClassTypeArgs))));
         }
 
+        // Class method sources can infer class-only instantiations too. Remove those with no
+        // matching method row, but leave the Arguments-only constructor fallback above unchanged.
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false }
+            && classMethodDataSources.Length > 0
+            && inferringRows is not null
+            && rowInstantiations is not null)
+        {
+            foreach (var instantiation in rowInstantiations.Values)
+            {
+                if (instantiation.HasClassRows && !instantiation.HasMethodRows)
+                {
+                    results.Remove(instantiation);
+                }
+            }
+        }
+
         foreach (var source in classMethodDataSources)
         {
             if (InferClassTypesFromClassMethodDataSource(testMethod, source) is not null
@@ -7788,8 +7804,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var compilation = testMethod.CompilationContext.Compilation;
         var dataSourceMember = ResolveMethodDataSourceMember(providerType, methodName, mdsAttr, compilation);
-        var rowType = dataSourceMember == null ? null : GetMethodDataSourceRowType(dataSourceMember, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
-        return rowType;
+        return dataSourceMember == null ? null : GetMethodDataSourceRowType(dataSourceMember, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
     }
 
     private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)

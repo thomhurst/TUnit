@@ -11,6 +11,7 @@ internal class Tests7333 : TestsBase
             {
                 await Assert.That(generatedFiles.Any(file => file.Contains($"global::TUnit.TestProject.Bugs._7333.{className}"))).IsTrue();
             }
+            await Assert.That(generatedFiles.Any(file => file.Contains("global::TUnit.TestProject.Bugs._7333.UnmatchedMethodRows<int>"))).IsFalse();
             await Assert.That(generatedFiles.Any(file => file.Contains("Could not infer the type arguments of generic class 'UninferableOwnRows`1'"))).IsTrue();
         });
 }
