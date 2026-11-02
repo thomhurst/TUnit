@@ -23,6 +23,20 @@ public class TrxAsserter
         assertions.ForEach(x => x.Invoke(testRun));
     }
 
+    // For a TRX the test project writes in-process to a known path (see InProcessTrxReporter in
+    // TUnit.TestProject). It is in place before the process exits, so there is nothing to wait for.
+    public static async Task AssertTrxAtPath(string trxPath, List<Action<TestRun>> assertions)
+    {
+        if (!File.Exists(trxPath))
+        {
+            throw new FileNotFoundException($"The test application wrote no trx file at {trxPath}. Did it crash?", trxPath);
+        }
+
+        var testRun = TrxControl.ReadTrx(new StringReader(await ReadTrxWithRetry(trxPath)));
+
+        assertions.ForEach(x => x.Invoke(testRun));
+    }
+
     // MTP can finish writing the trx after the subprocess returns control, so the file
     // may be missing or being written when the test reads it. Bounded retries keep the
     // window small enough to still surface a real "test never produced a trx" failure.

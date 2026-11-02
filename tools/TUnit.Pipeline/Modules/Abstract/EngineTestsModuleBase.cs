@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Globalization;
+using System.Runtime.InteropServices;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
@@ -31,6 +32,10 @@ public abstract class EngineTestsModuleBase : Module<CommandResult>
             Arguments = [
                 "--hangdump", "--hangdump-filename", $"hangdump.{RuntimeInformation.RuntimeIdentifier}.engine-tests-{TestMode}.dmp", "--hangdump-timeout", "30m",
                 "--timeout", "35m",
+                // Each engine test mostly waits on a child test-application process, so the
+                // engine's default limit (twice the processor count) leaves the CPUs idle. Four
+                // times the processor count was the default before #7354.
+                "--maximum-parallel-tests", (Environment.ProcessorCount * 4).ToString(CultureInfo.InvariantCulture),
                 ..AdditionalArguments,
             ],
         }, new CommandExecutionOptions

@@ -48,6 +48,15 @@
     </ItemGroup>
 
     <ItemGroup>
+        <!-- Writes the results TUnit.Engine.Tests asserts on, without the second process that
+             the report-trx option starts. It registers nothing unless TUNIT_ENGINE_TESTS_TRX_PATH is set. -->
+        <TestingPlatformBuilderHook Include="3B0F64E2-6A57-4C1B-9E3D-58A1C0E9D7B4">
+            <DisplayName>TUnit.Engine.Tests in-process TRX</DisplayName>
+            <TypeFullName>TUnit.TestProject.EngineTestSupport.InProcessTrxReporterHook</TypeFullName>
+        </TestingPlatformBuilderHook>
+    </ItemGroup>
+
+    <ItemGroup>
         <None Update="Data\Blah.txt">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
