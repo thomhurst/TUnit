@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+using System.Buffers;
 using System.Collections.Concurrent;
 #if NET8_0_OR_GREATER
 using System.Collections.Frozen;
@@ -940,9 +940,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// The class type argument that an <see cref="ArgumentsAttribute{T}"/> row with a null value infers, for a class
     /// with one type parameter, as the source generator infers it. The null value binds to the first parameter of the
-    /// constructor the instance is built with (<see cref="ReflectionGenericTypeResolver.FindRowConstructor"/>: one
-    /// marked <c>[TestConstructor]</c>, and otherwise the first public one), so the declared T is mapped through that
-    /// parameter's type:
+    /// class row's constructor (<see cref="GetClassRowConstructor"/>), so the declared T is mapped through that parameter's type:
     /// <c>[Arguments&lt;string[]&gt;(null)]</c> on <c>C&lt;T&gt;(T[] values)</c> infers <c>string</c>, not
     /// <c>string[]</c>. Null for any other row, or when the parameter type does not match the declared type.
     /// </summary>
@@ -952,7 +950,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             || dataSource.GetType() is not { IsGenericType: true } sourceType
             || sourceType.GetGenericTypeDefinition() != typeof(ArgumentsAttribute<>)
             || genericTypeDefinition.GetGenericArguments() is not [var typeParameter]
-            || ReflectionGenericTypeResolver.FindRowConstructor(genericTypeDefinition) is not { } constructor
+            || GetClassRowConstructor(genericTypeDefinition) is not { } constructor
             || constructor.GetParameters() is not [var parameter, ..])
         {
             return null;
@@ -1364,6 +1362,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// </summary>
     private static IDataSourceAttribute[]? SplitTypeFreeClassRows(Type genericTypeDefinition, ref IDataSourceAttribute[] classDataSources)
     {
+        // Only beside other class [Arguments] rows. Beside other class data sources, the rows keep being grouped
+        // with them as before; matching the source generator there is #7390's scope.
+        foreach (var source in classDataSources)
+        {
+            if (!IsClassArgumentsRow(source))
+            {
+                return null;
+            }
+        }
+
         List<IDataSourceAttribute>? typeFree = null;
         List<IDataSourceAttribute>? rest = null;
         for (var i = 0; i < classDataSources.Length; i++)
@@ -1414,7 +1422,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
-        if (genericTypeDefinition.GetConstructors() is not [var constructor, ..])
+        if (GetClassRowConstructor(genericTypeDefinition) is not { } constructor)
         {
             return false;
         }
@@ -1438,6 +1446,26 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
+    /// The constructor a class-level data row binds to when classifying it or inferring the class's type arguments
+    /// from it: the public one marked <c>[TestConstructor]</c>, which the instance is built with (see
+    /// <see cref="SelectInstanceConstructor"/>), else the first public one. Null when there is none. Mirrors
+    /// <c>TestMetadataGenerator.GetClassRowConstructor</c> (#7209).
+    /// </summary>
+    private static ConstructorInfo? GetClassRowConstructor(Type genericTypeDefinition)
+    {
+        var constructors = genericTypeDefinition.GetConstructors();
+        foreach (var constructor in constructors)
+        {
+            if (constructor.IsDefined(typeof(TestConstructorAttribute), inherit: false))
+            {
+                return constructor;
+            }
+        }
+
+        return constructors.Length > 0 ? constructors[0] : null;
+    }
+
+    /// <summary>
     /// Whether the class has class-level [Arguments] rows, in either the <see cref="ArgumentsAttribute"/> or
     /// the <see cref="ArgumentsAttribute{T}"/> form. The source generator treats both forms as class rows.
     /// </summary>
@@ -1445,8 +1473,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         foreach (var source in classDataSources)
         {
-            if (source is ArgumentsAttribute
-                || (source.GetType() is { IsGenericType: true } type && type.GetGenericTypeDefinition() == typeof(ArgumentsAttribute<>)))
+            if (IsClassArgumentsRow(source))
             {
                 return true;
             }
@@ -1454,6 +1481,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         return false;
     }
+
+    private static bool IsClassArgumentsRow(IDataSourceAttribute source) =>
+        source is ArgumentsAttribute
+        || (source.GetType() is { IsGenericType: true } type && type.GetGenericTypeDefinition() == typeof(ArgumentsAttribute<>));
 
     private static List<Type[]> GetValidGenerateGenericTestTypeArguments(GenerateGenericTestAttribute[] generateGenericTestAttributes, ReflectionGenericConstraintViolations constraintViolations)
     {

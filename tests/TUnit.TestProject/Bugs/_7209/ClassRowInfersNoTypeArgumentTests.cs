@@ -36,3 +36,96 @@ public class ClassRowInfersTypeArgument<T>(T classValue)
         await Assert.That(value).IsNull();
     }
 }
+
+// With several public constructors, both modes bind the class row to the first one, as reflection's GetConstructors()
+// does: (int number) takes no T, so the row is type-free and the method rows infer C<string> and C<int>. Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowOverloadedConstructors<T>
+{
+    private readonly int _number;
+
+    public TypeFreeClassRowOverloadedConstructors(int number) => _number = number;
+
+    public TypeFreeClassRowOverloadedConstructors(T value, int number) : this(number)
+    {
+    }
+
+    [Test]
+    [Arguments("s")]
+    [Arguments(1)]
+    public async Task Run(T value)
+    {
+        await Assert.That(_number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(value!.GetType());
+    }
+}
+
+// A primary constructor comes first, before an explicit constructor that takes T. The source generator used to skip
+// the primary constructor because it has no constructor declaration, bind the row to (T value, int number) and infer
+// C<int> from it, while reflection bound the row to the primary constructor. Both modes now bind to the primary
+// constructor, so the row is type-free and the method rows infer C<string> and C<int>.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowPrimaryConstructorBesideTypedConstructor<T>(int number)
+{
+    public TypeFreeClassRowPrimaryConstructorBesideTypedConstructor(T value, int number) : this(number)
+    {
+    }
+
+    [Test]
+    [Arguments("s")]
+    [Arguments(1)]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(value!.GetType());
+    }
+}
+
+// A class row binds to the constructor marked [TestConstructor], the one reflection builds the instance with, not to
+// the first public constructor: (T value) takes the row, so it infers C<int>, and the method row runs on it. Same in
+// both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowTestConstructorTakesTypeParameter<T>
+{
+    private readonly string _constructor;
+
+    public TypeFreeClassRowTestConstructorTakesTypeParameter(long number) => _constructor = $"long:{number}";
+
+    [TestConstructor]
+    public TypeFreeClassRowTestConstructorTakesTypeParameter(T value) => _constructor = $"T:{value}";
+
+    [Test]
+    [Arguments(null)]
+    public async Task Run(T? value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(_constructor).IsEqualTo("T:42");
+    }
+}
+
+// The [TestConstructor] constructor takes no T, so the class row is type-free even though the first public
+// constructor takes T: the method rows infer C<string> and C<bool>, each built through the marked constructor.
+// Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowTestConstructorTakesNoTypeParameter<T>
+{
+    private readonly int _number;
+
+    public TypeFreeClassRowTestConstructorTakesNoTypeParameter(T value) => _number = -1;
+
+    [TestConstructor]
+    public TypeFreeClassRowTestConstructorTakesNoTypeParameter(int number) => _number = number;
+
+    [Test]
+    [Arguments("s")]
+    [Arguments(true)]
+    public async Task Run(T value)
+    {
+        await Assert.That(_number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(value!.GetType());
+    }
+}

@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -6818,6 +6818,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static bool IsNullArgumentsArray(AttributeData argAttr) => argAttr.ConstructorArguments[0].IsNull;
 
     /// <summary>
+    /// The constructor a class-level data row binds to when inferring the class's type arguments: the public one
+    /// marked <c>[TestConstructor]</c>, which the rows are for, else the first public instance constructor in
+    /// declaration order, else the first instance constructor. This matches reflection mode's
+    /// <c>GetClassRowConstructor</c>, whose <c>GetConstructors()</c> returns the public constructors in metadata
+    /// (declaration) order, a C# primary constructor included (#7361, #7209).
+    /// </summary>
+    private static IMethodSymbol? GetClassRowConstructor(INamedTypeSymbol classSymbol)
+    {
+        return classSymbol.InstanceConstructors.FirstOrDefault(static c => c.DeclaredAccessibility == Accessibility.Public
+                && c.GetAttributes().Any(static a => a.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
+            ?? classSymbol.InstanceConstructors.FirstOrDefault(static c => c.DeclaredAccessibility == Accessibility.Public)
+            ?? classSymbol.InstanceConstructors.FirstOrDefault();
+    }
+
+    /// <summary>
     /// True for a class-level [Arguments] row whose values all bind to constructor parameters that do not
     /// use the class's type parameters, as <c>[Arguments(42)]</c> on <c>C&lt;T&gt;(int number)</c>. Such a
     /// row supplies no class type argument, so the method rows infer them, and the row only supplies the
@@ -6840,11 +6855,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             valueCount = IsNullArgumentsArray(argAttr) ? 1 : argAttr.ConstructorArguments[0].Values.Length;
         }
 
-        var primaryConstructor = classSymbol.Constructors
-            .FirstOrDefault(c => c.DeclaringSyntaxReferences.Any(sr =>
-                sr.GetSyntax() is ConstructorDeclarationSyntax cds &&
-                cds.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword))))
-            ?? classSymbol.Constructors.FirstOrDefault();
+        var primaryConstructor = GetClassRowConstructor(classSymbol);
 
         var boundCount = Math.Min(valueCount, primaryConstructor?.Parameters.Length ?? 0);
         if (boundCount == 0)
@@ -7081,17 +7092,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             argumentValues = argAttr.ConstructorArguments[0].Values;
         }
 
-        // The row binds to the constructor the instance is built with: one marked [TestConstructor], as the instance
-        // factory reads it, and otherwise the primary constructor. Mirrors reflection mode's
-        // ReflectionGenericTypeResolver.InferTypeArgumentsFromConstructor.
-        var primaryConstructor = classSymbol.InstanceConstructors
-            .FirstOrDefault(c => c.GetAttributes().Any(attribute =>
-                attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
-            ?? classSymbol.Constructors
-            .FirstOrDefault(c => c.DeclaringSyntaxReferences.Any(sr =>
-                sr.GetSyntax() is ConstructorDeclarationSyntax cds &&
-                cds.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword))))
-            ?? classSymbol.Constructors.FirstOrDefault();
+        // The constructor the class row binds to, chosen as in reflection mode
+        var primaryConstructor = GetClassRowConstructor(classSymbol);
 
         if (primaryConstructor == null)
         {
