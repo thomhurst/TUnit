@@ -3109,31 +3109,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (!isAccessibleMember)
         {
-            // The generated class cannot name a private or protected member, so the factory reads it by
-            // reflection. GetField/GetProperty/GetMethod on a typeof() with a constant name and binding flags is understood
-            // by the trimmer and the AOT compiler, which keep that member, so this works under native AOT
-            // without any trimming warning. The attribute's own reflection fallback finds the member from the
-            // test class type at run time, which neither of them can see.
-            var bindingFlags = (isStatic ? "global::System.Reflection.BindingFlags.Static" : "global::System.Reflection.BindingFlags.Instance")
-                + " | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly";
             var target = isStatic ? "null" : usesTestClassInstance ? "instance" : $"new {fullyQualifiedType}()";
-            // CanReadDataSourceMember only lets a parameterless, non-generic method through, so it is looked up with no
-            // parameter types, which also picks it out from any overloads. A parameterless generic overload of the same
-            // name would match that lookup too and make it ambiguous, so then the methods are filtered instead, without
-            // the genericParameterCount overload of GetMethod that .NET Framework and .NET Standard 2.0 lack.
-            var hasGenericParameterlessOverload = dataSourceMember is IMethodSymbol
-                && dataSourceMember.ContainingType.GetMembers(dataSourceMember.Name)
-                    .Any(static m => m is IMethodSymbol { IsGenericMethod: true, Parameters.Length: 0 });
-            var read = dataSourceMember switch
-            {
-                IFieldSymbol => $"GetField(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target})",
-                IPropertySymbol => $"GetProperty(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target})",
-                _ when hasGenericParameterlessOverload => $"GetMethods({bindingFlags}), static m => m.Name == \"{dataSourceMember.Name}\" && !m.IsGenericMethodDefinition && m.GetParameters().Length == 0)!.Invoke({target}, null)",
-                _ => $"GetMethod(\"{dataSourceMember.Name}\", {bindingFlags}, null, global::System.Type.EmptyTypes, null)!.Invoke({target}, null)"
-            };
+            var read = BuildReflectionDataSourceRead(dataSourceMember, target);
             var cast = kind is "Value" or "Enumerable" ? "" : $"({returnType.GloballyQualified()})";
-            var find = hasGenericParameterlessOverload ? "global::System.Array.Find(" : "";
-            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {cast}{find}typeof({dataSourceMember.ContainingType.GloballyQualified()}).{read}{nullAsEmpty})");
+            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {cast}{read}{nullAsEmpty})");
             return;
         }
 
@@ -3183,6 +3162,31 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 ? $"{helper}({metadataArgument}{lambdaHeader} {call})"
                 : $"{helper}({metadataArgument}{lambdaHeader} (object?){call}{nullAsEmpty})");
         }
+    }
+
+    /// <summary>
+    /// Builds the complete reflection read for an inaccessible data source member. Constant
+    /// declaring types, names and binding flags let trimming and Native AOT preserve the member.
+    /// </summary>
+    private static string BuildReflectionDataSourceRead(ISymbol dataSourceMember, string target)
+    {
+        var bindingFlags = (dataSourceMember.IsStatic ? "global::System.Reflection.BindingFlags.Static" : "global::System.Reflection.BindingFlags.Instance")
+            + " | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly";
+        // CanReadDataSourceMember only lets a parameterless, non-generic method through, so it is looked up with no
+        // parameter types, which also picks it out from any overloads. A parameterless generic overload of the same
+        // name would match that lookup too and make it ambiguous, so then the methods are filtered instead, without
+        // the genericParameterCount overload of GetMethod that .NET Framework and .NET Standard 2.0 lack.
+        var hasGenericParameterlessOverload = dataSourceMember is IMethodSymbol
+            && dataSourceMember.ContainingType.GetMembers(dataSourceMember.Name)
+                .Any(static m => m is IMethodSymbol { IsGenericMethod: true, Parameters.Length: 0 });
+        var declaringType = $"typeof({dataSourceMember.ContainingType.GloballyQualified()})";
+        return dataSourceMember switch
+        {
+            IFieldSymbol => $"{declaringType}.GetField(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target})",
+            IPropertySymbol => $"{declaringType}.GetProperty(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target})",
+            _ when hasGenericParameterlessOverload => $"global::System.Array.Find({declaringType}.GetMethods({bindingFlags}), static m => m.Name == \"{dataSourceMember.Name}\" && !m.IsGenericMethodDefinition && m.GetParameters().Length == 0)!.Invoke({target}, null)",
+            _ => $"{declaringType}.GetMethod(\"{dataSourceMember.Name}\", {bindingFlags}, null, global::System.Type.EmptyTypes, null)!.Invoke({target}, null)"
+        };
     }
 
     /// <summary>
