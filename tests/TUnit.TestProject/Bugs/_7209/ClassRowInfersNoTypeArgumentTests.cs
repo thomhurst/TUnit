@@ -351,6 +351,67 @@ public class TypeFreeClassRowPrimaryConstructorBesideTypedConstructor<T>(int num
     }
 }
 
+// [GenerateGenericTest] does not stop a typed data source from inferring T beside a type-free class row: C<long> comes
+// from [GenerateGenericTest] and C<int> from ClassDataSource<int>, each running the source and built from the class row
+// (number = 42). Same in both modes; reflection used to run only C<long>.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(long))]
+[Arguments(42)]
+public class TypeFreeClassRowWithGenerateGenericTestAndTypedSource<T>(int number)
+{
+    [Test]
+    [ClassDataSource<int>]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T) == typeof(int) || typeof(T) == typeof(long)).IsTrue();
+        await Assert.That(Convert.ToInt64(value)).IsEqualTo(0L);
+    }
+}
+
+// The same with a [MethodDataSource] member of the test class: C<long> from [GenerateGenericTest] and C<int> from the
+// member's declared type, each built from the class row (number = 42). Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(long))]
+[Arguments(42)]
+public class TypeFreeClassRowWithGenerateGenericTestAndMethodSource<T>(int number)
+{
+    public static IEnumerable<int> Values() => [5];
+
+    [Test]
+    [MethodDataSource(nameof(Values))]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T) == typeof(int) || typeof(T) == typeof(long)).IsTrue();
+        await Assert.That(Convert.ToInt64(value)).IsEqualTo(5L);
+    }
+}
+
+// A class row binds to the constructor marked [TestConstructor], the one reflection builds the instance with, not to
+// the first public constructor: (T value) takes the row, so it infers C<int>, and the method row runs on it. Same in
+// both modes. The source generator builds the instance by matching the row's run-time types (#7365), which picks the
+// marked constructor here because the other one takes a long.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowTestConstructorTakesTypeParameter<T>
+{
+    private readonly string _constructor;
+
+    public TypeFreeClassRowTestConstructorTakesTypeParameter(long number) => _constructor = $"long:{number}";
+
+    [TestConstructor]
+    public TypeFreeClassRowTestConstructorTakesTypeParameter(T value) => _constructor = $"T:{value}";
+
+    [Test]
+    [Arguments(null)]
+    public async Task Run(T? value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(_constructor).IsEqualTo("T:42");
+    }
+}
+
 public static class TypeFreeClassRowSources
 {
     public static IEnumerable<int> None() => [];
