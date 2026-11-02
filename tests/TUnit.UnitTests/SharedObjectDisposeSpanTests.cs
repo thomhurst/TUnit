@@ -30,7 +30,8 @@ public class SharedObjectDisposeSpanTests
         var span = scope.Single($"dispose {nameof(SharedObjectDisposeSpanTests)}.{nameof(SpanFixture)}");
         await Assert.That(span.Source.Name).IsEqualTo(TUnitActivitySource.LifecycleSourceName);
         await Assert.That(span.GetTagItem(TUnitActivitySource.TagTraceScope)).IsEqualTo("class");
-        await Assert.That(span.ParentSpanId).IsEqualTo(testContext.ClassContext.Activity?.Context.SpanId ?? default);
+        await Assert.That(span.ParentSpanId).IsNotEqualTo(default(ActivitySpanId));
+        await Assert.That(span.ParentSpanId).IsEqualTo(testContext.ClassContext.Activity!.Context.SpanId);
         await Assert.That(span.GetTagItem(TUnitActivitySource.TagTestClass)).IsEqualTo(testContext.ClassContext.ClassType.FullName);
     }
 
@@ -46,8 +47,8 @@ public class SharedObjectDisposeSpanTests
 
         var span = scope.Single($"dispose {nameof(SharedObjectDisposeSpanTests)}.{nameof(SpanFixture)}");
         await Assert.That(span.GetTagItem(TUnitActivitySource.TagTraceScope)).IsEqualTo("session");
-        await Assert.That(span.ParentSpanId)
-            .IsEqualTo(testContext.ClassContext.AssemblyContext.Activity?.Context.SpanId ?? default);
+        await Assert.That(span.ParentSpanId).IsNotEqualTo(default(ActivitySpanId));
+        await Assert.That(span.ParentSpanId).IsEqualTo(testContext.ClassContext.AssemblyContext.Activity!.Context.SpanId);
     }
 
     [Test]
@@ -89,11 +90,41 @@ public class SharedObjectDisposeSpanTests
     private static void RegisterScope(object obj, SharedType sharedType) =>
         TraceScopeRegistry.RegisterFromDataSource(new ClassDataSourceAttribute<SpanFixture> { Shared = sharedType }, [obj]);
 
+    /// <summary>
+    /// Builds a test context on its own class and assembly contexts, each with a distinct explicit
+    /// activity, so the parent assertions cannot pass by both sides falling back to <c>default</c>
+    /// and the running test's shared contexts are left untouched.
+    /// </summary>
     private static TestContext CreateContext()
     {
         var currentContext = TestContext.Current!;
-        return new TestContext(nameof(SharedObjectDisposeSpanTests), currentContext.ServiceProvider, currentContext.ClassContext,
+        var sessionContext = new TestSessionContext(new TestDiscoveryContext(new BeforeTestDiscoveryContext { TestFilter = null }) { TestFilter = null })
+        {
+            Id = Guid.NewGuid().ToString(),
+            TestFilter = null
+        };
+        var assemblyContext = new AssemblyHookContext(sessionContext)
+        {
+            Assembly = typeof(SharedObjectDisposeSpanTests).Assembly,
+            Activity = CreateStoppedActivity("test assembly")
+        };
+        var classContext = new ClassHookContext(assemblyContext)
+        {
+            ClassType = typeof(SharedObjectDisposeSpanTests),
+            Activity = CreateStoppedActivity("test suite")
+        };
+
+        return new TestContext(nameof(SharedObjectDisposeSpanTests), currentContext.ServiceProvider, classContext,
             new TestBuilderContext { TestMetadata = currentContext.TestDetails.MethodMetadata }, CancellationToken.None);
+    }
+
+    // Started without a listener and stopped at once: only its context is needed as a parent,
+    // and stopping restores Activity.Current.
+    private static Activity CreateStoppedActivity(string name)
+    {
+        var activity = new Activity(name).SetIdFormat(ActivityIdFormat.W3C).Start();
+        activity.Stop();
+        return activity;
     }
 
     public sealed class SpanFixture : IAsyncDisposable
