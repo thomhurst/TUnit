@@ -152,3 +152,30 @@ public class TestConstructorClassRowInference<T>
         await Assert.That(_value is string[] { Length: 1 } array && array[0] == "x").IsTrue();
     }
 }
+
+// With several public constructors and no [TestConstructor], the row infers T through the first declared one, the
+// constructor both modes build the instance with when the constructors take the same number of parameters: the
+// string[] binds to T[], so T is string. Constructors with different parameter counts are #7365.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments<string[]>(["x"])]
+public class MultipleConstructorsClassRowInference<T>
+{
+    private readonly T _value;
+
+    public MultipleConstructorsClassRowInference(T[] values)
+    {
+        _value = values[0];
+    }
+
+    public MultipleConstructorsClassRowInference(T value)
+    {
+        _value = value;
+    }
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(_value is "x").IsTrue();
+    }
+}
