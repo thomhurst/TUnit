@@ -2267,10 +2267,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         else if (!spreadsReferenceArray
             && (rowType == typeof(object[])
                 || rowType is { IsGenericType: true, Namespace: "System" } && rowType.Name.StartsWith("Tuple`", StringComparison.Ordinal)
-#if NET
-                || typeof(System.Runtime.CompilerServices.ITuple).IsAssignableFrom(rowType)
-#endif
-                ))
+                || IsITuple(rowType)))
         {
             // ToObjectArray also spreads an object[] row, whose value types the row type does not declare,
             // and a System.Tuple or other ITuple row (DataSourceHelpers.IsTuple spreads any runtime ITuple);
@@ -2383,6 +2380,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return true;
+    }
+
+    // A row type that is or implements ITuple can yield a tuple that ToObjectArray spreads, so the generator's
+    // IsITuple leaves it to runtime inference. netstandard2.0 has no ITuple type to reference, but .NET Framework
+    // 4.7.1 and later define it at runtime, so match it by name there.
+    private static bool IsITuple(Type type)
+    {
+#if NET
+        return typeof(System.Runtime.CompilerServices.ITuple).IsAssignableFrom(type);
+#else
+        const string ITupleFullName = "System.Runtime.CompilerServices.ITuple";
+        return type.FullName == ITupleFullName
+            || Array.Exists(type.GetInterfaces(), static i => i.FullName == ITupleFullName);
+#endif
     }
 
     private static bool IsSingleDimensionalZeroBasedArray(Type type)
