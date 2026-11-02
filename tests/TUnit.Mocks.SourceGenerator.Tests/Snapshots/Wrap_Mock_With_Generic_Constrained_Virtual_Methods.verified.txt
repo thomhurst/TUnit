@@ -12,9 +12,9 @@ namespace TUnit.Mocks.Generated
             return new Repository_Get_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Get", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
         }
 
-        public static Repository_Get_M0_MockCall<T> Get<T>(this global::TUnit.Mocks.Mock<global::Repository> mock, global::System.Func<int, bool> id) where T : class
+        public static Repository_Get_M0_MockCall<T> Get<T>(this global::TUnit.Mocks.Mock<global::Repository> mock, global::System.Func<int, bool>? id) where T : class
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)id;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher };
             return new Repository_Get_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Get", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
         }
@@ -25,9 +25,9 @@ namespace TUnit.Mocks.Generated
             return new Repository_Store_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Store", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
         }
 
-        public static Repository_Store_M1_MockCall<T> Store<T>(this global::TUnit.Mocks.Mock<global::Repository> mock, global::System.Func<T, bool> item) where T : class, new()
+        public static Repository_Store_M1_MockCall<T> Store<T>(this global::TUnit.Mocks.Mock<global::Repository> mock, global::System.Func<T, bool>? item) where T : class, new()
         {
-            global::TUnit.Mocks.Arguments.Arg<T> __fa_item = item;
+            global::TUnit.Mocks.Arguments.Arg<T> __fa_item = item is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<T>() : (global::TUnit.Mocks.Arguments.Arg<T>)item;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_item.Matcher };
             return new Repository_Store_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Store", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
         }

@@ -135,9 +135,9 @@ namespace TUnit.Mocks.Generated
             return new IFoo_Bar_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Bar", matchers);
         }
 
-        public static IFoo_Bar_M0_MockCall Bar(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<object?, bool> baz)
+        public static IFoo_Bar_M0_MockCall Bar(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<object?, bool>? baz)
         {
-            global::TUnit.Mocks.Arguments.Arg<object?> __fa_baz = baz;
+            global::TUnit.Mocks.Arguments.Arg<object?> __fa_baz = baz is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<object?>() : (global::TUnit.Mocks.Arguments.Arg<object?>)baz;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_baz.Matcher };
             return new IFoo_Bar_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Bar", matchers);
         }
@@ -148,24 +148,24 @@ namespace TUnit.Mocks.Generated
             return new IFoo_GetValue_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "GetValue", matchers);
         }
 
-        public static IFoo_GetValue_M1_MockCall GetValue(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string?, bool> key, global::TUnit.Mocks.Arguments.Arg<int> count)
+        public static IFoo_GetValue_M1_MockCall GetValue(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string?, bool>? key, global::TUnit.Mocks.Arguments.Arg<int> count)
         {
-            global::TUnit.Mocks.Arguments.Arg<string?> __fa_key = key;
+            global::TUnit.Mocks.Arguments.Arg<string?> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string?>() : (global::TUnit.Mocks.Arguments.Arg<string?>)key;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher, count.Matcher };
             return new IFoo_GetValue_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "GetValue", matchers);
         }
 
-        public static IFoo_GetValue_M1_MockCall GetValue(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::TUnit.Mocks.Arguments.Arg<string?> key, global::System.Func<int, bool> count)
+        public static IFoo_GetValue_M1_MockCall GetValue(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::TUnit.Mocks.Arguments.Arg<string?> key, global::System.Func<int, bool>? count)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_count = count;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_count = count is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)count;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { key.Matcher, __fa_count.Matcher };
             return new IFoo_GetValue_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "GetValue", matchers);
         }
 
-        public static IFoo_GetValue_M1_MockCall GetValue(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string?, bool> key, global::System.Func<int, bool> count)
+        public static IFoo_GetValue_M1_MockCall GetValue(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string?, bool>? key, global::System.Func<int, bool>? count)
         {
-            global::TUnit.Mocks.Arguments.Arg<string?> __fa_key = key;
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_count = count;
+            global::TUnit.Mocks.Arguments.Arg<string?> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string?>() : (global::TUnit.Mocks.Arguments.Arg<string?>)key;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_count = count is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)count;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher, __fa_count.Matcher };
             return new IFoo_GetValue_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "GetValue", matchers);
         }
@@ -183,56 +183,56 @@ namespace TUnit.Mocks.Generated
             return new IFoo_Process_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Process", matchers);
         }
 
-        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string, bool> nonNull, global::TUnit.Mocks.Arguments.Arg<string?> nullable, global::TUnit.Mocks.Arguments.Arg<object?> obj)
+        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string, bool>? nonNull, global::TUnit.Mocks.Arguments.Arg<string?> nullable, global::TUnit.Mocks.Arguments.Arg<object?> obj)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_nonNull = nonNull;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_nonNull = nonNull is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)nonNull;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_nonNull.Matcher, nullable.Matcher, obj.Matcher };
             return new IFoo_Process_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Process", matchers);
         }
 
-        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::TUnit.Mocks.Arguments.Arg<string> nonNull, global::System.Func<string?, bool> nullable, global::TUnit.Mocks.Arguments.Arg<object?> obj)
+        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::TUnit.Mocks.Arguments.Arg<string> nonNull, global::System.Func<string?, bool>? nullable, global::TUnit.Mocks.Arguments.Arg<object?> obj)
         {
-            global::TUnit.Mocks.Arguments.Arg<string?> __fa_nullable = nullable;
+            global::TUnit.Mocks.Arguments.Arg<string?> __fa_nullable = nullable is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string?>() : (global::TUnit.Mocks.Arguments.Arg<string?>)nullable;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { nonNull.Matcher, __fa_nullable.Matcher, obj.Matcher };
             return new IFoo_Process_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Process", matchers);
         }
 
-        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string, bool> nonNull, global::System.Func<string?, bool> nullable, global::TUnit.Mocks.Arguments.Arg<object?> obj)
+        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string, bool>? nonNull, global::System.Func<string?, bool>? nullable, global::TUnit.Mocks.Arguments.Arg<object?> obj)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_nonNull = nonNull;
-            global::TUnit.Mocks.Arguments.Arg<string?> __fa_nullable = nullable;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_nonNull = nonNull is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)nonNull;
+            global::TUnit.Mocks.Arguments.Arg<string?> __fa_nullable = nullable is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string?>() : (global::TUnit.Mocks.Arguments.Arg<string?>)nullable;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_nonNull.Matcher, __fa_nullable.Matcher, obj.Matcher };
             return new IFoo_Process_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Process", matchers);
         }
 
-        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::TUnit.Mocks.Arguments.Arg<string> nonNull, global::TUnit.Mocks.Arguments.Arg<string?> nullable, global::System.Func<object?, bool> obj)
+        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::TUnit.Mocks.Arguments.Arg<string> nonNull, global::TUnit.Mocks.Arguments.Arg<string?> nullable, global::System.Func<object?, bool>? obj)
         {
-            global::TUnit.Mocks.Arguments.Arg<object?> __fa_obj = obj;
+            global::TUnit.Mocks.Arguments.Arg<object?> __fa_obj = obj is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<object?>() : (global::TUnit.Mocks.Arguments.Arg<object?>)obj;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { nonNull.Matcher, nullable.Matcher, __fa_obj.Matcher };
             return new IFoo_Process_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Process", matchers);
         }
 
-        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string, bool> nonNull, global::TUnit.Mocks.Arguments.Arg<string?> nullable, global::System.Func<object?, bool> obj)
+        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string, bool>? nonNull, global::TUnit.Mocks.Arguments.Arg<string?> nullable, global::System.Func<object?, bool>? obj)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_nonNull = nonNull;
-            global::TUnit.Mocks.Arguments.Arg<object?> __fa_obj = obj;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_nonNull = nonNull is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)nonNull;
+            global::TUnit.Mocks.Arguments.Arg<object?> __fa_obj = obj is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<object?>() : (global::TUnit.Mocks.Arguments.Arg<object?>)obj;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_nonNull.Matcher, nullable.Matcher, __fa_obj.Matcher };
             return new IFoo_Process_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Process", matchers);
         }
 
-        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::TUnit.Mocks.Arguments.Arg<string> nonNull, global::System.Func<string?, bool> nullable, global::System.Func<object?, bool> obj)
+        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::TUnit.Mocks.Arguments.Arg<string> nonNull, global::System.Func<string?, bool>? nullable, global::System.Func<object?, bool>? obj)
         {
-            global::TUnit.Mocks.Arguments.Arg<string?> __fa_nullable = nullable;
-            global::TUnit.Mocks.Arguments.Arg<object?> __fa_obj = obj;
+            global::TUnit.Mocks.Arguments.Arg<string?> __fa_nullable = nullable is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string?>() : (global::TUnit.Mocks.Arguments.Arg<string?>)nullable;
+            global::TUnit.Mocks.Arguments.Arg<object?> __fa_obj = obj is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<object?>() : (global::TUnit.Mocks.Arguments.Arg<object?>)obj;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { nonNull.Matcher, __fa_nullable.Matcher, __fa_obj.Matcher };
             return new IFoo_Process_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Process", matchers);
         }
 
-        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string, bool> nonNull, global::System.Func<string?, bool> nullable, global::System.Func<object?, bool> obj)
+        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string, bool>? nonNull, global::System.Func<string?, bool>? nullable, global::System.Func<object?, bool>? obj)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_nonNull = nonNull;
-            global::TUnit.Mocks.Arguments.Arg<string?> __fa_nullable = nullable;
-            global::TUnit.Mocks.Arguments.Arg<object?> __fa_obj = obj;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_nonNull = nonNull is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)nonNull;
+            global::TUnit.Mocks.Arguments.Arg<string?> __fa_nullable = nullable is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string?>() : (global::TUnit.Mocks.Arguments.Arg<string?>)nullable;
+            global::TUnit.Mocks.Arguments.Arg<object?> __fa_obj = obj is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<object?>() : (global::TUnit.Mocks.Arguments.Arg<object?>)obj;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_nonNull.Matcher, __fa_nullable.Matcher, __fa_obj.Matcher };
             return new IFoo_Process_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Process", matchers);
         }
@@ -250,9 +250,9 @@ namespace TUnit.Mocks.Generated
             return new IFoo_GetAsync_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "GetAsync", matchers);
         }
 
-        public static IFoo_GetAsync_M3_MockCall GetAsync(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string?, bool> key)
+        public static IFoo_GetAsync_M3_MockCall GetAsync(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::System.Func<string?, bool>? key)
         {
-            global::TUnit.Mocks.Arguments.Arg<string?> __fa_key = key;
+            global::TUnit.Mocks.Arguments.Arg<string?> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string?>() : (global::TUnit.Mocks.Arguments.Arg<string?>)key;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher };
             return new IFoo_GetAsync_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "GetAsync", matchers);
         }

@@ -180,9 +180,9 @@ namespace TUnit.Mocks.Generated
             return new System_Func_int_System_Threading_Tasks_Task__Invoke_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers);
         }
 
-        public static System_Func_int_System_Threading_Tasks_Task__Invoke_M0_MockCall Invoke(this global::TUnit.Mocks.Mock<global::System.Func<int, global::System.Threading.Tasks.Task>> mock, global::System.Func<int, bool> arg)
+        public static System_Func_int_System_Threading_Tasks_Task__Invoke_M0_MockCall Invoke(this global::TUnit.Mocks.Mock<global::System.Func<int, global::System.Threading.Tasks.Task>> mock, global::System.Func<int, bool>? arg)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_arg = arg;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_arg = arg is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)arg;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_arg.Matcher };
             return new System_Func_int_System_Threading_Tasks_Task__Invoke_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers);
         }
@@ -329,9 +329,9 @@ namespace TUnit.Mocks.Generated
             return new System_Func_int_System_Threading_Tasks_Task_int__Invoke_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers);
         }
 
-        public static System_Func_int_System_Threading_Tasks_Task_int__Invoke_M0_MockCall Invoke(this global::TUnit.Mocks.Mock<global::System.Func<int, global::System.Threading.Tasks.Task<int>>> mock, global::System.Func<int, bool> arg)
+        public static System_Func_int_System_Threading_Tasks_Task_int__Invoke_M0_MockCall Invoke(this global::TUnit.Mocks.Mock<global::System.Func<int, global::System.Threading.Tasks.Task<int>>> mock, global::System.Func<int, bool>? arg)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_arg = arg;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_arg = arg is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)arg;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_arg.Matcher };
             return new System_Func_int_System_Threading_Tasks_Task_int__Invoke_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers);
         }
@@ -533,9 +533,9 @@ namespace TUnit.Mocks.Generated
             return new System_Func_string_System_Threading_Tasks_ValueTask_string__Invoke_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers);
         }
 
-        public static System_Func_string_System_Threading_Tasks_ValueTask_string__Invoke_M0_MockCall Invoke(this global::TUnit.Mocks.Mock<global::System.Func<string, global::System.Threading.Tasks.ValueTask<string>>> mock, global::System.Func<string, bool> arg)
+        public static System_Func_string_System_Threading_Tasks_ValueTask_string__Invoke_M0_MockCall Invoke(this global::TUnit.Mocks.Mock<global::System.Func<string, global::System.Threading.Tasks.ValueTask<string>>> mock, global::System.Func<string, bool>? arg)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg = arg;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg = arg is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)arg;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_arg.Matcher };
             return new System_Func_string_System_Threading_Tasks_ValueTask_string__Invoke_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers);
         }

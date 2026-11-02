@@ -97,9 +97,9 @@ namespace TUnit.Mocks.Generated
             return new ITest_Test_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Test", matchers);
         }
 
-        public static ITest_Test_M0_MockCall Test(this global::TUnit.Mocks.Mock<global::ITest> mock, global::System.Func<string, bool> @event)
+        public static ITest_Test_M0_MockCall Test(this global::TUnit.Mocks.Mock<global::ITest> mock, global::System.Func<string, bool>? @event)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_event = @event;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_event = @event is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)@event;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_event.Matcher };
             return new ITest_Test_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Test", matchers);
         }
@@ -110,24 +110,24 @@ namespace TUnit.Mocks.Generated
             return new ITest_Get_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Get", matchers);
         }
 
-        public static ITest_Get_M1_MockCall Get(this global::TUnit.Mocks.Mock<global::ITest> mock, global::System.Func<int, bool> @class, global::TUnit.Mocks.Arguments.Arg<string> @return)
+        public static ITest_Get_M1_MockCall Get(this global::TUnit.Mocks.Mock<global::ITest> mock, global::System.Func<int, bool>? @class, global::TUnit.Mocks.Arguments.Arg<string> @return)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_class = @class;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_class = @class is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)@class;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_class.Matcher, @return.Matcher };
             return new ITest_Get_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Get", matchers);
         }
 
-        public static ITest_Get_M1_MockCall Get(this global::TUnit.Mocks.Mock<global::ITest> mock, global::TUnit.Mocks.Arguments.Arg<int> @class, global::System.Func<string, bool> @return)
+        public static ITest_Get_M1_MockCall Get(this global::TUnit.Mocks.Mock<global::ITest> mock, global::TUnit.Mocks.Arguments.Arg<int> @class, global::System.Func<string, bool>? @return)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_return = @return;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_return = @return is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)@return;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { @class.Matcher, __fa_return.Matcher };
             return new ITest_Get_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Get", matchers);
         }
 
-        public static ITest_Get_M1_MockCall Get(this global::TUnit.Mocks.Mock<global::ITest> mock, global::System.Func<int, bool> @class, global::System.Func<string, bool> @return)
+        public static ITest_Get_M1_MockCall Get(this global::TUnit.Mocks.Mock<global::ITest> mock, global::System.Func<int, bool>? @class, global::System.Func<string, bool>? @return)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_class = @class;
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_return = @return;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_class = @class is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)@class;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_return = @return is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)@return;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_class.Matcher, __fa_return.Matcher };
             return new ITest_Get_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Get", matchers);
         }

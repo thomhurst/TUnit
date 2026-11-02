@@ -117,9 +117,9 @@ namespace TUnit.Mocks.Generated
             return new SelfEquatableSnapshot_Equals_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Equals", matchers);
         }
 
-        public static SelfEquatableSnapshot_Equals_M0_MockCall EqualsOf(this global::TUnit.Mocks.Mock<global::SelfEquatableSnapshot> mock, global::System.Func<global::SelfEquatableSnapshot?, bool> other)
+        public static SelfEquatableSnapshot_Equals_M0_MockCall EqualsOf(this global::TUnit.Mocks.Mock<global::SelfEquatableSnapshot> mock, global::System.Func<global::SelfEquatableSnapshot?, bool>? other)
         {
-            global::TUnit.Mocks.Arguments.Arg<global::SelfEquatableSnapshot?> __fa_other = other;
+            global::TUnit.Mocks.Arguments.Arg<global::SelfEquatableSnapshot?> __fa_other = other is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<global::SelfEquatableSnapshot?>() : (global::TUnit.Mocks.Arguments.Arg<global::SelfEquatableSnapshot?>)other;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_other.Matcher };
             return new SelfEquatableSnapshot_Equals_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Equals", matchers);
         }
@@ -130,9 +130,9 @@ namespace TUnit.Mocks.Generated
             return new SelfEquatableSnapshot_Equals_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Equals", matchers);
         }
 
-        public static SelfEquatableSnapshot_Equals_M1_MockCall EqualsOf(this global::TUnit.Mocks.Mock<global::SelfEquatableSnapshot> mock, global::System.Func<object?, bool> obj)
+        public static SelfEquatableSnapshot_Equals_M1_MockCall EqualsOf(this global::TUnit.Mocks.Mock<global::SelfEquatableSnapshot> mock, global::System.Func<object?, bool>? obj)
         {
-            global::TUnit.Mocks.Arguments.Arg<object?> __fa_obj = obj;
+            global::TUnit.Mocks.Arguments.Arg<object?> __fa_obj = obj is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<object?>() : (global::TUnit.Mocks.Arguments.Arg<object?>)obj;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_obj.Matcher };
             return new SelfEquatableSnapshot_Equals_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Equals", matchers);
         }

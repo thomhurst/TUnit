@@ -97,9 +97,9 @@ namespace TUnit.Mocks.Generated
             return new Sandbox_IFoo_T__Process_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Process", matchers);
         }
 
-        public static Sandbox_IFoo_T__Process_M1_MockCall<T> Process<T>(this global::TUnit.Mocks.Mock<global::Sandbox.IFoo<T>> mock, global::System.Func<T, bool> item)
+        public static Sandbox_IFoo_T__Process_M1_MockCall<T> Process<T>(this global::TUnit.Mocks.Mock<global::Sandbox.IFoo<T>> mock, global::System.Func<T, bool>? item)
         {
-            global::TUnit.Mocks.Arguments.Arg<T> __fa_item = item;
+            global::TUnit.Mocks.Arguments.Arg<T> __fa_item = item is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<T>() : (global::TUnit.Mocks.Arguments.Arg<T>)item;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_item.Matcher };
             return new Sandbox_IFoo_T__Process_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Process", matchers);
         }

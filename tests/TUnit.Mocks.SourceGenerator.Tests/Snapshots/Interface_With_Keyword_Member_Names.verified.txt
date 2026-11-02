@@ -117,9 +117,9 @@ namespace TUnit.Mocks.Generated
             return new IEscapedNames_event_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "event", matchers);
         }
 
-        public static IEscapedNames_event_M2_MockCall @event(this global::TUnit.Mocks.Mock<global::IEscapedNames> mock, global::System.Func<int, bool> @params)
+        public static IEscapedNames_event_M2_MockCall @event(this global::TUnit.Mocks.Mock<global::IEscapedNames> mock, global::System.Func<int, bool>? @params)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_params = @params;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_params = @params is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)@params;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_params.Matcher };
             return new IEscapedNames_event_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "event", matchers);
         }
@@ -130,24 +130,24 @@ namespace TUnit.Mocks.Generated
             return new IEscapedNames_namespace_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "namespace", matchers);
         }
 
-        public static IEscapedNames_namespace_M3_MockCall @namespace(this global::TUnit.Mocks.Mock<global::IEscapedNames> mock, global::System.Func<int, bool> @new, global::TUnit.Mocks.Arguments.Arg<int> @static)
+        public static IEscapedNames_namespace_M3_MockCall @namespace(this global::TUnit.Mocks.Mock<global::IEscapedNames> mock, global::System.Func<int, bool>? @new, global::TUnit.Mocks.Arguments.Arg<int> @static)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_new = @new;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_new = @new is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)@new;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_new.Matcher, @static.Matcher };
             return new IEscapedNames_namespace_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "namespace", matchers);
         }
 
-        public static IEscapedNames_namespace_M3_MockCall @namespace(this global::TUnit.Mocks.Mock<global::IEscapedNames> mock, global::TUnit.Mocks.Arguments.Arg<int> @new, global::System.Func<int, bool> @static)
+        public static IEscapedNames_namespace_M3_MockCall @namespace(this global::TUnit.Mocks.Mock<global::IEscapedNames> mock, global::TUnit.Mocks.Arguments.Arg<int> @new, global::System.Func<int, bool>? @static)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_static = @static;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_static = @static is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)@static;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { @new.Matcher, __fa_static.Matcher };
             return new IEscapedNames_namespace_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "namespace", matchers);
         }
 
-        public static IEscapedNames_namespace_M3_MockCall @namespace(this global::TUnit.Mocks.Mock<global::IEscapedNames> mock, global::System.Func<int, bool> @new, global::System.Func<int, bool> @static)
+        public static IEscapedNames_namespace_M3_MockCall @namespace(this global::TUnit.Mocks.Mock<global::IEscapedNames> mock, global::System.Func<int, bool>? @new, global::System.Func<int, bool>? @static)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_new = @new;
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_static = @static;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_new = @new is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)@new;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_static = @static is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)@static;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_new.Matcher, __fa_static.Matcher };
             return new IEscapedNames_namespace_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "namespace", matchers);
         }

@@ -108,9 +108,9 @@ namespace TUnit.Mocks.Generated
             return new ICustomCollection_Add_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Add", matchers);
         }
 
-        public static ICustomCollection_Add_M1_MockCall Add(this global::TUnit.Mocks.Mock<global::ICustomCollection> mock, global::System.Func<int, bool> item)
+        public static ICustomCollection_Add_M1_MockCall Add(this global::TUnit.Mocks.Mock<global::ICustomCollection> mock, global::System.Func<int, bool>? item)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_item = item;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_item = item is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)item;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_item.Matcher };
             return new ICustomCollection_Add_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Add", matchers);
         }

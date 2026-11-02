@@ -110,24 +110,24 @@ namespace TUnit.Mocks.Generated
             return new TestNamespace_Calculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
         }
 
-        public static TestNamespace_Calculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::TestNamespace.Calculator> mock, global::System.Func<int, bool> a, global::TUnit.Mocks.Arguments.Arg<int> b)
+        public static TestNamespace_Calculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::TestNamespace.Calculator> mock, global::System.Func<int, bool>? a, global::TUnit.Mocks.Arguments.Arg<int> b)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)a;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, b.Matcher };
             return new TestNamespace_Calculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
         }
 
-        public static TestNamespace_Calculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::TestNamespace.Calculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::System.Func<int, bool> b)
+        public static TestNamespace_Calculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::TestNamespace.Calculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::System.Func<int, bool>? b)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)b;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, __fa_b.Matcher };
             return new TestNamespace_Calculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
         }
 
-        public static TestNamespace_Calculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::TestNamespace.Calculator> mock, global::System.Func<int, bool> a, global::System.Func<int, bool> b)
+        public static TestNamespace_Calculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::TestNamespace.Calculator> mock, global::System.Func<int, bool>? a, global::System.Func<int, bool>? b)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)a;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)b;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, __fa_b.Matcher };
             return new TestNamespace_Calculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
         }

@@ -19,10 +19,10 @@ public sealed class INumericNamed_Int32_Mock<Int32> : global::TUnit.Mocks.Mock<g
         return new INumericNamed_Int32__RoundtripAsync_M1_MockCall<Int64, Int32>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundtripAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<Int64>.Value);
     }
 
-    public INumericNamed_Int32__RoundtripAsync_M1_MockCall<Int64, Int32> RoundtripAsync<Int64>(global::System.Func<Int64, bool> value)
+    public INumericNamed_Int32__RoundtripAsync_M1_MockCall<Int64, Int32> RoundtripAsync<Int64>(global::System.Func<Int64, bool>? value)
     {
         var mock = this;
-        global::TUnit.Mocks.Arguments.Arg<Int64> __fa_value = value;
+        global::TUnit.Mocks.Arguments.Arg<Int64> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<Int64>() : (global::TUnit.Mocks.Arguments.Arg<Int64>)value;
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
         return new INumericNamed_Int32__RoundtripAsync_M1_MockCall<Int64, Int32>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundtripAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<Int64>.Value);
     }
@@ -137,9 +137,9 @@ namespace TUnit.Mocks.Generated
                 return new INumericNamed_Int32__RoundtripAsync_M1_MockCall<Int64, Int32>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundtripAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<Int64>.Value);
             }
 
-            public INumericNamed_Int32__RoundtripAsync_M1_MockCall<Int64, Int32> RoundtripAsync<Int64>(global::System.Func<Int64, bool> value)
+            public INumericNamed_Int32__RoundtripAsync_M1_MockCall<Int64, Int32> RoundtripAsync<Int64>(global::System.Func<Int64, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<Int64> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<Int64> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<Int64>() : (global::TUnit.Mocks.Arguments.Arg<Int64>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
                 return new INumericNamed_Int32__RoundtripAsync_M1_MockCall<Int64, Int32>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundtripAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<Int64>.Value);
             }
@@ -152,9 +152,9 @@ namespace TUnit.Mocks.Generated
                 return new INumericNamed_Int32__RoundtripAsync_M1_MockCall<Int64, Int32>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundtripAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<Int64>.Value);
             }
 
-            public INumericNamed_Int32__RoundtripAsync_M1_MockCall<Int64, Int32> RoundtripAsync<Int64>(global::System.Func<Int64, bool> value)
+            public INumericNamed_Int32__RoundtripAsync_M1_MockCall<Int64, Int32> RoundtripAsync<Int64>(global::System.Func<Int64, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<Int64> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<Int64> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<Int64>() : (global::TUnit.Mocks.Arguments.Arg<Int64>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
                 return new INumericNamed_Int32__RoundtripAsync_M1_MockCall<Int64, Int32>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundtripAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<Int64>.Value);
             }

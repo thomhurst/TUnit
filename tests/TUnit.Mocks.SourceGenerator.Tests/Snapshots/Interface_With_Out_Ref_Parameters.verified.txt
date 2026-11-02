@@ -110,9 +110,9 @@ namespace TUnit.Mocks.Generated
             return new IDictionary_TryGetValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TryGetValue", matchers);
         }
 
-        public static IDictionary_TryGetValue_M0_MockCall TryGetValue(this global::TUnit.Mocks.Mock<global::IDictionary> mock, global::System.Func<string, bool> key)
+        public static IDictionary_TryGetValue_M0_MockCall TryGetValue(this global::TUnit.Mocks.Mock<global::IDictionary> mock, global::System.Func<string, bool>? key)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)key;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher };
             return new IDictionary_TryGetValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TryGetValue", matchers);
         }

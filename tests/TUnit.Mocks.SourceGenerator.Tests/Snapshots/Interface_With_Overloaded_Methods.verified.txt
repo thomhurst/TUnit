@@ -108,9 +108,9 @@ namespace TUnit.Mocks.Generated
             return new IFormatter_Format_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Format", matchers);
         }
 
-        public static IFormatter_Format_M0_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool> value)
+        public static IFormatter_Format_M0_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool>? value)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_value = value;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)value;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
             return new IFormatter_Format_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Format", matchers);
         }
@@ -121,9 +121,9 @@ namespace TUnit.Mocks.Generated
             return new IFormatter_Format_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Format", matchers);
         }
 
-        public static IFormatter_Format_M1_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<int, bool> value)
+        public static IFormatter_Format_M1_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<int, bool>? value)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_value = value;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)value;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
             return new IFormatter_Format_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Format", matchers);
         }
@@ -134,24 +134,24 @@ namespace TUnit.Mocks.Generated
             return new IFormatter_Format_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Format", matchers);
         }
 
-        public static IFormatter_Format_M2_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool> template, global::TUnit.Mocks.Arguments.Arg<string> arg1)
+        public static IFormatter_Format_M2_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool>? template, global::TUnit.Mocks.Arguments.Arg<string> arg1)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_template = template;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_template = template is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)template;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_template.Matcher, arg1.Matcher };
             return new IFormatter_Format_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Format", matchers);
         }
 
-        public static IFormatter_Format_M2_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::TUnit.Mocks.Arguments.Arg<string> template, global::System.Func<string, bool> arg1)
+        public static IFormatter_Format_M2_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::TUnit.Mocks.Arguments.Arg<string> template, global::System.Func<string, bool>? arg1)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg1 = arg1;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg1 = arg1 is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)arg1;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { template.Matcher, __fa_arg1.Matcher };
             return new IFormatter_Format_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Format", matchers);
         }
 
-        public static IFormatter_Format_M2_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool> template, global::System.Func<string, bool> arg1)
+        public static IFormatter_Format_M2_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool>? template, global::System.Func<string, bool>? arg1)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_template = template;
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg1 = arg1;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_template = template is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)template;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg1 = arg1 is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)arg1;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_template.Matcher, __fa_arg1.Matcher };
             return new IFormatter_Format_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Format", matchers);
         }
@@ -162,56 +162,56 @@ namespace TUnit.Mocks.Generated
             return new IFormatter_Format_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "Format", matchers);
         }
 
-        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool> template, global::TUnit.Mocks.Arguments.Arg<string> arg1, global::TUnit.Mocks.Arguments.Arg<string> arg2)
+        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool>? template, global::TUnit.Mocks.Arguments.Arg<string> arg1, global::TUnit.Mocks.Arguments.Arg<string> arg2)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_template = template;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_template = template is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)template;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_template.Matcher, arg1.Matcher, arg2.Matcher };
             return new IFormatter_Format_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "Format", matchers);
         }
 
-        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::TUnit.Mocks.Arguments.Arg<string> template, global::System.Func<string, bool> arg1, global::TUnit.Mocks.Arguments.Arg<string> arg2)
+        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::TUnit.Mocks.Arguments.Arg<string> template, global::System.Func<string, bool>? arg1, global::TUnit.Mocks.Arguments.Arg<string> arg2)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg1 = arg1;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg1 = arg1 is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)arg1;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { template.Matcher, __fa_arg1.Matcher, arg2.Matcher };
             return new IFormatter_Format_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "Format", matchers);
         }
 
-        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool> template, global::System.Func<string, bool> arg1, global::TUnit.Mocks.Arguments.Arg<string> arg2)
+        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool>? template, global::System.Func<string, bool>? arg1, global::TUnit.Mocks.Arguments.Arg<string> arg2)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_template = template;
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg1 = arg1;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_template = template is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)template;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg1 = arg1 is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)arg1;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_template.Matcher, __fa_arg1.Matcher, arg2.Matcher };
             return new IFormatter_Format_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "Format", matchers);
         }
 
-        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::TUnit.Mocks.Arguments.Arg<string> template, global::TUnit.Mocks.Arguments.Arg<string> arg1, global::System.Func<string, bool> arg2)
+        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::TUnit.Mocks.Arguments.Arg<string> template, global::TUnit.Mocks.Arguments.Arg<string> arg1, global::System.Func<string, bool>? arg2)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg2 = arg2;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg2 = arg2 is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)arg2;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { template.Matcher, arg1.Matcher, __fa_arg2.Matcher };
             return new IFormatter_Format_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "Format", matchers);
         }
 
-        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool> template, global::TUnit.Mocks.Arguments.Arg<string> arg1, global::System.Func<string, bool> arg2)
+        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool>? template, global::TUnit.Mocks.Arguments.Arg<string> arg1, global::System.Func<string, bool>? arg2)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_template = template;
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg2 = arg2;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_template = template is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)template;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg2 = arg2 is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)arg2;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_template.Matcher, arg1.Matcher, __fa_arg2.Matcher };
             return new IFormatter_Format_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "Format", matchers);
         }
 
-        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::TUnit.Mocks.Arguments.Arg<string> template, global::System.Func<string, bool> arg1, global::System.Func<string, bool> arg2)
+        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::TUnit.Mocks.Arguments.Arg<string> template, global::System.Func<string, bool>? arg1, global::System.Func<string, bool>? arg2)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg1 = arg1;
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg2 = arg2;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg1 = arg1 is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)arg1;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg2 = arg2 is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)arg2;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { template.Matcher, __fa_arg1.Matcher, __fa_arg2.Matcher };
             return new IFormatter_Format_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "Format", matchers);
         }
 
-        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool> template, global::System.Func<string, bool> arg1, global::System.Func<string, bool> arg2)
+        public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::System.Func<string, bool>? template, global::System.Func<string, bool>? arg1, global::System.Func<string, bool>? arg2)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_template = template;
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg1 = arg1;
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg2 = arg2;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_template = template is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)template;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg1 = arg1 is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)arg1;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_arg2 = arg2 is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)arg2;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_template.Matcher, __fa_arg1.Matcher, __fa_arg2.Matcher };
             return new IFormatter_Format_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "Format", matchers);
         }

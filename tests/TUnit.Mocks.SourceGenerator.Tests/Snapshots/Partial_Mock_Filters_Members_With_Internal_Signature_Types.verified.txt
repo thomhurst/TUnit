@@ -83,9 +83,9 @@ namespace TUnit.Mocks.Generated
             return new ExternalLib_ServiceClient_GetValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetValue", matchers);
         }
 
-        public static ExternalLib_ServiceClient_GetValue_M0_MockCall GetValue(this global::TUnit.Mocks.Mock<global::ExternalLib.ServiceClient> mock, global::System.Func<string, bool> key)
+        public static ExternalLib_ServiceClient_GetValue_M0_MockCall GetValue(this global::TUnit.Mocks.Mock<global::ExternalLib.ServiceClient> mock, global::System.Func<string, bool>? key)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)key;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher };
             return new ExternalLib_ServiceClient_GetValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetValue", matchers);
         }
