@@ -8,6 +8,21 @@ Local branches remain available for `git worktree add <path> <branch>`. Detached
 
 A crashed process or an expired Redis TTL cannot run release. `Remove-MergedWorktrees.ps1` remains the conservative fallback for merged work. It also removes the checkout of a closed `pr-<N>` or `issue-<N>` item that no merge signal matches, such as a review branch whose name differs from the PR head, a branch with local commits after its merge, or a PR closed unmerged. The item comes from `Get-WorktreeLockName`, else a `pr-<N>-*` or `issue-<N>-*` directory name. The sweep holds a temporary `AgentLocks.ps1` lease on the item through removal, keeps the branch, saves uncommitted changes to `retained-worktrees/<item>-wip-<sha>` (restore with `git stash apply <branch>`), retains a detached HEAD as `retained-worktrees/<SHA>`, and preserves a checkout with unknown ignored files. A merged checkout with leftover uncommitted changes is removed the same way, under the same lease, its changes saved to `retained-worktrees/<item>-wip-<sha>`. It is kept when its lock is held, Redis is unavailable, or it has no item identity. A clean merged checkout is removed without a lease, so a Redis outage never keeps it. A detached checkout of a main commit with changes is still preserved. No GitHub Actions job manages local disk.
 
+## Windows setup
+
+Before creating the first worktree on Windows, enable long paths in Git for this repository. Run this from the shared checkout, before `git worktree add`:
+
+```powershell
+git config --local core.longpaths true
+git config --local --get core.longpaths  # should print true
+```
+
+Template snapshots contain paths that can exceed Windows' `MAX_PATH` once placed under `<repo-parent>/TUnit-worktrees/<name>/`. Git for Windows needs `core.longpaths=true` to check them out. The local configuration is shared by this repository's worktrees, so this is a one-time setup and does not change the global Git configuration. Setting it after checkout fails is too late to prevent a partial checkout and a leftover branch.
+
+If checkout already failed with `Filename too long`, enable the setting above before retrying. Inspect `git worktree list` and `git branch --list <branch>` first: the failed command may have left the branch behind even if it did not register a worktree. Reuse that branch with `git worktree add <path> <branch>` rather than repeating `-b <branch>`; preserve any existing checkout or work before retrying.
+
+## Regression tests
+
 Run regression tests locally with PowerShell 7, Git and Docker:
 
 ```powershell
