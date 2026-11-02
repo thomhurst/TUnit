@@ -13,6 +13,15 @@ public interface ITestEvents
     /// Raised once per test, after its final attempt and after the test class instance is disposed, so a
     /// handler must not use the instance. It is also raised for a test that never runs: one that is
     /// skipped, cancelled before it starts, fails while its data is built, or is excluded by a filter.
+    /// <para>
+    /// A data source can subscribe through <see cref="TestBuilderContext.Events"/> while it builds data that
+    /// no single test owns: a static property, a class row that no test takes, a row read during discovery to
+    /// infer a generic class's type arguments, or a property of the temporary instance that supplies instance
+    /// method rows. Those handlers are raised once when TUnit releases that data, at the latest when the
+    /// session ends. No test exists for them, so they receive a <see langword="null"/> <see cref="TestContext"/>
+    /// argument (and the builder or session context as the sender), and a handler subscribed there must not read
+    /// the test context.
+    /// </para>
     /// </remarks>
     AsyncEvent<TestContext>? OnDispose { get; }
 

@@ -20,8 +20,8 @@ public class Issue7205Tests(TestMode testMode) : InvokableTestBase(testMode)
                 // throws and both CircularDependencyScopeTests fail their circular dependency, all by design;
                 // the observer checks their scopes.
                 result => result.ResultSummary.Outcome.ShouldBe("Failed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(24),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(14),
+                result => result.ResultSummary.Counters.Total.ShouldBe(25),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(15),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(7),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(3)
             ]);

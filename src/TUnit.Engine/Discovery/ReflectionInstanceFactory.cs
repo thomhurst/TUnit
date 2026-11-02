@@ -4,6 +4,7 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.Engine.Discovery;
 
@@ -73,10 +74,9 @@ internal static class ReflectionInstanceFactory
                 continue;
             }
 
+            var metadata = CreatePropertyMetadata(property, type, dataSource);
             try
             {
-                var metadata = CreatePropertyMetadata(property, type, dataSource);
-
                 await foreach (var factory in dataSource.GetDataRowsAsync(metadata))
                 {
                     var dataRow = await factory();
@@ -110,6 +110,12 @@ internal static class ReflectionInstanceFactory
             catch
             {
                 // Ignore errors during property injection - the test will fail with a better error message
+            }
+            finally
+            {
+                // No test owns this discovery instance, so the cleanup its data source subscribed (a
+                // dependency injection scope's disposal) runs at session end (#7205).
+                TestOnDisposeRaiser.DeferToSessionEnd(metadata.TestBuilderContext.Current);
             }
         }
     }

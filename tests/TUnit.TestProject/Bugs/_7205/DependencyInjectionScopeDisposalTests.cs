@@ -76,6 +76,8 @@ public sealed class MethodRowsDependencyInjectionAttribute() : ProbeDependencyIn
 
 public sealed class InstanceSourceDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(ClassRowScopeWithInstanceMethodDataSourceTests));
 
+public sealed class TemporaryInstancePropertyDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(TemporaryInstancePropertyScopeTests));
+
 public sealed class MethodParameterDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(MethodParameterScopeTests));
 
 public sealed class RetriedDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(RetriedScopeTests));
@@ -270,6 +272,29 @@ public class ClassRowScopeWithInstanceMethodDataSourceTests(ProbeService service
     public async Task Run(int value) => await Assert.That(service.Scope.IsDisposed).IsFalse();
 }
 
+// The temporary instance that reads the instance method rows has its own injected property, whose
+// scope owns the service the rows hand to the test. No test owns that temporary instance, so its scope
+// is disposed at session end, and the object tracker never disposes the service itself.
+[EngineTest(ExpectedResult.Pass)]
+public class TemporaryInstancePropertyScopeTests
+{
+    public static ConcurrentBag<ProbeService> RowServices { get; } = [];
+
+    [TemporaryInstancePropertyDependencyInjection]
+    public required ProbeService Service { get; init; }
+
+    public IEnumerable<ProbeService> Rows() => [Service];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(Rows))]
+    public async Task Run(ProbeService rowService)
+    {
+        RowServices.Add(rowService);
+        await Assert.That(rowService).IsNotSameReferenceAs(Service);
+        await Assert.That(rowService.Scope.IsDisposed).IsFalse();
+    }
+}
+
 [EngineTest(ExpectedResult.Pass)]
 public class MethodParameterScopeTests
 {
@@ -439,6 +464,7 @@ public class DependencyInjectionScopeDisposalObserverTests
     [DependsOn(typeof(ClassRowScopeWithMethodRowsTests))]
     [DependsOn(typeof(ClassRowScopeWithInstanceMethodDataSourceTests))]
     [DependsOn(typeof(MethodParameterScopeTests))]
+    [DependsOn(typeof(TemporaryInstancePropertyScopeTests))]
     [DependsOn(typeof(RetriedScopeTests))]
     [DependsOn(typeof(SkippedScopeTests), ProceedOnFailure = true)]
     [DependsOn(typeof(SkippedIfEmptyScopeTests), ProceedOnFailure = true)]
@@ -455,6 +481,17 @@ public class DependencyInjectionScopeDisposalObserverTests
 
         // One scope for the temporary instance that reads the method rows, then one per test.
         await AssertScopes(nameof(ClassRowScopeWithInstanceMethodDataSourceTests), 3);
+
+        // The test's own property scope is disposed when it ends. The temporary instance's scope, which
+        // resolved the row's service, lives until session end, and nothing disposed that service yet.
+        var temporaryInstanceScopes = ProbeScope.Created.Where(x => x.Owner == nameof(TemporaryInstancePropertyScopeTests)).ToArray();
+        var rowServices = TemporaryInstancePropertyScopeTests.RowServices.ToArray();
+        await Assert.That(temporaryInstanceScopes.Length).IsEqualTo(2);
+        await Assert.That(rowServices.Length).IsEqualTo(1);
+        await Assert.That(rowServices[0].Scope.IsDisposed).IsFalse();
+        await Assert.That(rowServices[0].DisposeCount).IsEqualTo(0);
+        await Assert.That(temporaryInstanceScopes.Count(x => x.IsDisposed)).IsEqualTo(1);
+        await Assert.That(temporaryInstanceScopes.Where(x => x.IsDisposed).SelectMany(x => x.Services).Count(x => x.DisposeCount == 1)).IsEqualTo(1);
 
         // A method parameter scope per test run.
         await AssertScopes(nameof(MethodParameterScopeTests), 2);

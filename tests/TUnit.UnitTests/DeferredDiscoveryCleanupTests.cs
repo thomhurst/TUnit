@@ -52,6 +52,31 @@ public class DeferredDiscoveryCleanupTests
         await Assert.That(session.DeferredDiscoveryOnDispose?.InvocationList.Count).IsEqualTo(1);
     }
 
+    [Test]
+    public async Task Deferring_Events_Moves_Their_Callbacks_To_The_Session()
+    {
+        // The temporary instance that reads instance method rows injects its properties against bare
+        // events, which no test raises.
+        var count = 0;
+        var session = CreateSession();
+        var events = new TestContextEvents();
+        events.OnDispose += (_, _) =>
+        {
+            count++;
+            return default;
+        };
+
+        TestOnDisposeRaiser.DeferToSessionEnd(events);
+
+        await Assert.That(events.OnDispose).IsNull();
+        await Assert.That(session.DeferredDiscoveryOnDispose?.InvocationList.Count).IsEqualTo(1);
+
+        var logger = new TUnitFrameworkLogger(null!, null!, null!, new LogLevelProvider(new NoOptions()));
+        await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(session, logger);
+
+        await Assert.That(count).IsEqualTo(1);
+    }
+
     private static TestSessionContext CreateSession()
     {
         var beforeDiscoveryContext = new BeforeTestDiscoveryContext { TestFilter = null };

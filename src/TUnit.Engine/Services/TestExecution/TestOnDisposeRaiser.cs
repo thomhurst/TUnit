@@ -77,6 +77,13 @@ internal static class TestOnDisposeRaiser
         => TestSessionContext.DeferOnDisposeToSessionEnd(context);
 
     /// <summary>
+    /// Moves the OnDispose callbacks subscribed on <paramref name="events"/> to the current session, as
+    /// <see cref="DeferToSessionEnd(TestBuilderContext)"/> does for a builder context.
+    /// </summary>
+    public static void DeferToSessionEnd(TestContextEvents events)
+        => TestSessionContext.DeferOnDisposeToSessionEnd(events);
+
+    /// <summary>
     /// Raises, once, the callbacks <see cref="DeferToSessionEnd"/> moved to <paramref name="session"/>.
     /// Called from the session's unconditional final cleanup, so they run even when no test executes
     /// (every test filtered out or removed by circular-dependency detection), and again when the session's

@@ -89,8 +89,15 @@ public class TestSessionContext : Context
     /// which the session's static property cleanup raises.
     /// </summary>
     internal static void DeferOnDisposeToSessionEnd(TestBuilderContext context)
+        => DeferOnDisposeToSessionEnd(context.EventsIfCreated);
+
+    /// <summary>
+    /// Moves the OnDispose callbacks subscribed on <paramref name="events"/> to the current session's
+    /// <see cref="DeferredDiscoveryOnDispose"/>, as <see cref="DeferOnDisposeToSessionEnd(TestBuilderContext)"/> does.
+    /// </summary>
+    internal static void DeferOnDisposeToSessionEnd(TestContextEvents? events)
     {
-        if (context.EventsIfCreated is not { OnDispose: { } onDispose } events)
+        if (events is not { OnDispose: { } onDispose })
         {
             return;
         }

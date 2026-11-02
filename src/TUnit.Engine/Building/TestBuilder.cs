@@ -2477,10 +2477,10 @@ internal sealed class TestBuilder : ITestBuilder
             return instanceResult;
         }
 
+        var tempEvents = new TestContextEvents();
         try
         {
             var tempObjectBag = new ConcurrentDictionary<string, object?>();
-            var tempEvents = new TestContextEvents();
 
             await _objectLifecycleService.RegisterObjectAsync(
                 instanceResult.Instance,
@@ -2496,6 +2496,13 @@ internal sealed class TestBuilder : ITestBuilder
         {
             await DisposeInstanceForMethodDataSourcesAsync(instanceResult.Instance);
             throw;
+        }
+        finally
+        {
+            // Property data sources of the temporary instance subscribed their cleanup (a dependency
+            // injection scope's disposal) here. What they injected can flow into every method row this
+            // instance supplies, and the scope owns it, so the cleanup runs at session end (#7205).
+            TestOnDisposeRaiser.DeferToSessionEnd(tempEvents);
         }
 
         return instanceResult;
