@@ -44,6 +44,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     private readonly ConcurrentDictionary<string, SessionReportState> _sessions = new();
     // Sessions between OnTestSessionStartingAsync and OnTestSessionFinishingAsync; guarded by _htmlReportStateLock.
     private readonly HashSet<string> _activeSessions = [];
+    // Finishing sessions that have not yet read TraceRegistry for their report; guarded by _htmlReportStateLock.
+    // TraceRegistry is cleared only when no session is active and no report still needs it.
+    private int _reportsReadingTraceRegistry;
     private readonly object _htmlReportStateLock = new();
     private GitHubReporter? _githubReporter;
     private int _htmlReportEnabledAfterDiscovery = HtmlReportEnabledUnresolved;
@@ -77,9 +80,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             return Task.CompletedTask;
         }
 
+        // Messages for a session that has not started or has already finished have no report to
+        // go into; creating state for them would leak an entry that nothing ever removes.
         if (value is UnobservedTaskExceptionsData unobserved)
         {
-            var unobservedState = GetSessionState(unobserved.SessionUid.Value);
+            if (!_sessions.TryGetValue(unobserved.SessionUid.Value, out var unobservedState))
+            {
+                return Task.CompletedTask;
+            }
+
             foreach (var exception in unobserved.Exceptions)
             {
                 unobservedState.UnobservedTaskExceptions.Enqueue(exception);
@@ -89,10 +98,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
 
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
+        if (!_sessions.TryGetValue(testNodeUpdateMessage.SessionUid.Value, out var sessionState))
+        {
+            return Task.CompletedTask;
+        }
+
         // Keep only the update we'll report per test: a final-state update always wins over a
         // non-final one, otherwise the latest wins. The engine emits a single final update per
         // test, so storing the whole stream (the old ConcurrentQueue) just wasted memory.
-        GetSessionState(testNodeUpdateMessage.SessionUid.Value).Updates.AddOrUpdate(
+        sessionState.Updates.AddOrUpdate(
             testNodeUpdateMessage.TestNode.Uid.Value,
             testNodeUpdateMessage,
             (_, existing) => PreferForReport(existing, testNodeUpdateMessage));
@@ -111,9 +125,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         => update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>().IsFinalState();
 
     public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage), typeof(UnobservedTaskExceptionsData)];
-
-    private SessionReportState GetSessionState(string sessionUid)
-        => _sessions.GetOrAdd(sessionUid, static _ => new SessionReportState());
 
     public Type[] DataTypesProduced { get; } = [typeof(SessionFileArtifact)];
 
@@ -162,41 +173,41 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         _sessions.TryRemove(sessionUid, out var sessionState);
         var updates = sessionState?.Updates;
         bool lastActiveSession;
+        var traceRegistryReleased = false;
 #if NET
         ActivityCollector? ownedCollector = null;
+        ActivityCollector? reportCollector;
 #endif
 
         lock (_htmlReportStateLock)
         {
             _activeSessions.Remove(sessionUid);
+            _reportsReadingTraceRegistry++;
             lastActiveSession = _activeSessions.Count == 0;
 #if NET
             if (lastActiveSession)
             {
                 // Detach the collector so a session starting during report generation creates
-                // its own instead of disposing the one this report still reads.
+                // its own instead of disposing the one this report still reads. Stop it under the
+                // lock too: that frees the process-wide ActivityCollector.Current and
+                // ExternalSpanSink slots before the next session's collector claims them (both are
+                // first-wins). Stopping keeps the spans already collected.
                 ownedCollector = _activityCollector;
                 _activityCollector = null;
+                ownedCollector?.Stop();
             }
 
-            if (sessionState is not null)
-            {
-                // An overlapping session keeps the shared collector running; its spans can then
-                // appear in this report's trace view as well, but test results stay per session.
-                sessionState.Collector = ownedCollector ?? _activityCollector;
-            }
+            // An overlapping session keeps the shared collector running; its spans can then
+            // appear in this report's trace view as well, but test results stay per session.
+            reportCollector = ownedCollector ?? _activityCollector;
 #endif
         }
 
         try
         {
-#if NET
-            ownedCollector?.Stop();
-#endif
-
             if (!IsHtmlReportEnabledForRun())
             {
-                ClearTraceRegistryIfLastSession(lastActiveSession);
+                ReleaseTraceRegistry(ref traceRegistryReleased);
                 var disabledOutputPath = _outputPath ?? GetDefaultOutputPath();
                 var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
                 await DeleteSidecarsAndRefreshAggregateAsync(
@@ -208,7 +219,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
             if (updates is null || updates.IsEmpty)
             {
-                ClearTraceRegistryIfLastSession(lastActiveSession);
+                ReleaseTraceRegistry(ref traceRegistryReleased);
                 if (!IsJsonReportEnabled())
                 {
                     var emptyOutputPath = _outputPath ?? GetDefaultOutputPath();
@@ -225,11 +236,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             ReportData reportData;
             try
             {
+#if NET
+                reportData = BuildReportData(sessionState!, reportCollector);
+#else
                 reportData = BuildReportData(sessionState!);
+#endif
             }
             finally
             {
-                ClearTraceRegistryIfLastSession(lastActiveSession);
+                ReleaseTraceRegistry(ref traceRegistryReleased);
             }
 
             // The sidecar JSON doesn't depend on the HTML, and on large suites each takes a
@@ -314,6 +329,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
         finally
         {
+            // Covers a failure before any branch above released it.
+            ReleaseTraceRegistry(ref traceRegistryReleased);
 #if NET
             ownedCollector?.Dispose();
             if (lastActiveSession)
@@ -325,25 +342,27 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
     }
 
-    // TraceRegistry is process-wide; clearing it while another session runs would drop that
-    // session's trace correlation.
-    private void ClearTraceRegistryIfLastSession(bool lastActiveSession)
+    // TraceRegistry is process-wide; clearing it while another session runs, or while another
+    // finishing session has yet to read its trace IDs, would drop that report's linked traces.
+    // The last finishing session to release it clears it, unless a session is running.
+    private void ReleaseTraceRegistry(ref bool released)
     {
-#if NET
-        if (!lastActiveSession)
+        if (released)
         {
             return;
         }
 
+        released = true;
         lock (_htmlReportStateLock)
         {
-            // A session may have started since this one finished; it now owns the registry.
-            if (_activeSessions.Count == 0)
+            _reportsReadingTraceRegistry--;
+#if NET
+            if (_reportsReadingTraceRegistry == 0 && _activeSessions.Count == 0)
             {
                 TraceRegistry.Clear();
             }
-        }
 #endif
+        }
     }
 
     /// <param name="preSerialized">
@@ -612,6 +631,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 #endif
     }
 
+    internal int SessionStateCount => _sessions.Count;
+
 #if NET
     internal bool HasActivityCollector => _activityCollector is not null;
 
@@ -685,14 +706,20 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 #endif
     internal ReportData BuildReportData(string sessionUid)
     {
+        // An unknown session reports no results; tests use that to read report metadata.
         var state = _sessions.TryGetValue(sessionUid, out var existing) ? existing : new SessionReportState();
 #if NET
-        state.Collector = _activityCollector;
-#endif
+        return BuildReportData(state, _activityCollector);
+#else
         return BuildReportData(state);
+#endif
     }
 
+#if NET
+    private ReportData BuildReportData(SessionReportState sessionState, ActivityCollector? collector)
+#else
     private ReportData BuildReportData(SessionReportState sessionState)
+#endif
     {
         var assemblyName = GetAssemblyName();
         var tunitVersion = typeof(HtmlReporter).Assembly.GetName().Version?.ToString() ?? "unknown";
@@ -710,7 +737,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         // Build span lookup to correlate traces with test results
 #if NET
-        var spanLookup = sessionState.Collector?.GetTestSpanLookup();
+        var spanLookup = collector?.GetTestSpanLookup();
 #else
         var spanLookup = (Dictionary<string, (string TraceId, string SpanId)>?)null;
 #endif
@@ -868,9 +895,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         // Collect spans
         SpanData[]? spans = null;
 #if NET
-        if (sessionState.Collector != null)
+        if (collector != null)
         {
-            spans = sessionState.Collector.GetAllSpans();
+            spans = collector.GetAllSpans();
 
             // Use the session span duration as the header duration when available,
             // since it captures the full wall-clock time including initialization.
@@ -1338,10 +1365,5 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         public ConcurrentDictionary<string, TestNodeUpdateMessage> Updates { get; } = new();
 
         public ConcurrentQueue<Exception> UnobservedTaskExceptions { get; } = new();
-
-#if NET
-        // The collector whose spans the report renders; assigned when the report is built.
-        public ActivityCollector? Collector { get; set; }
-#endif
     }
 }

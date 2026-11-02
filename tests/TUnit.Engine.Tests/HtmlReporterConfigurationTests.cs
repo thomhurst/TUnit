@@ -210,6 +210,27 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
+    public async Task Messages_For_A_Finished_Session_Do_Not_Recreate_Its_State(CancellationToken cancellationToken)
+    {
+        TUnitSettings.Default.Reporting.HtmlReportEnabled = true;
+        TUnitSettings.Default.Reporting.JsonReportEnabled = false;
+        using var reporter = new HtmlReporter(new MockExtension());
+        var session = new TestSessionContextStub("finished-session", cancellationToken);
+
+        await reporter.OnTestSessionStartingAsync(session);
+        await reporter.OnTestSessionFinishingAsync(session);
+        reporter.SessionStateCount.ShouldBe(0);
+
+        await reporter.ConsumeAsync(reporter, CreatePassedUpdate("late", session.SessionUid), cancellationToken);
+        await reporter.ConsumeAsync(
+            reporter,
+            new UnobservedTaskExceptionsData(session.SessionUid, [new InvalidOperationException("late")]),
+            cancellationToken);
+
+        reporter.SessionStateCount.ShouldBe(0);
+    }
+
+    [Test]
     public async Task Activity_Collection_Outlives_A_Finished_Session_While_Another_Overlaps(CancellationToken cancellationToken)
     {
         TUnitSettings.Default.Reporting.HtmlReportEnabled = true;
