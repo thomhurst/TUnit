@@ -3898,29 +3898,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var dynamicTests = new List<TestMetadata>(50);
 
-        // First check if there are any registered dynamic test sources from source generation
-        if (Sources.DynamicTestSources.Count > 0)
-        {
-            foreach (var source in Sources.DynamicTestSources)
-            {
-                try
-                {
-                    var tests = source.CollectDynamicTests(testSessionId);
-                    foreach (var dynamicTest in tests)
-                    {
-                        var testMetadataList = await ConvertDynamicTestToMetadata(dynamicTest).ConfigureAwait(false);
-                        dynamicTests.AddRange(testMetadataList);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Create a failed test metadata for this dynamic test source
-                    var failedTest = CreateFailedTestMetadataForDynamicSource(source, ex);
-                    dynamicTests.Add(failedTest);
-                }
-            }
-        }
-
+        // Reflection discovery owns builder invocation in this mode. Generated sources can also be
+        // registered for these assemblies; invoking both would run each builder twice.
         var allAssemblies = Assemblies;
         var assembliesList = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
@@ -3938,7 +3917,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 try
                 {
-                    return asm.GetExportedTypes();
+                    return asm.GetTypes();
                 }
                 catch
                 {
@@ -3988,8 +3967,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var dynamicTests = new List<TestMetadata>(50);
 
         // Extract file path and line number from the DynamicTestBuilderAttribute if possible
-        var filePath = ExtractFilePath(builderMethod) ?? "Unknown";
-        var lineNumber = ExtractLineNumber(builderMethod) ?? 0;
+#pragma warning disable TUnitWIP0001
+        var attribute = builderMethod.GetCustomAttribute<DynamicTestBuilderAttribute>(inherit: false);
+#pragma warning restore TUnitWIP0001
+        var filePath = attribute?.File ?? "Unknown";
+        var lineNumber = attribute?.Line ?? 0;
 
         // Create context
         var context = new DynamicTestBuilderContext(filePath, lineNumber);
@@ -4139,26 +4121,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         };
     }
 
-    private static TestMetadata CreateFailedTestMetadataForDynamicSource(IDynamicTestSource source, Exception ex)
-    {
-        var testName = $"[DYNAMIC SOURCE FAILED] {source.GetType().Name}";
-        var displayName = $"{testName} - {ex.Message}";
-
-        return new FailedTestMetadata(ex, displayName)
-        {
-            TestName = testName,
-            TestClassType = source.GetType(),
-            TestMethodName = "CollectDynamicTests",
-            FilePath = "Unknown",
-            LineNumber = 0,
-            MethodMetadata = CreateDummyMethodMetadata(source.GetType(), "CollectDynamicTests"),
-            AttributeFactory = static () => [],
-            DataSources = [],
-            ClassDataSources = [],
-            PropertyDataSources = []
-        };
-    }
-
     private static TestMetadata CreateFailedTestMetadataForDynamicBuilder(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
         Type type,
@@ -4168,13 +4130,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var testName = $"[DYNAMIC BUILDER FAILED] {type.FullName}.{method.Name}";
         var displayName = $"{testName} - {ex.Message}";
 
+#pragma warning disable TUnitWIP0001
+        var attribute = method.GetCustomAttribute<DynamicTestBuilderAttribute>(inherit: false);
+#pragma warning restore TUnitWIP0001
+
         return new FailedTestMetadata(ex, displayName)
         {
             TestName = testName,
             TestClassType = type,
             TestMethodName = method.Name,
-            FilePath = ExtractFilePath(method) ?? "Unknown",
-            LineNumber = ExtractLineNumber(method) ?? 0,
+            FilePath = attribute?.File ?? "Unknown",
+            LineNumber = attribute?.Line ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
             AttributeFactory = () => GetFailedTestAttributes(method),
             DataSources = [],
