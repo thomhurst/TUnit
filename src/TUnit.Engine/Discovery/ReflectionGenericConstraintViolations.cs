@@ -140,6 +140,13 @@ internal sealed class ReflectionGenericConstraintViolations(
     {
         var typeArguments = new Type?[classGenericParameters.Length];
 
+        // Row values bind to the data parameters only; the engine supplies any CancellationToken, wherever it
+        // is, as in InferClassTypeArgumentsFromMethodRow and the generator's GetDataParameters
+        if (Array.Exists(parameters, static parameter => parameter.ParameterType == typeof(CancellationToken)))
+        {
+            parameters = Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
+        }
+
         for (var i = 0; i < parameters.Length && i < values.Length; i++)
         {
             var parameterType = parameters[i].ParameterType;

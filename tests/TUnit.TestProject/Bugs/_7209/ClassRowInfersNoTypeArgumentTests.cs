@@ -105,6 +105,42 @@ public class TypeFreeClassRowConstraintViolation<T>(int number) where T : struct
     }
 }
 
+// A [MethodDataSource] member of the test class beside a method row that infers T runs on the instantiation the row
+// infers, not on one inferred from its own declared type: C<int> runs Run(1) and Run(2), never C<object>. Same in
+// both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithInferringRowAndMethodSource<T>(int number)
+{
+    public static IEnumerable<object> Rows() => [2];
+
+    [Test]
+    [Arguments(1)]
+    [MethodDataSource(nameof(Rows))]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value is 1 or 2).IsTrue();
+    }
+}
+
+// The engine supplies the CancellationToken, so the row's values bind to the other parameters: T is int, which
+// satisfies the struct constraint, and the null goes to object, not to T. Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithCancellationToken<T>(int number) where T : struct
+{
+    [Test]
+    [Arguments(1, null)]
+    public async Task Run(CancellationToken token, T value, object? other)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That((object)value).IsEqualTo(1);
+        await Assert.That(other).IsNull();
+    }
+}
+
 public static class TypeFreeClassRowSources
 {
     public static IEnumerable<int> FortyThree() => [43];
