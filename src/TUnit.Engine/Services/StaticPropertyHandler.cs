@@ -79,17 +79,20 @@ internal sealed class StaticPropertyHandler
             }
             catch (Exception ex)
             {
-                // The session ends with this exception, before DisposeStaticPropertiesAsync runs, so release
-                // the cleanup that static property data sources already subscribed (a dependency injection
-                // scope's disposal, for example) now (#7205).
-                await ReleaseSessionCallbacksAsync().ConfigureAwait(false);
-
+                // The session ends with this exception, before DisposeStaticPropertiesAsync runs. The scheduler
+                // releases the tests' cleanup and then calls ReleaseSessionCallbacksAfterFailedInitializationAsync.
                 throw new InvalidOperationException($"Failed to initialize static property {property.DeclaringType.Name}.{property.PropertyName}", ex);
             }
         }
     }
 
-    private async ValueTask ReleaseSessionCallbacksAsync()
+    /// <summary>
+    /// Raises the cleanup that static property data sources already subscribed (a dependency injection
+    /// scope's disposal, for example) when static property initialization fails, because
+    /// <see cref="DisposeStaticPropertiesAsync"/> never runs then (#7205). Call it after the tests' own
+    /// OnDispose callbacks, which may still use the session's services.
+    /// </summary>
+    public async ValueTask ReleaseSessionCallbacksAfterFailedInitializationAsync()
     {
         var cleanupExceptions = new List<Exception>();
         await TestOnDisposeRaiser.RaiseForSessionAsync(TestSessionContext.GlobalStaticPropertyContext, cleanupExceptions).ConfigureAwait(false);

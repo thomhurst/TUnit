@@ -12,6 +12,7 @@ using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
+using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 using TUnit.Engine.Services.TestExecution;
 using TUnit.Engine.Utilities;
@@ -26,6 +27,7 @@ internal sealed class TestBuilder : ITestBuilder
     private readonly ObjectLifecycleService _objectLifecycleService;
     private readonly Discovery.IHookRegistrar _hookDiscoveryService;
     private readonly IMetadataFilterMatcher _filterMatcher;
+    private readonly TUnitFrameworkLogger _logger;
 
     public TestBuilder(
         string sessionId,
@@ -33,9 +35,11 @@ internal sealed class TestBuilder : ITestBuilder
         IContextProvider contextProvider,
         ObjectLifecycleService objectLifecycleService,
         Discovery.IHookRegistrar hookDiscoveryService,
-        IMetadataFilterMatcher filterMatcher)
+        IMetadataFilterMatcher filterMatcher,
+        TUnitFrameworkLogger logger)
     {
         _sessionId = sessionId;
+        _logger = logger;
         _hookDiscoveryService = hookDiscoveryService;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _contextProvider = contextProvider;
@@ -232,7 +236,7 @@ internal sealed class TestBuilder : ITestBuilder
                     // No test holds this first fetch yet. The first test built from this class row takes it
                     // instead of calling the factory again, so a non-shared source does not create an extra
                     // instance that nothing tracks or disposes (#7157).
-                    var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, firstClassRowEvents);
+                    var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, firstClassRowEvents, _logger);
 
 #if NET
                     // Register scope for class data objects from the simple path.
@@ -240,15 +244,16 @@ internal sealed class TestBuilder : ITestBuilder
                     TraceScopeRegistry.RegisterFromDataSource(classDataSource, classData);
 #endif
 
-                    // Initialize objects before method data sources are evaluated.
-                    // ObjectInitializer is phase-aware and will only initialize IAsyncDiscoveryInitializer during Discovery.
-                    await InitializeClassDataAsync(classData);
-
                     var needsInstanceForMethodDataSources = HasInstanceDataAccessor(metadata.DataSources);
 
                     object? instanceForMethodDataSources = null;
                     try
                     {
+                        // Initialize objects before method data sources are evaluated. Inside the try, so a
+                        // failure still releases the row's cleanup (a dependency injection scope's disposal).
+                        // ObjectInitializer is phase-aware and will only initialize IAsyncDiscoveryInitializer during Discovery.
+                        await InitializeClassDataAsync(classData);
+
                         if (needsInstanceForMethodDataSources)
                         {
                             // The temporary instance is built from the first fetch and disposed below, so no
@@ -1111,7 +1116,7 @@ internal sealed class TestBuilder : ITestBuilder
     /// that takes or tracks them also raises those events (#7205).
     /// </para>
     /// </remarks>
-    private sealed class UnclaimedClassRow(object?[] data, TestDataRowMetadata? metadata, TestContextEvents? events)
+    private sealed class UnclaimedClassRow(object?[] data, TestDataRowMetadata? metadata, TestContextEvents? events, TUnitFrameworkLogger logger)
     {
         private object?[]? _data = data;
         private TestDataRowMetadata? _metadata = metadata;
@@ -1212,14 +1217,16 @@ internal sealed class TestBuilder : ITestBuilder
             await RaiseAsync(sender, onDispose.InvocationList).ConfigureAwait(false);
         }
 
-        private static async ValueTask RaiseAsync(TestBuilderContext sender, IReadOnlyList<AsyncEvent<TestContext>.Invocation> callbacks)
+        // No test takes these rows, so a cleanup failure is logged rather than thrown: throwing would fail
+        // the whole method's build and drop the later, valid rows.
+        private async ValueTask RaiseAsync(TestBuilderContext sender, IReadOnlyList<AsyncEvent<TestContext>.Invocation> callbacks)
         {
             var exceptions = new List<Exception>();
             await TestOnDisposeRaiser.RaiseDetachedAsync(sender, callbacks, exceptions).ConfigureAwait(false);
 
-            if (exceptions.Count > 0)
+            foreach (var exception in exceptions)
             {
-                throw new AggregateException(exceptions);
+                await logger.LogErrorAsync($"Error during OnDispose for a data row that no test took: {exception}").ConfigureAwait(false);
             }
         }
 
@@ -2328,10 +2335,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                 // The first test built from this class row takes this fetch instead of calling the factory
                 // again, so a non-shared source does not create an extra, untracked instance (#7157).
-                var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, firstClassRowEvents);
-
-                // Initialize objects before method data sources are evaluated (ObjectInitializer is phase-aware)
-                await InitializeClassDataAsync(classData);
+                var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, firstClassRowEvents, _logger);
 
                 // Handle instance creation for method data sources
                 var needsInstanceForMethodDataSources = HasInstanceDataAccessor(metadata.DataSources);
@@ -2339,6 +2343,10 @@ internal sealed class TestBuilder : ITestBuilder
 
                 try
                 {
+                    // Initialize objects before method data sources are evaluated (ObjectInitializer is phase-aware).
+                    // Inside the try, so a failure still releases the row's cleanup.
+                    await InitializeClassDataAsync(classData);
+
                     if (needsInstanceForMethodDataSources)
                     {
                         // The temporary instance is built from the first fetch and disposed below, so no

@@ -95,6 +95,20 @@ public sealed class ThrowingCreateDependencyInjectionAttribute() : ProbeDependen
         throw new InvalidOperationException("Resolving the service fails by design, after its scope was created.");
 }
 
+// Resolves a service whose discovery initialization fails, after its scope was created.
+public sealed class InitFailingDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(InitFailingScopeTests))
+{
+    public override object? Create(ProbeScope scope, Type type) => new InitFailingService(scope.Resolve());
+}
+
+public sealed class InitFailingService(ProbeService service) : IAsyncDiscoveryInitializer
+{
+    public ProbeService Service { get; } = service;
+
+    public Task InitializeAsync() =>
+        throw new InvalidOperationException("Initializing the service fails by design, after its scope was created.");
+}
+
 public sealed class FilterExcludedDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(FilterExcluded.FilterExcludedScopeTests));
 
 // A scope that is not disposable, whose Create constructs each service itself: nothing but the object
@@ -327,6 +341,16 @@ public class ThrowingCreateScopeTests(ProbeService service)
     public void Run() => throw new InvalidOperationException($"Should have failed to build, but ran with {service}");
 }
 
+// The class row's service fails to initialize during discovery, after its scope was created, so the class
+// row ends in a failed test that never took the row's events. The scope must still be disposed.
+[EngineTest(ExpectedResult.Failure)]
+[InitFailingDependencyInjection]
+public class InitFailingScopeTests(InitFailingService service)
+{
+    [Test]
+    public void Run() => throw new InvalidOperationException($"Should have failed to build, but ran with {service}");
+}
+
 // A test skipped because its dependency failed never reaches TestCoordinator. The scope created for
 // it must still be disposed, because the object tracker no longer disposes the services the scope owns.
 [EngineTest(ExpectedResult.Failure)]
@@ -423,6 +447,9 @@ public class DependencyInjectionScopeDisposalObserverTests
         var throwingCreateScopes = ProbeScope.Created.Where(x => x.Owner == nameof(ThrowingCreateScopeTests)).ToArray();
         await Assert.That(throwingCreateScopes.Length).IsEqualTo(1);
         await Assert.That(throwingCreateScopes.Count(x => x.IsDisposed)).IsEqualTo(1);
+
+        // The scope of the class row whose service failed to initialize during discovery.
+        await AssertScopes(nameof(InitFailingScopeTests), 1);
 
         // The scope of the test skipped because its dependency failed.
         await AssertScopes(nameof(DependencySkippedScopeTests), 1);

@@ -191,10 +191,23 @@ public class AsyncEvent<TEventArgs>
             return null;
         }
 
+        if (kept is not { Count: > 0 })
+        {
+            var all = _handlers;
+            _handlers = null;
+            return all.Count > 0 ? all : null;
+        }
+
+        var keptSet = new HashSet<Invocation>(kept);
         List<Invocation>? detached = null;
+        List<Invocation> remaining = new(kept.Count);
         foreach (var handler in _handlers)
         {
-            if (kept is null || !kept.Contains(handler))
+            if (keptSet.Contains(handler))
+            {
+                remaining.Add(handler);
+            }
+            else
             {
                 (detached ??= []).Add(handler);
             }
@@ -202,7 +215,7 @@ public class AsyncEvent<TEventArgs>
 
         if (detached is not null)
         {
-            _handlers.RemoveAll(detached.Contains);
+            _handlers = remaining;
         }
 
         return detached;
