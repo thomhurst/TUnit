@@ -11,8 +11,8 @@ public static class Issue7161Sources
     public static IEnumerable<int> Five() => [5];
 }
 
-// The class's types come from a class-level [MethodDataSource], which the source generator cannot
-// type at compile time. Each method row runs on the instantiation it infers, constructed from the
+// The class-level [MethodDataSource] infers int from its declared row type. Each method row runs
+// on the instantiation it infers, constructed from the
 // data source's 5 (converted to "5" for the string instantiation).
 [EngineTest(ExpectedResult.Pass)]
 [MethodDataSource(typeof(Issue7161Sources), nameof(Issue7161Sources.Five))]
