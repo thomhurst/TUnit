@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+using System.Buffers;
 using System.Collections.Concurrent;
 #if NET8_0_OR_GREATER
 using System.Collections.Frozen;
@@ -544,17 +544,26 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             ? BuildTestsFromMethodRows(genericTypeDefinition, testMethods, generateGenericTestAttributes, out methodRowTypeArguments)
             : null;
 
+        // Class rows whose values go to no type parameter infer no instantiation, so they are not grouped
+        // by type. They supply the constructor arguments of the instantiations that method rows infer, and
+        // alone they supply no class type argument, so an [Arguments(null)] method row infers object, as in
+        // the source generator (#7209).
+        var typeFreeClassRows = methodRowTests == null
+            ? SplitTypeFreeClassRows(genericTypeDefinition, ref classDataSources)
+            : null;
+
         // With class-level [Arguments] rows, method rows run only on the class instantiation their own values
         // infer (#7118)
         var methodRowClassTypeArguments = methodRowTests == null
-            ? InferClassTypeArgumentsOfMethodRows(genericTypeDefinition, testMethods, classDataSources)
+            ? InferClassTypeArgumentsOfMethodRows(genericTypeDefinition, testMethods, classDataSources.Length + (typeFreeClassRows?.Length ?? 0),
+                nullValuesArrayInfersObject: classDataSources.Length == 0 && generateGenericTestAttributes.Length == 0)
             : null;
 
         // [GenerateGenericTest] types' class constraint violations are reported before the class rows'
         var generateGenericTestTypeArguments = GetValidGenerateGenericTestTypeArguments(generateGenericTestAttributes, constraintViolations);
         // Method rows that infer types no class row infers build their instance from every class row, so keep
         // them all as discovery read them rather than reading the sources again (#7161)
-        var allClassRows = methodRowClassTypeArguments != null && !HasClassArgumentsRows(classDataSources) ? new List<IDataSourceAttribute>(classDataSources.Length) : null;
+        var allClassRows = methodRowClassTypeArguments != null && typeFreeClassRows == null && !HasClassArgumentsRows(classDataSources) ? new List<IDataSourceAttribute>(classDataSources.Length) : null;
         // Own-class sources whose types only [GenerateGenericTest] supplies, read on its instantiations (#7208)
         var deferredOwnSources = generateGenericTestAttributes.Length > 0 ? new List<IDataSourceAttribute>() : null;
         var classRowGroups = methodRowTests == null
@@ -591,7 +600,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             discoveredTests.AddRange(methodRowTests);
 
             // Return any tests discovered from method rows and GenerateGenericTest attributes
-            AddConstraintViolationTests(discoveredTests, constraintViolations);
+            AddConstraintViolationTests(discoveredTests, constraintViolations, classDataSuppliesTypeArguments: false);
             return;
         }
 
@@ -617,10 +626,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         if (methodRowClassTypeArguments != null)
         {
-            discoveredTests.AddRange(BuildTestsForMethodRowsWithoutClassRow(genericTypeDefinition, testMethods, methodRowClassTypeArguments, classRowGroups!, allClassRows, generateGenericTestAttributes));
+            discoveredTests.AddRange(BuildTestsForMethodRowsWithoutClassRow(genericTypeDefinition, testMethods, methodRowClassTypeArguments, classRowGroups!, allClassRows, typeFreeClassRows, generateGenericTestAttributes));
         }
 
-        AddConstraintViolationTests(discoveredTests, constraintViolations);
+        // Type-free class rows, split off above, supply no class type argument, so the method rows' types are
+        // checked against the class's constraints as without a class row (#7209)
+        AddConstraintViolationTests(discoveredTests, constraintViolations, classDataSuppliesTypeArguments: classDataSources.Length > 0);
     }
 
     /// <summary>
@@ -707,9 +718,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
-    private static void AddConstraintViolationTests(List<TestMetadata> discoveredTests, ReflectionGenericConstraintViolations constraintViolations)
+    private static void AddConstraintViolationTests(List<TestMetadata> discoveredTests, ReflectionGenericConstraintViolations constraintViolations, bool classDataSuppliesTypeArguments)
     {
-        constraintViolations.AddMethodRowViolations();
+        constraintViolations.AddMethodRowViolations(classDataSuppliesTypeArguments);
         discoveredTests.AddRange(constraintViolations.CreateMetadata());
     }
 
@@ -931,9 +942,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// The class type argument that an <see cref="ArgumentsAttribute{T}"/> row with a null value infers, for a class
     /// with one type parameter, as the source generator infers it. The null value binds to the first parameter of the
-    /// constructor the instance is built with (<see cref="ReflectionGenericTypeResolver.FindRowConstructor"/>: one
-    /// marked <c>[TestConstructor]</c>, and otherwise the first public one), so the declared T is mapped through that
-    /// parameter's type:
+    /// class row's constructor (<see cref="ReflectionGenericTypeResolver.FindRowConstructor"/>), so the declared T is mapped through that parameter's type:
     /// <c>[Arguments&lt;string[]&gt;(null)]</c> on <c>C&lt;T&gt;(T[] values)</c> infers <c>string</c>, not
     /// <c>string[]</c>. Null for any other row, or when the parameter type does not match the declared type.
     /// </summary>
@@ -1143,9 +1152,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// whatever the class data sources are, since it cannot know the types a [MethodDataSource] or other
     /// run-time source yields (#7161).
     /// </summary>
-    private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, IDataSourceAttribute[] classDataSources)
+    private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, int classDataSourceCount, bool nullValuesArrayInfersObject)
     {
-        if (classDataSources.Length == 0)
+        if (classDataSourceCount == 0)
         {
             return null;
         }
@@ -1173,9 +1182,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             for (var i = 0; i < methodDataSources.Length; i++)
             {
-                // Class rows supply the instantiations, so [Arguments(null)] infers none and runs on each (#7141)
+                // Class rows supply the instantiations, so [Arguments(null)] infers none and runs on each (#7141),
+                // unless every class row goes to no type parameter (#7209)
                 if (methodDataSources[i] is ArgumentsAttribute arguments
-                    && InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject: false) is { } typeArguments)
+                    && InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject) is { } typeArguments)
                 {
                     // A plain local, not `(rowTypeArguments ??= ...)[i] = ...`: the .NET 8 trim analyzer
                     // crashes (AD0001) on an array element write through a null-coalescing assignment.
@@ -1255,7 +1265,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// class data sources are known only at run time, and the source generator builds the instance from all
     /// of them, so this does too, from <paramref name="allClassRows"/>: the rows discovery already read, so a
     /// source is never read twice (#7161). <paramref name="allClassRows"/> is null when the class has
-    /// class-level [Arguments] rows. A class-level [GenerateGenericTest] listing those type arguments runs
+    /// class-level [Arguments] rows. Class rows whose values go to no type parameter
+    /// (<paramref name="typeFreeClassRows"/>) supply the constructor arguments of every such instantiation, as in
+    /// the source generator (#7209). A class-level [GenerateGenericTest] listing those type arguments runs
     /// the rows instead. Rows whose type arguments break the class's constraints are skipped, as the source
     /// generator skips them.
     /// </summary>
@@ -1265,10 +1277,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         Type[]?[]?[] methodRowClassTypeArguments,
         List<ClassRowGroup> classRowGroups,
         List<IDataSourceAttribute>? allClassRows,
+        IDataSourceAttribute[]? typeFreeClassRows,
         GenerateGenericTestAttribute[] generateGenericTestAttributes)
     {
         List<TestMetadata>? tests = null;
-        var allClassRowSources = allClassRows?.ToArray();
+        var allClassRowSources = allClassRows?.ToArray() ?? typeFreeClassRows;
 
         for (var methodIndex = 0; methodIndex < testMethods.Length; methodIndex++)
         {
@@ -1323,7 +1336,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         continue;
                     }
 
-                    var methodRows = ScopeMethodRowsToClassTypeArguments(concreteType, concreteMethod, rowTypeArguments, typeArguments, onlyInferringRows: true);
+                    // Type-free class rows make this a class row instantiation, so the method sources that
+                    // infer no type run on it too, as in the source generator (#7209)
+                    var methodRows = ScopeMethodRowsToClassTypeArguments(concreteType, concreteMethod, rowTypeArguments, typeArguments, onlyInferringRows: typeFreeClassRows == null);
                     (tests ??= []).Add(allClassRowSources == null
                         ? BuildTestMetadata(
                             concreteType,
@@ -1344,6 +1359,98 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
+    /// Removes from <paramref name="classDataSources"/> the class-level [Arguments] rows whose values all bind to
+    /// constructor parameters that do not use the class's type parameters, as <c>[Arguments(42)]</c> on
+    /// <c>C&lt;T&gt;(int number)</c>, or that have no values, and returns them, or null when there are none. Such a row supplies no class
+    /// type argument (#7209). Mirrors <c>TestMetadataGenerator.ClassRowSuppliesNoTypeArguments</c>.
+    /// </summary>
+    private static IDataSourceAttribute[]? SplitTypeFreeClassRows(Type genericTypeDefinition, ref IDataSourceAttribute[] classDataSources)
+    {
+        // Only beside other class [Arguments] rows. Beside other class data sources, the rows keep being grouped
+        // with them as before; matching the source generator there is #7390's scope.
+        foreach (var source in classDataSources)
+        {
+            if (!IsClassArgumentsRow(source))
+            {
+                return null;
+            }
+        }
+
+        List<IDataSourceAttribute>? typeFree = null;
+        List<IDataSourceAttribute>? rest = null;
+        for (var i = 0; i < classDataSources.Length; i++)
+        {
+            var source = classDataSources[i];
+            if (ClassRowSuppliesNoTypeArguments(genericTypeDefinition, source))
+            {
+                if (rest == null)
+                {
+                    // First type-free row: copy the sources kept so far
+                    rest = new List<IDataSourceAttribute>(classDataSources.Length);
+                    for (var j = 0; j < i; j++)
+                    {
+                        rest.Add(classDataSources[j]);
+                    }
+                }
+
+                (typeFree ??= []).Add(source);
+            }
+            else
+            {
+                rest?.Add(source);
+            }
+        }
+
+        if (typeFree == null)
+        {
+            return null;
+        }
+
+        classDataSources = rest!.ToArray();
+        return typeFree.ToArray();
+    }
+
+    private static bool ClassRowSuppliesNoTypeArguments(Type genericTypeDefinition, IDataSourceAttribute dataSource)
+    {
+        int valueCount;
+        if (dataSource is ArgumentsAttribute arguments)
+        {
+            valueCount = arguments.Values.Length;
+        }
+        else if (dataSource.GetType() is { IsGenericType: true } type && type.GetGenericTypeDefinition() == typeof(ArgumentsAttribute<>))
+        {
+            valueCount = 1;
+        }
+        else
+        {
+            return false;
+        }
+
+        if (ReflectionGenericTypeResolver.FindRowConstructor(genericTypeDefinition) is not { } constructor)
+        {
+            return false;
+        }
+
+        // An empty row ([Arguments] on C<T>()) has no value to supply a type argument
+        var parameters = constructor.GetParameters();
+        var boundCount = Math.Min(valueCount, parameters.Length);
+        if (boundCount == 0)
+        {
+            return valueCount == 0;
+        }
+
+        for (var i = 0; i < boundCount; i++)
+        {
+            if (parameters[i].ParameterType.ContainsGenericParameters)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Whether the class has class-level [Arguments] rows, in either the <see cref="ArgumentsAttribute"/> or
     /// the <see cref="ArgumentsAttribute{T}"/> form. The source generator treats both forms as class rows.
     /// </summary>
@@ -1351,8 +1458,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         foreach (var source in classDataSources)
         {
-            if (source is ArgumentsAttribute
-                || (source.GetType() is { IsGenericType: true } type && type.GetGenericTypeDefinition() == typeof(ArgumentsAttribute<>)))
+            if (IsClassArgumentsRow(source))
             {
                 return true;
             }
@@ -1360,6 +1466,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         return false;
     }
+
+    private static bool IsClassArgumentsRow(IDataSourceAttribute source) =>
+        source is ArgumentsAttribute
+        || (source.GetType() is { IsGenericType: true } type && type.GetGenericTypeDefinition() == typeof(ArgumentsAttribute<>));
 
     private static List<Type[]> GetValidGenerateGenericTestTypeArguments(GenerateGenericTestAttribute[] generateGenericTestAttributes, ReflectionGenericConstraintViolations constraintViolations)
     {
@@ -1459,7 +1569,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         && methodRowTypeArguments.TryGetValue(genericMethod, out var groups)
         && IndexOfTypeArguments(groups, typeArguments) >= 0;
 
-    private static Type[]? InferClassTypeArgumentsFromMethodRow(Type[] classGenericParameters, ParameterInfo[] parameters, ArgumentsAttribute arguments, bool nullValuesArrayInfersObject)
+    internal static Type[]? InferClassTypeArgumentsFromMethodRow(Type[] classGenericParameters, ParameterInfo[] parameters, ArgumentsAttribute arguments, bool nullValuesArrayInfersObject)
     {
         // [Arguments(null)] (a null params array) infers no type when [GenerateGenericTest] supplies the
         // instantiations it runs on. Otherwise its one null value infers object, as in the source generator.

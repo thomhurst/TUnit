@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -1263,11 +1263,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // When [GenerateGenericTest] or a class-level data source already supplies the class type
             // arguments, a method row's values need not infer them: [GenerateGenericTest(typeof(object))]
             // with [Arguments(1)] runs C<object>, so the C<int> inferred here is not reported as a
-            // violation. Reflection mode applies the same rule.
+            // violation. A class row whose values go to no type parameter supplies none (#7209), so beside
+            // it an [Arguments(null)] row still infers object, as without a class row, and a method row
+            // that infers types breaking the class's constraints is reported. Reflection mode applies the
+            // same rule.
             var classTypeArgumentsSupplied = testMethod.TypeSymbol.GetAttributes().Any(a =>
                 a.AttributeClass is { } attributeClass
                 && (attributeClass.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute")
-                    || DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)));
+                    || (DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
+                        && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a)))));
 
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
@@ -1590,11 +1594,29 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             var addUninferredMethodDataSources = uninferredMethodDataSources is not null && MethodParametersReferenceTypeParameters(testMethod);
 
+            // Class rows whose values go to no type parameter infer no instantiation of their own, so they
+            // supply the constructor arguments of every instantiation that the method rows infer (#7209).
+            // Reflection mode builds those instances from the same rows.
+            List<AttributeData>? typeFreeClassRows = null;
+            foreach (var classAttr in classArgumentsAttributes)
+            {
+                if (ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, classAttr))
+                {
+                    (typeFreeClassRows ??= []).Add(classAttr);
+                }
+            }
+
             foreach (var instantiation in rowInstantiations.Values)
             {
                 if (instantiation.HasMethodRows && !instantiation.HasClassRows)
                 {
                     var hasClassDataSource = false;
+                    foreach (var typeFreeClassRow in typeFreeClassRows ?? [])
+                    {
+                        instantiation.AddRow(typeFreeClassRow, isClassRow: true);
+                        hasClassDataSource = true;
+                    }
+
                     foreach (var (attribute, classTypes) in otherClassDataSources ?? [])
                     {
                         if (classTypes is null || InferredTypesMatch(classTypes, instantiation.ClassTypeArgs))
@@ -6790,9 +6812,73 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// </summary>
     private static bool IsNullArgumentsArray(AttributeData argAttr) => argAttr.ConstructorArguments[0].IsNull;
 
+    /// <summary>
+    /// The constructor a class-level data row binds to when inferring the class's type arguments: the public one
+    /// marked <c>[TestConstructor]</c>, which the rows are for, else the first public instance constructor in
+    /// declaration order, else null. This matches reflection mode's
+    /// <c>ReflectionGenericTypeResolver.FindRowConstructor</c>, whose <c>GetConstructors()</c> returns the public constructors in metadata
+    /// (declaration) order, a C# primary constructor included (#7361, #7209).
+    /// </summary>
+    private static IMethodSymbol? GetClassRowConstructor(INamedTypeSymbol classSymbol)
+    {
+        return classSymbol.InstanceConstructors.FirstOrDefault(static c => c.DeclaredAccessibility == Accessibility.Public
+                && c.GetAttributes().Any(static a => a.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
+            ?? classSymbol.InstanceConstructors.FirstOrDefault(static c => c.DeclaredAccessibility == Accessibility.Public);
+    }
+
+    /// <summary>
+    /// True for a class-level [Arguments] row whose values all bind to constructor parameters that do not
+    /// use the class's type parameters, as <c>[Arguments(42)]</c> on <c>C&lt;T&gt;(int number)</c>, or that has
+    /// no values. Such a
+    /// row supplies no class type argument, so the method rows infer them, and the row only supplies the
+    /// constructor arguments (#7209). Mirrors <c>ReflectionTestDataCollector.ClassRowSuppliesNoTypeArguments</c>.
+    /// </summary>
+    private static bool ClassRowSuppliesNoTypeArguments(INamedTypeSymbol classSymbol, AttributeData argAttr)
+    {
+        int valueCount;
+        if (argAttr.AttributeClass is { IsGenericType: true, TypeArguments.Length: 1 })
+        {
+            valueCount = 1;
+        }
+        else if (!HasArgumentsArray(argAttr))
+        {
+            return false;
+        }
+        else
+        {
+            // [Arguments(null)] passes one null value
+            valueCount = IsNullArgumentsArray(argAttr) ? 1 : argAttr.ConstructorArguments[0].Values.Length;
+        }
+
+        var primaryConstructor = GetClassRowConstructor(classSymbol);
+
+        if (primaryConstructor is null)
+        {
+            return false;
+        }
+
+        // An empty row ([Arguments] on C<T>()) has no value to supply a type argument
+        var boundCount = Math.Min(valueCount, primaryConstructor.Parameters.Length);
+        if (boundCount == 0)
+        {
+            return valueCount == 0;
+        }
+
+        for (var i = 0; i < boundCount; i++)
+        {
+            if (ContainsClassTypeParameter(primaryConstructor.Parameters[i].Type, classSymbol))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /// <param name="nullArgumentsArrayInfersObject">
     /// False when [GenerateGenericTest] or a class-level data source supplies the class type arguments: an
-    /// [Arguments(null)] row then infers no type and runs on those instantiations. True otherwise, so the
+    /// [Arguments(null)] row then infers no type and runs on those instantiations. A class row whose values go
+    /// to no type parameter supplies none (#7209). True otherwise, so the
     /// row's one null value infers object like any other null value instead of being dropped (#7141).
     /// </param>
     private static ITypeSymbol[]? InferClassTypesFromMethodArguments(INamedTypeSymbol classSymbol, IMethodSymbol methodSymbol, AttributeData argAttr, Compilation compilation, bool nullArgumentsArrayInfersObject)
@@ -7007,17 +7093,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             argumentValues = argAttr.ConstructorArguments[0].Values;
         }
 
-        // The row binds to the constructor the instance is built with: one marked [TestConstructor], as the instance
-        // factory reads it, and otherwise the primary constructor. Mirrors reflection mode's
-        // ReflectionGenericTypeResolver.InferTypeArgumentsFromConstructor.
-        var primaryConstructor = classSymbol.InstanceConstructors
-            .FirstOrDefault(c => c.GetAttributes().Any(attribute =>
-                attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
-            ?? classSymbol.Constructors
-            .FirstOrDefault(c => c.DeclaringSyntaxReferences.Any(sr =>
-                sr.GetSyntax() is ConstructorDeclarationSyntax cds &&
-                cds.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword))))
-            ?? classSymbol.Constructors.FirstOrDefault();
+        // The constructor the class row binds to, chosen as in reflection mode
+        var primaryConstructor = GetClassRowConstructor(classSymbol);
 
         if (primaryConstructor == null)
         {
