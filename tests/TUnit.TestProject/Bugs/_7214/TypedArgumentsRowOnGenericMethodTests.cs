@@ -207,6 +207,31 @@ public sealed class IntTestDataRowSourceAttribute : TypedDataSourceAttribute<Tes
     }
 }
 
+// A record deriving from TestDataRow<int> is unwrapped through ITestDataRow like TestDataRow<int> itself, so a
+// typed source of such rows infers Run<int>, not Run<DerivedIntTestDataRow>: Run<int>(1).
+[EngineTest(ExpectedResult.Pass)]
+public class TypedDerivedTestDataRowSource
+{
+    [Test]
+    [DerivedIntTestDataRowSource]
+    public async Task Run<TMethod>(TMethod arg)
+    {
+        await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
+        await Assert.That((int)(object)arg!).IsEqualTo(1);
+    }
+}
+
+public record DerivedIntTestDataRow(int Value) : TestDataRow<int>(Value);
+
+public sealed class DerivedIntTestDataRowSourceAttribute : TypedDataSourceAttribute<DerivedIntTestDataRow>
+{
+    public override async IAsyncEnumerable<Func<Task<DerivedIntTestDataRow>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await Task.CompletedTask;
+        yield return () => Task.FromResult(new DerivedIntTestDataRow(1));
+    }
+}
+
 // A typed source of Func<int> rows is invoked before invocation, so it infers Run<int>, not Run<Func<int>>:
 // Run<int>(1).
 [EngineTest(ExpectedResult.Pass)]

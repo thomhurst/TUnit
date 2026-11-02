@@ -96,12 +96,12 @@ internal static class TypedDataSourceInference
         // Func<T> row is invoked once, a TestDataRow<T> row is unwrapped, and a Func<T> inside it is invoked
         // once, so the value binds as that T.
         rowType = UnwrapSingleArgument(rowType, "Func", "System");
-        var unwrappedRow = UnwrapSingleArgument(rowType, "TestDataRow", "TUnit.Core");
+        var testDataRowType = FindTestDataRowType(rowType);
         var spreadsReferenceArray = false;
-        var isTestDataRow = !SymbolEqualityComparer.Default.Equals(unwrappedRow, rowType);
-        if (isTestDataRow)
+        var isTestDataRow = testDataRowType is not null;
+        if (testDataRowType is not null)
         {
-            rowType = UnwrapSingleArgument(unwrappedRow, "Func", "System");
+            rowType = UnwrapSingleArgument(testDataRowType.TypeArguments[0], "Func", "System");
 
             // UnwrapArray spreads a TestDataRow value that is an object?[], which a reference-type array
             // is through array covariance (ToObjectArray keeps a bare one whole). The elements bind as
@@ -242,7 +242,27 @@ internal static class TypedDataSourceInference
                 : type;
 
     private static bool IsTestDataRow(ITypeSymbol type)
-        => !SymbolEqualityComparer.Default.Equals(UnwrapSingleArgument(type, "TestDataRow", "TUnit.Core"), type);
+        => FindTestDataRowType(type) is not null;
+
+    /// <summary>
+    /// The constructed <c>TestDataRow&lt;T&gt;</c> that <paramref name="type"/> is or derives from, or
+    /// <see langword="null"/>. <c>TestDataRowUnwrapper</c> unwraps any row through <c>ITestDataRow</c>, so a
+    /// record deriving from <c>TestDataRow&lt;T&gt;</c> binds as its <c>T</c> as well.
+    /// </summary>
+    private static INamedTypeSymbol? FindTestDataRowType(ITypeSymbol type)
+    {
+        for (var current = type as INamedTypeSymbol; current is not null; current = current.BaseType)
+        {
+            if (current is { IsGenericType: true, TypeArguments.Length: 1 }
+                && current.OriginalDefinition.Name == "TestDataRow"
+                && current.OriginalDefinition.ContainingNamespace?.ToDisplayString() == "TUnit.Core")
+            {
+                return current;
+            }
+        }
+
+        return null;
+    }
 
     private static bool IsSpreadWithoutElementTypes(ITypeSymbol type)
         => type is IArrayTypeSymbol { Rank: 1, ElementType.SpecialType: SpecialType.System_Object }

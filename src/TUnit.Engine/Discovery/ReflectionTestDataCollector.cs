@@ -2194,10 +2194,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // once, so the value binds as that T.
         rowType = UnwrapFunc(rowType);
         var spreadsReferenceArray = false;
-        var isTestDataRow = TestDataRowUnwrapper.IsTestDataRowType(rowType);
-        if (isTestDataRow)
+        var testDataRowType = FindTestDataRowType(rowType);
+        var isTestDataRow = testDataRowType is not null;
+        if (testDataRowType is not null)
         {
-            rowType = UnwrapFunc(rowType.GetGenericArguments()[0]);
+            rowType = UnwrapFunc(testDataRowType.GetGenericArguments()[0]);
 
             // UnwrapArray spreads a TestDataRow value that is an object?[], which a reference-type array
             // is through array covariance (ToObjectArray keeps a bare one whole). The elements bind as
@@ -2236,7 +2237,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // UnwrapArray runs after ToObjectArray, so the TestDataRow<T> element of a one-element tuple
             // row that is not itself a TestDataRow is unwrapped (and its Func invoked, its tuple or
             // reference array spread) like a whole TestDataRow<T> row.
-            if (!isTestDataRow && tupleElements.Length == 1 && TestDataRowUnwrapper.IsTestDataRowType(tupleElements[0]))
+            if (!isTestDataRow && tupleElements.Length == 1 && FindTestDataRowType(tupleElements[0]) is not null)
             {
                 return InferTypesFromTypedRow(method, tupleElements[0], genericParameterCount);
             }
@@ -2295,6 +2296,24 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static Type UnwrapFunc(Type type)
         => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>) ? type.GetGenericArguments()[0] : type;
+
+    /// <summary>
+    /// The constructed <see cref="TestDataRow{T}"/> that <paramref name="type"/> is or derives from, or null.
+    /// TestDataRowUnwrapper unwraps any row through ITestDataRow, so a record deriving from TestDataRow&lt;T&gt;
+    /// binds as its T as well.
+    /// </summary>
+    private static Type? FindTestDataRowType(Type type)
+    {
+        for (Type? current = type; current is not null; current = current.BaseType)
+        {
+            if (TestDataRowUnwrapper.IsTestDataRowType(current))
+            {
+                return current;
+            }
+        }
+
+        return null;
+    }
 
     /// <summary>
     /// Matches <paramref name="parameterType"/> against <paramref name="valueType"/> for

@@ -23,6 +23,7 @@ public class Issue7214Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypedRowOnNullableParameter", new[] { "Run<int>(1)" })]
     [Arguments("TypedRowWithParamsCollection", new[] { "Run<object>(1)" })]
     [Arguments("TypedTestDataRowSource", new[] { "Run<int>(1)" })]
+    [Arguments("TypedDerivedTestDataRowSource", new[] { "Run<int>(1)" })]
     [Arguments("TypedFuncRowSource", new[] { "Run<int>(1)" })]
     [Arguments("TypedTestDataRowOfFuncSource", new[] { "Run<int>(() => 1)" })]
     [Arguments("TypedOneElementTupleRowSource", new[] { "Run<int>(1)" })]
