@@ -78,7 +78,20 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             // The state bag/events are only materialized when there are properties to resolve.
             if (PropertyInjectionCache.GetOrCreatePlan(testClassType).HasProperties)
             {
-                await PropertyInjector.ResolveAndCachePropertiesAsync(testClassType, testContext.StateBag.Items, methodMetadata, testContext.InternalEvents, testContext, cancellationToken);
+                try
+                {
+                    await PropertyInjector.ResolveAndCachePropertiesAsync(testClassType, testContext.StateBag.Items, methodMetadata, testContext.InternalEvents, testContext, cancellationToken);
+                }
+                catch
+                {
+                    // Sibling properties may have resolved before one threw, and the failed test's
+                    // ITestEndEventReceiver invocation still sees them. Track them, so this test holds them
+                    // until it ends: a registration hold released now (#7263) would otherwise dispose a
+                    // shared value no other test holds before that invocation, and nothing else would
+                    // dispose it before the session-end sweep.
+                    TrackObjectsAfterFailedResolution(testContext);
+                    throw;
+                }
             }
 
             // Track the cached objects so they get the correct reference count
@@ -97,6 +110,19 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             {
                 testContext.InvalidateEventReceiverCaches();
             }
+        }
+    }
+
+    private void TrackObjectsAfterFailedResolution(TestContext testContext)
+    {
+        try
+        {
+            _objectTracker.TrackObjects(testContext);
+        }
+        catch
+        {
+            // A getter in a resolved value's object graph threw. TrackObjects still tracked the root
+            // objects; the resolution failure is the one the test reports.
         }
     }
 

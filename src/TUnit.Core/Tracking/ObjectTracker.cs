@@ -538,7 +538,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// counted the references its tests keep by now, so this disposes only instances that no test holds.
     /// Disposal errors are logged by the <see cref="Disposer"/> and not rethrown: no test owns them.
     /// </summary>
-    public async ValueTask ReleaseRegistrationHoldsAsync(RegistrationHolds holds)
+    internal async ValueTask ReleaseRegistrationHoldsAsync(RegistrationHolds holds)
     {
         // The async flow keeps the holds until the method that began them returns; Released makes
         // later fetches in that flow skip them.

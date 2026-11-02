@@ -366,6 +366,42 @@ public class SharedInstanceLifetimeTests
     }
 
     [Test]
+    public async Task Registration_Hold_Is_Refused_For_An_Instance_Retired_After_It_Was_Fetched()
+    {
+        // GetOrCreate fetches and then holds. When the instance is retired in between, the hold must be
+        // refused, which makes GetOrCreate fetch again; the cache then creates a new instance.
+        var key = NewKey();
+        var (tracker, discoverer) = CreateTracker();
+        var holder = CreateContext();
+
+        var retired = Fetch(key);
+        discoverer.Discover = context => Add(context, retired);
+        tracker.TrackObjects(holder);
+
+        var holds = ObjectTracker.BeginRegistrationHolds();
+        SharedDisposable refetched;
+        try
+        {
+            await tracker.UntrackObjects(holder);
+            await Assert.That(retired.IsDisposed).IsTrue();
+
+            await Assert.That(ObjectTracker.TryHoldForRegistration(retired)).IsFalse();
+            await Assert.That(holds.Instances.Count).IsEqualTo(0);
+
+            refetched = Fetch(key);
+            await Assert.That(refetched).IsNotSameReferenceAs(retired);
+            await Assert.That(holds.Instances.Contains(refetched)).IsTrue();
+            await Assert.That(refetched.IsDisposed).IsFalse();
+        }
+        finally
+        {
+            await tracker.ReleaseRegistrationHoldsAsync(holds);
+        }
+
+        await Assert.That(refetched.DisposeCount).IsEqualTo(1);
+    }
+
+    [Test]
     public async Task Fetches_After_Holds_Are_Released_Are_Not_Held()
     {
         var key = NewKey();
