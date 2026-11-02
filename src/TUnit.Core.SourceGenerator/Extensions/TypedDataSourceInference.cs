@@ -14,8 +14,11 @@ internal static class TypedDataSourceInference
     /// <summary>
     /// Infers the type arguments of a generic test method on a non-generic class from a typed data source, whose
     /// type arguments come from its <c>DataSourceGeneratorAttribute</c> / <c>AsyncDataSourceGeneratorAttribute</c>
-    /// base. One type parameter takes the first type argument; otherwise a single tuple argument with one element per
-    /// type parameter, or one type argument per type parameter. Returns <see langword="null"/> when nothing is inferred.
+    /// base. One type parameter takes the first type argument; otherwise a single tuple argument with one element
+    /// per type parameter, or one type argument per type parameter. A source deriving from
+    /// <c>TypedDataSourceAttribute</c> without a generator base, such as <c>[Arguments&lt;T&gt;]</c>, instead
+    /// matches its row type against the data parameters (<see cref="InferMethodTypeArgumentsFromRowType"/>).
+    /// Returns <see langword="null"/> when nothing is inferred.
     /// </summary>
     public static ITypeSymbol[]? InferMethodTypeArguments(INamedTypeSymbol? attributeClass, IMethodSymbol method)
     {
@@ -24,12 +27,20 @@ internal static class TypedDataSourceInference
             return null;
         }
 
+        var hasGeneratorBase = false;
         for (var baseType = attributeClass?.BaseType; baseType is not null; baseType = baseType.BaseType)
         {
-            if (IsTypedDataSourceBase(baseType)
-                && InferMethodTypeArguments(method, baseType.TypeArguments) is { } inferred)
+            if (IsTypedDataSourceBase(baseType))
             {
-                return inferred;
+                hasGeneratorBase = true;
+                if (InferMethodTypeArguments(method, baseType.TypeArguments) is { } inferred)
+                {
+                    return inferred;
+                }
+            }
+            else if (!hasGeneratorBase && IsTypedRowBase(baseType))
+            {
+                return InferMethodTypeArgumentsFromRowType(method, baseType.TypeArguments[0]);
             }
         }
 
@@ -65,11 +76,220 @@ internal static class TypedDataSourceInference
     }
 
     /// <summary>
+    /// The type arguments of generic test method <paramref name="method"/> inferred from a typed row whose value
+    /// has type <paramref name="rowType"/> (<c>[Arguments&lt;T&gt;]</c>, #7214). The row binds to the data
+    /// parameters (any <c>CancellationToken</c> excluded): a tuple row spreads one element per leading data parameter,
+    /// as <c>ToObjectArray</c> spreads it, an <c>object[]</c> or <c>System.Tuple</c> row infers nothing, and any other
+    /// row binds whole to a single data parameter, or to the first of several, with omitted trailing parameters
+    /// optional (params arrays and params collections included). A <c>Func&lt;T&gt;</c>, <c>TestDataRow&lt;T&gt;</c> or
+    /// <c>TestDataRow&lt;Func&lt;T&gt;&gt;</c> row binds as its <c>T</c>, since it is invoked and unwrapped before invocation, and
+    /// a reference-type array <c>T</c> there spreads, so its element binds to the data parameter. A <c>T?</c> parameter takes a value of its underlying
+    /// type. Each parameter type is matched against its value type, including type
+    /// arguments nested in generic parameter types, so <c>[Arguments&lt;int[]&gt;]</c> on
+    /// <c>Run&lt;T&gt;(IEnumerable&lt;T&gt;)</c> infers nothing rather than <c>Run&lt;int[]&gt;</c>, whose
+    /// parameter could not take the row. Every type parameter must be inferred, each to one type; otherwise
+    /// returns <see langword="null"/>. Reflection mode's <c>InferTypesFromTypedRow</c> applies the same rules.
+    /// </summary>
+    public static ITypeSymbol[]? InferMethodTypeArgumentsFromRowType(IMethodSymbol method, ITypeSymbol rowType)
+    {
+        // The row reaches the method as ToObjectArray and TestDataRowUnwrapper.UnwrapArray produce it: a
+        // Func<T> row is invoked once, a TestDataRow<T> row is unwrapped, and a Func<T> inside it is invoked
+        // once, so the value binds as that T.
+        rowType = UnwrapSingleArgument(rowType, "Func", "System");
+        var testDataRowType = FindTestDataRowType(rowType);
+        var spreadsReferenceArray = false;
+        var isTestDataRow = testDataRowType is not null;
+        if (testDataRowType is not null)
+        {
+            rowType = UnwrapSingleArgument(testDataRowType.TypeArguments[0], "Func", "System");
+
+            // UnwrapArray spreads a TestDataRow value that is an object?[], which a reference-type array
+            // is through array covariance (ToObjectArray keeps a bare one whole). The elements bind as
+            // their declared type; an object or dynamic element type declares nothing, so leave it to
+            // runtime inference.
+            if (rowType is IArrayTypeSymbol { Rank: 1, ElementType.IsReferenceType: true } spreadArray)
+            {
+                if (spreadArray.ElementType.SpecialType == SpecialType.System_Object
+                    || spreadArray.ElementType.TypeKind == TypeKind.Dynamic)
+                {
+                    return null;
+                }
+
+                rowType = spreadArray.ElementType;
+                spreadsReferenceArray = true;
+            }
+        }
+
+        var dataParameters = method.Parameters.Where(p => !IsCancellationToken(p.Type)).ToArray();
+        var requiredCount = dataParameters.Count(p => !p.IsOptional && !p.HasExplicitDefaultValue && !p.IsParams);
+        var inferred = new ITypeSymbol?[method.TypeParameters.Length];
+
+        if (!spreadsReferenceArray && rowType is INamedTypeSymbol { IsTupleType: true } tupleType)
+        {
+            // ToObjectArray always spreads a tuple row, a one-element tuple included, so the tuple spreads
+            // over the leading data parameters; omitted trailing ones take their defaults.
+            var elements = tupleType.TupleElements;
+
+            // UnwrapArray runs after ToObjectArray, so the TestDataRow<T> element of a one-element tuple
+            // row that is not itself a TestDataRow is unwrapped (and its Func invoked, its tuple or
+            // reference array spread) like a whole TestDataRow<T> row.
+            if (!isTestDataRow && elements.Length == 1 && IsTestDataRow(elements[0].Type))
+            {
+                return InferMethodTypeArgumentsFromRowType(method, elements[0].Type);
+            }
+
+            if (elements.Length < requiredCount || elements.Length > dataParameters.Length)
+            {
+                return null;
+            }
+
+            for (var i = 0; i < elements.Length; i++)
+            {
+                if (!MapTypeParameters(method, dataParameters[i].Type, elements[i].Type, inferred))
+                {
+                    return null;
+                }
+            }
+        }
+        else if (!spreadsReferenceArray && IsSpreadWithoutElementTypes(rowType))
+        {
+            // ToObjectArray also spreads an object[] row, whose value types the row type does not declare,
+            // and a System.Tuple row; leave both to runtime inference.
+            return null;
+        }
+        else if (dataParameters.Length == 1)
+        {
+            if (!MapTypeParameters(method, dataParameters[0].Type, rowType, inferred))
+            {
+                return null;
+            }
+        }
+        else if (dataParameters.Length > 1 && requiredCount <= 1)
+        {
+            // A scalar row binds to the first data parameter; the rest are optional.
+            if (!MapTypeParameters(method, dataParameters[0].Type, rowType, inferred))
+            {
+                return null;
+            }
+        }
+        else
+        {
+            return null;
+        }
+
+        foreach (var typeArgument in inferred)
+        {
+            if (typeArgument is null)
+            {
+                return null;
+            }
+        }
+
+        return inferred!;
+    }
+
+    /// <summary>
+    /// Matches <paramref name="parameterType"/> against <paramref name="valueType"/>, recording each type
+    /// parameter of <paramref name="method"/> it binds. Returns <see langword="false"/> when one type parameter
+    /// binds two different types.
+    /// </summary>
+    private static bool MapTypeParameters(IMethodSymbol method, ITypeSymbol parameterType, ITypeSymbol valueType, ITypeSymbol?[] inferred)
+    {
+        if (parameterType is ITypeParameterSymbol { TypeParameterKind: TypeParameterKind.Method } typeParameter)
+        {
+            if (!SymbolEqualityComparer.Default.Equals(typeParameter.DeclaringMethod?.OriginalDefinition, method.OriginalDefinition))
+            {
+                return true;
+            }
+
+            if (inferred[typeParameter.Ordinal] is { } existing && !SymbolEqualityComparer.Default.Equals(existing, valueType))
+            {
+                return false;
+            }
+
+            inferred[typeParameter.Ordinal] = valueType;
+            return true;
+        }
+
+        // A T? parameter (Nullable<T>) takes a non-nullable value of its underlying type.
+        if (parameterType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableParameter
+            && valueType.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T)
+        {
+            return MapTypeParameters(method, nullableParameter.TypeArguments[0], valueType, inferred);
+        }
+
+        if (parameterType is INamedTypeSymbol { IsGenericType: true } parameterNamed
+            && valueType is INamedTypeSymbol { IsGenericType: true } valueNamed
+            && SymbolEqualityComparer.Default.Equals(parameterNamed.OriginalDefinition, valueNamed.OriginalDefinition))
+        {
+            for (var i = 0; i < parameterNamed.TypeArguments.Length && i < valueNamed.TypeArguments.Length; i++)
+            {
+                if (!MapTypeParameters(method, parameterNamed.TypeArguments[i], valueNamed.TypeArguments[i], inferred))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private static ITypeSymbol UnwrapSingleArgument(ITypeSymbol type, string name, string containingNamespace)
+        => type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } namedType
+            && namedType.OriginalDefinition.Name == name
+            && namedType.OriginalDefinition.ContainingNamespace?.ToDisplayString() == containingNamespace
+                ? namedType.TypeArguments[0]
+                : type;
+
+    private static bool IsTestDataRow(ITypeSymbol type)
+        => FindTestDataRowType(type) is not null;
+
+    /// <summary>
+    /// The constructed <c>TestDataRow&lt;T&gt;</c> that <paramref name="type"/> is or derives from, or
+    /// <see langword="null"/>. <c>TestDataRowUnwrapper</c> unwraps any row through <c>ITestDataRow</c>, so a
+    /// record deriving from <c>TestDataRow&lt;T&gt;</c> binds as its <c>T</c> as well.
+    /// </summary>
+    private static INamedTypeSymbol? FindTestDataRowType(ITypeSymbol type)
+    {
+        for (var current = type as INamedTypeSymbol; current is not null; current = current.BaseType)
+        {
+            if (current is { IsGenericType: true, TypeArguments.Length: 1 }
+                && current.OriginalDefinition.Name == "TestDataRow"
+                && current.OriginalDefinition.ContainingNamespace?.ToDisplayString() == "TUnit.Core")
+            {
+                return current;
+            }
+        }
+
+        return null;
+    }
+
+    private static bool IsSpreadWithoutElementTypes(ITypeSymbol type)
+        => type is IArrayTypeSymbol { Rank: 1, ElementType.SpecialType: SpecialType.System_Object }
+            || type is INamedTypeSymbol { IsGenericType: true, Name: "Tuple", ContainingNamespace: { } tupleNamespace }
+                && tupleNamespace.ToDisplayString() == "System";
+
+    private static bool IsCancellationToken(ITypeSymbol type)
+        => type is { Name: "CancellationToken", ContainingNamespace: { } containingNamespace }
+            && containingNamespace.ToDisplayString() == "System.Threading";
+
+    /// <summary>
     /// Whether <paramref name="baseType"/> is a constructed <c>DataSourceGeneratorAttribute</c> or
     /// <c>AsyncDataSourceGeneratorAttribute</c> from TUnit.Core.
     /// </summary>
     public static bool IsTypedDataSourceBase(INamedTypeSymbol baseType)
         => baseType.IsGenericType
             && baseType.OriginalDefinition.Name is "DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute"
+            && baseType.OriginalDefinition.ContainingNamespace?.ToDisplayString() == "TUnit.Core";
+
+    /// <summary>
+    /// Whether <paramref name="baseType"/> is TUnit.Core's <c>TypedDataSourceAttribute&lt;T&gt;</c>, the base of
+    /// <c>[Arguments&lt;T&gt;]</c>, whose row is a <c>T</c> value bound to the data parameters (#7214). The
+    /// generator bases derive from it too, so a caller walking up from the attribute class treats it as a row
+    /// base only when no generator base came first.
+    /// </summary>
+    public static bool IsTypedRowBase(INamedTypeSymbol baseType)
+        => baseType is { IsGenericType: true, TypeArguments.Length: 1 }
+            && baseType.OriginalDefinition.Name == "TypedDataSourceAttribute"
             && baseType.OriginalDefinition.ContainingNamespace?.ToDisplayString() == "TUnit.Core";
 }

@@ -1937,7 +1937,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var classGenericParameterCount = method.DeclaringType is { IsGenericType: true } declaringType
             ? declaringType.GetGenericArguments().Length
             : 0;
-        if (InferTypesFromTypedDataSource(dataSource, method.GetGenericArguments().Length, classGenericParameterCount) is not { } typeArguments)
+        if (InferTypesFromTypedDataSource(dataSource, method, method.GetGenericArguments().Length, classGenericParameterCount) is not { } typeArguments)
         {
             return null;
         }
@@ -1972,7 +1972,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// run on the [GenerateGenericTest] types instead, so each one is returned in <c>RowViolations</c>
     /// and fails with the constraint message, as in the source generator (#7153). Sources inferring types that
     /// are already instantiated are dropped, except further [Arguments] rows, which join the instantiation an
-    /// earlier [Arguments] row created. A skipped source other than an [Arguments] row runs on the
+    /// earlier [Arguments] row created, and [Arguments&lt;T&gt;] rows, which join any data source's instantiation.
+    /// A skipped source other than an [Arguments] row runs on the
     /// [GenerateGenericTest] types instead; when a data source already instantiated those types, the skipped
     /// source joins that instantiation, as the generator's <c>JoinDeferredDataSources</c> does (#7116).
     /// </summary>
@@ -2015,7 +2016,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             if (dataSource is not ArgumentsAttribute)
             {
-                AddInstantiation(InferTypesFromTypedDataSource(dataSource, genericParameterCount, classGenericParameterCount), dataSource);
+                AddInstantiation(InferTypesFromTypedDataSource(dataSource, method, genericParameterCount, classGenericParameterCount), dataSource);
             }
         }
 
@@ -2092,6 +2093,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     rows.Add(row);
                 }
+                // An [Arguments<T>] row is a literal row too: it joins any data source's instantiation of its
+                // types rather than being dropped, as the generator joins it (#7214). Rows keep declaration
+                // order, as the generator emits them.
+                else if (row is not null
+                    && IsTypedArgumentsRow(row)
+                    && instantiations[index].Rows is { } existingRows
+                    && !existingRows.Exists(existing => ReferenceEquals(existing, row)))
+                {
+                    existingRows.Add(row);
+                    existingRows.Sort((x, y) => DeclarationIndex(x).CompareTo(DeclarationIndex(y)));
+                }
 
                 return;
             }
@@ -2128,15 +2140,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
+    private static bool IsTypedArgumentsRow(IDataSourceAttribute dataSource)
+        => dataSource.GetType() is { IsGenericType: true } type && type.GetGenericTypeDefinition() == typeof(ArgumentsAttribute<>);
+
     /// <summary>
     /// Mirrors the generator's <c>InferTypesFromDataSourceAttribute</c> for generic methods: reads the type
     /// arguments of the <c>DataSourceGeneratorAttribute</c> / <c>AsyncDataSourceGeneratorAttribute</c> base.
     /// One type parameter takes the first type argument; otherwise a single tuple argument with one element
     /// per type parameter, or one type argument per type parameter. On a generic class, a source whose type
     /// arguments cover the class type parameters as well infers none: the generator closes the class and the
-    /// method over them together, so the class was already closed over them here.
+    /// method over them together, so the class was already closed over them here. A source deriving from
+    /// <c>TypedDataSourceAttribute&lt;T&gt;</c> without a generator base, such as [Arguments&lt;T&gt;], matches
+    /// its row type against the data parameters instead (<see cref="InferTypesFromTypedRow"/>).
     /// </summary>
-    private static Type[]? InferTypesFromTypedDataSource(IDataSourceAttribute dataSource, int genericParameterCount, int classGenericParameterCount)
+    private static Type[]? InferTypesFromTypedDataSource(IDataSourceAttribute dataSource, MethodInfo method, int genericParameterCount, int classGenericParameterCount)
     {
         for (var baseType = dataSource.GetType().BaseType; baseType is not null; baseType = baseType.BaseType)
         {
@@ -2145,7 +2162,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 continue;
             }
 
+            // The generator bases derive from TypedDataSourceAttribute<T> too, and are reached first
             var definition = baseType.GetGenericTypeDefinition();
+            if (definition == typeof(TypedDataSourceAttribute<>))
+            {
+                return InferTypesFromTypedRow(method, baseType.GetGenericArguments()[0], genericParameterCount);
+            }
+
             if (definition.Namespace != "TUnit.Core"
                 || !(definition.Name.StartsWith("DataSourceGeneratorAttribute`", StringComparison.Ordinal)
                      || definition.Name.StartsWith("AsyncDataSourceGeneratorAttribute`", StringComparison.Ordinal)))
@@ -2181,6 +2204,194 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Mirrors the generator's <c>TypedDataSourceInference.InferMethodTypeArgumentsFromRowType</c> (#7214): a
+    /// typed row of type <paramref name="rowType"/> binds to the data parameters (any CancellationToken
+    /// excluded): a tuple row spreads one element per leading data parameter, as ToObjectArray spreads it, an
+    /// object[] or System.Tuple row infers nothing, and any other row binds whole to a single data parameter, or
+    /// to the first of several, with omitted trailing parameters optional (params arrays and
+    /// params collections included). A Func&lt;T&gt; row, a TestDataRow&lt;T&gt; row and a TestDataRow&lt;Func&lt;T&gt;&gt; row bind as their
+    /// T, since they are invoked and unwrapped before invocation, and a reference-type array T there spreads, so its element binds. A T? parameter takes a value of its underlying type. Each parameter type is matched against its value type, including
+    /// type arguments nested in generic parameter types. Every type parameter must be inferred, each to one type.
+    /// </summary>
+    private static Type[]? InferTypesFromTypedRow(MethodInfo method, Type rowType, int genericParameterCount)
+    {
+        // The row reaches the method as ToObjectArray and TestDataRowUnwrapper.UnwrapArray produce it: a
+        // Func<T> row is invoked once, a TestDataRow<T> row is unwrapped, and a Func<T> inside it is invoked
+        // once, so the value binds as that T.
+        rowType = UnwrapFunc(rowType);
+        var spreadsReferenceArray = false;
+        var testDataRowType = FindTestDataRowType(rowType);
+        var isTestDataRow = testDataRowType is not null;
+        if (testDataRowType is not null)
+        {
+            rowType = UnwrapFunc(testDataRowType.GetGenericArguments()[0]);
+
+            // UnwrapArray spreads a TestDataRow value that is an object?[], which a reference-type array
+            // is through array covariance (ToObjectArray keeps a bare one whole). The elements bind as
+            // their declared type; an object element type declares nothing, so leave it to runtime inference.
+            if (rowType.IsSZArray && rowType.GetElementType() is { IsValueType: false, IsPointer: false } elementType)
+            {
+                if (elementType == typeof(object))
+                {
+                    return null;
+                }
+
+                rowType = elementType;
+                spreadsReferenceArray = true;
+            }
+        }
+
+        var dataParameters = Array.FindAll(method.GetParameters(), static parameter => parameter.ParameterType != typeof(CancellationToken));
+        var requiredCount = 0;
+        foreach (var parameter in dataParameters)
+        {
+            if (!parameter.IsOptional
+                && !parameter.HasDefaultValue
+                && !parameter.IsDefined(typeof(ParamArrayAttribute), false)
+                && !IsParamCollection(parameter))
+            {
+                requiredCount++;
+            }
+        }
+
+        var typeArguments = new Type?[genericParameterCount];
+
+        if (!spreadsReferenceArray && GetValueTupleElementTypes(rowType) is { } tupleElements)
+        {
+            // ToObjectArray always spreads a tuple row, a one-element tuple included, so the tuple spreads
+            // over the leading data parameters; omitted trailing ones take their defaults.
+            // UnwrapArray runs after ToObjectArray, so the TestDataRow<T> element of a one-element tuple
+            // row that is not itself a TestDataRow is unwrapped (and its Func invoked, its tuple or
+            // reference array spread) like a whole TestDataRow<T> row.
+            if (!isTestDataRow && tupleElements.Length == 1 && FindTestDataRowType(tupleElements[0]) is not null)
+            {
+                return InferTypesFromTypedRow(method, tupleElements[0], genericParameterCount);
+            }
+
+            if (tupleElements.Length < requiredCount || tupleElements.Length > dataParameters.Length)
+            {
+                return null;
+            }
+
+            for (var i = 0; i < tupleElements.Length; i++)
+            {
+                if (!MapTypedRowParameters(dataParameters[i].ParameterType, tupleElements[i], typeArguments))
+                {
+                    return null;
+                }
+            }
+        }
+        else if (!spreadsReferenceArray
+            && (rowType == typeof(object[])
+                || rowType is { IsGenericType: true, Namespace: "System" } && rowType.Name.StartsWith("Tuple`", StringComparison.Ordinal)))
+        {
+            // ToObjectArray also spreads an object[] row, whose value types the row type does not declare,
+            // and a System.Tuple row; leave both to runtime inference.
+            return null;
+        }
+        else if (dataParameters.Length == 1)
+        {
+            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments))
+            {
+                return null;
+            }
+        }
+        else if (dataParameters.Length > 1 && requiredCount <= 1)
+        {
+            // A scalar row binds to the first data parameter; the rest are optional.
+            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments))
+            {
+                return null;
+            }
+        }
+        else
+        {
+            return null;
+        }
+
+        foreach (var typeArgument in typeArguments)
+        {
+            if (typeArgument is null)
+            {
+                return null;
+            }
+        }
+
+        return typeArguments!;
+    }
+
+    private static Type UnwrapFunc(Type type)
+        => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>) ? type.GetGenericArguments()[0] : type;
+
+    /// <summary>
+    /// The constructed <see cref="TestDataRow{T}"/> that <paramref name="type"/> is or derives from, or null.
+    /// TestDataRowUnwrapper unwraps any row through ITestDataRow, so a record deriving from TestDataRow&lt;T&gt;
+    /// binds as its T as well.
+    /// </summary>
+    private static Type? FindTestDataRowType(Type type)
+    {
+        for (Type? current = type; current is not null; current = current.BaseType)
+        {
+            if (TestDataRowUnwrapper.IsTestDataRowType(current))
+            {
+                return current;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Matches <paramref name="parameterType"/> against <paramref name="valueType"/> for
+    /// <see cref="InferTypesFromTypedRow"/>, recording each method type parameter it binds. Returns false when
+    /// one type parameter binds two different types.
+    /// </summary>
+    private static bool MapTypedRowParameters(Type parameterType, Type valueType, Type?[] typeArguments)
+    {
+        if (parameterType.IsGenericParameter)
+        {
+            if (parameterType.DeclaringMethod is null)
+            {
+                return true;
+            }
+
+            var position = parameterType.GenericParameterPosition;
+            if (typeArguments[position] is { } existing && existing != valueType)
+            {
+                return false;
+            }
+
+            typeArguments[position] = valueType;
+            return true;
+        }
+
+        // A T? parameter (Nullable<T>) takes a non-nullable value of its underlying type.
+        if (parameterType.IsGenericType
+            && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>)
+            && Nullable.GetUnderlyingType(valueType) is null)
+        {
+            return MapTypedRowParameters(parameterType.GetGenericArguments()[0], valueType, typeArguments);
+        }
+
+        if (parameterType.IsGenericType
+            && valueType.IsGenericType
+            && parameterType.GetGenericTypeDefinition() == valueType.GetGenericTypeDefinition())
+        {
+            var parameterArguments = parameterType.GetGenericArguments();
+            var valueArguments = valueType.GetGenericArguments();
+            for (var i = 0; i < parameterArguments.Length && i < valueArguments.Length; i++)
+            {
+                if (!MapTypedRowParameters(parameterArguments[i], valueArguments[i], typeArguments))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /// <summary>
