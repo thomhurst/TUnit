@@ -129,3 +129,26 @@ public class TypeFreeClassRowTestConstructorTakesNoTypeParameter<T>
         await Assert.That(typeof(T)).IsEqualTo(value!.GetType());
     }
 }
+
+// A method data source that infers no class type runs beside the inferring [Arguments] row on the instantiation that
+// row infers, with the instance built from the type-free class row: C<int> runs [Arguments(1)] and the source's 2
+// and 3. Reflection mode used to drop the source there. Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithUninferredMethodSource<T>(int number)
+{
+    [Test]
+    [Arguments(1)]
+    [MethodDataSource(typeof(TypeFreeClassRowSources), nameof(TypeFreeClassRowSources.Values))]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value is 1 or 2 or 3).IsTrue();
+    }
+}
+
+public static class TypeFreeClassRowSources
+{
+    public static IEnumerable<object> Values() => [2, 3];
+}

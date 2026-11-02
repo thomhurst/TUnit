@@ -18,6 +18,7 @@ public class Issue7209Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypeFreeClassRowPrimaryConstructorBesideTypedConstructor", 2)]
     [Arguments("TypeFreeClassRowTestConstructorTakesTypeParameter", 1)]
     [Arguments("TypeFreeClassRowTestConstructorTakesNoTypeParameter", 2)]
+    [Arguments("TypeFreeClassRowWithUninferredMethodSource", 3)]
     public async Task Rows_Run_On_The_Instantiation_They_Infer(string className, int expectedTests)
     {
         await RunTestsWithFilter(

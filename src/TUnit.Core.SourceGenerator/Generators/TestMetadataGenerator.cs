@@ -6820,7 +6820,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// The constructor a class-level data row binds to when inferring the class's type arguments: the public one
     /// marked <c>[TestConstructor]</c>, which the rows are for, else the first public instance constructor in
-    /// declaration order, else the first instance constructor. This matches reflection mode's
+    /// declaration order, else null. This matches reflection mode's
     /// <c>GetClassRowConstructor</c>, whose <c>GetConstructors()</c> returns the public constructors in metadata
     /// (declaration) order, a C# primary constructor included (#7361, #7209).
     /// </summary>
@@ -6828,8 +6828,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         return classSymbol.InstanceConstructors.FirstOrDefault(static c => c.DeclaredAccessibility == Accessibility.Public
                 && c.GetAttributes().Any(static a => a.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
-            ?? classSymbol.InstanceConstructors.FirstOrDefault(static c => c.DeclaredAccessibility == Accessibility.Public)
-            ?? classSymbol.InstanceConstructors.FirstOrDefault();
+            ?? classSymbol.InstanceConstructors.FirstOrDefault(static c => c.DeclaredAccessibility == Accessibility.Public);
     }
 
     /// <summary>

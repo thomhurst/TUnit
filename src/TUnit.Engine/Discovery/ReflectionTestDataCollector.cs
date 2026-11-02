@@ -1334,7 +1334,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         continue;
                     }
 
-                    var methodRows = ScopeMethodRowsToClassTypeArguments(concreteType, concreteMethod, rowTypeArguments, typeArguments, onlyInferringRows: true);
+                    // Type-free class rows make this a class row instantiation, so the method sources that
+                    // infer no type run on it too, as in the source generator (#7209)
+                    var methodRows = ScopeMethodRowsToClassTypeArguments(concreteType, concreteMethod, rowTypeArguments, typeArguments, onlyInferringRows: typeFreeClassRows == null);
                     (tests ??= []).Add(allClassRowSources == null
                         ? BuildTestMetadata(
                             concreteType,
