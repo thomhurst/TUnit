@@ -1143,12 +1143,87 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         rowTypeArguments[i] = typeArguments;
                     }
                 }
+
+                // Failing those, parameter attributes ([Matrix<int>] on a T parameter) infer them, as the generator's
+                // InferTypesFromTypedDataSourceForClass does. That instantiation runs every method data source.
+                if (rowTypeArguments == null
+                    && methodDataSources.Length > 0
+                    && InferClassTypeArgumentsFromParameterAttributes(classGenericParameters.Length, parameters) is { } parameterTypeArguments)
+                {
+                    rowTypeArguments = new Type[]?[methodDataSources.Length];
+                    Array.Fill(rowTypeArguments, parameterTypeArguments);
+                }
             }
 
             result[methodIndex] = rowTypeArguments;
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// The class type arguments that the attributes of parameters typed by a class type parameter infer, or null
+    /// unless every class type parameter is inferred. Mirrors the generator's
+    /// <c>InferTypesFromTypedDataSourceForClass</c>: an attribute implementing <c>IInfersType&lt;T&gt;</c> infers
+    /// <c>T</c>, and failing that, a typed data source generator attribute infers its first type argument.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection mode requires dynamic access; attribute interfaces are only read, not invoked")]
+    private static Type[]? InferClassTypeArgumentsFromParameterAttributes(int classGenericParameterCount, ParameterInfo[] parameters)
+    {
+        Type[]? typeArguments = null;
+
+        foreach (var parameter in parameters)
+        {
+            var parameterType = parameter.ParameterType;
+            if (!parameterType.IsGenericParameter || parameterType.DeclaringMethod is not null)
+            {
+                continue;
+            }
+
+            foreach (var attribute in parameter.GetCustomAttributes(inherit: false))
+            {
+                var inferred = GetInferredType(attribute.GetType()) ?? GetTypedDataSourceGeneratorTypeArgument(attribute.GetType());
+                if (inferred is not null)
+                {
+                    typeArguments ??= new Type[classGenericParameterCount];
+                    typeArguments[parameterType.GenericParameterPosition] = inferred;
+                    break;
+                }
+            }
+        }
+
+        return typeArguments is not null && Array.TrueForAll(typeArguments, static typeArgument => typeArgument is not null)
+            ? typeArguments
+            : null;
+
+        static Type? GetInferredType(Type attributeType)
+        {
+            foreach (var implemented in attributeType.GetInterfaces())
+            {
+                if (implemented.IsGenericType && implemented.GetGenericTypeDefinition() == typeof(TUnit.Core.Interfaces.IInfersType<>))
+                {
+                    return implemented.GetGenericArguments()[0];
+                }
+            }
+
+            return null;
+        }
+
+        static Type? GetTypedDataSourceGeneratorTypeArgument(Type attributeType)
+        {
+            for (var baseType = attributeType.BaseType; baseType is not null; baseType = baseType.BaseType)
+            {
+                if (baseType.IsGenericType
+                    && baseType.GetGenericTypeDefinition() is { Namespace: "TUnit.Core" } definition
+                    && (definition.Name.StartsWith("DataSourceGeneratorAttribute`", StringComparison.Ordinal)
+                        || definition.Name.StartsWith("AsyncDataSourceGeneratorAttribute`", StringComparison.Ordinal)))
+                {
+                    return baseType.GetGenericArguments()[0];
+                }
+            }
+
+            return null;
+        }
     }
 
     /// <summary>

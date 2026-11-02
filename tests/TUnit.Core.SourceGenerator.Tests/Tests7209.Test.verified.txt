@@ -848,6 +848,91 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7209_TypeFreeClassRowWithInferringParameterAttribute_T_Run__T_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "TypeFreeClassRowWithInferringParameterAttribute",
+        Namespace = "TUnit.TestProject.Bugs._7209",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<>), false, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new global::TUnit.Core.ConcreteType(typeof(int)), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Run", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<>), "Run", false, 0, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Run(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MatrixDataSourceAttribute(),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+            new global::TUnit.Core.ArgumentsAttribute(42)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<int>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<int>>(
+            methodName: "Run",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<int>.Run",
+            filePath: "",
+            lineNumber: 167,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MatrixDataSourceAttribute(),
+},
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(42),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7209_TypeFreeClassRowWithInferringParameterAttribute_T_Run__T_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithInferringParameterAttribute<int>>(static () => TUnit_TestProject_Bugs__7209_TypeFreeClassRowWithInferringParameterAttribute_T_Run__T_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7209_TypeFreeClassRowArrayConstraintViolation_T_Run__T___TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowArrayConstraintViolation<>", new global::TUnit.Core.ClassMetadata
@@ -930,7 +1015,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             methodName: "Run",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7209.TypeFreeClassRowArrayConstraintViolation<string>.Run",
             filePath: "",
-            lineNumber: 166,
+            lineNumber: 183,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -953,7 +1038,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
         {
             MethodName = "Run",
             FilePath = "",
-            LineNumber = 166,
+            LineNumber = 183,
             MethodMetadata = __mm_0,
             Messages = new string[] { "Type 'Int32' does not satisfy the 'class' constraint for generic parameter 'T'" },
         },
