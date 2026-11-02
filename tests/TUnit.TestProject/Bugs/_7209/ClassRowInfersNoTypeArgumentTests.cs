@@ -191,6 +191,45 @@ public class TypeFreeClassRowArrayConstraintViolation<T>(int number) where T : c
     }
 }
 
+// A typed data source infers T beside a method row that infers another type, and is not scoped to it: [Arguments(1L)]
+// runs on C<long>, and ClassDataSource<int> runs on C<int> and on C<long>, each built from the class row (number = 42),
+// as in the source generator. Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithInferringRowAndTypedSource<T>(int number)
+{
+    [Test]
+    [Arguments(1L)]
+    [ClassDataSource<int>]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That((object?)value is 1L or 0L or 0).IsTrue();
+        await Assert.That(typeof(T)).IsEqualTo(value is long ? typeof(long) : typeof(int));
+    }
+}
+
+// Two method data sources that infer different types: each instantiation they infer runs both sources, as in the
+// source generator, so C<int> and C<object> each run Run(1) and Run(2). Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithTwoInferringMethodSources<T>(int number)
+{
+    [Test]
+    [MethodDataSource(nameof(Ints))]
+    [MethodDataSource(nameof(Objects))]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T) == typeof(int) || typeof(T) == typeof(object)).IsTrue();
+        await Assert.That((object?)value is 1 or 2).IsTrue();
+    }
+
+    public static IEnumerable<int> Ints() => [1];
+
+    public static IEnumerable<object> Objects() => [2];
+}
+
 public static class TypeFreeClassRowSources
 {
     public static IEnumerable<int> FortyThree() => [43];
