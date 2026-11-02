@@ -111,7 +111,7 @@ public class BrowserTest : PlaywrightTest
             throw new InvalidOperationException($"BrowserType is not initialized. This may indicate that {nameof(PlaywrightTest)}.{nameof(Playwright)} is not initialized or {nameof(PlaywrightTest)}.{nameof(PlaywrightSetup)} did not execute properly.");
         }
 
-        var service = await BrowserService.Register(this, BrowserType, _options).ConfigureAwait(false);
+        var service = await BrowserService.Register(this, BrowserType, PlaywrightEnvironment.ApplyHeaded(_options)).ConfigureAwait(false);
         lock (_contextsLock)
         {
             Browser = service.Browser;

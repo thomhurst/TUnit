@@ -61,7 +61,7 @@ public class LoginPageTests : PageTest
 
 Override the `BrowserName` property to control which browser is launched. The possible values are:
 
-- `chromium` (default)
+- `chromium` (default, unless the `BROWSER` environment variable names another; see [Headed Runs and Browser Selection](#headed-runs-and-browser-selection))
 - `firefox`
 - `webkit`
 
@@ -91,6 +91,28 @@ public class HeadlessChromeTests : PageTest
     }
 }
 ```
+
+## Headed Runs and Browser Selection
+
+Switch to a visible browser or a different browser for a whole run with environment variables, without changing code. Like the Microsoft Playwright test adapters, TUnit reads:
+
+- `HEADED=1` (or `true`): launch visible browsers instead of headless ones.
+- `BROWSER=chromium|firefox|webkit`: the default `BrowserName`. An unknown value fails the test with an error naming the variable.
+
+```bash
+HEADED=1 dotnet run --project Tests
+BROWSER=firefox dotnet run --project Tests
+```
+
+Both apply to every `BrowserTest`, `ContextTest`, `PageTest`, `BrowserFixture`, `ContextFixture` and `PageFixture` consumer. CI runs without the variables stay headless on Chromium. Make sure the selected browser is installed, for example with `playwright install firefox`.
+
+Headless mode is decided in this order:
+
+1. An explicit `BrowserTypeLaunchOptions.Headless`, whether passed to the base constructor, returned from `BrowserFixture.GetLaunchOptions()`, or set in `PlaywrightSettings.DefaultBrowserTypeLaunchOptions`.
+2. `HEADED=1`.
+3. Playwright's default: headless, unless `PWDEBUG=1` is set.
+
+Setting `Headless` explicitly therefore also overrides `PWDEBUG=1`. Leave it unset to let the environment decide. Overriding `BrowserName` likewise pins the browser regardless of `BROWSER`. The variables are read when a browser launches, so a `[Before(TestSession)]` hook can still set them.
 
 ## Limiting Parallel Browser Tests
 
