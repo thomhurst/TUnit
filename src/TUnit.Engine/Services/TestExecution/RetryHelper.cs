@@ -109,6 +109,14 @@ internal static class RetryHelper
                         return;
                     }
 
+                    if (testContext.InternalEventsIfCreated?.OnTestRetry is { } onRetry)
+                    {
+                        foreach (var handler in onRetry.InvocationList)
+                        {
+                            await handler.InvokeAsync(testContext, (testContext, attempt + 1)).ConfigureAwait(false);
+                        }
+                    }
+
                     continue;
                 }
 

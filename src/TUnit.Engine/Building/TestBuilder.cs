@@ -481,6 +481,10 @@ internal sealed class TestBuilder : ITestBuilder
 
                                         // Shares the per-iteration bag lazily; it is only allocated if something reads it.
                                         testSpecificContext.ShareStateBagWith(contextAccessor.Current);
+                                        if (contextAccessor.Current.EventsIfCreated is { } events)
+                                        {
+                                            testSpecificContext.Events = events;
+                                        }
                                     }
 
                                     var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken);
@@ -2495,6 +2499,10 @@ internal sealed class TestBuilder : ITestBuilder
 
             // Shares the per-iteration bag lazily; it is only allocated if something reads it.
             testSpecificContext.ShareStateBagWith(contextAccessor.Current);
+            if (contextAccessor.Current.EventsIfCreated is { } events)
+            {
+                testSpecificContext.Events = events;
+            }
 
             var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken: cancellationToken);
 

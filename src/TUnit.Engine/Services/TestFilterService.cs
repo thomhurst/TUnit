@@ -131,6 +131,14 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             await InvokeTestRegisteredReceivers(registeredReceivers, registeredContext, invokedReceivers).ConfigureAwait(false);
         }
 
+        if (test.Context.InternalEventsIfCreated?.OnTestRegistered is { } onRegistered)
+        {
+            foreach (var handler in onRegistered.InvocationList)
+            {
+                await handler.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
+            }
+        }
+
         // If the test was marked as skipped by an event receiver, skip argument registration entirely.
         // This avoids initializing expensive shared data sources (e.g., WebApplicationFactory)
         // for tests that will never execute.

@@ -154,7 +154,7 @@ internal sealed class EventReceiverOrchestrator
         }
 #endif
         // Fast path - no allocation if no receivers
-        if (!_registry.HasTestStartReceivers())
+        if (!_registry.HasTestStartReceivers() && (stage == EventReceiverStage.Early || context.InternalEventsIfCreated?.OnTestStart is null))
         {
             return ValueTask.CompletedTask;
         }
@@ -196,6 +196,14 @@ internal sealed class EventReceiverOrchestrator
             await receiver.OnTestStart(context);
         }
 #endif
+        // Delegate events have no stage; dispatch once, with the default (late) receivers.
+        if (stage != EventReceiverStage.Early && context.InternalEventsIfCreated?.OnTestStart is { } onStart)
+        {
+            foreach (var handler in onStart.InvocationList)
+            {
+                await handler.InvokeAsync(context, context);
+            }
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -207,7 +215,7 @@ internal sealed class EventReceiverOrchestrator
             return new ValueTask<IReadOnlyList<Exception>>([]);
         }
 #endif
-        if (!_registry.HasTestEndReceivers())
+        if (!_registry.HasTestEndReceivers() && (stage == EventReceiverStage.Early || context.InternalEventsIfCreated?.OnTestEnd is null))
         {
             return new ValueTask<IReadOnlyList<Exception>>([]);
         }
@@ -215,7 +223,7 @@ internal sealed class EventReceiverOrchestrator
         if (stage.HasValue)
         {
             var receivers = context.GetTestEndReceivers(stage.Value);
-            if (receivers.Length == 0)
+            if (receivers.Length == 0 && (stage == EventReceiverStage.Early || context.InternalEventsIfCreated?.OnTestEnd is null))
             {
                 return new ValueTask<IReadOnlyList<Exception>>([]);
             }
@@ -225,7 +233,7 @@ internal sealed class EventReceiverOrchestrator
             var earlyReceivers = context.GetTestEndReceivers(EventReceiverStage.Early);
             var lateReceivers = context.GetTestEndReceivers(EventReceiverStage.Late);
 
-            if (earlyReceivers.Length == 0 && lateReceivers.Length == 0)
+            if (earlyReceivers.Length == 0 && lateReceivers.Length == 0 && context.InternalEventsIfCreated?.OnTestEnd is null)
             {
                 return new ValueTask<IReadOnlyList<Exception>>([]);
             }
@@ -309,13 +317,29 @@ internal sealed class EventReceiverOrchestrator
         }
 #endif
 
+        if (stage != EventReceiverStage.Early && context.InternalEventsIfCreated?.OnTestEnd is { } onEnd)
+        {
+            foreach (var handler in onEnd.InvocationList)
+            {
+                try
+                {
+                    await handler.InvokeAsync(context, context);
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"Error in test end event handler: {ex.Message}");
+                    (exceptions ??= []).Add(ex);
+                }
+            }
+        }
+
         return exceptions == null ? Array.Empty<Exception>() : exceptions;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ValueTask InvokeTestSkippedEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
-        if (!_registry.HasTestSkippedReceivers())
+        if (!_registry.HasTestSkippedReceivers() && context.InternalEventsIfCreated?.OnTestSkipped is null)
         {
             return ValueTask.CompletedTask;
         }
@@ -328,14 +352,17 @@ internal sealed class EventReceiverOrchestrator
         // Use pre-computed receivers (already filtered, sorted, and scoped-attribute filtered)
         var receivers = context.GetTestSkippedReceivers();
 
-        if (receivers.Length == 0)
-        {
-            return;
-        }
-
         foreach (var receiver in receivers)
         {
             await receiver.OnTestSkipped(context);
+        }
+
+        if (context.InternalEventsIfCreated?.OnTestSkipped is { } onSkipped)
+        {
+            foreach (var handler in onSkipped.InvocationList)
+            {
+                await handler.InvokeAsync(context, context);
+            }
         }
     }
 
