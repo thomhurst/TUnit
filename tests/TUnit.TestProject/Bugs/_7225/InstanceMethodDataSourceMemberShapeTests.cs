@@ -5,7 +5,8 @@ namespace TUnit.TestProject.Bugs._7225;
 /// <summary>
 /// [InstanceMethodDataSource] read every member by reflection in source-gen mode before #7225, so its generated
 /// factory must keep that behavior: an <c>object</c> value holding many rows supplies each row, a private method
-/// is still callable, and a single tuple parameter still receives the whole tuple.
+/// is still callable (even beside a generic overload of the same name), a single tuple parameter still receives the
+/// whole tuple, and a null value is an empty source, so SkipIfEmpty skips the test.
 /// </summary>
 [EngineTest(ExpectedResult.Pass)]
 public class InstanceMethodDataSourceMemberShapeTests
@@ -17,6 +18,12 @@ public class InstanceMethodDataSourceMemberShapeTests
     public IEnumerable<(int, int)> TupleRows => [(1, 2), (3, 4)];
 
     private IEnumerable<int> PrivateRows() => [65, 66];
+
+    private IEnumerable<int> OverloadedRows() => [67, 68];
+
+    private IEnumerable<T> OverloadedRows<T>() => [];
+
+    public object? NullRows => null;
 
     [Test]
     [InstanceMethodDataSource(nameof(ObjectProperty))]
@@ -44,5 +51,19 @@ public class InstanceMethodDataSourceMemberShapeTests
     public async Task Private_Method(int value)
     {
         await Assert.That(value).IsBetween(65, 66);
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(OverloadedRows))]
+    public async Task Private_Method_With_Generic_Overload(int value)
+    {
+        await Assert.That(value).IsBetween(67, 68);
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(NullRows), SkipIfEmpty = true)]
+    public void Null_Source_With_SkipIfEmpty_Is_Skipped(int value)
+    {
+        throw new InvalidOperationException($"Should have been skipped, but ran with '{value}'");
     }
 }

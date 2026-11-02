@@ -118,7 +118,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceField
 {
     new global::TUnit.Core.InstanceMethodDataSourceAttribute("Rows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => ((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceFieldTests)instance).Rows),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceFieldTests)instance).Rows ?? global::System.Array.Empty<object>()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -142,7 +142,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceField
 {
     new global::TUnit.Core.InstanceMethodDataSourceAttribute("PropertyRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceEnumerable(dataGeneratorMetadata, static instance => ((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceFieldTests)instance).PropertyRows),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceEnumerable(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceFieldTests)instance).PropertyRows ?? global::System.Array.Empty<object>()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -166,7 +166,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceField
 {
     new global::TUnit.Core.InstanceMethodDataSourceAttribute("StaticRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceFieldTests.StaticRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => (object?)global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceFieldTests.StaticRows() ?? global::System.Array.Empty<object>()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),

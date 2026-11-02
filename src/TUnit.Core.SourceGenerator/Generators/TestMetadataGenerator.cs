@@ -3088,6 +3088,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             metadataArgument = "dataGeneratorMetadata, ";
         }
 
+        // [InstanceMethodDataSource] read its member by reflection before #7225, and that path, still used in
+        // reflection mode, treats a null value as a source with no rows, so SkipIfEmpty skips the test. The factory
+        // helpers would turn null into one row holding null, so a null value becomes an empty source here.
+        var nullAsEmpty = decidesRowsFromRuntimeValue && kind is "Value" or "Enumerable"
+            ? " ?? global::System.Array.Empty<object>()"
+            : "";
+
         if (!isAccessibleMember)
         {
             // The generated class cannot name a private or protected member, so the factory reads it by
@@ -3099,15 +3106,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 + " | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly";
             var target = isStatic ? "null" : usesTestClassInstance ? "instance" : $"new {fullyQualifiedType}()";
             // CanReadDataSourceMember only lets a parameterless, non-generic method through, so it is looked up with no
-            // parameter types, which also picks it out from any overloads
+            // parameter types, which also picks it out from any overloads. A parameterless generic overload of the same
+            // name would match that lookup too and make it ambiguous, so then the methods are filtered instead, without
+            // the genericParameterCount overload of GetMethod that .NET Framework and .NET Standard 2.0 lack.
+            var hasGenericParameterlessOverload = dataSourceMember is IMethodSymbol
+                && dataSourceMember.ContainingType.GetMembers(dataSourceMember.Name)
+                    .Any(static m => m is IMethodSymbol { IsGenericMethod: true, Parameters.Length: 0 });
             var read = dataSourceMember switch
             {
                 IFieldSymbol => $"GetField(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target})",
                 IPropertySymbol => $"GetProperty(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target})",
+                _ when hasGenericParameterlessOverload => $"GetMethods({bindingFlags}), static m => m.Name == \"{dataSourceMember.Name}\" && !m.IsGenericMethodDefinition && m.GetParameters().Length == 0)!.Invoke({target}, null)",
                 _ => $"GetMethod(\"{dataSourceMember.Name}\", {bindingFlags}, null, global::System.Type.EmptyTypes, null)!.Invoke({target}, null)"
             };
             var cast = kind is "Value" or "Enumerable" ? "" : $"({returnType.GloballyQualified()})";
-            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {cast}typeof({dataSourceMember.ContainingType.GloballyQualified()}).{read})");
+            var find = hasGenericParameterlessOverload ? "global::System.Array.Find(" : "";
+            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {cast}{find}typeof({dataSourceMember.ContainingType.GloballyQualified()}).{read}{nullAsEmpty})");
             return;
         }
 
@@ -3147,13 +3161,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.Append("global::System.Array.Empty<object?>()");
             }
             writer.AppendLine(";");
-            writer.AppendLine($"return {call};");
+            writer.AppendLine(nullAsEmpty.Length == 0 ? $"return {call};" : $"return (object?){call}{nullAsEmpty};");
             writer.Unindent();
             writer.Append("})");
         }
         else
         {
-            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {call})");
+            writer.Append(nullAsEmpty.Length == 0
+                ? $"{helper}({metadataArgument}{lambdaHeader} {call})"
+                : $"{helper}({metadataArgument}{lambdaHeader} (object?){call}{nullAsEmpty})");
         }
     }
 
