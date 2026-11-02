@@ -25,6 +25,12 @@
         <AdditionalFiles Include="..\$(_BaseProjectName)\AnalyzerReleases.Unshipped.md" />
     </ItemGroup>
 
+    <!-- Core source generator: the [GenerateGenericTest] arity messages are shared with TUnit.Engine (#7222),
+         as the base project's TUnit.Core.SourceGenerator.csproj links them -->
+    <ItemGroup Condition="'$(_BaseProjectName)' == 'TUnit.Core.SourceGenerator'">
+        <Compile Include="..\TUnit.Core\Helpers\GenerateGenericTestArityMessages.cs" Link="Shared\GenerateGenericTestArityMessages.cs" />
+    </ItemGroup>
+
     <!-- SourceGenerator: include folder link for IDE navigation -->
     <ItemGroup Condition="$(_BaseProjectName.Contains('SourceGenerator'))">
         <Folder Include="..\$(_BaseProjectName)\CodeGenerators\Writers\Hooks\">

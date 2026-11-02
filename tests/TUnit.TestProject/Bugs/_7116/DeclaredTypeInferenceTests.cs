@@ -74,8 +74,8 @@ public class DeclaredTypeInferenceTests
         => await Assert.That(typeof(T)).IsEqualTo(typeof(MemoryStream));
 
     // One [GenerateGenericTest] with a full set of type arguments runs the object-declared rows in both modes,
-    // whatever the other [GenerateGenericTest] attributes list. Reflection mode also fails the wrongly sized
-    // one on its own, which source-generated mode ignores (#7222).
+    // whatever the other [GenerateGenericTest] attributes list. Both modes also fail the wrongly sized one on
+    // its own (#7222).
     [Test]
     [GenerateGenericTest(typeof(MemoryStream))]
     [GenerateGenericTest(typeof(MemoryStream), typeof(int))]
@@ -91,8 +91,8 @@ public class DeclaredTypeInferenceTests
     public async Task GenerateGenericTestWithUnconvertibleRows<T>(T value) where T : IDisposable
         => await Assert.That(typeof(T)).IsEqualTo(typeof(MemoryStream));
 
-    // A [GenerateGenericTest] with the wrong number of type arguments cannot run the rows either, so the
-    // declared-type violation is still reported rather than the rows silently disappearing.
+    // A [GenerateGenericTest] with the wrong number of type arguments cannot run the rows either. It fails in
+    // both modes instead of the rows silently disappearing (#7222).
     [Test]
     [GenerateGenericTest(typeof(MemoryStream), typeof(int))]
     [MethodDataSource(nameof(Streams))]
