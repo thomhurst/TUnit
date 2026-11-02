@@ -3217,12 +3217,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// Whether a generated factory can read the data source member, directly or, for a private or protected member,
     /// by reflection on its declaring type. That needs a declaring type that the generated class can name without
-    /// type parameters, a getter for a property, a method without parameters or type parameters, and a member type it
+    /// type parameters, a getter for a property, a method that returns a value and has no parameters or type parameters, and a member type it
     /// can name when the factory casts the value. Otherwise the attribute keeps its reflection fallback.
     /// </summary>
     private static bool CanReadDataSourceMember(ISymbol member, Compilation compilation)
     {
-        if (member is IPropertySymbol { GetMethod: null } or IPropertySymbol { IsIndexer: true })
+        // A void method has no value to read. TUnit0011 reports it only for [MethodDataSource], so for
+        // [InstanceMethodDataSource] the attribute's reflection fallback reports it rather than generated code that does not compile.
+        if (member is IPropertySymbol { GetMethod: null } or IPropertySymbol { IsIndexer: true } or IMethodSymbol { ReturnsVoid: true })
         {
             return false;
         }
