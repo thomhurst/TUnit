@@ -500,7 +500,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             if (argumentType is null)
             {
                 // A null argument has no runtime type the binder can match on.
-                return ResolveDataSourceMethodWithNullArgument(targetType, arguments);
+                return ResolveDataSourceMethodByScore(targetType, arguments);
             }
 
             argumentTypes[i] = argumentType;
@@ -513,7 +513,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // IEnumerable<int> Rows() is used rather than an ambiguous match with IEnumerable<T> Rows<T>(),
         // as the source generator does.
 #if NET
-        return targetType.GetMethod(MethodNameProvidingDataSource, genericParameterCount: 0, BindingFlags, binder: null, argumentTypes, modifiers: null);
+        var resolvedMethod = targetType.GetMethod(MethodNameProvidingDataSource, genericParameterCount: 0, BindingFlags, binder: null, argumentTypes, modifiers: null);
 #else
         List<MethodBase>? candidates = null;
         foreach (var method in targetType.GetMethods(BindingFlags))
@@ -524,14 +524,17 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             }
         }
 
-        return candidates is null
+        var resolvedMethod = candidates is null
             ? null
             : (MethodInfo?)Type.DefaultBinder.SelectMethod(BindingFlags, candidates.ToArray(), argumentTypes, modifiers: null);
 #endif
+        // The binder requires exact arity. Match omitted optional and CancellationToken parameters
+        // with the same scoring used for null arguments and by the source generator.
+        return resolvedMethod ?? ResolveDataSourceMethodByScore(targetType, arguments);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
-    private MethodInfo? ResolveDataSourceMethodWithNullArgument([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType, object?[] arguments)
+    private MethodInfo? ResolveDataSourceMethodByScore([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType, object?[] arguments)
     {
         var bestScore = -1;
         var best = new List<MethodInfo>();

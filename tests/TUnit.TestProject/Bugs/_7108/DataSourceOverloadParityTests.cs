@@ -276,6 +276,7 @@ public class DataSourceOverloadParityTests
     [MethodDataSource(nameof(Token), Arguments = new object[] { "Token(string, int, CancellationToken)", 1 })]
     // An override called through its base declaration passes its own default, as reflection does, not the base's
     [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.OverriddenDefault), Arguments = new object?[] { "Derived.OverriddenDefault(string, string?, int = 2)", null })]
+    [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.OverriddenDefault), Arguments = new object[] { "Derived.OverriddenDefault(string, string?, int = 2)", "non-null" })]
     public async Task Chosen_Overload_With_Missing_Or_Null_Arguments(string expected, string chosen)
     {
         await Assert.That(chosen).IsEqualTo(expected);
