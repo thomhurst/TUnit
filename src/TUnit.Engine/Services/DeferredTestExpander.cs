@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.Enums;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Building;
 
 namespace TUnit.Engine.Services;
@@ -16,11 +17,13 @@ internal sealed class DeferredTestExpander
 {
     private readonly TestBuilderPipeline _testBuilderPipeline;
     private readonly TestFilterService _testFilterService;
+    private readonly ObjectTracker _objectTracker;
 
-    public DeferredTestExpander(TestBuilderPipeline testBuilderPipeline, TestFilterService testFilterService)
+    public DeferredTestExpander(TestBuilderPipeline testBuilderPipeline, TestFilterService testFilterService, ObjectTracker objectTracker)
     {
         _testBuilderPipeline = testBuilderPipeline;
         _testFilterService = testFilterService;
+        _objectTracker = objectTracker;
     }
 
     /// <summary>
@@ -43,22 +46,32 @@ internal sealed class DeferredTestExpander
         // Execution registration is done explicitly below via RegisterTestsAsync(isForExecution: true).
         var buildingContext = new TestBuildingContext(IsForExecution: false, Filter: null, IgnoreDeferral: true);
 
-        var built = await _testBuilderPipeline
-            .BuildTestsFromMetadataAsync([placeholder.Metadata], buildingContext, cancellationToken)
-            .ConfigureAwait(false);
-
-        var children = built as IReadOnlyList<AbstractExecutableTest> ?? built.ToList();
-
-        foreach (var child in children)
+        // Other tests may be running, so hold the shared instances the children fetch until
+        // registration has counted them (#7263).
+        var holds = ObjectTracker.BeginRegistrationHolds();
+        try
         {
-            child.Context.ParentTestId = placeholder.TestId;
-            child.Context.Relationship = TestRelationship.Generated;
+            var built = await _testBuilderPipeline
+                .BuildTestsFromMetadataAsync([placeholder.Metadata], buildingContext, cancellationToken)
+                .ConfigureAwait(false);
+
+            var children = built as IReadOnlyList<AbstractExecutableTest> ?? built.ToList();
+
+            foreach (var child in children)
+            {
+                child.Context.ParentTestId = placeholder.TestId;
+                child.Context.Relationship = TestRelationship.Generated;
+            }
+
+            // Children bypassed the discovery pipeline's post-filter registration (they didn't exist then),
+            // so register them here before they are scheduled - mirrors TestRegistry's dynamic-test path.
+            await _testFilterService.RegisterTestsAsync(children, isForExecution: true).ConfigureAwait(false);
+
+            return children;
         }
-
-        // Children bypassed the discovery pipeline's post-filter registration (they didn't exist then),
-        // so register them here before they are scheduled - mirrors TestRegistry's dynamic-test path.
-        await _testFilterService.RegisterTestsAsync(children, isForExecution: true).ConfigureAwait(false);
-
-        return children;
+        finally
+        {
+            await _objectTracker.ReleaseRegistrationHoldsAsync(holds).ConfigureAwait(false);
+        }
     }
 }

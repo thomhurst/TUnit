@@ -260,6 +260,131 @@ public class SharedInstanceLifetimeTests
         await Assert.That(instance.IsDisposed).IsTrue();
     }
 
+    [Test]
+    public async Task Test_Registered_While_The_Last_Holder_Ends_Keeps_The_Instance()
+    {
+        // #7263: a test built and registered while other tests run receives a cached instance, and
+        // the instance's last holder ends before registration counts it.
+        var key = NewKey();
+        var (tracker, discoverer) = CreateTracker();
+        var holder = CreateContext();
+        var registering = CreateContext();
+
+        var instance = Fetch(key);
+        discoverer.Discover = context => Add(context, instance);
+        tracker.TrackObjects(holder);
+
+        var holds = ObjectTracker.BeginRegistrationHolds();
+        try
+        {
+            await Assert.That(Fetch(key)).IsSameReferenceAs(instance);
+
+            await tracker.UntrackObjects(holder);
+            await Assert.That(instance.IsDisposed).IsFalse();
+
+            tracker.TrackObjects(registering);
+        }
+        finally
+        {
+            await tracker.ReleaseRegistrationHoldsAsync(holds);
+        }
+
+        await Assert.That(instance.IsDisposed).IsFalse();
+
+        await tracker.UntrackObjects(registering);
+        await Assert.That(instance.DisposeCount).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task Test_Registered_Between_The_Count_Reaching_Zero_And_Retirement_Keeps_The_Instance()
+    {
+        // The registering test fetches the instance after the last holder's count reaches zero but
+        // before that holder retires it. The hold must stop the retirement.
+        var key = NewKey();
+        var (tracker, discoverer) = CreateTracker();
+        var holder = CreateContext();
+        var registering = CreateContext();
+
+        var instance = Fetch(key);
+        discoverer.Discover = context => Add(context, instance);
+        tracker.TrackObjects(holder);
+
+        var holds = ObjectTracker.BeginRegistrationHolds();
+        try
+        {
+            SharedDisposable? fetched = null;
+
+            // Raised synchronously when the count reaches zero, before the holder retires the instance.
+            ObjectTracker.OnDisposed(instance, () => fetched = Fetch(key));
+
+            await tracker.UntrackObjects(holder);
+
+            await Assert.That(fetched).IsSameReferenceAs(instance);
+            await Assert.That(instance.IsDisposed).IsFalse();
+
+            tracker.TrackObjects(registering);
+        }
+        finally
+        {
+            await tracker.ReleaseRegistrationHoldsAsync(holds);
+        }
+
+        await Assert.That(instance.IsDisposed).IsFalse();
+        await Assert.That(Fetch(key)).IsSameReferenceAs(instance);
+
+        await tracker.UntrackObjects(registering);
+        await Assert.That(instance.DisposeCount).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task Registration_Fetching_A_Retired_Instance_Gets_A_New_One()
+    {
+        var key = NewKey();
+        var (tracker, discoverer) = CreateTracker();
+        var holder = CreateContext();
+
+        var disposed = Fetch(key);
+        discoverer.Discover = context => Add(context, disposed);
+        tracker.TrackObjects(holder);
+        await tracker.UntrackObjects(holder);
+
+        var holds = ObjectTracker.BeginRegistrationHolds();
+        SharedDisposable fetched;
+        try
+        {
+            fetched = Fetch(key);
+        }
+        finally
+        {
+            await tracker.ReleaseRegistrationHoldsAsync(holds);
+        }
+
+        await Assert.That(fetched).IsNotSameReferenceAs(disposed);
+
+        // No registered test kept it, so releasing the hold disposed it.
+        await Assert.That(fetched.DisposeCount).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task Fetches_After_Holds_Are_Released_Are_Not_Held()
+    {
+        var key = NewKey();
+        var (tracker, _) = CreateTracker();
+
+        var holds = ObjectTracker.BeginRegistrationHolds();
+        await tracker.ReleaseRegistrationHoldsAsync(holds);
+
+        var instance = Fetch(key);
+
+        // Invoked immediately only for an object that is not tracked.
+        var untracked = false;
+        ObjectTracker.OnDisposed(instance, () => untracked = true);
+
+        await Assert.That(holds.Instances.Count).IsEqualTo(0);
+        await Assert.That(untracked).IsTrue();
+        await Assert.That(instance.IsDisposed).IsFalse();
+    }
+
     private static string NewKey() => $"{nameof(SharedInstanceLifetimeTests)}-{Guid.NewGuid():N}";
 
     // Fetched by a test that is not running yet, as a data source does at registration.

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
+using TUnit.Core.Tracking;
 
 namespace TUnit.Core;
 
@@ -69,6 +70,21 @@ internal static class TestDataContainer
     }
 
     private static object? GetOrCreate(InstanceKey key, Func<Type, object> func)
+    {
+        var instance = Fetch(key, func);
+
+        // While tests are registered alongside running tests, hold the instance until registration
+        // has counted it, so its last running holder cannot dispose it in between (#7263). Fails only
+        // when the instance has just been retired, which also evicts it, so fetching again creates a new one.
+        while (instance is not null && !ObjectTracker.TryHoldForRegistration(instance))
+        {
+            instance = Fetch(key, func);
+        }
+
+        return instance;
+    }
+
+    private static object? Fetch(InstanceKey key, Func<Type, object> func)
     {
         if (_instances.TryGetValue(key, out var existing))
         {
