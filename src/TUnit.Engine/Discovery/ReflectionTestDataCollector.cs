@@ -556,6 +556,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // [GenerateGenericTest] types' class constraint violations are reported before the class rows'
         var generateGenericTestTypeArguments = GetValidGenerateGenericTestTypeArguments(generateGenericTestAttributes, constraintViolations);
+        // Only a class row that breaks the constraints supplies class type arguments; a rejected [GenerateGenericTest]
+        // type does not stop the method sources from inferring theirs, as in the source generator (#7209)
+        var generateGenericTestViolationCount = constraintViolations.ClassViolationCount;
         // Method rows that infer types no class row infers build their instance from every class row, so keep
         // them all as discovery read them rather than reading the sources again (#7161)
         var allClassRows = methodRowTests == null && classDataSourceCount > 0 && !HasClassArgumentsRows(classDataSources) ? new List<IDataSourceAttribute>(classDataSources.Length) : null;
@@ -583,7 +586,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 methodSourcesInferClassTypeArguments: typeFreeClassRows != null
                     && !HasClassArgumentsRows(classDataSources)
                     && classRowGroups!.Count == 0
-                    && !constraintViolations.HasClassViolation,
+                    && constraintViolations.ClassViolationCount == generateGenericTestViolationCount,
                 out methodSourceInstantiations)
             : null;
 

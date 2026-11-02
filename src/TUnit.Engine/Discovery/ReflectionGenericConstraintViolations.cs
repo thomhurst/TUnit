@@ -28,10 +28,11 @@ internal sealed class ReflectionGenericConstraintViolations(
     private Dictionary<MethodInfo, List<string>>? _messagesByMethod;
 
     /// <summary>
-    /// Whether <see cref="TryAddClassViolation"/> recorded a violation: some source supplied class type
-    /// arguments, even though they break the class's constraints.
+    /// How many class type argument sets <see cref="TryAddClassViolation"/> recorded: each is a source that supplied
+    /// class type arguments, even though they break the class's constraints. A caller compares counts to tell the
+    /// violations of one source (class rows) from those recorded before it ([GenerateGenericTest]).
     /// </summary>
-    public bool HasClassViolation { get; private set; }
+    public int ClassViolationCount { get; private set; }
 
     /// <summary>
     /// Records <paramref name="typeArguments"/> as a violation for every test method when they break
@@ -50,7 +51,7 @@ internal sealed class ReflectionGenericConstraintViolations(
             Add(testMethod, message);
         }
 
-        HasClassViolation = true;
+        ClassViolationCount++;
         return true;
     }
 

@@ -63,6 +63,7 @@ public class Issue7209Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     [Arguments("TypeFreeClassRowConstraintViolation", "Type 'Object' does not satisfy the 'struct' constraint for generic parameter 'T'")]
     [Arguments("TypeFreeClassRowArrayConstraintViolation", "Type 'Int32' does not satisfy the 'class' constraint for generic parameter 'T'")]
+    [Arguments("TypeFreeClassRowWithInvalidGenerateGenericTestAndTypedSource", "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'")]
     public async Task Method_Row_Inferring_An_Invalid_Class_Type_Beside_A_Type_Free_Class_Row_Fails(string className, string expectedMessage)
     {
         await RunTestsWithFilter(

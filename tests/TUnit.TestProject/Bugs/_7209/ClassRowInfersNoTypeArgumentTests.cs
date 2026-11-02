@@ -369,6 +369,24 @@ public class TypeFreeClassRowWithGenerateGenericTestAndTypedSource<T>(int number
     }
 }
 
+// A [GenerateGenericTest] type that breaks the class's constraints fails, but does not stop a typed data source from
+// inferring T beside a type-free class row: C<string> fails the 'struct' constraint, and ClassDataSource<int> still runs
+// on C<int>, built from the class row (number = 42). Same in both modes; reflection used to drop C<int>.
+// No [EngineTest]: TUnit.Engine.Tests targets it by name, because it has a failing row.
+[GenerateGenericTest(typeof(string))]
+[Arguments(42)]
+public class TypeFreeClassRowWithInvalidGenerateGenericTestAndTypedSource<T>(int number) where T : struct
+{
+    [Test]
+    [ClassDataSource<int>]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value).IsEqualTo(0);
+    }
+}
+
 // The same with a [MethodDataSource] member of the test class: C<long> from [GenerateGenericTest] and C<int> from the
 // member's declared type, each built from the class row (number = 42). Same in both modes.
 [EngineTest(ExpectedResult.Pass)]
