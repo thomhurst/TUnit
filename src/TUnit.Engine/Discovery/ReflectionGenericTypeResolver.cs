@@ -16,7 +16,7 @@ internal static class ReflectionGenericTypeResolver
     /// <summary>
     /// Determines generic type arguments from data row values
     /// </summary>
-    public static Type[]? DetermineGenericTypeArguments(Type genericTypeDefinition, object?[] dataRow)
+    public static Type[]? DetermineGenericTypeArguments(Type genericTypeDefinition, IDataSourceAttribute dataSource, object?[] dataRow)
     {
 #if NET
         if (!RuntimeFeature.IsDynamicCodeSupported)
@@ -25,8 +25,135 @@ internal static class ReflectionGenericTypeResolver
         }
 #endif
 
-        // Source-generated mode partitions class rows by the same rule at run time (#7210)
+        // A compile-time [Arguments] row infers through the constructor's parameter types, as the source generator
+        // infers it (#7223). Rows known only at run time use the rule source-generated mode partitions them by (#7210)
+        if (IsArgumentsAttribute(dataSource)
+            && dataRow.Length > 0
+            && InferTypeArgumentsFromConstructor(genericTypeDefinition, genericTypeDefinition.GetGenericArguments(), dataRow) is { } constructorTypeArguments)
+        {
+            return constructorTypeArguments;
+        }
+
         return GenericClassRowPartition.InferClassTypeArguments(dataRow, genericTypeDefinition.GetGenericArguments().Length);
+    }
+
+    private static bool IsArgumentsAttribute(IDataSourceAttribute dataSource)
+    {
+        return dataSource is ArgumentsAttribute
+            || dataSource.GetType() is { IsGenericType: true } type && type.GetGenericTypeDefinition() == typeof(ArgumentsAttribute<>);
+    }
+
+    /// <summary>
+    /// The class type arguments a data row infers through the first public constructor, as the source generator
+    /// infers them: each non-null value is matched against its constructor parameter's type, so a <c>string[]</c>
+    /// value for a <c>T[]</c> parameter infers <c>string</c> and a <c>List&lt;int&gt;</c> value for a
+    /// <c>List&lt;T&gt;</c> parameter infers <c>int</c> (#7223). Null when the parameters leave a type parameter
+    /// uninferred.
+    /// </summary>
+    private static Type[]? InferTypeArgumentsFromConstructor(Type genericTypeDefinition, Type[] genericParameters, object?[] dataRow)
+    {
+        if (genericTypeDefinition.GetConstructors() is not [var constructor, ..])
+        {
+            return null;
+        }
+
+        var parameters = constructor.GetParameters();
+        var typeArguments = new Type?[genericParameters.Length];
+        var nullOnly = new bool[genericParameters.Length];
+
+        // A T[] or List<T> value fixes T first, because it cannot bind to any other T: [Arguments((short)2, new[] { 1 })]
+        // on C<T>(T count, T[] values) infers int, which the short also binds to. A bare T then takes the first
+        // non-null value's type. Mirrors TestMetadataGenerator.InferTypesFromClassArgumentsAttribute, apart from its
+        // last-value rule for a repeated bare T (#7366).
+        for (var pass = 0; pass < 2; pass++)
+        {
+            var bareParameters = pass == 1;
+            for (var i = 0; i < dataRow.Length && i < parameters.Length; i++)
+            {
+                var parameterType = parameters[i].ParameterType;
+                if (parameterType.IsGenericParameter != bareParameters)
+                {
+                    continue;
+                }
+
+                if (dataRow[i] is not { } value)
+                {
+                    if (bareParameters && Array.IndexOf(genericParameters, parameterType) is var nullIndex and >= 0)
+                    {
+                        nullOnly[nullIndex] = true;
+                    }
+
+                    continue;
+                }
+
+                var valueType = value.GetType();
+                for (var j = 0; j < genericParameters.Length; j++)
+                {
+                    if (typeArguments[j] == null
+                        && MatchTypeParameter(parameterType, valueType, genericParameters[j]) is { } typeArgument)
+                    {
+                        typeArguments[j] = typeArgument;
+                    }
+                }
+            }
+        }
+
+        var inferredCount = 0;
+        for (var j = 0; j < genericParameters.Length; j++)
+        {
+            // A bare T that only nulls bind is object, as in the source generator. A one-value row is skipped, because
+            // [Arguments(null)] reads as one null value here and the source generator infers nothing from it.
+            if (typeArguments[j] == null && nullOnly[j] && dataRow.Length > 1)
+            {
+                typeArguments[j] = typeof(object);
+            }
+
+            if (typeArguments[j] != null)
+            {
+                inferredCount++;
+            }
+        }
+
+        return inferredCount == genericParameters.Length ? (Type[]) typeArguments! : null;
+    }
+
+    /// <summary>
+    /// The type that <paramref name="typeParameter"/> takes when a value of <paramref name="declaredType"/> binds to a
+    /// parameter of <paramref name="parameterType"/>: the declared type itself for a parameter of type T, its element
+    /// type for T[], and the matching type argument for a constructed generic such as List&lt;T&gt;. Null when the
+    /// parameter type does not mention the type parameter or the declared type does not have its shape. Mirrors
+    /// <c>TestMetadataGenerator.MatchTypeParameter</c>.
+    /// </summary>
+    internal static Type? MatchTypeParameter(Type parameterType, Type declaredType, Type typeParameter)
+    {
+        if (parameterType.IsGenericParameter)
+        {
+            return parameterType == typeParameter ? declaredType : null;
+        }
+
+        if (parameterType.IsArray)
+        {
+            return declaredType.IsArray && declaredType.GetArrayRank() == parameterType.GetArrayRank()
+                ? MatchTypeParameter(parameterType.GetElementType()!, declaredType.GetElementType()!, typeParameter)
+                : null;
+        }
+
+        if (parameterType.IsGenericType
+            && declaredType.IsGenericType
+            && parameterType.GetGenericTypeDefinition() == declaredType.GetGenericTypeDefinition())
+        {
+            var parameterTypeArguments = parameterType.GetGenericArguments();
+            var declaredTypeArguments = declaredType.GetGenericArguments();
+            for (var i = 0; i < parameterTypeArguments.Length; i++)
+            {
+                if (MatchTypeParameter(parameterTypeArguments[i], declaredTypeArguments[i], typeParameter) is { } match)
+                {
+                    return match;
+                }
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

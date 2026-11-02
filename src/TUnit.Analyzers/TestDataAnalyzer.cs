@@ -1007,6 +1007,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             // test parameter types (they could be used for other purposes in the implementation)
         }
 
+        // A class row infers the class's type arguments from its declared types, as both execution modes infer them,
+        // so the constructor parameter types are checked closed over that inference: [Arguments<string[]>] on
+        // C<T>(T[] values) infers T as string and matches (#7223).
+        if (context.Symbol is INamedTypeSymbol { IsGenericType: true } classSymbol
+            && typeArguments.Length == testDataTypes.Length
+            && TryCloseOverInferredClassTypeArguments(context.Compilation, classSymbol, typeArguments, testDataTypes) is { } closedTestDataTypes)
+        {
+            testDataTypes = closedTestDataTypes;
+        }
+
         if (testDataTypes.Any(x => x.IsGenericDefinition()))
         {
             // Open parameter types are not checked for conversions, but a bare method type parameter is inferred
@@ -1048,6 +1058,127 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         context.ReportDiagnostic(Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                 attribute.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
                 string.Join(", ", typeArguments), string.Join(", ", testDataTypes)));
+    }
+
+    /// <summary>
+    /// The constructor parameter types with the class's type parameters replaced by the types a class row infers for
+    /// them, matching each declared type against its parameter type (T takes the declared type, T[] its element type,
+    /// List&lt;T&gt; its type argument). Null when the parameter types mention no class type parameter, or when the
+    /// row leaves one uninferred or infers it inconsistently; the open types are then checked as before.
+    /// </summary>
+    private static ImmutableArray<ITypeSymbol>? TryCloseOverInferredClassTypeArguments(Compilation compilation,
+        INamedTypeSymbol classSymbol,
+        ImmutableArray<ITypeSymbol> declaredTypes,
+        ImmutableArray<ITypeSymbol> parameterTypes)
+    {
+        var classTypeParameters = classSymbol.TypeParameters;
+        if (!parameterTypes.Any(t => MentionsAnyTypeParameter(t, classTypeParameters)))
+        {
+            return null;
+        }
+
+        var inferred = new Dictionary<ITypeParameterSymbol, ITypeSymbol>(SymbolEqualityComparer.Default);
+        for (var i = 0; i < parameterTypes.Length; i++)
+        {
+            if (!TryMatchTypeParameters(parameterTypes[i], declaredTypes[i], classTypeParameters, inferred))
+            {
+                return null;
+            }
+        }
+
+        var closed = ImmutableArray.CreateBuilder<ITypeSymbol>(parameterTypes.Length);
+        foreach (var parameterType in parameterTypes)
+        {
+            if (Substitute(compilation, parameterType, inferred) is not { } closedType)
+            {
+                return null;
+            }
+
+            closed.Add(closedType);
+        }
+
+        return closed.MoveToImmutable();
+    }
+
+    private static bool MentionsAnyTypeParameter(ITypeSymbol type, ImmutableArray<ITypeParameterSymbol> typeParameters) => type switch
+    {
+        ITypeParameterSymbol typeParameter => typeParameters.Contains(typeParameter, SymbolEqualityComparer.Default),
+        IArrayTypeSymbol array => MentionsAnyTypeParameter(array.ElementType, typeParameters),
+        INamedTypeSymbol named => named.TypeArguments.Any(t => MentionsAnyTypeParameter(t, typeParameters)),
+        _ => false
+    };
+
+    // Records what each of the class's type parameters in parameterType takes when a value of declaredType binds to
+    // it. False when declaredType does not have parameterType's shape or contradicts an earlier inference.
+    private static bool TryMatchTypeParameters(ITypeSymbol parameterType, ITypeSymbol declaredType,
+        ImmutableArray<ITypeParameterSymbol> typeParameters, Dictionary<ITypeParameterSymbol, ITypeSymbol> inferred)
+    {
+        if (!MentionsAnyTypeParameter(parameterType, typeParameters))
+        {
+            return true;
+        }
+
+        switch (parameterType)
+        {
+            case ITypeParameterSymbol typeParameter:
+                if (inferred.TryGetValue(typeParameter, out var existing))
+                {
+                    return SymbolEqualityComparer.Default.Equals(existing, declaredType);
+                }
+
+                inferred[typeParameter] = declaredType;
+                return true;
+            case IArrayTypeSymbol parameterArray:
+                return declaredType is IArrayTypeSymbol declaredArray
+                       && declaredArray.Rank == parameterArray.Rank
+                       && TryMatchTypeParameters(parameterArray.ElementType, declaredArray.ElementType, typeParameters, inferred);
+            case INamedTypeSymbol parameterNamed:
+                if (declaredType is not INamedTypeSymbol { IsGenericType: true } declaredNamed
+                    || !SymbolEqualityComparer.Default.Equals(parameterNamed.OriginalDefinition, declaredNamed.OriginalDefinition))
+                {
+                    return false;
+                }
+
+                for (var i = 0; i < parameterNamed.TypeArguments.Length; i++)
+                {
+                    if (!TryMatchTypeParameters(parameterNamed.TypeArguments[i], declaredNamed.TypeArguments[i], typeParameters, inferred))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private static ITypeSymbol? Substitute(Compilation compilation, ITypeSymbol type, Dictionary<ITypeParameterSymbol, ITypeSymbol> inferred)
+    {
+        switch (type)
+        {
+            case ITypeParameterSymbol typeParameter:
+                return inferred.TryGetValue(typeParameter, out var typeArgument) ? typeArgument : type;
+            case IArrayTypeSymbol array:
+                return Substitute(compilation, array.ElementType, inferred) is { } elementType
+                    ? compilation.CreateArrayTypeSymbol(elementType, array.Rank)
+                    : null;
+            case INamedTypeSymbol { IsGenericType: true } named:
+                var typeArguments = new ITypeSymbol[named.TypeArguments.Length];
+                for (var i = 0; i < typeArguments.Length; i++)
+                {
+                    if (Substitute(compilation, named.TypeArguments[i], inferred) is not { } substituted)
+                    {
+                        return null;
+                    }
+
+                    typeArguments[i] = substituted;
+                }
+
+                return named.OriginalDefinition.Construct(typeArguments);
+            default:
+                return type;
+        }
     }
 
     private static void CheckInferredTypeArgumentConstraints(SymbolAnalysisContext context,

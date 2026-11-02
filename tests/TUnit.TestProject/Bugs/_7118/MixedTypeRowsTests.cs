@@ -241,9 +241,7 @@ public class NullTypedClassRow<T>(T? value)
 // A class row [Arguments<string[]>(null)] binds its null value to the constructor's T[] parameter, so it infers T
 // as string, not string[], and the method row "a" runs on <string> with a null constructor value.
 [EngineTest(ExpectedResult.Pass)]
-#pragma warning disable TUnit0001 // the analyzer does not map string[] through the T[] parameter
 [Arguments<string[]>(null)]
-#pragma warning restore TUnit0001
 public class ArrayParameterNullTypedClassRow<T>(T[]? values)
 {
     [Test]
