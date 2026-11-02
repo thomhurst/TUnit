@@ -1263,16 +1263,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // When [GenerateGenericTest] or a class-level data source already supplies the class type
             // arguments, a method row's values need not infer them: [GenerateGenericTest(typeof(object))]
             // with [Arguments(1)] runs C<object>, so the C<int> inferred here is not reported as a
-            // violation. Reflection mode applies the same rule.
+            // violation. A class row whose values go to no type parameter supplies none (#7209), so beside
+            // it an [Arguments(null)] row still infers object, as without a class row, and a method row
+            // that infers types breaking the class's constraints is reported. Reflection mode applies the
+            // same rule.
             var classTypeArgumentsSupplied = testMethod.TypeSymbol.GetAttributes().Any(a =>
-                a.AttributeClass is { } attributeClass
-                && (attributeClass.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute")
-                    || DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)));
-
-            // A class row whose values go to no type parameter supplies no class type argument, so an
-            // [Arguments(null)] row still infers object beside it, as without a class row (#7209).
-            // Reflection mode applies the same rule.
-            var nullArgumentsArrayInfersObject = !testMethod.TypeSymbol.GetAttributes().Any(a =>
                 a.AttributeClass is { } attributeClass
                 && (attributeClass.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute")
                     || (DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
@@ -1281,7 +1276,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
                 var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation,
-                    nullArgumentsArrayInfersObject: nullArgumentsArrayInfersObject);
+                    nullArgumentsArrayInfersObject: !classTypeArgumentsSupplied);
                 if (inferredTypes is { Length: > 0 })
                 {
                     (inferringRows ??= []).Add(methodArgAttr);
@@ -6833,7 +6828,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// True for a class-level [Arguments] row whose values all bind to constructor parameters that do not
-    /// use the class's type parameters, as <c>[Arguments(42)]</c> on <c>C&lt;T&gt;(int number)</c>. Such a
+    /// use the class's type parameters, as <c>[Arguments(42)]</c> on <c>C&lt;T&gt;(int number)</c>, or that has
+    /// no values. Such a
     /// row supplies no class type argument, so the method rows infer them, and the row only supplies the
     /// constructor arguments (#7209). Mirrors <c>ReflectionTestDataCollector.ClassRowSuppliesNoTypeArguments</c>.
     /// </summary>
@@ -6856,15 +6852,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var primaryConstructor = GetClassRowConstructor(classSymbol);
 
-        var boundCount = Math.Min(valueCount, primaryConstructor?.Parameters.Length ?? 0);
-        if (boundCount == 0)
+        if (primaryConstructor is null)
         {
             return false;
         }
 
+        // An empty row ([Arguments] on C<T>()) has no value to supply a type argument
+        var boundCount = Math.Min(valueCount, primaryConstructor.Parameters.Length);
+        if (boundCount == 0)
+        {
+            return valueCount == 0;
+        }
+
         for (var i = 0; i < boundCount; i++)
         {
-            if (ContainsClassTypeParameter(primaryConstructor!.Parameters[i].Type, classSymbol))
+            if (ContainsClassTypeParameter(primaryConstructor.Parameters[i].Type, classSymbol))
             {
                 return false;
             }

@@ -600,7 +600,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             discoveredTests.AddRange(methodRowTests);
 
             // Return any tests discovered from method rows and GenerateGenericTest attributes
-            AddConstraintViolationTests(discoveredTests, constraintViolations);
+            AddConstraintViolationTests(discoveredTests, constraintViolations, classDataSuppliesTypeArguments: false);
             return;
         }
 
@@ -629,7 +629,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             discoveredTests.AddRange(BuildTestsForMethodRowsWithoutClassRow(genericTypeDefinition, testMethods, methodRowClassTypeArguments, classRowGroups!, allClassRows, typeFreeClassRows, generateGenericTestAttributes));
         }
 
-        AddConstraintViolationTests(discoveredTests, constraintViolations);
+        // Type-free class rows, split off above, supply no class type argument, so the method rows' types are
+        // checked against the class's constraints as without a class row (#7209)
+        AddConstraintViolationTests(discoveredTests, constraintViolations, classDataSuppliesTypeArguments: classDataSources.Length > 0);
     }
 
     /// <summary>
@@ -716,9 +718,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
-    private static void AddConstraintViolationTests(List<TestMetadata> discoveredTests, ReflectionGenericConstraintViolations constraintViolations)
+    private static void AddConstraintViolationTests(List<TestMetadata> discoveredTests, ReflectionGenericConstraintViolations constraintViolations, bool classDataSuppliesTypeArguments)
     {
-        constraintViolations.AddMethodRowViolations();
+        constraintViolations.AddMethodRowViolations(classDataSuppliesTypeArguments);
         discoveredTests.AddRange(constraintViolations.CreateMetadata());
     }
 
@@ -1359,7 +1361,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Removes from <paramref name="classDataSources"/> the class-level [Arguments] rows whose values all bind to
     /// constructor parameters that do not use the class's type parameters, as <c>[Arguments(42)]</c> on
-    /// <c>C&lt;T&gt;(int number)</c>, and returns them, or null when there are none. Such a row supplies no class
+    /// <c>C&lt;T&gt;(int number)</c>, or that have no values, and returns them, or null when there are none. Such a row supplies no class
     /// type argument (#7209). Mirrors <c>TestMetadataGenerator.ClassRowSuppliesNoTypeArguments</c>.
     /// </summary>
     private static IDataSourceAttribute[]? SplitTypeFreeClassRows(Type genericTypeDefinition, ref IDataSourceAttribute[] classDataSources)
@@ -1429,11 +1431,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
+        // An empty row ([Arguments] on C<T>()) has no value to supply a type argument
         var parameters = constructor.GetParameters();
         var boundCount = Math.Min(valueCount, parameters.Length);
         if (boundCount == 0)
         {
-            return false;
+            return valueCount == 0;
         }
 
         for (var i = 0; i < boundCount; i++)

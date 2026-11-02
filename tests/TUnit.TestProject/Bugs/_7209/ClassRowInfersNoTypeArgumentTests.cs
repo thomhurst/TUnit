@@ -148,6 +148,37 @@ public class TypeFreeClassRowWithUninferredMethodSource<T>(int number)
     }
 }
 
+// An empty class row has no value to supply a type argument, so it is type-free like [Arguments(42)] on
+// C<T>(int number): the method rows infer C<int> and C<string>, each built from the empty row. Same in both modes.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments]
+public class EmptyClassRow<T>
+{
+    [Test]
+    [Arguments(1)]
+    [Arguments("s")]
+    public async Task Run(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(value!.GetType());
+    }
+}
+
+// The type-free class row supplies no class type argument, so the null method row's object breaks the struct
+// constraint and is reported as a failed test, as without a class row (#7141), rather than dropped. Same in both
+// modes. No [EngineTest] attribute: the failing row must not be picked up by the `/**[EngineTest=Pass]` run.
+[Arguments(42)]
+public class ConstrainedClassWithTypeFreeClassRow<T>(int number) where T : struct
+{
+    [Test]
+    [Arguments(1)]
+    [Arguments(null)]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(value).IsEqualTo((T)(object)1);
+    }
+}
+
 public static class TypeFreeClassRowSources
 {
     public static IEnumerable<object> Values() => [2, 3];

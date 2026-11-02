@@ -55,12 +55,13 @@ internal sealed class ReflectionGenericConstraintViolations(
     /// <remarks>
     /// Only invalid rows are reported here. Running the valid rows of such methods is tracked by #7106.
     /// When <see cref="GenerateGenericTestAttribute"/> or a class-level data source already supplies the
-    /// class type arguments, method rows do not infer them, so nothing is reported.
+    /// class type arguments (<paramref name="classDataSuppliesTypeArguments"/>), method rows do not infer them,
+    /// so nothing is reported. A class [Arguments] row whose values go to no type parameter supplies none (#7209).
     /// </remarks>
-    public void AddMethodRowViolations()
+    public void AddMethodRowViolations(bool classDataSuppliesTypeArguments)
     {
-        if (genericTypeDefinition.IsDefined(typeof(GenerateGenericTestAttribute), inherit: false)
-            || ReflectionAttributeExtractor.ExtractDataSources(genericTypeDefinition).Length > 0)
+        if (classDataSuppliesTypeArguments
+            || genericTypeDefinition.IsDefined(typeof(GenerateGenericTestAttribute), inherit: false))
         {
             return;
         }

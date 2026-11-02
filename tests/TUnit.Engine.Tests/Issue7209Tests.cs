@@ -19,6 +19,7 @@ public class Issue7209Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypeFreeClassRowTestConstructorTakesTypeParameter", 1)]
     [Arguments("TypeFreeClassRowTestConstructorTakesNoTypeParameter", 2)]
     [Arguments("TypeFreeClassRowWithUninferredMethodSource", 3)]
+    [Arguments("EmptyClassRow", 2)]
     public async Task Rows_Run_On_The_Instantiation_They_Infer(string className, int expectedTests)
     {
         await RunTestsWithFilter(
@@ -29,6 +30,21 @@ public class Issue7209Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Total.ShouldBe(expectedTests),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(expectedTests),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task Null_Row_That_Breaks_The_Class_Constraint_Beside_A_Type_Free_Class_Row_Fails()
+    {
+        await RunTestsWithFilter(
+            $"{Namespace}/ConstrainedClassWithTypeFreeClassRow*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.Results.Single(x => x.Outcome == "Failed").TestName.ShouldBe("Run"),
+                result => result.Results.Single(x => x.Outcome == "Failed").Output?.ErrorInfo?.Message
+                    .ShouldContain("Type 'Object' does not satisfy the 'struct' constraint for generic parameter 'T'")
             ]);
     }
 }
