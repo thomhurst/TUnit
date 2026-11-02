@@ -330,7 +330,7 @@ The built-in `DefaultValueProvider` uses reflection to build defaults for `Task<
 
 A generic method on a generic interface can be set up with explicit type arguments, such as `mock.Invoke<string>(Any())`, on both `IOutbox<int>.Mock()` and `Mock.Of<IOutbox<int>>()`. On `Mock<T>`, this works for closed types named in `Mock.Of<T>()`, `MockRepository.Of<T>()`, or `[assembly: GenerateMock(typeof(IOutbox<int>))]`.
 
-A few methods still need `IOutbox<int>.Mock()` for explicit type arguments: those with a constraint that names an interface type parameter, such as `TOther Select<TOther>() where TOther : T`, and those that use an unconstrained interface type parameter as `T?`. When C# can infer the type arguments from the call, as in `mock.RoundTrip(Arg.Any<Guid>())`, every form works.
+A few methods still need `IOutbox<int>.Mock()` for explicit type arguments: those with a constraint that names an interface type parameter, such as `TOther Select<TOther>() where TOther : T`, those that use an unconstrained interface type parameter as `T?`, and overloads whose setup signatures become identical after substituting the closed type arguments. Colliding closed copies are omitted so registering the mock still compiles. When C# can infer the type arguments from the call, as in `mock.RoundTrip(Arg.Any<Guid>())`, every form works.
 
 ## Reset
 

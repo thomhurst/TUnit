@@ -1,5 +1,5 @@
-using System.Globalization;
 using System.Collections.Immutable;
+using System.Globalization;
 using TUnit.Mocks.SourceGenerator.Models;
 
 namespace TUnit.Mocks.SourceGenerator.Builders;
@@ -78,7 +78,7 @@ internal static class ClosedGenericRegistrationBuilder
         var emissions = new List<ClosedGenericMethodSetupEmission>();
         foreach (var (registration, model) in Pair(registrations, models))
         {
-            if (MockMembersBuilder.GetClosedReceiverGenericMethods(model).Count > 0)
+            if (MockMembersBuilder.GetClosedReceiverGenericMethods(model, registration.TypeArguments).Count > 0)
             {
                 emissions.Add(new ClosedGenericMethodSetupEmission(model, registration.ClosedTypeFullyQualifiedName, registration.TypeArguments));
             }
@@ -125,7 +125,7 @@ internal static class ClosedGenericRegistrationBuilder
                     using (writer.Block($"extension(global::TUnit.Mocks.Mock<{MockImplBuilder.GetMockableTypeName(model)}> mock)"))
                     {
                         var first = true;
-                        foreach (var method in MockMembersBuilder.GetClosedReceiverGenericMethods(model))
+                        foreach (var method in MockMembersBuilder.GetClosedReceiverGenericMethods(model, emission.TypeArguments))
                         {
                             if (!first) writer.AppendLine();
                             first = false;

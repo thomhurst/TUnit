@@ -42,6 +42,33 @@ public class Issue7302Tests : SnapshotTestBase
     private const string SetupsFileMarker = "_ClosedMockMemberExtensions_";
 
     [Test]
+    public async Task Overloads_That_Collapse_After_Substitution_Are_Omitted()
+    {
+        var source = """
+            namespace TestNamespace
+            {
+                public interface IOverloaded<T>
+                {
+                    TResult Map<TResult>(T value);
+                    TOther Map<TOther>(int value);
+                    TResult Nested<TResult>(System.Collections.Generic.List<T> value);
+                    TOther Nested<TOther>(System.Collections.Generic.List<int> value);
+                    TResult Keep<TResult>(T value);
+                }
+                public class Usage
+                {
+                    void M() => _ = TUnit.Mocks.Mock.Of<IOverloaded<int>>();
+                }
+            }
+            """;
+        var setups = GetSetupsSource(source);
+        await Assert.That(setups).IsNotNull();
+        await Assert.That(setups!).Contains(" Keep<TResult>(");
+        await Assert.That(setups).DoesNotContain(" Map<");
+        await Assert.That(setups).DoesNotContain(" Nested<");
+    }
+
+    [Test]
     public Task Closed_Generic_Method_Setups_Snapshot()
         => VerifyGeneratorOutput(Usage(
             "TUnit.Mocks.Mock.Of<IInvoker<int>>()",

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Mocks.SourceGenerator.Models;
 using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
 
@@ -931,6 +934,97 @@ internal static class MockMembersBuilder
         }
 
         return result;
+    }
+
+    // Compare the actual emitted signatures, including predicate and params-expanded overloads.
+    // A closed substitution can collapse distinct open overloads; omit both rather than choosing
+    // which underlying member an identical setup should configure.
+    internal static List<MockMemberModel> GetClosedReceiverGenericMethods(MockTypeModel model, EquatableArray<string> typeArguments)
+    {
+        var methods = GetClosedReceiverGenericMethods(model);
+        var collisions = new HashSet<int>();
+        foreach (var group in methods.GroupBy(m => (m.Name, m.TypeParameters.Length)).Where(g => g.Count() > 1))
+        {
+            var signatures = new Dictionary<string, int>(System.StringComparer.Ordinal);
+            foreach (var method in group)
+            {
+                var writer = new CodeWriter();
+                GenerateGenericMethodMembersInCurrentBlock(writer, method, model, MockImplBuilder.GetCompositeSafeName(model));
+                var source = "class Signatures { " + writer + " }";
+                // Ref-struct setup overloads differ across target frameworks. Check both branches.
+                var declarations = new[] { new CSharpParseOptions(), new CSharpParseOptions(preprocessorSymbols: new[] { "NET9_0_OR_GREATER" }) }
+                    .SelectMany(options => CSharpSyntaxTree.ParseText(source, options).GetRoot()
+                        .DescendantNodes().OfType<MethodDeclarationSyntax>());
+                var rewriter = new ClosedSignatureRewriter(model, typeArguments, method);
+                foreach (var declaration in declarations)
+                {
+                    var key = declaration.Identifier.ValueText + "`" + (declaration.TypeParameterList?.Parameters.Count ?? 0).ToString(CultureInfo.InvariantCulture)
+                        + "(" + string.Join(",", declaration.ParameterList.Parameters.Select(p =>
+                            string.Concat(p.Modifiers.Select(t => t.ValueText)) + ":" + rewriter.Visit(p.Type!)!.WithoutTrivia().NormalizeWhitespace().ToFullString())) + ")";
+                    if (signatures.TryGetValue(key, out var other) && other != method.MemberId)
+                    {
+                        collisions.Add(other);
+                        collisions.Add(method.MemberId);
+                    }
+                    else
+                    {
+                        signatures[key] = method.MemberId;
+                    }
+                }
+            }
+        }
+
+        return methods.Where(m => !collisions.Contains(m.MemberId)).ToList();
+    }
+
+    private sealed class ClosedSignatureRewriter : CSharpSyntaxRewriter
+    {
+        private readonly Dictionary<string, TypeSyntax> _substitutions = new(System.StringComparer.Ordinal);
+
+        public ClosedSignatureRewriter(MockTypeModel model, EquatableArray<string> arguments, MockMemberModel method)
+        {
+            for (var i = 0; i < model.TypeParameters.Length; i++)
+                _substitutions[model.TypeParameters[i].Name] = SyntaxFactory.ParseTypeName(arguments[i]);
+            for (var i = 0; i < method.TypeParameters.Length; i++)
+                _substitutions[method.TypeParameters[i].Name] = SyntaxFactory.IdentifierName("__MethodType" + i.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
+        {
+            if (node.Parent is QualifiedNameSyntax or AliasQualifiedNameSyntax)
+                return base.VisitIdentifierName(node);
+            if (_substitutions.TryGetValue(node.Identifier.ValueText, out var replacement))
+                return Visit(replacement);
+            return node.Identifier.ValueText switch
+            {
+                "dynamic" => SyntaxFactory.ParseTypeName("global::System.Object"),
+                "nint" => SyntaxFactory.ParseTypeName("global::System.IntPtr"),
+                "nuint" => SyntaxFactory.ParseTypeName("global::System.UIntPtr"),
+                _ => base.VisitIdentifierName(node)
+            };
+        }
+
+        public override SyntaxNode? VisitPredefinedType(PredefinedTypeSyntax node)
+            => SyntaxFactory.ParseTypeName("global::System." + (node.Keyword.ValueText switch
+            {
+                "bool" => "Boolean", "byte" => "Byte", "sbyte" => "SByte", "short" => "Int16",
+                "ushort" => "UInt16", "int" => "Int32", "uint" => "UInt32", "long" => "Int64",
+                "ulong" => "UInt64", "char" => "Char", "float" => "Single", "double" => "Double",
+                "decimal" => "Decimal", "string" => "String", "object" => "Object", _ => node.Keyword.ValueText
+            }));
+
+        // Nullability and tuple element names cannot distinguish overloads. Removing nullable
+        // value annotations too is conservative: it can only omit an additional closed copy.
+        public override SyntaxNode? VisitNullableType(NullableTypeSyntax node) => Visit(node.ElementType);
+        public override SyntaxNode? VisitTupleType(TupleTypeSyntax node)
+            => TupleType(node.Elements.Select(e => Visit(e.Type)!.NormalizeWhitespace().ToFullString()).ToArray());
+
+        private static TypeSyntax TupleType(string[] elements)
+        {
+            var arguments = elements.Length <= 7 ? elements
+                : elements.Take(7).Concat(new[] { TupleType(elements.Skip(7).ToArray()).ToFullString() }).ToArray();
+            return SyntaxFactory.ParseTypeName("global::System.ValueTuple<" + string.Join(",", arguments) + ">");
+        }
     }
 
     internal static void GenerateClosedReceiverGenericMethodMembers(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)

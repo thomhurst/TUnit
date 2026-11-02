@@ -16,6 +16,15 @@ public interface IConstrainedInvoker7302<T>
     TOther Keep<TOther>(T value);
 }
 
+public interface IOverloadedInvoker7302<T>
+{
+    TResult Map<TResult>(T value);
+    TOther Map<TOther>(int value);
+    TResult Nested<TResult>(System.Collections.Generic.List<T> value);
+    TOther Nested<TOther>(System.Collections.Generic.List<int> value);
+    TResult Keep<TResult>(T value);
+}
+
 public class Outer7302<TOuter>
 {
     public interface IInner<TInner>
@@ -36,6 +45,22 @@ public struct Point7302
 /// </summary>
 public class Issue7302Tests
 {
+    [Test]
+    public async Task Closing_Overloads_Does_Not_Break_Compilation_Or_Unrelated_Setups()
+    {
+        // Map and Nested collapse for int; merely registering this mock must compile.
+        var collapsed = Mock.Of<IOverloadedInvoker7302<int>>();
+        collapsed.Keep<string>(Arg.Any<int>()).Returns("kept");
+        await Assert.That(collapsed.Object.Keep<string>(1)).IsEqualTo("kept");
+
+        // The same open overloads remain distinct for string and retain explicit setups.
+        var distinct = Mock.Of<IOverloadedInvoker7302<string>>();
+        distinct.Map<string>(Arg.Any<string>()).Returns("text");
+        distinct.Map<string>(Arg.Any<int>()).Returns("number");
+        await Assert.That(distinct.Object.Map<string>("x")).IsEqualTo("text");
+        await Assert.That(distinct.Object.Map<string>(1)).IsEqualTo("number");
+    }
+
     [Test]
     public async Task Explicit_Method_Type_Arguments_Bind_On_Mock_Of_Generic_Interface()
     {
