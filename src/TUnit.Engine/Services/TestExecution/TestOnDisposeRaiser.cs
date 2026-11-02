@@ -64,9 +64,6 @@ internal static class TestOnDisposeRaiser
         await RaiseDetachedAsync(context, onDispose.InvocationList, exceptions).ConfigureAwait(false);
     }
 
-    // Guards adds to the session context's OnDispose from discovery, which can run in parallel.
-    private static readonly object s_sessionCallbacksLock = new();
-
     /// <summary>
     /// Moves the OnDispose callbacks subscribed on <paramref name="context"/> to the current session's
     /// <see cref="TestSessionContext.DeferredDiscoveryOnDispose"/>, so <see cref="RaiseDeferredForSessionAsync"/>
@@ -77,33 +74,7 @@ internal static class TestOnDisposeRaiser
     /// which the session's static property cleanup raises.
     /// </summary>
     public static void DeferToSessionEnd(TestBuilderContext context)
-    {
-        if (context.EventsIfCreated is not { OnDispose: { } onDispose } events)
-        {
-            return;
-        }
-
-        events.OnDispose = null;
-
-        lock (s_sessionCallbacksLock)
-        {
-            AsyncEvent<TestContext> target;
-            if (TestSessionContext.Current is { } session)
-            {
-                target = session.DeferredDiscoveryOnDispose ??= new AsyncEvent<TestContext>();
-            }
-            else
-            {
-                var globalEvents = TestSessionContext.GlobalStaticPropertyContext.Events;
-                target = globalEvents.OnDispose ??= new AsyncEvent<TestContext>();
-            }
-
-            foreach (var invocation in onDispose.InvocationList)
-            {
-                target.Add(invocation.InvokeAsync, invocation.Order);
-            }
-        }
-    }
+        => TestSessionContext.DeferOnDisposeToSessionEnd(context);
 
     /// <summary>
     /// Raises, once, the callbacks <see cref="DeferToSessionEnd"/> moved to <paramref name="session"/>.
@@ -113,14 +84,7 @@ internal static class TestOnDisposeRaiser
     /// </summary>
     public static async ValueTask RaiseDeferredForSessionAsync(TestSessionContext session, TUnitFrameworkLogger logger)
     {
-        AsyncEvent<TestContext>? onDispose;
-        lock (s_sessionCallbacksLock)
-        {
-            onDispose = session.DeferredDiscoveryOnDispose;
-            session.DeferredDiscoveryOnDispose = null;
-        }
-
-        if (onDispose is null)
+        if (session.TakeDeferredDiscoveryOnDispose() is not { } onDispose)
         {
             return;
         }

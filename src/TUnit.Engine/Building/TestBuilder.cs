@@ -134,6 +134,11 @@ internal sealed class TestBuilder : ITestBuilder
 
         var tests = new List<AbstractExecutableTest>();
 
+        // The context of the row being built, until a test (or the class row it is handed back to) owns the
+        // events its data sources subscribed. When building the row throws, the method's failed test takes
+        // them, so the cleanup they hold (a dependency injection scope's disposal) still runs (#7205).
+        TestBuilderContext? unownedRowContext = null;
+
         try
         {
             // Create a context for capturing output during test building.
@@ -298,7 +303,10 @@ internal sealed class TestBuilder : ITestBuilder
                                 hasAnyMethodData = true;
                                 methodDataLoopIndex++;
 
-                                for (var i = 0; i < repeatCount + 1; i++)
+                                // Every way out of an iteration that does not throw (a built test, a failed test,
+                                // a row handed back to the class row) leaves its events owned, so the iterator
+                                // clears unownedRowContext, which also runs on continue.
+                                for (var i = 0; i < repeatCount + 1; i++, unownedRowContext = null)
                                 {
                                     // Update context BEFORE calling data factories so they track objects in the right context
                                     // StateBag and Events are lazy-initialized for performance
@@ -310,6 +318,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         InitializedAttributes = testBuilderContext.InitializedAttributes,
                                         ClassConstructor = testBuilderContext.ClassConstructor
                                     };
+                                    unownedRowContext = contextAccessor.Current;
 
                                     testBuilderContext.CopyStateBagTo(contextAccessor.Current);
 
@@ -688,7 +697,10 @@ internal sealed class TestBuilder : ITestBuilder
             // The build context was disposed on leaving the try block; stop routing output to it.
             TestBuildContext.Current = null;
 
-            var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
+            // A row that threw while it was built (its method data source, a class row fetched again, or the
+            // initialization of its objects) holds events that no test took, including the class row's once
+            // it was taken against the row's context.
+            var failedTest = CreateFailedTestForDataGenerationError(metadata, ex, new TestDataCombination(), rowEvents: unownedRowContext?.EventsIfCreated);
             tests.Add(failedTest);
             return tests;
         }

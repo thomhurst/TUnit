@@ -13,8 +13,9 @@ namespace TUnit.TestProject.Bugs._7205;
 // the object tracker must not dispose them a second time. A scope that is not disposable cannot dispose
 // what Create returns, so the object tracker still does. A row that fails after its scope was created
 // still disposes that scope (#7326), and so do a class row whose service fails to resolve after its
-// scope was created, a test skipped because its dependency failed, a test removed by circular-dependency
-// detection and a test a property filter excluded after it was built.
+// scope was created, a method row whose service fails to resolve after the class row was taken, a test
+// skipped because its dependency failed, a test removed by circular-dependency detection and a test a
+// property filter excluded after it was built.
 
 public sealed class ProbeScope : IDisposable
 {
@@ -93,6 +94,14 @@ public sealed class ThrowingCreateDependencyInjectionAttribute() : ProbeDependen
 {
     public override object? Create(ProbeScope scope, Type type) =>
         throw new InvalidOperationException("Resolving the service fails by design, after its scope was created.");
+}
+
+public sealed class MethodRowThrowsClassDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(MethodRowThrowsScopeTests));
+
+public sealed class MethodRowThrowsDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(MethodRowThrowsScopeTests.MethodRowOwner)
+{
+    public override object? Create(ProbeScope scope, Type type) =>
+        throw new InvalidOperationException("Resolving the method row's service fails by design, after its scope was created.");
 }
 
 // Resolves a service whose discovery initialization fails, after its scope was created.
@@ -351,6 +360,21 @@ public class InitFailingScopeTests(InitFailingService service)
     public void Run() => throw new InvalidOperationException($"Should have failed to build, but ran with {service}");
 }
 
+// The method row's service fails to resolve after its scope was created, once the test's row had taken the
+// class row's first fetch, so the method's build fails. Neither the class row's scope nor the method row's
+// scope may be lost with it.
+[EngineTest(ExpectedResult.Failure)]
+[MethodRowThrowsClassDependencyInjection]
+public class MethodRowThrowsScopeTests(ProbeService service)
+{
+    public const string MethodRowOwner = nameof(MethodRowThrowsScopeTests) + ".MethodRow";
+
+    [Test]
+    [MethodRowThrowsDependencyInjection]
+    public void Run(ProbeService methodService) =>
+        throw new InvalidOperationException($"Should have failed to build, but ran with {service} and {methodService}");
+}
+
 // A test skipped because its dependency failed never reaches TestCoordinator. The scope created for
 // it must still be disposed, because the object tracker no longer disposes the services the scope owns.
 [EngineTest(ExpectedResult.Failure)]
@@ -419,6 +443,7 @@ public class DependencyInjectionScopeDisposalObserverTests
     [DependsOn(typeof(SkippedScopeTests), ProceedOnFailure = true)]
     [DependsOn(typeof(SkippedIfEmptyScopeTests), ProceedOnFailure = true)]
     [DependsOn(typeof(FailedRowScopeTests), ProceedOnFailure = true)]
+    [DependsOn(typeof(MethodRowThrowsScopeTests), ProceedOnFailure = true)]
     [DependsOn(typeof(DependencySkippedScopeTests), ProceedOnFailure = true)]
     [DependsOn(typeof(NonDisposableScopeTests))]
     [DependsOn(typeof(NestedScopeDependencyTests))]
@@ -447,6 +472,13 @@ public class DependencyInjectionScopeDisposalObserverTests
         var throwingCreateScopes = ProbeScope.Created.Where(x => x.Owner == nameof(ThrowingCreateScopeTests)).ToArray();
         await Assert.That(throwingCreateScopes.Length).IsEqualTo(1);
         await Assert.That(throwingCreateScopes.Count(x => x.IsDisposed)).IsEqualTo(1);
+
+        // The class row's scope, which resolved the class's service, and the scope of the method row whose
+        // service failed to resolve, which resolved nothing.
+        await AssertScopes(nameof(MethodRowThrowsScopeTests), 1);
+        var methodRowScopes = ProbeScope.Created.Where(x => x.Owner == MethodRowThrowsScopeTests.MethodRowOwner).ToArray();
+        await Assert.That(methodRowScopes.Length).IsEqualTo(1);
+        await Assert.That(methodRowScopes.Count(x => x.IsDisposed)).IsEqualTo(1);
 
         // The scope of the class row whose service failed to initialize during discovery.
         await AssertScopes(nameof(InitFailingScopeTests), 1);

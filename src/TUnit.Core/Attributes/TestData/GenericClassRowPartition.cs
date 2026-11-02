@@ -221,18 +221,50 @@ public static class GenericClassRowPartition
             var rowsByIndex = new List<EvaluatedRow>?[dataSources.Length];
             var anyRowInfers = false;
 
-            foreach (var index in partitionedIndices)
+            // The rows are read against a context of their own, so the cleanup their sources subscribe (a
+            // dependency injection scope's disposal) lands on no test's context, and none of it is lost when
+            // a row's first fetch returns the evaluated values without subscribing again. It runs at session
+            // end, as it does for the rows reflection discovery evaluates to infer type arguments (#7205).
+            var accessor = dataGeneratorMetadata.TestBuilderContext;
+            var previousContext = accessor?.Current;
+            TestBuilderContext? evaluationContext = null;
+            if (accessor is not null && previousContext is not null)
             {
-                var rows = new List<EvaluatedRow>();
-                await foreach (var rowFactory in dataSources[index].GetDataRowsAsync(dataGeneratorMetadata).ConfigureAwait(false))
+                evaluationContext = new TestBuilderContext
                 {
-                    var row = await rowFactory().ConfigureAwait(false) is { } fetched ? EvaluateWrappedFactory(fetched) : null;
-                    var infers = InfersTypeArguments(row, ClassTypeArguments);
-                    anyRowInfers |= infers;
-                    rows.Add(new EvaluatedRow(rowFactory, row, infers));
-                }
+                    TestMetadata = previousContext.TestMetadata,
+                    DataSourceAttribute = previousContext.DataSourceAttribute,
+                    ClassDataSourceAttribute = previousContext.ClassDataSourceAttribute,
+                    InitializedAttributes = previousContext.InitializedAttributes,
+                    ClassConstructor = previousContext.ClassConstructor
+                };
+                evaluationContext.ShareStateBagWith(previousContext);
+                accessor.Current = evaluationContext;
+            }
 
-                rowsByIndex[index] = rows;
+            try
+            {
+                foreach (var index in partitionedIndices)
+                {
+                    var rows = new List<EvaluatedRow>();
+                    await foreach (var rowFactory in dataSources[index].GetDataRowsAsync(dataGeneratorMetadata).ConfigureAwait(false))
+                    {
+                        var row = await rowFactory().ConfigureAwait(false) is { } fetched ? EvaluateWrappedFactory(fetched) : null;
+                        var infers = InfersTypeArguments(row, ClassTypeArguments);
+                        anyRowInfers |= infers;
+                        rows.Add(new EvaluatedRow(rowFactory, row, infers));
+                    }
+
+                    rowsByIndex[index] = rows;
+                }
+            }
+            finally
+            {
+                if (evaluationContext is not null)
+                {
+                    accessor!.Current = previousContext!;
+                    TestSessionContext.DeferOnDisposeToSessionEnd(evaluationContext);
+                }
             }
 
             return new Evaluation(rowsByIndex, anyRowInfers);
