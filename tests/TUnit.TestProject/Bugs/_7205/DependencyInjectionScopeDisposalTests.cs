@@ -206,7 +206,9 @@ public class CircularDependencyScopeTests
     public void Second(ProbeService service) => throw new InvalidOperationException($"Should have failed its circular dependency, but ran with {service}");
 }
 
-[EngineTest(ExpectedResult.Pass)]
+// Not tagged [EngineTest]: it depends on DependencySkippedScopeTests, whose Fails test fails by design,
+// and asserts the scopes of CircularDependencyScopeTests, so it only holds when the whole _7205 folder
+// runs together. Issue7205Tests runs it that way; the [EngineTest=Pass] sweep must not pull it in.
 public class DependencyInjectionScopeDisposalObserverTests
 {
     [Test]

@@ -1,4 +1,4 @@
-﻿namespace TUnit.Core.Interfaces;
+namespace TUnit.Core.Interfaces;
 
 /// <summary>
 /// Provides access to test-specific events for advanced integration scenarios.
