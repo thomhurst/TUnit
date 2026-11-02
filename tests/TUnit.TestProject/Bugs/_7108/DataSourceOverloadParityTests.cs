@@ -5,7 +5,7 @@ namespace TUnit.TestProject.Bugs._7108;
 /// <summary>
 /// A table of [MethodDataSource] overload scenarios. Source-gen mode picks the overload with
 /// <c>ScoreDataSourceOverload</c> in the generator, and reflection mode with the runtime binder and
-/// <c>MethodDataSourceAttribute.ResolveDataSourceMethodWithNullArgument</c>. Each attribute is one row:
+/// <c>MethodDataSourceAttribute.ResolveDataSourceMethodByScore</c>. Each attribute is one row:
 /// its first argument names the overload both modes must choose, and every overload yields
 /// (expected, its own signature). Issue7108Tests runs the table in both modes, so a divergence between
 /// the two resolvers fails the row in the mode that drifted. The test methods are not generic, so the
@@ -185,6 +185,26 @@ public class DataSourceOverloadParityTests
         yield return (expected, "Token(string, int, CancellationToken)");
     }
 
+    public static IEnumerable<(string, string)> TiedTokens(string expected, CancellationToken token)
+    {
+        yield return (expected, "TiedTokens(string, CancellationToken)");
+    }
+
+    public static IEnumerable<(string, string)> TiedTokens(string expected, CancellationToken first, CancellationToken second)
+    {
+        yield return (expected, "TiedTokens(string, CancellationToken, CancellationToken)");
+    }
+
+    public static IEnumerable<(string, string)> TiedTokensLongerFirst(string expected, CancellationToken first, CancellationToken second)
+    {
+        yield return (expected, "TiedTokensLongerFirst(string, CancellationToken, CancellationToken)");
+    }
+
+    public static IEnumerable<(string, string)> TiedTokensLongerFirst(string expected, CancellationToken token)
+    {
+        yield return (expected, "TiedTokensLongerFirst(string, CancellationToken)");
+    }
+
     // C# converts an int to decimal or long?, but reflection's binder and MethodInfo.Invoke cannot, so the object
     // overload declared first wins in both modes
     public static IEnumerable<(string, string)> ObjectOrDecimal(string expected, object value)
@@ -274,6 +294,8 @@ public class DataSourceOverloadParityTests
     [MethodDataSource(nameof(NullOptional), Arguments = new object?[] { "NullOptional(string, string?, int)", null })]
     [MethodDataSource(nameof(Optional), Arguments = new object[] { "Optional(string, string, int)", "a" })]
     [MethodDataSource(nameof(Token), Arguments = new object[] { "Token(string, int, CancellationToken)", 1 })]
+    [MethodDataSource(nameof(TiedTokens), Arguments = new object[] { "TiedTokens(string, CancellationToken)" })]
+    [MethodDataSource(nameof(TiedTokensLongerFirst), Arguments = new object[] { "TiedTokensLongerFirst(string, CancellationToken, CancellationToken)" })]
     // An override called through its base declaration passes its own default, as reflection does, not the base's
     [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.OverriddenDefault), Arguments = new object?[] { "Derived.OverriddenDefault(string, string?, int = 2)", null })]
     [MethodDataSource(typeof(DataSourceOverloadParityDerivedProvider), nameof(DataSourceOverloadParityDerivedProvider.OverriddenDefault), Arguments = new object[] { "Derived.OverriddenDefault(string, string?, int = 2)", "non-null" })]

@@ -33,8 +33,8 @@ public class Issue7108Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7108/DataSourceOverloadParityTests/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(32),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(32),
+                result => result.ResultSummary.Counters.Total.ShouldBe(34),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(34),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
