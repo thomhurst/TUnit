@@ -125,12 +125,10 @@ public class GenericConstraintValidationTests
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
     }
 
-    // A constraint violation is a test-building error, so it is reported as a failure even when the
-    // test is skipped. Both modes must agree (#7097).
+    // Generic-resolution failures preserve method attributes, including Skip, in both modes (#7222).
     [Test]
     [Arguments("invalid")]
-    [Skip("Skip does not hide a generic constraint violation")]
-    [EngineTest(ExpectedResult.Failure)]
+    [Skip("A skipped row stays skipped even when its inferred type violates a constraint")]
     public async Task GenericMethodWithStructConstraint_SkippedInvalidType<T>(T value) where T : struct
     {
         await Task.CompletedTask;

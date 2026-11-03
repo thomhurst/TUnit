@@ -1730,7 +1730,8 @@ internal sealed class TestBuilder : ITestBuilder
 
     private TestDetails CreateFailedTestDetails(TestMetadata metadata, string testId, object?[] failedDataRowObjects)
     {
-        return new TestDetails([])
+        var attributes = GetFailedTestAttributes(metadata);
+        return new TestDetails(attributes)
         {
             TestId = testId,
             UnreceivedDataRowObjects = failedDataRowObjects,
@@ -1747,8 +1748,21 @@ internal sealed class TestBuilder : ITestBuilder
             TestEndColumnNumber = metadata.EndColumnNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
-            AttributesByType = AttributeDictionaryHelper.Empty
+            AttributesByType = attributes.Length == 0 ? AttributeDictionaryHelper.Empty : new LazyAttributeDictionary(attributes)
         };
+    }
+
+    internal static Attribute[] GetFailedTestAttributes(TestMetadata metadata)
+    {
+        try
+        {
+            return ScopeRowAttributesToTest(metadata.GetOrCreateAttributes(), null, null);
+        }
+        catch
+        {
+            // An attribute factory can itself be the discovery failure. Keep reporting that failure.
+            return [];
+        }
     }
 
     /// <summary>

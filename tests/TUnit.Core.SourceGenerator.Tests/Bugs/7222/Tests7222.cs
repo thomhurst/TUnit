@@ -1,0 +1,159 @@
+using TUnit.Core.SourceGenerator.Tests.Options;
+
+namespace TUnit.Core.SourceGenerator.Tests;
+
+/// <summary>
+/// A method-level [GenerateGenericTest] with no type arguments, or the wrong number of them, is emitted as a
+/// failing entry with reflection mode's message instead of being dropped (#7222).
+/// </summary>
+internal class Tests7222 : TestsBase
+{
+    [Test]
+    public Task Test() => RunTest(Path.Combine(
+            Git.TestsDirectory.FullName,
+            "TUnit.TestProject",
+            "Bugs",
+            "_7222",
+            "GenerateGenericTestArityTests.cs"),
+        new RunTestOptions
+        {
+            AdditionalSyntaxes =
+            [
+                // A pointer is not a valid type argument: M<int*>() would not compile
+                """
+                namespace TUnit.TestProject.Bugs._7222;
+
+                public unsafe class PointerGenerateGenericTestTests
+                {
+                    [Test]
+                    [GenerateGenericTest(typeof(int*))]
+                    public void PointerTypeArgument<T>()
+                    {
+                    }
+                }
+
+                // On a generic class, too, the pointer is not paired with the class type arguments
+                [GenerateGenericTest(typeof(int))]
+                public unsafe class PointerOnGenericClassTests<TClass>
+                {
+                    [Test]
+                    [GenerateGenericTest(typeof(int*))]
+                    public void PointerTypeArgument<TMethod>()
+                    {
+                    }
+                }
+
+                // A class-level pointer fails rather than closing the class as C<int*>, which would not compile
+                [GenerateGenericTest(typeof(int*))]
+                public unsafe class PointerClassTypeArgumentTests<T>
+                {
+                    [Test]
+                    public void NonGenericMethod()
+                    {
+                    }
+                }
+
+                [GenerateGenericTest(typeof(int*))]
+                [GenerateGenericTest(typeof(int))]
+                public unsafe class PointerClassTypeArgumentGenericMethodTests<TClass>
+                {
+                    [Test]
+                    [GenerateGenericTest(typeof(string))]
+                    public void GenericMethod<TMethod>()
+                    {
+                    }
+                }
+                """
+            ]
+        },
+        async generatedFiles =>
+        {
+            const string violation = "global::TUnit.Core.GenericConstraintViolationDataSource.Create(";
+
+            string SourceFor(string className, string methodName) => generatedFiles.Single(f =>
+                f.Contains($"class TUnit_TestProject_Bugs__7222_{className}")
+                && (f.Contains($"methodName: \"{methodName}<") || f.Contains($"methodName: \"{methodName}\"")));
+
+            await Assert.That(SourceFor("GenerateGenericTestArityTests", "TooManyTypeArguments"))
+                .Contains(violation + "\"[GenerateGenericTest] on method 'TooManyTypeArguments' provides 2 type argument(s) but method requires 1. Provided: [Int32, String]\")");
+
+            await Assert.That(SourceFor("GenerateGenericTestArityTests", "NoTypeArguments"))
+                .Contains(violation + "\"[GenerateGenericTest] on method 'NoTypeArguments' has no type arguments\")");
+
+            await Assert.That(SourceFor("GenerateGenericTestArityTests", "TooFewTypeArguments"))
+                .Contains(violation + "\"[GenerateGenericTest] on method 'TooFewTypeArguments' provides 1 type argument(s) but method requires 2. Provided: [Int32]\")");
+
+            // The valid ones still run beside the failing one.
+            var mixed = SourceFor("GenerateGenericTestArityTests", "MixedArity");
+            await Assert.That(mixed).Contains("instance.MixedArity<int>(");
+            await Assert.That(mixed).Contains("instance.MixedArity<string>(");
+            await Assert.That(mixed).Contains(violation + "\"[GenerateGenericTest] on method 'MixedArity' provides 2 type argument(s)");
+
+            // An array type argument is a type argument like any other.
+            var array = SourceFor("GenerateGenericTestArityTests", "ArrayTypeArgument");
+            await Assert.That(array).DoesNotContain(violation);
+            await Assert.That(array).Contains("instance.ArrayTypeArgument<int[]>(");
+
+            // A generic method of a generic class fails the wrongly sized one on each concrete class.
+            var genericClass = SourceFor("GenericClassGenerateGenericTestArityTests", "MixedArity");
+            await Assert.That(genericClass.Split([violation + "\"[GenerateGenericTest] on method 'MixedArity'"], StringSplitOptions.None).Length - 1)
+                .IsEqualTo(2);
+
+            // With no valid method-level [GenerateGenericTest], the concrete class still gets the failure.
+            await Assert.That(SourceFor("OnlyWronglySizedOnGenericClassTests", "NoTypeArguments"))
+                .Contains(violation + "\"[GenerateGenericTest] on method 'NoTypeArguments' has no type arguments\")");
+
+            // Declaration order: the arity failure first, then the constraint failure, as in reflection mode.
+            var order = SourceFor("ArityAndConstraintOrderTests", "ArityThenConstraint");
+            await Assert.That(order.IndexOf(violation + "\"[GenerateGenericTest] on method 'ArityThenConstraint' provides 2", StringComparison.Ordinal))
+                .IsLessThan(order.IndexOf(violation + "\"Type 'Int32' does not satisfy", StringComparison.Ordinal));
+
+            // The failing entry has no class rows, so it fails once rather than once per class row.
+            var classRows = SourceFor("ClassRowsGenerateGenericTestArityTests", "MixedArity");
+            var classRowsViolationEntry = classRows.Substring(classRows.IndexOf(violation, StringComparison.Ordinal));
+            classRowsViolationEntry = classRowsViolationEntry.Substring(0, classRowsViolationEntry.IndexOf("TestEntryFactory", StringComparison.Ordinal) is var end and > 0 ? end : classRowsViolationEntry.Length);
+            await Assert.That(classRowsViolationEntry).DoesNotContain("classDataSources:");
+
+            // A non-generic class passes its constructor argument rather than calling a parameterless constructor.
+            await Assert.That(SourceFor("ConstructorArgumentGenerateGenericTestArityTests", "MixedArity"))
+                .DoesNotContain("new global::TUnit.TestProject.Bugs._7222.ConstructorArgumentGenerateGenericTestArityTests()");
+
+            var pointer = SourceFor("PointerGenerateGenericTestTests", "PointerTypeArgument");
+            await Assert.That(pointer).DoesNotContain("PointerTypeArgument<int*>");
+            await Assert.That(pointer)
+                .Contains(violation + "\"[GenerateGenericTest] on method 'PointerTypeArgument' provides type argument 'Int32*', which cannot be a generic type argument\")");
+
+            var pointerOnGenericClass = SourceFor("PointerOnGenericClassTests", "PointerTypeArgument");
+            await Assert.That(pointerOnGenericClass).DoesNotContain("PointerTypeArgument<int*>");
+            await Assert.That(pointerOnGenericClass)
+                .Contains(violation + "\"[GenerateGenericTest] on method 'PointerTypeArgument' provides type argument 'Int32*', which cannot be a generic type argument\")");
+
+            // A class-level pointer fails with reflection mode's MakeGenericType message instead of closing the class over it.
+            foreach (var (className, methodName) in new[] { ("PointerClassTypeArgumentTests_T", "NonGenericMethod"), ("PointerClassTypeArgumentGenericMethodTests_TClass", "GenericMethod") })
+            {
+                var pointerClass = generatedFiles.Single(f => f.Contains($"class TUnit_TestProject_Bugs__7222_{className}_{methodName}_TestSource"));
+                await Assert.That(pointerClass).DoesNotContain("<int*>");
+                await Assert.That(pointerClass)
+                    .Contains($"Messages = new string[] {{ \"Type arguments 'Int32*' do not satisfy the generic constraints of type '{className.Substring(0, className.LastIndexOf('_'))}`1'\" }}");
+            }
+
+            await Assert.That(SourceFor("PointerClassTypeArgumentGenericMethodTests", "GenericMethod")).Contains("GenericMethod<string>(");
+
+            // A null type argument is counted and rejected, as reflection mode reads TypeArguments.
+            await Assert.That(SourceFor("NullTypeArgumentGenerateGenericTestTests", "NullTypeArgument"))
+                .Contains(violation + "\"[GenerateGenericTest] on method 'NullTypeArgument' provides type argument 'null', which cannot be a generic type argument\")");
+            var nullBesideType = SourceFor("NullTypeArgumentGenerateGenericTestTests", "NullBesideType");
+            await Assert.That(nullBesideType).DoesNotContain("NullBesideType<int>");
+            await Assert.That(nullBesideType)
+                .Contains(violation + "\"[GenerateGenericTest] on method 'NullBesideType' provides 2 type argument(s) but method requires 1. Provided: [Int32, null]\")");
+
+            // A broad data source on a generic class defers to the method-level [GenerateGenericTest]: only the
+            // arity failure is reported.
+            foreach (var className in new[] { "BroadSourceOnGenericClassRowTests", "BroadSourceOnGenericClassTypeTests" })
+            {
+                var broad = SourceFor(className, "EmptyGenerateGenericTest");
+                await Assert.That(broad).Contains(violation + "\"[GenerateGenericTest] on method 'EmptyGenerateGenericTest' has no type arguments\")");
+                await Assert.That(broad).DoesNotContain("does not satisfy");
+            }
+        });
+}

@@ -52,6 +52,7 @@ public class Issue7116Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result =>
                 {
                     var message = result.Results.Single().Output?.ErrorInfo?.Message;
+                    message.ShouldNotBeNull();
                     foreach (var phrase in SharedExplanationPhrases)
                     {
                         message.ShouldContain(phrase);
@@ -93,15 +94,14 @@ public class Issue7116Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     public async Task GenerateGenericTest_With_Full_Arity_Runs_Broad_Rows_Beside_A_Wrongly_Sized_One()
     {
-        // The full [GenerateGenericTest] runs the object-declared rows in both modes. Reflection mode also
-        // fails the wrongly sized one, which source-generated mode ignores (#7222).
-        var expectedTotal = testMode == TestMode.Reflection ? 2 : 1;
+        // The full [GenerateGenericTest] runs the object-declared rows in both modes, and both modes fail the
+        // wrongly sized one on its own (#7222).
         await RunTestsWithFilter(
             $"{ClassFilter}/MixedArityGenerateGenericTestWithObjectRows*",
             [
-                result => result.ResultSummary.Counters.Total.ShouldBe(expectedTotal),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(1),
-                result => result.ResultSummary.Counters.Failed.ShouldBe(expectedTotal - 1)
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1)
             ]);
     }
 
