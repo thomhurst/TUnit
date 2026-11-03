@@ -365,6 +365,166 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7440_OptionalArrayConstructorArgumentTests_T_Run_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "OptionalArrayConstructorArgumentTests",
+        Namespace = "TUnit.TestProject.Bugs._7440",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "rest", new global::TUnit.Core.ConcreteType(typeof(int[])), true)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Run", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
+    private static global::TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args.Length < 2 ? default(int[]) : (args.Length == 2 ? (args[1] is null ? null : args[1] is int[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(args[1])) : (args.Length > 1 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(1, args.Length - 1), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>()))));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Run());
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+            new global::TUnit.Core.ArgumentsAttribute(1),
+            new global::TUnit.Core.ArgumentsAttribute(2)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<int>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<int>>(
+            methodName: "Run",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<int>.Run",
+            filePath: "",
+            lineNumber: 151,
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(1),
+    new global::TUnit.Core.ArgumentsAttribute(2),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7440_OptionalArrayConstructorArgumentTests_T_Run_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7440.OptionalArrayConstructorArgumentTests<int>>(static () => TUnit_TestProject_Bugs__7440_OptionalArrayConstructorArgumentTests_T_Run_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7440_SelectedConstructorArgumentTests_T_Run_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "SelectedConstructorArgumentTests",
+        Namespace = "TUnit.TestProject.Bugs._7440",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "text", new global::TUnit.Core.ConcreteType(typeof(string)), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Run", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
+    private static global::TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Run());
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+            new global::TUnit.Core.ArgumentsAttribute(1, "first"),
+            new global::TUnit.Core.ArgumentsAttribute(2, "second")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<int>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<int>>(
+            methodName: "Run",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<int>.Run",
+            filePath: "",
+            lineNumber: 184,
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(1, "first"),
+    new global::TUnit.Core.ArgumentsAttribute(2, "second"),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7440_SelectedConstructorArgumentTests_T_Run_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7440.SelectedConstructorArgumentTests<int>>(static () => TUnit_TestProject_Bugs__7440_SelectedConstructorArgumentTests_T_Run_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7440_DecimalConstructorArgumentTests__TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7440.DecimalConstructorArgumentTests", new global::TUnit.Core.ClassMetadata
@@ -696,4 +856,100 @@ internal static class TUnit_TestProject_Bugs__7440_DecimalStringConstantConstruc
 internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_Bugs__7440_DecimalStringConstantConstructorArgumentTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7440.DecimalStringConstantConstructorArgumentTests>(static () => TUnit_TestProject_Bugs__7440_DecimalStringConstantConstructorArgumentTests__TestSource.Entries);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7440_OptionalOnlyArrayConstructorArgumentTests__TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests)),
+        Name = "OptionalOnlyArrayConstructorArgumentTests",
+        Namespace = "TUnit.TestProject.Bugs._7440",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests), false, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "rest", new global::TUnit.Core.ConcreteType(typeof(int[])), true)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests);
+    private static global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests((args.Length < 1 ? default(int[]) : (args.Length == 1 ? (args[0] is null ? null : args[0] is int[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(args[0])) : (args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>()))));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            switch (methodIndex)
+            {
+                case 0:
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Run());
+                }
+                default:
+                    throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes(int groupIndex)
+    {
+        switch (groupIndex)
+        {
+            case 0:
+            {
+                return
+                [
+                    new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+                    new global::TUnit.Core.ArgumentsAttribute()
+                ];
+            }
+            default:
+                throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
+        }
+    }
+    private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests> __createInstance = __CreateInstance;
+    private static readonly global::System.Func<global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
+    private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests>(
+            methodName: "Run",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests.Run",
+            filePath: "",
+            lineNumber: 163,
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(),
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 0,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7440_OptionalOnlyArrayConstructorArgumentTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7440.OptionalOnlyArrayConstructorArgumentTests>(static () => TUnit_TestProject_Bugs__7440_OptionalOnlyArrayConstructorArgumentTests__TestSource.Entries);
 }

@@ -312,8 +312,14 @@ public static class InstanceFactoryGenerator
             {
                 var singleValueArguments = TupleArgumentHelper.GenerateArgumentAccessWithParams(parameters, "args", parameters.Length);
                 var trailingArgument = arguments[arguments.Count - 1];
-                arguments[arguments.Count - 1] = new InvocationArgument(
-                    $"(args.Length == {parameters.Length.ToString(CultureInfo.InvariantCulture)} ? {singleValueArguments[singleValueArguments.Count - 1].Expression} : {trailingArgument.Expression})");
+                var trailingExpression = $"(args.Length == {parameters.Length.ToString(CultureInfo.InvariantCulture)} ? {singleValueArguments[singleValueArguments.Count - 1].Expression} : {trailingArgument.Expression})";
+                var lastParameter = parameters[parameters.Length - 1];
+                if (!lastParameter.IsParams && lastParameter.HasExplicitDefaultValue)
+                {
+                    // Runtime class rows can omit an optional plain array just like statically bound rows.
+                    trailingExpression = $"(args.Length < {parameters.Length.ToString(CultureInfo.InvariantCulture)} ? default({lastParameter.Type.GloballyQualified()}) : {trailingExpression})";
+                }
+                arguments[arguments.Count - 1] = new InvocationArgument(trailingExpression);
             }
             writer.Append(string.Join(", ", arguments));
 

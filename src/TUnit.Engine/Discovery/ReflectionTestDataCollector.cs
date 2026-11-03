@@ -3436,7 +3436,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 if (trailingElementType != null)
                 {
                     var trailingCount = Math.Max(0, args.Length - regularParameterCount);
-                    if (trailingCount == 1)
+                    if (trailingCount == 0
+                        && lastParameter!.HasDefaultValue
+                        && !lastParameter.IsDefined(typeof(ParamArrayAttribute), false)
+                        && !IsParamCollection(lastParameter))
+                    {
+                        // Omitted optional arrays retain their declared default; params arrays stay empty.
+                        castedArgs[regularParameterCount] = Type.Missing;
+                    }
+                    else if (trailingCount == 1)
                     {
                         // Preserve explicit arrays and null, matching the generated row binder.
                         var value = args[regularParameterCount];

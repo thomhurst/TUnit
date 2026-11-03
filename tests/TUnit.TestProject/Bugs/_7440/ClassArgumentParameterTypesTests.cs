@@ -142,3 +142,48 @@ public class ParamsConstructorArgumentTests<T>(T value, params int[] rest)
         }
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+[Arguments(2)]
+public class OptionalArrayConstructorArgumentTests<T>(T value, int[]? rest = null)
+{
+    [Test]
+    public async Task Run()
+    {
+        await Assert.That(value is int).IsTrue();
+        await Assert.That(rest).IsNull();
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments]
+public class OptionalOnlyArrayConstructorArgumentTests(int[]? rest = null)
+{
+    [Test]
+    public async Task Run() => await Assert.That(rest).IsNull();
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1, "first")]
+[Arguments(2, "second")]
+public class SelectedConstructorArgumentTests<T>
+{
+    private readonly T _value;
+    private readonly string _text;
+
+    public SelectedConstructorArgumentTests(T value) => throw new InvalidOperationException("Unselected constructor");
+
+    [TestConstructor]
+    public SelectedConstructorArgumentTests(T value, string text)
+    {
+        _value = value;
+        _text = text;
+    }
+
+    [Test]
+    public async Task Run()
+    {
+        await Assert.That((int)(object)_value!).IsEqualTo(_text == "first" ? 1 : 2);
+    }
+}
