@@ -86,7 +86,7 @@ Several properties have been moved from the main `TestContext` class into their 
 
 **New interface** exposing nullable event properties for lazy initialization:
 
-* `OnDispose` - Event raised when test context is disposed
+* `OnDispose` - Event raised once per test, after its final attempt and after the test class instance is disposed (also for tests that never run)
 * `OnTestRegistered` - Event raised when test is registered
 * `OnInitialize` - Event raised before test initialization
 * `OnTestStart` - Event raised before test method execution
