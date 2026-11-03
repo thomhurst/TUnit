@@ -1973,6 +1973,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // [GenerateGenericTest]. Convert them to the parameter types, as reflection mode does (#7161).
             writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol.Construct(entry.ClassTypeArgs)));
         }
+        else if (entry.HasParameterizedConstructor && entry.SpecificIsClassRow
+                 && entry.SpecificArgumentsAttribute?.AttributeClass?.Name == "MethodDataSourceAttribute")
+        {
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol.Construct(entry.ClassTypeArgs)));
+        }
         else if (entry.HasParameterizedConstructor)
         {
             writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
@@ -2454,7 +2459,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.Indent();
             foreach (var attr in classDataSources)
             {
-                GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol);
+                var skipNullRows = attr.AttributeClass?.Name == "MethodDataSourceAttribute"
+                    && (attr.ConstructorArguments is [{ Value: INamedTypeSymbol }, ..] || attr.AttributeClass.IsGenericType)
+                    && InferClassTypesFromClassMethodDataSource(testMethod, attr) is not null
+                    && GetDeclaredMethodDataSourceRowType(testMethod, attr) is { } rowType
+                    && (GetTupleElementTypes(rowType) ?? [rowType]).Any(type => !type.IsValueType);
+                GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol, skipNullRows);
             }
             dsWriter.Unindent();
             dsWriter.Append("}");
@@ -2795,7 +2805,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GeneratePropertyDataSources(writer, testMethod);
     }
 
-    private static void GenerateDataSourceAttribute(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    private static void GenerateDataSourceAttribute(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol, bool skipNullRows = false)
     {
         var attrClass = attr.AttributeClass;
         if (attrClass == null)
@@ -2807,7 +2817,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (attrName == "global::TUnit.Core.MethodDataSourceAttribute")
         {
-            GenerateMethodDataSourceAttribute(writer, attr, typeSymbol, compilationContext.Compilation);
+            GenerateMethodDataSourceAttribute(writer, attr, typeSymbol, compilationContext.Compilation, skipNullRows);
         }
         else if (attrName == "global::TUnit.Core.ArgumentsAttribute")
         {
@@ -3096,7 +3106,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return true;
     }
 
-    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol, Compilation compilation)
+    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol, Compilation compilation, bool skipNullRows = false)
     {
         // Extract method name and target type
         string? methodName = null;
@@ -3231,6 +3241,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (skipIfEmptyProperty is { Key: not null, Value.IsNull: false } && skipIfEmptyProperty.Value.Value is true)
         {
             writer.AppendLine("SkipIfEmpty = true,");
+        }
+
+        if (skipNullRows)
+        {
+            writer.AppendLine("FilterNullClassRows = true,");
         }
 
         // Set the Factory property as a single expression calling a shared TUnit.Core helper.

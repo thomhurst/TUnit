@@ -217,3 +217,40 @@ public class ExternalNullableArrayParameterRows<T>(T[] values)
         await Assert.That((object?)values[1]).IsNull();
     }
 }
+
+public static class AdditionalExternalRows
+{
+    public static IEnumerable<(int, string)> PositionalRows() => [(2, "3")];
+    public static IEnumerable<string?> NullRows() => [null];
+}
+
+// Fixed external row types match constructor positions, not unrelated leading columns.
+[Arguments(1, 2)]
+[MethodDataSource(typeof(AdditionalExternalRows), nameof(AdditionalExternalRows.PositionalRows))]
+public class ExternalConstructorPositionRows<T>(int id, T value)
+{
+    [Test]
+    public async Task Test()
+    {
+        if (typeof(T) == typeof(int))
+        {
+            await Assert.That(id).IsEqualTo(1);
+            await Assert.That((object?)value).IsEqualTo(2);
+        }
+        else
+        {
+            await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+            await Assert.That(id).IsEqualTo(2);
+            await Assert.That((object?)value).IsEqualTo("3");
+        }
+    }
+}
+
+// A typed external source must retain runtime filtering of its all-null rows.
+[Arguments("seed")]
+[MethodDataSource(typeof(AdditionalExternalRows), nameof(AdditionalExternalRows.NullRows))]
+public class ExternalNullRows<T>(T value)
+{
+    [Test]
+    public async Task Test() => await Assert.That((object?)value).IsEqualTo("seed");
+}

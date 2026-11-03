@@ -861,7 +861,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             for (var rowIndex = 0; rowIndex < dataItems.Count; rowIndex++)
             {
                 var dataRow = evaluatedItems?[rowIndex]?.Value ?? dataItems[rowIndex];
-                if (dataRow == null || dataRow.Length == 0)
+                if (dataRow == null || dataRow.Length == 0
+                    || dataSource is MethodDataSourceAttribute { ClassProvidingDataSource: not null }
+                    && !TestDataRowUnwrapper.UnwrapArray(dataRow).Data.Any(value => value is not null))
                 {
                     continue;
                 }

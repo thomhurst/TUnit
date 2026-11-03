@@ -95,6 +95,10 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// </remarks>
     public Func<DataGeneratorMetadata, IAsyncEnumerable<Func<Task<object?[]?>>>>? Factory { get; set; }
 
+    /// <summary>Preserves runtime filtering of all-null external generic class rows in generated code.</summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public bool FilterNullClassRows { get; set; }
+
     /// <summary>
     /// Gets or sets the arguments to pass to the data source method.
     /// Use this when the data source method requires parameters.
@@ -161,12 +165,29 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             await foreach (var func in Factory(dataGeneratorMetadata))
             {
                 factoryYieldedAny = true;
-                yield return func;
+                if (FilterNullClassRows)
+                {
+                    var row = await func().ConfigureAwait(false);
+                    if (row is null)
+                    {
+                        continue;
+                    }
+
+                    row = GenericClassRowPartition.EvaluateWrappedFactory(row);
+                    if (TestDataRowUnwrapper.UnwrapArray(row).Data.Any(value => value is not null))
+                    {
+                        yield return () => Task.FromResult<object?[]?>(row);
+                    }
+                }
+                else
+                {
+                    yield return func;
+                }
             }
 
             // An empty source runs the test once with no arguments, like NoDataSource (#2862), unless
             // SkipIfEmpty is set. Same rule as the reflection path below, so both modes agree (#7092).
-            if (!factoryYieldedAny && !SkipIfEmpty)
+            if (!factoryYieldedAny && !SkipIfEmpty && !FilterNullClassRows)
             {
                 yield return static () => Task.FromResult<object?[]?>([]);
             }

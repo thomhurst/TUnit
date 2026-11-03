@@ -1046,13 +1046,14 @@ namespace
         public ? ClassProvidingDataSource { get; }
         public bool DeferEnumeration { get; set; }
         public <.DataGeneratorMetadata, .<<.<object?[]?>>>>? Factory { get; set; }
+        public bool FilterNullClassRows { get; set; }
         public string MethodNameProvidingDataSource { get; }
         public bool SkipIfEmpty { get; set; }
         [.("Trimming", "IL2072", Justification="Method data sources require runtime discovery. AOT users should use Factory prope" +
             "rty.")]
         [.("Trimming", "IL2075", Justification="Method data sources require runtime discovery. AOT users should use Factory prope" +
             "rty.")]
-        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__26))]
+        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__30))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]

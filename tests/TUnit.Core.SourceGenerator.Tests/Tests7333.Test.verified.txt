@@ -25,7 +25,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalRows_T_Test_TestSourc
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7333.ExternalRows<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7333.ExternalRows<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.ExternalRows<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7333.ExternalRows<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.ExternalRows<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -104,7 +104,7 @@ internal static class TUnit_TestProject_Bugs__7333_OwnRows_T_Test_TestSource
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7333.OwnRows<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7333.OwnRows<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.OwnRows<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7333.OwnRows<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.OwnRows<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -183,7 +183,7 @@ internal static class TUnit_TestProject_Bugs__7333_AsyncFactoryRows_T_Test_TestS
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7333.AsyncFactoryRows<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7333.AsyncFactoryRows<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.AsyncFactoryRows<string>), args)!;
+        return new global::TUnit.TestProject.Bugs._7333.AsyncFactoryRows<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.AsyncFactoryRows<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -216,6 +216,7 @@ internal static class TUnit_TestProject_Bugs__7333_AsyncFactoryRows_T_Test_TestS
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Strings")
     {
+        FilterNullClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromTask(static () => global::TUnit.TestProject.Bugs._7333.Rows.Strings()),
     },
 },
@@ -262,7 +263,7 @@ internal static class TUnit_TestProject_Bugs__7333_MultipleSources_T_Test_TestSo
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7333.MultipleSources<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7333.MultipleSources<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.MultipleSources<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7333.MultipleSources<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.MultipleSources<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -349,7 +350,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "methodValue"
 }));
     private static global::TUnit.TestProject.Bugs._7333.GenericMethod<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7333.GenericMethod<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.GenericMethod<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7333.GenericMethod<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.GenericMethod<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -495,7 +496,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "methodValue"
 }));
     private static global::TUnit.TestProject.Bugs._7333.MethodRows<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7333.MethodRows<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.MethodRows<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7333.MethodRows<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.MethodRows<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -714,7 +715,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "methodValue"
 }));
     private static global::TUnit.TestProject.Bugs._7333.ClassAndMethodSources<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7333.ClassAndMethodSources<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.ClassAndMethodSources<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7333.ClassAndMethodSources<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.ClassAndMethodSources<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -882,7 +883,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalArrayRows_T_Test_Test
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7333.ExternalArrayRows<int[]> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7333.ExternalArrayRows<int[]>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.ExternalArrayRows<int[]>), args)!;
+        return new global::TUnit.TestProject.Bugs._7333.ExternalArrayRows<int[]>(global::TUnit.Core.Helpers.CastHelper.Cast<int[]>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.ExternalArrayRows<int[]> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -915,6 +916,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalArrayRows_T_Test_Test
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "Integers")
     {
+        FilterNullClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ArrayRows.Integers()),
     },
 },
@@ -961,7 +963,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalSealedArrayRows_T_Tes
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7333.ExternalSealedArrayRows<string[]> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7333.ExternalSealedArrayRows<string[]>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.ExternalSealedArrayRows<string[]>), args)!;
+        return new global::TUnit.TestProject.Bugs._7333.ExternalSealedArrayRows<string[]>(global::TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.ExternalSealedArrayRows<string[]> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -994,6 +996,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalSealedArrayRows_T_Tes
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "Strings")
     {
+        FilterNullClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ArrayRows.Strings()),
     },
 },
@@ -1040,7 +1043,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalNestedArrayRows_T_Tes
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7333.ExternalNestedArrayRows<int[][]> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7333.ExternalNestedArrayRows<int[][]>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.ExternalNestedArrayRows<int[][]>), args)!;
+        return new global::TUnit.TestProject.Bugs._7333.ExternalNestedArrayRows<int[][]>(global::TUnit.Core.Helpers.CastHelper.Cast<int[][]>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.ExternalNestedArrayRows<int[][]> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -1073,6 +1076,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalNestedArrayRows_T_Tes
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "NestedIntegers")
     {
+        FilterNullClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ArrayRows.NestedIntegers()),
     },
 },
@@ -1284,7 +1288,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalNullableArrayRows_T_T
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7333.ExternalNullableArrayRows<int?[]> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7333.ExternalNullableArrayRows<int?[]>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.ExternalNullableArrayRows<int?[]>), args)!;
+        return new global::TUnit.TestProject.Bugs._7333.ExternalNullableArrayRows<int?[]>(global::TUnit.Core.Helpers.CastHelper.Cast<int?[]>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.ExternalNullableArrayRows<int?[]> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -1317,6 +1321,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalNullableArrayRows_T_T
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "NullableIntegers")
     {
+        FilterNullClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ArrayRows.NullableIntegers()),
     },
 },
@@ -1363,7 +1368,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalNullableArrayParamete
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7333.ExternalNullableArrayParameterRows<int?> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7333.ExternalNullableArrayParameterRows<int?>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.ExternalNullableArrayParameterRows<int?>), args)!;
+        return new global::TUnit.TestProject.Bugs._7333.ExternalNullableArrayParameterRows<int?>(global::TUnit.Core.Helpers.CastHelper.Cast<int?[]>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.ExternalNullableArrayParameterRows<int?> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -1396,6 +1401,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalNullableArrayParamete
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "NullableIntegers")
     {
+        FilterNullClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ArrayRows.NullableIntegers()),
     },
 },
@@ -1410,4 +1416,215 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalNullableArrayParamete
 internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_Bugs__7333_ExternalNullableArrayParameterRows_T_Test_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7333.ExternalNullableArrayParameterRows<int?>>(static () => TUnit_TestProject_Bugs__7333_ExternalNullableArrayParameterRows_T_Test_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7333_ExternalConstructorPositionRows_T_Test_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "ExternalConstructorPositionRows",
+        Namespace = "TUnit.TestProject.Bugs._7333",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "id", new global::TUnit.Core.ConcreteType(typeof(int)), false),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
+    private static global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return (global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<int>), new object[] { 1, 2 })!;
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Test());
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(1, 2),
+            new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows), "PositionalRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<int>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<int>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<int>.Test",
+            filePath: "",
+            lineNumber: 232,
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(1, 2),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+    private static global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<string> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Test());
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_1(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(1, 2),
+            new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows), "PositionalRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<string>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<string>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<string>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<string>.Test",
+            filePath: "",
+            lineNumber: 232,
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows), "PositionalRows")
+    {
+        FilterNullClassRows = true,
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows.PositionalRows()),
+    },
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7333_ExternalConstructorPositionRows_T_Test_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<int>>(static () => TUnit_TestProject_Bugs__7333_ExternalConstructorPositionRows_T_Test_TestSource.Entries_0);
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7333_ExternalConstructorPositionRows_T_Test_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7333.ExternalConstructorPositionRows<string>>(static () => TUnit_TestProject_Bugs__7333_ExternalConstructorPositionRows_T_Test_TestSource.Entries_1);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7333_ExternalNullRows_T_Test_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7333.ExternalNullRows<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7333.ExternalNullRows<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7333.ExternalNullRows<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "ExternalNullRows",
+        Namespace = "TUnit.TestProject.Bugs._7333",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7333.ExternalNullRows<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7333.ExternalNullRows<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
+    private static global::TUnit.TestProject.Bugs._7333.ExternalNullRows<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return (global::TUnit.TestProject.Bugs._7333.ExternalNullRows<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.ExternalNullRows<string>), args)!;
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.ExternalNullRows<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Test());
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute("seed"),
+            new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows), "NullRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.ExternalNullRows<string>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.ExternalNullRows<string>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7333.ExternalNullRows<string>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7333.ExternalNullRows<string>.Test",
+            filePath: "",
+            lineNumber: 254,
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute("seed"),
+    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows), "NullRows")
+    {
+        FilterNullClassRows = true,
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows.NullRows()),
+    },
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7333_ExternalNullRows_T_Test_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7333.ExternalNullRows<string>>(static () => TUnit_TestProject_Bugs__7333_ExternalNullRows_T_Test_TestSource.Entries_0);
 }
