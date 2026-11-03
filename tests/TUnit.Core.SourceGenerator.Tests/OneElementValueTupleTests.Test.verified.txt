@@ -549,7 +549,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute("WrappedPairRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.OneElementValueTupleTests.WrappedPairRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.OneElementValueTupleTests.WrappedPairRows()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
