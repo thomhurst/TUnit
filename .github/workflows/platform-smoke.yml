@@ -37,7 +37,7 @@ jobs:
       SmokePlatform: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-dotnet@v6.0.0
+      - uses: actions/setup-dotnet@v6.1.0
         with:
           dotnet-version: 11.0.100-rc.3.26522.148
       - uses: actions/cache@v6
@@ -110,7 +110,7 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-dotnet@v6.0.0
+      - uses: actions/setup-dotnet@v6.1.0
         with:
           dotnet-version: 11.0.100-rc.3.26522.148
       - uses: actions/cache@v6

@@ -57,7 +57,7 @@ jobs:
         uses: microsoft/setup-msbuild@v3
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6.0.0
+        uses: actions/setup-dotnet@v6.1.0
 
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
@@ -165,7 +165,7 @@ jobs:
             TMP,{{ DEV_DRIVE }}/tmp
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6.0.0
+        uses: actions/setup-dotnet@v6.1.0
 
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
