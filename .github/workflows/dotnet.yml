@@ -80,7 +80,7 @@ jobs:
       # ~2.4 GB each they pushed the repository past its cache quota, so every run missed and
       # then spent up to 3 minutes saving an entry that was evicted within the hour.
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6.0.0
+        uses: actions/setup-dotnet@v6.1.0
 
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
@@ -209,7 +209,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6.0.0
+        uses: actions/setup-dotnet@v6.1.0
 
       # TUnit.Mocks.Aot.Tests sets TreatWarningsAsErrors, so any trim/AOT warning ILC reports
       # for everyday mock usage fails its publish (#7027). Every framework still runs after an
@@ -266,7 +266,7 @@ jobs:
         uses: microsoft/setup-msbuild@v3
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6.0.0
+        uses: actions/setup-dotnet@v6.1.0
 
       - name: Enable Long Paths
         run: |
@@ -342,7 +342,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6.0.0
+        uses: actions/setup-dotnet@v6.1.0
 
       # Packing reads the Roslyn analyzer/generator variants from their own bin folders, so build
       # every library project, not just the packed ones.
