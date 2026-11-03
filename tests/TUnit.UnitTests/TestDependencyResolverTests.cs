@@ -27,12 +27,21 @@ public class TestDependencyResolverTests
         placeholder.SetResult(state, failed ? new InvalidOperationException("expansion failed") : null);
         placeholder.ExpansionCompletedWithoutChildren = true;
         var result = placeholder.Result;
+        var other = TestRunnerTests.CreateTest("other", dependencies: [placeholder]);
+        placeholder.Dependencies = [new ResolvedDependency
+        {
+            Test = other,
+            Metadata = TestDependency.FromMethodName("other")
+        }];
+        resolver.RegisterTest(other);
         var dependent = TestRunnerTests.CreateTest("dependent", dependencyMetadata: [TestDependency.FromMethodName("empty")]);
         resolver.RegisterTest(dependent);
 
         resolver.ReplaceDeferredTests([(placeholder, Array.Empty<AbstractExecutableTest>())]);
         resolver.ResolveAllDependencies();
 
+        await Assert.That(placeholder.Dependencies.Length).IsEqualTo(0);
+        await Assert.That(new CircularDependencyDetector().DetectCircularDependencies([other]).Count).IsEqualTo(0);
         await Assert.That(placeholder.State).IsEqualTo(state);
         await Assert.That(ReferenceEquals(placeholder.Result, result)).IsTrue();
         await Assert.That(dependent.Dependencies.Length).IsEqualTo(1);

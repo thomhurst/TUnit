@@ -9,6 +9,7 @@ namespace TUnit.Engine.Services;
 internal class TestFinder : ITestFinder
 {
     private readonly TestDiscoveryService _discoveryService;
+    private int _cachedTestsVersion = -1;
     private Dictionary<Type, List<TestContext>>? _testsByType;
     private Dictionary<(Type ClassType, string TestName), List<TestContext>>? _testsByTypeAndName;
 
@@ -22,7 +23,7 @@ internal class TestFinder : ITestFinder
     /// </summary>
     private void EnsureIndexesBuilt()
     {
-        if (_testsByType != null)
+        if (_testsByType != null && _cachedTestsVersion == _discoveryService.CachedTestsVersion)
         {
             return; // Already built
         }
@@ -48,6 +49,7 @@ internal class TestFinder : ITestFinder
             testsByTypeAndName.AddToList((classType, testName), test);
         }
 
+        _cachedTestsVersion = _discoveryService.CachedTestsVersion;
         _testsByType = testsByType;
         _testsByTypeAndName = testsByTypeAndName;
     }

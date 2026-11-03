@@ -57,6 +57,16 @@ internal sealed class TestDependencyResolver
                 }
             }
 
+            // Completed placeholders are terminal outcomes, so their old outgoing edges must
+            // not participate in scheduling or circular-dependency detection.
+            foreach (var test in _allTests)
+            {
+                if (test is DeferredEnumerationExecutableTest { ExpansionCompletedWithoutChildren: true })
+                {
+                    test.Dependencies = [];
+                }
+            }
+
             // Empty and failed expansions must retain their outcome, not be resolved again.
             _testsWithPendingDependencies.RemoveWhere(static test =>
                 test is DeferredEnumerationExecutableTest { ExpansionCompletedWithoutChildren: true });

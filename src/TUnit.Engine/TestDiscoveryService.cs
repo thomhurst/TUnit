@@ -424,12 +424,50 @@ internal sealed class TestDiscoveryService : IDataProducer
             Environment.ProcessorCount);
     }
 
+    private Dictionary<AbstractExecutableTest, IReadOnlyList<AbstractExecutableTest>> _deferredReplacements = new();
+    internal int CachedTestsVersion { get; private set; }
+
+    internal void ReplaceDeferredTests(
+        IReadOnlyList<(AbstractExecutableTest Placeholder, IReadOnlyList<AbstractExecutableTest> Children)> expansions)
+    {
+        // Publish replacements before scheduling. Keep the original discovery queue so later
+        // discovery requests and unselected tests remain visible as well.
+        var replacements = new Dictionary<AbstractExecutableTest, IReadOnlyList<AbstractExecutableTest>>(_deferredReplacements);
+        foreach (var (placeholder, children) in expansions)
+        {
+            if (children.Count > 0)
+            {
+                replacements[placeholder] = children;
+            }
+        }
+
+        if (replacements.Count == _deferredReplacements.Count)
+        {
+            return;
+        }
+
+        _deferredReplacements = replacements;
+        CachedTestsVersion++;
+    }
+
     public IEnumerable<TestContext> GetCachedTestContexts()
     {
         var list = new List<TestContext>(_cachedTests.Count);
+        var replacements = _deferredReplacements;
         foreach (var test in _cachedTests)
         {
-            list.Add(test.Context);
+            if (replacements.TryGetValue(test, out var children))
+            {
+                foreach (var child in children)
+                {
+                    list.Add(child.Context);
+                }
+            }
+            else
+            {
+                // Empty and failed placeholders remain completed lookup targets.
+                list.Add(test.Context);
+            }
         }
         return list;
     }

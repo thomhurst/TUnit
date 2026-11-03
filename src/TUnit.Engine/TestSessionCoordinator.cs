@@ -255,6 +255,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             }
         }
 
+        _serviceProvider.DiscoveryService.ReplaceDeferredTests(expanded);
         _dependencyResolver.ReplaceDeferredTests(expanded);
         _dependencyResolver.ResolveAllDependencies();
         _serviceProvider.TestBuilderPipeline.PopulateAllDependencies(_dependencyResolver.RegisteredTests, refresh: true);
