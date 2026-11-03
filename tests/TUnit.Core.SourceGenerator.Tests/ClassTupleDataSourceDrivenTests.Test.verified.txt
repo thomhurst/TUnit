@@ -151,22 +151,22 @@ internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests__TestSou
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()),
     },
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", false, new global::TUnit.Core.ParameterMetadata[]

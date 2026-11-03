@@ -241,7 +241,7 @@ internal static class TUnit_TestProject_Bugs__7165_DynamicParameterTests__TestSo
 {
     new global::TUnit.Core.MethodDataSourceAttribute("CollectionData")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7165.DynamicParameterTests.CollectionData()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7165.DynamicParameterTests.CollectionData()),
     },
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]

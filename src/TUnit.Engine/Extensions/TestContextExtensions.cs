@@ -3,6 +3,7 @@ using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Utilities;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Extensions;
 
@@ -172,9 +173,9 @@ internal static class TestContextExtensions
     private static object[] BuildEligibleEventObjects(TestContext testContext)
     {
         var details = testContext.Metadata.TestDetails;
-        var testClassArgs = details.TestClassArguments;
+        var testClassArgs = TupleArguments.Expand(details.TestClassArguments);
         var attributes = details.GetAllAttributes();
-        var testMethodArgs = details.TestMethodArguments;
+        var testMethodArgs = TupleArguments.Expand(details.TestMethodArguments);
         var injectedProps = details.TestClassInjectedPropertyArguments;
 
         // Count non-null items first to allocate exact size
@@ -244,6 +245,21 @@ internal static class TestContextExtensions
             }
         }
 
+        // The same fixture can be supplied by constructor data, method data and injected
+        // properties. Receiver callbacks belong to the instance, not each argument occurrence.
+        var visited = new HashSet<object>(TUnit.Core.Helpers.ReferenceEqualityComparer.Instance);
+        var uniqueCount = 0;
+        foreach (var item in result)
+        {
+            if (visited.Add(item))
+            {
+                result[uniqueCount++] = item;
+            }
+        }
+        if (uniqueCount != result.Length)
+        {
+            Array.Resize(ref result, uniqueCount);
+        }
         return result;
     }
 

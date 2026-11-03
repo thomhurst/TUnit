@@ -153,7 +153,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncDataMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethod()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -177,7 +177,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncDataMethodWithTuples")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithTuples()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithTuples()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -202,7 +202,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncEnumerableDataMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncEnumerableDataMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncEnumerableDataMethod()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -226,7 +226,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncFuncDataMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncFuncDataMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncFuncDataMethod()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -251,7 +251,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncDataMethodWithArgs")
     {
         Arguments = new object[] { 5 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 5 };
             return global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithArgs(((int)arguments[0]));
@@ -279,7 +279,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.AsyncExternalDataSource), "GetData")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncExternalDataSource.GetData()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.AsyncExternalDataSource.GetData()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -303,7 +303,7 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
 {
     new global::TUnit.Core.MethodDataSourceAttribute("ValueTaskDataMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.ValueTaskDataMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.ValueTaskDataMethod()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),

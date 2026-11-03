@@ -60,7 +60,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("BasePropertyRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => typeof(global::TUnit.TestProject.Bugs._7108.InheritedProtectedMemberDataSourceBase).GetProperty("BasePropertyRows", global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly)!.GetValue(null)),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => typeof(global::TUnit.TestProject.Bugs._7108.InheritedProtectedMemberDataSourceBase).GetProperty("BasePropertyRows", global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly)!.GetValue(null)),
     },
 },
             methodMetadata: __mm_0,
@@ -141,7 +141,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("BaseFieldRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => typeof(global::TUnit.TestProject.Bugs._7108.InheritedProtectedMemberDataSourceBase).GetField("BaseFieldRows", global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly)!.GetValue(null)),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => typeof(global::TUnit.TestProject.Bugs._7108.InheritedProtectedMemberDataSourceBase).GetField("BaseFieldRows", global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly)!.GetValue(null)),
     },
 },
             methodMetadata: __mm_0,

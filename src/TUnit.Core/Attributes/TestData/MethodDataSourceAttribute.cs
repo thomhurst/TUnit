@@ -343,6 +343,21 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // (constructor params for class-level, method params for method-level)
         var paramTypes = GetMemberTypes(dataGeneratorMetadata.MembersToGenerate);
 
+        object?[] ToRow(object? item)
+        {
+            // Property injection consumes a value, not the invoker's flattened argument boxes.
+            if (dataGeneratorMetadata.MembersToGenerate is [PropertyMetadata property]
+                && TupleHelper.IsTupleType(property.Type))
+            {
+                item = DataSourceHelpers.InvokeIfFunc(item);
+                if (DataSourceHelpers.IsTuple(item))
+                {
+                    return [item];
+                }
+            }
+            return item.ToObjectArrayWithTypes(paramTypes);
+        }
+
         // If it's IAsyncEnumerable, handle it specially
         if (IsAsyncEnumerable(methodResult.GetType()))
         {
@@ -350,7 +365,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             {
                 yield return async () =>
                 {
-                    return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
+                    return await Task.FromResult<object?[]?>(ToRow(item));
                 };
             }
         }
@@ -371,7 +386,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 {
                     yield return async () =>
                     {
-                        return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
+                        return await Task.FromResult<object?[]?>(ToRow(item));
                     };
                 }
             }
@@ -379,7 +394,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             {
                 yield return async () =>
                 {
-                    return await Task.FromResult<object?[]?>(taskResult.ToObjectArrayWithTypes(paramTypes));
+                    return await Task.FromResult<object?[]?>(ToRow(taskResult));
                 };
             }
         }
@@ -389,14 +404,14 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         {
             foreach (var item in enumerable)
             {
-                yield return () => Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
+                yield return () => Task.FromResult<object?[]?>(ToRow(item));
             }
         }
         else
         {
             yield return async () =>
             {
-                return await Task.FromResult<object?[]?>(methodResult.ToObjectArrayWithTypes(paramTypes));
+                return await Task.FromResult<object?[]?>(ToRow(methodResult));
             };
         }
     }

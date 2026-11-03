@@ -108,7 +108,7 @@ internal static class TUnit_TestProject_Bugs__7355_ExplicitClassSource_T_Test_Te
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7355.Sources), "Counters")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7355.Sources.Counters()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7355.Sources.Counters()),
     },
 },
             methodMetadata: __mm_0,

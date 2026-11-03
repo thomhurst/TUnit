@@ -252,7 +252,7 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute("Method")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.CustomDisplayNameTests.Method()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.CustomDisplayNameTests.Method()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),

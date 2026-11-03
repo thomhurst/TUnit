@@ -2382,7 +2382,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // CancellationToken (e.g. [GenerateGenericTest(typeof(CancellationToken))]) and must stay a data argument.
         var closedParameters = method.Parameters;
         if (!bindsByShape
-            && closedParameters[parameters[0].Ordinal].Type is not INamedTypeSymbol { IsTupleType: true })
+            && (closedParameters[parameters[0].Ordinal].Type is not INamedTypeSymbol singleParameterType
+                || !singleParameterType.IsTupleType && !IsReferenceTuple(singleParameterType)))
         {
             return null;
         }
@@ -3610,11 +3611,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     ? $"new {fullyQualifiedType}()"
                     : $"(({receiverType})new {fullyQualifiedType}())";
         var lambdaHeader = usesTestClassInstance ? "static instance =>" : "static () =>";
-        // The instance helpers take the metadata anyway. [InstanceMethodDataSource] read its member by reflection before
-        // #7225, and that path keeps a tuple row whole when the test takes a single tuple, so its static helpers get the
-        // metadata too: without the parameter types, a one-element tuple holding null would reach the test as null.
-        // Preserve one-element rows before unwrapping: their element can itself have the expected tuple type.
-        var metadataArgument = usesTestClassInstance || decidesRowsFromRuntimeValue || keepSingleElementTupleWhole ? "dataGeneratorMetadata, " : "";
+        // All helpers need parameter types to keep a tuple row whole when the test takes a single tuple.
+        // Otherwise a one-element tuple holding null becomes indistinguishable from a null argument.
+        const string metadataArgument = "dataGeneratorMetadata, ";
 
         // A declared type such as object does not say whether the value is one row or many. Reflection mode, and the
         // attribute's reflection fallback that read every field and every private or protected property before the
@@ -3628,7 +3627,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             helper = isStatic || !usesTestClassInstance
                 ? "global::TUnit.Core.Helpers.DataSourceFactories.FromRuntimeValue"
                 : "global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue";
-            metadataArgument = "dataGeneratorMetadata, ";
         }
 
         // [InstanceMethodDataSource] read its member by reflection before #7225, and that path, still used in
@@ -4423,10 +4421,42 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    // System.Tuple<T1..T7>. An eight-element Tuple nests its rest in TRest, which DataSourceHelpers flattens, so it is left alone.
+    // Emit tuple element conversions statically so nested Item tuples remain AOT-safe.
+    private static string CastTupleElement(ITypeSymbol type, string value)
+    {
+        if (type is INamedTypeSymbol { IsTupleType: true } tuple)
+        {
+            var elements = tuple.TupleElements.Select((element, index) => CastTupleElement(element.Type,
+                $"global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot({value})[{index.ToString(CultureInfo.InvariantCulture)}]"));
+            var construction = tuple.TupleElements.Length == 1
+                ? $"new {type.GloballyQualified()}({string.Join(", ", elements)})"
+                : $"({string.Join(", ", elements)})";
+            // Only tuples can be recursively unpacked. Keep CastHelper's null-to-default
+            // and custom conversion behavior for other values.
+            return $"(global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple({value}) ? {construction} : global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({value}))";
+        }
+
+        return $"global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({value})";
+    }
+
+    // Rebuild flattened System.Tuple rows, recursively constructing Rest after the seventh element.
+    private static string ConstructReferenceTuple(INamedTypeSymbol type, ref int elementIndex)
+    {
+        var arguments = new List<string>();
+        for (var i = 0; i < type.TypeArguments.Length; i++)
+        {
+            var element = type.TypeArguments[i];
+            arguments.Add(i == 7 && element is INamedTypeSymbol rest && IsReferenceTuple(rest)
+                ? ConstructReferenceTuple(rest, ref elementIndex)
+                : CastTupleElement(element, $"args[{(elementIndex++).ToString(CultureInfo.InvariantCulture)}]"));
+        }
+
+        return $"new {type.GloballyQualified()}({string.Join(", ", arguments)})";
+    }
+
     private static bool IsReferenceTuple(INamedTypeSymbol type)
     {
-        return type is { Name: "Tuple", IsGenericType: true, TypeArguments.Length: >= 1 and <= 7, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } };
+        return type is { Name: "Tuple", IsGenericType: true, TypeArguments.Length: >= 1 and <= 8, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } };
     }
 
     /// <summary>
@@ -4485,7 +4515,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Build tuple reconstruction with proper casting
             var tupleElements = singleTupleParam.TupleElements.Select((elem, i) =>
-                $"global::TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
+                CastTupleElement(elem.Type, $"args[{i.ToString(CultureInfo.InvariantCulture)}]"));
             var tupleConstruction = singleTupleParam.TupleElements.Length == 1
                 ? $"new {singleTupleParam.GloballyQualified()}({string.Join(", ", tupleElements)})"
                 : $"({string.Join(", ", tupleElements)})";
@@ -4522,20 +4552,34 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // argument-count switch below, as it does for every other single parameter.
             var singleReferenceTupleParam = parametersFromArgs is [{ Type: INamedTypeSymbol referenceTupleType }]
                                             && IsReferenceTuple(referenceTupleType)
+                                            && GetTupleElementTypes(referenceTupleType) is not null
                 ? referenceTupleType
                 : null;
             if (singleReferenceTupleParam is not null)
             {
-                var arity = singleReferenceTupleParam.TypeArguments.Length;
+                var arity = GetTupleElementTypes(singleReferenceTupleParam)!.Length;
                 writer.AppendLine("// Special handling for single reference tuple parameter");
+                if (arity == 1)
+                {
+                    // Preserve the distinction between a null argument and a tuple containing null,
+                    // even when the source's invariant Tuple<T> needs an element conversion.
+                    writer.AppendLine($"if (args.Length == 1 && args[0] is not {singleReferenceTupleParam.GloballyQualified()} && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]) is [null])");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    var nullTuple = $"new {singleReferenceTupleParam.GloballyQualified()}(global::TUnit.Core.Helpers.CastHelper.Cast<{singleReferenceTupleParam.TypeArguments[0].GloballyQualified()}>(null))";
+                    GenerateReturnHandling(writer, $"instance.{methodName}({FormatSingleArgumentCall(nullTuple, hasCancellationToken, parametersFromArgs)})", returnPattern);
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.AppendLine("else");
+                }
+
                 // With one element, a lone argument is either that element or the whole tuple (or null), so check it.
                 var unwrappedCheck = arity == 1 ? $" && args[0] is not null && args[0] is not {singleReferenceTupleParam.GloballyQualified()}" : "";
                 writer.AppendLine($"if (args.Length == {arity.ToString(CultureInfo.InvariantCulture)}{unwrappedCheck})");
                 writer.AppendLine("{");
                 writer.Indent();
-                var tupleElements = singleReferenceTupleParam.TypeArguments.Select((elementType, i) =>
-                    $"global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
-                var tupleConstruction = $"new {singleReferenceTupleParam.GloballyQualified()}({string.Join(", ", tupleElements)})";
+                var elementIndex = 0;
+                var tupleConstruction = ConstructReferenceTuple(singleReferenceTupleParam, ref elementIndex);
                 GenerateReturnHandling(writer, $"instance.{methodName}({FormatSingleArgumentCall(tupleConstruction, hasCancellationToken, parametersFromArgs)})", returnPattern);
                 writer.Unindent();
                 writer.AppendLine("}");

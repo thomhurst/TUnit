@@ -105,7 +105,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "expected", n
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.GenericMethodTests.AggregateBy_Numeric_TestData()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.GenericMethodTests.AggregateBy_Numeric_TestData()),
     },
 },
             methodMetadata: __mm_0,
@@ -125,7 +125,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "expected", n
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_String_TestData")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.GenericMethodTests.AggregateBy_String_TestData()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.GenericMethodTests.AggregateBy_String_TestData()),
     },
 },
             methodMetadata: __mm_0,

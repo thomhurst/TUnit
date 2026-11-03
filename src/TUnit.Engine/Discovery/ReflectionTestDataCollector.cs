@@ -3414,6 +3414,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// </summary>
     private static void InferGenericTypeMapping(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType, Dictionary<Type, Type> typeMapping, bool isTopLevel = false)
     {
+        // Match discovery inference when a nullable tuple element has been boxed as its value.
+        if (Nullable.GetUnderlyingType(paramType) is { } underlyingParameter
+            && argType.IsValueType && Nullable.GetUnderlyingType(argType) is null)
+        {
+            InferGenericTypeMapping(underlyingParameter, argType, typeMapping, isTopLevel);
+            return;
+        }
+
         // Direct generic parameter
         if (paramType.IsGenericParameter)
         {
@@ -3610,11 +3618,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return false;
     }
 
-    private static bool ReceivesNullArgument(Type genericParameter, ParameterInfo[] methodParams, object?[] args)
+    private static bool ReceivesNullArgument(Type genericParameter, ParameterInfo[] methodParams,
+        object?[] args, Type[]? flattenedTupleTypes, int tupleOffset)
     {
-        for (var j = 0; j < methodParams.Length && j < args.Length; j++)
+        var parameterCount = flattenedTupleTypes?.Length ?? methodParams.Length;
+        for (var j = 0; j < parameterCount && j + tupleOffset < args.Length; j++)
         {
-            if (args[j] is null && methodParams[j].ParameterType == genericParameter)
+            var parameterType = flattenedTupleTypes?[j] ?? methodParams[j].ParameterType;
+            if (args[j + tupleOffset] is null && parameterType == genericParameter)
             {
                 return true;
             }
@@ -3667,6 +3678,32 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return shape.Constructor.Invoke(arguments);
     }
 
+    private static ParameterInfo? GetSingleDataParameter(ParameterInfo[]? parameters)
+    {
+        ParameterInfo? dataParameter = null;
+        if (parameters is null)
+        {
+            return null;
+        }
+
+        foreach (var parameter in parameters)
+        {
+            if (parameter.ParameterType == typeof(CancellationToken))
+            {
+                continue;
+            }
+
+            if (dataParameter is not null)
+            {
+                return null;
+            }
+
+            dataParameter = parameter;
+        }
+
+        return dataParameter;
+    }
+
     /// <summary>
     /// Creates a reflection-based test invoker with proper AOT attribution
     /// </summary>
@@ -3676,7 +3713,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // For non-generic methods, parameter shape is stable across invocations — hoist the
         // GetParameters() call out of the hot lambda. Generic method definitions are resolved
         // to a concrete MethodInfo per invocation, so they must still call GetParameters() inline.
-        var staticParameters = testMethod.IsGenericMethodDefinition ? null : testMethod.GetParameters();
+        var definitionParameters = testMethod.GetParameters();
+        var definitionParameterTypes = testMethod.IsGenericMethodDefinition
+            ? Array.ConvertAll(definitionParameters, static p => p.ParameterType)
+            : null;
+        var staticParameters = testMethod.IsGenericMethodDefinition ? null : definitionParameters;
+        var staticTupleElements = GetSingleDataParameter(staticParameters) is { ParameterType: var tupleType }
+            ? GetTupleElementTypes(tupleType)
+            : null;
 
         return (instance, args) =>
         {
@@ -3698,15 +3742,21 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     // Try to infer type arguments from the actual arguments
                     var genericParams = testMethod.GetGenericArguments();
                     var typeMapping = new Dictionary<Type, Type>();
-                    var methodParams = testMethod.GetParameters();
+                    var methodParams = definitionParameters;
 
-                    // Build type mapping from method parameters and actual arguments
-                    for (var j = 0; j < methodParams.Length && j < args.Length; j++)
+                    var flattenedTupleTypes = TupleParameterTypes.GetFlattenedTypes(definitionParameterTypes!, args, includesInjectedTokens: true);
+                    var tupleOffset = flattenedTupleTypes is not null
+                        ? Array.FindIndex(methodParams, static p => p.ParameterType != typeof(CancellationToken))
+                        : 0;
+                    var inferenceCount = flattenedTupleTypes?.Length ?? methodParams.Length;
+
+                    // Build type mapping from method parameters (or flattened tuple elements) and actual arguments.
+                    for (var j = 0; j < inferenceCount && j + tupleOffset < args.Length; j++)
                     {
-                        var arg = args[j];
+                        var arg = args[j + tupleOffset];
                         if (arg != null && arg != Type.Missing)
                         {
-                            var paramType = methodParams[j].ParameterType;
+                            var paramType = flattenedTupleTypes?[j] ?? methodParams[j].ParameterType;
                             var argType = arg.GetType();
                             InferGenericTypeMapping(paramType, argType, typeMapping, isTopLevel: true);
                         }
@@ -3722,7 +3772,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             // infers object, as in TestGenericTypeResolver and the source generator (#7155).
                             // A Nullable<T> inferred from a nested type, such as List<int?>, holds the null.
                             typeArguments[i] = TestGenericTypeResolver.CannotHoldNull(inferredType)
-                                && ReceivesNullArgument(genericParams[i], methodParams, args)
+                                && ReceivesNullArgument(genericParams[i], methodParams, args, flattenedTupleTypes, tupleOffset)
                                 ? typeof(object)
                                 : inferredType;
                         }
@@ -3781,7 +3831,33 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         || lastParam.IsDefined(typeof(ParamArrayAttribute), false)
                         || IsParamCollection(lastParam));
 
-                if (isParamsArray && lastParam != null)
+                var tupleElements = staticParameters != null
+                    ? staticTupleElements
+                    : GetSingleDataParameter(parameters) is { ParameterType: var singleType } ? GetTupleElementTypes(singleType) : null;
+                var singleDataIndex = tupleElements is not null
+                    ? Array.FindIndex(parameters, static p => p.ParameterType != typeof(CancellationToken))
+                    : -1;
+                if (tupleElements is { Length: > 0 }
+                    && args.Length == tupleElements.Length + parameters.Length - 1
+                    && (tupleElements.Length > 1
+                        || args[singleDataIndex] is { } singleValue
+                            && !(DataSourceHelpers.IsTuple(singleValue) && DataSourceHelpers.UnwrapTupleAot(singleValue) is [null])
+                            && !parameters[singleDataIndex].ParameterType.IsInstanceOfType(singleValue)))
+                {
+                    // DataUnwrapper spreads an incompatible tuple so each element can be
+                    // converted before constructing the target, as the generated invoker does.
+                    var dataIndex = singleDataIndex;
+                    var offset = dataIndex;
+                    castedArgs[dataIndex] = ConstructInvocationTuple(parameters[dataIndex].ParameterType, args, ref offset);
+                    for (var i = 0; i < parameters.Length; i++)
+                    {
+                        if (i != dataIndex)
+                        {
+                            castedArgs[i] = args[i < dataIndex ? i : tupleElements.Length + i - 1];
+                        }
+                    }
+                }
+                else if (isParamsArray && lastParam != null)
                 {
                     // Handle params array / params collection parameter
                     var regularParamsCount = dataParameterCount - 1;

@@ -60,7 +60,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("GenericProviderRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.GenericProviderRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.GenericProviderRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -143,7 +143,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("ObjectOrDecimalRows")
     {
         Arguments = new object[] { 28 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 28 };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.ObjectOrDecimalRows(((object)arguments[0]));
@@ -228,7 +228,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("FuncRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.FuncRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.FuncRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -309,7 +309,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("NestedFuncRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.NestedFuncRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.NestedFuncRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -390,7 +390,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("FuncOfTestDataRowOfFuncRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.FuncOfTestDataRowOfFuncRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.FuncOfTestDataRowOfFuncRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -471,7 +471,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("PlainRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.PlainRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.PlainRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -552,7 +552,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("ArrayRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.ArrayRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.ArrayRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -633,7 +633,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromAsyncEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.AsyncRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromAsyncEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.AsyncRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -714,7 +714,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TaskRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromTask(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.TaskRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromTask(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.TaskRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -795,7 +795,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TestDataRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.TestDataRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.TestDataRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -876,7 +876,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("ListRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.ListRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.ListRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -958,7 +958,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "text", new g
 {
     new global::TUnit.Core.MethodDataSourceAttribute("PlainTupleRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.PlainTupleRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.PlainTupleRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -1041,7 +1041,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("RowsWithArgument")
     {
         Arguments = new object[] { 9 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 9 };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.RowsWithArgument(((int)arguments[0]));
@@ -1158,7 +1158,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
 {
     new global::TUnit.Core.MethodDataSourceAttribute("IntArrayRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.IntArrayRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.IntArrayRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -1241,7 +1241,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("OverloadedRows")
     {
         Arguments = new object[] { 12 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 12 };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.OverloadedRows(((int)arguments[0]));
@@ -1326,7 +1326,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("OverloadedRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.OverloadedRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.OverloadedRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -1409,7 +1409,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("WideningRows")
     {
         Arguments = new object[] { 13 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 13 };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.WideningRows(((long)(int)arguments[0]));
@@ -1496,7 +1496,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("FloatWideningRows")
     {
         Arguments = new object[] { 1.5f },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 1.5f };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.FloatWideningRows(((double)(float)arguments[0]));
@@ -1583,7 +1583,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("LongRows")
     {
         Arguments = new object[] { 16L },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 16L };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.LongRows(((long)arguments[0]));
@@ -1670,7 +1670,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("NullableRows")
     {
         Arguments = new object[] { 17 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 17 };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.NullableRows(((int?)(int)arguments[0]));
@@ -1755,7 +1755,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("FieldRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.FieldRows),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.FieldRows),
     },
 },
             methodMetadata: __mm_0,
@@ -1836,7 +1836,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("PrivateFieldRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => typeof(global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests).GetField("PrivateFieldRows", global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly)!.GetValue(null)),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => typeof(global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests).GetField("PrivateFieldRows", global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly)!.GetValue(null)),
     },
 },
             methodMetadata: __mm_0,
@@ -1917,7 +1917,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("PrivatePropertyRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => typeof(global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests).GetProperty("PrivatePropertyRows", global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly)!.GetValue(null)),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => typeof(global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests).GetProperty("PrivatePropertyRows", global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly)!.GetValue(null)),
     },
 },
             methodMetadata: __mm_0,
@@ -2000,7 +2000,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("NonNullTieRows")
     {
         Arguments = new object[] { 23 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 23 };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.NonNullTieRows(((long)(int)arguments[0]));
@@ -2087,7 +2087,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("LiteralRows")
     {
         Arguments = new object[] { '\0', "a\u2028b\"\\", double.NaN, 1E+20d, float.PositiveInfinity, global::System.DayOfWeek.Friday },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { '\0', "a\u2028b\"\\", double.NaN, 1E+20d, float.PositiveInfinity, global::System.DayOfWeek.Friday };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.LiteralRows(((char)arguments[0]), ((string)arguments[1]), ((double)arguments[2]), ((double)arguments[3]), ((float)arguments[4]), ((global::System.DayOfWeek)arguments[5]));
@@ -2186,7 +2186,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "pair", new g
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TupleParameterRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.TupleParameterRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.TupleParameterRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -2267,7 +2267,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("CancellationTokenOnlyRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = global::System.Array.Empty<object?>();
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.CancellationTokenOnlyRows(global::System.Threading.CancellationToken.None);
@@ -2354,7 +2354,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("ExactTypeRows")
     {
         Arguments = new object[] { 15 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 15 };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.ExactTypeRows(((int)arguments[0]));
@@ -2441,7 +2441,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("OptionalOverloadRows")
     {
         Arguments = new object[] { "a", "b" },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { "a", "b" };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.OptionalOverloadRows(((object)arguments[0]), ((object)arguments[1]));
@@ -2528,7 +2528,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("OptionalParameterRows")
     {
         Arguments = new object[] { "abc" },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { "abc" };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.OptionalParameterRows(((string)arguments[0]));
@@ -2615,7 +2615,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("CancellationTokenRows")
     {
         Arguments = new object[] { 14 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 14 };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.CancellationTokenRows(((int)arguments[0]), global::System.Threading.CancellationToken.None);
@@ -2702,7 +2702,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("NullRows")
     {
         Arguments = new object[] { null },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { null };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.NullRows(((string)arguments[0]));
@@ -2789,7 +2789,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("NullOptionalRows")
     {
         Arguments = new object[] { null },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { null };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.NullOptionalRows(((string)arguments[0]));
@@ -2876,7 +2876,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("NullWideningRows")
     {
         Arguments = new object[] { null, 20 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { null, 20 };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.NullWideningRows(((string)arguments[0]), ((long)(int)arguments[1]));
@@ -2963,7 +2963,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     new global::TUnit.Core.MethodDataSourceAttribute("TieRows")
     {
         Arguments = new object[] { null, 22 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { null, 22 };
             return global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.TieRows(((string)arguments[0]), ((long)(int)arguments[1]));
@@ -3048,7 +3048,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TaskOfAsyncRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromTask(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.TaskOfAsyncRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromTask(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.TaskOfAsyncRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -3144,7 +3144,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TupleParameterRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericSingleTupleWithCancellationTokenTests.TupleParameterRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericSingleTupleWithCancellationTokenTests.TupleParameterRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -3240,7 +3240,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "pair", new g
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TupleParameterRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericSingleTupleWithCancellationTokenTests.TupleParameterRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericSingleTupleWithCancellationTokenTests.TupleParameterRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -3420,7 +3420,7 @@ internal static class TUnit_TestProject_Bugs__7108_GenericMethodNonTupleMethodDa
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TupleParameterRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.TupleParameterRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7108.GenericMethodNonTupleMethodDataSourceTests.TupleParameterRows()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces;
+using TUnit.Core.PropertyInjection;
 
 namespace TUnit.Core.Helpers;
 
@@ -11,6 +12,54 @@ namespace TUnit.Core.Helpers;
 /// </summary>
 public static class DataSourceHelpers
 {
+    private static readonly ConcurrentDictionary<Type, bool> TupleMutableElementShapes = new();
+
+    // Property injection, initialization, and event callbacks mutate boxed structs.
+    // Keep populated mutable elements in the flattened row so invocation reconstructs
+    // the tuple from those same boxes. Empty nullable elements still preserve the tuple.
+    internal static bool RequiresFlattenedTupleBinding(object tuple)
+    {
+        if (!HasMutableTupleElementShape(tuple.GetType()))
+        {
+            return false;
+        }
+
+        // Nullable struct elements box to null when empty. Only flatten when an actual
+        // mutable value needs reconstruction; otherwise retain the tuple container.
+        foreach (var element in UnwrapTupleAot(tuple))
+        {
+            if (element is not null && element.GetType().IsValueType
+                && (element is IAsyncInitializer or IEventReceiver
+                    || PropertyInjectionCache.HasInjectableProperties(element.GetType())))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool HasMutableTupleElementShape(Type tupleType)
+        => TupleMutableElementShapes.GetOrAdd(tupleType, static type =>
+        {
+            var elements = type.GetGenericArguments();
+            for (var i = 0; i < elements.Length; i++)
+            {
+                var element = Nullable.GetUnderlyingType(elements[i]) ?? elements[i];
+                if (IsMutableTupleElementType(element)
+                    || i == 7 && TupleHelper.IsTupleType(element) && HasMutableTupleElementShape(element))
+                {
+                    return true;
+                }
+            }
+            return false;
+        });
+
+    private static bool IsMutableTupleElementType(Type type)
+        => type.IsValueType && (typeof(IAsyncInitializer).IsAssignableFrom(type)
+            || typeof(IEventReceiver).IsAssignableFrom(type)
+            || PropertyInjectionCache.HasInjectableProperties(type));
+
     /// <summary>
     /// Invokes a Func&lt;T&gt; if the value is one, otherwise returns the value as-is.
     /// Note: Most Func invocation should be handled by the source generator at compile time for AOT compatibility.
@@ -405,7 +454,9 @@ public static class DataSourceHelpers
                 // and the item is a tuple, don't unwrap
                 if (expectedTypes.Length == 1 && TupleHelper.IsTupleType(expectedTypes[0]))
                 {
-                    return [item];
+                    return RequiresFlattenedTupleBinding(item)
+                        ? UnwrapTupleAot(item)
+                        : [item];
                 }
 
                 return UnwrapTupleWithTypes(item, expectedTypes);

@@ -35,68 +35,68 @@ public static class DataSourceFactories
 {
     /// <summary>Data member declared as a single (non-enumerable, non-task) value.</summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromValue(Func<object?> invoke)
-        => FromValueCore(invoke, keepTupleRowsWhole: false);
+        => FromValueCore(invoke, tupleRowBinding: TupleRowBinding.Spread);
 
     /// <summary>
     /// <see cref="FromValue(Func{object?})"/> that keeps a tuple row whole when the test takes a single tuple,
     /// as the attribute's reflection path does.
     /// </summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromValue(DataGeneratorMetadata dataGeneratorMetadata, Func<object?> invoke)
-        => FromValueCore(invoke, KeepsTupleRowsWhole(dataGeneratorMetadata));
+        => FromValueCore(invoke, GetTupleRowBinding(dataGeneratorMetadata));
 
     /// <summary>Data member declared as a synchronous enumerable.</summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromEnumerable(Func<object?> invoke)
-        => FromEnumerableCore(invoke, keepTupleRowsWhole: false);
+        => FromEnumerableCore(invoke, tupleRowBinding: TupleRowBinding.Spread);
 
     /// <summary>
     /// <see cref="FromEnumerable(Func{object?})"/> that keeps a tuple row whole when the test takes a single tuple,
     /// as the attribute's reflection path does.
     /// </summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromEnumerable(DataGeneratorMetadata dataGeneratorMetadata, Func<object?> invoke)
-        => FromEnumerableCore(invoke, KeepsTupleRowsWhole(dataGeneratorMetadata));
+        => FromEnumerableCore(invoke, GetTupleRowBinding(dataGeneratorMetadata));
 
     /// <summary>Data member declared as <c>Task&lt;T&gt;</c>.</summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromTask<T>(Func<Task<T>> invoke)
-        => FromTaskCore(invoke, keepTupleRowsWhole: false);
+        => FromTaskCore(invoke, tupleRowBinding: TupleRowBinding.Spread);
 
     /// <summary>
     /// <see cref="FromTask{T}(Func{Task{T}})"/> that keeps a tuple row whole when the test takes a single tuple,
     /// as the attribute's reflection path does.
     /// </summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromTask<T>(DataGeneratorMetadata dataGeneratorMetadata, Func<Task<T>> invoke)
-        => FromTaskCore(invoke, KeepsTupleRowsWhole(dataGeneratorMetadata));
+        => FromTaskCore(invoke, GetTupleRowBinding(dataGeneratorMetadata));
 
     /// <summary>Data member declared as <c>ValueTask&lt;T&gt;</c>.</summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromValueTask<T>(Func<ValueTask<T>> invoke)
-        => FromValueTaskCore(invoke, keepTupleRowsWhole: false);
+        => FromValueTaskCore(invoke, tupleRowBinding: TupleRowBinding.Spread);
 
     /// <summary>
     /// <see cref="FromValueTask{T}(Func{ValueTask{T}})"/> that keeps a tuple row whole when the test takes a single tuple,
     /// as the attribute's reflection path does.
     /// </summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromValueTask<T>(DataGeneratorMetadata dataGeneratorMetadata, Func<ValueTask<T>> invoke)
-        => FromValueTaskCore(invoke, KeepsTupleRowsWhole(dataGeneratorMetadata));
+        => FromValueTaskCore(invoke, GetTupleRowBinding(dataGeneratorMetadata));
 
     /// <summary>Data member declared as <c>IAsyncEnumerable&lt;T&gt;</c>.</summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromAsyncEnumerable<T>(Func<IAsyncEnumerable<T>> invoke)
-        => FromAsyncEnumerableCore(invoke, keepTupleRowsWhole: false);
+        => FromAsyncEnumerableCore(invoke, tupleRowBinding: TupleRowBinding.Spread);
 
     /// <summary>
     /// <see cref="FromAsyncEnumerable{T}(Func{IAsyncEnumerable{T}})"/> that keeps a tuple row whole when the test takes a
     /// single tuple, as the attribute's reflection path does.
     /// </summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromAsyncEnumerable<T>(DataGeneratorMetadata dataGeneratorMetadata, Func<IAsyncEnumerable<T>> invoke)
-        => FromAsyncEnumerableCore(invoke, KeepsTupleRowsWhole(dataGeneratorMetadata));
+        => FromAsyncEnumerableCore(invoke, GetTupleRowBinding(dataGeneratorMetadata));
 
 #pragma warning disable CS1998 // sync-only async iterators: deferred invocation, no await by design
-    private static async IAsyncEnumerable<Func<Task<object?[]?>>> FromValueCore(Func<object?> invoke, bool keepTupleRowsWhole)
+    private static async IAsyncEnumerable<Func<Task<object?[]?>>> FromValueCore(Func<object?> invoke, TupleRowBinding tupleRowBinding)
     {
         var result = invoke();
 
-        yield return () => Task.FromResult<object?[]?>(ToRow(result, keepTupleRowsWhole));
+        yield return () => Task.FromResult<object?[]?>(ToRow(result, tupleRowBinding));
     }
 
-    private static async IAsyncEnumerable<Func<Task<object?[]?>>> FromEnumerableCore(Func<object?> invoke, bool keepTupleRowsWhole)
+    private static async IAsyncEnumerable<Func<Task<object?[]?>>> FromEnumerableCore(Func<object?> invoke, TupleRowBinding tupleRowBinding)
     {
         var result = invoke();
 
@@ -105,14 +105,14 @@ public static class DataSourceFactories
             yield break;
         }
 
-        foreach (var row in RowsFromValue(result, keepTupleRowsWhole))
+        foreach (var row in RowsFromValue(result, tupleRowBinding))
         {
             yield return row;
         }
     }
 #pragma warning restore CS1998
 
-    private static async IAsyncEnumerable<Func<Task<object?[]?>>> FromTaskCore<T>(Func<Task<T>> invoke, bool keepTupleRowsWhole)
+    private static async IAsyncEnumerable<Func<Task<object?[]?>>> FromTaskCore<T>(Func<Task<T>> invoke, TupleRowBinding tupleRowBinding)
     {
         var result = invoke();
 
@@ -128,13 +128,13 @@ public static class DataSourceFactories
             yield break;
         }
 
-        foreach (var row in RowsFromValue(taskResult, keepTupleRowsWhole))
+        foreach (var row in RowsFromValue(taskResult, tupleRowBinding))
         {
             yield return row;
         }
     }
 
-    private static async IAsyncEnumerable<Func<Task<object?[]?>>> FromValueTaskCore<T>(Func<ValueTask<T>> invoke, bool keepTupleRowsWhole)
+    private static async IAsyncEnumerable<Func<Task<object?[]?>>> FromValueTaskCore<T>(Func<ValueTask<T>> invoke, TupleRowBinding tupleRowBinding)
     {
         var taskResult = await invoke();
         if (taskResult is null && IsDeclaredCollection<T>())
@@ -142,13 +142,13 @@ public static class DataSourceFactories
             yield break;
         }
 
-        foreach (var row in RowsFromValue(taskResult, keepTupleRowsWhole))
+        foreach (var row in RowsFromValue(taskResult, tupleRowBinding))
         {
             yield return row;
         }
     }
 
-    private static async IAsyncEnumerable<Func<Task<object?[]?>>> FromAsyncEnumerableCore<T>(Func<IAsyncEnumerable<T>> invoke, bool keepTupleRowsWhole)
+    private static async IAsyncEnumerable<Func<Task<object?[]?>>> FromAsyncEnumerableCore<T>(Func<IAsyncEnumerable<T>> invoke, TupleRowBinding tupleRowBinding)
     {
         var result = invoke();
 
@@ -160,7 +160,7 @@ public static class DataSourceFactories
 
         await foreach (var item in result)
         {
-            yield return () => Task.FromResult<object?[]?>(ToRow(item, keepTupleRowsWhole));
+            yield return () => Task.FromResult<object?[]?>(ToRow(item, tupleRowBinding));
         }
     }
 
@@ -169,23 +169,23 @@ public static class DataSourceFactories
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromInstanceValue(DataGeneratorMetadata dataGeneratorMetadata, Func<object, object?> invoke)
     {
         var result = invoke(GetRequiredInstance(dataGeneratorMetadata));
-        var keepTupleRowsWhole = KeepsTupleRowsWhole(dataGeneratorMetadata);
+        var tupleRowBinding = GetTupleRowBinding(dataGeneratorMetadata);
 
-        yield return () => Task.FromResult<object?[]?>(ToRow(result, keepTupleRowsWhole));
+        yield return () => Task.FromResult<object?[]?>(ToRow(result, tupleRowBinding));
     }
 
     /// <summary>Instance data member declared as a synchronous enumerable.</summary>
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromInstanceEnumerable(DataGeneratorMetadata dataGeneratorMetadata, Func<object, object?> invoke)
     {
         var result = invoke(GetRequiredInstance(dataGeneratorMetadata));
-        var keepTupleRowsWhole = KeepsTupleRowsWhole(dataGeneratorMetadata);
+        var tupleRowBinding = GetTupleRowBinding(dataGeneratorMetadata);
 
         if (result is null)
         {
             yield break;
         }
 
-        foreach (var row in RowsFromValue(result, keepTupleRowsWhole))
+        foreach (var row in RowsFromValue(result, tupleRowBinding))
         {
             yield return row;
         }
@@ -196,7 +196,7 @@ public static class DataSourceFactories
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromInstanceTask<T>(DataGeneratorMetadata dataGeneratorMetadata, Func<object, Task<T>> invoke)
     {
         var result = invoke(GetRequiredInstance(dataGeneratorMetadata));
-        var keepTupleRowsWhole = KeepsTupleRowsWhole(dataGeneratorMetadata);
+        var tupleRowBinding = GetTupleRowBinding(dataGeneratorMetadata);
 
         // A null task is a source with no rows, as the attribute's reflection path reads it, so SkipIfEmpty skips the test.
         if (result is null)
@@ -210,7 +210,7 @@ public static class DataSourceFactories
             yield break;
         }
 
-        foreach (var row in RowsFromValue(taskResult, keepTupleRowsWhole))
+        foreach (var row in RowsFromValue(taskResult, tupleRowBinding))
         {
             yield return row;
         }
@@ -220,7 +220,7 @@ public static class DataSourceFactories
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromInstanceValueTask<T>(DataGeneratorMetadata dataGeneratorMetadata, Func<object, ValueTask<T>> invoke)
     {
         var result = invoke(GetRequiredInstance(dataGeneratorMetadata));
-        var keepTupleRowsWhole = KeepsTupleRowsWhole(dataGeneratorMetadata);
+        var tupleRowBinding = GetTupleRowBinding(dataGeneratorMetadata);
 
         var taskResult = await result;
         if (taskResult is null && IsDeclaredCollection<T>())
@@ -228,7 +228,7 @@ public static class DataSourceFactories
             yield break;
         }
 
-        foreach (var row in RowsFromValue(taskResult, keepTupleRowsWhole))
+        foreach (var row in RowsFromValue(taskResult, tupleRowBinding))
         {
             yield return row;
         }
@@ -238,7 +238,7 @@ public static class DataSourceFactories
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromInstanceAsyncEnumerable<T>(DataGeneratorMetadata dataGeneratorMetadata, Func<object, IAsyncEnumerable<T>> invoke)
     {
         var result = invoke(GetRequiredInstance(dataGeneratorMetadata));
-        var keepTupleRowsWhole = KeepsTupleRowsWhole(dataGeneratorMetadata);
+        var tupleRowBinding = GetTupleRowBinding(dataGeneratorMetadata);
 
         // A null source has no rows, as the attribute's reflection path reads it, so SkipIfEmpty skips the test.
         if (result is null)
@@ -248,7 +248,7 @@ public static class DataSourceFactories
 
         await foreach (var item in result)
         {
-            yield return () => Task.FromResult<object?[]?>(ToRow(item, keepTupleRowsWhole));
+            yield return () => Task.FromResult<object?[]?>(ToRow(item, tupleRowBinding));
         }
     }
 
@@ -293,41 +293,46 @@ public static class DataSourceFactories
 
     // Splits a data member's value into rows the way FromEnumerable always has: an enumerable other than a string gives
     // one row per item, anything else is one row.
-    private static IEnumerable<Func<Task<object?[]?>>> RowsFromValue(object? value, bool keepTupleRowsWhole)
+    private static IEnumerable<Func<Task<object?[]?>>> RowsFromValue(object? value, TupleRowBinding tupleRowBinding)
     {
         if (value is IEnumerable enumerable && !(value is string))
         {
             foreach (var item in enumerable)
             {
-                yield return () => Task.FromResult<object?[]?>(ToRow(item, keepTupleRowsWhole));
+                yield return () => Task.FromResult<object?[]?>(ToRow(item, tupleRowBinding));
             }
         }
         else
         {
-            yield return () => Task.FromResult<object?[]?>(ToRow(value, keepTupleRowsWhole));
+            yield return () => Task.FromResult<object?[]?>(ToRow(value, tupleRowBinding));
         }
     }
 
-    // When the test takes a single tuple, the attribute's reflection path (ToObjectArrayWithTypes) passes a tuple row
-    // as that one argument instead of splitting it into elements. Splitting would lose the difference between a null
-    // row and a one-element tuple holding null, such as Tuple.Create<string?>(null): both become [null].
-    private static bool KeepsTupleRowsWhole(DataGeneratorMetadata dataGeneratorMetadata)
+    // Preserve tuple-valued properties and distinguish null rows from tuples holding null.
+    // Method arguments with struct initializers need flattened boxes for reconstruction after initialization.
+    private enum TupleRowBinding
     {
-        return dataGeneratorMetadata.MembersToGenerate is [var member]
-            && TupleHelper.IsTupleType(member switch
-            {
-                ParameterMetadata parameter => parameter.Type,
-                PropertyMetadata property => property.Type,
-                _ => null
-            });
+        Spread,
+        Preserve,
+        PreserveUnlessInitializer
     }
 
-    private static object?[] ToRow(object? item, bool keepTupleRowsWhole)
+    private static TupleRowBinding GetTupleRowBinding(DataGeneratorMetadata dataGeneratorMetadata)
+        => dataGeneratorMetadata.MembersToGenerate switch
+        {
+            [PropertyMetadata property] when TupleHelper.IsTupleType(property.Type) => TupleRowBinding.Preserve,
+            [ParameterMetadata parameter] when TupleHelper.IsTupleType(parameter.Type) => TupleRowBinding.PreserveUnlessInitializer,
+            _ => TupleRowBinding.Spread
+        };
+
+    private static object?[] ToRow(object? item, TupleRowBinding tupleRowBinding)
     {
-        if (keepTupleRowsWhole)
+        if (tupleRowBinding != TupleRowBinding.Spread)
         {
             item = DataSourceHelpers.InvokeIfFunc(item);
-            if (DataSourceHelpers.IsTuple(item))
+            if (DataSourceHelpers.IsTuple(item)
+                && (tupleRowBinding == TupleRowBinding.Preserve
+                    || !DataSourceHelpers.RequiresFlattenedTupleBinding(item!)))
             {
                 return [item];
             }

@@ -117,7 +117,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
 {
     new global::TUnit.Core.MethodDataSourceAttribute("Foo")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.TestData.Foo()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.TestData.Foo()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "GenericMethodDataSource", false, new global::TUnit.Core.ParameterMetadata[]
@@ -140,7 +140,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.TestData), "Foo")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.TestData.Foo()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.TestData.Foo()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "NonGenericMethodDataSource", false, new global::TUnit.Core.ParameterMetadata[]

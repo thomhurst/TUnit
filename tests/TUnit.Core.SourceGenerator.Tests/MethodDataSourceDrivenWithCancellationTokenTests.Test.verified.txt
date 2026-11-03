@@ -83,27 +83,27 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenWithCancellationTo
 {
     new global::TUnit.Core.MethodDataSourceAttribute("T")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.T()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.T()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.FuncT()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.FuncT()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableT()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableT()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableFuncT()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableFuncT()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayT()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayT()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayFuncT()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayFuncT()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", false, new global::TUnit.Core.ParameterMetadata[]

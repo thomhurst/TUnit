@@ -135,10 +135,22 @@ internal class DataUnwrapper
 
         var lastDataParameterType = expectedParameters[lastDataParameterIndex].Type;
 
-        // A single data parameter that expects a tuple receives the tuple itself
+        // Keep compatible tuples whole (including one-element tuples holding null).
+        // Otherwise the invoker needs every element to reconstruct the target tuple
+        // with per-element conversions, rather than casting incompatible tuple types.
         if (dataParameterCount == 1 && TupleHelper.IsTupleType(lastDataParameterType))
         {
-            return values;
+            // Keep the runtime tuple intact until generic inference closes the parameter type.
+            if (!DataSourceHelpers.RequiresFlattenedTupleBinding(values[0]!)
+                && (lastDataParameterType.ContainsGenericParameters || lastDataParameterType.IsInstanceOfType(values[0])))
+            {
+                return values;
+            }
+
+            // A reference tuple with a lone null must retain its container: [null] also
+            // represents an actual null argument. Value tuples always reconstruct from null.
+            var tupleElements = DataSourceHelpers.UnwrapTupleAot(values[0]);
+            return !lastDataParameterType.IsValueType && tupleElements is [null] ? values : tupleElements;
         }
 
         // A tuple that is already an instance of the first data parameter's tuple type binds to it

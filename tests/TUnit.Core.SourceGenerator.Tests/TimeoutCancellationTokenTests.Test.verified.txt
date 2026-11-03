@@ -183,7 +183,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -208,7 +208,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -233,7 +233,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -262,7 +262,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -288,14 +288,14 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -325,7 +325,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -432,7 +432,7 @@ internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutDoesNotFireTests.DataSource()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.TimeoutDoesNotFireTests.DataSource()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -538,7 +538,7 @@ internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.CancellationTokenTriggeredTests.DataSource()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.CancellationTokenTriggeredTests.DataSource()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
