@@ -142,7 +142,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.Long_Tuple_Infers_Generic_Element<string>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, int, int, int, int, int, int, global::System.ValueTuple<string>>>(args[0])));
+                return new global::System.Threading.Tasks.ValueTask(instance.Long_Tuple_Infers_Generic_Element<string>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 8 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, int, int, int, int, int, int, global::System.ValueTuple<string>> => (global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, int, int, int, int, int, int, global::System.ValueTuple<string>>)(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[5]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[6]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[7])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, int, int, int, int, int, int, global::System.ValueTuple<string>>>(__tupleFallback0) })));
             }
             else
             {
@@ -239,7 +239,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.Tuple_Infers_Generic_Element_With_Leading_Token<int>(cancellationToken, global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, int>>(args[0])));
+                return new global::System.Threading.Tasks.ValueTask(instance.Tuple_Infers_Generic_Element_With_Leading_Token<int>(cancellationToken, (args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 2 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, int> => (global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, int>)(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, int>>(__tupleFallback0) })));
             }
             else
             {
@@ -334,7 +334,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.Value_Tuple_Infers_Generic_Element<int>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, int>>(args[0])));
+                return new global::System.Threading.Tasks.ValueTask(instance.Value_Tuple_Infers_Generic_Element<int>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 2 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, int> => (global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, int>)(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, int>>(__tupleFallback0) })));
             }
             else
             {
@@ -526,7 +526,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.Tuple_Token_Element_Binds_As_Data<int>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, global::System.Threading.CancellationToken, int>>(args[0])));
+                return new global::System.Threading.Tasks.ValueTask(instance.Tuple_Token_Element_Binds_As_Data<int>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 3 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, global::System.Threading.CancellationToken, int> => (global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, global::System.Threading.CancellationToken, int>)(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Threading.CancellationToken>(__tupleInput0[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[2])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture, global::System.Threading.CancellationToken, int>>(__tupleFallback0) })));
             }
             else
             {
@@ -621,7 +621,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.Null_Element_Keeps_Generic_Reference_Type<object>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object, object, global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>>(args[0])));
+                return new global::System.Threading.Tasks.ValueTask(instance.Null_Element_Keeps_Generic_Reference_Type<object>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 3 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object, object, global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture> => (global::System.ValueTuple<object, object, global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>)(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(__tupleInput0[2])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object, object, global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>>(__tupleFallback0) })));
             }
             else
             {
@@ -815,7 +815,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.Null_Element_With_Leading_Token<object>(cancellationToken, global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object, object, global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>>(args[0])));
+                return new global::System.Threading.Tasks.ValueTask(instance.Null_Element_With_Leading_Token<object>(cancellationToken, (args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 3 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object, object, global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture> => (global::System.ValueTuple<object, object, global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>)(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(__tupleInput0[2])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object, object, global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>>(__tupleFallback0) })));
             }
             else
             {
@@ -912,7 +912,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.Null_Element_With_Trailing_Token<object>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object, object, global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>>(args[0]), cancellationToken));
+                return new global::System.Threading.Tasks.ValueTask(instance.Null_Element_With_Trailing_Token<object>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 3 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object, object, global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture> => (global::System.ValueTuple<object, object, global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>)(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(__tupleInput0[2])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object, object, global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>>(__tupleFallback0) }), cancellationToken));
             }
             else
             {
