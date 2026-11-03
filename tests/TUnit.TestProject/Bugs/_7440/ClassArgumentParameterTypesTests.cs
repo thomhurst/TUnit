@@ -37,3 +37,38 @@ public class DecimalConstructorArgumentTests(decimal value)
         await Assert.That(number).IsEqualTo(4);
     }
 }
+
+public static class DecimalArgumentConstants
+{
+    public const double DoubleRate = 0.1;
+    public const float FloatRate = 0.1f;
+    public const string Amount = "3\n";
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(DecimalArgumentConstants.DoubleRate)]
+[Arguments(DecimalArgumentConstants.FloatRate)]
+public class DecimalConstantConstructorArgumentTests(decimal value)
+{
+    [Test]
+    [Arguments(DecimalArgumentConstants.DoubleRate)]
+    [Arguments(DecimalArgumentConstants.FloatRate)]
+    public async Task Run(decimal number)
+    {
+        await Assert.That(value).IsEqualTo(0.1m);
+        await Assert.That(number).IsEqualTo(0.1m);
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(DecimalArgumentConstants.Amount)]
+public class DecimalStringConstantConstructorArgumentTests(decimal value)
+{
+    [Test]
+    [Arguments(DecimalArgumentConstants.Amount)]
+    public async Task Run(decimal number)
+    {
+        await Assert.That(value).IsEqualTo(3m);
+        await Assert.That(number).IsEqualTo(3m);
+    }
+}

@@ -3121,10 +3121,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Only process positional arguments (exclude named arguments)
         var positionalArgs = argumentList.Arguments.Where(a => a.NameEquals == null).ToArray();
-        var values = attr.ConstructorArguments is [{ Kind: TypedConstantKind.Array } array]
-            ? array.Values
-            : attr.ConstructorArguments;
-
         for (var i = 0; i < positionalArgs.Length; i++)
         {
             var argumentSyntax = positionalArgs[i];
@@ -3136,18 +3132,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 : null;
 
             // Preserve exact decimal digits only for supported numeric literal syntax.
-            // Integral suffixes and constant expressions must be formatted from their values.
+            // Keep other expressions on the runtime conversion path, including floating-point
+            // and string constants, so they behave identically to reflection discovery.
             if (targetParameterType?.SpecialType == SpecialType.System_Decimal
                 && TryGetDecimalLiteralText(expression, out var decimalLiteral))
             {
                 writer.Append(decimalLiteral);
-            }
-            else if (targetParameterType?.SpecialType == SpecialType.System_Decimal
-                && positionalArgs.Length == values.Length
-                && expression.Kind() != SyntaxKind.StringLiteralExpression
-                && expression.Kind() != SyntaxKind.NullLiteralExpression)
-            {
-                writer.Append(new TypedConstantFormatter().FormatForCode(values[i], targetParameterType));
             }
             else
             {
