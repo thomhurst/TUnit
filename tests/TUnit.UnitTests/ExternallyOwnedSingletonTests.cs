@@ -80,11 +80,38 @@ public class ExternallyOwnedSingletonTests
         // The count was released, so the session-end sweep will not dispose the object either.
         await Assert.That(IsCounted(singleton)).IsFalse();
 
-        // A later source does not count it.
+        // A later source still balances its reference without disposing it.
         var laterTest = CreateContext(singleton);
         tracker.TrackObjects(laterTest);
         await tracker.UntrackObjects(laterTest);
 
+        await Assert.That(singleton.DisposeCount).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task Later_Consumers_Do_Not_Release_The_First_Consumers_Reference()
+    {
+        var tracker = CreateTracker();
+        var singleton = new TrackedDisposable();
+        var first = CreateContext(singleton);
+        tracker.TrackObjects(first);
+        ObjectTracker.MarkExternallyOwned(singleton);
+
+        var laterConsumers = Enumerable.Range(0, 16).Select(_ => CreateContext(singleton)).ToArray();
+        foreach (var context in laterConsumers)
+        {
+            tracker.TrackObjects(context);
+        }
+
+        await Assert.That(ObjectTracker.IsShared(singleton)).IsTrue();
+        var errors = await Task.WhenAll(laterConsumers.Select(context => Task.Run(async () => await tracker.UntrackObjects(context))));
+        await Assert.That(errors.All(x => x is null)).IsTrue();
+        // Later consumers must leave the reference taken before the ownership mark intact.
+        await Assert.That(IsCounted(singleton)).IsTrue();
+        await Assert.That(ObjectTracker.IsShared(singleton)).IsFalse();
+
+        await tracker.UntrackObjects(first);
+        await Assert.That(IsCounted(singleton)).IsFalse();
         await Assert.That(singleton.DisposeCount).IsEqualTo(0);
     }
 

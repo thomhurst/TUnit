@@ -152,6 +152,15 @@ public sealed class NestedProbeService(NestedProbeDependency dependency)
 
     [ClassDataSource<InjectedProbeFixture>(Shared = SharedType.None)]
     public InjectedProbeFixture Fixture { get; set; } = null!;
+
+    public InjectedFixtureAlias Alias => new(this);
+}
+
+public sealed class InjectedFixtureAlias(NestedProbeService service) : IAsyncInitializer
+{
+    public InjectedProbeFixture Fixture => service.Fixture;
+
+    public Task InitializeAsync() => Task.CompletedTask;
 }
 
 public sealed class InjectedProbeFixture : IAsyncInitializer, IDisposable
@@ -366,6 +375,28 @@ public class NestedScopeDependencyTests(NestedProbeService service)
     }
 }
 
+public sealed class FailedClassRowDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(FailedClassRowScopeTests));
+
+public sealed class FailedMethodRowDependencyInjectionAttribute() : ProbeDependencyInjectionAttribute(nameof(FailedMethodRowScopeTests));
+
+[EngineTest(ExpectedResult.Failure)]
+[FailedClassRowDependencyInjection]
+// The optional argument also lets the generator emit the placeholder for a constraint-invalid row.
+public class FailedClassRowScopeTests(ProbeService? service = null)
+{
+    [Test]
+    [Arguments("not a struct")]
+    public Task Run<T>(T value) where T : struct => Task.CompletedTask;
+}
+
+[EngineTest(ExpectedResult.Failure)]
+public class FailedMethodRowScopeTests
+{
+    [Test]
+    [FailedMethodRowDependencyInjection]
+    public Task Run<T>(T value) where T : struct => Task.CompletedTask;
+}
+
 // Not tagged [EngineTest]: it depends on DependencySkippedScopeTests, whose Fails test fails by design,
 // and asserts the scopes of CircularDependencyScopeTests, so it only holds when the whole _7205 folder
 // runs together. Issue7205Tests runs it that way; the [EngineTest=Pass] sweep must not pull it in.
@@ -382,6 +413,8 @@ public class DependencyInjectionScopeDisposalObserverTests
     [DependsOn(typeof(DependencySkippedScopeTests), ProceedOnFailure = true)]
     [DependsOn(typeof(NonDisposableScopeTests))]
     [DependsOn(typeof(NestedScopeDependencyTests))]
+    [DependsOn(typeof(FailedClassRowScopeTests), ProceedOnFailure = true)]
+    [DependsOn(typeof(FailedMethodRowScopeTests), ProceedOnFailure = true)]
     public async Task Every_Scope_Is_Disposed_When_Its_Test_Ends()
     {
         // One scope per test: two tests, then two method rows run twice each.
@@ -397,6 +430,8 @@ public class DependencyInjectionScopeDisposalObserverTests
 
         // One scope for both attempts, and one for each skipped test.
         await AssertScopes(nameof(RetriedScopeTests), 1);
+        await AssertScopes(nameof(FailedClassRowScopeTests), 1);
+        await AssertScopes(nameof(FailedMethodRowScopeTests), 1);
         await AssertScopes(nameof(SkippedScopeTests), 1);
         await AssertScopes(nameof(SkippedIfEmptyScopeTests), 1);
 
