@@ -5,6 +5,44 @@ namespace TUnit.UnitTests;
 public class GenericClassSourceRuntimeTests
 {
     [Test]
+    public async Task Null_Evaluated_Row_Uses_Original_Factory()
+    {
+        var calls = 0;
+        var state = new EvaluatedDataRow(null, () =>
+        {
+            calls++;
+            return Task.FromResult<object?[]?>(null);
+        });
+
+        await Assert.That(await state.FetchAsync()).IsNull();
+        await Assert.That(await state.FetchAsync()).IsNull();
+        await Assert.That(calls).IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task Partitions_Consume_Shared_Evaluated_Row_Once_Across_Enumerations()
+    {
+        var original = new object?[] { new object() };
+        var calls = 0;
+        var state = new EvaluatedDataRow(original, () =>
+        {
+            Interlocked.Increment(ref calls);
+            return Task.FromResult<object?[]?>([new object()]);
+        });
+        var raw = new StaticDataSourceAttribute(original) { EvaluatedRows = [state] };
+        var grouped = new StaticDataSourceAttribute(original) { EvaluatedRows = [state] };
+
+        var rawFactories = await ReadFactories(raw);
+        var groupedFactories = await ReadFactories(grouped);
+        var repeatedFactories = await ReadFactories(grouped);
+        var rows = await Task.WhenAll(rawFactories[0](), groupedFactories[0](), repeatedFactories[0]());
+
+        await Assert.That(rows.Count(row => ReferenceEquals(row, original))).IsEqualTo(1);
+        await Assert.That(calls).IsEqualTo(2);
+        await Assert.That(ReferenceEquals(rows[1]![0], rows[2]![0])).IsFalse();
+    }
+
+    [Test]
     public async Task Instance_Conversion_Preserves_Inferred_Source_Settings()
     {
         var source = new MethodDataSourceAttribute(typeof(GenericClassSourceRuntimeTests), "Rows");

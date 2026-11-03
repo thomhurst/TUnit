@@ -181,12 +181,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                     {
                         // Reuse the value evaluated for filtering only once. Later method rows and
                         // repetitions must call the source factory for fresh constructor data.
-                        var evaluated = row;
-                        yield return () =>
-                        {
-                            var firstRow = Interlocked.Exchange(ref evaluated, null);
-                            return firstRow is not null ? Task.FromResult<object?[]?>(firstRow) : func();
-                        };
+                        yield return new EvaluatedDataRow(row, func).FetchAsync;
                     }
                 }
                 else

@@ -292,7 +292,7 @@ public static class GenericClassRowPartition
                         // Retain declared constructor-position and own-class null inference.
                         var infers = RowInfers(dataSources[index], row, ClassTypeArguments);
                         anyRowInfers |= infers;
-                        rows.Add(new EvaluatedRow(rowFactory, row, infers));
+                        rows.Add(new EvaluatedRow(new EvaluatedDataRow(row, rowFactory), infers));
                     }
 
                     rowsByIndex[index] = rows;
@@ -374,10 +374,10 @@ public static class GenericClassRowPartition
     }
 
     /// <summary>
-    /// A row of a partitioned source, evaluated once to read its values' types. <see cref="Row"/> holds the values
+    /// A row of a partitioned source, evaluated once to read its values' types. <see cref="EvaluatedDataRow"/> holds the values
     /// evaluated from a wrapped factory (<see cref="EvaluateWrappedFactory"/>), so its first fetch does not invoke it again.
     /// </summary>
-    internal readonly record struct EvaluatedRow(Func<Task<object?[]?>> Factory, object?[]? Row, bool InfersTypeArguments);
+    internal readonly record struct EvaluatedRow(EvaluatedDataRow State, bool InfersTypeArguments);
 
     /// <summary>The evaluated rows of each partitioned source, by data source index, and whether any of them infers the instantiation.</summary>
     internal sealed record Evaluation(List<EvaluatedRow>?[] RowsByIndex, bool AnyRowInfers);
@@ -502,23 +502,8 @@ internal sealed class GenericClassRowPartitionDataSource : Attribute, IDataSourc
         {
             if (useEveryRow || evaluatedRow.InfersTypeArguments)
             {
-                yield return FirstFetchReturnsEvaluatedRow(evaluatedRow);
+                yield return evaluatedRow.State.FetchAsync;
             }
         }
-    }
-
-    /// <summary>
-    /// The first fetch returns the values that were evaluated to choose the row, so no extra objects are made.
-    /// Later fetches, such as for a repeated test, call the source's own factory, as they would without the partition.
-    /// </summary>
-    private static Func<Task<object?[]?>> FirstFetchReturnsEvaluatedRow(GenericClassRowPartition.EvaluatedRow evaluatedRow)
-    {
-        var evaluated = evaluatedRow.Row;
-        var factory = evaluatedRow.Factory;
-        return () =>
-        {
-            var row = Interlocked.Exchange(ref evaluated, null);
-            return row is not null ? Task.FromResult<object?[]?>(row) : factory();
-        };
     }
 }
