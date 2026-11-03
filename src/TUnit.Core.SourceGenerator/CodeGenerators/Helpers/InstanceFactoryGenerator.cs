@@ -280,7 +280,7 @@ public static class InstanceFactoryGenerator
 
     public static void GenerateRequiredConstructorCache(CodeWriter writer, ITypeSymbol type, IMethodSymbol? constructor, string cacheName)
     {
-        if (constructor == null || constructor.Parameters.Length == 0 ||
+        if (constructor == null ||
             constructor.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute") ||
             (!RequiredPropertyHelper.GetAllRequiredProperties(type).Any() && !RequiredPropertyHelper.GetAllRequiredFields(type).Any()))
         {
@@ -290,8 +290,16 @@ public static class InstanceFactoryGenerator
         // A direct C# new expression must assign every required member, which overwrites values
         // initialized by the class. Cache the exact selected constructor instead, preserving those
         // values and retaining the same argument conversions as the ordinary typed factory.
-        var parameterTypes = string.Join(", ", constructor.Parameters.Select(p => $"typeof({p.Type.GloballyQualified()})"));
-        writer.AppendLine($"private static readonly global::System.Reflection.ConstructorInfo? {cacheName} = typeof({type.GloballyQualified()}).GetConstructor(new global::System.Type[] {{ {parameterTypes} }});");
+        // Closed generic overloads can have identical parameter types (C<T>(T) and C<T>(int)
+        // when T is int). Preserve the selected declaration's ordinal instead of rebinding its
+        // closed signature. GetConstructors returns public instance constructors in metadata
+        // order, matching the declaration order used by GetClassRowConstructor.
+        var publicConstructors = constructor.ContainingType.InstanceConstructors
+            .Where(static c => c.DeclaredAccessibility == Accessibility.Public)
+            .ToArray();
+        var constructorIndex = Array.FindIndex(publicConstructors,
+            candidate => SymbolEqualityComparer.Default.Equals(candidate, constructor));
+        writer.AppendLine($"private static readonly global::System.Reflection.ConstructorInfo {cacheName} = typeof({type.GloballyQualified()}).GetConstructors()[{constructorIndex.ToString(CultureInfo.InvariantCulture)}];");
     }
 
     private static void GenerateTypedConstructorCall(CodeWriter writer, string className, IMethodSymbol constructor)

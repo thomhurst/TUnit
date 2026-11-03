@@ -369,3 +369,36 @@ public class KeywordRequiredFieldTests(int value)
         await Assert.That(@class).IsEqualTo(0);
     }
 }
+
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments]
+public class GenericRequiredParameterlessConstructorTests<T>
+{
+    public required int Number = 3;
+
+    [TestConstructor]
+    public GenericRequiredParameterlessConstructorTests() { }
+
+    public GenericRequiredParameterlessConstructorTests(T value) => throw new Exception("Wrong constructor");
+
+    [Test]
+    public async Task Run() => await Assert.That(Number).IsEqualTo(3);
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+public class GenericRequiredCollidingConstructorTests<T>
+{
+    public required int Number = 3;
+
+    public GenericRequiredCollidingConstructorTests(T value) => throw new Exception("Wrong constructor");
+
+    [TestConstructor]
+    public GenericRequiredCollidingConstructorTests(int value) => Number += value;
+
+    [Test]
+    public async Task Run() => await Assert.That(Number).IsEqualTo(4);
+}
