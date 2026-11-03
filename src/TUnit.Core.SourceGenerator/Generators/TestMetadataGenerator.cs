@@ -1315,6 +1315,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     || (DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
                         && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a)))));
 
+            // classTypeArgumentsSupplied already includes explicit [GenerateGenericTest] class types.
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
                 var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation,
@@ -1805,7 +1806,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     foreach (var (attribute, classTypes) in otherClassDataSources ?? [])
                     {
-                        if (GenericClassInferencePolicy.IncludesRow(classTypes is not null, classTypes is not null && InferredTypesMatch(classTypes, instantiation.ClassTypeArgs), includeUninferred: true))
+                        if (GenericClassInferencePolicy.IncludesRow(classTypes is null ? null : InferredTypesMatch(classTypes, instantiation.ClassTypeArgs), includeUninferred: true))
                         {
                             instantiation.AddRow(attribute, isClassRow: true);
                             hasClassDataSource = true;
@@ -7971,7 +7972,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var inferred = rowType == null
                 ? null
                 : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType);
-            if (GenericClassInferencePolicy.IncludesRow(inferred is not null, inferred is not null && inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default), includeUninferred))
+            if (GenericClassInferencePolicy.IncludesRow(inferred is null ? null : inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default), includeUninferred))
             {
                 yield return attribute;
             }

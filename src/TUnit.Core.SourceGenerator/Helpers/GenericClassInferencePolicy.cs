@@ -19,8 +19,8 @@ internal static class GenericClassInferencePolicy
             : hasClassArgumentsRows ? RowFallback.NoClassRow
             : RowFallback.AllRows;
 
-    internal static bool IncludesRow(bool hasInferredTypes, bool matchesInstantiation, bool includeUninferred)
-        => hasInferredTypes ? matchesInstantiation : includeUninferred;
+    internal static bool IncludesRow(bool? matchesInstantiation, bool includeUninferred)
+        => matchesInstantiation ?? includeUninferred;
 
     internal static bool ClassRowSuppliesNoTypeArguments(int valueCount, int boundCount, bool hasClassTypeParameter)
         => boundCount == 0 ? valueCount == 0 : !hasClassTypeParameter;

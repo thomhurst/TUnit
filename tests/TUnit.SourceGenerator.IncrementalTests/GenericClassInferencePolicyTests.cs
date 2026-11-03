@@ -16,14 +16,14 @@ internal class GenericClassInferencePolicyTests
     }
 
     [Test]
-    [Arguments(true, true, false, true)]
-    [Arguments(true, false, true, false)]
-    [Arguments(false, false, true, true)]
-    [Arguments(false, false, false, false)]
+    [Arguments(true, false, true)]
+    [Arguments(false, true, false)]
+    [Arguments(null, true, true)]
+    [Arguments(null, false, false)]
     public async Task Uninferred_rows_join_only_when_the_scope_allows_them(
-        bool inferred, bool matching, bool includeUninferred, bool expected)
+        bool? matching, bool includeUninferred, bool expected)
     {
-        await Assert.That(GenericClassInferencePolicy.IncludesRow(inferred, matching, includeUninferred)).IsEqualTo(expected);
+        await Assert.That(GenericClassInferencePolicy.IncludesRow(matching, includeUninferred)).IsEqualTo(expected);
     }
 
     [Test]

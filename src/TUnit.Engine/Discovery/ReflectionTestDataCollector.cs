@@ -1039,6 +1039,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         inferredTypeArguments = null;
         var classGenericParameters = genericTypeDefinition.GetGenericArguments();
 
+        // This helper is called only when the class has no data sources, so hasClassTypeSource is false.
         // With no [GenerateGenericTest] instantiation for it to run on, [Arguments(null)] infers object
         // like any other null value, rather than being dropped (#7141)
         var nullValuesArrayInfersObject = GenericClassInferencePolicy.NullMethodRowInfersObject(hasClassTypeSource: false, hasExplicitClassTypes: generateGenericTestAttributes.Length > 0);
@@ -1126,7 +1127,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     var rows = new List<IDataSourceAttribute>(concreteDataSources.Length);
                     for (var i = 0; i < concreteDataSources.Length; i++)
                     {
-                        if (GenericClassInferencePolicy.IncludesRow(groupOfSource[i] >= 0, groupOfSource[i] == groupIndex, isListedByGenerateGenericTest))
+                        if (GenericClassInferencePolicy.IncludesRow(groupOfSource[i] < 0 ? null : groupOfSource[i] == groupIndex, isListedByGenerateGenericTest))
                         {
                             rows.Add(concreteDataSources[i]);
                         }
@@ -1247,8 +1248,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         for (var i = 0; i < dataSources.Length; i++)
         {
             var inferred = rowTypeArguments[i];
-            var keep = GenericClassInferencePolicy.IncludesRow(inferred is not null,
-                inferred is not null && AreSameTypeArguments(inferred, classTypeArguments), !onlyInferringRows);
+            var keep = GenericClassInferencePolicy.IncludesRow(inferred is null ? null : AreSameTypeArguments(inferred, classTypeArguments),
+                includeUninferred: !onlyInferringRows);
 
             if (keep)
             {
