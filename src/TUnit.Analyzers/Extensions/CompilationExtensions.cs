@@ -99,16 +99,17 @@ public static class CompilationExtensions
     private static bool MatchesArrayElement(Compilation compilation, ITypeSymbol argument, ITypeSymbol parameter,
         bool allowReferenceConversions = true)
     {
-        var bindings = ImmutableDictionary.Create<ITypeParameterSymbol, ITypeSymbol>(SymbolEqualityComparer.Default);
+        var bindings = ImmutableDictionary.Create<ITypeParameterSymbol, ImmutableArray<(ITypeSymbol Type, VarianceKind Variance)>>(SymbolEqualityComparer.Default);
         return MatchesArrayElement(compilation, argument, parameter, ref bindings, allowReferenceConversions);
     }
 
     private static bool MatchesArrayElement(Compilation compilation, ITypeSymbol argument, ITypeSymbol parameter,
-        ref ImmutableDictionary<ITypeParameterSymbol, ITypeSymbol> bindings, bool allowReferenceConversions = true)
+        ref ImmutableDictionary<ITypeParameterSymbol, ImmutableArray<(ITypeSymbol Type, VarianceKind Variance)>> bindings, bool allowReferenceConversions = true,
+        VarianceKind variance = VarianceKind.Out)
     {
         // Interface/base candidates are alternatives. A failed candidate must not constrain the next one.
         var originalBindings = bindings;
-        if (MatchesArrayElementCore(compilation, argument, parameter, ref bindings, allowReferenceConversions))
+        if (MatchesArrayElementCore(compilation, argument, parameter, ref bindings, allowReferenceConversions, variance))
         {
             return true;
         }
@@ -118,21 +119,42 @@ public static class CompilationExtensions
     }
 
     private static bool MatchesArrayElementCore(Compilation compilation, ITypeSymbol argument, ITypeSymbol parameter,
-        ref ImmutableDictionary<ITypeParameterSymbol, ITypeSymbol> bindings, bool allowReferenceConversions)
+        ref ImmutableDictionary<ITypeParameterSymbol, ImmutableArray<(ITypeSymbol Type, VarianceKind Variance)>> bindings, bool allowReferenceConversions,
+        VarianceKind variance)
     {
         if (parameter is ITypeParameterSymbol typeParameter)
         {
-            // Invariant occurrences require the same substitution, including nested arrays and containing types.
-            if (!allowReferenceConversions)
+            // Keep variant bounds as well as exact bindings: a later invariant occurrence
+            // must satisfy earlier bounds, and vice versa, regardless of traversal order.
+            bindings.TryGetValue(typeParameter, out var occurrences);
+            if (occurrences.IsDefault)
             {
-                if (bindings.TryGetValue(typeParameter, out var inferredType))
-                {
-                    return SymbolEqualityComparer.Default.Equals(inferredType, argument);
-                }
-
-                bindings = bindings.Add(typeParameter, argument);
+                occurrences = ImmutableArray<(ITypeSymbol Type, VarianceKind Variance)>.Empty;
             }
 
+            occurrences = occurrences.Add((argument, allowReferenceConversions ? variance : VarianceKind.None));
+            foreach (var invariant in occurrences)
+            {
+                if (invariant.Variance != VarianceKind.None)
+                {
+                    continue;
+                }
+
+                foreach (var occurrence in occurrences)
+                {
+                    var source = occurrence.Variance == VarianceKind.In ? invariant.Type : occurrence.Type;
+                    var target = occurrence.Variance == VarianceKind.In ? occurrence.Type : invariant.Type;
+                    var boundConversion = compilation.ClassifyConversion(source, target);
+                    if (!boundConversion.IsIdentity
+                        && (occurrence.Variance == VarianceKind.None
+                            || !boundConversion.IsImplicit || !boundConversion.IsReference))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            bindings = bindings.SetItem(typeParameter, occurrences);
             return true;
         }
 
@@ -174,7 +196,8 @@ public static class CompilationExtensions
                     if (!MatchesArrayElement(compilation, argumentType, parameterType, ref bindings,
                             allowReferenceConversions: allowReferenceConversions
                                 && argumentType.IsReferenceType
-                                && parameterNamed.TypeParameters[i].Variance != VarianceKind.None))
+                                && parameterNamed.TypeParameters[i].Variance != VarianceKind.None,
+                            variance: parameterNamed.TypeParameters[i].Variance))
                     {
                         return false;
                     }
@@ -186,11 +209,11 @@ public static class CompilationExtensions
                 // IEnumerable<string> can become IEnumerable<object>, but IEnumerable<int> cannot.
                 var allowVariance = allowReferenceConversions && argumentType.IsReferenceType
                     && (parameterType.IsReferenceType || parameterType is ITypeParameterSymbol);
-                var variance = allowVariance ? parameterNamed.TypeParameters[i].Variance : VarianceKind.None;
+                var argumentVariance = allowVariance ? parameterNamed.TypeParameters[i].Variance : VarianceKind.None;
                 if (!MatchesArrayElement(compilation,
-                        variance == VarianceKind.In ? parameterType : argumentType,
-                        variance == VarianceKind.In ? argumentType : parameterType,
-                        ref bindings, allowReferenceConversions: variance != VarianceKind.None))
+                        argumentVariance == VarianceKind.In ? parameterType : argumentType,
+                        argumentVariance == VarianceKind.In ? argumentType : parameterType,
+                        ref bindings, allowReferenceConversions: argumentVariance != VarianceKind.None))
                 {
                     return false;
                 }
@@ -201,10 +224,9 @@ public static class CompilationExtensions
 
         // Reference array covariance can expose the inferred type through an implemented
         // interface or base class, without rebuilding any array elements.
-        if (allowReferenceConversions && argument is INamedTypeSymbol { IsReferenceType: true } referenceType
-            && parameter.IsReferenceType)
+        if (allowReferenceConversions && argument.IsReferenceType && parameter.IsReferenceType)
         {
-            foreach (var interfaceType in referenceType.AllInterfaces)
+            foreach (var interfaceType in argument.AllInterfaces)
             {
                 if (MatchesArrayElement(compilation, interfaceType, parameter, ref bindings))
                 {
@@ -212,7 +234,7 @@ public static class CompilationExtensions
                 }
             }
 
-            if (referenceType.BaseType is { } baseType)
+            if (argument.BaseType is { } baseType)
             {
                 return MatchesArrayElement(compilation, baseType, parameter, ref bindings);
             }

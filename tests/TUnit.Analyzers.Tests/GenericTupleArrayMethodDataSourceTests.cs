@@ -69,6 +69,14 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("int[][]", "IEnumerable<T>[]", false)]
+    [Arguments("IEnumerable<int[]>[]", "IEnumerable<IEnumerable<T>>[]", false)]
+    [Arguments("IPair<string, Box<int>>[]", "IPair<T, Box<T>>[]", true)]
+    [Arguments("IPair<Box<int>, string>[]", "IPair<Box<T>, T>[]", true)]
+    [Arguments("IPair<string, Box<object>>[]", "IPair<T, Box<T>>[]", false)]
+    [Arguments("IPair<Box<object>, string>[]", "IPair<Box<T>, T>[]", false)]
+    [Arguments("IConsumer<Box<string>, object>[]", "IConsumer<Box<T>, T>[]", false)]
+    [Arguments("IConsumer<Box<object>, string>[]", "IConsumer<Box<T>, T>[]", true)]
     [Arguments("Alternative[]", "IInvariant<T, T>[]", false)]
     [Arguments("Outer<string>.Inner<int>[]", "Outer<T>.Inner<T>[]", true)]
     [Arguments("Outer<int>.Inner<int>[]", "Outer<T>.Inner<T>[]", false)]
@@ -99,6 +107,7 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
         var attribute = expectDiagnostic ? "{|#0:MethodDataSource(nameof(Row))|}" : "MethodDataSource(nameof(Row))";
         var source = $$"""
             #pragma warning disable TUnit0046 // Mutable array rows are intentional in these binding tests.
+            using System.Collections.Generic;
             using System.Threading;
             using System.Threading.Tasks;
             using TUnit.Core;
@@ -108,6 +117,7 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
             public interface IInvariant<A, B> { }
             public class Alternative : IInvariant<int, string>, IInvariant<string, string> { }
             public class Pair<A, B> { }
+            public class Box<A> { }
             public class Outer<A> { public class Inner<B> { } }
             public class C
             {
