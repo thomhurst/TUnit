@@ -90,6 +90,7 @@ public class Issue7300Tests : SnapshotTestBase
 
     [Test]
     [Arguments("LibAlias")]
+    [Arguments("myglobal")]
     [Arguments("@class")]
     [Arguments("Alias_With_Underscores")]
     [Arguments("別名")]
@@ -102,6 +103,22 @@ public class Issue7300Tests : SnapshotTestBase
             .IsEqualTo(IdentifierEscaping.SanitizeIdentifier(globalName));
         await Assert.That(IdentifierEscaping.SanitizeIdentifier(aliasedName.Replace("Y_Value", "Y.Value")))
             .IsNotEqualTo(IdentifierEscaping.SanitizeIdentifier(aliasedName));
+    }
+
+    [Test]
+    public async Task Composite_Names_Preserve_Primary_And_Additional_Types()
+    {
+        var model = new TUnit.Mocks.SourceGenerator.Models.MockTypeModel
+        {
+            FullyQualifiedName = "global::N.IA",
+            AdditionalInterfaceNames = new(["LibAlias::Lib.IExtra", "global::N.IThird"])
+        };
+        var actual = TUnit.Mocks.SourceGenerator.Builders.MockImplBuilder.GetCompositeSafeName(model);
+        await Assert.That(actual).IsEqualTo(IdentifierEscaping.SanitizeIdentifier("N.IA_Lib.IExtra_N.IThird"));
+        await Assert.That(actual).IsNotEqualTo(TUnit.Mocks.SourceGenerator.Builders.MockImplBuilder.GetCompositeSafeName(
+            model with { FullyQualifiedName = "global::N.IB" }));
+        await Assert.That(actual).IsEqualTo(TUnit.Mocks.SourceGenerator.Builders.MockImplBuilder.GetCompositeSafeName(
+            model with { AdditionalInterfaceNames = new(["global::Lib.IExtra", "global::N.IThird"]) }));
     }
 
     [Test]

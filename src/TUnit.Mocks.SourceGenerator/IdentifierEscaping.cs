@@ -67,7 +67,7 @@ internal static class IdentifierEscaping
     /// </summary>
     internal static string SanitizeIdentifier(string name)
     {
-        name = StripAliasQualifier(name).Replace("global::", "");
+        name = StripAliasQualifier(name);
 
         // Qualifiers can occur at every nesting level, including generic arguments.
         // Remove only the alias token immediately before each ::, preserving namespaces
