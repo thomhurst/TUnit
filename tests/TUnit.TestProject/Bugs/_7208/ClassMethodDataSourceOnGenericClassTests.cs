@@ -418,8 +418,6 @@ public class OwnClassMethodDataSourceWithTestConstructor<T>
 
 // The class parameter metadata that splits a tuple row comes from the [TestConstructor], the constructor the instance
 // is built with, not from the first constructor: each row keeps its label (Codex and Greptile review of #7336).
-// TUnit0001 checks the rows against the first constructor, not the [TestConstructor] (#7370).
-#pragma warning disable TUnit0001
 [EngineTest(ExpectedResult.Pass)]
 [GenerateGenericTest(typeof(int))]
 [MethodDataSource(nameof(Rows))]
@@ -446,7 +444,6 @@ public class OwnClassTupleMethodDataSourceWithTestConstructor<T>
         await Assert.That(_label).IsEqualTo("b");
     }
 }
-#pragma warning restore TUnit0001
 
 // Two own-class sources naming overloads of one member, told apart only by Arguments, each read on the instantiation
 // their own rows infer: Rows(int) on C<int> and Rows(string) on C<string>, never the other's rows (CodeRabbit review

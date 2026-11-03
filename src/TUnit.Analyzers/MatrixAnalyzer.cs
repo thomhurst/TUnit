@@ -27,7 +27,7 @@ public class MatrixAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
+        var constructorParameters = namedTypeSymbol.GetTestConstructor()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
 
         // Nothing to check without constructor parameters; cheaper than IsTestClass, so test it first.
         if (constructorParameters.IsEmpty)
