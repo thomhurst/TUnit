@@ -145,6 +145,54 @@ public class ObjectTrackerRollbackTests
         await Assert.That(testContext.TrackedObjectsIfCreated?.Count ?? 0).IsEqualTo(0);
     }
 
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Session_Sweep_Preserves_Other_Sessions_References(bool shareObject)
+    {
+        var firstDiscoverer = new FakeDiscoverer();
+        var secondDiscoverer = new FakeDiscoverer();
+        var first = new ObjectTracker(new TrackableObjectGraphProvider(firstDiscoverer), GlobalContext.Current.Disposer);
+        var second = new ObjectTracker(new TrackableObjectGraphProvider(secondDiscoverer), GlobalContext.Current.Disposer);
+        var firstObject = new TrackedDisposable();
+        var secondObject = shareObject ? firstObject : new TrackedDisposable();
+        firstDiscoverer.Discover = context => Add(context, firstObject);
+        secondDiscoverer.Discover = context => Add(context, secondObject);
+        var firstContext = CreateContext();
+        var secondContext = CreateContext();
+        first.TrackObjects(firstContext);
+        second.TrackObjects(secondContext);
+
+        await first.DisposeAndClearStaticTrackingAsync();
+
+        await Assert.That(firstObject.IsDisposed).IsEqualTo(!shareObject);
+        await Assert.That(secondObject.IsDisposed).IsFalse();
+        // Late cleanup of a retired session must not release the other session's reference.
+        await first.UntrackObjects(firstContext);
+        await first.DisposeAndClearStaticTrackingAsync();
+        await Assert.That(secondObject.IsDisposed).IsFalse();
+        await second.UntrackObjects(secondContext);
+        await Assert.That(secondObject.DisposeCount).IsEqualTo(1);
+        await second.DisposeAndClearStaticTrackingAsync();
+        await Assert.That(secondObject.DisposeCount).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task Session_Sweep_Does_Not_Release_A_Static_Lease_That_Outlives_Its_Tracker()
+    {
+        var discoverer = new FakeDiscoverer();
+        var tracker = new ObjectTracker(new TrackableObjectGraphProvider(discoverer), GlobalContext.Current.Disposer);
+        var resource = new TrackedDisposable();
+        tracker.TrackStaticLeaseObject(resource);
+        discoverer.Discover = context => Add(context, resource);
+        tracker.TrackObjects(CreateContext());
+
+        await tracker.DisposeAndClearStaticTrackingAsync();
+        await Assert.That(resource.IsDisposed).IsFalse();
+        await tracker.ReleaseStaticLeaseObjectAsync(resource);
+        await Assert.That(resource.DisposeCount).IsEqualTo(1);
+    }
+
     private static SortedList<int, HashSet<object>> Add(TestContext context, object obj, int depth = 0)
     {
         var tracked = context.TrackedObjects;
@@ -169,7 +217,9 @@ public class ObjectTrackerRollbackTests
     {
         public bool IsDisposed { get; private set; }
 
-        public void Dispose() => IsDisposed = true;
+        public int DisposeCount { get; private set; }
+
+        public void Dispose() { IsDisposed = true; DisposeCount++; }
     }
 
     private sealed class FakeDiscoverer : IObjectGraphDiscoverer

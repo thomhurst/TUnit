@@ -11,8 +11,7 @@ namespace TUnit.Core.Tracking;
 /// </summary>
 /// <remarks>
 /// The static <c>s_trackedObjects</c> dictionary is shared across all tests.
-/// Call <see cref="DisposeAndClearStaticTrackingAsync"/> at the end of a run session to
-/// dispose any leftovers and release memory.
+/// Each tracker owns its session references. Session cleanup releases only those references.
 /// </remarks>
 internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphProvider, Disposer disposer)
 {
@@ -20,8 +19,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     private static readonly ConcurrentDictionary<object, Counter> s_trackedObjects =
         new(Helpers.ReferenceEqualityComparer.Instance);
 
-    // Serializes retiring a cached shared instance (count reached zero) with a running test taking
-    // a reference to it, so the instance is either retired or held, never both.
+    private readonly Dictionary<object, int> _sessionReferences = new(Helpers.ReferenceEqualityComparer.Instance);
+
+    // Keeps session ownership and global counts atomic with retirement and shared-instance holds.
     private static readonly object s_sharedInstanceLock = new();
 
     // Collects errors from async disposal callbacks for post-session review
@@ -34,24 +34,25 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     public static IReadOnlyCollection<Exception> GetAsyncCallbackErrors() => s_asyncCallbackErrors.ToArray();
 
     /// <summary>
-    /// Disposes any objects still tracked with a positive reference count, then clears all
-    /// static tracking state. Call at the end of a run session: every executed test has
-    /// already decremented its references by then, so anything still alive would otherwise
-    /// leak (e.g. its remaining consumers were cancelled or a path miscounted). Clearing also
-    /// ensures a subsequent run request in the same process starts with fresh state.
-    /// Intentionally an instance method despite operating on static state: disposal needs the
-    /// injected <see cref="Disposer"/> (for error logging), which only instances carry.
+    /// Releases this session's remaining references without retiring objects held by other sessions.
     /// </summary>
-    /// <returns>Any exceptions thrown by the disposals, or null if none.</returns>
     public async ValueTask<List<Exception>?> DisposeAndClearStaticTrackingAsync()
     {
         List<Exception>? exceptions = null;
+        object[] objects;
+        lock (s_sharedInstanceLock)
+        {
+            objects = _sessionReferences.Keys.ToArray();
+        }
 
-        foreach (var kvp in s_trackedObjects)
+        foreach (var obj in objects)
         {
             try
             {
-                await DisposeUnleasedTrackedObjectAsync(kvp.Key).ConfigureAwait(false);
+                while (HasSessionReference(obj))
+                {
+                    await UntrackObjectAsync(obj).ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
@@ -64,6 +65,11 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         return exceptions;
     }
 
+    private bool HasSessionReference(object obj)
+    {
+        lock (s_sharedInstanceLock) return _sessionReferences.ContainsKey(obj);
+    }
+
     internal async ValueTask DisposeUnleasedTrackedObjectAsync(object obj)
     {
         lock (s_staticLeaseLock)
@@ -71,7 +77,11 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             // Static leases can outlive this session. Retiring a counter and acquiring a
             // lease must be atomic so a sweep cannot remove a newly protected counter.
             if (s_staticLeaseObjects.TryGetValue(obj, out var leases) && leases.Count > 0) return;
-            if (!s_trackedObjects.TryRemove(obj, out _) || IsExternallyOwned(obj)) return;
+            lock (s_sharedInstanceLock)
+            {
+                if (!s_trackedObjects.TryGetValue(obj, out var counter) || counter.CurrentCount > 0
+                    || !RemoveCounter(obj, counter) || IsExternallyOwned(obj)) return;
+            }
         }
         await disposer.DisposeAsync(obj).ConfigureAwait(false);
     }
@@ -257,13 +267,13 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         // Released last: the test's own objects may depend on the shared instances it fetched.
         if (heldSharedInstances is { Count: > 0 })
         {
-            cleanupExceptions = await UntrackBucketAsync(testContext, heldSharedInstances, cleanupExceptions).ConfigureAwait(false);
+            cleanupExceptions = await UntrackBucketAsync(testContext, heldSharedInstances, cleanupExceptions, sessionReference: false).ConfigureAwait(false);
         }
 
         return cleanupExceptions;
     }
 
-    private async ValueTask<List<Exception>?> UntrackBucketAsync(TestContext? testContext, HashSet<object> bucket, List<Exception>? cleanupExceptions)
+    private async ValueTask<List<Exception>?> UntrackBucketAsync(TestContext? testContext, HashSet<object> bucket, List<Exception>? cleanupExceptions, bool sessionReference = true)
     {
         List<Task>? disposalTasks = null;
 
@@ -271,7 +281,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         {
             try
             {
-                var task = UntrackObject(obj, testContext);
+                var task = UntrackObject(obj, testContext, sessionReference);
 
                 if (!task.IsCompletedSuccessfully)
                 {
@@ -315,7 +325,8 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         lock (s_staticLeaseLock)
         {
             s_staticLeaseObjects.GetValue(obj, static _ => new()).Count++;
-            TrackObject(obj);
+            // The final static-property owner releases this lease, which may outlive this session.
+            TrackObject(obj, sessionReference: false);
         }
     }
 
@@ -325,7 +336,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         try
         {
             // Keep sweep protection while asynchronous fixture teardown is in progress.
-            await UntrackObjectAsync(obj).ConfigureAwait(false);
+            await UntrackObject(obj, testContext: null, sessionReference: false).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -377,15 +388,22 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// For backward compatibility - adds to existing tracked objects for the context.
     /// </summary>
     /// <param name="obj">The object to track</param>
-    private void TrackObject(object? obj)
+    private void TrackObject(object? obj, bool sessionReference = true)
     {
         if (obj == null || ShouldSkipTracking(obj))
         {
             return;
         }
 
-        var counter = GetOrCreateCounter(obj);
-        counter.Increment();
+        lock (s_sharedInstanceLock)
+        {
+            if (sessionReference)
+            {
+                _sessionReferences.TryGetValue(obj, out var count);
+                _sessionReferences[obj] = count + 1;
+            }
+            GetOrCreateCounter(obj).Increment();
+        }
     }
 
     /// <summary>
@@ -397,7 +415,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// </summary>
     public ValueTask UntrackObjectAsync(object? obj) => UntrackObject(obj, testContext: null);
 
-    private async ValueTask UntrackObject(object? obj, TestContext? testContext)
+    private async ValueTask UntrackObject(object? obj, TestContext? testContext, bool sessionReference = true)
     {
         // Every disposable is counted, including externally owned objects. Ownership changes only
         // who disposes it, so each test always releases exactly the reference it took.
@@ -408,22 +426,31 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         var shouldDispose = false;
 
-        if (s_trackedObjects.TryGetValue(obj, out var counter))
+        lock (s_sharedInstanceLock)
         {
-            int count;
-            try { count = counter.Decrement(); }
-            catch { s_trackedObjects.TryRemove(obj, out _); throw; }
-
-            if (count < 0)
+            if (sessionReference)
             {
-                throw new InvalidOperationException("Reference count for object went below zero. This indicates a bug in the reference counting logic.");
+                if (!_sessionReferences.TryGetValue(obj, out var ownedCount)) return;
+                if (ownedCount == 1) _sessionReferences.Remove(obj);
+                else _sessionReferences[obj] = ownedCount - 1;
             }
-
-            if (count == 0)
+            if (s_trackedObjects.TryGetValue(obj, out var counter))
             {
-                shouldDispose = TestDataContainer.IsCached(obj)
-                    ? TryRetireSharedInstance(obj, counter)
-                    : RemoveCounter(obj, counter);
+                int count;
+                try { count = counter.Decrement(); }
+                catch { s_trackedObjects.TryRemove(obj, out _); throw; }
+
+                if (count < 0)
+                {
+                    throw new InvalidOperationException("Reference count for object went below zero. This indicates a bug in the reference counting logic.");
+                }
+
+                if (count == 0)
+                {
+                    shouldDispose = TestDataContainer.IsCached(obj)
+                        ? TryRetireSharedInstance(obj, counter)
+                        : RemoveCounter(obj, counter);
+                }
             }
         }
 
@@ -640,7 +667,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         // No longer changes: TryHoldForRegistration checks Released under the same lock.
         if (holds.Instances.Count > 0)
         {
-            await UntrackBucketAsync(testContext: null, holds.Instances, cleanupExceptions: null).ConfigureAwait(false);
+            await UntrackBucketAsync(testContext: null, holds.Instances, cleanupExceptions: null, sessionReference: false).ConfigureAwait(false);
         }
     }
 
