@@ -44,3 +44,20 @@ public class InheritedOnlyArguments<T>(T value) : IntermediateBase
         }
     }
 }
+
+[Arguments("base")]
+public abstract class StringArgumentsBase;
+
+public class InheritedNullMethodArguments<T>(T value) : StringArgumentsBase
+    where T : class, IComparable
+{
+    [Test]
+    [Arguments(null)]
+    public void Test(T? methodValue)
+    {
+        if (value is not "base" || methodValue is not null)
+        {
+            throw new InvalidOperationException("Expected the inherited string row with a null method argument.");
+        }
+    }
+}

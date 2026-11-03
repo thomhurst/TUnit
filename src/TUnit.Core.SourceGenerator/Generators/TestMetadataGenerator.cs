@@ -1322,7 +1322,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // it an [Arguments(null)] row still infers object, as without a class row, and a method row
             // that infers types breaking the class's constraints is reported. Reflection mode applies the
             // same rule.
-            var classTypeArgumentsSupplied = testMethod.TypeSymbol.GetAttributes().Any(a =>
+            var classTypeArgumentsSupplied = testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
                 a.AttributeClass is { } attributeClass
                 && (attributeClass.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute")
                     || (DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
