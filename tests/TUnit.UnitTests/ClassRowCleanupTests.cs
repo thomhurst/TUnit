@@ -9,6 +9,46 @@ public class ClassRowCleanupTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
+    public async Task RejectedMethodRowsRetainCleanupWithoutLifecycleSubscriptions(bool failedRow)
+    {
+        var original = CreateContext();
+        var constructorDisposals = 0;
+        var rejectedDisposals = 0;
+        var scopeDisposals = 0;
+        var rejectedStarts = 0;
+        original.Events.OnDispose += (_, _) => { constructorDisposals++; return default; };
+        var data = new object?[] { new object() };
+        var row = new TestBuilder.UnclaimedClassRow(data, null, original);
+        // Two rejected method factories share the saved constructor, but register distinct cleanup.
+        for (var i = 0; i < 2; i++)
+        {
+            var rejected = CreateContext();
+            await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse constructor"), rejected);
+            rejected.Events.OnDispose += (_, _) => { rejectedDisposals++; return default; };
+            rejected.Events.OnTestStart += (_, _) => { rejectedStarts++; return default; };
+            (rejected.Events.DataRowScopes ??= new()).Register(new CallbackScope(() => { scopeDisposals++; return default; }));
+            row.Return(data, null, rejected.Events);
+        }
+        var owner = CreateContext();
+        if (failedRow)
+            row.TransferCleanupTo(owner);
+        else
+            await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse constructor"), owner);
+        foreach (var handler in owner.Events.OnDispose!.InvocationList)
+            await handler.InvokeAsync(this, TestContext.Current!);
+        if (owner.Events.OnTestStart is { } starts)
+            foreach (var handler in starts.InvocationList)
+                await handler.InvokeAsync(this, TestContext.Current!);
+        await DisposeRow(owner);
+        await Assert.That(constructorDisposals).IsEqualTo(1);
+        await Assert.That(rejectedDisposals).IsEqualTo(2);
+        await Assert.That(scopeDisposals).IsEqualTo(2);
+        await Assert.That(rejectedStarts).IsEqualTo(0);
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
     public async Task InstanceConstructorSubscriptionsReachExecutableRow(bool streaming)
     {
         var current = TestContext.Current!;

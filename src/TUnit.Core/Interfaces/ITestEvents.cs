@@ -34,16 +34,19 @@ public interface ITestEvents
     /// <summary>
     /// Gets the event that is raised before the test method is invoked.
     /// </summary>
+    /// <remarks>Handler failures propagate and prevent the test method from running.</remarks>
     AsyncEvent<TestContext>? OnTestStart { get; }
 
     /// <summary>
     /// Gets the event that is raised after the test method has completed.
     /// </summary>
+    /// <remarks>Handler failures join the teardown exception collection, alongside receiver failures.</remarks>
     AsyncEvent<TestContext>? OnTestEnd { get; }
 
     /// <summary>
     /// Gets the event that is raised if the test was skipped.
     /// </summary>
+    /// <remarks>Handler failures propagate.</remarks>
     AsyncEvent<TestContext>? OnTestSkipped { get; }
 
     /// <summary>

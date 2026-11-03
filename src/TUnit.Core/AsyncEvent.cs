@@ -54,6 +54,15 @@ public class AsyncEvent<TEventArgs>
         _handlers = _handlers is null ? null : [.. _handlers]
     };
 
+    internal void AddMissingFrom(AsyncEvent<TEventArgs> source)
+    {
+        foreach (var invocation in source.InvocationList)
+        {
+            if (_handlers?.Contains(invocation) != true)
+                (_handlers ??= []).Insert(FindInsertionIndex(invocation.Order), invocation);
+        }
+    }
+
     /// <summary>
     /// Represents a single invocation of an async event handler.
     /// </summary>

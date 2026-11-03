@@ -6,6 +6,27 @@ namespace TUnit.UnitTests;
 public class EventReceiverRegistrationTests
 {
     [Test]
+    public async Task StartDelegateFailurePropagatesOriginalException()
+    {
+        var context = CreateContext(new OrdinaryObject(), []);
+        var failure = new InvalidOperationException("Start handler failed");
+        context.InternalEvents.OnTestStart += (_, _) => throw failure;
+        try
+        {
+            var orchestrator = new EventReceiverOrchestrator(null!);
+            var thrown = await Assert.That(async () =>
+                await orchestrator.InvokeTestStartEventReceiversAsync(context, CancellationToken.None))
+                .Throws<InvalidOperationException>();
+            await Assert.That(thrown).IsSameReferenceAs(failure);
+        }
+        finally
+        {
+            context.RemoveFromRegistry();
+            context.Dispose();
+        }
+    }
+
+    [Test]
     public void OrdinaryObjectsDoNotParticipateInReceiverDeduplication()
     {
         var context = CreateContext(new OrdinaryObject(), [new OrdinaryAttribute()]);

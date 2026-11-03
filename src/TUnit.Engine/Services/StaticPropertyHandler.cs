@@ -111,13 +111,8 @@ internal sealed class StaticPropertyHandler
         ObjectTracker objectTracker,
         List<Exception> cleanupExceptions)
     {
-        DataRowScopeCollection? scopes;
-        lock (events)
-        {
-            // Detach before awaiting so a reused host cannot retain scopes from earlier sessions.
-            scopes = events.DataRowScopes;
-            events.DataRowScopes = null;
-        }
+        // Detach before awaiting so a reused host cannot retain scopes from earlier sessions.
+        var scopes = events.DetachDataRowScopes();
 
         foreach (var staticProperty in staticProperties)
         {

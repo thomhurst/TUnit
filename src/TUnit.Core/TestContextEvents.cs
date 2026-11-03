@@ -19,6 +19,34 @@ public class TestContextEvents : ITestEvents
         OnTestRetry = OnTestRetry?.Clone()
     };
 
+    private object? _scopeLock;
+
+    internal void AddDataRowScopes(DataRowScopeCollection scopes)
+    {
+        lock (LazyInitializer.EnsureInitialized(ref _scopeLock)!)
+        {
+            (DataRowScopes ??= new()).AddRange(scopes);
+        }
+    }
+
+    internal DataRowScopeCollection? DetachDataRowScopes()
+    {
+        lock (LazyInitializer.EnsureInitialized(ref _scopeLock)!)
+        {
+            var scopes = DataRowScopes;
+            DataRowScopes = null;
+            return scopes;
+        }
+    }
+
+    internal void AddCleanupFrom(TestContextEvents source)
+    {
+        if (source.DataRowScopes is { } scopes)
+            AddDataRowScopes(scopes);
+        if (source.OnDispose is { } onDispose)
+            (OnDispose ??= new()).AddMissingFrom(onDispose);
+    }
+
     // Clones share once-only scope owners while keeping row ownership collections isolated.
     internal DataRowScopeCollection? DataRowScopes { get; set; }
 

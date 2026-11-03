@@ -113,7 +113,7 @@ internal static class RetryHelper
                     {
                         try
                         {
-                            foreach (var handler in onRetry.InvocationList)
+                            foreach (var handler in onRetry.InvocationList.ToArray())
                             {
                                 await handler.InvokeAsync(testContext, (testContext, attempt + 1)).ConfigureAwait(false);
                             }
