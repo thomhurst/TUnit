@@ -112,7 +112,7 @@ public class TypedArgumentsRowOfOtherTypeWithGenerateGenericTest
 }
 
 // A typed row is matched against the parameter type, not taken as the type argument whole: an [Arguments<int[]>]
-// row on an IEnumerable<T> parameter infers nothing and joins the [GenerateGenericTest] instantiation, so only
+// row on an IEnumerable<T> parameter infers int and joins the [GenerateGenericTest] instantiation, so only
 // Run<int> runs (no Run<int[]>, whose parameter could not take the row).
 [EngineTest(ExpectedResult.Pass)]
 public class TypedCollectionRowWithGenerateGenericTest

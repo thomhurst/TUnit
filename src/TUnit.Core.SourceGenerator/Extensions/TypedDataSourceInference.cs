@@ -86,9 +86,8 @@ internal static class TypedDataSourceInference
     /// <c>TestDataRow&lt;Func&lt;T&gt;&gt;</c> row binds as its <c>T</c>, since it is invoked and unwrapped before invocation, and
     /// a reference-type array <c>T</c> there spreads, so its element binds to the data parameter. A <c>T?</c> parameter takes a value of its underlying
     /// type. Each parameter type is matched against its value type, including type
-    /// arguments nested in generic parameter types, so <c>[Arguments&lt;int[]&gt;]</c> on
-    /// <c>Run&lt;T&gt;(IEnumerable&lt;T&gt;)</c> infers nothing rather than <c>Run&lt;int[]&gt;</c>, whose
-    /// parameter could not take the row. Every type parameter must be inferred, each to one type; otherwise
+    /// arguments nested in generic parameter types, including implemented interfaces and base classes. All matching constructed types must agree
+    /// on the bindings, so ambiguous interfaces infer nothing regardless of enumeration order. Every type parameter must be inferred, each to one type; otherwise
     /// returns <see langword="null"/>. Reflection mode's <c>InferTypesFromTypedRow</c> applies the same rules.
     /// </summary>
     public static ITypeSymbol[]? InferMethodTypeArgumentsFromRowType(IMethodSymbol method, ITypeSymbol rowType)
@@ -225,16 +224,51 @@ internal static class TypedDataSourceInference
             return MapTypeParameters(method, nullableParameter.TypeArguments[0], valueType, inferred);
         }
 
-        if (parameterType is INamedTypeSymbol { IsGenericType: true } parameterNamed
-            && valueType is INamedTypeSymbol { IsGenericType: true } valueNamed
-            && SymbolEqualityComparer.Default.Equals(parameterNamed.OriginalDefinition, valueNamed.OriginalDefinition))
+        if (parameterType is INamedTypeSymbol { IsGenericType: true } parameterNamed)
         {
-            for (var i = 0; i < parameterNamed.TypeArguments.Length && i < valueNamed.TypeArguments.Length; i++)
+            // Inspect every matching construction: choosing the first interface would make ambiguous
+            // rows depend on metadata order. Repeated identical bindings (including diamonds) are safe.
+            for (var current = valueType as INamedTypeSymbol; current is not null; current = current.BaseType)
             {
-                if (!MapTypeParameters(method, parameterNamed.TypeArguments[i], valueNamed.TypeArguments[i], inferred))
+                if (!MapMatchingType(current))
                 {
                     return false;
                 }
+            }
+
+            foreach (var implemented in valueType.AllInterfaces)
+            {
+                if (!MapMatchingType(implemented))
+                {
+                    return false;
+                }
+            }
+
+            bool MapMatchingType(INamedTypeSymbol candidate)
+            {
+                if (!SymbolEqualityComparer.Default.Equals(parameterNamed.OriginalDefinition, candidate.OriginalDefinition))
+                {
+                    return true;
+                }
+
+                // Roslyn keeps outer generic arguments on ContainingType; reflection's
+                // GetGenericArguments includes them in the nested type's arguments.
+                if (parameterNamed.ContainingType is { } containingParameter
+                    && candidate.ContainingType is { } containingCandidate
+                    && !MapTypeParameters(method, containingParameter, containingCandidate, inferred))
+                {
+                    return false;
+                }
+
+                for (var i = 0; i < parameterNamed.TypeArguments.Length; i++)
+                {
+                    if (!MapTypeParameters(method, parameterNamed.TypeArguments[i], candidate.TypeArguments[i], inferred))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
             }
         }
 

@@ -27,6 +27,19 @@ internal class TypedRowInferenceParityTests
         yield return ["T first, T second", "TestDataRow<Func<(int, int)>>", "", "int"];
         yield return ["T first, T second", "TestDataRow<Func<(int, string)>>", "", null];
         yield return ["T first, T second", "(int, int)", "", "int"];
+        yield return ["IEnumerable<T> value", "int[]", "", "int"];
+        yield return ["IEnumerable<T> value", "List<int>", "", "int"];
+        yield return ["IEnumerable<T> value", "IntList", "", "int"];
+        yield return ["Base<T> value", "Derived", "", "int"];
+        yield return ["Outer<T>.Base value", "NestedDerived", "", "int"];
+        yield return ["Outer<T>.Nested<T> value", "NestedGenericDerived", "", "int"];
+        yield return ["Outer<T>.Nested<T> value", "NestedConflictingDerived", "", null];
+        yield return ["Outer<T>.IMarker value", "NestedImplementation", "", "int"];
+        yield return ["IEnumerable<IEnumerable<T>> value", "List<int[]>", "", "int"];
+        yield return ["IMarker<T> value", "Diamond", "", "int"];
+        yield return ["IMarker<T> value", "Ambiguous", "", null];
+        yield return ["IMarker<T> value", "AmbiguousReversed", "", null];
+        yield return ["IEnumerable<T> first, T second", "(List<int>, string)", "", null];
         yield return ["T value", "object[]", "", null];
     }
 
@@ -41,6 +54,25 @@ internal class TypedRowInferenceParityTests
             using System;
             using System.Collections.Generic;
             using TUnit.Core;
+            public class IntList : List<int> { }
+            public class Base<T> { }
+            public class Derived : Base<int> { }
+            public class Outer<T>
+            {
+                public class Base { }
+                public class Nested<U> { }
+                public interface IMarker { }
+            }
+            public class NestedDerived : Outer<int>.Base { }
+            public class NestedGenericDerived : Outer<int>.Nested<int> { }
+            public class NestedConflictingDerived : Outer<int>.Nested<string> { }
+            public class NestedImplementation : Outer<int>.IMarker { }
+            public interface IMarker<T> { }
+            public interface ILeft : IMarker<int> { }
+            public interface IRight : IMarker<int> { }
+            public class Diamond : ILeft, IRight { }
+            public class Ambiguous : IMarker<int>, IMarker<string> { }
+            public class AmbiguousReversed : IMarker<string>, IMarker<int> { }
             public class Subject
             {
                 public static void Run<T>({{parameters}}) {{constraints}} { }

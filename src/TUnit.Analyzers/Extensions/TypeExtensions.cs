@@ -81,7 +81,8 @@ public static partial class TypeExtensions
             return false;
         }
 
-        return namedTypeSymbol.TypeArguments.Any(IsGenericDefinition);
+        return namedTypeSymbol.TypeArguments.Any(IsGenericDefinition)
+            || (namedTypeSymbol.ContainingType is { } containingType && containingType.IsGenericDefinition());
     }
 
     public static bool IsIEnumerable(this ITypeSymbol namedTypeSymbol, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)

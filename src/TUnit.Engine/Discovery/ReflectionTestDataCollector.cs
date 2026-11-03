@@ -2662,18 +2662,44 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return MapTypedRowParameters(parameterType.GetGenericArguments()[0], valueType, typeArguments);
         }
 
-        if (parameterType.IsGenericType
-            && valueType.IsGenericType
-            && parameterType.GetGenericTypeDefinition() == valueType.GetGenericTypeDefinition())
+        if (parameterType.IsGenericType)
         {
+            var definition = parameterType.GetGenericTypeDefinition();
             var parameterArguments = parameterType.GetGenericArguments();
-            var valueArguments = valueType.GetGenericArguments();
-            for (var i = 0; i < parameterArguments.Length && i < valueArguments.Length; i++)
+            for (var current = valueType; current is not null; current = current.BaseType)
             {
-                if (!MapTypedRowParameters(parameterArguments[i], valueArguments[i], typeArguments))
+                if (!MapMatchingType(current))
                 {
                     return false;
                 }
+            }
+
+            foreach (var implemented in AssemblyReferenceCache.GetInterfaces(valueType))
+            {
+                if (!MapMatchingType(implemented))
+                {
+                    return false;
+                }
+            }
+
+            // As in source discovery, all matching constructions must agree, not just the first.
+            bool MapMatchingType(Type candidate)
+            {
+                if (!candidate.IsGenericType || candidate.GetGenericTypeDefinition() != definition)
+                {
+                    return true;
+                }
+
+                var valueArguments = candidate.GetGenericArguments();
+                for (var i = 0; i < parameterArguments.Length; i++)
+                {
+                    if (!MapTypedRowParameters(parameterArguments[i], valueArguments[i], typeArguments))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
             }
         }
 
