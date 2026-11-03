@@ -474,12 +474,12 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     // GetData(object) vs GetData(string) — where a plain IsAssignableFrom scan would match both and
     // throw on SingleOrDefault.
     //
-    // When any argument is null it has no runtime type, so it cannot be expressed in the binder's
-    // Type[]. The overloads are then scored the way the source generator scores them (ScoreArguments):
+    // When an argument is null, or the binder finds no exact-arity match, the overloads are scored
+    // the way the source generator scores them (ScoreArguments):
     // a null needs a reference or Nullable<T> parameter, other arguments may use numeric widening,
     // missing trailing parameters must be optional or a CancellationToken, and exact-count overloads and
-    // exact argument types rank higher. A single best overload is used. Otherwise we fall back to the
-    // caller's name-only lookup.
+    // exact argument types rank higher. Ties prefer more specific supplied parameter types, then the
+    // first declaration, as in the generator. If none match, use the caller's name-only lookup.
     //
     // With zero arguments the empty Type[] flows through the same binder path and selects the
     // parameterless overload directly — including when the name is shared with other-arity
@@ -500,7 +500,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             if (argumentType is null)
             {
                 // A null argument has no runtime type the binder can match on.
-                return ResolveDataSourceMethodWithNullArgument(targetType, arguments);
+                return ResolveDataSourceMethodByScore(targetType, arguments);
             }
 
             argumentTypes[i] = argumentType;
@@ -513,7 +513,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // IEnumerable<int> Rows() is used rather than an ambiguous match with IEnumerable<T> Rows<T>(),
         // as the source generator does.
 #if NET
-        return targetType.GetMethod(MethodNameProvidingDataSource, genericParameterCount: 0, BindingFlags, binder: null, argumentTypes, modifiers: null);
+        var resolvedMethod = targetType.GetMethod(MethodNameProvidingDataSource, genericParameterCount: 0, BindingFlags, binder: null, argumentTypes, modifiers: null);
 #else
         List<MethodBase>? candidates = null;
         foreach (var method in targetType.GetMethods(BindingFlags))
@@ -524,17 +524,20 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             }
         }
 
-        return candidates is null
+        var resolvedMethod = candidates is null
             ? null
             : (MethodInfo?)Type.DefaultBinder.SelectMethod(BindingFlags, candidates.ToArray(), argumentTypes, modifiers: null);
 #endif
+        // The binder requires exact arity. Match omitted optional and CancellationToken parameters
+        // with the same scoring used for null arguments and by the source generator.
+        return resolvedMethod ?? ResolveDataSourceMethodByScore(targetType, arguments);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
-    private MethodInfo? ResolveDataSourceMethodWithNullArgument([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType, object?[] arguments)
+    private MethodInfo? ResolveDataSourceMethodByScore([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType, object?[] arguments)
     {
         var bestScore = -1;
-        var best = new List<MethodInfo>();
+        MethodInfo? best = null;
         foreach (var method in targetType.GetMethods(BindingFlags))
         {
             if (method.Name != MethodNameProvidingDataSource || method.IsGenericMethodDefinition)
@@ -542,43 +545,18 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 continue;
             }
 
-            var score = ScoreArguments(method.GetParameters(), arguments);
-            if (score < 0 || score < bestScore)
+            var parameters = method.GetParameters();
+            var score = ScoreArguments(parameters, arguments);
+            if (score > bestScore
+                || (score == bestScore && score >= 0 && IsMoreSpecific(parameters, best!.GetParameters(), arguments.Length)))
             {
-                continue;
-            }
-
-            if (score > bestScore)
-            {
-                best.Clear();
                 bestScore = score;
-            }
-
-            best.Add(method);
-        }
-
-        // On a tie, the overload with the more specific parameter types wins, as with the binder and the source
-        // generator: Rows(string?, long) beats Rows(string?, object) for { null, 20 }.
-        foreach (var candidate in best)
-        {
-            var mostSpecific = true;
-            foreach (var other in best)
-            {
-                if (!ReferenceEquals(candidate, other) && !IsMoreSpecific(candidate.GetParameters(), other.GetParameters(), arguments.Length))
-                {
-                    mostSpecific = false;
-                    break;
-                }
-            }
-
-            if (mostSpecific)
-            {
-                return candidate;
+                best = method;
             }
         }
 
-        // Still ambiguous, or nothing accepts the arguments: the caller's name-only lookup reports it
-        return null;
+        // Keep the first declaration on an otherwise equal tie, just as the source generator does.
+        return best;
     }
 
     private static bool IsMoreSpecific(ParameterInfo[] candidate, ParameterInfo[] other, int argumentCount)
@@ -601,10 +579,21 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 continue;
             }
 
-            var otherUnderlying = Nullable.GetUnderlyingType(otherType) ?? otherType;
+            var candidateNullable = Nullable.GetUnderlyingType(candidateType);
+            var otherNullable = Nullable.GetUnderlyingType(otherType);
+            var otherUnderlying = otherNullable ?? otherType;
+            // Specificity compares parameter types, not boxed argument conversions. Nullable numeric
+            // conversions are lifted, and decimal conversions count even though Invoke cannot widen to decimal.
+            var numericSource = candidateNullable ?? candidateType;
+            var hasNumericConversion = (candidateNullable is null || otherNullable is not null)
+                && (IsNumericWidening(numericSource, otherUnderlying)
+                    || (otherUnderlying == typeof(decimal) && !numericSource.IsEnum
+                        && Type.GetTypeCode(numericSource) is TypeCode.SByte or TypeCode.Byte
+                            or TypeCode.Int16 or TypeCode.UInt16 or TypeCode.Char or TypeCode.Int32
+                            or TypeCode.UInt32 or TypeCode.Int64 or TypeCode.UInt64));
             if (!otherType.IsAssignableFrom(candidateType)
                 && candidateType != otherUnderlying
-                && !IsNumericWidening(candidateType, otherUnderlying))
+                && !hasNumericConversion)
             {
                 return false;
             }
