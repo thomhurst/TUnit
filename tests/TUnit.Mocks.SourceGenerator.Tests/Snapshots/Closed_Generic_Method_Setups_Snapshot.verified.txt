@@ -45,9 +45,9 @@ namespace TUnit.Mocks.Generated.ClosedGenericMethodSetups_0
                 return new TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TResult>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext> Invoke<TResult>(global::System.Func<object, bool> message)
+            public TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext> Invoke<TResult>(global::System.Func<object, bool>? message)
             {
-                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message;
+                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<object>(default(object)!) : (global::TUnit.Mocks.Arguments.Arg<object>)message;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
                 return new TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TResult>.Value);
             }
@@ -58,24 +58,24 @@ namespace TUnit.Mocks.Generated.ClosedGenericMethodSetups_0
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool> context, global::TUnit.Mocks.Arguments.Arg<TState> state) where TState : struct
+            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool>? context, global::TUnit.Mocks.Arguments.Arg<TState> state) where TState : struct
             {
-                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context;
+                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context is null ? global::TUnit.Mocks.Arguments.Arg.Is<TContext>(default(TContext)!) : (global::TUnit.Mocks.Arguments.Arg<TContext>)context;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_context.Matcher, state.Matcher };
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::TUnit.Mocks.Arguments.Arg<TContext> context, global::System.Func<TState, bool> state) where TState : struct
+            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::TUnit.Mocks.Arguments.Arg<TContext> context, global::System.Func<TState, bool>? state) where TState : struct
             {
-                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state;
+                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state is null ? global::TUnit.Mocks.Arguments.Arg.Is<TState>(default(TState)!) : (global::TUnit.Mocks.Arguments.Arg<TState>)state;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { context.Matcher, __fa_state.Matcher };
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool> context, global::System.Func<TState, bool> state) where TState : struct
+            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool>? context, global::System.Func<TState, bool>? state) where TState : struct
             {
-                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context;
-                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state;
+                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context is null ? global::TUnit.Mocks.Arguments.Arg.Is<TContext>(default(TContext)!) : (global::TUnit.Mocks.Arguments.Arg<TContext>)context;
+                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state is null ? global::TUnit.Mocks.Arguments.Arg.Is<TState>(default(TState)!) : (global::TUnit.Mocks.Arguments.Arg<TState>)state;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_context.Matcher, __fa_state.Matcher };
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
@@ -97,9 +97,9 @@ namespace TUnit.Mocks.Generated.ClosedGenericMethodSetups_1
                 return new TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TResult>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext> Invoke<TResult>(global::System.Func<object, bool> message)
+            public TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext> Invoke<TResult>(global::System.Func<object, bool>? message)
             {
-                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message;
+                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<object>(default(object)!) : (global::TUnit.Mocks.Arguments.Arg<object>)message;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
                 return new TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TResult>.Value);
             }
@@ -110,24 +110,24 @@ namespace TUnit.Mocks.Generated.ClosedGenericMethodSetups_1
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool> context, global::TUnit.Mocks.Arguments.Arg<TState> state) where TState : struct
+            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool>? context, global::TUnit.Mocks.Arguments.Arg<TState> state) where TState : struct
             {
-                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context;
+                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context is null ? global::TUnit.Mocks.Arguments.Arg.Is<TContext>(default(TContext)!) : (global::TUnit.Mocks.Arguments.Arg<TContext>)context;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_context.Matcher, state.Matcher };
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::TUnit.Mocks.Arguments.Arg<TContext> context, global::System.Func<TState, bool> state) where TState : struct
+            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::TUnit.Mocks.Arguments.Arg<TContext> context, global::System.Func<TState, bool>? state) where TState : struct
             {
-                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state;
+                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state is null ? global::TUnit.Mocks.Arguments.Arg.Is<TState>(default(TState)!) : (global::TUnit.Mocks.Arguments.Arg<TState>)state;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { context.Matcher, __fa_state.Matcher };
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool> context, global::System.Func<TState, bool> state) where TState : struct
+            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool>? context, global::System.Func<TState, bool>? state) where TState : struct
             {
-                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context;
-                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state;
+                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context is null ? global::TUnit.Mocks.Arguments.Arg.Is<TContext>(default(TContext)!) : (global::TUnit.Mocks.Arguments.Arg<TContext>)context;
+                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state is null ? global::TUnit.Mocks.Arguments.Arg.Is<TState>(default(TState)!) : (global::TUnit.Mocks.Arguments.Arg<TState>)state;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_context.Matcher, __fa_state.Matcher };
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
@@ -167,10 +167,10 @@ namespace TestNamespace
             return new TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TResult>.Value);
         }
 
-        public TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext> Invoke<TResult>(global::System.Func<object, bool> message)
+        public TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext> Invoke<TResult>(global::System.Func<object, bool>? message)
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message;
+            global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<object>(default(object)!) : (global::TUnit.Mocks.Arguments.Arg<object>)message;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
             return new TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TResult>.Value);
         }
@@ -184,27 +184,27 @@ namespace TestNamespace
             return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
         }
 
-        public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool> context, global::TUnit.Mocks.Arguments.Arg<TState> state) where TState : struct
+        public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool>? context, global::TUnit.Mocks.Arguments.Arg<TState> state) where TState : struct
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context;
+            global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context is null ? global::TUnit.Mocks.Arguments.Arg.Is<TContext>(default(TContext)!) : (global::TUnit.Mocks.Arguments.Arg<TContext>)context;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_context.Matcher, state.Matcher };
             return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
         }
 
-        public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::TUnit.Mocks.Arguments.Arg<TContext> context, global::System.Func<TState, bool> state) where TState : struct
+        public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::TUnit.Mocks.Arguments.Arg<TContext> context, global::System.Func<TState, bool>? state) where TState : struct
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state;
+            global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state is null ? global::TUnit.Mocks.Arguments.Arg.Is<TState>(default(TState)!) : (global::TUnit.Mocks.Arguments.Arg<TState>)state;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { context.Matcher, __fa_state.Matcher };
             return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
         }
 
-        public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool> context, global::System.Func<TState, bool> state) where TState : struct
+        public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool>? context, global::System.Func<TState, bool>? state) where TState : struct
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context;
-            global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state;
+            global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context is null ? global::TUnit.Mocks.Arguments.Arg.Is<TContext>(default(TContext)!) : (global::TUnit.Mocks.Arguments.Arg<TContext>)context;
+            global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state is null ? global::TUnit.Mocks.Arguments.Arg.Is<TState>(default(TState)!) : (global::TUnit.Mocks.Arguments.Arg<TState>)state;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_context.Matcher, __fa_state.Matcher };
             return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
         }
@@ -298,9 +298,9 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TResult>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext> Invoke<TResult>(global::System.Func<object, bool> message)
+            public TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext> Invoke<TResult>(global::System.Func<object, bool>? message)
             {
-                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message;
+                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<object>(default(object)!) : (global::TUnit.Mocks.Arguments.Arg<object>)message;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
                 return new TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TResult>.Value);
             }
@@ -313,9 +313,9 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TResult>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext> Invoke<TResult>(global::System.Func<object, bool> message)
+            public TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext> Invoke<TResult>(global::System.Func<object, bool>? message)
             {
-                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message;
+                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<object>(default(object)!) : (global::TUnit.Mocks.Arguments.Arg<object>)message;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
                 return new TestNamespace_IInvoker_TContext__Invoke_M0_MockCall<TResult, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TResult>.Value);
             }
@@ -329,24 +329,24 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool> context, global::TUnit.Mocks.Arguments.Arg<TState> state) where TState : struct
+            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool>? context, global::TUnit.Mocks.Arguments.Arg<TState> state) where TState : struct
             {
-                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context;
+                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context is null ? global::TUnit.Mocks.Arguments.Arg.Is<TContext>(default(TContext)!) : (global::TUnit.Mocks.Arguments.Arg<TContext>)context;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_context.Matcher, state.Matcher };
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::TUnit.Mocks.Arguments.Arg<TContext> context, global::System.Func<TState, bool> state) where TState : struct
+            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::TUnit.Mocks.Arguments.Arg<TContext> context, global::System.Func<TState, bool>? state) where TState : struct
             {
-                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state;
+                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state is null ? global::TUnit.Mocks.Arguments.Arg.Is<TState>(default(TState)!) : (global::TUnit.Mocks.Arguments.Arg<TState>)state;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { context.Matcher, __fa_state.Matcher };
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool> context, global::System.Func<TState, bool> state) where TState : struct
+            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool>? context, global::System.Func<TState, bool>? state) where TState : struct
             {
-                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context;
-                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state;
+                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context is null ? global::TUnit.Mocks.Arguments.Arg.Is<TContext>(default(TContext)!) : (global::TUnit.Mocks.Arguments.Arg<TContext>)context;
+                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state is null ? global::TUnit.Mocks.Arguments.Arg.Is<TState>(default(TState)!) : (global::TUnit.Mocks.Arguments.Arg<TState>)state;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_context.Matcher, __fa_state.Matcher };
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
@@ -359,24 +359,24 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool> context, global::TUnit.Mocks.Arguments.Arg<TState> state) where TState : struct
+            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool>? context, global::TUnit.Mocks.Arguments.Arg<TState> state) where TState : struct
             {
-                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context;
+                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context is null ? global::TUnit.Mocks.Arguments.Arg.Is<TContext>(default(TContext)!) : (global::TUnit.Mocks.Arguments.Arg<TContext>)context;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_context.Matcher, state.Matcher };
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::TUnit.Mocks.Arguments.Arg<TContext> context, global::System.Func<TState, bool> state) where TState : struct
+            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::TUnit.Mocks.Arguments.Arg<TContext> context, global::System.Func<TState, bool>? state) where TState : struct
             {
-                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state;
+                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state is null ? global::TUnit.Mocks.Arguments.Arg.Is<TState>(default(TState)!) : (global::TUnit.Mocks.Arguments.Arg<TState>)state;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { context.Matcher, __fa_state.Matcher };
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
 
-            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool> context, global::System.Func<TState, bool> state) where TState : struct
+            public TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext> RoundTrip<TState>(global::System.Func<TContext, bool>? context, global::System.Func<TState, bool>? state) where TState : struct
             {
-                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context;
-                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state;
+                global::TUnit.Mocks.Arguments.Arg<TContext> __fa_context = context is null ? global::TUnit.Mocks.Arguments.Arg.Is<TContext>(default(TContext)!) : (global::TUnit.Mocks.Arguments.Arg<TContext>)context;
+                global::TUnit.Mocks.Arguments.Arg<TState> __fa_state = state is null ? global::TUnit.Mocks.Arguments.Arg.Is<TState>(default(TState)!) : (global::TUnit.Mocks.Arguments.Arg<TState>)state;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_context.Matcher, __fa_state.Matcher };
                 return new TestNamespace_IInvoker_TContext__RoundTrip_M1_MockCall<TState, TContext>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "RoundTrip", matchers, global::TUnit.Mocks.TypeArguments.Of<TState>.Value);
             }
