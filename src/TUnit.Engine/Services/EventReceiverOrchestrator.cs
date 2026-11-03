@@ -199,7 +199,7 @@ internal sealed class EventReceiverOrchestrator
         // Delegate events have no stage; dispatch once, with the default (late) receivers.
         if (stage != EventReceiverStage.Early && context.InternalEventsIfCreated?.OnTestStart is { } onStart)
         {
-            foreach (var handler in onStart.InvocationList)
+            foreach (var handler in onStart.InvocationList.ToArray())
             {
                 await handler.InvokeAsync(context, context);
             }
@@ -319,7 +319,7 @@ internal sealed class EventReceiverOrchestrator
 
         if (stage != EventReceiverStage.Early && context.InternalEventsIfCreated?.OnTestEnd is { } onEnd)
         {
-            foreach (var handler in onEnd.InvocationList)
+            foreach (var handler in onEnd.InvocationList.ToArray())
             {
                 try
                 {
@@ -359,7 +359,7 @@ internal sealed class EventReceiverOrchestrator
 
         if (context.InternalEventsIfCreated?.OnTestSkipped is { } onSkipped)
         {
-            foreach (var handler in onSkipped.InvocationList)
+            foreach (var handler in onSkipped.InvocationList.ToArray())
             {
                 await handler.InvokeAsync(context, context);
             }
