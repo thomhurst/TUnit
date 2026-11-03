@@ -3160,7 +3160,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// Otherwise every row's Skip, DisplayName and Categories would be applied to the failed test (#7076).
     /// </summary>
     private static Attribute[] GetFailedTestAttributes(MethodInfo method)
-        => TestBuilder.ScopeRowAttributesToTest(method.GetCustomAttributes().ToArray(), null, null);
+        => TestBuilder.ScopeRowAttributesToTest(
+            ReflectionAttributeExtractor.GetAllAttributes(method.ReflectedType ?? method.DeclaringType!, method),
+            null, null);
 
     private static string? ExtractFilePath(MethodInfo method)
     {

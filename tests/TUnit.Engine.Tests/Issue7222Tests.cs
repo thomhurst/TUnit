@@ -12,6 +12,18 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     private const string ClassFilter = "/*/TUnit.TestProject.Bugs._7222/GenerateGenericTestArityTests";
 
     [Test]
+    public async Task Class_Skip_Is_Preserved_On_Arity_Failures()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/SkippedClassGenerateGenericTestArityTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(2)
+            ]);
+    }
+
+    [Test]
     public async Task Explicit_Arity_Failures_Are_Excluded_Beside_Normal_Tests()
     {
         await RunTestsWithFilter(
