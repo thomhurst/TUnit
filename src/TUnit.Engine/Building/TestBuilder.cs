@@ -731,7 +731,7 @@ internal sealed class TestBuilder : ITestBuilder
             var failureContext = contextAccessor?.Current;
             if (activeClassRow is not null && failureContext is not null)
             {
-                failureContext = activeClassRow.CreateFailureContext(failureContext);
+                failureContext = activeClassRow.CreateEnumerationFailureContext(failureContext);
             }
             var failedTest = CreateFailedTestForDataGenerationError(metadata, ex, new TestDataCombination(),
                 methodData: activeClassRow?.TakeLentObjects(), rowContext: failureContext);
@@ -1135,13 +1135,22 @@ internal sealed class TestBuilder : ITestBuilder
         {
             if (_data is { } data)
             {
-                // The target already holds method-enumeration state. Add saved constructor
-                // state without replacing that baseline (or its newer values).
+                // Keep method-enumeration state, but replay constructor-factory updates
+                // to inherited keys as well as newly added constructor state.
                 if (_rowContext.HasStateBag)
                 {
                     foreach (var entry in _rowContext.StateBag)
                     {
-                        context.StateBag.TryAdd(entry.Key, entry.Value);
+                        if (!_enumerationContext.HasStateBag
+                            || !_enumerationContext.StateBag.TryGetValue(entry.Key, out var inherited)
+                            || !ReferenceEquals(inherited, entry.Value))
+                        {
+                            context.StateBag[entry.Key] = entry.Value;
+                        }
+                        else
+                        {
+                            context.StateBag.TryAdd(entry.Key, entry.Value);
+                        }
                     }
                 }
                 if (_events is { } savedEvents)

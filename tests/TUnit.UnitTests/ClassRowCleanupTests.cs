@@ -117,9 +117,10 @@ public class ClassRowCleanupTests
     }
 
     [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public async Task ClassIteratorFailureDoesNotDisposeRunnableScope(bool laterSource)
+    [Arguments(false, false)]
+    [Arguments(true, false)]
+    [Arguments(false, true)]
+    public async Task ClassIteratorFailureDoesNotDisposeRunnableScope(bool laterSource, bool emptyMethodSource)
     {
         var current = TestContext.Current!;
         var builder = (ITestBuilder)current.ServiceProvider.GetService(typeof(ITestBuilder))!;
@@ -133,7 +134,7 @@ public class ClassRowCleanupTests
             LineNumber = 0,
             AttributeFactory = () => [],
             MethodMetadata = current.TestDetails.MethodMetadata,
-            DataSources = [],
+            DataSources = emptyMethodSource ? [new EmptySource()] : [],
             ClassDataSources = laterSource ? [source, new ThrowingBeforeRowSource()] : [source],
             PropertyDataSources = [],
             InstanceFactory = (_, _) => new ClassRowCleanupTests(),
@@ -143,11 +144,14 @@ public class ClassRowCleanupTests
         var tests = (await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null))).ToArray();
         try
         {
-            await Assert.That(tests.Length).IsEqualTo(2);
-            await Assert.That(tests[1].Result!.Exception!.Message).IsEqualTo("Class iterator failure");
-            await DisposeTestRow(tests[1].Context);
-            await Assert.That(source.Disposals).IsEqualTo(0);
-            await DisposeTestRow(tests[0].Context);
+            await Assert.That(tests.Length).IsEqualTo(emptyMethodSource ? 1 : 2);
+            await Assert.That(tests[^1].Result!.Exception!.Message).IsEqualTo("Class iterator failure");
+            await DisposeTestRow(tests[^1].Context);
+            await Assert.That(source.Disposals).IsEqualTo(emptyMethodSource ? 1 : 0);
+            if (!emptyMethodSource)
+            {
+                await DisposeTestRow(tests[0].Context);
+            }
             await Assert.That(source.Disposals).IsEqualTo(1);
         }
         finally
@@ -157,6 +161,17 @@ public class ClassRowCleanupTests
                 test.Context.RemoveFromRegistry();
                 test.Context.Dispose();
             }
+        }
+    }
+
+    private sealed class EmptySource : Attribute, IDataSourceAttribute
+    {
+        public bool SkipIfEmpty { get; set; }
+        public bool DeferEnumeration { get; set; }
+        public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata metadata)
+        {
+            await Task.CompletedTask;
+            yield break;
         }
     }
 
@@ -286,6 +301,7 @@ public class ClassRowCleanupTests
             foreach (var test in tests)
             {
                 await Assert.That(test.Result?.Exception).IsNull();
+                await Assert.That(test.Context.StateBag.Items["overwritten"]).IsEqualTo(test.Context.StateBag.Items["class-factory"]);
                 if (classEnumeration)
                 {
                     await Assert.That(test.Context.StateBag.Items["class-enumeration"]).IsEqualTo(test.Context.StateBag.Items["class-factory"]);
@@ -319,6 +335,10 @@ public class ClassRowCleanupTests
                 {
                     metadata.TestBuilderContext.Current.StateBag[prefix + "-enumeration"] = value;
                 }
+                if (constructor)
+                {
+                    metadata.TestBuilderContext.Current.StateBag["overwritten"] = new object();
+                }
                 yield return () =>
                 {
                     var state = metadata.TestBuilderContext.Current.StateBag;
@@ -329,6 +349,10 @@ public class ClassRowCleanupTests
                     if (!state.TryAdd(prefix + "-factory", value))
                     {
                         throw new InvalidOperationException("Factory state leaked into enumeration");
+                    }
+                    if (constructor)
+                    {
+                        state["overwritten"] = value;
                     }
                     return Task.FromResult<object?[]?>([value]);
                 };
