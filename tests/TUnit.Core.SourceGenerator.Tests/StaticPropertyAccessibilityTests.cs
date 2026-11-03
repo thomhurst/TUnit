@@ -85,13 +85,30 @@ internal class StaticPropertyAccessibilityTests
         await Check(source, true, true);
     }
 
+    [Test]
+    public async Task File_level_options_suppress_diagnostic()
+    {
+        const string source = """
+            public class Outer
+            {
+                private class Helper
+                {
+                    [TUnit.Core.Arguments("value")]
+                    public static string Value { get; set; }
+                }
+            }
+            """;
+        await Check(source, true, true, expectDiagnostic: false, suppressDiagnostic: true);
+    }
+
     private static async Task Check(string source, bool inaccessible, bool enabled,
-        string? snapshotParameter = null, bool expectDiagnostic = true)
+        string? snapshotParameter = null, bool expectDiagnostic = true, bool suppressDiagnostic = false)
     {
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
         var compilation = CSharpCompilation.Create("StaticPropertyAccessibility",
             [CSharpSyntaxTree.ParseText(source, parseOptions)], ReferencesHelper.References,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                .WithSyntaxTreeOptionsProvider(suppressDiagnostic ? new SuppressDiagnosticOptionsProvider() : null));
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
             [new StaticPropertyInitializationGenerator().AsSourceGenerator()], parseOptions: parseOptions);
         driver = driver.WithUpdatedAnalyzerConfigOptions(new TestAnalyzerConfigOptionsProvider(
@@ -106,12 +123,31 @@ internal class StaticPropertyAccessibilityTests
         if (enabled && inaccessible && expectDiagnostic)
         {
             await Assert.That(diagnostics[0].Id).IsEqualTo("TUNITGEN005");
+            await Assert.That(diagnostics[0].Location.SourceTree).IsEqualTo(compilation.SyntaxTrees.Single());
             await Assert.That(source.Substring(diagnostics[0].Location.SourceSpan.Start, diagnostics[0].Location.SourceSpan.Length))
                 .IsEqualTo("Value");
             if (snapshotParameter is not null)
             {
                 await Verify(diagnostics[0].GetMessage()).UseParameters(snapshotParameter);
             }
+        }
+    }
+    private sealed class SuppressDiagnosticOptionsProvider : SyntaxTreeOptionsProvider
+    {
+        public override GeneratedKind IsGenerated(SyntaxTree tree, CancellationToken cancellationToken) => GeneratedKind.Unknown;
+
+        public override bool TryGetDiagnosticValue(SyntaxTree tree, string diagnosticId,
+            CancellationToken cancellationToken, out ReportDiagnostic severity)
+        {
+            severity = ReportDiagnostic.Suppress;
+            return diagnosticId == "TUNITGEN005";
+        }
+
+        public override bool TryGetGlobalDiagnosticValue(string diagnosticId,
+            CancellationToken cancellationToken, out ReportDiagnostic severity)
+        {
+            severity = ReportDiagnostic.Default;
+            return false;
         }
     }
 }

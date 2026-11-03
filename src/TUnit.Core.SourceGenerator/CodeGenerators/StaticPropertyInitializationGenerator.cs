@@ -50,15 +50,15 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             // stops unrelated classes (any class with a base list) from re-running the parse step.
             .Where(static chain => HasAnyProperty(chain));
 
-        context.RegisterSourceOutput(classChains.Collect().Combine(enabledProvider), static (ctx, pair) =>
+        context.RegisterSourceOutput(classChains.Collect().Combine(enabledProvider).Combine(context.CompilationProvider), static (ctx, pair) =>
         {
-            if (!pair.Right)
+            if (!pair.Left.Right)
             {
                 return;
             }
 
             var reported = new HashSet<InaccessibleProperty>();
-            foreach (var chain in pair.Left)
+            foreach (var chain in pair.Left.Left)
             {
                 foreach (var segment in chain)
                 {
@@ -66,8 +66,13 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
                     {
                         if (reported.Add(property))
                         {
-                            ctx.ReportDiagnostic(Diagnostic.Create(InaccessibleContainingType,
-                                Location.Create(property.FilePath, property.Span, property.LineSpan), property.Name));
+                            // Reattach to the current tree so pragmas and per-file diagnostic options apply.
+                            // Only equatable location data is retained in the discovery models.
+                            var tree = pair.Right.SyntaxTrees.FirstOrDefault(tree => tree.FilePath == property.FilePath);
+                            var location = tree is null
+                                ? Location.Create(property.FilePath, property.Span, property.LineSpan)
+                                : Location.Create(tree, property.Span);
+                            ctx.ReportDiagnostic(Diagnostic.Create(InaccessibleContainingType, location, property.Name));
                         }
                     }
                 }
