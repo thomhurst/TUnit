@@ -25,7 +25,7 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
     {
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/ExplicitExternalNullRowsWithMethodRows*/*",
         [
-            result => result.ResultSummary.Outcome.ShouldBe("Passed"),
+            result => result.ResultSummary.Outcome.ShouldBe("Completed"),
             result => result.ResultSummary.Counters.Total.ShouldBe(1),
             result => result.ResultSummary.Counters.Passed.ShouldBe(1)
         ]);
@@ -36,7 +36,7 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
     {
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/ExplicitExternalOnlyNullRowsWithMethodRows*/*",
         [
-            result => result.ResultSummary.Outcome.ShouldBe("Passed"),
+            result => result.ResultSummary.Outcome.ShouldBe("Completed"),
             result => result.ResultSummary.Counters.Total.ShouldBe(1),
             result => result.ResultSummary.Counters.Passed.ShouldBe(1)
         ]);
@@ -68,7 +68,7 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
     {
         await RunTestsWithFilter($"/*/TUnit.TestProject.Bugs._7333/{className}*/*",
         [
-            result => result.ResultSummary.Outcome.ShouldBe("Passed"),
+            result => result.ResultSummary.Outcome.ShouldBe("Completed"),
             result => result.ResultSummary.Counters.Total.ShouldBe(count),
             result => result.ResultSummary.Counters.Passed.ShouldBe(count)
         ]);
