@@ -29,6 +29,7 @@ public interface ITestEvents
     /// <summary>
     /// Gets the event that is raised when the test has been registered with the test runner.
     /// </summary>
+    /// <remarks>Handler failures propagate and stop registration.</remarks>
     AsyncEvent<TestContext>? OnTestRegistered { get; }
 
     /// <summary>
@@ -39,20 +40,25 @@ public interface ITestEvents
     /// <summary>
     /// Gets the event that is raised before the test method is invoked.
     /// </summary>
+    /// <remarks>Handler failures propagate and prevent the test method from running.</remarks>
     AsyncEvent<TestContext>? OnTestStart { get; }
 
     /// <summary>
     /// Gets the event that is raised after the test method has completed.
     /// </summary>
+    /// <remarks>Handler failures join the teardown exception collection, alongside receiver failures.</remarks>
     AsyncEvent<TestContext>? OnTestEnd { get; }
 
     /// <summary>
     /// Gets the event that is raised if the test was skipped.
     /// </summary>
+    /// <remarks>Handler failures propagate.</remarks>
     AsyncEvent<TestContext>? OnTestSkipped { get; }
 
     /// <summary>
-    /// Gets the event that is raised before a test is retried.
+    /// Gets the event raised before a retry, after backoff and cancellation checks.
+    /// The retry attempt is one-based. A handler failure aborts retry processing;
+    /// an accepted cancellation is preserved as a cancelled result.
     /// </summary>
     AsyncEvent<(TestContext TestContext, int RetryAttempt)>? OnTestRetry { get; }
 }

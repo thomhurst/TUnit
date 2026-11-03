@@ -94,3 +94,7 @@ So the order of precedence is:
 1. Method
 1. Class
 1. Assembly
+
+## Retry event handlers
+
+Handlers subscribed through `TestBuilderContext.Events.OnTestRetry` receive the upcoming, one-based retry number after backoff and cancellation checks. If a handler throws, retry processing stops and the failure propagates. If cancellation was already accepted, the test remains cancelled instead.
