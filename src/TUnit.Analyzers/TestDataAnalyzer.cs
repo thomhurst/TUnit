@@ -1038,6 +1038,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             var constructedMethod = method.Construct(inferred);
             var closedParameters = method.Parameters.WithoutTestMethodCancellationTokens()
                 .Select(p => constructedMethod.Parameters[p.Ordinal]).ToArray();
+            // Preserve the declared trailing position before dropping omitted optional parameters.
+            var trailingParameter = closedParameters.LastOrDefault();
             // A shorter row leaves trailing optional parameters at their defaults.
             var suppliedParameterCount = typeArguments.Length;
             if (suppliedParameterCount < closedParameters.Length
@@ -1046,12 +1048,29 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 closedParameters = closedParameters.Take(suppliedParameterCount).ToArray();
             }
 
-            testDataTypes = closedParameters.Select((p, i) =>
-                (p.IsParams || (i == closedParameters.Length - 1 && p.Type is IArrayTypeSymbol { IsSZArray: true }))
-                    && GetParamsElementType(p.Type) is { } elementType && i < typeArguments.Length
-                    && !context.Compilation.HasImplicitConversionOrGenericParameter(typeArguments[i], p.Type)
-                    ? elementType
-                    : p.Type).ToImmutableArray();
+            var expectedTypes = ImmutableArray.CreateBuilder<ITypeSymbol>();
+            for (var i = 0; i < closedParameters.Length; i++)
+            {
+                var parameter = closedParameters[i];
+                if (SymbolEqualityComparer.Default.Equals(parameter, trailingParameter)
+                    && (parameter.IsParams || parameter.Type is IArrayTypeSymbol { IsSZArray: true })
+                    && GetParamsElementType(parameter.Type) is { } elementType && i < typeArguments.Length
+                    && (typeArguments.Length > closedParameters.Length
+                        || !context.Compilation.HasImplicitConversionOrGenericParameter(typeArguments[i], parameter.Type)))
+                {
+                    // Every loose value binds to the original trailing parameter's element type.
+                    for (var argumentIndex = i; argumentIndex < typeArguments.Length; argumentIndex++)
+                    {
+                        expectedTypes.Add(elementType);
+                    }
+                }
+                else
+                {
+                    expectedTypes.Add(parameter.Type);
+                }
+            }
+
+            testDataTypes = expectedTypes.ToImmutable();
         }
 
         if (testDataTypes.Any(x => x.IsGenericDefinition()))

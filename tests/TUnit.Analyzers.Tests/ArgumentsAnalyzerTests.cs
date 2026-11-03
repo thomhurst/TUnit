@@ -150,6 +150,67 @@ public class ArgumentsAnalyzerTests
     }
 
     [Test]
+    [Arguments("params string[]", "string")]
+    [Arguments("string[]", "string")]
+    [Arguments("params string[]", "int", true)]
+    [Arguments("string[]", "int", true)]
+    public async Task Typed_Generator_Source_Validates_Multiple_Trailing_Elements(string trailingType, string lastType, bool invalid = false)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class ArrayRowAttribute : DataSourceGeneratorAttribute<int, int[], string, {{lastType}}>
+            {
+                protected override IEnumerable<Func<(int, int[], string, {{lastType}})>> GenerateDataSources(DataGeneratorMetadata metadata)
+                {
+                    yield return () => (1, new[] { 2 }, "a", default!);
+                }
+            }
+
+            public class MyClass
+            {
+                [Test, {{(invalid ? "{|#0:ArrayRow|}" : "ArrayRow")}}]
+                public void Run<T>(T value, T[] values, {{trailingType}} rest) { }
+            }
+            """,
+            invalid
+                ? [Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                    .WithArguments("int, int[], string, int", "int, int[], string, string")]
+                : []);
+    }
+
+    [Test]
+    public async Task Typed_Generator_Source_Rejects_Scalar_For_Nontrailing_Array()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class Widget { }
+            public class ArrayRowAttribute : DataSourceGeneratorAttribute<Widget>
+            {
+                protected override IEnumerable<Func<Widget>> GenerateDataSources(DataGeneratorMetadata metadata)
+                {
+                    yield return () => new Widget();
+                }
+            }
+
+            public class MyClass
+            {
+                [Test, {|#0:ArrayRow|}]
+                public void Run<T>(T[] values, string label = "") { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments("Widget", "Widget[]"));
+    }
+
+    [Test]
     public async Task Typed_Array_Source_With_Foreign_Generator_Name_Unwraps_Row()
     {
         await Verifier.VerifyAnalyzerAsync(

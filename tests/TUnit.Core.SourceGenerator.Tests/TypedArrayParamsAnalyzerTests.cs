@@ -11,6 +11,45 @@ internal class TypedArrayParamsAnalyzerTests
 {
 #if NET9_0_OR_GREATER
     [Test]
+    [Arguments("string", false)]
+    [Arguments("int", true)]
+    public async Task Closed_signature_validates_multiple_params_collection_elements(string lastType, bool invalid)
+    {
+        var source = $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class ArrayRowAttribute : DataSourceGeneratorAttribute<int, int[], string, {{lastType}}>
+            {
+                protected override IEnumerable<Func<(int, int[], string, {{lastType}})>> GenerateDataSources(DataGeneratorMetadata metadata)
+                {
+                    yield return () => (1, new[] { 2 }, "a", default!);
+                }
+            }
+            public class Subject
+            {
+                [Test, ArrayRow]
+                public void Run<T>(T value, T[] values, params IEnumerable<string> rest) { }
+            }
+            """;
+        var compilation = CSharpCompilation.Create(
+            "TypedArrayParams_" + Guid.NewGuid().ToString("N"),
+            [CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview))],
+            ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        var errors = compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToArray();
+        await Assert.That(errors.Length).IsEqualTo(0).Because(string.Join(Environment.NewLine, errors.Select(d => d.ToString())));
+
+        var diagnostics = await compilation.WithAnalyzers([new TestDataAnalyzer()]).GetAnalyzerDiagnosticsAsync();
+        await Assert.That(diagnostics.Length).IsEqualTo(invalid ? 1 : 0);
+        if (invalid)
+        {
+            await Assert.That(diagnostics.Single().Id).IsEqualTo("TUnit0001");
+            await Assert.That(diagnostics.Single().GetMessage()).Contains("int, int[], string, string");
+        }
+    }
+
+    [Test]
     [Arguments("IEnumerable", "string", false)]
     [Arguments("ICollection", "string", false)]
     [Arguments("IList", "string", false)]
