@@ -6,10 +6,31 @@ public interface INullLiteralService
     string Pair(string? first, string? second);
     void Notify(string? value);
     string NullableNumber(int? value);
+    string Number(int value);
 }
 
 public class NullLiteralMatcherTests
 {
+    [Test]
+    public async Task Default_Literal_For_NonNullable_Number_Is_A_Null_Predicate()
+    {
+        var mock = Mock.Of<INullLiteralService>();
+        // An untyped default selects the nullable predicate overload. Null cannot
+        // match an int; use a typed default to request the exact value zero.
+        mock.Number(default).Returns("null predicate");
+
+        await Assert.That(mock.Object.Number(0)).IsEqualTo("");
+        mock.Number(default).WasNeverCalled();
+
+        mock.Number(default(int)).Returns("zero");
+
+        await Assert.That(mock.Object.Number(0)).IsEqualTo("zero");
+        await Assert.That(mock.Object.Number(1)).IsEqualTo("");
+
+        mock.Number(default(int)).WasCalled(Times.Exactly(2));
+        mock.Number(default).WasNeverCalled();
+    }
+
     [Test]
     public async Task Null_And_Default_Literals_Match_Only_Null()
     {
