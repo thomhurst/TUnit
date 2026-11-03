@@ -25,13 +25,15 @@ public class IntRows7440Attribute : DataSourceGeneratorAttribute<int>
 
 [EngineTest(ExpectedResult.Pass)]
 [Arguments(3)]
+[Arguments(3L)]
+[Arguments(int.MaxValue)]
 public class DecimalConstructorArgumentTests(decimal value)
 {
     [Test]
     [Arguments(4)]
     public async Task Run(int number)
     {
-        await Assert.That(value).IsEqualTo(3m);
+        await Assert.That(value == 3m || value == int.MaxValue).IsTrue();
         await Assert.That(number).IsEqualTo(4);
     }
 }

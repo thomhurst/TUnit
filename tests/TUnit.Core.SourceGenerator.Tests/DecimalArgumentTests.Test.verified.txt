@@ -467,7 +467,7 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.ArgumentsAttribute(42),
+    new global::TUnit.Core.ArgumentsAttribute(42m),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.DecimalArgumentTests), "TestMethod", false, new global::TUnit.Core.ParameterMetadata[]

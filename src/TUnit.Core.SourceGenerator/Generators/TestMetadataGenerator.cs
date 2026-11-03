@@ -3121,6 +3121,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Only process positional arguments (exclude named arguments)
         var positionalArgs = argumentList.Arguments.Where(a => a.NameEquals == null).ToArray();
+        var values = attr.ConstructorArguments is [{ Kind: TypedConstantKind.Array } array]
+            ? array.Values
+            : attr.ConstructorArguments;
 
         for (var i = 0; i < positionalArgs.Length; i++)
         {
@@ -3132,14 +3135,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 ? targetParameters[i].Type
                 : null;
 
-            // For decimal parameters, preserve source text and add 'm' suffix (only for numeric literals)
-            if (expression is not IdentifierNameSyntax
-                && targetParameterType?.SpecialType == SpecialType.System_Decimal
+            // Preserve exact decimal digits only for supported numeric literal syntax.
+            // Integral suffixes and constant expressions must be formatted from their values.
+            if (targetParameterType?.SpecialType == SpecialType.System_Decimal
+                && TryGetDecimalLiteralText(expression, out var decimalLiteral))
+            {
+                writer.Append(decimalLiteral);
+            }
+            else if (targetParameterType?.SpecialType == SpecialType.System_Decimal
+                && positionalArgs.Length == values.Length
                 && expression.Kind() != SyntaxKind.StringLiteralExpression
                 && expression.Kind() != SyntaxKind.NullLiteralExpression)
             {
-                var sourceText = expression.ToString().TrimEnd('d', 'D', 'f', 'F', 'm', 'M').Trim();
-                writer.Append($"{sourceText}m");
+                writer.Append(new TypedConstantFormatter().FormatForCode(values[i], targetParameterType));
             }
             else
             {

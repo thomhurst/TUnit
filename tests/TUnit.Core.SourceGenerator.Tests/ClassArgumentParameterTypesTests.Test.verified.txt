@@ -149,7 +149,9 @@ internal static class TUnit_TestProject_Bugs__7440_DecimalConstructorArgumentTes
                 [
                     new global::TUnit.Core.TestAttribute(),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-                    new global::TUnit.Core.ArgumentsAttribute(3)
+                    new global::TUnit.Core.ArgumentsAttribute(3),
+                    new global::TUnit.Core.ArgumentsAttribute(3L),
+                    new global::TUnit.Core.ArgumentsAttribute(2147483647)
                 ];
             }
             default:
@@ -165,7 +167,7 @@ internal static class TUnit_TestProject_Bugs__7440_DecimalConstructorArgumentTes
             methodName: "Run",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7440.DecimalConstructorArgumentTests.Run",
             filePath: "",
-            lineNumber: 30,
+            lineNumber: 32,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -174,6 +176,8 @@ internal static class TUnit_TestProject_Bugs__7440_DecimalConstructorArgumentTes
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(3m),
+    new global::TUnit.Core.ArgumentsAttribute(3m),
+    new global::TUnit.Core.ArgumentsAttribute(2147483647m),
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7440.DecimalConstructorArgumentTests), "Run", false, new global::TUnit.Core.ParameterMetadata[]
