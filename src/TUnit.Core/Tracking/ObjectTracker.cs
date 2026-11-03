@@ -256,7 +256,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         return cleanupExceptions;
     }
 
-    private async ValueTask<List<Exception>?> UntrackBucketAsync(TestContext testContext, HashSet<object> bucket, List<Exception>? cleanupExceptions)
+    private async ValueTask<List<Exception>?> UntrackBucketAsync(TestContext? testContext, HashSet<object> bucket, List<Exception>? cleanupExceptions)
     {
         List<Task>? disposalTasks = null;
 
@@ -557,7 +557,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         // No longer changes: TryHoldForRegistration checks Released under the same lock.
         if (holds.Instances.Count > 0)
         {
-            await UntrackBucketAsync(holds.Instances, null).ConfigureAwait(false);
+            await UntrackBucketAsync(testContext: null, holds.Instances, cleanupExceptions: null).ConfigureAwait(false);
         }
     }
 
