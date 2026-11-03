@@ -202,7 +202,15 @@ internal static class DataGeneratorMetadataCreator
         }
         else
         {
-            testBuilderContext = TestSessionContext.GlobalStaticPropertyContext;
+            testBuilderContext = events == null
+                ? TestSessionContext.GlobalStaticPropertyContext
+                : new TestBuilderContext
+                {
+                    TestMetadata = TestSessionContext.GlobalStaticPropertyContext.TestMetadata,
+                    Events = events,
+                    DataSourceAttribute = dataSource,
+                    StateBag = objectBag ?? new ConcurrentDictionary<string, object?>()
+                };
         }
 
         return new DataGeneratorMetadata

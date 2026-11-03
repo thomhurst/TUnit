@@ -12,12 +12,18 @@ public class TestSessionContext : Context
     }
 
     /// <summary>
-    /// Global TestBuilderContext for static property initialization.
-    /// This context lives for the entire test session and is used for tracking
-    /// disposable objects created during static property initialization.
-    /// Initialized immediately as a static field to be available before TestSessionContext creation.
+    /// Builder context for static property initialization in the current session.
+    /// Falls back to a process context before a session exists. Both generated and reflection
+    /// data sources use this accessor so overlapping sessions keep separate disposal callbacks.
     /// </summary>
-    public static TestBuilderContext GlobalStaticPropertyContext { get; } = new TestBuilderContext
+    public static TestBuilderContext GlobalStaticPropertyContext => Current?.StaticPropertyContext ?? s_globalStaticPropertyContext;
+
+    internal TestBuilderContext StaticPropertyContext { get; } = new()
+    {
+        TestMetadata = s_globalStaticPropertyContext.TestMetadata
+    };
+
+    private static readonly TestBuilderContext s_globalStaticPropertyContext = new TestBuilderContext
     {
         TestMetadata = new MethodMetadata
         {

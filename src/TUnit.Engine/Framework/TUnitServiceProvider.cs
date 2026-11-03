@@ -268,7 +268,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             hashSetPool,
             maxParallelismLimiter));
 
-        var staticPropertyHandler = Register(new StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, lazyPropertyInjector, objectGraphDiscoveryService));
+        var staticPropertyHandler = Register(new StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, lazyPropertyInjector, objectGraphDiscoveryService, ContextProvider.TestSessionContext));
 
         var dynamicTestQueue = Register<IDynamicTestQueue>(new DynamicTestQueue(MessageBus));
 
@@ -336,6 +336,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(ContextProvider.TestSessionContext, Logger).ConfigureAwait(false);
+        // Generated/reflection static initializers can fail before the scheduler starts.
+        await ((StaticPropertyHandler)_services[typeof(StaticPropertyHandler)]).ReleaseSessionCallbacksAfterFailedInitializationAsync().ConfigureAwait(false);
 
         foreach (var service in _services.Values)
         {

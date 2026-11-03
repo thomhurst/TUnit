@@ -19,14 +19,17 @@ internal sealed class StaticPropertyHandler
     private readonly Lazy<PropertyInjector> _propertyInjector;
     private readonly ObjectGraphDiscoveryService _objectGraphDiscoveryService;
     private readonly ConcurrentDictionary<string, object?> _sessionObjectBag = new();
+    private readonly TestBuilderContext _staticPropertyContext;
     private bool _initialized;
 
     public StaticPropertyHandler(TUnitFrameworkLogger logger,
         ObjectTracker objectTracker,
         TrackableObjectGraphProvider trackableObjectGraphProvider,
         Lazy<PropertyInjector> propertyInjector,
-        ObjectGraphDiscoveryService objectGraphDiscoveryService)
+        ObjectGraphDiscoveryService objectGraphDiscoveryService,
+        TestSessionContext sessionContext)
     {
+        _staticPropertyContext = sessionContext.StaticPropertyContext;
         _logger = logger;
         _objectTracker = objectTracker;
         _trackableObjectGraphProvider = trackableObjectGraphProvider;
@@ -63,7 +66,7 @@ internal sealed class StaticPropertyHandler
                         value,
                         _sessionObjectBag,
                         methodMetadata: null,
-                        TestSessionContext.GlobalStaticPropertyContext.Events);
+                        _staticPropertyContext.Events);
 
                     // Initialize nested objects depth-first BEFORE initializing the main value
                     // This ensures containers (IAsyncInitializer) are started before the factory
@@ -88,7 +91,7 @@ internal sealed class StaticPropertyHandler
     public async ValueTask ReleaseSessionCallbacksAfterFailedInitializationAsync()
     {
         var exceptions = new List<Exception>();
-        await TestOnDisposeRaiser.RaiseForSessionAsync(TestSessionContext.GlobalStaticPropertyContext, exceptions).ConfigureAwait(false);
+        await TestOnDisposeRaiser.RaiseForSessionAsync(_staticPropertyContext, exceptions).ConfigureAwait(false);
         foreach (var exception in exceptions)
         {
             await _logger.LogErrorAsync($"Error during static property cleanup after failed initialization: {exception}").ConfigureAwait(false);
@@ -110,12 +113,11 @@ internal sealed class StaticPropertyHandler
     /// rather than disposing directly, so the tracking entry is removed and the session-end
     /// sweep in TestSessionCoordinator does not dispose the same object a second time.
     /// </summary>
-    public async Task DisposeStaticPropertiesAsync(List<Exception> cleanupExceptions)
+    public Task DisposeStaticPropertiesAsync(List<Exception> cleanupExceptions)
+        => DisposeStaticPropertiesAsync(cleanupExceptions, _trackableObjectGraphProvider.GetStaticPropertyTrackableObjects());
+
+    internal async Task DisposeStaticPropertiesAsync(List<Exception> cleanupExceptions, IEnumerable<object> staticProperties)
     {
-        await TestOnDisposeRaiser.RaiseForSessionAsync(TestSessionContext.GlobalStaticPropertyContext, cleanupExceptions).ConfigureAwait(false);
-
-        var staticProperties = _trackableObjectGraphProvider.GetStaticPropertyTrackableObjects();
-
         foreach (var staticProperty in staticProperties)
         {
             try
@@ -127,6 +129,10 @@ internal sealed class StaticPropertyHandler
                 cleanupExceptions.Add(e);
             }
         }
+
+        // Fixtures may use injected services during Dispose/DisposeAsync. Release their scopes
+        // only after every fixture has been untracked, even when a fixture disposal failed.
+        await TestOnDisposeRaiser.RaiseForSessionAsync(_staticPropertyContext, cleanupExceptions).ConfigureAwait(false);
 
         if (cleanupExceptions.Count > 0)
         {

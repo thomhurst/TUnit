@@ -6,7 +6,7 @@ namespace TUnit.UnitTests;
 
 /// <summary>
 /// A dependency injection data source for a static property runs against
-/// <see cref="TestSessionContext.GlobalStaticPropertyContext"/>, which no test owns. The object tracker
+/// <see cref="TestSessionContext.GlobalStaticPropertyContext"/>, which belongs to the current session rather than a test. The object tracker
 /// does not dispose the services a disposable scope owns, so the scope must be disposed at session end,
 /// once, by raising that context's OnDispose callbacks (#7205).
 /// </summary>

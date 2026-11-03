@@ -110,13 +110,7 @@ public static class StaticPropertyReflectionInitializer
         // Create metadata for the data source
         var metadata = new DataGeneratorMetadata
         {
-            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()
-            {
-                DataSourceAttribute = dataSourceAttr,
-                TestMetadata = null!,
-                Events = new TestContextEvents(),
-                StateBag = new ConcurrentDictionary<string, object?>()
-            }),
+            TestBuilderContext = new TestBuilderContextAccessor(TestSessionContext.GlobalStaticPropertyContext),
             MembersToGenerate = [],
             TestInformation = null!,
             Type = DataGeneratorType.Property,
