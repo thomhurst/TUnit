@@ -7776,10 +7776,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var types = rowType is null ? null : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType);
         // External members infer from runtime values in reflection mode. An interface or
         // unsealed reference type cannot fix those values' types; retain runtime partitioning.
+        // Check supplied row values, not inferred arguments: a nullable inside T[] is
+        // never boxed separately, whereas a nullable tuple column is.
         var isExternal = attribute.ConstructorArguments is [{ Value: INamedTypeSymbol }, ..]
             || attribute.AttributeClass is { IsGenericType: true };
         return types is not null
-            && (!isExternal || types.All(HasFixedRuntimeType))
+            && (!isExternal || (GetTupleElementTypes(rowType!) ?? [rowType!]).All(HasFixedRuntimeType))
             && FindInaccessibleType(types, testMethod.CompilationContext.Compilation) is null
             ? types
             : null;

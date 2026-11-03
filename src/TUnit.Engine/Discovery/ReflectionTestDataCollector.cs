@@ -809,6 +809,27 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 sourceClassMetadata = CreateDummyMethodMetadata(closedType, "Discovery");
                 sourceConstructorParameters = GetClosedConstructorParameters(closedType, inferenceConstructor!);
             }
+            else if (dataSource is MethodDataSourceAttribute externalSource
+                && externalSource.GetDeclaredMemberType(externalSource.ClassProvidingDataSource ?? genericTypeDefinition) is { } memberType
+                && MethodDataSourceAttribute.GetDeclaredRowType(memberType) is { } rowType
+                && (GetTupleElementTypes(rowType) ?? [rowType]).All(HasFixedRuntimeRowType))
+            {
+                // Match fixed external rows through the constructor just like source-generated
+                // discovery. For T[] parameters, the array's element type supplies T; the array
+                // itself is the row value, so nullable elements are never boxed separately.
+                memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, externalSource, out var inferenceConstructor);
+                if (memberTypeArguments is not null)
+                {
+                    if (constraintViolations.TryAddClassViolation(memberTypeArguments))
+                    {
+                        continue;
+                    }
+
+                    var closedType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, memberTypeArguments);
+                    sourceClassMetadata = CreateDummyMethodMetadata(closedType, "Discovery");
+                    sourceConstructorParameters = GetClosedConstructorParameters(closedType, inferenceConstructor!);
+                }
+            }
 
             var dataItems = await GetDataFromSourceAsync(dataSource, sourceClassMetadata!, sourceConstructorParameters).ConfigureAwait(false);
 
@@ -2717,7 +2738,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     /// <summary>
     /// The class type arguments that the declared row type of a class-level [MethodDataSource] member of the
-    /// generic class itself infers, by matching the row's elements against a public constructor's parameters:
+    /// generic class or a fixed external source infers, by matching the row's elements against a public constructor's parameters:
     /// <c>IEnumerable&lt;string&gt; Rows()</c> on <c>C&lt;T&gt;(T value)</c> infers <c>string</c>. The member is
     /// the one invocation reads, so overloads resolve by the attribute's <c>Arguments</c>. It may return its rows
     /// directly, through <c>Task</c> or <c>ValueTask</c>, as a sequence of rows or <c>Func</c>s of rows, or as a
@@ -2735,7 +2756,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource, out ConstructorInfo? constructor)
     {
         constructor = null;
-        if (methodDataSource.GetDeclaredMemberType(genericTypeDefinition) is not { } memberType
+        if (methodDataSource.GetDeclaredMemberType(methodDataSource.ClassProvidingDataSource ?? genericTypeDefinition) is not { } memberType
             || MethodDataSourceAttribute.GetDeclaredRowType(memberType) is not { } rowType)
         {
             return null;
@@ -2874,6 +2895,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
     }
+
+    private static bool HasFixedRuntimeRowType(Type type) => type.IsArray
+        ? type.GetElementType()!.IsValueType || HasFixedRuntimeRowType(type.GetElementType()!)
+        : Nullable.GetUnderlyingType(type) is null && (type.IsValueType || type.IsSealed);
 
     /// <summary>
     /// Returns the logical element types of a <see cref="ValueTuple"/> or <see cref="Tuple"/> type, or null for any

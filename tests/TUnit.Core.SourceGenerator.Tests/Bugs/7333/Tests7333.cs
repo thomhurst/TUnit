@@ -7,7 +7,7 @@ internal class Tests7333 : TestsBase
         "TUnit.TestProject", "Bugs", "_7333", "ClassMethodDataSourceInferenceTests.cs"),
         async generatedFiles =>
         {
-            foreach (var className in new[] { "ExternalRows<int>", "OwnRows<int>", "AsyncFactoryRows<string>", "MultipleSources<int>", "GenericMethod<int>", "MethodRows<int>", "ClassAndMethodSources<int>", "PolymorphicExternalRows<int>", "ExternalArrayRows<int[]>", "ExternalSealedArrayRows<string[]>", "ExternalNestedArrayRows<int[][]>", "CovariantExternalArrayRows<string[]>", "NullableExternalRows<int>", "ExternalNullableArrayRows<int?[]>" })
+            foreach (var className in new[] { "ExternalRows<int>", "OwnRows<int>", "AsyncFactoryRows<string>", "MultipleSources<int>", "GenericMethod<int>", "MethodRows<int>", "ClassAndMethodSources<int>", "PolymorphicExternalRows<int>", "ExternalArrayRows<int[]>", "ExternalSealedArrayRows<string[]>", "ExternalNestedArrayRows<int[][]>", "CovariantExternalArrayRows<string[]>", "NullableExternalRows<int>", "ExternalNullableArrayRows<int?[]>", "ExternalNullableArrayParameterRows<int?>" })
             {
                 await Assert.That(generatedFiles.Any(file => file.Contains($"global::TUnit.TestProject.Bugs._7333.{className}"))).IsTrue();
             }

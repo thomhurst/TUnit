@@ -203,3 +203,17 @@ public class ExternalNullableArrayRows<T>(T value)
         await Assert.That(((int?[])(object)value!)[1]).IsNull();
     }
 }
+
+// Inference extracts T from T[], but only the supplied array is boxed as a row.
+[MethodDataSource(typeof(ArrayRows), nameof(ArrayRows.NullableIntegers))]
+public class ExternalNullableArrayParameterRows<T>(T[] values)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int?));
+        await Assert.That(values.Length).IsEqualTo(2);
+        await Assert.That((object?)values[0]).IsEqualTo(3);
+        await Assert.That((object?)values[1]).IsNull();
+    }
+}
