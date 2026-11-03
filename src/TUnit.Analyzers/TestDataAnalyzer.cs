@@ -1127,6 +1127,15 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return false;
         }
 
+        // Convert.ChangeType cannot produce native integers, and their operators require
+        // exact int/long or uint/ulong inputs rather than widening smaller integers first.
+        if (unwrappedTarget.SpecialType is SpecialType.System_IntPtr or SpecialType.System_UIntPtr
+            && unwrappedSource.SpecialType is SpecialType.System_Byte or SpecialType.System_SByte
+                or SpecialType.System_Int16 or SpecialType.System_UInt16 or SpecialType.System_Char)
+        {
+            return false;
+        }
+
         if (!SymbolEqualityComparer.Default.Equals(target, unwrappedTarget)
             && !conversion.IsUserDefined
             && unwrappedTarget is INamedTypeSymbol { IsTupleType: true }
