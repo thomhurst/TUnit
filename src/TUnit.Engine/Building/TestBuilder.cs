@@ -212,6 +212,14 @@ internal sealed class TestBuilder : ITestBuilder
             foreach (var classDataSource in await GetDataSourcesAsync(metadata.ClassDataSources, cancellationToken))
             {
                 activeClassRow = null;
+                contextAccessor.Current = new TestBuilderContext
+                {
+                    TestMetadata = metadata.MethodMetadata,
+                    InitializedAttributes = attributes,
+                    ClassConstructor = testBuilderContext.ClassConstructor,
+                    ClassDataSourceAttribute = classDataSource
+                };
+                testBuilderContext.CopyStateBagTo(contextAccessor.Current);
                 classDataAttributeIndex++;
 
                 var classDataLoopIndex = 0;
@@ -241,12 +249,22 @@ internal sealed class TestBuilder : ITestBuilder
 
                     // A new factory owns its own cleanup, even if it throws before producing a row.
                     activeClassRow = null;
+                    // Keep constructor-factory state on its saved row, outside the enumeration baseline.
+                    var classRowEnumerationContext = new TestBuilderContext
+                    {
+                        TestMetadata = metadata.MethodMetadata,
+                        InitializedAttributes = attributes,
+                        ClassConstructor = contextAccessor.Current.ClassConstructor,
+                        ClassDataSourceAttribute = classDataSource
+                    };
+                    contextAccessor.Current.CopyStateBagTo(classRowEnumerationContext);
                     var (classData, firstClassRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
 
                     // No test holds this first fetch yet. The first test built from this class row takes it
                     // instead of calling the factory again, so a non-shared source does not create an extra
                     // instance that nothing tracks or disposes (#7157).
-                    var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, contextAccessor.Current);
+                    var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, contextAccessor.Current, classRowEnumerationContext);
+                    contextAccessor.Current = classRowEnumerationContext;
                     activeClassRow = unclaimedClassRow;
 
 #if NET
@@ -1096,13 +1114,13 @@ internal sealed class TestBuilder : ITestBuilder
     /// are lent to the instance instead, and the next test built from the row tracks them without
     /// receiving them, so they are still disposed.
     /// </remarks>
-    internal sealed class UnclaimedClassRow(object?[] data, TestDataRowMetadata? metadata, TestBuilderContext rowContext)
+    internal sealed class UnclaimedClassRow(object?[] data, TestDataRowMetadata? metadata, TestBuilderContext rowContext, TestBuilderContext? enumerationContext = null)
     {
         private object?[]? _data = data;
         private TestDataRowMetadata? _metadata = metadata;
         private object?[]? _lent;
         private AsyncEvent<(TestContext Context, object? Object)>? _lentCleanup;
-        private readonly TestBuilderContext _enumerationContext = rowContext;
+        private readonly TestBuilderContext _enumerationContext = enumerationContext ?? rowContext;
         private TestBuilderContext _rowContext = rowContext;
         // Snapshot before any method factory can mutate the class subscriptions.
         private TestContextEvents? _events = rowContext.EventsIfCreated?.Clone();
@@ -2293,11 +2311,21 @@ internal sealed class TestBuilder : ITestBuilder
                 };
                 baseContext.CopyStateBagTo(contextAccessor.Current);
 
+                // Keep constructor-factory state on its saved row, outside the enumeration baseline.
+                var classRowEnumerationContext = new TestBuilderContext
+                {
+                    TestMetadata = metadata.MethodMetadata,
+                    InitializedAttributes = attributes,
+                    ClassConstructor = contextAccessor.Current.ClassConstructor,
+                    ClassDataSourceAttribute = classDataSource
+                };
+                contextAccessor.Current.CopyStateBagTo(classRowEnumerationContext);
                 var (classData, firstClassRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
 
                 // The first test built from this class row takes this fetch instead of calling the factory
                 // again, so a non-shared source does not create an extra, untracked instance (#7157).
-                var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, contextAccessor.Current);
+                var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, contextAccessor.Current, classRowEnumerationContext);
+                contextAccessor.Current = classRowEnumerationContext;
 
                 // Initialize objects before method data sources are evaluated (ObjectInitializer is phase-aware)
                 await InitializeClassDataAsync(classData);
