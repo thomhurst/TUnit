@@ -19,8 +19,8 @@ public class Issue7205Tests(TestMode testMode) : InvokableTestBase(testMode)
                 // DependencySkippedScopeTests.Fails throws and both CircularDependencyScopeTests fail their
                 // circular dependency, and two DI rows violate generic constraints, by design; the observer checks their scopes.
                 result => result.ResultSummary.Outcome.ShouldBe("Failed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(22),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(14),
+                result => result.ResultSummary.Counters.Total.ShouldBe(25),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(17),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(5),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(3)
             ]);

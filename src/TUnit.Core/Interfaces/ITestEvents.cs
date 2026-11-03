@@ -18,6 +18,11 @@ public interface ITestEvents
     /// Handlers that a data source subscribes through <see cref="TestBuilderContext.Events"/> while it builds a
     /// test's row (a dependency injection scope's disposal, for example) are raised with that test's handlers.
     /// </para>
+    /// <para>
+    /// Data that outlives a test (static properties, generic partition inference rows, and temporary
+    /// instance method data source dependencies) is cleaned up once at session end. These handlers
+    /// receive a null test context because no single test owns the data.
+    /// </para>
     /// </remarks>
     AsyncEvent<TestContext>? OnDispose { get; }
 

@@ -121,6 +121,7 @@ internal sealed class TestScheduler : ITestScheduler
             // The session ends here, before any test reaches TestCoordinator, so release what each test's
             // data sources hold (a dependency injection scope, for example) now (#7205).
             await RaiseOnDisposeForUnstartedTestsAsync(executableTests).ConfigureAwait(false);
+            await _staticPropertyHandler.ReleaseSessionCallbacksAfterFailedInitializationAsync().ConfigureAwait(false);
             throw;
         }
 

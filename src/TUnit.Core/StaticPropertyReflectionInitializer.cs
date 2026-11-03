@@ -1,6 +1,7 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core.Enums;
 
 namespace TUnit.Core;
@@ -13,7 +14,120 @@ namespace TUnit.Core;
 #endif
 public static class StaticPropertyReflectionInitializer
 {
-    private static readonly ConcurrentDictionary<Type, bool> _initializedTypes = new();
+    // A static property is shared by every session in the process. Keep one value until
+    // all sessions that discovered it have released their claim.
+    private static readonly ConditionalWeakTable<TestBuilderContext, SessionInitialization> _initializedTypes = new();
+
+    private static readonly ConditionalWeakTable<Type, SharedInitialization> _sharedInitializations = new();
+
+    private sealed class SessionInitialization
+    {
+        public readonly ConcurrentDictionary<Type, bool> Types = new();
+    }
+
+    // Encapsulates the shared value's lease: acquisition and final release use the same gate.
+    // A failed initialization remains visible until the last lease is released.
+    private sealed class SharedInitialization
+    {
+        private readonly SemaphoreSlim _gate = new(1, 1);
+        private int _owners;
+        private TestBuilderContext? _context;
+        private Exception? _error;
+
+#if NET8_0_OR_GREATER
+        [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
+#endif
+        public async Task AcquireAsync(Type type, PropertyInfo[] properties, TestBuilderContext sessionContext,
+            SessionInitialization session)
+        {
+            await _gate.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                if (!session.Types.TryAdd(type, true))
+                {
+                    if (_error is { } priorError)
+                    {
+                        throw new InvalidOperationException($"Static property initialization failed for {type.FullName}", priorError);
+                    }
+                    return;
+                }
+
+                var first = _owners++ == 0;
+                if (first)
+                {
+                    _context = new TestBuilderContext { TestMetadata = sessionContext.TestMetadata };
+                    _error = null;
+                }
+
+                // Register before initialization so partial initialization also gets cleaned up.
+                TestSessionContext.RegisterStaticOnDispose(sessionContext, (_, _) => ReleaseAsync());
+
+                if (first)
+                {
+                    try
+                    {
+                        await InitializeTypeAsync(type, properties, _context!).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        _error = ex;
+                        throw;
+                    }
+                }
+                else if (_error is { } error)
+                {
+                    throw new InvalidOperationException($"Static property initialization failed for {type.FullName}", error);
+                }
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
+
+        private async ValueTask ReleaseAsync()
+        {
+            await _gate.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                if (--_owners != 0)
+                {
+                    return;
+                }
+
+                var context = _context!;
+                var onDispose = TestSessionContext.TakeStaticOnDispose(context);
+                _context = null;
+                _error = null;
+                if (onDispose is null)
+                {
+                    return;
+                }
+
+                var exceptions = new List<Exception>();
+                foreach (var invocation in onDispose.InvocationList)
+                {
+                    try
+                    {
+                        await invocation.InvokeAsync(context, null!).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        exceptions.Add(ex);
+                    }
+                }
+
+                if (exceptions.Count > 0)
+                {
+                    throw new AggregateException("Errors occurred while disposing reflection static properties", exceptions);
+                }
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
+    }
 
     /// <summary>
     /// Initializes static properties with data sources for all loaded types
@@ -54,14 +168,25 @@ public static class StaticPropertyReflectionInitializer
 #endif
     public static async Task InitializeStaticPropertiesForType(Type type)
     {
-        // Skip if already initialized
-        if (!_initializedTypes.TryAdd(type, true))
+        var context = TestSessionContext.GlobalStaticPropertyContext;
+        var initializedTypes = _initializedTypes.GetValue(context, static _ => new());
+
+        var staticProperties = type.GetProperties(BindingFlags.Public | BindingFlags.Static);
+        if (staticProperties.Length == 0)
         {
+            initializedTypes.Types.TryAdd(type, true);
             return;
         }
 
-        var staticProperties = type.GetProperties(BindingFlags.Public | BindingFlags.Static);
+        var shared = _sharedInitializations.GetValue(type, static _ => new());
+        await shared.AcquireAsync(type, staticProperties, context, initializedTypes).ConfigureAwait(false);
+    }
 
+#if NET8_0_OR_GREATER
+    [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
+#endif
+    private static async Task InitializeTypeAsync(Type type, PropertyInfo[] staticProperties, TestBuilderContext context)
+    {
         foreach (var property in staticProperties)
         {
             if (!property.CanWrite)
@@ -79,7 +204,7 @@ public static class StaticPropertyReflectionInitializer
 
             try
             {
-                await InitializeStaticProperty(property, dataSourceAttr);
+                await InitializeStaticProperty(property, dataSourceAttr, context);
             }
             catch (Exception ex)
             {
@@ -105,18 +230,12 @@ public static class StaticPropertyReflectionInitializer
 #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
 #endif
-    private static async Task InitializeStaticProperty(PropertyInfo property, IDataSourceAttribute dataSourceAttr)
+    private static async Task InitializeStaticProperty(PropertyInfo property, IDataSourceAttribute dataSourceAttr, TestBuilderContext context)
     {
         // Create metadata for the data source
         var metadata = new DataGeneratorMetadata
         {
-            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()
-            {
-                DataSourceAttribute = dataSourceAttr,
-                TestMetadata = null!,
-                Events = new TestContextEvents(),
-                StateBag = new ConcurrentDictionary<string, object?>()
-            }),
+            TestBuilderContext = new TestBuilderContextAccessor(context),
             MembersToGenerate = [],
             TestInformation = null!,
             Type = DataGeneratorType.Property,

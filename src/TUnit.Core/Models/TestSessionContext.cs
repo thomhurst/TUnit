@@ -12,12 +12,23 @@ public class TestSessionContext : Context
     }
 
     /// <summary>
-    /// Global TestBuilderContext for static property initialization.
-    /// This context lives for the entire test session and is used for tracking
-    /// disposable objects created during static property initialization.
-    /// Initialized immediately as a static field to be available before TestSessionContext creation.
+    /// Builder context for static property initialization in the current session.
+    /// Falls back to a process context before a session exists. Both generated and reflection
+    /// data sources use this accessor. Generated initialization can select the shared value's
+    /// context so overlapping sessions retain its callbacks until the last owner finishes.
     /// </summary>
-    public static TestBuilderContext GlobalStaticPropertyContext { get; } = new TestBuilderContext
+    public static TestBuilderContext GlobalStaticPropertyContext => StaticInitializationContext.Value ?? Current?.StaticPropertyContext ?? s_globalStaticPropertyContext;
+
+    // Generated initializers keep their existing accessor, but their callbacks belong to
+    // the shared value rather than whichever session initialized it first.
+    internal static readonly AsyncLocal<TestBuilderContext?> StaticInitializationContext = new();
+
+    internal TestBuilderContext StaticPropertyContext { get; } = new()
+    {
+        TestMetadata = s_globalStaticPropertyContext.TestMetadata
+    };
+
+    private static readonly TestBuilderContext s_globalStaticPropertyContext = new TestBuilderContext
     {
         TestMetadata = new MethodMetadata
         {
@@ -68,6 +79,94 @@ public class TestSessionContext : Context
     /// <see cref="TestContext.CancellationToken"/> instead; this token spans the whole session.
     /// </remarks>
     public CancellationToken SessionCancellationToken { get; internal set; }
+
+    /// <summary>
+    /// OnDispose callbacks that data sources subscribed while a generic class's rows were evaluated to infer
+    /// its type arguments (by reflection discovery, or by a source-generated row partition), raised once when
+    /// this session ends (#7205). They belong to this session, not the process, so a concurrent session in
+    /// server mode never raises them.
+    /// </summary>
+    internal AsyncEvent<TestContext>? DeferredDiscoveryOnDispose { get; private set; }
+
+    // Guards DeferredDiscoveryOnDispose and the static property context's OnDispose: builds add to them in parallel.
+    private static readonly object s_deferredOnDisposeLock = new();
+
+    /// <summary>
+    /// Moves the OnDispose callbacks subscribed on <paramref name="context"/> to the current session's
+    /// <see cref="DeferredDiscoveryOnDispose"/>, so they are raised once when that session ends. Rows evaluated
+    /// to infer a generic class's type arguments are not owned by one test (reflection discovery shares them
+    /// across the partition's tests), so a dependency injection scope created while they were read lives for
+    /// the session (#7205). Without a current session they go to <see cref="GlobalStaticPropertyContext"/>,
+    /// which the session's static property cleanup raises.
+    /// </summary>
+    internal static void DeferOnDisposeToSessionEnd(TestBuilderContext context)
+        => DeferOnDisposeToSessionEnd(context.EventsIfCreated);
+
+    /// <summary>
+    /// Moves the OnDispose callbacks subscribed on <paramref name="events"/> to the current session's
+    /// <see cref="DeferredDiscoveryOnDispose"/>, as <see cref="DeferOnDisposeToSessionEnd(TestBuilderContext)"/> does.
+    /// </summary>
+    internal static void DeferOnDisposeToSessionEnd(TestContextEvents? events)
+    {
+        lock (s_deferredOnDisposeLock)
+        {
+            if (events is not { OnDispose: { } onDispose })
+            {
+                return;
+            }
+
+            events.OnDispose = null;
+
+            AsyncEvent<TestContext> target;
+            if (Current is { } session)
+            {
+                target = session.DeferredDiscoveryOnDispose ??= new AsyncEvent<TestContext>();
+            }
+            else
+            {
+                var globalEvents = GlobalStaticPropertyContext.Events;
+                target = globalEvents.OnDispose ??= new AsyncEvent<TestContext>();
+            }
+
+            foreach (var invocation in onDispose.InvocationList)
+            {
+                target.Add(invocation.InvokeAsync, invocation.Order);
+            }
+        }
+    }
+
+    // All engine-owned registration and detachment of static cleanup uses the same lock
+    // as the no-session fallback transfer above. Never invoke callbacks under this lock.
+    internal static void RegisterStaticOnDispose(TestBuilderContext context, Func<object, TestContext, ValueTask> callback)
+    {
+        lock (s_deferredOnDisposeLock)
+        {
+            context.Events.OnDispose += callback;
+        }
+    }
+
+    internal static AsyncEvent<TestContext>? TakeStaticOnDispose(TestBuilderContext context)
+    {
+        lock (s_deferredOnDisposeLock)
+        {
+            var onDispose = context.EventsIfCreated?.OnDispose;
+            if (onDispose is not null) context.Events.OnDispose = null;
+            return onDispose;
+        }
+    }
+
+    /// <summary>
+    /// Takes the callbacks <see cref="DeferOnDisposeToSessionEnd"/> moved to this session, so they are raised once.
+    /// </summary>
+    internal AsyncEvent<TestContext>? TakeDeferredDiscoveryOnDispose()
+    {
+        lock (s_deferredOnDisposeLock)
+        {
+            var onDispose = DeferredDiscoveryOnDispose;
+            DeferredDiscoveryOnDispose = null;
+            return onDispose;
+        }
+    }
 
     private readonly Lock _lock = new();
     private readonly List<AssemblyHookContext> _assemblies = [];

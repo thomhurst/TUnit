@@ -49,6 +49,11 @@ public static class StaticPropertyRegistry
         _initializedValues[key] = value;
     }
 
+    internal static void RemoveInitializedValue(Type declaringType, string propertyName)
+    {
+        _initializedValues.TryRemove($"{declaringType.FullName}.{propertyName}", out _);
+    }
+
     /// <summary>
     /// Get all initialized values for tracking
     /// </summary>
