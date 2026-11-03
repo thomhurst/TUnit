@@ -373,11 +373,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
-    private static async Task<List<TestMetadata>> DiscoverTestsInAssembly(Assembly assembly)
+    internal static Type[] GetAssemblyTypes(Assembly assembly)
     {
-        var discoveredTests = new List<TestMetadata>(100);
-
-        var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
+        return _assemblyTypesCache.GetOrAdd(assembly, asm =>
         {
             try
             {
@@ -392,6 +390,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return [];
             }
         });
+    }
+
+    private static async Task<List<TestMetadata>> DiscoverTestsInAssembly(Assembly assembly)
+    {
+        var discoveredTests = new List<TestMetadata>(100);
+
+        var types = GetAssemblyTypes(assembly);
 
         if (types.Length == 0)
         {
@@ -3984,17 +3989,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         foreach (var assembly in assemblies)
         {
-            var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
-            {
-                try
-                {
-                    return asm.GetTypes();
-                }
-                catch
-                {
-                    return [];
-                }
-            });
+            var types = GetAssemblyTypes(assembly);
 
             foreach (var type in types)
             {
