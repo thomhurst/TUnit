@@ -5,6 +5,77 @@ namespace TUnit.Analyzers.Tests;
 public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 {
     [Test]
+    public async Task Equally_Specific_Optional_Overloads_Keep_Declaration_Order()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public static IEnumerable<string> Rows(int value, int count = 1) => ["first"];
+                public static IEnumerable<int> Rows(int value, string suffix = "") => [value];
+                [Test, MethodDataSource(nameof(Rows), Arguments = new object[] { 1 })]
+                public void First(string value) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Optional_Overloads_Use_Invocation_Conversions()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public static IEnumerable<string> Decimal(object value, int count = 1) => ["ok"];
+                public static IEnumerable<int> Decimal(decimal value, int count = 1) => [count];
+                public static IEnumerable<string> Nullable(object value, int count = 1) => ["ok"];
+                public static IEnumerable<int> Nullable(long? value, int count = 1) => [count];
+                public static IEnumerable<string> UserDefined(object value, int count = 1) => ["ok"];
+                public static IEnumerable<int> UserDefined(Converted value, int count = 1) => [count];
+                [Test, MethodDataSource(nameof(Decimal), Arguments = new object[] { 1 })]
+                public void DecimalTest(string value) { }
+                [Test, MethodDataSource(nameof(Nullable), Arguments = new object[] { 1 })]
+                public void NullableTest(string value) { }
+                [Test, MethodDataSource(nameof(UserDefined), Arguments = new object[] { 1 })]
+                public void UserDefinedTest(string value) { }
+            }
+            public class Converted
+            {
+                public static implicit operator Converted(int value) => new();
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Optional_Overloads_Exclude_Unavailable_Base_Methods()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Base
+            {
+                private static IEnumerable<int> Private(int value, int count = 1) => [count];
+                public static IEnumerable<int> Hidden(int value, int count = 1) => [count];
+            }
+            public class Tests : Base
+            {
+                public static IEnumerable<string> Private(object value, int count = 1) => ["ok"];
+                public new static IEnumerable<int> Hidden(int value, int count) => [count];
+                public static IEnumerable<string> Hidden(object value, int count = 1) => ["ok"];
+                [Test, MethodDataSource(nameof(Private), Arguments = new object[] { 1 })]
+                public void PrivateTest(string value) { }
+                [Test, MethodDataSource(nameof(Hidden), Arguments = new object[] { 1 })]
+                public void HiddenTest(string value) { }
+            }
+            """);
+    }
+
+    [Test]
     public async Task Null_Argument_Selects_More_Specific_Optional_Overload()
     {
         await Verifier.VerifyAnalyzerAsync(
