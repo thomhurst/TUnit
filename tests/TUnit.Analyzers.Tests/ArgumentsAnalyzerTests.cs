@@ -64,6 +64,47 @@ public class ArgumentsAnalyzerTests
     }
 
     [Test]
+    [Arguments("Func<(int[], int)>")]
+    [Arguments("TestDataRow<Func<(int[], int)>>")]
+    public async Task Typed_Array_Source_Unwraps_Row_Before_Closed_Signature_Check(string rowType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            public class ArrayRowAttribute : TypedDataSourceAttribute<{{rowType}}>
+            {
+                public override async IAsyncEnumerable<Func<Task<{{rowType}}>>> GetTypedDataRowsAsync(DataGeneratorMetadata metadata)
+                {
+                    await Task.Yield();
+                    yield break;
+                }
+            }
+
+            public class MyClass
+            {
+                [Test]
+                [ArrayRow]
+                public void Run<T>(T[] values, T value) { }
+
+                [Test]
+                [ArrayRow]
+                public void RunOptional<T>(T[] values, T value, int count = 0) { }
+
+                [Test]
+                [{|#0:ArrayRow|}]
+                public void RunInvalid<T>(T[] values, string value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(0)
+                .WithArguments("int[], int", "int[], string"));
+    }
+
+    [Test]
     public async Task Typed_Array_Source_Preserves_Declared_Type_Constraint_Diagnostic()
     {
         await Verifier.VerifyAnalyzerAsync(

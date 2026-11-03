@@ -1022,6 +1022,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             && testDataTypes.Any(t => t is IArrayTypeSymbol && ReferencesMethodTypeParameter(t))
             && TypedDataSourceInference.InferMethodTypeArguments(attribute.AttributeClass, method) is { } inferred)
         {
+            // A typed row can wrap a function or TestDataRow whose tuple spreads into arguments.
+            // Generator-base sources retain their existing declared-type argument semantics.
+            var hasGeneratorBase = selfAndBaseTypes.Any(t => t.IsGenericType
+                && (t.Name == "DataSourceGeneratorAttribute" || t.Name == "AsyncDataSourceGeneratorAttribute"));
+            if (!hasGeneratorBase && typedInterface?.TypeArguments is [var rowType]
+                && TypedDataSourceInference.GetRowArgumentTypes(rowType) is { } rowArguments)
+            {
+                typeArguments = rowArguments;
+            }
+
             // Check constraints while the original method type parameters are still available.
             CheckInferredTypeArgumentConstraints(context, attribute, typeArguments, testDataTypes);
 

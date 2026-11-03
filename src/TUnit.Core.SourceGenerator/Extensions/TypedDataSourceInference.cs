@@ -93,6 +93,44 @@ internal static class TypedDataSourceInference
     /// </summary>
     public static ITypeSymbol[]? InferMethodTypeArgumentsFromRowType(IMethodSymbol method, ITypeSymbol rowType)
     {
+        var rowTypes = GetRowArgumentTypes(rowType);
+        if (rowTypes is null)
+        {
+            return null;
+        }
+
+        var dataParameters = method.Parameters.Where(p => !IsCancellationToken(p.Type)).ToArray();
+        var requiredCount = dataParameters.Count(p => !p.IsOptional && !p.HasExplicitDefaultValue && !p.IsParams);
+        var inferred = new ITypeSymbol?[method.TypeParameters.Length];
+
+        if (rowTypes.Value.Length < requiredCount || rowTypes.Value.Length > dataParameters.Length)
+        {
+            return null;
+        }
+
+        for (var i = 0; i < rowTypes.Value.Length; i++)
+        {
+            if (!MapTypeParameters(method, dataParameters[i].Type, rowTypes.Value[i], inferred))
+            {
+                return null;
+            }
+        }
+
+        foreach (var typeArgument in inferred)
+        {
+            if (typeArgument is null)
+            {
+                return null;
+            }
+        }
+
+        return inferred!;
+    }
+
+    // The argument types after the same invocation, unwrapping and spreading used by discovery.
+    // Null means the row shape does not declare its element types reliably.
+    public static ImmutableArray<ITypeSymbol>? GetRowArgumentTypes(ITypeSymbol rowType)
+    {
         // The row reaches the method as ToObjectArray and TestDataRowUnwrapper.UnwrapArray produce it: a
         // Func<T> row is invoked once, a TestDataRow<T> row is unwrapped, and a Func<T> inside it is invoked
         // once, so the value binds as that T.
@@ -130,72 +168,23 @@ internal static class TypedDataSourceInference
             }
         }
 
-        var dataParameters = method.Parameters.Where(p => !IsCancellationToken(p.Type)).ToArray();
-        var requiredCount = dataParameters.Count(p => !p.IsOptional && !p.HasExplicitDefaultValue && !p.IsParams);
-        var inferred = new ITypeSymbol?[method.TypeParameters.Length];
-
         if (!spreadsReferenceArray && rowType is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
-            // ToObjectArray always spreads a tuple row, a one-element tuple included, so the tuple spreads
-            // over the leading data parameters; omitted trailing ones take their defaults.
             var elements = tupleType.TupleElements;
-
-            // UnwrapArray runs after ToObjectArray, so the TestDataRow<T> element of a one-element tuple
-            // row that is not itself a TestDataRow is unwrapped (and its Func invoked, its tuple or
-            // reference array spread) like a whole TestDataRow<T> row.
             if (!isTestDataRow && elements.Length == 1 && IsTestDataRow(elements[0].Type))
             {
-                return InferMethodTypeArgumentsFromRowType(method, elements[0].Type);
+                return GetRowArgumentTypes(elements[0].Type);
             }
 
-            if (elements.Length < requiredCount || elements.Length > dataParameters.Length)
-            {
-                return null;
-            }
+            return elements.Select(e => e.Type).ToImmutableArray();
+        }
 
-            for (var i = 0; i < elements.Length; i++)
-            {
-                if (!MapTypeParameters(method, dataParameters[i].Type, elements[i].Type, inferred))
-                {
-                    return null;
-                }
-            }
-        }
-        else if (!spreadsReferenceArray && IsSpreadWithoutElementTypes(rowType))
-        {
-            // ToObjectArray also spreads an object[] row, whose value types the row type does not declare,
-            // and a System.Tuple or other ITuple row; leave them to runtime inference.
-            return null;
-        }
-        else if (dataParameters.Length == 1)
-        {
-            if (!MapTypeParameters(method, dataParameters[0].Type, rowType, inferred))
-            {
-                return null;
-            }
-        }
-        else if (dataParameters.Length > 1 && requiredCount <= 1)
-        {
-            // A scalar row binds to the first data parameter; the rest are optional.
-            if (!MapTypeParameters(method, dataParameters[0].Type, rowType, inferred))
-            {
-                return null;
-            }
-        }
-        else
+        if (!spreadsReferenceArray && IsSpreadWithoutElementTypes(rowType))
         {
             return null;
         }
 
-        foreach (var typeArgument in inferred)
-        {
-            if (typeArgument is null)
-            {
-                return null;
-            }
-        }
-
-        return inferred!;
+        return ImmutableArray.Create(rowType);
     }
 
     /// <summary>
