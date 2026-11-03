@@ -2625,6 +2625,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return true;
         }
 
+        if (parameterType.IsArray && valueType.IsArray
+            && parameterType.GetArrayRank() == valueType.GetArrayRank()
+            && IsSingleDimensionalZeroBasedArray(parameterType) == IsSingleDimensionalZeroBasedArray(valueType))
+        {
+            return MapTypedRowParameters(parameterType.GetElementType()!, valueType.GetElementType()!, typeArguments);
+        }
+
         // A T? parameter (Nullable<T>) takes a non-nullable value of its underlying type.
         if (parameterType.IsGenericType
             && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>)

@@ -1016,6 +1016,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             testDataTypes = closedTestDataTypes;
         }
 
+        // Match array parameters after closing the method over the same row inference as discovery.
+        // An open T[] has no Roslyn conversion from int[], even when discovery infers T = int.
+        if (context.Symbol is IMethodSymbol { IsGenericMethod: true } method
+            && testDataTypes.Any(t => t is IArrayTypeSymbol && ReferencesMethodTypeParameter(t))
+            && TypedDataSourceInference.InferMethodTypeArguments(attribute.AttributeClass, method) is { } inferred)
+        {
+            testDataTypes = method.Construct(inferred).Parameters
+                .WithoutCancellationTokenParameter().Select(p => p.Type).ToImmutableArray();
+        }
+
         if (testDataTypes.Any(x => x.IsGenericDefinition()))
         {
             // Open parameter types are not checked for conversions, but a bare method type parameter is inferred

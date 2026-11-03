@@ -221,6 +221,14 @@ internal static class TypedDataSourceInference
             return true;
         }
 
+        if (parameterType is IArrayTypeSymbol parameterArray
+            && valueType is IArrayTypeSymbol valueArray
+            && parameterArray.Rank == valueArray.Rank
+            && parameterArray.IsSZArray == valueArray.IsSZArray)
+        {
+            return MapTypeParameters(method, parameterArray.ElementType, valueArray.ElementType, inferred);
+        }
+
         // A T? parameter (Nullable<T>) takes a non-nullable value of its underlying type.
         if (parameterType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableParameter
             && valueType.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T)

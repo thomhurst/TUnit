@@ -5,6 +5,22 @@ namespace TUnit.Analyzers.Tests;
 public class ArgumentsAnalyzerTests
 {
     [Test]
+    public async Task Typed_Array_Row_Infers_Method_Element_Type()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using TUnit.Core;
+
+            public class MyClass
+            {
+                [Test]
+                [Arguments<int[]>(new[] { 1, 2 })]
+                public void Run<T>(T[] values) { }
+            }
+            """);
+    }
+
+    [Test]
     public async Task Test_No_Error()
     {
         await Verifier
