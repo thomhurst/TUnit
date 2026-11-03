@@ -775,6 +775,7 @@ namespace
     }
     public static class GenericClassRowPartition
     {
+        public static .IDataSourceAttribute ConfigureInferredSource(.IDataSourceAttribute source, bool filterRows, params [] classTypeArguments) { }
         public static .IDataSourceAttribute[] Create([] classTypeArguments, .GenericClassRowFallback fallback, .IDataSourceAttribute[] dataSources, params int[] partitionedIndices) { }
     }
     public class GenericConstraintViolationDataSource : , .IDataSourceAttribute
@@ -791,6 +792,7 @@ namespace
     public sealed class GenericConstraintViolationEntry
     {
         public GenericConstraintViolationEntry() { }
+        public .IDataSourceAttribute[]? DataSources { get; init; }
         public required string FilePath { get; init; }
         public required int LineNumber { get; init; }
         public required string[] Messages { get; init; }
@@ -1016,7 +1018,7 @@ namespace
         public <.DataGeneratorMetadata, .<<.<object?[]?>>>>? Factory { get; set; }
         public string MethodNameProvidingDataSource { get; }
         public bool SkipIfEmpty { get; set; }
-        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__26))]
+        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__34))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]

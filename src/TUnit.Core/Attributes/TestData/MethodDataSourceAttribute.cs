@@ -95,6 +95,11 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// </remarks>
     public Func<DataGeneratorMetadata, IAsyncEnumerable<Func<Task<object?[]?>>>>? Factory { get; set; }
 
+    // Configured only by GenericClassRowPartition.ConfigureInferredSource for generated code.
+    internal bool FilterClassRows { get; set; }
+
+    internal Type[]? InferredClassTypeArguments { get; set; }
+
     /// <summary>
     /// Gets or sets the arguments to pass to the data source method.
     /// Use this when the data source method requires parameters.
@@ -147,6 +152,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         converted.Arguments = Arguments;
         converted.SkipIfEmpty = SkipIfEmpty;
         converted.DeferEnumeration = DeferEnumeration;
+        converted.FilterClassRows = FilterClassRows;
+        converted.InferredClassTypeArguments = InferredClassTypeArguments;
 
         return converted;
     }
@@ -161,12 +168,36 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             await foreach (var func in Factory(dataGeneratorMetadata))
             {
                 factoryYieldedAny = true;
-                yield return func;
+                if (FilterClassRows)
+                {
+                    var row = await func().ConfigureAwait(false);
+                    if (row is null)
+                    {
+                        continue;
+                    }
+
+                    row = GenericClassRowPartition.EvaluateWrappedFactory(row);
+                    if (ClassProvidingDataSource is null || GenericClassRowPartition.HasNonNullValues(row))
+                    {
+                        // Reuse the value evaluated for filtering only once. Later method rows and
+                        // repetitions must call the source factory for fresh constructor data.
+                        var evaluated = row;
+                        yield return () =>
+                        {
+                            var firstRow = Interlocked.Exchange(ref evaluated, null);
+                            return firstRow is not null ? Task.FromResult<object?[]?>(firstRow) : func();
+                        };
+                    }
+                }
+                else
+                {
+                    yield return func;
+                }
             }
 
             // An empty source runs the test once with no arguments, like NoDataSource (#2862), unless
             // SkipIfEmpty is set. Same rule as the reflection path below, so both modes agree (#7092).
-            if (!factoryYieldedAny && !SkipIfEmpty)
+            if (!factoryYieldedAny && !SkipIfEmpty && !FilterClassRows)
             {
                 yield return static () => Task.FromResult<object?[]?>([]);
             }
@@ -324,6 +355,11 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         {
             await task.ConfigureAwait(false);
             var taskResult = GetTaskResult(task);
+            if (taskResult is null && GetTaskResultType(task.GetType()) is { } resultType
+                && resultType != typeof(string) && typeof(System.Collections.IEnumerable).IsAssignableFrom(resultType))
+            {
+                yield break;
+            }
 
             if (taskResult is System.Collections.IEnumerable enumerable and not string && !DataSourceHelpers.IsTuple(taskResult))
             {
@@ -852,6 +888,19 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 : null);
 
         return asTaskMethod?.Invoke(methodResult, null) as Task;
+    }
+
+    private static Type? GetTaskResultType(Type taskType)
+    {
+        for (var current = taskType; current is not null; current = current.BaseType)
+        {
+            if (current.IsGenericType && current.GetGenericTypeDefinition() == typeof(Task<>))
+            {
+                return current.GetGenericArguments()[0];
+            }
+        }
+
+        return null;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection usage is documented. AOT-safe path available via Factory property")]

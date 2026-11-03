@@ -27,6 +27,15 @@ public class SourcePathScrubberTests
     }
 
     [Test]
+    public async Task Scrubs_Caller_File_Path_With_Wrapped_Extension()
+    {
+        var text = "[.Before(., \"/home/user/src/File.c\" +\n" +
+                   "            \"s\", 39)]";
+
+        await Assert.That(Tests.ScrubSourcePaths(text)).IsEqualTo("[.Before(., \"PATH_SCRUBBED\", 39)]");
+    }
+
+    [Test]
     public async Task Scrubs_Wrapped_Windows_Caller_File_Path()
     {
         var text = "[.After(., \"C:\\\\Users\\\\dev\\\\source\\\\repos\\\\TUnit\\\\TUnit.OpenTelemetry\\\\\" +\r\n" +
