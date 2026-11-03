@@ -219,6 +219,39 @@ public class ArgumentsAnalyzerTests
     }
 
     [Test]
+    [Arguments("string[] rest")]
+    [Arguments("params string[] rest")]
+    [Arguments("int count = 0, string[] rest = null!")]
+    [Arguments("string[] rest, int count = 0", true)]
+    public async Task Typed_Generator_Source_Validates_Omitted_Trailing_Array(string trailingParameters, bool invalid = false)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class ArrayRowAttribute : DataSourceGeneratorAttribute<int, int[]>
+            {
+                protected override IEnumerable<Func<(int, int[])>> GenerateDataSources(DataGeneratorMetadata metadata)
+                {
+                    yield return () => (1, new[] { 2 });
+                }
+            }
+
+            public class MyClass
+            {
+                [Test, {{(invalid ? "{|#0:ArrayRow|}" : "ArrayRow")}}]
+                public void Run<T>(T value, T[] values, {{trailingParameters}}) { }
+            }
+            """,
+            invalid
+                ? [Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                    .WithArguments("int, int[]", "int, int[], string[], int")]
+                : []);
+    }
+
+    [Test]
     public async Task Typed_Generator_Source_Rejects_Scalar_For_Nontrailing_Array()
     {
         await Verifier.VerifyAnalyzerAsync(

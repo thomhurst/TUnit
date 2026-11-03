@@ -1040,10 +1040,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 .Select(p => constructedMethod.Parameters[p.Ordinal]).ToArray();
             // Preserve the declared trailing position before dropping omitted optional parameters.
             var trailingParameter = closedParameters.LastOrDefault();
-            // A shorter row leaves trailing optional parameters at their defaults.
+            // A shorter row leaves optional parameters at their defaults and a trailing SZ array empty.
             var suppliedParameterCount = typeArguments.Length;
             if (suppliedParameterCount < closedParameters.Length
-                && closedParameters.Skip(suppliedParameterCount).All(p => p.IsOptional || p.HasExplicitDefaultValue || p.IsParams))
+                && closedParameters.Skip(suppliedParameterCount).All(p => p.IsOptional || p.HasExplicitDefaultValue || p.IsParams
+                    || (SymbolEqualityComparer.Default.Equals(p, trailingParameter)
+                        && p.Type is IArrayTypeSymbol { IsSZArray: true })))
             {
                 closedParameters = closedParameters.Take(suppliedParameterCount).ToArray();
             }
