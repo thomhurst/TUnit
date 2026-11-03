@@ -31,6 +31,10 @@ internal class TypedRowInferenceParityTests
         yield return ["IEnumerable<T> value", "List<int>", "", "int"];
         yield return ["IEnumerable<T> value", "IntList", "", "int"];
         yield return ["Base<T> value", "Derived", "", "int"];
+        yield return ["Outer<T>.Base value", "NestedDerived", "", "int"];
+        yield return ["Outer<T>.Nested<T> value", "NestedGenericDerived", "", "int"];
+        yield return ["Outer<T>.Nested<T> value", "NestedConflictingDerived", "", null];
+        yield return ["Outer<T>.IMarker value", "NestedImplementation", "", "int"];
         yield return ["IEnumerable<IEnumerable<T>> value", "List<int[]>", "", "int"];
         yield return ["IMarker<T> value", "Diamond", "", "int"];
         yield return ["IMarker<T> value", "Ambiguous", "", null];
@@ -53,6 +57,16 @@ internal class TypedRowInferenceParityTests
             public class IntList : List<int> { }
             public class Base<T> { }
             public class Derived : Base<int> { }
+            public class Outer<T>
+            {
+                public class Base { }
+                public class Nested<U> { }
+                public interface IMarker { }
+            }
+            public class NestedDerived : Outer<int>.Base { }
+            public class NestedGenericDerived : Outer<int>.Nested<int> { }
+            public class NestedConflictingDerived : Outer<int>.Nested<string> { }
+            public class NestedImplementation : Outer<int>.IMarker { }
             public interface IMarker<T> { }
             public interface ILeft : IMarker<int> { }
             public interface IRight : IMarker<int> { }

@@ -251,6 +251,15 @@ internal static class TypedDataSourceInference
                     return true;
                 }
 
+                // Roslyn keeps outer generic arguments on ContainingType; reflection's
+                // GetGenericArguments includes them in the nested type's arguments.
+                if (parameterNamed.ContainingType is { } containingParameter
+                    && candidate.ContainingType is { } containingCandidate
+                    && !MapTypeParameters(method, containingParameter, containingCandidate, inferred))
+                {
+                    return false;
+                }
+
                 for (var i = 0; i < parameterNamed.TypeArguments.Length; i++)
                 {
                     if (!MapTypeParameters(method, parameterNamed.TypeArguments[i], candidate.TypeArguments[i], inferred))
