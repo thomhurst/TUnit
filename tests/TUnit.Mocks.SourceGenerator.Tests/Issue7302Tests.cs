@@ -1,3 +1,11 @@
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Mocks.SourceGenerator;
+using TUnit.Mocks.SourceGenerator.Builders;
+using TUnit.Mocks.SourceGenerator.Models;
+
 namespace TUnit.Mocks.SourceGenerator.Tests;
 
 // Regression: https://github.com/thomhurst/TUnit/issues/7302
@@ -40,6 +48,79 @@ public class Issue7302Tests : SnapshotTestBase
         """;
 
     private const string SetupsFileMarker = "_ClosedMockMemberExtensions_";
+
+    // Compare the analysis surface to the actual emitted signatures, rather than maintaining
+    // a second list of matcher/predicate/params/any-args overloads. A new conditional shape
+    // must be included in analysis too; a new condition requires extending this guard.
+    [Test]
+    [Arguments(0, false)]
+    [Arguments(1, false)]
+    [Arguments(4, false)]
+    [Arguments(5, false)]
+    [Arguments(9, false)]
+    [Arguments(1, true)]
+    [Arguments(4, true)]
+    [Arguments(5, true)]
+    public async Task Collision_Analysis_Sees_Every_Emitted_Overload(int parameterCount, bool hasRefStruct)
+    {
+        var model = new MockTypeModel
+        {
+            Name = "ISurface",
+            FullyQualifiedName = "global::TestNamespace.ISurface<T>",
+            Namespace = "TestNamespace",
+            IsInterface = true,
+            TypeParameters = new(ImmutableArray.Create(new MockTypeParameterModel { Name = "T" }))
+        };
+        var parameters = Enumerable.Range(0, parameterCount).Select(index => new MockParameterModel
+        {
+            Name = "value" + index,
+            Type = index == 0 && hasRefStruct ? "Span<T>" : "T[]",
+            FullyQualifiedType = index == 0 && hasRefStruct ? "global::System.Span<T>" : "T[]",
+            IsRefStruct = index == 0 && hasRefStruct,
+            SpanElementType = index == 0 && hasRefStruct ? "T" : null,
+            ParamsElementType = index == parameterCount - 1 && !(index == 0 && hasRefStruct) ? "T" : null
+        }).ToImmutableArray();
+        var method = new MockMemberModel
+        {
+            Name = "Map",
+            ReturnType = "U",
+            UnwrappedReturnType = "U",
+            IsGenericMethod = true,
+            TypeParameters = new(ImmutableArray.Create(new MockTypeParameterModel { Name = "U" })),
+            Parameters = new(parameters)
+        };
+
+        var emitted = new CodeWriter();
+        MockMembersBuilder.GenerateClosedReceiverGenericMethodMembers(emitted, method, model, "ISurface");
+        var analysis = new CodeWriter();
+        MockMembersBuilder.GenerateGenericMethodMembersInCurrentBlock(analysis, method, model, "ISurface", includeAllFrameworkOverloads: true);
+        var analysisRoot = CSharpSyntaxTree.ParseText("class Surface { " + analysis + " }").GetRoot();
+        await Assert.That(analysisRoot.DescendantTrivia().Any(trivia => trivia.IsDirective)).IsFalse();
+        await Assert.That(analysisRoot.GetDiagnostics().Any(d => d.Severity == DiagnosticSeverity.Error)).IsFalse();
+
+        var emittedSource = "class Surface { " + emitted + " }";
+        var roots = new[]
+        {
+            CSharpSyntaxTree.ParseText(emittedSource).GetRoot(),
+            CSharpSyntaxTree.ParseText(emittedSource, new CSharpParseOptions(preprocessorSymbols: ["NET9_0_OR_GREATER"])).GetRoot()
+        };
+        var conditions = roots.SelectMany(root => root.DescendantTrivia(descendIntoTrivia: true))
+            .Select(trivia => trivia.GetStructure())
+            .Select(directive => directive switch
+            {
+                IfDirectiveTriviaSyntax condition => condition.Condition.ToString(),
+                ElifDirectiveTriviaSyntax condition => condition.Condition.ToString(),
+                _ => null
+            }).Where(condition => condition is not null).Distinct();
+        await Assert.That(conditions.All(condition => condition == "NET9_0_OR_GREATER")).IsTrue();
+
+        static IEnumerable<string> Signatures(SyntaxNode root) => root.DescendantNodes()
+            .OfType<MethodDeclarationSyntax>()
+            .Select(declaration => declaration.Identifier.ValueText + declaration.TypeParameterList + declaration.ParameterList.NormalizeWhitespace().ToFullString());
+        var expected = string.Join("\n", roots.SelectMany(Signatures).Distinct().OrderBy(signature => signature, StringComparer.Ordinal));
+        var actual = string.Join("\n", Signatures(analysisRoot).Distinct().OrderBy(signature => signature, StringComparer.Ordinal));
+        await Assert.That(actual).IsEqualTo(expected);
+    }
 
     [Test]
     public async Task Nullable_Containers_Are_Kept_And_Nullable_Model_Elements_Are_Skipped()

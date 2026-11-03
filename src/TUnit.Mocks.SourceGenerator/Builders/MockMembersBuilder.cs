@@ -878,21 +878,21 @@ internal static class MockMembersBuilder
     }
 
     // GetClosedReceiverGenericMethods(model, typeArguments) parses this output to detect
-    // closed-signature collisions. Keep its two framework configurations in sync with
-    // any conditional overloads emitted here.
-    private static void GenerateGenericMethodMembersInCurrentBlock(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
+    // closed-signature collisions. Analysis emits all framework overloads together; the
+    // emission coverage regression verifies that no conditional signature is hidden.
+    internal static void GenerateGenericMethodMembersInCurrentBlock(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName, bool includeAllFrameworkOverloads = false)
     {
         if (method.HasRefStructParams)
         {
-            writer.AppendLine("#if NET9_0_OR_GREATER");
+            if (!includeAllFrameworkOverloads) writer.AppendLine("#if NET9_0_OR_GREATER");
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: false);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: false);
             EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: false);
-            writer.AppendLine("#else");
+            if (!includeAllFrameworkOverloads) writer.AppendLine("#else");
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
             EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
-            writer.AppendLine("#endif");
+            if (!includeAllFrameworkOverloads) writer.AppendLine("#endif");
         }
         else
         {
@@ -957,12 +957,12 @@ internal static class MockMembersBuilder
             foreach (var method in group)
             {
                 var writer = new CodeWriter();
-                GenerateGenericMethodMembersInCurrentBlock(writer, method, model, MockImplBuilder.GetCompositeSafeName(model));
+                GenerateGenericMethodMembersInCurrentBlock(writer, method, model, MockImplBuilder.GetCompositeSafeName(model), includeAllFrameworkOverloads: true);
                 var source = "class Signatures { " + writer + " }";
-                // Ref-struct setup overloads differ across target frameworks. Check both branches.
-                var declarations = new[] { new CSharpParseOptions(), new CSharpParseOptions(preprocessorSymbols: new[] { "NET9_0_OR_GREATER" }) }
-                    .SelectMany(options => CSharpSyntaxTree.ParseText(source, options).GetRoot()
-                        .DescendantNodes().OfType<MethodDeclarationSyntax>());
+                // The emitter includes every framework branch without directives, so one parse
+                // sees all signatures without a separate list of preprocessor configurations.
+                var declarations = CSharpSyntaxTree.ParseText(source).GetRoot()
+                    .DescendantNodes().OfType<MethodDeclarationSyntax>();
                 var rewriter = new ClosedSignatureRewriter(model, typeArguments, method);
                 foreach (var declaration in declarations)
                 {
