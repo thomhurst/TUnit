@@ -129,6 +129,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         var tests = new List<AbstractExecutableTest>();
         TestBuilderContextAccessor? contextAccessor = null;
+        UnclaimedClassRow? activeClassRow = null;
 
         try
         {
@@ -210,6 +211,7 @@ internal sealed class TestBuilder : ITestBuilder
             var classDataAttributeIndex = 0;
             foreach (var classDataSource in await GetDataSourcesAsync(metadata.ClassDataSources, cancellationToken))
             {
+                activeClassRow = null;
                 classDataAttributeIndex++;
 
                 var classDataLoopIndex = 0;
@@ -237,12 +239,15 @@ internal sealed class TestBuilder : ITestBuilder
                     };
                     testBuilderContext.CopyStateBagTo(contextAccessor.Current);
 
+                    // A new factory owns its own cleanup, even if it throws before producing a row.
+                    activeClassRow = null;
                     var (classData, firstClassRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
 
                     // No test holds this first fetch yet. The first test built from this class row takes it
                     // instead of calling the factory again, so a non-shared source does not create an extra
                     // instance that nothing tracks or disposes (#7157).
                     var unclaimedClassRow = new UnclaimedClassRow(classData, firstClassRowMetadata, contextAccessor.Current);
+                    activeClassRow = unclaimedClassRow;
 
 #if NET
                     // Register scope for class data objects from the simple path.
@@ -701,7 +706,15 @@ internal sealed class TestBuilder : ITestBuilder
             // The build context was disposed on leaving the try block; stop routing output to it.
             TestBuildContext.Current = null;
 
-            var failedTest = CreateFailedTestForDataGenerationError(metadata, ex, new TestDataCombination(), rowContext: contextAccessor?.Current);
+            // Class-source MoveNext runs outside the per-class-row catch. Its context can
+            // still carry cleanup already claimed by a runnable row.
+            var failureContext = contextAccessor?.Current;
+            if (activeClassRow is not null && failureContext is not null)
+            {
+                failureContext = activeClassRow.CreateFailureContext(failureContext);
+            }
+            var failedTest = CreateFailedTestForDataGenerationError(metadata, ex, new TestDataCombination(),
+                methodData: activeClassRow?.TakeLentObjects(), rowContext: failureContext);
             tests.Add(failedTest);
             return tests;
         }
@@ -1089,6 +1102,7 @@ internal sealed class TestBuilder : ITestBuilder
         private TestDataRowMetadata? _metadata = metadata;
         private object?[]? _lent;
         private AsyncEvent<(TestContext Context, object? Object)>? _lentCleanup;
+        private readonly TestBuilderContext _enumerationContext = rowContext;
         private TestBuilderContext _rowContext = rowContext;
         // Snapshot before any method factory can mutate the class subscriptions.
         private TestContextEvents? _events = rowContext.EventsIfCreated?.Clone();
@@ -1154,6 +1168,15 @@ internal sealed class TestBuilder : ITestBuilder
             }
 
             target.Events.OnDataRowDispose = cleanup.Clone();
+        }
+
+        internal TestBuilderContext CreateFailureContext(TestBuilderContext currentContext)
+        {
+            // A separate factory context owns its callbacks, including callbacks added
+            // before a factory failure. Only the saved enumeration context needs filtering.
+            return ReferenceEquals(currentContext, _enumerationContext)
+                ? CreateEnumerationFailureContext(currentContext)
+                : currentContext;
         }
 
         internal TestBuilderContext CreateEnumerationFailureContext(TestBuilderContext enumerationContext)
