@@ -669,7 +669,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "argument", n
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7440.OverloadedConstructorRows7440), "Values")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7440.OverloadedConstructorRows7440.Values()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7440.OverloadedConstructorRows7440.Values()),
     },
 }, 0),
             methodMetadata: __mm_0,
