@@ -246,28 +246,19 @@ public class WaitsForAssertionTests
     }
 
     [Test]
-    public async Task WaitsFor_Performance_Many_Quick_Polls()
+    public async Task WaitsFor_Keeps_Polling_Until_Assertion_Passes()
     {
         var counter = 0;
-        var stopwatch = Stopwatch.StartNew();
-
-        // This will take many polls before succeeding
         Func<int> getValue = () => Interlocked.Increment(ref counter);
 
-        // Use a more realistic polling interval (10ms) and target count (20)
-        // On .NET Framework, the minimum timer resolution is ~15ms, making 1ms intervals unreliable
+        // Verify repeated polling, not throughput on a shared CI runner. Allow scheduling
+        // delays under load; timeout behaviour is covered by separate tests.
         await Assert.That(getValue).WaitsFor(
             assert => assert.IsGreaterThan(20),
-            timeout: TimeSpan.FromSeconds(5),
+            timeout: TimeSpan.FromSeconds(30),
             pollingInterval: TimeSpan.FromMilliseconds(10));
 
-        stopwatch.Stop();
-
-        // Should have made at least 20 attempts
-        await Assert.That(counter).IsGreaterThanOrEqualTo(21);
-
-        // Should complete in a reasonable time (well under 5 seconds)
-        await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromSeconds(5));
+        await Assert.That(counter).IsEqualTo(21);
     }
 
     [Test]
