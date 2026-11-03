@@ -147,6 +147,37 @@ public class ArgumentsAnalyzerTests
     }
 
     [Test]
+    public async Task Typed_Array_Source_With_Foreign_Generator_Name_Unwraps_Row()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            namespace Foreign
+            {
+                public class DataSourceGeneratorAttribute<T> : TypedDataSourceAttribute<T>
+                {
+                    public override async IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(DataGeneratorMetadata metadata)
+                    {
+                        await Task.Yield();
+                        yield break;
+                    }
+                }
+            }
+
+            public class MyClass
+            {
+                [Test]
+                [Foreign.DataSourceGenerator<Func<int[]>>]
+                public void Run<T>(T[] values) { }
+            }
+            """);
+    }
+
+    [Test]
     public async Task Typed_Array_Source_Preserves_Declared_Type_Constraint_Diagnostic()
     {
         await Verifier.VerifyAnalyzerAsync(

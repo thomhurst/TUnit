@@ -1024,8 +1024,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             // A typed row can wrap a function or TestDataRow whose tuple spreads into arguments.
             // Generator-base sources retain their existing declared-type argument semantics.
-            var hasGeneratorBase = selfAndBaseTypes.Any(t => t.IsGenericType
-                && (t.Name == "DataSourceGeneratorAttribute" || t.Name == "AsyncDataSourceGeneratorAttribute"));
+            var hasGeneratorBase = selfAndBaseTypes.Any(TypedDataSourceInference.IsTypedDataSourceBase);
             if (!hasGeneratorBase && typedInterface?.TypeArguments is [var rowType]
                 && TypedDataSourceInference.GetRowArgumentTypes(rowType) is { } rowArguments)
             {
