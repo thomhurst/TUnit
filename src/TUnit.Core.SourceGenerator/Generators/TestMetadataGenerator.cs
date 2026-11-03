@@ -2508,9 +2508,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 && explicitTypes.SequenceEqual(entry.ClassTypeArgs, SymbolEqualityComparer.Default));
             foreach (var attr in classDataSources)
             {
-                // Inferred sources bypass runtime partitioning. Suppress its empty fallback here;
-                // the attribute also preserves the external-source rule for all-null rows.
-                var filterClassRows = !hasExplicitClassTypes && entry.FindClassMethodDataSource(attr)?.TypeArguments is not null;
+                // Filter only sources that supply this entry's inferred class rows. Method-only
+                // fallback entries retain raw rows, including the empty-source fallback (#7161).
+                var filterClassRows = !hasExplicitClassTypes && entry.IsSpecificClassDataSource(attr)
+                    && entry.FindClassMethodDataSource(attr)?.TypeArguments is not null;
                 GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol, filterClassRows);
             }
             dsWriter.Unindent();

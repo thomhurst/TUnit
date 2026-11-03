@@ -448,3 +448,21 @@ public class ExplicitExternalNullRows<T>(T value)
     [Test]
     public async Task Test() => await Assert.That((object?)value).IsNull();
 }
+
+// Only the method row infers string: retain the raw empty class row so construction
+// reports its missing argument, rather than silently dropping the test.
+[MethodDataSource(typeof(ReviewRows), nameof(ReviewRows.EmptyIntegers))]
+public class MethodOnlyEmptyClassRows<T>
+{
+    public MethodOnlyEmptyClassRows(T value)
+    {
+        if (value is null)
+        {
+            throw new ArgumentNullException(nameof(value));
+        }
+    }
+
+    [Test]
+    [Arguments("method")]
+    public void ReportsMissingConstructorValue(T argument) => _ = argument;
+}

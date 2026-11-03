@@ -118,7 +118,6 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7161.Issue7161Sources), "Five")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7161.Issue7161Sources.Five()),
     },
 },
