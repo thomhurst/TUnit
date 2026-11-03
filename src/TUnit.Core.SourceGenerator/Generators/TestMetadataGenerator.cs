@@ -2157,7 +2157,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (partition.Fallback == ClassRowFallback.AllRows || !entry.HasClassRows)
             {
                 // Rows of other types may build the instance, converted to the parameter types (#7161)
-                writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol.Construct(entry.ClassTypeArgs)));
+                var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
+                writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType)));
             }
             else
             {
@@ -2184,7 +2185,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // No class row infers these types, so the constructor arguments come from class-level data
             // sources of any type, such as a [MethodDataSource] or a class row of another type under a
             // [GenerateGenericTest]. Convert them to the parameter types, as reflection mode does (#7161).
-            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol.Construct(entry.ClassTypeArgs)));
+            var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType)));
         }
         else if (entry.HasParameterizedConstructor)
         {
@@ -3140,7 +3142,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Keep other expressions on the runtime conversion path, including floating-point
             // and string constants, so they behave identically to reflection discovery.
             if (targetParameterType?.SpecialType == SpecialType.System_Decimal
-                && TryGetDecimalLiteralText(expression, out var decimalLiteral))
+                && TryGetDecimalLiteralText(expression, methodSymbol?.MethodKind == MethodKind.Constructor, out var decimalLiteral))
             {
                 writer.Append(decimalLiteral);
             }
@@ -3252,7 +3254,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 if (syntaxAligned
                     && targetType?.SpecialType == SpecialType.System_Decimal
-                    && TryGetDecimalLiteralText(positionalSyntax![i].Expression, out var decimalLiteral))
+                    && TryGetDecimalLiteralText(positionalSyntax![i].Expression, testMethodParameters[i].ContainingSymbol is IMethodSymbol { MethodKind: MethodKind.Constructor }, out var decimalLiteral))
                 {
                     writer.Append(decimalLiteral);
                 }
@@ -3305,8 +3307,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// literals qualify: plain digits with optional separators, fraction, exponent and a real suffix
     /// (<c>d</c>/<c>f</c>/<c>m</c>). Hex and binary prefixes and integral suffixes (<c>L</c>, <c>U</c>,
     /// <c>UL</c>) have no decimal form and must be formatted from their typed constant instead.
+    /// Constructor arguments additionally retain floating-point values for reflection-compatible conversion.
     /// </summary>
-    private static bool TryGetDecimalLiteralText(ExpressionSyntax expression, out string decimalLiteral)
+    private static bool TryGetDecimalLiteralText(ExpressionSyntax expression, bool isConstructorArgument, out string decimalLiteral)
     {
         decimalLiteral = string.Empty;
         var sign = string.Empty;
@@ -3326,6 +3329,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         if (expression is not LiteralExpressionSyntax literal || !literal.IsKind(SyntaxKind.NumericLiteralExpression))
+        {
+            return false;
+        }
+
+        // Class rows must retain the rounded attribute value that reflection converts at runtime.
+        // Method rows retain their established exact-decimal literal behavior.
+        if (isConstructorArgument && literal.Token.Value is double or float)
         {
             return false;
         }

@@ -220,3 +220,54 @@ public class ConvertedArrayConstructorArgumentTests(int[] values)
         await Assert.That(values[1]).IsEqualTo(2);
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1.2345678901234567, 1)]
+[Arguments(1.2345678901234567d, 2)]
+[Arguments(1.23456789f, 3)]
+public class FloatingDecimalConstructorArgumentTests<T>(decimal value, T row)
+{
+    [Test]
+    public async Task Run()
+    {
+        var expected = (int)(object)row! == 3
+            ? Convert.ToDecimal(1.23456789f)
+            : Convert.ToDecimal(1.2345678901234567d);
+        await Assert.That(value).IsEqualTo(expected);
+    }
+}
+
+public static class OverloadedConstructorRows7440
+{
+    public static IEnumerable<int> Values() => [5];
+}
+
+#pragma warning disable TUnit0052 // Pin existing first-public constructor selection without TestConstructor.
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(typeof(OverloadedConstructorRows7440), nameof(OverloadedConstructorRows7440.Values))]
+public class RuntimeRowOverloadedConstructorTests<T>
+{
+    private readonly T _value;
+    public RuntimeRowOverloadedConstructorTests(T value) => _value = value;
+    public RuntimeRowOverloadedConstructorTests(T value, string other) => throw new InvalidOperationException("Unselected constructor");
+
+    [Test]
+    [Arguments(1)]
+    public async Task Run(T argument) => await Assert.That(_value!.ToString()).IsEqualTo("5");
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(5)]
+[GenerateGenericTest(typeof(string))]
+public class InferredRowOverloadedConstructorTests<T>
+{
+    private readonly T _value;
+    public InferredRowOverloadedConstructorTests(T value) => _value = value;
+    public InferredRowOverloadedConstructorTests(T value, string other) => throw new InvalidOperationException("Unselected constructor");
+
+    [Test]
+    [Arguments(1)]
+    [Arguments("a")]
+    public async Task Run(T argument) => await Assert.That(_value!.ToString()).IsEqualTo("5");
+}
+#pragma warning restore TUnit0052
