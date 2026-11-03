@@ -19,6 +19,38 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    public async Task OpenClassTuplePreservesImplicitArrayCovariance()
+    {
+        await Verifier.VerifyAnalyzerAsync("""
+            #pragma warning disable TUnit0046
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class C<T>
+            {
+                public static (int, List<T>[]) Row() => default;
+                [Test, MethodDataSource(nameof(Row))]
+                public void Test((int, IEnumerable<T>[]) row) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task SeparateParametersPreserveInferredArrayCovariance()
+    {
+        await Verifier.VerifyAnalyzerAsync("""
+            #pragma warning disable TUnit0046
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class C
+            {
+                public static (int, List<int>[], int) Row() => default;
+                [Test, MethodDataSource(nameof(Row))]
+                public void Test<T>(T seed, IEnumerable<T>[] values, int end) { }
+            }
+            """);
+    }
+
+    [Test]
     [Arguments("int[]", "T[]", false)]
     [Arguments("int[][]", "T[][]", false)]
     [Arguments("int[,]", "T[,]", false)]

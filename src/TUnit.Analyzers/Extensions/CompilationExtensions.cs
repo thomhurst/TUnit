@@ -19,6 +19,13 @@ public static class CompilationExtensions
             return true;
         }
 
+        // Preserve conversions Roslyn can already prove, including open array covariance.
+        if (argumentType is not null && parameterType is not null
+            && compilation.HasImplicitConversion(argumentType, parameterType))
+        {
+            return true;
+        }
+
         // Open arrays have no Roslyn conversion until their element type arguments are inferred.
         // Recurse through tuple elements so a single tuple parameter keeps its row container.
         if (parameterType is IArrayTypeSymbol parameterArray && ContainsTypeParameter(parameterArray)
@@ -27,7 +34,7 @@ public static class CompilationExtensions
             return parameterArray.Rank == argumentArray.Rank
                 && parameterArray.IsSZArray == argumentArray.IsSZArray
                 && (parameterArray.ElementType is ITypeParameterSymbol
-                    || MatchesArrayElement(argumentArray.ElementType, parameterArray.ElementType));
+                    || MatchesArrayElement(compilation, argumentArray.ElementType, parameterArray.ElementType));
         }
 
         // Tuples already recognized as generic definitions retain the existing conversion path below.
@@ -37,10 +44,23 @@ public static class CompilationExtensions
             && !parameterTuple.IsGenericDefinition()
             && argumentType is INamedTypeSymbol { IsTupleType: true } argumentTuple)
         {
-            return parameterTuple.TupleElements.Length == argumentTuple.TupleElements.Length
-                && parameterTuple.TupleElements.Zip(argumentTuple.TupleElements, (parameter, argument) =>
-                    parameter.Type is ITypeParameterSymbol
-                    || compilation.HasImplicitConversionOrGenericParameter(argument.Type, parameter.Type)).All(matches => matches);
+            if (parameterTuple.TupleElements.Length != argumentTuple.TupleElements.Length)
+            {
+                return false;
+            }
+
+            for (var i = 0; i < parameterTuple.TupleElements.Length; i++)
+            {
+                // Bare type parameters retain the existing generic path behavior; this shape check ignores constraints.
+                if (parameterTuple.TupleElements[i].Type is not ITypeParameterSymbol
+                    && !compilation.HasImplicitConversionOrGenericParameter(
+                        argumentTuple.TupleElements[i].Type, parameterTuple.TupleElements[i].Type))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         if (parameterType?.IsGenericDefinition() == false)
@@ -75,9 +95,12 @@ public static class CompilationExtensions
 
     // Array elements are not rebuilt as tuples by CastHelper. After inference, constructed
     // element types must agree rather than merely having element-wise numeric conversions.
-    private static bool MatchesArrayElement(ITypeSymbol argument, ITypeSymbol parameter)
+    private static bool MatchesArrayElement(Compilation compilation, ITypeSymbol argument, ITypeSymbol parameter,
+        bool allowReferenceConversions = true)
     {
-        if (parameter is ITypeParameterSymbol || SymbolEqualityComparer.Default.Equals(argument, parameter))
+        var conversion = compilation.ClassifyConversion(argument, parameter);
+        if (parameter is ITypeParameterSymbol || conversion.IsIdentity
+            || (allowReferenceConversions && conversion.IsImplicit && conversion.IsReference))
         {
             return true;
         }
@@ -86,7 +109,7 @@ public static class CompilationExtensions
         {
             return argumentArray.Rank == parameterArray.Rank
                 && argumentArray.IsSZArray == parameterArray.IsSZArray
-                && MatchesArrayElement(argumentArray.ElementType, parameterArray.ElementType);
+                && MatchesArrayElement(compilation, argumentArray.ElementType, parameterArray.ElementType);
         }
 
         if (argument is INamedTypeSymbol argumentNamed && parameter is INamedTypeSymbol parameterNamed
@@ -94,13 +117,33 @@ public static class CompilationExtensions
         {
             for (var i = 0; i < parameterNamed.TypeArguments.Length; i++)
             {
-                if (!MatchesArrayElement(argumentNamed.TypeArguments[i], parameterNamed.TypeArguments[i]))
+                if (!MatchesArrayElement(compilation, argumentNamed.TypeArguments[i], parameterNamed.TypeArguments[i],
+                        allowReferenceConversions: false))
                 {
                     return false;
                 }
             }
 
             return true;
+        }
+
+        // Reference array covariance can expose the inferred type through an implemented
+        // interface or base class, without rebuilding any array elements.
+        if (allowReferenceConversions && argument is INamedTypeSymbol { IsReferenceType: true } referenceType
+            && parameter.IsReferenceType)
+        {
+            foreach (var interfaceType in referenceType.AllInterfaces)
+            {
+                if (MatchesArrayElement(compilation, interfaceType, parameter))
+                {
+                    return true;
+                }
+            }
+
+            if (referenceType.BaseType is { } baseType)
+            {
+                return MatchesArrayElement(compilation, baseType, parameter);
+            }
         }
 
         return false;
