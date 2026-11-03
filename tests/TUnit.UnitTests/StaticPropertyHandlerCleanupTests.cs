@@ -168,6 +168,37 @@ public class StaticPropertyHandlerCleanupTests
         await Assert.That(nextResource.DisposeCount).IsEqualTo(1);
     }
 
+    [Test]
+    public async Task Throwing_Reflection_Release_Continues_Resource_And_Session_Cleanup()
+    {
+        var session = CreateSession();
+        await StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(ThrowingReflectionFixture));
+        var resource = ThrowingReflectionFixture.Resource!;
+        var laterSessionCallback = 0;
+        session.StaticPropertyContext.Events.OnDispose += (_, _) => { laterSessionCallback++; return default; };
+        var errors = new List<Exception>();
+        await Assert.That(() => CreateHandler(session).DisposeStaticPropertiesAsync(errors, []))
+            .Throws<AggregateException>();
+        await Assert.That(resource.DisposeCount).IsEqualTo(1);
+        await Assert.That(laterSessionCallback).IsEqualTo(1);
+        await Assert.That(errors.Count).IsEqualTo(1);
+        await CreateHandler(session).DisposeStaticPropertiesAsync([], []);
+        await Assert.That(resource.DisposeCount).IsEqualTo(1);
+
+        var next = CreateSession();
+        await StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(ThrowingReflectionFixture));
+        await Assert.That(ReferenceEquals(resource, ThrowingReflectionFixture.Resource)).IsFalse();
+        await Assert.That(() => CreateHandler(next).DisposeStaticPropertiesAsync([], []))
+            .Throws<AggregateException>();
+        await Assert.That(ThrowingReflectionFixture.Resource!.DisposeCount).IsEqualTo(1);
+    }
+
+    internal sealed class ThrowingReflectionFixture
+    {
+        [ResourceSource(ThrowOnDispose = true)]
+        public static Resource? Resource { get; set; }
+    }
+
     internal sealed class FailingReflectionFixture
     {
         public static bool FailNextAssignment;
@@ -209,11 +240,17 @@ public class StaticPropertyHandlerCleanupTests
 
     public sealed class ResourceSourceAttribute : Attribute, IDataSourceAttribute
     {
+        public bool ThrowOnDispose { get; set; }
         public bool SkipIfEmpty { get; set; }
         public bool DeferEnumeration { get; set; }
         public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata metadata)
         {
             var resource = new Resource();
+            if (ThrowOnDispose)
+            {
+                metadata.TestBuilderContext.Current.Events.OnDispose += (_, _) =>
+                    throw new InvalidOperationException("resource cleanup failed");
+            }
             metadata.TestBuilderContext.Current.Events.OnDispose += (_, _) =>
             {
                 resource.Disposed = true;
