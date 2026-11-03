@@ -170,12 +170,27 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
+        builder.ConfigureServices(services =>
+        {
+            // The application entry point and WebApplicationFactory share this host.
+            // Coordinate disposal before either path can dispose its service provider.
+            var descriptor = services.LastOrDefault(service => service.ServiceType == typeof(IHost));
+            if (descriptor?.ImplementationFactory is { } createHost)
+            {
+                services[services.IndexOf(descriptor)] = ServiceDescriptor.Singleton<IHost>(
+                    provider => new DisposalCoordinatingHost((IHost)createHost(provider)));
+            }
+        });
+
         if (SuppressHostedServiceExecutionContextFlow)
         {
             builder.ConfigureServices(DecorateHostedServicesWithFlowSuppression);
         }
 
-        return base.CreateHost(builder);
+        var host = base.CreateHost(builder);
+        return host.Services.GetService<IHost>() is DisposalCoordinatingHost applicationHost
+            ? new DisposalAwaitingHost(host, applicationHost)
+            : host;
     }
 
     private static void DecorateHostedServicesWithFlowSuppression(IServiceCollection services)

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using TUnit.AspNetCore;
 using TUnit.AspNetCore.Extensions;
 
@@ -141,6 +142,60 @@ public class PerTestWebApplicationTestTests : PerTestWebApplicationTest<TestWebA
 public class PerTestWebApplicationTestDisposalFailureTests : PerTestWebApplicationTest<StopFailureWebAppFactory, Program>
 {
     [Test]
+    public async Task DisposeFactoryAsync_Waits_For_Concurrent_Application_Disposal_After_Stop_Failure()
+    {
+        var stopFailure = new ThrowingOnStopService();
+        await CreateFactoryAsync(builder =>
+            builder.ConfigureTestServices(services => services.AddHostedService(_ => stopFailure)));
+        var checkpoint = new FactoryStopCheckpoint();
+        var healthy = await CreateFactoryAsync(builder =>
+            builder.ConfigureTestServices(services =>
+            {
+                services.AddSingleton<BlockingDisposalProbe>();
+                services.AddSingleton(checkpoint);
+            }));
+        await Assert.That(healthy.Services.GetRequiredService<IHost>()).IsTypeOf<DisposalCoordinatingHost>();
+        var probe = healthy.Services.GetRequiredService<BlockingDisposalProbe>();
+        var lifetime = healthy.Services.GetRequiredService<IHostApplicationLifetime>();
+        Task? disposal = null;
+
+        try
+        {
+            // app.Run() now owns disposal, and pauses inside the singleton's Dispose.
+            lifetime.StopApplication();
+            await probe.Entered.Task.WaitAsync(TimeSpan.FromSeconds(30));
+
+            disposal = DisposeFactoryAsync();
+            await checkpoint.Entered.Task.WaitAsync(TimeSpan.FromSeconds(30));
+            // The healthy host's StopAsync has been invoked, past the failing factory.
+            // It must still be waiting for the blocked application disposal.
+            await Assert.That(checkpoint.StopTask!.IsCompleted).IsFalse();
+            await Assert.That(disposal.IsCompleted).IsFalse();
+            probe.Release.Set();
+
+            await Assert.That(async () => await disposal.WaitAsync(TimeSpan.FromSeconds(30)))
+                .Throws<Exception>().WithMessageContaining(ThrowingOnStopService.Message);
+            await Assert.That(probe.IsDisposed).IsTrue();
+        }
+        finally
+        {
+            probe.Release.Set();
+            stopFailure.StopFailing();
+            if (disposal is not null)
+            {
+                try
+                {
+                    await disposal;
+                }
+                catch (Exception)
+                {
+                    // The deliberate stop failure was asserted above.
+                }
+            }
+        }
+    }
+
+    [Test]
     public async Task DisposeFactoryAsync_Disposes_Remaining_Factories_When_One_Throws()
     {
         var stopFailure = new ThrowingOnStopService();
@@ -167,6 +222,34 @@ public class PerTestWebApplicationTestDisposalFailureTests : PerTestWebApplicati
 public class StopFailureWebAppFactory : TestWebApplicationFactory<Program>
 {
     protected override bool SuppressHostedServiceExecutionContextFlow => false;
+
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        var host = base.CreateHost(builder);
+        return host.Services.GetService<FactoryStopCheckpoint>() is { } checkpoint
+            ? new CheckpointHost(host, checkpoint)
+            : host;
+    }
+
+    private sealed class CheckpointHost(IHost inner, FactoryStopCheckpoint checkpoint) : IHost
+    {
+        public IServiceProvider Services => inner.Services;
+        public Task StartAsync(CancellationToken cancellationToken = default) => inner.StartAsync(cancellationToken);
+        public void Dispose() => inner.Dispose();
+        public Task StopAsync(CancellationToken cancellationToken = default)
+        {
+            var task = inner.StopAsync(cancellationToken);
+            checkpoint.StopTask = task;
+            checkpoint.Entered.TrySetResult();
+            return task;
+        }
+    }
+}
+
+internal sealed class FactoryStopCheckpoint
+{
+    public TaskCompletionSource Entered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public Task? StopTask { get; set; }
 }
 
 /// <summary>
@@ -250,4 +333,23 @@ public sealed class ThrowingOnStopService : Microsoft.Extensions.Hosting.IHosted
             : Task.CompletedTask;
 
     public void StopFailing() => _failStops = false;
+}
+
+internal sealed class BlockingDisposalProbe : IDisposable
+{
+    public TaskCompletionSource Entered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public ManualResetEventSlim Release { get; } = new();
+    public bool IsDisposed { get; private set; }
+
+    public void Dispose()
+    {
+        Entered.TrySetResult();
+        // This models a synchronous singleton release, not a wait on asynchronous work.
+        if (!Release.Wait(TimeSpan.FromSeconds(30)))
+        {
+            throw new TimeoutException("The test did not release singleton disposal.");
+        }
+
+        IsDisposed = true;
+    }
 }
