@@ -2026,14 +2026,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
             var closedConstructor = entry.FindClassMethodDataSource(entry.SpecificArgumentsAttribute)?.Constructor;
+            // Missing cached metadata is a generator invariant violation, not a test failure.
+            // Let Roslyn report the generator exception during compilation instead of emitting a runtime throw.
             if (closedConstructor is null)
             {
-                writer.AppendLine("throw new global::System.InvalidOperationException(\"Could not resolve the constructor selected for class data source inference.\");");
+                throw new InvalidOperationException("Could not resolve the constructor selected for class data source inference.");
             }
-            else
-            {
-                writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, closedConstructor));
-            }
+
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, closedConstructor));
         }
         else if (entry.HasParameterizedConstructor)
         {
@@ -2607,7 +2607,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             && testMethod.MethodAttributes.Any(attribute => attribute.AttributeClass?.Name == "ArgumentsAttribute"))
         {
             return new ClassDataSourcePartition(allClassDataSources,
-                Enumerable.Range(0, allClassDataSources.Length).ToArray(), ClassRowFallback.AllRows);
+                Enumerable.Range(0, allClassDataSources.Length).ToArray(),
+                // Explicit instantiations retain raw rows. Method-inferred types with class Arguments
+                // must report missing constructor data when no actual row creates their group.
+                !entry.HasExplicitClassTypes && allClassDataSources.Any(source => source.AttributeClass?.Name == "ArgumentsAttribute")
+                    ? ClassRowFallback.NoClassRow
+                    : ClassRowFallback.AllRows);
         }
 
         // A class-level [Arguments] row is typed by its values; other sources by their declared type arguments

@@ -635,3 +635,13 @@ public static class MixedPartitionProvider
     public static IEnumerable<string> EmptyRows() => [];
     public static IEnumerable<object> ObjectRows() => ["seed"];
 }
+
+// With class Arguments, an empty inferred source must not reuse unrelated constructor data.
+[Arguments("123")]
+[MethodDataSource(typeof(ReviewRows), nameof(ReviewRows.EmptyIntegers), SkipIfEmpty = true)]
+public class UnmatchedClassArgumentsWithEmptySource<T>(T value)
+{
+    [Test]
+    [Arguments(1)]
+    public void ReportsMissingConstructorValue(T argument) { }
+}

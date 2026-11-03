@@ -11,9 +11,9 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/*/*",
         [
             result => result.ResultSummary.Outcome.ShouldBe("Failed"),
-            result => result.ResultSummary.Counters.Total.ShouldBe(60),
+            result => result.ResultSummary.Counters.Total.ShouldBe(61),
             result => result.ResultSummary.Counters.Passed.ShouldBe(57),
-            result => result.ResultSummary.Counters.Failed.ShouldBe(3),
+            result => result.ResultSummary.Counters.Failed.ShouldBe(4),
             result => result.Results.Where(test => test.Outcome == "Failed" && !test.TestName!.StartsWith("ReportsMissingConstructorValue", StringComparison.Ordinal))
                 .ShouldAllBe(test => test.Output!.ErrorInfo!.Message!.Contains("type arguments"))
         ]);
@@ -78,6 +78,18 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
             result => result.ResultSummary.Outcome.ShouldBe("Failed"),
             result => result.ResultSummary.Counters.Total.ShouldBe(1),
             result => result.ResultSummary.Counters.Failed.ShouldBe(1)
+        ]);
+    }
+
+    [Test]
+    public async Task Empty_Source_Does_Not_Reuse_Unrelated_Class_Arguments()
+    {
+        await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/UnmatchedClassArgumentsWithEmptySource*/*",
+        [
+            result => result.ResultSummary.Counters.Total.ShouldBe(1),
+            result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+            result => result.Results.Single(test => test.Outcome == "Failed")
+                .Output!.ErrorInfo!.Message!.ShouldContain("no class row supplies the constructor arguments")
         ]);
     }
 
