@@ -2001,10 +2001,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
             var inferredConstructor = entry.FindClassMethodDataSource(entry.SpecificArgumentsAttribute)!.Constructor!;
 
-            // Use the same constructor that inferred this instantiation, with its closed parameter
-            // types. The general instance factory's longest-constructor rule can select another overload.
-            var closedConstructor = constructedType.InstanceConstructors.First(constructor =>
-                SymbolEqualityComparer.Default.Equals(constructor.OriginalDefinition, inferredConstructor.OriginalDefinition));
+            // Inference can use a value overload only to determine the class types. Match reflection's
+            // explicit/parameterless construction preference before falling back to that overload.
+            var publicConstructors = constructedType.InstanceConstructors
+                .Where(constructor => constructor.DeclaredAccessibility == Accessibility.Public).ToArray();
+            var closedConstructor = publicConstructors.FirstOrDefault(constructor => constructor.GetAttributes().Any(attribute =>
+                    attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
+                ?? publicConstructors.FirstOrDefault(constructor => constructor.Parameters.Length == 0)
+                ?? publicConstructors.First(constructor =>
+                    SymbolEqualityComparer.Default.Equals(constructor.OriginalDefinition, inferredConstructor.OriginalDefinition));
             writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, closedConstructor));
         }
         else if (entry.HasParameterizedConstructor)

@@ -317,7 +317,7 @@ public class ExternalEmptyValueRows<T>(T value)
     public async Task Test() => await Assert.That((object?)value).IsEqualTo(1);
 }
 
-// Construction must use the constructor that supplied the inferred class types.
+// Without a default or explicit constructor, use the overload that inferred the class types.
 #pragma warning disable TUnit0052 // Deliberately exercises implicit constructor selection.
 [MethodDataSource(typeof(Rows), nameof(Rows.Integers))]
 public class ExternalOverloadedConstructorRows<T>
@@ -377,3 +377,51 @@ public class UnsealedExternalRows<T>(T value)
         await Assert.That((object?)value).IsTypeOf<DerivedRow>();
     }
 }
+
+#pragma warning disable TUnit0001 // Rows infer T even when construction takes no arguments.
+// The value overload determines T, but the default constructor initializes the instance.
+#pragma warning disable TUnit0052 // Deliberately exercises implicit constructor selection.
+[MethodDataSource(typeof(Rows), nameof(Rows.Integers))]
+public class ExternalParameterlessConstructorRows<T>
+{
+    public ExternalParameterlessConstructorRows() { }
+
+    public ExternalParameterlessConstructorRows(T value)
+        => throw new InvalidOperationException("This overload is for type inference only.");
+
+    [Test]
+    public async Task Test() => await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+}
+
+[MethodDataSource(nameof(Rows))]
+public class OwnParameterlessConstructorRows<T>
+{
+    public static IEnumerable<int> Rows() => [3];
+
+    public OwnParameterlessConstructorRows() { }
+
+    public OwnParameterlessConstructorRows(T value)
+        => throw new InvalidOperationException("This overload is for type inference only.");
+
+    [Test]
+    public async Task Test() => await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+}
+#pragma warning restore TUnit0052
+
+// An explicit constructor still takes priority over the parameterless overload.
+[MethodDataSource(typeof(Rows), nameof(Rows.Integers))]
+public class ExplicitConstructorRows<T>
+{
+    private readonly T _value;
+
+    public ExplicitConstructorRows()
+        => throw new InvalidOperationException("The explicit constructor must take priority.");
+
+    [TestConstructor]
+    public ExplicitConstructorRows(T value) => _value = value;
+
+    [Test]
+    public async Task Test() => await Assert.That((object?)_value).IsEqualTo(3);
+}
+
+#pragma warning restore TUnit0001
