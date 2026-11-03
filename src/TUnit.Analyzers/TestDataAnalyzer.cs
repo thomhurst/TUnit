@@ -1022,8 +1022,20 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             && testDataTypes.Any(t => t is IArrayTypeSymbol && ReferencesMethodTypeParameter(t))
             && TypedDataSourceInference.InferMethodTypeArguments(attribute.AttributeClass, method) is { } inferred)
         {
-            testDataTypes = method.Construct(inferred).Parameters
-                .WithoutCancellationTokenParameter().Select(p => p.Type).ToImmutableArray();
+            // Check constraints while the original method type parameters are still available.
+            CheckInferredTypeArgumentConstraints(context, attribute, typeArguments, testDataTypes);
+
+            var closedParameters = method.Construct(inferred).Parameters
+                .WithoutCancellationTokenParameter().ToArray();
+            // A shorter row leaves trailing optional parameters at their defaults.
+            var suppliedParameterCount = typeArguments.Length;
+            if (suppliedParameterCount < closedParameters.Length
+                && closedParameters.Skip(suppliedParameterCount).All(p => p.IsOptional || p.HasExplicitDefaultValue || p.IsParams))
+            {
+                closedParameters = closedParameters.Take(suppliedParameterCount).ToArray();
+            }
+
+            testDataTypes = closedParameters.Select(p => p.Type).ToImmutableArray();
         }
 
         if (testDataTypes.Any(x => x.IsGenericDefinition()))

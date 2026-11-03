@@ -21,6 +21,77 @@ public class ArgumentsAnalyzerTests
     }
 
     [Test]
+    public async Task Typed_Array_Row_Allows_Omitted_Generic_Optional_Parameter()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using TUnit.Core;
+
+            public class MyClass
+            {
+                [Test]
+                [Arguments<int[]>(new[] { 1, 2 })]
+                public void Run<T>(T[] values, T fallback = default!) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Typed_Array_Source_Allows_Omitted_Optional_Parameter()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class ArrayRowAttribute : TypedDataSourceAttribute<(int[], int)>
+            {
+                public override async IAsyncEnumerable<Func<System.Threading.Tasks.Task<(int[], int)>>> GetTypedDataRowsAsync(DataGeneratorMetadata metadata)
+                {
+                    await System.Threading.Tasks.Task.Yield();
+                    yield return () => System.Threading.Tasks.Task.FromResult((new[] { 1 }, 2));
+                }
+            }
+
+            public class MyClass
+            {
+                [Test]
+                [ArrayRow]
+                public void Run<T>(T[] values, T value, int count = 0) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Typed_Array_Source_Preserves_Declared_Type_Constraint_Diagnostic()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class ObjectRowAttribute : DataSourceGeneratorAttribute<object, object[]>
+            {
+                protected override IEnumerable<Func<(object, object[])>> GenerateDataSources(DataGeneratorMetadata metadata)
+                {
+                    yield return () => (new object(), new object[0]);
+                }
+            }
+
+            public class MyClass
+            {
+                [Test]
+                [{|#0:ObjectRow|}]
+                public void Run<T>(T value, T[] values) where T : IDisposable { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.GenericTypeArgumentInferredFromDeclaredType)
+                .WithLocation(0).WithArguments("T", "object"));
+    }
+
+    [Test]
     public async Task Test_No_Error()
     {
         await Verifier
