@@ -668,3 +668,48 @@ public static class MarkedConstructorRowsProvider
 {
     public static IEnumerable<(string, int)> Rows() => [("source", 1)];
 }
+
+// Method sources must use the same grouped-versus-raw decision as method Arguments.
+[GenerateGenericTest(typeof(string))]
+[MethodDataSource(typeof(ExplicitMethodRowsProvider), nameof(ExplicitMethodRowsProvider.Rows))]
+public class ExplicitExternalNullRowsWithMethodSource<T>(T value)
+{
+    public static IEnumerable<int> MethodRows() => [1];
+
+    [Test]
+    [MethodDataSource(nameof(MethodRows))]
+    public async Task Test<U>(U argument)
+    {
+        await Assert.That((object?)value).IsEqualTo("seed");
+        await Assert.That((object?)argument).IsEqualTo(1);
+    }
+}
+
+// Method sources must use the same grouped-versus-raw decision as method Arguments.
+[GenerateGenericTest(typeof(string))]
+[MethodDataSource(typeof(GenericExternalProvider), nameof(GenericExternalProvider.NullRows))]
+public class ExplicitExternalOnlyNullRowsWithMethodSource<T>(T value)
+{
+    public static IEnumerable<int> MethodRows() => [1];
+
+    [Test]
+    [MethodDataSource(nameof(MethodRows))]
+    public async Task Test<U>(U argument)
+    {
+        await Assert.That((object?)value).IsNull();
+        await Assert.That((object?)argument).IsEqualTo(1);
+    }
+}
+
+// Both resolvers select the first public constructor when no constructor is preferred.
+[MethodDataSource(nameof(Integers))]
+public class FirstConstructorCannotInfer<T>
+{
+    public static IEnumerable<int> Integers() => [3];
+
+    public FirstConstructorCannotInfer(object unrelated) { }
+    public FirstConstructorCannotInfer(T value) { }
+
+    [Test]
+    public void Test() { }
+}

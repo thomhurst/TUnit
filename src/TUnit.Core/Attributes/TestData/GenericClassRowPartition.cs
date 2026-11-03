@@ -91,6 +91,7 @@ public static class GenericClassRowPartition
     /// <returns>The configured source. Evaluated row values are reused on the first fetch only.</returns>
     public static IDataSourceAttribute ConfigureInferredSource(IDataSourceAttribute source, bool filterRows, params Type[] classTypeArguments)
     {
+        // Generated emission creates a fresh source instance for each closed instantiation.
         if (source is MethodDataSourceAttribute methodSource)
         {
             methodSource.FilterClassRows = filterRows;

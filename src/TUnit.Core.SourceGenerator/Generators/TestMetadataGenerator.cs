@@ -2605,7 +2605,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             source.TypeArguments is not null && entry.IsSpecificClassDataSource(source.Source));
         if ((entry.HasExplicitClassTypes || (entry.HasMethodRows && hasInferredClassSource))
             && MethodParametersReferenceTypeParameters(testMethod)
-            && testMethod.MethodAttributes.Any(attribute => attribute.AttributeClass?.Name == "ArgumentsAttribute"))
+            && testMethod.MethodAttributes.Any(attribute => DataSourceAttributeHelper.IsDataSourceAttribute(attribute.AttributeClass)))
         {
             return new ClassDataSourcePartition(allClassDataSources,
                 Enumerable.Range(0, allClassDataSources.Length).ToArray(),

@@ -11,9 +11,9 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/*/*",
         [
             result => result.ResultSummary.Outcome.ShouldBe("Failed"),
-            result => result.ResultSummary.Counters.Total.ShouldBe(63),
-            result => result.ResultSummary.Counters.Passed.ShouldBe(59),
-            result => result.ResultSummary.Counters.Failed.ShouldBe(4),
+            result => result.ResultSummary.Counters.Total.ShouldBe(66),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(61),
+            result => result.ResultSummary.Counters.Failed.ShouldBe(5),
             result => result.Results.Where(test => test.Outcome == "Failed" && !test.TestName!.StartsWith("ReportsMissingConstructorValue", StringComparison.Ordinal))
                 .ShouldAllBe(test => test.Output!.ErrorInfo!.Message!.Contains("type arguments"))
         ]);
@@ -53,6 +53,8 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    [Arguments("ExplicitExternalNullRowsWithMethodSource", 1)]
+    [Arguments("ExplicitExternalOnlyNullRowsWithMethodSource", 1)]
     [Arguments("GroupedRowsWithMarkedConstructor", 2)]
     [Arguments("MixedPartitionNullRows", 1)]
     [Arguments("MixedPartitionArgumentsRows", 2)]
@@ -79,6 +81,34 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
             result => result.ResultSummary.Outcome.ShouldBe("Failed"),
             result => result.ResultSummary.Counters.Total.ShouldBe(1),
             result => result.ResultSummary.Counters.Failed.ShouldBe(1)
+        ]);
+    }
+
+    // The same fixtures and expected class types run through generated/AOT and reflection discovery.
+    [Test]
+    [Arguments("ExternalSealedArrayRows")]
+    [Arguments("ExternalNullableArrayParameterRows")]
+    [Arguments("ExternalNestedArrayRows")]
+    [Arguments("ExternalParameterlessConstructorRows")]
+    [Arguments("OwnParameterlessConstructorRows")]
+    [Arguments("ExplicitConstructorRows")]
+    public async Task Class_Row_Type_And_Constructor_Parity(string className)
+    {
+        await RunTestsWithFilter($"/*/TUnit.TestProject.Bugs._7333/{className}*/*",
+        [
+            result => result.ResultSummary.Counters.Total.ShouldBe(1),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(1)
+        ]);
+    }
+
+    [Test]
+    public async Task First_Public_Constructor_Must_Infer_Class_Types()
+    {
+        await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/FirstConstructorCannotInfer*/*",
+        [
+            result => result.ResultSummary.Counters.Total.ShouldBe(1),
+            result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+            result => result.Results.Single().Output!.ErrorInfo!.Message!.ShouldContain("type arguments")
         ]);
     }
 
