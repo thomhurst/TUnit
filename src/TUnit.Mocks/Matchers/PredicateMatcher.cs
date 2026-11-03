@@ -7,14 +7,14 @@ namespace TUnit.Mocks.Matchers;
 /// </summary>
 internal sealed class PredicateMatcher<T> : IArgumentMatcher<T>
 {
-    private readonly Func<T?, bool> _predicate;
+    private readonly Func<T, bool> _predicate;
 
-    public PredicateMatcher(Func<T?, bool> predicate)
+    public PredicateMatcher(Func<T, bool> predicate)
     {
         _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
     }
 
-    public bool Matches(T? value) => _predicate(value);
+    public bool Matches(T? value) => _predicate(value!);
 
     public bool Matches(object? value)
     {
