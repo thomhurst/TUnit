@@ -269,6 +269,11 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         foreach (var obj in bucket)
         {
+            if (testContext?.InternalEventsIfCreated?.DataRowScopes is { } scopes)
+            {
+                cleanupExceptions = await scopes.ReleaseAsync(obj, cleanupExceptions).ConfigureAwait(false);
+            }
+
             try
             {
                 var task = UntrackObject(obj, testContext);
@@ -718,15 +723,19 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         => s_hasExternallyOwned && s_externallyOwned.TryGetValue(obj, out _);
 
     // Objects whose lifetime another owner controls (a dependency injection scope, for example).
-    // The tracker counts references but leaves disposal to their owner.
+    // The tracker balances references but never disposes them; their owner controls disposal.
     private static readonly ConditionalWeakTable<object, object> s_externallyOwned = new();
     private static readonly object s_externallyOwnedMarker = new();
 
+    // Ownership cannot live only on a row or counted entry: a container singleton can be
+    // supplied by another source before or after its DI row, including after its count reaches zero.
+    // A weak identity mark preserves that ownership without retaining the singleton.
+    // The flag deliberately stays set: live marks can outlast any individual row or test session.
     // Skips the table lookup for every tracked object until something is marked.
     private static volatile bool s_hasExternallyOwned;
 
     /// <summary>
-    /// Marks <paramref name="obj"/> as disposed by another owner, so the tracker counts references without disposing it.
+    /// Marks <paramref name="obj"/> as disposed by another owner, so the tracker never disposes it.
     /// Dependency injection data sources mark the services they resolve, because the scope that created
     /// them disposes them when the test ends (#7205). Existing tracker references are released
     /// without disposing the object, regardless of which data source supplied it first.

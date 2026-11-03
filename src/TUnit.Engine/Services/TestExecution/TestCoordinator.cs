@@ -224,12 +224,25 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             // Once per test, after its final attempt and on every skip or early-failure path, so objects
             // that every attempt reuses stay alive until the test is done with them (#7205).
-            await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
+            await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger, disposeDataRow: false).ConfigureAwait(false);
 
             // Stay null on the success path — materializing the list only when something actually fails
             // saves ~56 bytes per passing test (and passing is the overwhelming majority).
             test.Context.StopHoldingSharedReferences();
-            var cleanupExceptions = await _objectTracker.UntrackObjects(test.Context).ConfigureAwait(false);
+            List<Exception>? cleanupExceptions = null;
+
+            // Release roots before their dependencies. Scope cleanup is invoked at the resolved
+            // object's graph depth by the tracker; completion catches untracked scopes.
+            var trackingExceptions = await _objectTracker.UntrackObjects(test.Context).ConfigureAwait(false);
+            if (trackingExceptions is { Count: > 0 })
+            {
+                (cleanupExceptions ??= []).AddRange(trackingExceptions);
+            }
+
+            if (test.Context.InternalEventsIfCreated?.DataRowScopes is { } scopes)
+            {
+                cleanupExceptions = await scopes.CompleteAsync(cleanupExceptions).ConfigureAwait(false);
+            }
 
 #if NET
             // Per-test cleanup has completed. Keep the test activity open for final status

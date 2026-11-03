@@ -89,6 +89,79 @@ public class StaticPropertyHandlerCleanupTests
     }
 
     [Test]
+    [NotInParallel]
+    [Arguments(false, false)]
+    [Arguments(true, false)]
+    [Arguments(false, true)]
+    [Arguments(true, true)]
+    public async Task Reflection_Static_Scopes_Drain_Without_Handlers_And_After_Failures(bool failFactory, bool throwHandler)
+    {
+        var session = CreateSession();
+        ReflectionScopeSourceAttribute.FailFactory = failFactory;
+        ReflectionScopeSourceAttribute.ThrowHandler = throwHandler;
+        if (failFactory)
+        {
+            await Assert.That(() => StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(ReflectionScopeFixture)))
+                .Throws<InvalidOperationException>();
+        }
+        else
+        {
+            await StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(ReflectionScopeFixture));
+        }
+        var scope = ReflectionScopeSourceAttribute.LastScope!;
+        var handler = CreateHandler(session);
+        await Assert.That(scope.DisposeCount).IsEqualTo(0);
+        if (throwHandler)
+        {
+            await Assert.That(() => handler.DisposeStaticPropertiesAsync([], []))
+                .Throws<AggregateException>();
+        }
+        else
+        {
+            await handler.DisposeStaticPropertiesAsync([], []);
+        }
+        await handler.DisposeStaticPropertiesAsync([], []);
+        await Assert.That(scope.DisposeCount).IsEqualTo(1);
+    }
+
+    internal sealed class ReflectionScopeFixture
+    {
+        [ReflectionScopeSource]
+        public static Resource? Resource { get; set; }
+    }
+
+    public sealed class ReflectionScopeSourceAttribute : Attribute, IDataSourceAttribute
+    {
+        public bool SkipIfEmpty { get; set; }
+        public bool DeferEnumeration { get; set; }
+        internal static bool FailFactory;
+        internal static bool ThrowHandler;
+        internal static ReflectionScope? LastScope;
+
+        public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata metadata)
+        {
+            LastScope = new ReflectionScope();
+            metadata.TestBuilderContext.Current.Events.GetOrCreateDataRowScopes().Register(LastScope);
+            if (ThrowHandler)
+                metadata.TestBuilderContext.Current.Events.OnDispose += (_, _) => throw new InvalidOperationException("callback failure");
+            yield return () => FailFactory
+                ? throw new InvalidOperationException("factory failure")
+                : Task.FromResult<object?[]?>([new Resource()]);
+            await Task.CompletedTask;
+        }
+    }
+
+    internal sealed class ReflectionScope : IAsyncDisposable
+    {
+        internal int DisposeCount;
+        public async ValueTask DisposeAsync()
+        {
+            await Task.Yield();
+            DisposeCount++;
+        }
+    }
+
+    [Test]
     public async Task Reflection_Static_Properties_Reinitialize_For_The_Next_Session()
     {
         var first = CreateSession();

@@ -15,6 +15,33 @@ namespace TUnit.UnitTests;
 public class ExternallyOwnedSingletonTests
 {
     // Synthetic contexts never reach the engine's cleanup, so each test removes its own from the registry.
+    [Test]
+    public async Task Later_Consumers_Do_Not_Release_The_First_Consumers_Reference()
+    {
+        var tracker = CreateTracker();
+        var singleton = new TrackedDisposable();
+        var first = CreateContext(singleton);
+        tracker.TrackObjects(first);
+        ObjectTracker.MarkExternallyOwned(singleton);
+
+        var laterConsumers = Enumerable.Range(0, 16).Select(_ => CreateContext(singleton)).ToArray();
+        foreach (var context in laterConsumers)
+        {
+            tracker.TrackObjects(context);
+        }
+
+        await Assert.That(ObjectTracker.IsShared(singleton)).IsTrue();
+        var errors = await Task.WhenAll(laterConsumers.Select(context => Task.Run(async () => await tracker.UntrackObjects(context))));
+        await Assert.That(errors.All(x => x is null)).IsTrue();
+        // Later consumers must leave the reference taken before the ownership mark intact.
+        await Assert.That(IsCounted(singleton)).IsTrue();
+        await Assert.That(ObjectTracker.IsShared(singleton)).IsFalse();
+
+        await tracker.UntrackObjects(first);
+        await Assert.That(IsCounted(singleton)).IsFalse();
+        await Assert.That(singleton.DisposeCount).IsEqualTo(0);
+    }
+
     private readonly List<TestContext> _contexts = [];
 
     [After(Test)]
@@ -80,37 +107,36 @@ public class ExternallyOwnedSingletonTests
         // The count was released, so the session-end sweep will not dispose the object either.
         await Assert.That(IsCounted(singleton)).IsFalse();
 
-        // A later source still balances its reference without disposing it.
+        // A later source balances its own reference without taking disposal ownership.
         var laterTest = CreateContext(singleton);
+        var secondLaterTest = CreateContext(singleton);
         tracker.TrackObjects(laterTest);
+        tracker.TrackObjects(secondLaterTest);
+        await Assert.That(ObjectTracker.IsShared(singleton)).IsTrue();
         await tracker.UntrackObjects(laterTest);
+        await tracker.UntrackObjects(secondLaterTest);
 
+        await Assert.That(IsCounted(singleton)).IsFalse();
         await Assert.That(singleton.DisposeCount).IsEqualTo(0);
     }
 
     [Test]
-    public async Task Later_Consumers_Do_Not_Release_The_First_Consumers_Reference()
+    public async Task Consumers_After_Ownership_Mark_Hold_Their_Own_References()
     {
         var tracker = CreateTracker();
         var singleton = new TrackedDisposable();
-        var first = CreateContext(singleton);
-        tracker.TrackObjects(first);
+        var earlierTest = CreateContext(singleton);
+        tracker.TrackObjects(earlierTest);
         ObjectTracker.MarkExternallyOwned(singleton);
+        var laterTest = CreateContext(singleton);
+        tracker.TrackObjects(laterTest);
 
-        var laterConsumers = Enumerable.Range(0, 16).Select(_ => CreateContext(singleton)).ToArray();
-        foreach (var context in laterConsumers)
-        {
-            tracker.TrackObjects(context);
-        }
-
+        // Both consumers must hold a reference before either can release it.
         await Assert.That(ObjectTracker.IsShared(singleton)).IsTrue();
-        var errors = await Task.WhenAll(laterConsumers.Select(context => Task.Run(async () => await tracker.UntrackObjects(context))));
-        await Assert.That(errors.All(x => x is null)).IsTrue();
-        // Later consumers must leave the reference taken before the ownership mark intact.
-        await Assert.That(IsCounted(singleton)).IsTrue();
-        await Assert.That(ObjectTracker.IsShared(singleton)).IsFalse();
+        await Task.WhenAll(
+            Task.Run(async () => await tracker.UntrackObjects(earlierTest)),
+            Task.Run(async () => await tracker.UntrackObjects(laterTest)));
 
-        await tracker.UntrackObjects(first);
         await Assert.That(IsCounted(singleton)).IsFalse();
         await Assert.That(singleton.DisposeCount).IsEqualTo(0);
     }

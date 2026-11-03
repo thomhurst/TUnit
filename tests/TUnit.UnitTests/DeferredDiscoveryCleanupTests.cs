@@ -98,21 +98,52 @@ public class DeferredDiscoveryCleanupTests
     {
         var session = CreateSession();
         var count = 0;
-        var events = ContextWithOnDispose(() => count++).Events;
-        // Exercise the real ownership transition without constructing executable tests. The row holder
-        // is private; reflection here is confined to the test, never a runtime discovery path.
-        var rowType = typeof(TUnit.Engine.Building.TestBuilder).GetNestedType(
-            "UnclaimedClassRow", System.Reflection.BindingFlags.NonPublic)!;
-        var row = Activator.CreateInstance(rowType, new object?[] { Array.Empty<object?>(), null, events })!;
-        rowType.GetMethod("LendToTemporaryInstance")!.Invoke(row, null);
+        var context = ContextWithOnDispose(() => count++);
+        var row = new TUnit.Engine.Building.TestBuilder.UnclaimedClassRow([], null, context);
+        row.LendToTemporaryInstance();
 
         await Assert.That(count).IsEqualTo(0);
-        await Assert.That(rowType.GetMethod("TakeEvents")!.Invoke(row, null)).IsNull();
         await Assert.That(session.DeferredDiscoveryOnDispose?.InvocationList.Count).IsEqualTo(1);
         var logger = new TUnitFrameworkLogger(null!, null!, null!, new LogLevelProvider(new NoOptions()));
         await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(session, logger);
         await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(session, logger);
         await Assert.That(count).IsEqualTo(1);
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Deferred_Data_Row_Scopes_Belong_To_Their_Session(bool includeCallbacks)
+    {
+        var first = CreateSession();
+        var firstScope = new CountingScope();
+        var firstContext = includeCallbacks ? ContextWithOnDispose(() => { }) : new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata };
+        firstContext.Events.GetOrCreateDataRowScopes().Register(firstScope);
+        TestOnDisposeRaiser.DeferToSessionEnd(firstContext);
+        var second = CreateSession();
+        var secondScope = new CountingScope();
+        var secondContext = includeCallbacks ? ContextWithOnDispose(() => { }) : new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata };
+        secondContext.Events.GetOrCreateDataRowScopes().Register(secondScope);
+        TestOnDisposeRaiser.DeferToSessionEnd(secondContext);
+        var logger = new TUnitFrameworkLogger(null!, null!, null!, new LogLevelProvider(new NoOptions()));
+
+        await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(first, logger);
+        await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(first, logger);
+        await Assert.That(firstScope.Count).IsEqualTo(1);
+        await Assert.That(secondScope.Count).IsEqualTo(0);
+        await Assert.That(firstContext.Events.DataRowScopes).IsNull();
+        await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(second, logger);
+        await Assert.That(secondScope.Count).IsEqualTo(1);
+    }
+
+    private sealed class CountingScope : IAsyncDisposable
+    {
+        public int Count;
+        public ValueTask DisposeAsync()
+        {
+            Count++;
+            return default;
+        }
     }
 
     [Test]

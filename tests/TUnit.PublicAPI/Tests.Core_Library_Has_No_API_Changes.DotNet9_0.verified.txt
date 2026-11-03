@@ -1485,7 +1485,7 @@ namespace
         public .AsyncEvent<.TestContext>? OnInitialize { get; set; }
         public .AsyncEvent<.TestContext>? OnTestEnd { get; set; }
         public .AsyncEvent<.TestContext>? OnTestRegistered { get; set; }
-        [.(new string[] {
+        [.(new string?[]?[] {
                 "TestContext",
                 "RetryAttempt"})]
         public .AsyncEvent<<.TestContext, int>>? OnTestRetry { get; set; }

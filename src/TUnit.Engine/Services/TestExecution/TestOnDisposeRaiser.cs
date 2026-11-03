@@ -17,15 +17,15 @@ internal static class TestOnDisposeRaiser
     /// before they reach the coordinator: a test skipped because a dependency failed, and a test the
     /// run's cancellation stopped before it started.
     /// </summary>
-    public static async ValueTask RaiseOnceAsync(AbstractExecutableTest test, TUnitFrameworkLogger logger)
+    public static async ValueTask RaiseOnceAsync(AbstractExecutableTest test, TUnitFrameworkLogger logger, bool disposeDataRow = true)
     {
         var onDispose = test.Context.InternalEventsIfCreated?.OnDispose;
-        if (onDispose?.InvocationList is not { } invocations || !test.TryClaimOnDispose())
+        if (!test.TryClaimOnDispose())
         {
             return;
         }
 
-        foreach (var invocation in invocations)
+        foreach (var invocation in onDispose?.InvocationList ?? [])
         {
             try
             {
@@ -37,6 +37,18 @@ internal static class TestOnDisposeRaiser
                 TUnitActivitySource.RecordException(System.Diagnostics.Activity.Current, disposeEx);
 #endif
                 await logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}").ConfigureAwait(false);
+            }
+        }
+        // Tests bypassing the coordinator have no tracked graph to release. Release their row
+        // scopes here; the coordinator dispatches these after its depth-ordered graph cleanup.
+        if (disposeDataRow && test.Context.InternalEventsIfCreated?.DataRowScopes is { } scopes)
+        {
+            if (await scopes.CompleteAsync().ConfigureAwait(false) is { } exceptions)
+            {
+                foreach (var exception in exceptions)
+                {
+                    await logger.LogErrorAsync($"Error during row cleanup for {test.TestId}: {exception}").ConfigureAwait(false);
+                }
             }
         }
     }
@@ -53,12 +65,16 @@ internal static class TestOnDisposeRaiser
     /// </summary>
     public static async ValueTask RaiseForSessionAsync(TestBuilderContext context, List<Exception> exceptions)
     {
-        if (TestSessionContext.TakeStaticOnDispose(context) is not { } onDispose)
+        if (TestSessionContext.TakeStaticOnDispose(context) is { } onDispose)
         {
-            return;
+            await RaiseDetachedAsync(context, onDispose.InvocationList, exceptions).ConfigureAwait(false);
         }
 
-        await RaiseDetachedAsync(context, onDispose.InvocationList, exceptions).ConfigureAwait(false);
+        // Session/static contexts also own scopes whose factories failed before returning a value.
+        if (context.EventsIfCreated?.DetachDataRowScopes() is { } scopes)
+        {
+            await scopes.CompleteAsync(exceptions).ConfigureAwait(false);
+        }
     }
 
     /// <summary>
