@@ -122,6 +122,30 @@ public class Issue7300Tests : SnapshotTestBase
     }
 
     [Test]
+    [Arguments(false, "global")]
+    [Arguments(true, "global")]
+    [Arguments(false, "LibAlias")]
+    [Arguments(true, "@class")]
+    public async Task Event_Raiser_Names_Preserve_Both_Surface_Types(bool secondarySurface, string alias)
+    {
+        var model = new TUnit.Mocks.SourceGenerator.Models.MockTypeModel
+        {
+            FullyQualifiedName = "global::N.IA",
+            AdditionalInterfaceNames = new([alias + "::N.IEvents"]),
+            IsSecondaryMemberSurface = secondarySurface
+        };
+        var evt = new TUnit.Mocks.SourceGenerator.Models.MockEventModel
+        {
+            Name = "Changed",
+            OwnerTypeIndex = secondarySurface ? 0 : 1
+        };
+        var actual = TUnit.Mocks.SourceGenerator.Builders.EventRaiserBuilder.GetInterfaceName(model, evt);
+        await Assert.That(actual).IsEqualTo(IdentifierEscaping.SanitizeIdentifier("N.IA_N.IEvents") + "_Changed_Raiser");
+        await Assert.That(actual).IsNotEqualTo(TUnit.Mocks.SourceGenerator.Builders.EventRaiserBuilder.GetInterfaceName(
+            model with { FullyQualifiedName = "global::N.IB" }, evt));
+    }
+
+    [Test]
     public async Task Extern_Aliased_Types_Resolve_In_Generated_Code()
     {
         var errors = GetGeneratedCompilationErrors(Source, AliasedLibrary());
