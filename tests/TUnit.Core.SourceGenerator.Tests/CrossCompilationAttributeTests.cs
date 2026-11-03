@@ -68,6 +68,9 @@ public class CrossCompilationAttributeTests
         [Arguments<int[]>(new int[] { 1, 2 })]
         public abstract class GenericArrayRows;
 
+        [Arguments<object[]>(new object[] { System.DayOfWeek.Monday, (System.DayOfWeek)99 })]
+        public abstract class GenericEnumArrayRows;
+
         [Arguments<int[]>(null)]
         public abstract class GenericNullArrayRows;
         """;
@@ -93,6 +96,11 @@ public class CrossCompilationAttributeTests
         }
 
         public class GenericArrayDerived(int[] value) : GenericArrayRows
+        {
+            [Test] public void Run() { }
+        }
+
+        public class GenericEnumArrayDerived(object[] value) : GenericEnumArrayRows
         {
             [Test] public void Run() { }
         }
@@ -222,6 +230,9 @@ public class CrossCompilationAttributeTests
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(1.5d)");
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute<int>(3)");
         await Assert.That(generated).Contains("ParseDecimalWithCultureFallback(\"3\\n\")");
+
+        await Assert.That(generated).Contains("global::System.DayOfWeek.Monday");
+        await Assert.That(generated).Contains("(global::System.DayOfWeek)99");
 
         // [Arguments(null)] binds null to the params array itself.
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(null)");
