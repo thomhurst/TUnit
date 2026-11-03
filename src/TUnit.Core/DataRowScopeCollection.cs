@@ -18,6 +18,8 @@ internal sealed class DataRowScopeCollection
         return owner;
     }
 
+    // A scope resolving several objects is released at the first object's graph depth;
+    // subsequent releases share the same once-only owner.
     internal void RegisterObject(ScopeOwner owner, object? instance)
     {
         if (instance is null)

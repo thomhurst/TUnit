@@ -99,13 +99,8 @@ public static class StaticPropertyReflectionInitializer
                 var onDispose = TestSessionContext.TakeStaticOnDispose(context);
                 _context = null;
                 _error = null;
-                if (onDispose is null)
-                {
-                    return;
-                }
-
                 var exceptions = new List<Exception>();
-                foreach (var invocation in onDispose.InvocationList)
+                foreach (var invocation in onDispose?.InvocationList ?? [])
                 {
                     try
                     {
@@ -115,6 +110,13 @@ public static class StaticPropertyReflectionInitializer
                     {
                         exceptions.Add(ex);
                     }
+                }
+
+                // The private initialization context owns DI scopes independently of OnDispose.
+                // Drain even after failed initialization or a throwing callback.
+                if (context.EventsIfCreated?.DetachDataRowScopes() is { } scopes)
+                {
+                    await scopes.CompleteAsync(exceptions).ConfigureAwait(false);
                 }
 
                 if (exceptions.Count > 0)

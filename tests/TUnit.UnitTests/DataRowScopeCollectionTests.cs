@@ -115,6 +115,37 @@ public class DataRowScopeCollectionTests
             await Assert.That(count).IsEqualTo(1);
     }
 
+    [Test]
+    public async Task ConcurrentEventSubscriptionsAndMergesPreserveDuplicatesAndSnapshots()
+    {
+        var destination = new TestContextEvents { OnDispose = new() };
+        var source = new TestContextEvents { OnDispose = new() };
+        var calls = 0;
+        Func<object, TestContext, ValueTask> callback = (_, _) =>
+        {
+            Interlocked.Increment(ref calls);
+            return default;
+        };
+        source.OnDispose.Add(callback);
+        source.OnDispose.Add(callback);
+        var originalSnapshot = destination.OnDispose.InvocationList;
+        await Task.WhenAll(Enumerable.Range(0, 128).Select(i => Task.Run(() =>
+        {
+            if (i % 2 == 0)
+                destination.OnDispose.Add(callback);
+            else
+                destination.AddCleanupFrom(source);
+        })));
+        await Assert.That(originalSnapshot.Count).IsEqualTo(0);
+        await Assert.That(destination.OnDispose.InvocationList.Count).IsEqualTo(66);
+        var clone = destination.OnDispose.Clone();
+        destination.OnDispose.Add(callback);
+        await Assert.That(clone.InvocationList.Count).IsEqualTo(66);
+        foreach (var invocation in destination.OnDispose.InvocationList)
+            await invocation.InvokeAsync(destination, TestContext.Current!);
+        await Assert.That(calls).IsEqualTo(67);
+    }
+
     private sealed class ConcurrentSource : DependencyInjectionDataSourceAttribute<Scope>
     {
         internal Scope Scope { get; } = new();

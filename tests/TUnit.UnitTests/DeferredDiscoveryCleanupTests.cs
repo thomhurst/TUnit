@@ -111,16 +111,18 @@ public class DeferredDiscoveryCleanupTests
     }
 
     [Test]
-    public async Task Deferred_Data_Row_Scopes_Belong_To_Their_Session()
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Deferred_Data_Row_Scopes_Belong_To_Their_Session(bool includeCallbacks)
     {
         var first = CreateSession();
         var firstScope = new CountingScope();
-        var firstContext = ContextWithOnDispose(() => { });
+        var firstContext = includeCallbacks ? ContextWithOnDispose(() => { }) : new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata };
         firstContext.Events.GetOrCreateDataRowScopes().Register(firstScope);
         TestOnDisposeRaiser.DeferToSessionEnd(firstContext);
         var second = CreateSession();
         var secondScope = new CountingScope();
-        var secondContext = ContextWithOnDispose(() => { });
+        var secondContext = includeCallbacks ? ContextWithOnDispose(() => { }) : new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata };
         secondContext.Events.GetOrCreateDataRowScopes().Register(secondScope);
         TestOnDisposeRaiser.DeferToSessionEnd(secondContext);
         var logger = new TUnitFrameworkLogger(null!, null!, null!, new LogLevelProvider(new NoOptions()));

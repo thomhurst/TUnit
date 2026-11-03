@@ -47,19 +47,29 @@ namespace TUnit.Core;
 /// </example>
 public class AsyncEvent<TEventArgs>
 {
+    // Published lists are immutable snapshots; readers and clones need no monitor.
     private List<Invocation>? _handlers;
+    private object? _handlerLock;
 
     internal AsyncEvent<TEventArgs> Clone() => new()
     {
-        _handlers = _handlers is null ? null : [.. _handlers]
+        _handlers = Volatile.Read(ref _handlers)
     };
 
     internal void AddMissingFrom(AsyncEvent<TEventArgs> source)
     {
-        foreach (var invocation in source.InvocationList)
+        var sourceHandlers = source.InvocationList;
+        lock (LazyInitializer.EnsureInitialized(ref _handlerLock))
         {
-            if (_handlers?.Contains(invocation) != true)
-                (_handlers ??= []).Insert(FindInsertionIndex(invocation.Order), invocation);
+            var handlers = _handlers is null ? [] : new List<Invocation>(_handlers);
+            foreach (var invocation in sourceHandlers)
+            {
+                // Clones share Invocation identities. Separate subscriptions, even of the same
+                // delegate, remain distinct and must both run.
+                if (!handlers.Contains(invocation))
+                    handlers.Insert(FindInsertionIndex(handlers, invocation.Order), invocation);
+            }
+            Volatile.Write(ref _handlers, handlers);
         }
     }
 
@@ -106,8 +116,12 @@ public class AsyncEvent<TEventArgs>
         }
 
         var invocation = new Invocation(callback, order);
-        var insertIndex = FindInsertionIndex(order);
-        (_handlers ??= []).Insert(insertIndex, invocation);
+        lock (LazyInitializer.EnsureInitialized(ref _handlerLock))
+        {
+            var handlers = _handlers is null ? [] : new List<Invocation>(_handlers);
+            handlers.Insert(FindInsertionIndex(handlers, order), invocation);
+            Volatile.Write(ref _handlers, handlers);
+        }
     }
 
     /// <summary>
@@ -129,9 +143,13 @@ public class AsyncEvent<TEventArgs>
         }
 
         var invocation = new Invocation(callback, order);
-        var handlers = _handlers ??= [];
-        var clampedIndex = index < 0 ? 0 : (index > handlers.Count ? handlers.Count : index);
-        handlers.Insert(clampedIndex, invocation);
+        lock (LazyInitializer.EnsureInitialized(ref _handlerLock))
+        {
+            var handlers = _handlers is null ? [] : new List<Invocation>(_handlers);
+            var clampedIndex = index < 0 ? 0 : (index > handlers.Count ? handlers.Count : index);
+            handlers.Insert(clampedIndex, invocation);
+            Volatile.Write(ref _handlers, handlers);
+        }
     }
 
     /// <summary>
@@ -145,13 +163,7 @@ public class AsyncEvent<TEventArgs>
     {
         get
         {
-            if (_handlers == null)
-            {
-                return [];
-            }
-
-            return _handlers;
-
+            return Volatile.Read(ref _handlers) is { } handlers ? handlers : [];
         }
     }
 
@@ -194,13 +206,13 @@ public class AsyncEvent<TEventArgs>
         return e;
     }
 
-    private int FindInsertionIndex(int order)
+    private static int FindInsertionIndex(List<Invocation> handlers, int order)
     {
-        int left = 0, right = (_handlers ??= []).Count;
+        int left = 0, right = handlers.Count;
         while (left < right)
         {
             var mid = left + (right - left) / 2;
-            if (_handlers[mid].Order <= order)
+            if (handlers[mid].Order <= order)
                 left = mid + 1;
             else
                 right = mid;
