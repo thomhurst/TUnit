@@ -470,8 +470,6 @@ public class OwnClassOverloadedMethodDataSourcesWithArguments<T>(T value)
 
 // A System.Tuple row spreads over the constructor like a value tuple, as the runtime unwraps it through ITuple, so it
 // infers T = int rather than T = Tuple<int, string> (Codex review of #7336).
-// TUnit0001 does not spread System.Tuple rows (#7374).
-#pragma warning disable TUnit0001
 [EngineTest(ExpectedResult.Pass)]
 [GenerateGenericTest(typeof(int))]
 [MethodDataSource(nameof(Rows))]
@@ -486,7 +484,6 @@ public class OwnClassReferenceTupleMethodDataSourceWithGenerateGenericTest<T>(T 
         await Assert.That(label).IsEqualTo("b");
     }
 }
-#pragma warning restore TUnit0001
 
 // The class parameter metadata of a [TestConstructor] resolves its ParameterInfo on that constructor, not on an earlier
 // one of the same shape once its T parameter is emitted as object (CodeRabbit review of #7336)

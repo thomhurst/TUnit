@@ -883,26 +883,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
         }
 
-        if (type is INamedTypeSymbol namedType && namedType.IsTupleType)
+        if (TryGetTupleElementTypes(type, context.Compilation, out var tupleElements))
         {
-            var tupleType = namedType;
-            if (testParameterTypes.Length == 1 && 
-                testParameterTypes[0] is INamedTypeSymbol paramTupleType && 
-                paramTupleType.IsTupleType &&
-                SymbolEqualityComparer.Default.Equals(tupleType, testParameterTypes[0]))
+            if (testParameterTypes.Length == 1
+                && SymbolEqualityComparer.Default.Equals(type, testParameterTypes[0]))
             {
                 return ImmutableArray.Create(type);
             }
-            
+
             isTuples = true;
-            
-            if (testParameterTypes.Length == 1 && 
-                testParameterTypes[0] is INamedTypeSymbol { IsTupleType: true })
-            {
-                return ImmutableArray.CreateRange(tupleType.TupleElements.Select(e => e.Type));
-            }
-            
-            return ImmutableArray.CreateRange(tupleType.TupleElements.Select(e => e.Type));
+            return tupleElements;
         }
 
         if (testParameterTypes.Length == 1
@@ -922,6 +912,39 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         return ImmutableArray.Create(type);
+    }
+
+    private static bool TryGetTupleElementTypes(ITypeSymbol type, Compilation compilation,
+        out ImmutableArray<ITypeSymbol> elements)
+    {
+        if (type is INamedTypeSymbol { IsTupleType: true } valueTuple)
+        {
+            elements = ImmutableArray.CreateRange(valueTuple.TupleElements.Select(e => e.Type));
+            return true;
+        }
+
+        if (type is INamedTypeSymbol { Arity: >= 1 and <= 8 } tuple
+            && SymbolEqualityComparer.Default.Equals(tuple.OriginalDefinition,
+                compilation.GetTypeByMetadataName(FormattableString.Invariant($"System.Tuple`{tuple.Arity}"))))
+        {
+            // ITuple exposes Rest's elements as part of the same row for arities above seven.
+            if (tuple.Arity == 8)
+            {
+                if (TryGetTupleElementTypes(tuple.TypeArguments[7], compilation, out var rest))
+                {
+                    elements = ImmutableArray.CreateRange(tuple.TypeArguments.Take(7)).AddRange(rest);
+                    return true;
+                }
+            }
+            else
+            {
+                elements = tuple.TypeArguments;
+                return true;
+            }
+        }
+
+        elements = default;
+        return false;
     }
 
     private void CheckDataGenerator(SymbolAnalysisContext context,
