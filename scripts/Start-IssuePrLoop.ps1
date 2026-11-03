@@ -85,7 +85,7 @@ param(
     [int]$MaxDeferSeconds = 259200,
     # Open, unparked loop PRs at which no new issue is started. 0 means no limit.
     [ValidateRange(0, 1000)]
-    [int]$MaxOpenPrs = 8,
+    [int]$MaxOpenPrs = 15,
     # Reasoning effort for PRs that look ready to merge, and for all other units.
     # An empty value keeps the agent's configured default.
     [string]$LightEffort = 'medium',
