@@ -4420,10 +4420,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    // System.Tuple<T1..T7>. An eight-element Tuple nests its rest in TRest, which DataSourceHelpers flattens, so it is left alone.
+    // Rebuild flattened System.Tuple rows, recursively constructing Rest after the seventh element.
+    private static string ConstructReferenceTuple(INamedTypeSymbol type, ref int elementIndex)
+    {
+        var arguments = new List<string>();
+        for (var i = 0; i < type.TypeArguments.Length; i++)
+        {
+            var element = type.TypeArguments[i];
+            arguments.Add(i == 7 && element is INamedTypeSymbol rest && IsReferenceTuple(rest)
+                ? ConstructReferenceTuple(rest, ref elementIndex)
+                : $"global::TUnit.Core.Helpers.CastHelper.Cast<{element.GloballyQualified()}>(args[{(elementIndex++).ToString(CultureInfo.InvariantCulture)}])");
+        }
+
+        return $"new {type.GloballyQualified()}({string.Join(", ", arguments)})";
+    }
+
     private static bool IsReferenceTuple(INamedTypeSymbol type)
     {
-        return type is { Name: "Tuple", IsGenericType: true, TypeArguments.Length: >= 1 and <= 7, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } };
+        return type is { Name: "Tuple", IsGenericType: true, TypeArguments.Length: >= 1 and <= 8, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } };
     }
 
     /// <summary>
@@ -4519,20 +4533,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // argument-count switch below, as it does for every other single parameter.
             var singleReferenceTupleParam = parametersFromArgs is [{ Type: INamedTypeSymbol referenceTupleType }]
                                             && IsReferenceTuple(referenceTupleType)
+                                            && GetTupleElementTypes(referenceTupleType) is not null
                 ? referenceTupleType
                 : null;
             if (singleReferenceTupleParam is not null)
             {
-                var arity = singleReferenceTupleParam.TypeArguments.Length;
+                var arity = GetTupleElementTypes(singleReferenceTupleParam)!.Length;
                 writer.AppendLine("// Special handling for single reference tuple parameter");
                 // With one element, a lone argument is either that element or the whole tuple (or null), so check it.
                 var unwrappedCheck = arity == 1 ? $" && args[0] is not null && args[0] is not {singleReferenceTupleParam.GloballyQualified()}" : "";
                 writer.AppendLine($"if (args.Length == {arity.ToString(CultureInfo.InvariantCulture)}{unwrappedCheck})");
                 writer.AppendLine("{");
                 writer.Indent();
-                var tupleElements = singleReferenceTupleParam.TypeArguments.Select((elementType, i) =>
-                    $"global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
-                var tupleConstruction = $"new {singleReferenceTupleParam.GloballyQualified()}({string.Join(", ", tupleElements)})";
+                var elementIndex = 0;
+                var tupleConstruction = ConstructReferenceTuple(singleReferenceTupleParam, ref elementIndex);
                 GenerateReturnHandling(writer, $"instance.{methodName}({FormatSingleArgumentCall(tupleConstruction, hasCancellationToken, parametersFromArgs)})", returnPattern);
                 writer.Unindent();
                 writer.AppendLine("}");

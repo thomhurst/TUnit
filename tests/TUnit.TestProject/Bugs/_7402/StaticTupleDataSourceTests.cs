@@ -36,6 +36,35 @@ public class StaticTupleDataSourceTests
         await Assert.That(value.Item2).IsEqualTo(2L);
     }
 
+    [Test]
+    [MethodDataSource(nameof(NumericValue))]
+    public async Task Tuple_Conversion_With_Trailing_Token((long, long) value, CancellationToken token)
+    {
+        await Assert.That(value).IsEqualTo((1L, 2L));
+        await Assert.That(token).IsEqualTo(TestContext.Current!.Execution.CancellationToken);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(NumericValue))]
+    public async Task Tuple_Conversion_With_Leading_Token(CancellationToken token, (long, long) value)
+    {
+        await Assert.That(value).IsEqualTo((1L, 2L));
+        await Assert.That(token).IsEqualTo(TestContext.Current!.Execution.CancellationToken);
+    }
+
+    public static Tuple<int, int, int, int, int, int, int, Tuple<int>> LongReferenceValue()
+        => Tuple.Create(1, 2, 3, 4, 5, 6, 7, 8);
+
+    [Test]
+#pragma warning disable TUnit0001 // Exercise runtime element conversion; reference-tuple widening is tracked in #7480.
+    [MethodDataSource(nameof(LongReferenceValue))]
+#pragma warning restore TUnit0001
+    public async Task Long_Reference_Tuple_Elements_Can_Be_Converted(
+        Tuple<long, long, long, long, long, long, long, Tuple<long>> value)
+    {
+        await Assert.That(value).IsEqualTo(Tuple.Create(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
+    }
+
     public static Tuple<string?> Value() => Tuple.Create<string?>(null);
     public static IEnumerable<Tuple<string?>> Rows() => [Value()];
     public static Task<Tuple<string?>> TaskRow() => Task.FromResult(Value());

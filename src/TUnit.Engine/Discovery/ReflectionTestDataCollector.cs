@@ -3674,6 +3674,32 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return shape.Constructor.Invoke(arguments);
     }
 
+    private static ParameterInfo? GetSingleDataParameter(ParameterInfo[]? parameters)
+    {
+        ParameterInfo? dataParameter = null;
+        if (parameters is null)
+        {
+            return null;
+        }
+
+        foreach (var parameter in parameters)
+        {
+            if (parameter.ParameterType == typeof(CancellationToken))
+            {
+                continue;
+            }
+
+            if (dataParameter is not null)
+            {
+                return null;
+            }
+
+            dataParameter = parameter;
+        }
+
+        return dataParameter;
+    }
+
     /// <summary>
     /// Creates a reflection-based test invoker with proper AOT attribution
     /// </summary>
@@ -3684,7 +3710,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // GetParameters() call out of the hot lambda. Generic method definitions are resolved
         // to a concrete MethodInfo per invocation, so they must still call GetParameters() inline.
         var staticParameters = testMethod.IsGenericMethodDefinition ? null : testMethod.GetParameters();
-        var staticTupleElements = staticParameters is [{ ParameterType: var tupleType }]
+        var staticTupleElements = GetSingleDataParameter(staticParameters) is { ParameterType: var tupleType }
             ? GetTupleElementTypes(tupleType)
             : null;
 
@@ -3793,14 +3819,22 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 var tupleElements = staticParameters != null
                     ? staticTupleElements
-                    : parameters is [{ ParameterType: var singleType }] ? GetTupleElementTypes(singleType) : null;
+                    : GetSingleDataParameter(parameters) is { ParameterType: var singleType } ? GetTupleElementTypes(singleType) : null;
                 if (tupleElements is { Length: > 1 }
-                    && args.Length == tupleElements.Length)
+                    && args.Length == tupleElements.Length + parameters.Length - 1)
                 {
                     // DataUnwrapper spreads an incompatible tuple so each element can be
                     // converted before constructing the target, as the generated invoker does.
-                    var offset = 0;
-                    castedArgs[0] = ReconstructTuple(parameters[0].ParameterType, args, ref offset);
+                    var dataIndex = Array.FindIndex(parameters, p => p.ParameterType != typeof(CancellationToken));
+                    var offset = dataIndex;
+                    castedArgs[dataIndex] = ReconstructTuple(parameters[dataIndex].ParameterType, args, ref offset);
+                    for (var i = 0; i < parameters.Length; i++)
+                    {
+                        if (i != dataIndex)
+                        {
+                            castedArgs[i] = args[i < dataIndex ? i : tupleElements.Length + i - 1];
+                        }
+                    }
                 }
                 else if (isParamsArray && lastParam != null)
                 {

@@ -67,6 +67,64 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
                 }
                 case 2:
                 {
+                    var context = global::TUnit.Core.TestContext.Current;
+                    // Special handling for single tuple parameter
+                    if (args.Length == 2)
+                    {
+                        // Arguments are unwrapped tuple elements, reconstruct the tuple
+                        return new global::System.Threading.Tasks.ValueTask(instance.Tuple_Conversion_With_Trailing_Token((global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[1])), cancellationToken));
+                    }
+                    else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+                    {
+                        // Rare case: tuple is wrapped as a single argument
+                        return new global::System.Threading.Tasks.ValueTask(instance.Tuple_Conversion_With_Trailing_Token(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<long, long>>(args[0]), cancellationToken));
+                    }
+                    else
+                    {
+                        throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+                    }
+                }
+                case 3:
+                {
+                    var context = global::TUnit.Core.TestContext.Current;
+                    // Special handling for single tuple parameter
+                    if (args.Length == 2)
+                    {
+                        // Arguments are unwrapped tuple elements, reconstruct the tuple
+                        return new global::System.Threading.Tasks.ValueTask(instance.Tuple_Conversion_With_Leading_Token(cancellationToken, (global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]))));
+                    }
+                    else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+                    {
+                        // Rare case: tuple is wrapped as a single argument
+                        return new global::System.Threading.Tasks.ValueTask(instance.Tuple_Conversion_With_Leading_Token(cancellationToken, global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<long, long>>(args[0])));
+                    }
+                    else
+                    {
+                        throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+                    }
+                }
+                case 4:
+                {
+                    // Special handling for single reference tuple parameter
+                    if (args.Length == 8)
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Long_Reference_Tuple_Elements_Can_Be_Converted(new global::System.Tuple<long, long, long, long, long, long, long, global::System.Tuple<long>>(global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]), new global::System.Tuple<long>(global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[7])))));
+                    }
+                    else
+                    {
+                        switch (args.Length)
+                        {
+                            case 1:
+                                {
+                                    return new global::System.Threading.Tasks.ValueTask(instance.Long_Reference_Tuple_Elements_Can_Be_Converted(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<long, long, long, long, long, long, long, global::System.Tuple<long>>>(args[0])));
+                                }
+                            default:
+                                throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                        }
+                    }
+                }
+                case 5:
+                {
                     // Special handling for single reference tuple parameter
                     if (args.Length == 1 && args[0] is not null && args[0] is not global::System.Tuple<string>)
                     {
@@ -180,10 +238,84 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
             createAttributes: __attributes,
             attributeGroupIndex: 0),
         global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
+            methodName: "Tuple_Conversion_With_Trailing_Token",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Tuple_Conversion_With_Trailing_Token",
+            filePath: "",
+            lineNumber: 39,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("NumericValue")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.NumericValue()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests), "Tuple_Conversion_With_Trailing_Token", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.ValueTuple<long, long>), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<long, long>)), false),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 2,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
+            methodName: "Tuple_Conversion_With_Leading_Token",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Tuple_Conversion_With_Leading_Token",
+            filePath: "",
+            lineNumber: 47,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("NumericValue")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.NumericValue()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests), "Tuple_Conversion_With_Leading_Token", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.ValueTuple<long, long>), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<long, long>)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 3,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
+            methodName: "Long_Reference_Tuple_Elements_Can_Be_Converted",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Long_Reference_Tuple_Elements_Can_Be_Converted",
+            filePath: "",
+            lineNumber: 58,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("LongReferenceValue")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.LongReferenceValue()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests), "Long_Reference_Tuple_Elements_Can_Be_Converted", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Tuple<long, long, long, long, long, long, long, global::System.Tuple<long>>), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<long, long, long, long, long, long, long, global::System.Tuple<long>>)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 4,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
             methodName: "Tuple_Holding_Null_Stays_A_Tuple",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Tuple_Holding_Null_Stays_A_Tuple",
             filePath: "",
-            lineNumber: 49,
+            lineNumber: 78,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -216,7 +348,7 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 2,
+            methodIndex: 5,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
     };
