@@ -163,6 +163,13 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("Tuple<nint>", "Tuple<decimal>", "nint")]
+    [Arguments("Tuple<nuint>", "Tuple<decimal>", "nuint")]
+    [Arguments("Tuple<nint>", "Tuple<decimal?>", "nint")]
+    [Arguments("Tuple<nuint>", "Tuple<decimal?>", "nuint")]
+    [Arguments("Tuple<nint?>", "Tuple<decimal?>", "nint?")]
+    [Arguments("Tuple<nuint?>", "Tuple<decimal?>", "nuint?")]
+    [Arguments("Tuple<(nint, int)>", "Tuple<(decimal, long)>", "(nint, int)")]
     [Arguments("Tuple<nint>", "Tuple<double>", "nint")]
     [Arguments("Tuple<nint>", "Tuple<float>", "nint")]
     [Arguments("Tuple<nuint>", "Tuple<double>", "nuint")]
