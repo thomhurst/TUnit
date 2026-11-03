@@ -5,6 +5,340 @@ namespace TUnit.Analyzers.Tests;
 public class ArgumentsAnalyzerTests
 {
     [Test]
+    public async Task Typed_Array_Row_Infers_Method_Element_Type()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using TUnit.Core;
+
+            public class MyClass
+            {
+                [Test]
+                [Arguments<int[]>(new[] { 1, 2 })]
+                public void Run<T>(T[] values) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Typed_Array_Row_Allows_Omitted_Generic_Optional_Parameter()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using TUnit.Core;
+
+            public class MyClass
+            {
+                [Test]
+                [Arguments<int[]>(new[] { 1, 2 })]
+                public void Run<T>(T[] values, T fallback = default!) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Typed_Array_Source_Allows_Omitted_Optional_Parameter()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class ArrayRowAttribute : TypedDataSourceAttribute<(int[], int)>
+            {
+                public override async IAsyncEnumerable<Func<System.Threading.Tasks.Task<(int[], int)>>> GetTypedDataRowsAsync(DataGeneratorMetadata metadata)
+                {
+                    await System.Threading.Tasks.Task.Yield();
+                    yield return () => System.Threading.Tasks.Task.FromResult((new[] { 1 }, 2));
+                }
+            }
+
+            public class MyClass
+            {
+                [Test]
+                [ArrayRow]
+                public void Run<T>(T[] values, T value, int count = 0) { }
+            }
+            """);
+    }
+
+    [Test]
+    [Arguments("Func<(int[], int)>")]
+    [Arguments("TestDataRow<Func<(int[], int)>>")]
+    public async Task Typed_Array_Source_Unwraps_Row_Before_Closed_Signature_Check(string rowType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            public class ArrayRowAttribute : TypedDataSourceAttribute<{{rowType}}>
+            {
+                public override async IAsyncEnumerable<Func<Task<{{rowType}}>>> GetTypedDataRowsAsync(DataGeneratorMetadata metadata)
+                {
+                    await Task.Yield();
+                    yield break;
+                }
+            }
+
+            public class MyClass
+            {
+                [Test]
+                [ArrayRow]
+                public void Run<T>(T[] values, T value) { }
+
+                [Test]
+                [ArrayRow]
+                public void RunOptional<T>(T[] values, T value, int count = 0) { }
+
+                [Test]
+                [ArrayRow]
+                public void RunCount<T>(T[] values, int count) { }
+
+                [Test]
+                [{|#0:ArrayRow|}]
+                public void RunInvalid<T>(T[] values, string value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(0)
+                .WithArguments("int[], int", "int[], string"));
+    }
+
+    [Test]
+    [Arguments("(int[], int)", "T[] values, System.Threading.CancellationToken token, T value")]
+    [Arguments("(int[], int, string)", "T[] values, T value, string[] rest")]
+    [Arguments("(int[], int, string[])", "T[] values, T value, string[] rest")]
+    [Arguments("(int[], int, int)", "T[] values, T value, string[] rest", true)]
+    [Arguments("(int[], int, string)", "T[] values, T value, params string[] rest")]
+    [Arguments("(int[], int, string[])", "T[] values, T value, params string[] rest")]
+    [Arguments("(int[], int, int)", "T[] values, T value, params string[] rest", true)]
+    [Arguments("(System.Threading.CancellationToken, System.Threading.CancellationToken[])", "T value, T[] values")]
+    [Arguments("(System.Threading.CancellationToken, System.Threading.CancellationToken[])", "T value, System.Threading.CancellationToken token, T[] values")]
+    public async Task Typed_Array_Source_Validates_Injected_Tokens_And_Params(string rowType, string parameters, bool invalid = false)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            public class ArrayRowAttribute : TypedDataSourceAttribute<{{rowType}}>
+            {
+                public override async IAsyncEnumerable<Func<Task<{{rowType}}>>> GetTypedDataRowsAsync(DataGeneratorMetadata metadata)
+                {
+                    await Task.Yield();
+                    yield break;
+                }
+            }
+
+            public class MyClass
+            {
+                [Test]
+                [{{(invalid ? "{|#0:ArrayRow|}" : "ArrayRow")}}]
+                public void Run<T>({{parameters}}) { }
+            }
+            """,
+            invalid
+                ? [Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                    .WithArguments("int[], int, int", "int[], int, string")]
+                : []);
+    }
+
+    [Test]
+    [Arguments("params long[]", "int[]")]
+    [Arguments("long[]", "int[]")]
+    [Arguments("params object[]", "int[]")]
+    [Arguments("params int[][]", "int[]")]
+    [Arguments("params long[]", "string[]", true)]
+    public async Task Typed_Array_Source_Validates_Trailing_Array_Elements(string trailingType, string suppliedType, bool invalid = false)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            public class ArrayRowAttribute : TypedDataSourceAttribute<(int[], int, {{suppliedType}})>
+            {
+                public override async IAsyncEnumerable<Func<Task<(int[], int, {{suppliedType}})>>> GetTypedDataRowsAsync(DataGeneratorMetadata metadata)
+                {
+                    await Task.Yield();
+                    yield break;
+                }
+            }
+
+            public class MyClass
+            {
+                [Test, {{(invalid ? "{|#0:ArrayRow|}" : "ArrayRow")}}]
+                public void Run<T>(T[] values, T value, {{trailingType}} rest) { }
+            }
+            """,
+            invalid
+                ? [Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                    .WithArguments("int[], int, string[]", "int[], int, long")]
+                : []);
+    }
+
+    [Test]
+    [Arguments("params string[]", "string")]
+    [Arguments("string[]", "string")]
+    [Arguments("params string[]", "int", true)]
+    [Arguments("string[]", "int", true)]
+    public async Task Typed_Generator_Source_Validates_Multiple_Trailing_Elements(string trailingType, string lastType, bool invalid = false)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class ArrayRowAttribute : DataSourceGeneratorAttribute<int, int[], string, {{lastType}}>
+            {
+                protected override IEnumerable<Func<(int, int[], string, {{lastType}})>> GenerateDataSources(DataGeneratorMetadata metadata)
+                {
+                    yield return () => (1, new[] { 2 }, "a", default!);
+                }
+            }
+
+            public class MyClass
+            {
+                [Test, {{(invalid ? "{|#0:ArrayRow|}" : "ArrayRow")}}]
+                public void Run<T>(T value, T[] values, {{trailingType}} rest) { }
+            }
+            """,
+            invalid
+                ? [Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                    .WithArguments("int, int[], string, int", "int, int[], string, string")]
+                : []);
+    }
+
+    [Test]
+    [Arguments("string[] rest")]
+    [Arguments("params string[] rest")]
+    [Arguments("int count = 0, string[] rest = null!")]
+    [Arguments("string[] rest, int count = 0", true)]
+    public async Task Typed_Generator_Source_Validates_Omitted_Trailing_Array(string trailingParameters, bool invalid = false)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class ArrayRowAttribute : DataSourceGeneratorAttribute<int, int[]>
+            {
+                protected override IEnumerable<Func<(int, int[])>> GenerateDataSources(DataGeneratorMetadata metadata)
+                {
+                    yield return () => (1, new[] { 2 });
+                }
+            }
+
+            public class MyClass
+            {
+                [Test, {{(invalid ? "{|#0:ArrayRow|}" : "ArrayRow")}}]
+                public void Run<T>(T value, T[] values, {{trailingParameters}}) { }
+            }
+            """,
+            invalid
+                ? [Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                    .WithArguments("int, int[]", "int, int[], string[], int")]
+                : []);
+    }
+
+    [Test]
+    public async Task Typed_Generator_Source_Rejects_Scalar_For_Nontrailing_Array()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class Widget { }
+            public class ArrayRowAttribute : DataSourceGeneratorAttribute<Widget>
+            {
+                protected override IEnumerable<Func<Widget>> GenerateDataSources(DataGeneratorMetadata metadata)
+                {
+                    yield return () => new Widget();
+                }
+            }
+
+            public class MyClass
+            {
+                [Test, {|#0:ArrayRow|}]
+                public void Run<T>(T[] values, string label = "") { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments("Widget", "Widget[]"));
+    }
+
+    [Test]
+    public async Task Typed_Array_Source_With_Foreign_Generator_Name_Unwraps_Row()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            namespace Foreign
+            {
+                public class DataSourceGeneratorAttribute<T> : TypedDataSourceAttribute<T>
+                {
+                    public override async IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(DataGeneratorMetadata metadata)
+                    {
+                        await Task.Yield();
+                        yield break;
+                    }
+                }
+            }
+
+            public class MyClass
+            {
+                [Test]
+                [Foreign.DataSourceGenerator<Func<int[]>>]
+                public void Run<T>(T[] values) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Typed_Array_Source_Preserves_Declared_Type_Constraint_Diagnostic()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class ObjectRowAttribute : DataSourceGeneratorAttribute<object, object[]>
+            {
+                protected override IEnumerable<Func<(object, object[])>> GenerateDataSources(DataGeneratorMetadata metadata)
+                {
+                    yield return () => (new object(), new object[0]);
+                }
+            }
+
+            public class MyClass
+            {
+                [Test]
+                [{|#0:ObjectRow|}]
+                public void Run<T>(T value, T[] values) where T : IDisposable { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.GenericTypeArgumentInferredFromDeclaredType)
+                .WithLocation(0).WithArguments("T", "object"));
+    }
+
+    [Test]
     public async Task Test_No_Error()
     {
         await Verifier

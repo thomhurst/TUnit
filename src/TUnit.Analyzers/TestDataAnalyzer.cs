@@ -1016,6 +1016,76 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             testDataTypes = closedTestDataTypes;
         }
 
+        // Match array parameters after closing the method over the same row inference as discovery.
+        // An open T[] has no Roslyn conversion from int[], even when discovery infers T = int.
+        if (context.Symbol is IMethodSymbol { IsGenericMethod: true } method
+            && testDataTypes.Any(t => t is IArrayTypeSymbol && ReferencesMethodTypeParameter(t))
+            && TypedDataSourceInference.InferMethodTypeArguments(attribute.AttributeClass, method) is { } inferred)
+        {
+            // A typed row can wrap a function or TestDataRow whose tuple spreads into arguments.
+            // Generator-base sources retain their existing declared-type argument semantics.
+            var hasGeneratorBase = selfAndBaseTypes.Any(TypedDataSourceInference.IsTypedDataSourceBase);
+            if (!hasGeneratorBase && typedInterface?.TypeArguments is [var rowType]
+                && TypedDataSourceInference.GetRowArgumentTypes(rowType) is { } rowArguments)
+            {
+                typeArguments = rowArguments;
+            }
+
+            // Check constraints while the original method type parameters are still available.
+            CheckInferredTypeArgumentConstraints(context, attribute, typeArguments, testDataTypes);
+
+            // Injection follows the declared signature: a T inferred as CancellationToken still takes data.
+            var constructedMethod = method.Construct(inferred);
+            var closedParameters = method.Parameters.WithoutTestMethodCancellationTokens()
+                .Select(p => constructedMethod.Parameters[p.Ordinal]).ToArray();
+            // Preserve the declared trailing position before dropping omitted optional parameters.
+            var trailingParameter = closedParameters.LastOrDefault();
+            // A shorter row leaves optional parameters at their defaults and a trailing SZ array empty.
+            var suppliedParameterCount = typeArguments.Length;
+            if (suppliedParameterCount < closedParameters.Length
+                && closedParameters.Skip(suppliedParameterCount).All(p => p.IsOptional || p.HasExplicitDefaultValue || p.IsParams
+                    || (SymbolEqualityComparer.Default.Equals(p, trailingParameter)
+                        && p.Type is IArrayTypeSymbol { IsSZArray: true })))
+            {
+                closedParameters = closedParameters.Take(suppliedParameterCount).ToArray();
+            }
+
+            var expectedTypes = ImmutableArray.CreateBuilder<ITypeSymbol>();
+            for (var i = 0; i < closedParameters.Length; i++)
+            {
+                var parameter = closedParameters[i];
+                if (SymbolEqualityComparer.Default.Equals(parameter, trailingParameter)
+                    && (parameter.IsParams || parameter.Type is IArrayTypeSymbol { IsSZArray: true })
+                    && GetParamsElementType(parameter.Type) is { } elementType && i < typeArguments.Length
+                    && (typeArguments.Length > closedParameters.Length
+                        || !context.Compilation.HasImplicitConversionOrGenericParameter(typeArguments[i], parameter.Type)))
+                {
+                    // A single supplied array is converted element-wise by ToTrailingArray unless
+                    // the whole array itself binds as one element (for example params object[]).
+                    if (typeArguments.Length == closedParameters.Length
+                        && typeArguments[i] is IArrayTypeSymbol { Rank: 1 } suppliedArray
+                        && !context.Compilation.HasImplicitConversionOrGenericParameter(suppliedArray, elementType)
+                        && context.Compilation.HasImplicitConversionOrGenericParameter(suppliedArray.ElementType, elementType))
+                    {
+                        expectedTypes.Add(suppliedArray);
+                        continue;
+                    }
+
+                    // Every loose value binds to the original trailing parameter's element type.
+                    for (var argumentIndex = i; argumentIndex < typeArguments.Length; argumentIndex++)
+                    {
+                        expectedTypes.Add(elementType);
+                    }
+                }
+                else
+                {
+                    expectedTypes.Add(parameter.Type);
+                }
+            }
+
+            testDataTypes = expectedTypes.ToImmutable();
+        }
+
         if (testDataTypes.Any(x => x.IsGenericDefinition()))
         {
             // Open parameter types are not checked for conversions, but a bare method type parameter is inferred
@@ -1058,6 +1128,19 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 attribute.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
                 string.Join(", ", typeArguments), string.Join(", ", testDataTypes)));
     }
+
+    // Match the array-assignable params collections supported by TupleArgumentHelper in discovery.
+    private static ITypeSymbol? GetParamsElementType(ITypeSymbol type) => type switch
+    {
+        IArrayTypeSymbol { IsSZArray: true } array => array.ElementType,
+        INamedTypeSymbol { IsGenericType: true } named when named.OriginalDefinition.SpecialType is
+            SpecialType.System_Collections_Generic_IEnumerable_T
+            or SpecialType.System_Collections_Generic_ICollection_T
+            or SpecialType.System_Collections_Generic_IList_T
+            or SpecialType.System_Collections_Generic_IReadOnlyCollection_T
+            or SpecialType.System_Collections_Generic_IReadOnlyList_T => named.TypeArguments[0],
+        _ => null
+    };
 
     /// <summary>
     /// The constructor parameter types with the class's type parameters replaced by the types a class row infers for
