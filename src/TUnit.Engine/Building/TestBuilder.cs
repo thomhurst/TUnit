@@ -1055,9 +1055,9 @@ internal sealed class TestBuilder : ITestBuilder
         private object?[]? _lent;
 
         private readonly TestBuilderContext _enumerationContext = enumerationContext ?? rowContext;
-        // Method enumeration mutates _enumerationContext after this row is saved.
-        // Compare constructor changes against its original state, never that live context.
-        private readonly Dictionary<string, object?>? _constructorBaseline = enumerationContext?.HasStateBag == true
+        // Compare each saved constructor row against its own pre-factory state.
+        // Method enumeration can change between constructor fetches.
+        private Dictionary<string, object?>? _constructorBaseline = enumerationContext?.HasStateBag == true
             ? new(enumerationContext.StateBag)
             : null;
         private TestBuilderContext _rowContext = rowContext;
@@ -1083,6 +1083,7 @@ internal sealed class TestBuilder : ITestBuilder
 
             async ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> FetchAsync(Func<Task<object?[]?>> factory, TestBuilderContext target)
             {
+                _constructorBaseline = target.HasStateBag ? new(target.StateBag) : null;
                 var row = DataUnwrapper.UnwrapWithMetadata(await factory() ?? []);
                 _rowContext = target with { };
                 target.CopyStateBagTo(_rowContext);

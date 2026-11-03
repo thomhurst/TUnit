@@ -3,7 +3,8 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 /// <summary>
-/// Test context events container
+/// Test context events container. Registration, start and skipped handler failures propagate
+/// and stop the remaining handlers. End handler failures are collected with teardown failures.
 /// </summary>
 public class TestContextEvents : ITestEvents
 {

@@ -9,6 +9,46 @@ public class ClassRowCleanupTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
+    public async Task RefetchedRejectedConstructorReplaysOnlyItsOwnStateChanges(bool initialState)
+    {
+        var enumeration = CreateContext();
+        if (initialState)
+            enumeration.StateBag["method-row"] = new object();
+        var original = enumeration with { };
+        enumeration.CopyStateBagTo(original);
+        var data = new object?[] { new object() };
+        var row = new TestBuilder.UnclaimedClassRow(data, null, original, enumeration);
+        await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse first row"), CreateContext());
+
+        var rejected = CreateContext();
+        rejected.StateBag["method-row"] = new object();
+        rejected.StateBag["removed-by-constructor"] = new object();
+        rejected.StateBag["changed-by-constructor"] = new object();
+        var constructorValue = new object();
+        await row.TakeOrFetchAsync(() =>
+        {
+            rejected.StateBag["added-by-constructor"] = constructorValue;
+            rejected.StateBag["changed-by-constructor"] = constructorValue;
+            rejected.StateBag.TryRemove("removed-by-constructor", out _);
+            return Task.FromResult<object?[]?>(data);
+        }, rejected);
+        row.Return(data, null, rejected);
+
+        var compatible = CreateContext();
+        var methodValue = new object();
+        compatible.StateBag["method-row"] = methodValue;
+        compatible.StateBag["removed-by-constructor"] = new object();
+        compatible.StateBag["changed-by-constructor"] = new object();
+        await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse rejected constructor"), compatible);
+        await Assert.That(compatible.StateBag["method-row"]).IsSameReferenceAs(methodValue);
+        await Assert.That(compatible.StateBag["added-by-constructor"]).IsSameReferenceAs(constructorValue);
+        await Assert.That(compatible.StateBag["changed-by-constructor"]).IsSameReferenceAs(constructorValue);
+        await Assert.That(compatible.StateBag.ContainsKey("removed-by-constructor")).IsFalse();
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
     public async Task RejectedMethodRowsRetainCleanupWithoutLifecycleSubscriptions(bool failedRow)
     {
         var original = CreateContext();
