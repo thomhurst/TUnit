@@ -4428,7 +4428,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Build tuple reconstruction with proper casting
             var tupleElements = singleTupleParam.TupleElements.Select((elem, i) =>
                 $"global::TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
-            var tupleConstruction = $"({string.Join(", ", tupleElements)})";
+            var tupleConstruction = singleTupleParam.TupleElements.Length == 1
+                ? $"new {singleTupleParam.GloballyQualified()}({string.Join(", ", tupleElements)})"
+                : $"({string.Join(", ", tupleElements)})";
 
             var methodCallReconstructed = $"instance.{methodName}({FormatSingleArgumentCall(tupleConstruction, hasCancellationToken, parametersFromArgs)})";
             GenerateReturnHandling(writer, methodCallReconstructed, returnPattern);
