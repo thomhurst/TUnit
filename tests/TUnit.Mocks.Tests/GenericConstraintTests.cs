@@ -79,3 +79,28 @@ public class GenericConstraintTests
         await Assert.That(result).IsEqualTo(0);
     }
 }
+
+public interface INullableConstraintService
+{
+    Task<T> Get<T>(string key) where T : class?;
+    T Base<T>() where T : Stream?;
+}
+
+public class NullableGenericConstraintTests
+{
+    [Test]
+    public async Task Nullable_Type_Arguments_Can_Be_Set_Up_And_Verified()
+    {
+        var mock = Mock.Of<INullableConstraintService>();
+        mock.Get<string?>(Any()).Returns((string?)null);
+        mock.Base<MemoryStream?>().Returns((MemoryStream?)null);
+
+        var result = await mock.Object.Get<string?>("key");
+        var stream = mock.Object.Base<MemoryStream?>();
+
+        await Assert.That(result).IsNull();
+        await Assert.That(stream).IsNull();
+        mock.Get<string?>(Any()).WasCalled(Times.Once);
+        mock.Base<MemoryStream?>().WasCalled(Times.Once);
+    }
+}

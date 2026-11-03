@@ -53,7 +53,9 @@ internal static class MethodSymbolExtensions
         var constraints = new List<string>();
 
         if (typeParam.HasReferenceTypeConstraint)
-            constraints.Add("class");
+            constraints.Add(typeParam.ReferenceTypeConstraintNullableAnnotation == NullableAnnotation.Annotated
+                ? "class?"
+                : "class");
         // Roslyn reports HasValueTypeConstraint for 'unmanaged' too, but C# forbids
         // combining 'struct' with 'unmanaged' (CS0449) — emit only 'unmanaged' (#6471)
         if (typeParam.HasValueTypeConstraint && !typeParam.HasUnmanagedTypeConstraint)
@@ -65,7 +67,8 @@ internal static class MethodSymbolExtensions
 
         foreach (var constraintType in typeParam.ConstraintTypes)
         {
-            constraints.Add(MethodTypeParameterRenames.ToDisplayString(constraintType, SymbolDisplayFormat.FullyQualifiedFormat));
+            constraints.Add(MethodTypeParameterRenames.ToDisplayString(constraintType, SymbolDisplayFormat.FullyQualifiedFormat.WithMiscellaneousOptions(
+                SymbolDisplayFormat.FullyQualifiedFormat.MiscellaneousOptions | SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier)));
         }
 
         if (typeParam.HasConstructorConstraint)
