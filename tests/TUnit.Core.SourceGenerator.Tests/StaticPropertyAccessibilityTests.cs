@@ -101,6 +101,39 @@ internal class StaticPropertyAccessibilityTests
         await Check(source, true, true, expectDiagnostic: false, suppressDiagnostic: true);
     }
 
+    [Test]
+    [Arguments("")]
+    [Arguments("shared.cs")]
+    public async Task Duplicate_paths_preserve_tree_identity_and_file_options(string path)
+    {
+        const string source = """
+            public class Outer
+            {
+                private class Helper
+                {
+                    [TUnit.Core.Arguments("value")]
+                    public static string Value { get; set; }
+                }
+            }
+            """;
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+        var first = CSharpSyntaxTree.ParseText(source, parseOptions, path);
+        var second = CSharpSyntaxTree.ParseText(source.Replace("Outer", "Other"), parseOptions, path);
+        var compilation = CSharpCompilation.Create("DuplicatePaths", [first, second], ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                .WithSyntaxTreeOptionsProvider(new SuppressDiagnosticOptionsProvider(first)));
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new StaticPropertyInitializationGenerator().AsSourceGenerator()], parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToArray()).IsEmpty();
+        await Assert.That(driver.GetRunResult().Results[0].Exception).IsNull();
+        await Assert.That(diagnostics.Length).IsEqualTo(1);
+        await Assert.That(diagnostics[0].Id).IsEqualTo("TUNITGEN005");
+        await Assert.That(diagnostics[0].Location.SourceTree).IsEqualTo(second);
+        await Assert.That(second.GetText().ToString(diagnostics[0].Location.SourceSpan)).IsEqualTo("Value");
+    }
+
     private static async Task Check(string source, bool inaccessible, bool enabled,
         string? snapshotParameter = null, bool expectDiagnostic = true, bool suppressDiagnostic = false)
     {
@@ -132,7 +165,7 @@ internal class StaticPropertyAccessibilityTests
             }
         }
     }
-    private sealed class SuppressDiagnosticOptionsProvider : SyntaxTreeOptionsProvider
+    private sealed class SuppressDiagnosticOptionsProvider(SyntaxTree? suppressedTree = null) : SyntaxTreeOptionsProvider
     {
         public override GeneratedKind IsGenerated(SyntaxTree tree, CancellationToken cancellationToken) => GeneratedKind.Unknown;
 
@@ -140,7 +173,7 @@ internal class StaticPropertyAccessibilityTests
             CancellationToken cancellationToken, out ReportDiagnostic severity)
         {
             severity = ReportDiagnostic.Suppress;
-            return diagnosticId == "TUNITGEN005";
+            return diagnosticId == "TUNITGEN005" && (suppressedTree is null || ReferenceEquals(tree, suppressedTree));
         }
 
         public override bool TryGetGlobalDiagnosticValue(string diagnosticId,

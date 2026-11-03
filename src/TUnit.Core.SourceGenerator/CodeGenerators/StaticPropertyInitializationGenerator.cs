@@ -67,8 +67,9 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
                         if (reported.Add(property))
                         {
                             // Reattach to the current tree so pragmas and per-file diagnostic options apply.
-                            // Only equatable location data is retained in the discovery models.
-                            var tree = pair.Right.SyntaxTrees.FirstOrDefault(tree => tree.FilePath == property.FilePath);
+                            // The compilation-relative ordinal distinguishes trees with identical paths,
+                            // while discovery models retain only equatable location data.
+                            var tree = pair.Right.SyntaxTrees.ElementAtOrDefault(property.TreeOrdinal);
                             var location = tree is null
                                 ? Location.Create(property.FilePath, property.Span, property.LineSpan)
                                 : Location.Create(tree, property.Span);
@@ -98,7 +99,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
     internal sealed record StaticPropertyTypeSegment(string TypeKey, EquatableArray<StaticPropertyEntry> Properties,
         EquatableArray<InaccessibleProperty> InaccessibleProperties);
 
-    internal sealed record InaccessibleProperty(string Name, string FilePath, TextSpan Span, LinePositionSpan LineSpan);
+    internal sealed record InaccessibleProperty(string Name, string FilePath, TextSpan Span, LinePositionSpan LineSpan, int TreeOrdinal);
 
     internal sealed record StaticPropertyEntry(string Name, PropertyWithDataSourceModel Model);
 
@@ -222,7 +223,8 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
                         {
                             inaccessibleProperties ??= [];
                             inaccessibleProperties.Add(new InaccessibleProperty(property.Name,
-                                location.GetLineSpan().Path, location.SourceSpan, location.GetLineSpan().Span));
+                                location.GetLineSpan().Path, location.SourceSpan, location.GetLineSpan().Span,
+                                compilation.SyntaxTrees.TakeWhile(tree => !ReferenceEquals(tree, location.SourceTree)).Count()));
                         }
 
                         continue;
