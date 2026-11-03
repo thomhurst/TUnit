@@ -11,11 +11,11 @@ public class ClassRowCleanupTests
     {
         var original = CreateContext();
         var disposals = 0;
-        original.Events.OnDataRowDispose += (_, _) =>
+        (original.Events.DataRowScopes ??= new()).Register(new CallbackScope(() =>
         {
             disposals++;
             return default;
-        };
+        }));
         var row = new TestBuilder.UnclaimedClassRow([new object()], null, original);
         var runnable = CreateContext();
         await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must use saved row"), runnable);
@@ -33,11 +33,11 @@ public class ClassRowCleanupTests
     {
         var original = CreateContext();
         var disposals = 0;
-        original.Events.OnDataRowDispose += (_, _) =>
+        (original.Events.DataRowScopes ??= new()).Register(new CallbackScope(() =>
         {
             disposals++;
             return default;
-        };
+        }));
         var row = new TestBuilder.UnclaimedClassRow([new object()], null, original);
         var skipped = CreateContext();
         row.TransferCleanupTo(skipped);
@@ -51,11 +51,11 @@ public class ClassRowCleanupTests
     {
         var original = CreateContext();
         var disposals = 0;
-        original.Events.OnDataRowDispose += (_, _) =>
+        (original.Events.DataRowScopes ??= new()).Register(new CallbackScope(() =>
         {
             disposals++;
             return default;
-        };
+        }));
         var row = new TestBuilder.UnclaimedClassRow([new object()], null, original);
         var session = CreateContext();
         row.LendToTemporaryInstance(session);
@@ -81,11 +81,11 @@ public class ClassRowCleanupTests
     {
         var enumeration = CreateContext();
         var disposals = 0;
-        enumeration.Events.OnDataRowDispose += (_, _) =>
+        (enumeration.Events.DataRowScopes ??= new()).Register(new CallbackScope(() =>
         {
             disposals++;
             return default;
-        };
+        }));
         var row = new TestBuilder.UnclaimedClassRow([new object()], null, enumeration);
         var runnable = CreateContext();
         if (claimed)
@@ -108,11 +108,11 @@ public class ClassRowCleanupTests
         var row = new TestBuilder.UnclaimedClassRow([new object()], null, enumeration);
         var factoryContext = CreateContext();
         var disposals = 0;
-        factoryContext.Events.OnDataRowDispose += (_, _) =>
+        (factoryContext.Events.DataRowScopes ??= new()).Register(new CallbackScope(() =>
         {
             disposals++;
             return default;
-        };
+        }));
 
         var failed = row.CreateFailureContext(factoryContext);
         await DisposeRow(failed);
@@ -259,11 +259,11 @@ public class ClassRowCleanupTests
         var disposals = 0;
         foreach (var context in contexts)
         {
-            context.Events.OnDataRowDispose += (_, _) =>
+            (context.Events.DataRowScopes ??= new()).Register(new CallbackScope(() =>
             {
                 Interlocked.Increment(ref disposals);
                 return default;
-            };
+            }));
         }
         Parallel.ForEach(contexts, context =>
             new TestBuilder.UnclaimedClassRow([new object()], null, context).LendToTemporaryInstance(session));
@@ -294,11 +294,11 @@ public class ClassRowCleanupTests
             await Task.CompletedTask;
             yield return () =>
             {
-                metadata.TestBuilderContext.Current.Events.OnDataRowDispose += (_, _) =>
+                (metadata.TestBuilderContext.Current.Events.DataRowScopes ??= new()).Register(new CallbackScope(() =>
                 {
                     Disposals++;
                     return default;
-                };
+                }));
                 return Task.FromResult<object?[]?>([new object()]);
             };
             if (ThrowAfterRow)
@@ -521,12 +521,10 @@ public class ClassRowCleanupTests
 
     private static async Task DisposeTestRow(TestContext context)
     {
-        if (context.InternalEventsIfCreated?.OnDataRowDispose is { } cleanup)
+        if (context.InternalEventsIfCreated?.DataRowScopes is { } scopes &&
+            await scopes.CompleteAsync() is { } exceptions)
         {
-            foreach (var handler in cleanup.InvocationList)
-            {
-                await handler.InvokeAsync(context, (context, null));
-            }
+            throw new AggregateException(exceptions);
         }
     }
 
@@ -537,12 +535,15 @@ public class ClassRowCleanupTests
 
     private static async Task DisposeRow(TestBuilderContext context)
     {
-        if (context.EventsIfCreated?.OnDataRowDispose is { } cleanup)
+        if (context.EventsIfCreated?.DataRowScopes is { } scopes &&
+            await scopes.CompleteAsync() is { } exceptions)
         {
-            foreach (var handler in cleanup.InvocationList)
-            {
-                await handler.InvokeAsync(TestContext.Current!, (TestContext.Current!, null));
-            }
+            throw new AggregateException(exceptions);
         }
+    }
+
+    private sealed class CallbackScope(Func<ValueTask> dispose) : IAsyncDisposable
+    {
+        public ValueTask DisposeAsync() => dispose();
     }
 }

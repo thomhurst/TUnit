@@ -9,7 +9,7 @@ public class TestContextEvents : ITestEvents
 {
     internal TestContextEvents Clone() => new()
     {
-        OnDataRowDispose = OnDataRowDispose?.Clone(),
+        DataRowScopes = DataRowScopes?.Clone(),
         OnDispose = OnDispose?.Clone(),
         OnTestRegistered = OnTestRegistered?.Clone(),
         OnInitialize = OnInitialize?.Clone(),
@@ -19,9 +19,8 @@ public class TestContextEvents : ITestEvents
         OnTestRetry = OnTestRetry?.Clone()
     };
 
-    // Notified before each tracked object is released, then with null for any untracked scopes.
-    // Scope handlers match their resolved objects and dispose at most once.
-    internal AsyncEvent<(TestContext? Context, object? Object)>? OnDataRowDispose { get; set; }
+    // Clones share once-only scope owners while keeping row ownership collections isolated.
+    internal DataRowScopeCollection? DataRowScopes { get; set; }
 
     public AsyncEvent<TestContext>? OnDispose { get; set; }
     public AsyncEvent<TestContext>? OnTestRegistered { get; set; }

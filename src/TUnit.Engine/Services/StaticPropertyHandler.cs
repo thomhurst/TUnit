@@ -111,39 +111,21 @@ internal sealed class StaticPropertyHandler
         ObjectTracker objectTracker,
         List<Exception> cleanupExceptions)
     {
-        AsyncEvent<(TestContext? Context, object? Object)>? cleanup;
+        DataRowScopeCollection? scopes;
         lock (events)
         {
-            // Detach this session's handlers before awaiting disposal. A reused host must
-            // neither retain disposed scopes nor scan their callbacks in later sessions.
-            cleanup = events.OnDataRowDispose;
-            events.OnDataRowDispose = null;
-        }
-
-        async ValueTask DisposeScopesAsync(object? instance)
-        {
-            if (cleanup is null)
-            {
-                return;
-            }
-
-            foreach (var handler in cleanup.InvocationList)
-            {
-                try
-                {
-                    await handler.InvokeAsync(events, (null, instance)).ConfigureAwait(false);
-                }
-                catch (Exception e)
-                {
-                    cleanupExceptions.Add(e);
-                }
-            }
+            // Detach before awaiting so a reused host cannot retain scopes from earlier sessions.
+            scopes = events.DataRowScopes;
+            events.DataRowScopes = null;
         }
 
         foreach (var staticProperty in staticProperties)
         {
             // Scope-owned values must be released by their scope before tracker disposal is skipped.
-            await DisposeScopesAsync(staticProperty).ConfigureAwait(false);
+            if (scopes is not null)
+            {
+                await scopes.ReleaseAsync(staticProperty, cleanupExceptions).ConfigureAwait(false);
+            }
             try
             {
                 await objectTracker.UntrackObjectAsync(staticProperty).ConfigureAwait(false);
@@ -155,7 +137,10 @@ internal sealed class StaticPropertyHandler
         }
 
         // Also release scopes whose factory failed or whose returned value was not trackable.
-        await DisposeScopesAsync(null).ConfigureAwait(false);
+        if (scopes is not null)
+        {
+            await scopes.CompleteAsync(cleanupExceptions).ConfigureAwait(false);
+        }
 
         if (cleanupExceptions.Count > 0)
         {

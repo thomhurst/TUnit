@@ -1217,7 +1217,7 @@ internal sealed class TestBuilder : ITestBuilder
             var failureContext = enumerationContext with { };
             enumerationContext.CopyStateBagTo(failureContext);
             failureContext.Events = enumerationContext.EventsIfCreated?.Clone() ?? new();
-            failureContext.Events.OnDataRowDispose = null;
+            failureContext.Events.DataRowScopes = null;
             TransferCleanupTo(failureContext);
             return failureContext;
         }
@@ -1239,17 +1239,14 @@ internal sealed class TestBuilder : ITestBuilder
             _lent = _data;
             // Method rows can retain services from this temporary instance's scope.
             // Keep that scope alive until session cleanup, rather than the first test's cleanup.
-            if (_events?.OnDataRowDispose is { } cleanup)
+            if (_events?.DataRowScopes is { } scopes)
             {
                 lifetimeContext ??= TestSessionContext.GlobalStaticPropertyContext;
                 var lifetimeEvents = lifetimeContext.Events;
-                // Builders run concurrently. Protect both initial event creation and insertion.
+                // Builders run concurrently. Protect collection creation and all ownership transfers.
                 lock (lifetimeEvents)
                 {
-                    foreach (var handler in cleanup.InvocationList)
-                    {
-                        lifetimeEvents.OnDataRowDispose += handler.InvokeAsync;
-                    }
+                    (lifetimeEvents.DataRowScopes ??= new()).AddRange(scopes);
                 }
             }
             _events = null;

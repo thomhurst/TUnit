@@ -41,17 +41,13 @@ internal static class TestOnDisposeRaiser
         }
         // Tests bypassing the coordinator have no tracked graph to release. Release their row
         // scopes here; the coordinator dispatches these after its depth-ordered graph cleanup.
-        if (disposeDataRow && test.Context.InternalEventsIfCreated?.OnDataRowDispose is { } cleanup)
+        if (disposeDataRow && test.Context.InternalEventsIfCreated?.DataRowScopes is { } scopes)
         {
-            foreach (var invocation in cleanup.InvocationList)
+            if (await scopes.CompleteAsync().ConfigureAwait(false) is { } exceptions)
             {
-                try
+                foreach (var exception in exceptions)
                 {
-                    await invocation.InvokeAsync(test.Context, (test.Context, null)).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    await logger.LogErrorAsync($"Error during row cleanup for {test.TestId}: {ex}").ConfigureAwait(false);
+                    await logger.LogErrorAsync($"Error during row cleanup for {test.TestId}: {exception}").ConfigureAwait(false);
                 }
             }
         }

@@ -232,26 +232,16 @@ internal sealed class TestCoordinator : ITestCoordinator
             List<Exception>? cleanupExceptions = null;
 
             // Release roots before their dependencies. Scope cleanup is invoked at the resolved
-            // object's graph depth by the tracker; the final notification catches untracked scopes.
+            // object's graph depth by the tracker; completion catches untracked scopes.
             var trackingExceptions = await _objectTracker.UntrackObjects(test.Context).ConfigureAwait(false);
             if (trackingExceptions is { Count: > 0 })
             {
                 (cleanupExceptions ??= []).AddRange(trackingExceptions);
             }
 
-            if (test.Context.InternalEventsIfCreated?.OnDataRowDispose is { } onDataRowDispose)
+            if (test.Context.InternalEventsIfCreated?.DataRowScopes is { } scopes)
             {
-                foreach (var handler in onDataRowDispose.InvocationList)
-                {
-                    try
-                    {
-                        await handler.InvokeAsync(this, (test.Context, null)).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        (cleanupExceptions ??= []).Add(ex);
-                    }
-                }
+                cleanupExceptions = await scopes.CompleteAsync(cleanupExceptions).ConfigureAwait(false);
             }
 
 #if NET

@@ -16,49 +16,11 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
             // disposing the returned objects, as it does for any other data source.
             var scopeOwnsCreatedObjects = scope is IDisposable or IAsyncDisposable;
 
-            // Dispose at the depth of the resolved objects, before their nested dependencies.
-            // The final null notification also cleans up scopes whose objects were not tracked.
-            object?[]? createdObjects = null;
-            var disposed = 0;
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDataRowDispose += async (_, args) =>
-            {
-                if (args.Object is not null)
-                {
-                    var ownsObject = false;
-                    if (createdObjects is not null)
-                    {
-                        foreach (var created in createdObjects)
-                        {
-                            if (ReferenceEquals(created, args.Object))
-                            {
-                                ownsObject = true;
-                                break;
-                            }
-                        }
-                    }
+            // Register before resolving so a failed factory still releases its scope.
+            var cleanup = dataGeneratorMetadata.TestBuilderContext.Current.Events.DataRowScopes ??= new();
+            var owner = cleanup.Register(scope);
 
-                    if (!ownsObject)
-                    {
-                        return;
-                    }
-                }
-
-                if (Interlocked.Exchange(ref disposed, 1) != 0)
-                {
-                    return;
-                }
-
-                if (scope is IAsyncDisposable asyncDisposable)
-                {
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                }
-                else if (scope is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
-            };
-
-            return createdObjects = dataGeneratorMetadata.MembersToGenerate
+            return dataGeneratorMetadata.MembersToGenerate
                 .Select(m => m switch
                 {
                     PropertyMetadata prop => prop.Type,
@@ -70,6 +32,7 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                 .Select(x =>
                 {
                     var created = Create(scope, x);
+                    cleanup.RegisterObject(owner, created);
 
                     if (scopeOwnsCreatedObjects)
                     {
