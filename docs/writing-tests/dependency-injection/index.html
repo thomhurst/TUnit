@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.a95f87d4.css">
-<script src="/assets/js/runtime~main.3833bf74.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.bb4018df.js" defer="defer"></script>
 <script src="/assets/js/main.37860cca.js" defer="defer"></script>
 </head>
 <body>
@@ -37,6 +37,8 @@
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="scope-lifetime-and-disposal">Scope Lifetime and Disposal<a href="#scope-lifetime-and-disposal" class="hash-link" aria-label="Direct link to Scope Lifetime and Disposal" title="Direct link to Scope Lifetime and Disposal" translate="no">​</a></h3>
 <ul>
 <li class=""><strong>When the scope is disposed.</strong> TUnit disposes a disposable scope (<code>IDisposable</code> or <code>IAsyncDisposable</code>) once, when its test ends, after the test class instance is disposed. A retried test keeps the same scope and the same resolved services for every attempt, and the scope is disposed after the last attempt. Each <code>[Repeat]</code> iteration is a separate test with its own scope, so services and their state do not carry over between repeats. A test that is skipped, skipped because a dependency failed, cancelled before it starts, or removed by circular-dependency detection still has its scope disposed.</li>
+<li class=""><strong>Lifetime change for custom callbacks.</strong> Discovery-owned <code>OnDispose</code> callbacks now run at session cleanup with a null <code>TestContext</code>. Custom handlers must avoid dereferencing that argument when their data source is used for static properties, generic inference, or temporary method-data-source instances. Overlapping sessions share generated and reflection static-property values and retain their scopes until the final owning session finishes.</li>
+<li class=""><strong>Scopes shared during discovery.</strong> Scopes used to initialize static properties, infer generic class arguments, or construct a temporary instance for an instance method data source live until session cleanup. This includes the temporary instance’s constructor and injected-property scopes: several method rows can borrow their services, so the first test must not dispose them. These scopes are cleaned up even when no test executes. Large data-driven suites can retain more services and other scope-owned resources until session cleanup. Their <code>OnDispose</code> handlers receive a null <code>TestContext</code>, because no single test owns them.</li>
 <li class=""><strong><code>OnDispose</code> handlers.</strong> The scope is disposed by an <code>OnDispose</code> handler. <code>OnDispose</code> is raised once per test, after its final attempt and after the test class instance is disposed. Earlier versions raised it once per attempt, before the instance was disposed, so a handler that used the test class instance must move that work to an <code>[After(Test)]</code> hook or to the instance&#x27;s own <code>Dispose</code>.</li>
 </ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="choosing-between-the-two">Choosing Between the Two<a href="#choosing-between-the-two" class="hash-link" aria-label="Direct link to Choosing Between the Two" title="Direct link to Choosing Between the Two" translate="no">​</a></h2>
