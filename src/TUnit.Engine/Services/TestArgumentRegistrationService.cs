@@ -1,5 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.PropertyInjection;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -82,8 +83,8 @@ internal sealed class TestArgumentRegistrationService
         TestDetails testDetails,
         CancellationToken cancellationToken)
     {
-        var classArguments = testDetails.TestClassArguments;
-        var methodArguments = testDetails.TestMethodArguments;
+        var classArguments = TupleArguments.Expand(testDetails.TestClassArguments);
+        var methodArguments = TupleArguments.Expand(testDetails.TestMethodArguments);
 
         // Argument registration only injects properties, so it is a no-op unless some argument has
         // injectable properties. Checking first avoids materializing the per-test state bag

@@ -34,6 +34,8 @@ public class TupleLifecycleTests
         Received.Add(fixture);
         await Assert.That(fixture.Initializations).IsEqualTo(1);
         await Assert.That(fixture.Disposals).IsEqualTo(0);
+        await Assert.That(fixture.Dependency).IsNotNull();
+        await Assert.That(fixture.Starts).IsEqualTo(1);
     }
 
     [After(Class)]
@@ -42,15 +44,37 @@ public class TupleLifecycleTests
         foreach (var fixture in Received)
         {
             await Assert.That(fixture.Disposals).IsEqualTo(1);
+            await Assert.That(fixture.Ends).IsEqualTo(1);
         }
     }
 
-    public sealed class Fixture : IAsyncInitializer, IAsyncDisposable
+    public sealed class Dependency;
+
+    public sealed class Fixture : IAsyncInitializer, IAsyncDisposable, ITestStartEventReceiver, ITestEndEventReceiver
     {
+        [ClassDataSource<Dependency>]
+        public Dependency Dependency { get; set; } = null!;
+        public int Starts { get; private set; }
+        public int Ends { get; private set; }
+        public int Order => 0;
+        public ValueTask OnTestStart(TestContext context)
+        {
+            Starts++;
+            return default;
+        }
+        public ValueTask OnTestEnd(TestContext context)
+        {
+            Ends++;
+            return default;
+        }
         public int Initializations { get; private set; }
         public int Disposals { get; private set; }
         public Task InitializeAsync()
         {
+            if (Dependency is null)
+            {
+                throw new InvalidOperationException("Tuple element dependency must be injected before initialization.");
+            }
             Initializations++;
             return Task.CompletedTask;
         }
