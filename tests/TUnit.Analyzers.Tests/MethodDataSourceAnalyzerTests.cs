@@ -5,6 +5,30 @@ namespace TUnit.Analyzers.Tests;
 public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 {
     [Test]
+    public async Task Private_Intermediate_Source_Does_Not_Hide_Public_Base_Overload()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Base
+            {
+                public static IEnumerable<int> Rows(int value, int count = 1) => [value];
+            }
+            public class Middle : Base
+            {
+                private new static IEnumerable<int> Rows(int value, int count = 1) => [value];
+            }
+            public class Tests : Middle
+            {
+                public static IEnumerable<string> Rows(object value, int count = 1) => ["broad"];
+                [Test, MethodDataSource(nameof(Rows), Arguments = new object[] { 1 })]
+                public void Specific(int value) { }
+            }
+            """);
+    }
+
+    [Test]
     public async Task Optional_Metadata_Without_Default_Is_Rejected()
     {
         await Verifier.VerifyAnalyzerAsync(

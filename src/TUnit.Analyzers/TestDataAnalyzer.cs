@@ -751,15 +751,17 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     private static IMethodSymbol? FindOptionalDataSource(SymbolAnalysisContext context, TypedConstant[] arguments,
         IMethodSymbol[] methods, string name, ITypeSymbol targetType)
     {
+        // Inaccessible declarations cannot hide an otherwise available base source.
+        var availableMethods = methods.Where(method => method.Name == name && !method.IsGenericMethod
+            && (SymbolEqualityComparer.Default.Equals(method.ContainingType, targetType)
+                || (method.DeclaredAccessibility != Accessibility.Private
+                    && context.Compilation.IsSymbolAccessibleWithin(method, context.Compilation.Assembly))))
+            .ToArray();
         IMethodSymbol? best = null;
         var bestScore = -1;
-        foreach (var method in methods)
+        foreach (var method in availableMethods)
         {
-            if (method.Name != name || method.IsGenericMethod
-                || (!SymbolEqualityComparer.Default.Equals(method.ContainingType, targetType)
-                    && (method.DeclaredAccessibility == Accessibility.Private
-                        || !context.Compilation.IsSymbolAccessibleWithin(method, context.Compilation.Assembly)))
-                || methods.Any(derived => HidesBaseSignature(derived, method)))
+            if (availableMethods.Any(derived => HidesBaseSignature(derived, method)))
             {
                 continue;
             }
