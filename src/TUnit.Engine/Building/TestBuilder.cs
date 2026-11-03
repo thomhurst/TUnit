@@ -523,7 +523,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 // The test built below holds classData, which may be the unclaimed first fetch,
                                 // and tracks any objects that a temporary instance used.
                                 var lentClassRowObjects = unclaimedClassRow.TakeLentObjects();
-                                unclaimedClassRow.TransferCleanupTo(contextAccessor.Current);
+                                var rowCleanup = unclaimedClassRow.TakeCleanup();
                                 unclaimedClassRow.Clear();
 
                                 Type[] resolvedClassGenericArgs;
@@ -543,6 +543,10 @@ internal sealed class TestBuilder : ITestBuilder
                                 // If generic type inference failed, create a failed test instead of skipped
                                 if (genericResolutionException != null)
                                 {
+                                    if (rowCleanup is not null)
+                                    {
+                                        contextAccessor.Current.Events.OnDataRowDispose = rowCleanup.Clone();
+                                    }
                                     var failedTest = CreateFailedTestForDataGenerationError(metadata, genericResolutionException, new TestDataCombination(), classData, lentClassRowObjects, contextAccessor.Current);
                                     tests.Add(failedTest);
                                 }
@@ -574,7 +578,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     };
 
                                     testBuilderContext.CopyStateBagTo(testSpecificContext);
-                                    if (contextAccessor.Current.EventsIfCreated?.OnDataRowDispose is { } cleanup)
+                                    if (rowCleanup is { } cleanup)
                                     {
                                         testSpecificContext.Events.OnDataRowDispose = cleanup.Clone();
                                     }
@@ -1064,7 +1068,7 @@ internal sealed class TestBuilder : ITestBuilder
     /// are lent to the instance instead, and the next test built from the row tracks them without
     /// receiving them, so they are still disposed.
     /// </remarks>
-    private sealed class UnclaimedClassRow(object?[] data, TestDataRowMetadata? metadata, TestBuilderContext rowContext)
+    internal sealed class UnclaimedClassRow(object?[] data, TestDataRowMetadata? metadata, TestBuilderContext rowContext)
     {
         private object?[]? _data = data;
         private TestDataRowMetadata? _metadata = metadata;
@@ -1096,9 +1100,8 @@ internal sealed class TestBuilder : ITestBuilder
 
             async ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> FetchAsync(Func<Task<object?[]?>> factory, TestBuilderContext target)
             {
-                var row = DataUnwrapper.UnwrapWithMetadata(await factory() ?? []);
-                // The temporary instance used a different scope. Keep its cleanup even when
-                // this fetch replaces the original class row's event snapshot.
+                // Transfer the temporary instance's scope before invoking a factory that may
+                // throw, so failed-row cleanup can still release that scope.
                 if (_lentCleanup is { } lentCleanup)
                 {
                     foreach (var handler in lentCleanup.InvocationList)
@@ -1107,6 +1110,7 @@ internal sealed class TestBuilder : ITestBuilder
                     }
                     _lentCleanup = null;
                 }
+                var row = DataUnwrapper.UnwrapWithMetadata(await factory() ?? []);
                 _rowContext = target with { };
                 target.CopyStateBagTo(_rowContext);
                 _events = target.EventsIfCreated?.Clone();
@@ -1128,14 +1132,22 @@ internal sealed class TestBuilder : ITestBuilder
         /// </summary>
         public void TransferCleanupTo(TestBuilderContext target)
         {
-            var cleanup = _lentCleanup ?? _events?.OnDataRowDispose;
+            var cleanup = TakeCleanup();
             if (cleanup is null)
             {
                 return;
             }
 
             target.Events.OnDataRowDispose = cleanup.Clone();
+        }
+
+        public AsyncEvent<(TestContext Context, object? Object)>? TakeCleanup()
+        {
+            // A claimed row already belongs to a runnable test. Never copy its cleanup
+            // to a later empty source, which may finish before that test.
+            var cleanup = _lentCleanup ?? (_data is not null ? _events?.OnDataRowDispose : null);
             _lentCleanup = null;
+            return cleanup;
         }
 
         /// <summary>Marks the unclaimed objects as held by a test.</summary>

@@ -111,9 +111,22 @@ internal static class RetryHelper
 
                     if (testContext.InternalEventsIfCreated?.OnTestRetry is { } onRetry)
                     {
-                        foreach (var handler in onRetry.InvocationList)
+                        try
                         {
-                            await handler.InvokeAsync(testContext, (testContext, attempt + 1)).ConfigureAwait(false);
+                            foreach (var handler in onRetry.InvocationList)
+                            {
+                                await handler.InvokeAsync(testContext, (testContext, attempt + 1)).ConfigureAwait(false);
+                            }
+                        }
+                        catch
+                        {
+                            if (testContext.CompleteTestCancellation())
+                            {
+                                SetCancelledResult(testContext);
+                                return;
+                            }
+
+                            throw;
                         }
                     }
 
