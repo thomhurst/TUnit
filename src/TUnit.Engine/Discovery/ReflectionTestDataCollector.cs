@@ -824,6 +824,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     sourceClassMetadata = CreateDummyMethodMetadata(closedType, "Discovery");
                     sourceConstructorParameters = GetClosedConstructorParameters(closedType, inferenceConstructor!);
                 }
+                else if (memberTypeArguments is not null)
+                {
+                    // Keep every tuple column while checking whether an invalid source has an eligible row.
+                    // The open constructor supplies the row shape without closing a constraint-violating class.
+                    sourceConstructorParameters = CreateConstructorParameterMetadata(inferenceConstructor!);
+                }
             }
 
             var rowFactories = dataSource is MethodDataSourceAttribute ? new List<Func<Task<object?[]?>>>() : null;
@@ -2814,22 +2820,27 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 continue;
             }
 
-            var parameters = closedConstructor.GetParameters();
-            var result = new ParameterMetadata[parameters.Length];
-            for (var i = 0; i < parameters.Length; i++)
-            {
-                result[i] = new ParameterMetadata(parameters[i].ParameterType)
-                {
-                    Name = parameters[i].Name ?? $"param{i}",
-                    TypeInfo = new ConcreteType(parameters[i].ParameterType),
-                    ReflectionInfo = parameters[i]
-                };
-            }
-
-            return result;
+            return CreateConstructorParameterMetadata(closedConstructor);
         }
 
         return [];
+    }
+
+    private static ParameterMetadata[] CreateConstructorParameterMetadata(ConstructorInfo constructor)
+    {
+        var parameters = constructor.GetParameters();
+        var result = new ParameterMetadata[parameters.Length];
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            result[i] = new ParameterMetadata(parameters[i].ParameterType)
+            {
+                Name = parameters[i].Name ?? $"param{i}",
+                TypeInfo = new ConcreteType(parameters[i].ParameterType),
+                ReflectionInfo = parameters[i]
+            };
+        }
+
+        return result;
     }
 
     private static bool HasParameterlessConstructor(ConstructorInfo[] constructors)

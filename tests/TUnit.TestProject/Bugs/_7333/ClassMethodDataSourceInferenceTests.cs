@@ -744,4 +744,22 @@ public static class ConstraintExternalRowsProvider
     public static IEnumerable<string> Empty() => [];
     public static IEnumerable<string?> Nulls() => [null];
     public static IEnumerable<string> Values() => ["invalid"];
+    public static IEnumerable<(string?, string)> TupleValues() => [(null, "invalid")];
+    public static IEnumerable<(object?, string)> ObjectTupleValues() => [(null, "invalid")];
+}
+
+[Arguments(null, 1)]
+[MethodDataSource(typeof(ConstraintExternalRowsProvider), nameof(ConstraintExternalRowsProvider.TupleValues))]
+public class TupleExternalConstraintRows<T>(string? label, T value) where T : struct
+{
+    [Test]
+    public async Task Test() => await Assert.That((object)value).IsEqualTo(1);
+}
+
+[Arguments(null, 1)]
+[MethodDataSource(typeof(ConstraintExternalRowsProvider), nameof(ConstraintExternalRowsProvider.ObjectTupleValues))]
+public class ObjectTupleExternalConstraintRows<T>(object? label, T value) where T : struct
+{
+    [Test]
+    public async Task Test() => await Assert.That((object)value).IsEqualTo(1);
 }

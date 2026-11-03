@@ -11,9 +11,9 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/*/*",
         [
             result => result.ResultSummary.Outcome.ShouldBe("Failed"),
-            result => result.ResultSummary.Counters.Total.ShouldBe(70),
-            result => result.ResultSummary.Counters.Passed.ShouldBe(64),
-            result => result.ResultSummary.Counters.Failed.ShouldBe(6),
+            result => result.ResultSummary.Counters.Total.ShouldBe(74),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(66),
+            result => result.ResultSummary.Counters.Failed.ShouldBe(8),
             result => result.Results.Where(test => test.Outcome == "Failed" && !test.TestName!.StartsWith("ReportsMissingConstructorValue", StringComparison.Ordinal))
                 .ShouldAllBe(test => test.Output!.ErrorInfo!.Message!.Contains("type arguments")
                     || test.Output.ErrorInfo.Message.Contains("does not satisfy the 'struct' constraint"))
@@ -89,6 +89,8 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("EmptyExternalConstraintRows", 1, 0)]
     [Arguments("NullExternalConstraintRows", 1, 0)]
     [Arguments("NonemptyExternalConstraintRows", 2, 1)]
+    [Arguments("TupleExternalConstraintRows", 2, 1)]
+    [Arguments("ObjectTupleExternalConstraintRows", 2, 1)]
     public async Task External_Constraint_Failures_Require_Actual_Rows(string className, int total, int failed)
     {
         await RunTestsWithFilter($"/*/TUnit.TestProject.Bugs._7333/{className}*/*",
