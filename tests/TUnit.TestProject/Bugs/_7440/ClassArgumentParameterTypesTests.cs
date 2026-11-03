@@ -402,3 +402,21 @@ public class GenericRequiredCollidingConstructorTests<T>
     [Test]
     public async Task Run() => await Assert.That(Number).IsEqualTo(4);
 }
+
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(1)]
+public class GenericRefConstructorTests<T>
+{
+    private readonly T _value;
+
+    public GenericRefConstructorTests(ref T value)
+    {
+        _value = value;
+        value = default!;
+    }
+
+    [Test]
+    public async Task Run() => await Assert.That((int)(object)_value!).IsEqualTo(1);
+}

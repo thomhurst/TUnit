@@ -332,10 +332,6 @@ public static class InstanceFactoryGenerator
         else
         {
             var useCachedConstructor = requiredConstructorCache != null && (requiredProperties.Any() || requiredFields.Any());
-            writer.Append(useCachedConstructor
-                ? $"return ({className}){requiredConstructorCache}!.Invoke(new object?[] {{ "
-                : $"return new {className}(");
-
             // Preserve an explicitly supplied trailing array, while packing loose row values.
             var parameters = constructor.Parameters.ToArray();
             var arguments = TupleArgumentHelper.GenerateArgumentAccessWithParams(parameters, "args", "args.Length");
@@ -352,6 +348,23 @@ public static class InstanceFactoryGenerator
                 }
                 arguments[arguments.Count - 1] = new InvocationArgument(trailingExpression);
             }
+            if (!useCachedConstructor && parameters.Any(static parameter => parameter.RefKind != RefKind.None))
+            {
+                // By-reference arguments need assignable locals. Evaluate all conversions in
+                // parameter order before invoking the constructor, as a direct call would.
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    var refKind = parameters[i].RefKind;
+                    var localName = $"__constructorArgument_{i.ToString(CultureInfo.InvariantCulture)}";
+                    writer.AppendLine($"var {localName} = {arguments[i].Expression};");
+                    var modifier = refKind == RefKind.None ? "" : refKind == RefKind.Out ? "out " : refKind == RefKind.Ref ? "ref " : "in ";
+                    arguments[i] = arguments[i] with { Expression = $"{modifier}{localName}" };
+                }
+            }
+
+            writer.Append(useCachedConstructor
+                ? $"return ({className}){requiredConstructorCache}!.Invoke(new object?[] {{ "
+                : $"return new {className}(");
             writer.Append(string.Join(", ", arguments));
 
             writer.Append(useCachedConstructor ? " })" : ")");
