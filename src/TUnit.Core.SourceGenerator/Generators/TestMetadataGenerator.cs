@@ -1250,7 +1250,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodArgumentsAttributes = methodArgumentsBucket ?? [];
 
         var classArgumentsAttributes = testMethod.IsGenericType
-            ? testMethod.TypeSymbol.GetAttributes()
+            ? testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
                 .ToArray()
             : Array.Empty<AttributeData>();
@@ -1423,7 +1423,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Process class-level Arguments attributes for generic classes
         if (testMethod.IsGenericType)
         {
-            foreach (var argAttr in testMethod.TypeSymbol.GetAttributes().Where(a => a.AttributeClass?.Name == "ArgumentsAttribute"))
+            foreach (var argAttr in classArgumentsAttributes)
             {
                 var classInferredTypes = InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, argAttr, compilation);
                 if (classInferredTypes is { Length: > 0 })
@@ -6591,7 +6591,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // For generic classes, collect class-level Arguments attributes separately
         if (testMethod.IsGenericType)
         {
-            classArgumentsAttributes = testMethod.TypeSymbol.GetAttributes()
+            classArgumentsAttributes = testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
                 .ToArray();
         }
@@ -6898,8 +6898,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Process class-level Arguments attributes for generic classes (combined with generic methods)
         if (testMethod.IsGenericType)
         {
-            var argumentsAttributes = testMethod.TypeSymbol.GetAttributes()
-                .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute");
+            var argumentsAttributes = classArgumentsAttributes;
 
             foreach (var argAttr in argumentsAttributes)
             {
