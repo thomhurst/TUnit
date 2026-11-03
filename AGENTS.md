@@ -39,6 +39,8 @@ Read only as needed:
 
 Use `scripts/AgentLocks.ps1` from the shared checkout for work-item ownership (`pr-<N>` or `issue-<N>`). Set `$agentLocks` to its absolute path, acquire before creating the checkout, and pass the same stable `-OwnerId` to every verb (`acquire`, `renew`, `release`) outside Codex, or set `TUNIT_AGENT_LOCK_OWNER_ID`. Git and Docker are required locally.
 
+On Windows, before creating the first worktree, run `git config --local core.longpaths true` from the shared checkout. Template snapshot paths can exceed Windows' `MAX_PATH` under the worktree root. This repository-local setting is shared by its worktrees and must be enabled before checkout; see [Windows setup](scripts/WorktreeLifecycle.md#windows-setup).
+
 Immediately after checkout, run `pwsh $agentLocks renew -LockName $lockName -Worktree $worktree -OwnerId $ownerId` once to register its path. Stop owned processes, save needed evidence under the evidence root (below), then release from the shared checkout in `finally`. Release removes clean checkouts even for open PRs; branches and detached commits remain available for re-checkout. See [local worktree lifecycle](scripts/WorktreeLifecycle.md) for preservation rules and crash behavior.
 
 Never edit the main checkout, and write nothing loose beside it. Every file an agent produces outside a worktree has one home, so cleanup can find it:
