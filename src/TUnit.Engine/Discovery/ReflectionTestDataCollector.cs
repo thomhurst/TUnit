@@ -3709,7 +3709,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // For non-generic methods, parameter shape is stable across invocations — hoist the
         // GetParameters() call out of the hot lambda. Generic method definitions are resolved
         // to a concrete MethodInfo per invocation, so they must still call GetParameters() inline.
-        var staticParameters = testMethod.IsGenericMethodDefinition ? null : testMethod.GetParameters();
+        var definitionParameters = testMethod.GetParameters();
+        var definitionParameterTypes = testMethod.IsGenericMethodDefinition
+            ? Array.ConvertAll(definitionParameters, static p => p.ParameterType)
+            : null;
+        var staticParameters = testMethod.IsGenericMethodDefinition ? null : definitionParameters;
         var staticTupleElements = GetSingleDataParameter(staticParameters) is { ParameterType: var tupleType }
             ? GetTupleElementTypes(tupleType)
             : null;
@@ -3734,15 +3738,21 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     // Try to infer type arguments from the actual arguments
                     var genericParams = testMethod.GetGenericArguments();
                     var typeMapping = new Dictionary<Type, Type>();
-                    var methodParams = testMethod.GetParameters();
+                    var methodParams = definitionParameters;
 
-                    // Build type mapping from method parameters and actual arguments
-                    for (var j = 0; j < methodParams.Length && j < args.Length; j++)
+                    var flattenedTupleTypes = TupleParameterTypes.GetFlattenedTypes(definitionParameterTypes!, args, includesInjectedTokens: true);
+                    var tupleOffset = flattenedTupleTypes is not null
+                        ? Array.FindIndex(methodParams, static p => p.ParameterType != typeof(CancellationToken))
+                        : 0;
+                    var inferenceCount = flattenedTupleTypes?.Length ?? methodParams.Length;
+
+                    // Build type mapping from method parameters (or flattened tuple elements) and actual arguments.
+                    for (var j = 0; j < inferenceCount && j + tupleOffset < args.Length; j++)
                     {
-                        var arg = args[j];
+                        var arg = args[j + tupleOffset];
                         if (arg != null && arg != Type.Missing)
                         {
-                            var paramType = methodParams[j].ParameterType;
+                            var paramType = flattenedTupleTypes?[j] ?? methodParams[j].ParameterType;
                             var argType = arg.GetType();
                             InferGenericTypeMapping(paramType, argType, typeMapping, isTopLevel: true);
                         }
@@ -3825,7 +3835,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     : -1;
                 if (tupleElements is { Length: > 0 }
                     && args.Length == tupleElements.Length + parameters.Length - 1
-                    && (tupleElements.Length > 1 || !parameters[singleDataIndex].ParameterType.IsInstanceOfType(args[singleDataIndex])))
+                    && (tupleElements.Length > 1
+                        || args[singleDataIndex] is { } singleValue
+                            && !parameters[singleDataIndex].ParameterType.IsInstanceOfType(singleValue)))
                 {
                     // DataUnwrapper spreads an incompatible tuple so each element can be
                     // converted before constructing the target, as the generated invoker does.

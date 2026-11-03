@@ -425,7 +425,18 @@ internal sealed class TestGenericTypeResolver
             }
         }
 
-        var hasGenericParamsArray = HasGenericParamsArray(methodMetadata, parameterTypes, lastDataParameterIndex);
+        // A flattened tuple row binds its boxes to tuple elements, rather than to the tuple itself.
+        // This preserves generic inference without rebuilding a tuple before its structs initialize.
+        var tupleElementTypes = TupleParameterTypes.GetFlattenedTypes(parameterTypes, methodArguments);
+        if (tupleElementTypes is not null)
+        {
+            parameterTypes = tupleElementTypes;
+            dataParameterCount = tupleElementTypes.Length;
+            lastDataParameterIndex = tupleElementTypes.Length - 1;
+        }
+
+        var hasGenericParamsArray = tupleElementTypes is null
+            && HasGenericParamsArray(methodMetadata, parameterTypes, lastDataParameterIndex);
 
         // Method type parameters that only received null values, if any
         List<Type>? nullArgumentParameters = null;
@@ -434,7 +445,7 @@ internal sealed class TestGenericTypeResolver
         var parameterIndex = 0;
         for (var i = 0; i < Math.Min(dataParameterCount, methodArguments.Length); i++, parameterIndex++)
         {
-            while (parameterTypes[parameterIndex] == typeof(CancellationToken))
+            while (tupleElementTypes is null && parameterTypes[parameterIndex] == typeof(CancellationToken))
             {
                 parameterIndex++;
             }

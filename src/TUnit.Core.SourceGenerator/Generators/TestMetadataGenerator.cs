@@ -2382,7 +2382,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // CancellationToken (e.g. [GenerateGenericTest(typeof(CancellationToken))]) and must stay a data argument.
         var closedParameters = method.Parameters;
         if (!bindsByShape
-            && closedParameters[parameters[0].Ordinal].Type is not INamedTypeSymbol { IsTupleType: true })
+            && (closedParameters[parameters[0].Ordinal].Type is not INamedTypeSymbol singleParameterType
+                || !singleParameterType.IsTupleType && !IsReferenceTuple(singleParameterType)))
         {
             return null;
         }
