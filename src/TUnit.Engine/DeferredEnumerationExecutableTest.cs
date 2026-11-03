@@ -12,6 +12,8 @@ namespace TUnit.Engine;
 /// </summary>
 internal sealed class DeferredEnumerationExecutableTest : AbstractExecutableTest
 {
+    internal bool ExpansionCompletedWithoutChildren { get; set; }
+
     public override Task<object> CreateInstanceAsync() =>
         throw new InvalidOperationException(
             $"Deferred enumeration placeholder '{TestId}' was scheduled directly. It must be expanded by DeferredTestExpander before execution.");

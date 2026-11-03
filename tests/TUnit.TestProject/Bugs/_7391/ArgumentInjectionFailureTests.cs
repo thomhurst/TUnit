@@ -43,7 +43,7 @@ public sealed class ArgumentInjectionFailureTests
 public sealed class ArgumentInjectionFailureObserverTests
 {
     [Test]
-    [NotInParallel("7391-argument", Order = 2)]
+    [DependsOn(typeof(ArgumentInjectionFailureTests), nameof(ArgumentInjectionFailureTests.Fails_During_Argument_Injection), ProceedOnFailure = true)]
     public async Task Argument_Lives_Until_The_Failed_Test_Ends()
     {
         await Assert.That(FailingInjectionArgument.EndRan).IsTrue();

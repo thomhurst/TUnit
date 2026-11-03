@@ -30,6 +30,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     private readonly IStaticPropertyInitializer _staticPropertyInitializer;
     private readonly ObjectTracker _objectTracker;
     private readonly DeferredTestExpander _deferredTestExpander;
+    private readonly TestDependencyResolver _dependencyResolver;
 
     public TestSessionCoordinator(EventReceiverOrchestrator eventReceiverOrchestrator,
         TUnitFrameworkLogger logger,
@@ -40,7 +41,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         ITUnitMessageBus messageBus,
         IStaticPropertyInitializer staticPropertyInitializer,
         ObjectTracker objectTracker,
-        DeferredTestExpander deferredTestExpander)
+        DeferredTestExpander deferredTestExpander,
+        TestDependencyResolver dependencyResolver)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _logger = logger;
@@ -52,6 +54,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _staticPropertyInitializer = staticPropertyInitializer;
         _objectTracker = objectTracker;
         _deferredTestExpander = deferredTestExpander;
+        _dependencyResolver = dependencyResolver;
     }
 
     public async Task ExecuteTests(
@@ -233,6 +236,12 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             {
                 var children = await _deferredTestExpander.ExpandAsync(placeholder, cancellationToken);
                 testList.AddRange(children);
+                _dependencyResolver.ReplaceDeferredTest(placeholder, children);
+                if (children.Count == 0)
+                {
+                    placeholder.State = TestState.Passed;
+                    placeholder.ExpansionCompletedWithoutChildren = true;
+                }
                 expanded.Add((placeholder, children));
             }
             catch (Exception ex)
@@ -242,10 +251,12 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
                 await _logger.LogErrorAsync($"Failed to expand deferred test '{placeholder.TestId}': {ex}");
                 placeholder.EndTime = DateTimeOffset.UtcNow;
                 placeholder.SetResult(TestState.Failed, ex);
+                placeholder.ExpansionCompletedWithoutChildren = true;
                 await _messageBus.Failed(placeholder.Context, ex, placeholder.StartTime.GetValueOrDefault());
             }
         }
 
+        _dependencyResolver.ResolveAllDependencies();
         return expanded;
     }
 

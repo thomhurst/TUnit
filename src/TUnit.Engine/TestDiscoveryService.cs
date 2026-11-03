@@ -31,7 +31,7 @@ internal sealed class TestDiscoveryService : IDataProducer
     private readonly TestFilterService _testFilterService;
     private readonly MetadataDependencyExpander _dependencyExpander;
     private readonly ConcurrentQueue<AbstractExecutableTest> _cachedTests = new();
-    private readonly TestDependencyResolver _dependencyResolver = new();
+    private readonly TestDependencyResolver _dependencyResolver;
 
     public string Uid => "TUnit";
     public string Version => "2.0.0";
@@ -45,9 +45,11 @@ internal sealed class TestDiscoveryService : IDataProducer
         TestExecutor testExecutor,
         TestBuilderPipeline testBuilderPipeline,
         TestFilterService testFilterService,
-        MetadataDependencyExpander dependencyExpander)
+        MetadataDependencyExpander dependencyExpander,
+        TestDependencyResolver dependencyResolver)
     {
         _testExecutor = testExecutor;
+        _dependencyResolver = dependencyResolver;
         _testBuilderPipeline = testBuilderPipeline ?? throw new ArgumentNullException(nameof(testBuilderPipeline));
         _testFilterService = testFilterService;
         _dependencyExpander = dependencyExpander ?? throw new ArgumentNullException(nameof(dependencyExpander));

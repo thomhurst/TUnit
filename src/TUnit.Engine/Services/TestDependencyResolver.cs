@@ -38,6 +38,35 @@ internal sealed class TestDependencyResolver
         }
     }
 
+    // Expansion happens before scheduling. Replace discovery identities in both the lookup
+    // indices and already-resolved edges, including edges from other deferred tests.
+    public void ReplaceDeferredTest(AbstractExecutableTest placeholder, IReadOnlyList<AbstractExecutableTest> children)
+    {
+        lock (_resolutionLock)
+        {
+            if (children.Count == 0)
+            {
+                return;
+            }
+
+            _allTests.Remove(placeholder);
+            _allTests.AddRange(children);
+            _testsWithPendingDependencies.Remove(placeholder);
+            _testsByType.Clear();
+            _testsByMethodName.Clear();
+            _testLookupCache.Clear();
+            _indexedCount = 0;
+
+            foreach (var test in _allTests)
+            {
+                if (test.Dependencies.Any(dependency => dependency.Test == placeholder))
+                {
+                    test.Dependencies = [];
+                }
+            }
+        }
+    }
+
     // Must be called under _resolutionLock (or before a lock-free batch starts).
     private void EnsureIndexed()
     {
