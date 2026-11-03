@@ -63,6 +63,15 @@ public class StaticTupleDataSourceTests
         await Assert.That(value).IsEqualTo(Tuple.Create(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
     }
 
+    public static Tuple<char> CharacterReferenceValue() => Tuple.Create('A');
+
+    [Test]
+    [MethodDataSource(nameof(CharacterReferenceValue))]
+    public async Task Reference_Tuple_Character_Can_Be_Converted_To_Decimal(Tuple<decimal> value)
+    {
+        await Assert.That(value.Item1).IsEqualTo(65m);
+    }
+
     public sealed class ImplicitTupleValue
     {
         public static implicit operator (int, int)(ImplicitTupleValue value) => (1, 2);

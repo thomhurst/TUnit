@@ -133,6 +133,7 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("Tuple<char>", "Tuple<decimal>")]
     [Arguments("Tuple<string>", "Tuple<object>")]
     [Arguments("Tuple<int>", "Tuple<object>")]
     [Arguments("Tuple<int>", "Tuple<long>")]
