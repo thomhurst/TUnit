@@ -242,6 +242,104 @@ public class ClassRowCleanupTests
         }
     }
 
+    [Test]
+    [Arguments(false, false)]
+    [Arguments(false, true)]
+    [Arguments(true, false)]
+    [Arguments(true, true)]
+    public async Task ClassAndMethodEnumerationStateSurvivesFactories(bool streaming, bool classEnumeration)
+    {
+        var current = TestContext.Current!;
+        var builder = (ITestBuilder)current.ServiceProvider.GetService(typeof(ITestBuilder))!;
+        var metadata = new TestMetadata<ClassRowCleanupTests>
+        {
+            TestClassType = typeof(ClassRowCleanupTests),
+            TestMethodName = nameof(ClassAndMethodEnumerationStateSurvivesFactories),
+            TestName = "Enumeration state regression",
+            FilePath = "Unknown",
+            LineNumber = 0,
+            AttributeFactory = () => [],
+            MethodMetadata = current.TestDetails.MethodMetadata,
+            RepeatCount = 1,
+            DataSources = [new EnumerationStateSource(false)],
+            ClassDataSources = [new EnumerationStateSource(true, classEnumeration)],
+            PropertyDataSources = [],
+            InstanceFactory = (_, _) => new ClassRowCleanupTests(),
+            InvokeTypedTest = (_, _, _) => ValueTask.CompletedTask
+        };
+        var tests = new List<AbstractExecutableTest>();
+        try
+        {
+            if (streaming)
+            {
+                await foreach (var test in builder.BuildTestsStreamingAsync(metadata))
+                {
+                    tests.Add(test);
+                }
+            }
+            else
+            {
+                tests.AddRange(await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null)));
+            }
+
+            await Assert.That(tests.Count).IsEqualTo(4);
+            foreach (var test in tests)
+            {
+                await Assert.That(test.Result?.Exception).IsNull();
+                if (classEnumeration)
+                {
+                    await Assert.That(test.Context.StateBag.Items["class-enumeration"]).IsEqualTo(test.Context.StateBag.Items["class-factory"]);
+                }
+                await Assert.That(test.Context.StateBag.Items["method-enumeration"]).IsEqualTo(test.Context.StateBag.Items["method-factory"]);
+            }
+        }
+        finally
+        {
+            foreach (var test in tests)
+            {
+                test.Context.RemoveFromRegistry();
+                test.Context.Dispose();
+            }
+        }
+    }
+
+    private sealed class EnumerationStateSource(bool constructor, bool enumerationState = true) : Attribute, IDataSourceAttribute
+    {
+        public bool SkipIfEmpty { get; set; }
+        public bool DeferEnumeration { get; set; }
+
+        public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata metadata)
+        {
+            await Task.CompletedTask;
+            var prefix = constructor ? "class" : "method";
+            for (var i = 0; i < (constructor ? 2 : 1); i++)
+            {
+                var value = new object();
+                if (enumerationState)
+                {
+                    metadata.TestBuilderContext.Current.StateBag[prefix + "-enumeration"] = value;
+                }
+                yield return () =>
+                {
+                    var state = metadata.TestBuilderContext.Current.StateBag;
+                    if (enumerationState && !ReferenceEquals(state[prefix + "-enumeration"], value))
+                    {
+                        throw new InvalidOperationException("Enumeration state belongs to another row");
+                    }
+                    if (!state.TryAdd(prefix + "-factory", value))
+                    {
+                        throw new InvalidOperationException("Factory state leaked into enumeration");
+                    }
+                    return Task.FromResult<object?[]?>([value]);
+                };
+                if (metadata.TestBuilderContext.Current.StateBag.ContainsKey(prefix + "-factory"))
+                {
+                    throw new InvalidOperationException("Factory state leaked when enumeration resumed");
+                }
+            }
+        }
+    }
+
     private sealed class StatefulConstructorSource : Attribute, IDataSourceAttribute
     {
         public readonly List<object> Resources = [];

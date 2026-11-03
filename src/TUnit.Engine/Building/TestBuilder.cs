@@ -220,6 +220,7 @@ internal sealed class TestBuilder : ITestBuilder
                     ClassDataSourceAttribute = classDataSource
                 };
                 testBuilderContext.CopyStateBagTo(contextAccessor.Current);
+                var classSourceContext = contextAccessor.Current;
                 classDataAttributeIndex++;
 
                 var classDataLoopIndex = 0;
@@ -245,7 +246,7 @@ internal sealed class TestBuilder : ITestBuilder
                         ClassConstructor = testBuilderContext.ClassConstructor,
                         ClassDataSourceAttribute = classDataSource
                     };
-                    testBuilderContext.CopyStateBagTo(contextAccessor.Current);
+                    classSourceContext.CopyStateBagTo(contextAccessor.Current);
 
                     // A new factory owns its own cleanup, even if it throws before producing a row.
                     activeClassRow = null;
@@ -631,6 +632,7 @@ internal sealed class TestBuilder : ITestBuilder
                     finally
                     {
                         await DisposeInstanceForMethodDataSourcesAsync(instanceForMethodDataSources);
+                        contextAccessor.Current = classSourceContext;
                     }
                 }
 
@@ -1133,7 +1135,15 @@ internal sealed class TestBuilder : ITestBuilder
         {
             if (_data is { } data)
             {
-                _rowContext.CopyStateBagTo(context);
+                // The target already holds method-enumeration state. Add saved constructor
+                // state without replacing that baseline (or its newer values).
+                if (_rowContext.HasStateBag)
+                {
+                    foreach (var entry in _rowContext.StateBag)
+                    {
+                        context.StateBag.TryAdd(entry.Key, entry.Value);
+                    }
+                }
                 if (_events is { } savedEvents)
                 {
                     context.Events = savedEvents.Clone();
@@ -2287,6 +2297,15 @@ internal sealed class TestBuilder : ITestBuilder
         var classDataAttributeIndex = 0;
         foreach (var classDataSource in await GetDataSourcesAsync(metadata.ClassDataSources, cancellationToken))
         {
+            var classSourceContext = new TestBuilderContext
+            {
+                TestMetadata = metadata.MethodMetadata,
+                InitializedAttributes = attributes,
+                ClassConstructor = baseContext.ClassConstructor,
+                ClassDataSourceAttribute = classDataSource
+            };
+            baseContext.CopyStateBagTo(classSourceContext);
+            contextAccessor.Current = classSourceContext;
             classDataAttributeIndex++;
             var classDataLoopIndex = 0;
 
@@ -2309,7 +2328,7 @@ internal sealed class TestBuilder : ITestBuilder
                     ClassConstructor = baseContext.ClassConstructor,
                     ClassDataSourceAttribute = classDataSource
                 };
-                baseContext.CopyStateBagTo(contextAccessor.Current);
+                classSourceContext.CopyStateBagTo(contextAccessor.Current);
 
                 // Keep constructor-factory state on its saved row, outside the enumeration baseline.
                 var classRowEnumerationContext = new TestBuilderContext
@@ -2420,6 +2439,7 @@ internal sealed class TestBuilder : ITestBuilder
                 finally
                 {
                     await DisposeInstanceForMethodDataSourcesAsync(instanceForMethodDataSources);
+                    contextAccessor.Current = classSourceContext;
                 }
             }
         }
