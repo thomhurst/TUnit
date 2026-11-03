@@ -291,3 +291,39 @@ public class SingleGenericDecimalConstructorTests<T>(decimal amount, T value)
         await Assert.That((int)(object)value!).IsEqualTo(42);
     }
 }
+
+public abstract class RequiredFieldBase
+{
+    public required string? Inherited;
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+public class SingleGenericRequiredFieldTests<T>(T value) : RequiredFieldBase
+{
+    public required int Number;
+
+    [Test]
+    public async Task Run()
+    {
+        await Assert.That((int)(object)value!).IsEqualTo(1);
+        await Assert.That(Number).IsEqualTo(0);
+        await Assert.That(Inherited).IsNull();
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+public class SingleGenericSetsRequiredFieldTests<T>
+{
+    public required int Number = 3;
+
+    [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+    public SingleGenericSetsRequiredFieldTests(T value)
+    {
+        Number += (int)(object)value!;
+    }
+
+    [Test]
+    public async Task Run() => await Assert.That(Number).IsEqualTo(4);
+}

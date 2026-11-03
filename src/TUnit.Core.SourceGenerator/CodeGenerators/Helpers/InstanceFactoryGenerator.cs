@@ -297,7 +297,11 @@ public static class InstanceFactoryGenerator
             ? []
             : RequiredPropertyHelper.GetAllRequiredProperties(constructor.ContainingType).ToArray();
 
-        if (constructor.Parameters.Length == 0 && !requiredProperties.Any())
+        var requiredFields = setsRequiredMembers
+            ? []
+            : RequiredPropertyHelper.GetAllRequiredFields(constructor.ContainingType).ToArray();
+
+        if (constructor.Parameters.Length == 0 && !requiredProperties.Any() && !requiredFields.Any())
         {
             writer.AppendLine($"return new {className}();");
         }
@@ -325,8 +329,8 @@ public static class InstanceFactoryGenerator
 
             writer.Append(")");
 
-            // Add object initializer for required properties
-            if (requiredProperties.Any())
+            // Satisfy required properties and fields unless the constructor initializes them.
+            if (requiredProperties.Any() || requiredFields.Any())
             {
                 writer.AppendLine();
                 writer.AppendLine("{");
@@ -336,6 +340,12 @@ public static class InstanceFactoryGenerator
                 {
                     var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
                     writer.AppendLine($"{property.Name} = {defaultValue},");
+                }
+
+                foreach (var field in requiredFields)
+                {
+                    var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(field.Type);
+                    writer.AppendLine($"{field.Name} = {defaultValue},");
                 }
 
                 writer.Unindent();
