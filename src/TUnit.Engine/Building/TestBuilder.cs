@@ -302,11 +302,11 @@ internal sealed class TestBuilder : ITestBuilder
                                 hasAnyMethodData = true;
                                 methodDataLoopIndex++;
 
+                                var enumerationContext = contextAccessor.Current;
                                 for (var i = 0; i < repeatCount + 1; i++)
                                 {
                                     // Update context BEFORE calling data factories so they track objects in the right context
                                     // StateBag and Events are lazy-initialized for performance
-                                    var enumerationContext = contextAccessor.Current;
                                     contextAccessor.Current = new TestBuilderContext
                                     {
                                         TestMetadata = metadata.MethodMetadata,
@@ -507,9 +507,10 @@ internal sealed class TestBuilder : ITestBuilder
                                         test.Context.SkipReason = basicSkipReason;
                                     }
                                     tests.Add(test);
-
-                                    // Context already updated at the beginning of the loop before calling factories
                                 }
+
+                                // Resume enumeration against its own context, without factory-written row state.
+                                contextAccessor.Current = enumerationContext;
                             }
 
                             // If no data was yielded and SkipIfEmpty is true, create a skipped test
@@ -2253,12 +2254,12 @@ internal sealed class TestBuilder : ITestBuilder
                             cancellationToken.ThrowIfCancellationRequested();
                             methodDataLoopIndex++;
 
+                            var enumerationContext = contextAccessor.Current;
                             // Stream through repeat count
                             for (var i = 0; i < repeatCount + 1; i++)
                             {
                                 cancellationToken.ThrowIfCancellationRequested();
 
-                                var enumerationContext = contextAccessor.Current;
                                 contextAccessor.Current = new TestBuilderContext
                                 {
                                     TestMetadata = metadata.MethodMetadata,
@@ -2283,6 +2284,9 @@ internal sealed class TestBuilder : ITestBuilder
                                     yield return test;
                                 }
                             }
+
+                            // Keep subsequent rows and repeats independent of each test's factory state.
+                            contextAccessor.Current = enumerationContext;
                         }
                     }
                 }
