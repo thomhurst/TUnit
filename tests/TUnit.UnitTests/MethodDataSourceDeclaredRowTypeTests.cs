@@ -61,6 +61,8 @@ public class MethodDataSourceDeclaredRowTypeTests
     }
 
     [Test]
+    [Arguments(typeof(Task))]
+    [Arguments(typeof(ValueTask))]
     [Arguments(typeof(object[][]))]
     [Arguments(typeof(IEnumerable<object[]>))]
     [Arguments(typeof(System.Collections.ArrayList))]
@@ -68,6 +70,24 @@ public class MethodDataSourceDeclaredRowTypeTests
     public async Task Rows_Of_Unknown_Type_Have_No_Declared_Row_Type(Type memberType)
     {
         await Assert.That(MethodDataSourceAttribute.GetDeclaredRowType(memberType)).IsNull();
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Resultless_Source_Is_Awaited_Before_Yielding_A_Null_Row(bool useValueTask)
+    {
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        object source = useValueTask ? new ValueTask(completion.Task) : completion.Task;
+        await using var rows = MethodDataSourceAttribute.GetRowsFromRuntimeValueAsync(source, CreateMetadata()).GetAsyncEnumerator();
+        var move = rows.MoveNextAsync();
+        await Assert.That(move.IsCompleted).IsFalse();
+        completion.SetResult();
+        await Assert.That(await move).IsTrue();
+        var row = await rows.Current();
+        await Assert.That(row!).Count().IsEqualTo(1);
+        await Assert.That(row![0]).IsNull();
+        await Assert.That(await rows.MoveNextAsync()).IsFalse();
     }
 
     private static async IAsyncEnumerable<int> AsyncRows()

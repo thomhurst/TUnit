@@ -222,3 +222,5 @@ public class MyTests
 2. **Alternative:** Use `IAsyncDiscoveryInitializer` if you need discovery-time initialization
 
 See [Property Injection - Discovery Phase Initialization](property-injection.md#discovery-phase-initialization) for detailed guidance and examples.
+
+Resultless `Task` and `ValueTask` sources are awaited during discovery and supply one row containing a single `null` value. They do not supply an empty row; the receiving test needs one nullable parameter. This also applies to `InstanceMethodDataSource` in both generated and reflection discovery. Prefer a generic task returning explicit data when supplying test arguments.
