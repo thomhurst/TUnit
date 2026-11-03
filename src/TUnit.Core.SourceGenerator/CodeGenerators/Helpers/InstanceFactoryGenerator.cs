@@ -200,6 +200,9 @@ public static class InstanceFactoryGenerator
     /// but not during source output.
     /// </summary>
     public static string GenerateInstanceFactoryBody(ITypeSymbol typeSymbol)
+        => GenerateInstanceFactoryBody(typeSymbol, null);
+
+    public static string GenerateInstanceFactoryBody(ITypeSymbol typeSymbol, IMethodSymbol? selectedConstructor)
     {
         var bodyWriter = new CodeWriter(includeHeader: false);
         var className = typeSymbol.GloballyQualified();
@@ -210,7 +213,7 @@ public static class InstanceFactoryGenerator
         }
         else if (typeSymbol.HasParameterizedConstructor())
         {
-            var constructor = GetPrimaryConstructor(typeSymbol);
+            var constructor = selectedConstructor ?? GetPrimaryConstructor(typeSymbol);
             if (constructor != null)
             {
                 GenerateTypedConstructorCallBody(bodyWriter, className, constructor);

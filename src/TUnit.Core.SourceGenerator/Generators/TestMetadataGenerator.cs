@@ -1976,7 +1976,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else if (entry.HasParameterizedConstructor && entry.SpecificIsClassRow
                  && entry.SpecificArgumentsAttribute?.AttributeClass?.Name == "MethodDataSourceAttribute")
         {
-            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol.Construct(entry.ClassTypeArgs)));
+            var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
+            var rowType = GetDeclaredMethodDataSourceRowType(testMethod, entry.SpecificArgumentsAttribute);
+            IMethodSymbol? inferredConstructor = null;
+            if (rowType is not null)
+            {
+                InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType, false, out inferredConstructor);
+            }
+
+            // Use the same constructor that inferred this instantiation, with its closed parameter
+            // types. The general instance factory's longest-constructor rule can select another overload.
+            var closedConstructor = constructedType.InstanceConstructors.FirstOrDefault(constructor =>
+                SymbolEqualityComparer.Default.Equals(constructor.OriginalDefinition, inferredConstructor?.OriginalDefinition));
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, closedConstructor));
         }
         else if (entry.HasParameterizedConstructor)
         {
@@ -2459,11 +2471,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.Indent();
             foreach (var attr in classDataSources)
             {
+                // Fixed external sources bypass runtime partitioning, so discard null and empty
+                // rows here even for value types rather than synthesizing an argument-free test.
                 var skipNullRows = attr.AttributeClass?.Name == "MethodDataSourceAttribute"
                     && (attr.ConstructorArguments is [{ Value: INamedTypeSymbol }, ..] || attr.AttributeClass.IsGenericType)
-                    && InferClassTypesFromClassMethodDataSource(testMethod, attr) is not null
-                    && GetDeclaredMethodDataSourceRowType(testMethod, attr) is { } rowType
-                    && (GetTupleElementTypes(rowType) ?? [rowType]).Any(type => !type.IsValueType);
+                    && InferClassTypesFromClassMethodDataSource(testMethod, attr) is not null;
                 GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol, skipNullRows);
             }
             dsWriter.Unindent();
@@ -7692,7 +7704,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <c>object</c>. Mirrors reflection mode's <c>InferClassTypeArgumentsFromOwnMemberRowType</c> (#7208).
     /// </summary>
     private static ITypeSymbol[]? InferClassTypesFromOwnMemberRowType(INamedTypeSymbol classSymbol, ITypeSymbol rowType, bool requireFixedRuntimeTypes = false)
+        => InferClassTypesFromOwnMemberRowType(classSymbol, rowType, requireFixedRuntimeTypes, out _);
+
+    private static ITypeSymbol[]? InferClassTypesFromOwnMemberRowType(INamedTypeSymbol classSymbol, ITypeSymbol rowType, bool requireFixedRuntimeTypes, out IMethodSymbol? selectedConstructor)
     {
+        selectedConstructor = null;
         var constructors = classSymbol.InstanceConstructors
             .Where(constructor => constructor.DeclaredAccessibility == Accessibility.Public)
             .ToArray();
@@ -7702,11 +7718,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix));
         if (testConstructor != null)
         {
+            selectedConstructor = testConstructor;
             return InferClassTypesFromConstructorRow(testConstructor, rowType, classSymbol.TypeParameters, requireFixedRuntimeTypes);
         }
 
         if (constructors.Length > 0 && !constructors.Any(constructor => constructor.Parameters.Length == 0))
         {
+            selectedConstructor = constructors[0];
             return InferClassTypesFromConstructorRow(constructors[0], rowType, classSymbol.TypeParameters, requireFixedRuntimeTypes);
         }
 
@@ -7714,6 +7732,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             if (InferClassTypesFromConstructorRow(constructor, rowType, classSymbol.TypeParameters, requireFixedRuntimeTypes) is { } typeArguments)
             {
+                selectedConstructor = constructor;
                 return typeArguments;
             }
         }

@@ -268,3 +268,69 @@ public class ExternalUnrelatedColumnRows<T>(T value, object other)
         await Assert.That(other).IsEqualTo("other");
     }
 }
+
+
+public sealed class FreshResource : IDisposable
+{
+    private int _used;
+
+    public void Use()
+    {
+        if (Interlocked.Exchange(ref _used, 1) != 0)
+        {
+            throw new InvalidOperationException("A factory resource was reused or already disposed.");
+        }
+    }
+
+    public void Dispose() => Interlocked.Exchange(ref _used, 1);
+}
+
+public static class ReviewRows
+{
+    public static IEnumerable<Func<FreshResource>> Resources() => [() => new FreshResource()];
+    public static IEnumerable<int> EmptyIntegers() => [];
+}
+
+// Each method row must fetch a fresh factory value, including after the first is disposed.
+[MethodDataSource(typeof(ReviewRows), nameof(ReviewRows.Resources))]
+public class ExternalFreshFactoryRows<T>(T value) : IDisposable
+{
+    [Test]
+    [Arguments(1)]
+    [Arguments(2)]
+    [NotInParallel]
+    public void Test(int methodRow)
+    {
+        _ = methodRow;
+        ((FreshResource)(object)value!).Use();
+    }
+
+    public void Dispose() => ((IDisposable)value!).Dispose();
+}
+
+// An empty external source adds no row to the explicit seed, even for value types.
+[Arguments(1)]
+[MethodDataSource(typeof(ReviewRows), nameof(ReviewRows.EmptyIntegers))]
+public class ExternalEmptyValueRows<T>(T value)
+{
+    [Test]
+    public async Task Test() => await Assert.That((object?)value).IsEqualTo(1);
+}
+
+// Construction must use the constructor that supplied the inferred class types.
+#pragma warning disable TUnit0052 // Deliberately exercises implicit constructor selection.
+[MethodDataSource(typeof(Rows), nameof(Rows.Integers))]
+public class ExternalOverloadedConstructorRows<T>
+{
+    private readonly T _value;
+
+    public ExternalOverloadedConstructorRows(T value) => _value = value;
+
+    public ExternalOverloadedConstructorRows(T value, string label)
+        => throw new InvalidOperationException("The longer constructor does not match the row.");
+
+    [Test]
+    public async Task Test() => await Assert.That((object?)_value).IsEqualTo(3);
+}
+
+#pragma warning restore TUnit0052

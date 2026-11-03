@@ -176,7 +176,14 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                     row = GenericClassRowPartition.EvaluateWrappedFactory(row);
                     if (TestDataRowUnwrapper.UnwrapArray(row).Data.Any(value => value is not null))
                     {
-                        yield return () => Task.FromResult<object?[]?>(row);
+                        // Reuse the value evaluated for filtering only once. Later method rows and
+                        // repetitions must call the source factory for fresh constructor data.
+                        var evaluated = row;
+                        yield return () =>
+                        {
+                            var firstRow = Interlocked.Exchange(ref evaluated, null);
+                            return firstRow is not null ? Task.FromResult<object?[]?>(firstRow) : func();
+                        };
                     }
                 }
                 else
