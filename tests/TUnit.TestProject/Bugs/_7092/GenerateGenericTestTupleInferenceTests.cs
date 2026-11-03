@@ -87,9 +87,8 @@ public class GenerateGenericTestDuplicateMethodDataSourceInferenceTests
         yield return () => (2, "b");
     }
 
-    // Both sources infer <int, string>. Source-gen mode keeps only the first source for that instantiation, so
-    // <int, string> runs FirstRows and <object, object> runs both sources: three tests. Reflection mode also ran
-    // SecondRows for <int, string>.
+    // Both sources infer <int, string>. Both modes keep the first source for that instantiation.
+    // <int, string> runs FirstRows and <object, object> runs both sources: three tests.
     [Test]
     [GenerateGenericTest(typeof(object), typeof(object))]
 #pragma warning disable TUnit0001 // the analyzer does not resolve T1/T2 from the tuple
@@ -99,6 +98,10 @@ public class GenerateGenericTestDuplicateMethodDataSourceInferenceTests
     public async Task Duplicate_Inferred_Types_Keep_The_First_Source<T1, T2>(T1 first, T2 second)
     {
         await Assert.That(first is T1 && second is T2).IsTrue();
+        if (typeof(T1) == typeof(int))
+        {
+            await Assert.That(first).IsEqualTo((T1)(object)1);
+        }
     }
 }
 

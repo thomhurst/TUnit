@@ -16,6 +16,7 @@ using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
+using TUnit.Inference;
 
 namespace TUnit.Engine.Discovery;
 
@@ -2089,6 +2090,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             var index = instantiations?.FindIndex(x => TypeArrayComparer.Instance.Equals(x.Method.GetGenericArguments(), typeArguments)) ?? -1;
             if (index >= 0)
             {
+                // The class is already closed here. This is declared method-source selection, not
+                // inference of class type arguments (which has a separate policy).
                 instantiations![index].Rows.Add(dataSource);
             }
             else
@@ -2239,35 +2242,33 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // is declared. The source generator skips tokens the same way when it infers from [Arguments] rows
         // and from [MethodDataSource] tuple elements.
         ParameterInfo[]? dataParameters = null;
-        foreach (var dataSource in dataSources)
-        {
-            if (dataSource is ArgumentsAttribute arguments)
-            {
-                dataParameters ??= Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
-                AddInstantiation(InferMethodTypeArguments(arguments.Values, dataParameters, genericParameterCount), arguments, isMethodArgumentsRow: true);
-            }
-        }
-
-        // On a generic class too (#7164), as the generator does
         var classGenericParameterCount = method.DeclaringType is { IsGenericType: true } declaringType
             ? declaringType.GetGenericArguments().Length
             : 0;
-        foreach (var dataSource in dataSources)
+        foreach (var rule in GenericMethodInferencePolicy.Rules)
         {
-            if (dataSource is not ArgumentsAttribute)
+            if (rule.Source == GenericMethodInferencePolicy.Source.ParameterAttribute)
             {
-                AddInstantiation(InferTypesFromTypedDataSource(dataSource, method, genericParameterCount, classGenericParameterCount), dataSource);
+                AddInstantiation(InferTypesFromTypeInferringAttributes(parameters, genericParameterCount), null, source: rule.Source);
+                continue;
             }
-        }
 
-        AddInstantiation(InferTypesFromTypeInferringAttributes(parameters, genericParameterCount), null);
-
-        foreach (var dataSource in dataSources)
-        {
-            if (dataSource is MethodDataSourceAttribute methodDataSource)
+            foreach (var dataSource in dataSources)
             {
-                dataParameters ??= Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
-                AddInstantiation(InferTypesFromMethodDataSource(testClass, methodDataSource, dataParameters, genericParameterCount), methodDataSource);
+                switch (rule.Source)
+                {
+                    case GenericMethodInferencePolicy.Source.Arguments when dataSource is ArgumentsAttribute arguments:
+                        dataParameters ??= Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
+                        AddInstantiation(InferMethodTypeArguments(arguments.Values, dataParameters, genericParameterCount), arguments, isMethodArgumentsRow: true, source: rule.Source);
+                        break;
+                    case GenericMethodInferencePolicy.Source.TypedDataSource when dataSource is not ArgumentsAttribute:
+                        AddInstantiation(InferTypesFromTypedDataSource(dataSource, method, genericParameterCount, classGenericParameterCount), dataSource, source: rule.Source);
+                        break;
+                    case GenericMethodInferencePolicy.Source.MethodDataSource when dataSource is MethodDataSourceAttribute methodDataSource:
+                        dataParameters ??= Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
+                        AddInstantiation(InferTypesFromMethodDataSource(testClass, methodDataSource, dataParameters, genericParameterCount), methodDataSource, source: rule.Source);
+                        break;
+                }
             }
         }
 
@@ -2315,7 +2316,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return dataSources.Length;
         }
 
-        void AddInstantiation(Type[]? typeArguments, IDataSourceAttribute? row, bool isMethodArgumentsRow = false)
+        // This collector is called only when explicit method types exist. Without them, reflection
+        // uses ResolveDeclaredTypedSourceInstantiations and runtime inference instead.
+        void AddInstantiation(Type[]? typeArguments, IDataSourceAttribute? row, GenericMethodInferencePolicy.Source source,
+            bool isMethodArgumentsRow = false)
         {
             if (typeArguments is null)
             {
@@ -2337,7 +2341,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // types rather than being dropped, as the generator joins it (#7214). Rows keep declaration
                 // order, as the generator emits them.
                 else if (row is not null
-                    && IsTypedArgumentsRow(row)
+                    && GenericMethodInferencePolicy.JoinsDuplicate(
+                        isLiteralRow: IsTypedArgumentsRow(row), joinsInferredSources: false)
                     && instantiations[index].Rows is { } existingRows
                     && !existingRows.Exists(existing => ReferenceEquals(existing, row)))
                 {
@@ -2359,7 +2364,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // so it fails with the constraint message, wrapped so that its own values are still produced
                 // first (#7153). Any other source is skipped and runs on those types instead (#7116), as the
                 // source generator skips it.
-                if (isMethodArgumentsRow && row is not null)
+                if (GenericMethodInferencePolicy.ReportsConstraintViolation(source, hasExplicitTypes: true) && isMethodArgumentsRow && row is not null)
                 {
                     // FindConstraintViolation produces the generator's message. It returns null only for a type-argument
                     // count mismatch or when MakeGenericMethod succeeds, and neither can happen once MakeGenericMethod
@@ -2376,7 +2381,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return;
             }
 
-            instantiations.Add((closedMethod, typeArguments, row is null ? null : [row]));
+            instantiations.Add((closedMethod, typeArguments, row is null || !GenericMethodInferencePolicy.GetRule(source).ScopesRows ? null : [row]));
         }
     }
 

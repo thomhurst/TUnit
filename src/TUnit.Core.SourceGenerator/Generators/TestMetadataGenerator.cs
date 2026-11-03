@@ -15,6 +15,7 @@ using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 using TUnit.Core.SourceGenerator.Utilities;
+using TUnit.Inference;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -1024,8 +1025,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Otherwise its rows would be reported as uninferable (#7163). Reflection mode drops
                     // such a source when the method has [GenerateGenericTest], so it is dropped here too.
                     // The name also matches [Arguments<T>], a literal row that joins as well (#7214).
-                    if (specificAttr?.AttributeClass?.Name == "ArgumentsAttribute"
-                        || (specificAttr is not null && !isClassRow && joinsDuplicateMethodSources))
+                    if (specificAttr is not null && GenericMethodInferencePolicy.JoinsDuplicate(
+                        isLiteralRow: specificAttr.AttributeClass?.Name == "ArgumentsAttribute",
+                        joinsInferredSources: joinsDuplicateMethodSources && !isClassRow))
                     {
                         existing.AddRow(specificAttr, isClassRow);
                     }
@@ -1340,31 +1342,55 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // a data source declared with a broad type (object, an interface or int?) supplies more specific
         // values. Reflection mode skips such sources the same way (InferMethodInstantiationsFromDataSources
         // in TUnit.Engine), and TUnit0001 accepts them (#7116).
-        // An empty or wrongly sized [GenerateGenericTest] creates no instantiation to run those rows on, but it
-        // fails on its own (#7222), so the rows do not silently disappear. Reflection mode skips them the same way.
-        var reportDataSourceConstraintViolations = !(testMethod.IsGenericMethod && generateGenericTestBucket is not null);
-
-        // Process typed data source attributes
-        foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+        // Empty or wrongly sized explicit types fail independently (#7222), so declared sources
+        // still defer to them, matching reflection discovery and preserving the existing behavior.
+        var hasExplicitMethodTypes = testMethod.IsGenericMethod && generateGenericTestBucket is not null;
+        // Arguments are collected above; explicit types are paired below. Both adapters use
+        // the shared table to order the declared sources between these boundary phases.
+        foreach (var rule in GenericMethodInferencePolicy.Rules)
         {
-            var inferredTypes = InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr);
-            if (inferredTypes is { Length: > 0 })
+            var reportDataSourceConstraintViolations = GenericMethodInferencePolicy.ReportsConstraintViolation(rule.Source, hasExplicitMethodTypes);
+            switch (rule.Source)
             {
-                TryAddInstantiation(inferredTypes, dataSourceAttr, reportMethodConstraintViolation: reportDataSourceConstraintViolations,
-                    deferToGenerateGenericTest: !reportDataSourceConstraintViolations);
+                case GenericMethodInferencePolicy.Source.TypedDataSource:
+                    foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+                    {
+                        var inferredTypes = InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr);
+                        if (inferredTypes is { Length: > 0 })
+                        {
+                            TryAddInstantiation(inferredTypes, rule.ScopesRows ? dataSourceAttr : null, reportMethodConstraintViolation: reportDataSourceConstraintViolations,
+                                deferToGenerateGenericTest: !reportDataSourceConstraintViolations);
+                        }
+                    }
+                    break;
+                case GenericMethodInferencePolicy.Source.ParameterAttribute:
+                    if (testMethod.IsGenericMethod)
+                    {
+                        var inferredTypes = InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol);
+                        if (inferredTypes is { Length: > 0 })
+                        {
+                            TryAddInstantiation(inferredTypes, reportMethodConstraintViolation: true);
+                        }
+                    }
+                    break;
+                case GenericMethodInferencePolicy.Source.MethodDataSource:
+                    if (testMethod.IsGenericMethod)
+                    {
+                        foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+                        {
+                            var inferredTypes = InferTypesFromMethodDataSource(testMethod, mdsAttr);
+                            if (inferredTypes is { Length: > 0 })
+                            {
+                                TryAddInstantiation(inferredTypes, rule.ScopesRows ? mdsAttr : null, reportMethodConstraintViolation: reportDataSourceConstraintViolations,
+                                    deferToGenerateGenericTest: !reportDataSourceConstraintViolations);
+                            }
+                        }
+                    }
+                    break;
             }
         }
 
-        // Process IInfersType<T> attributes on parameters
-        if (testMethod.IsGenericMethod)
-        {
-            var inferredTypes = InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol);
-            if (inferredTypes is { Length: > 0 })
-            {
-                TryAddInstantiation(inferredTypes, reportMethodConstraintViolation: true);
-            }
-        }
-
+        // This class-only phase is mutually exclusive with the generic-method phases above.
         // Process MethodDataSource attributes for generic classes (non-generic methods)
         if (testMethod is { IsGenericType: true, IsGenericMethod: false })
         {
@@ -1382,20 +1408,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (typedDataSourceInferredTypes is { Length: > 0 })
             {
                 TryAddInstantiation(typedDataSourceInferredTypes);
-            }
-        }
-
-        // Process MethodDataSource attributes for generic methods
-        if (testMethod.IsGenericMethod)
-        {
-            foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
-            {
-                var inferredTypes = InferTypesFromMethodDataSource(testMethod, mdsAttr);
-                if (inferredTypes is { Length: > 0 })
-                {
-                    TryAddInstantiation(inferredTypes, mdsAttr, reportMethodConstraintViolation: reportDataSourceConstraintViolations,
-                        deferToGenerateGenericTest: !reportDataSourceConstraintViolations);
-                }
             }
         }
 
@@ -1480,12 +1492,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // data sources come first, in reflection mode's order, so a type that one of them
                 // infers runs only that source. Any other [GenerateGenericTest] type runs every method
                 // data source. A null source (IInfersType<T>) also runs every method data source.
-                var methodSources = new List<(ITypeSymbol[] Types, AttributeData? Source)>();
+                var methodSources = new List<(ITypeSymbol[] Types, AttributeData? Source, GenericMethodInferencePolicy.Source PolicySource)>();
                 foreach (var methodArgAttr in methodArgumentsAttributes)
                 {
                     if (InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodArgAttr, compilation) is { } types && types.Length == methodTypeArgCount)
                     {
-                        methodSources.Add((types, methodArgAttr));
+                        methodSources.Add((types, methodArgAttr, GenericMethodInferencePolicy.Source.Arguments));
                     }
                 }
 
@@ -1496,36 +1508,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     if (InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr) is { } types && types.Length == methodTypeArgCount)
                     {
-                        methodSources.Add((types, dataSourceAttr));
+                        methodSources.Add((types, dataSourceAttr, GenericMethodInferencePolicy.Source.TypedDataSource));
                     }
                 }
 
                 if (InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol) is { } inferringTypes && inferringTypes.Length == methodTypeArgCount)
                 {
-                    methodSources.Add((inferringTypes, null));
+                    methodSources.Add((inferringTypes, null, GenericMethodInferencePolicy.Source.ParameterAttribute));
                 }
 
                 foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
                 {
                     if (InferTypesFromMethodDataSource(testMethod, mdsAttr) is { } types && types.Length == methodTypeArgCount)
                     {
-                        methodSources.Add((types, mdsAttr));
+                        methodSources.Add((types, mdsAttr, GenericMethodInferencePolicy.Source.MethodDataSource));
                     }
                 }
 
                 // With a method-level [GenerateGenericTest], a typed data source or [MethodDataSource] whose
                 // declared type breaks the method's constraints is not reported, as on a non-generic class
-                // (reportDataSourceConstraintViolations) and as reflection mode skips it on each concrete class.
-                bool ReportsMethodSourceViolation(AttributeData? source)
-                    => reportDataSourceConstraintViolations || source is null
-                        || source.GetFullyQualifiedAttributeTypeName() == "global::TUnit.Core.ArgumentsAttribute";
-
+                // and as reflection mode skips it on each concrete class.
                 foreach (var classGenericTest in classGenericTestAttrs)
                 {
                     var classIsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, classGenericTest.TypeArgs!, compilation);
-                    foreach (var (methodTypes, source) in methodSources)
+                    foreach (var (methodTypes, source, policySource) in methodSources)
                     {
-                        var reportsViolation = ReportsMethodSourceViolation(source);
+                        var reportsViolation = GenericMethodInferencePolicy.ReportsConstraintViolation(policySource, hasExplicitMethodTypes);
                         TryAddInstantiation(CloseOverClass(classGenericTest.TypeArgs!, methodTypes), source,
                             reportMethodConstraintViolation: reportsViolation,
                             deferToGenerateGenericTest: !reportsViolation,
@@ -1543,12 +1551,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
 
                     // Method rows were already paired with this class row above; they join their entries.
-                    foreach (var (methodTypes, source) in methodSources)
+                    foreach (var (methodTypes, source, policySource) in methodSources)
                     {
                         if (source is not null)
                         {
                             TryAddCombinedArgumentsInstantiation(classTypes, CloseOverClass(classTypes, methodTypes), classAttr, source,
-                                reportMethodConstraintViolation: ReportsMethodSourceViolation(source));
+                                reportMethodConstraintViolation: GenericMethodInferencePolicy.ReportsConstraintViolation(policySource, hasExplicitMethodTypes));
                         }
                         else
                         {
@@ -6695,6 +6703,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
+        // This class-only phase is mutually exclusive with the generic-method phases above.
         // Process MethodDataSource attributes for generic classes (non-generic methods)
         if (testMethod is { IsGenericType: true, IsGenericMethod: false })
         {
