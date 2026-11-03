@@ -72,6 +72,6 @@ public class GenericArgumentsArrayClassRow<T>(T value)
     public async Task Test()
     {
         await Assert.That(value).IsTypeOf<int[]>();
-        await Assert.That((int[])(object)value!).IsEquivalentTo(new[] { 1, 2 });
+        await Assert.That((int[])(object)value!).IsEquivalentTo(new[] { 1, 2 }, EqualityComparer<int>.Default);
     }
 }

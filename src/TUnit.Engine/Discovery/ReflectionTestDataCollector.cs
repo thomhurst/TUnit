@@ -815,13 +815,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // discovery. For T[] parameters, the array's element type supplies T; the array
                 // itself is the row value, so nullable elements are never boxed separately.
                 memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, externalSource, out var inferenceConstructor, requireFixedRuntimeTypes: true);
-                if (memberTypeArguments is not null)
+                // An external source can be enumerated without closing the test class.
+                // Report invalid declared types below only when an eligible row actually exists.
+                if (memberTypeArguments is not null
+                    && ReflectionGenericTypeResolver.FindConstraintViolation(genericTypeDefinition, memberTypeArguments) is null)
                 {
-                    if (constraintViolations.TryAddClassViolation(memberTypeArguments))
-                    {
-                        continue;
-                    }
-
                     var closedType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, memberTypeArguments);
                     sourceClassMetadata = CreateDummyMethodMetadata(closedType, "Discovery");
                     sourceConstructorParameters = GetClosedConstructorParameters(closedType, inferenceConstructor!);

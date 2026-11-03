@@ -34,18 +34,42 @@ public sealed class GenericConstraintViolationEntry
     /// </summary>
     public required string[] Messages { get; init; }
 
+    /// <summary>Optional row-backed violations; empty sources contribute no failing rows.</summary>
+    public IDataSourceAttribute[]? DataSources { get; init; }
+
     internal TestMetadata ToTestMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)] Type genericTypeDefinition, string testSessionId)
     {
+        if (DataSources is not null)
+        {
+            // These entries report only actual invalid class rows. An empty source must not
+            // create a skipped placeholder against the open, unconstructable generic type.
+            foreach (var source in DataSources)
+            {
+                source.SkipIfEmpty = false;
+            }
+        }
+
         var metadata = GenericConstraintViolationTestMetadata.Create(
             genericTypeDefinition,
             MethodName,
             MethodMetadata,
             FilePath,
             LineNumber,
-            Messages);
+            DataSources ?? CreateUnconditionalDataSources());
         metadata.TestSessionId = testSessionId;
         return metadata;
     }
+
+    private IDataSourceAttribute[] CreateUnconditionalDataSources()
+    {
+        var sources = new IDataSourceAttribute[Messages.Length];
+        for (var i = 0; i < sources.Length; i++)
+        {
+            sources[i] = GenericConstraintViolationDataSource.Create(Messages[i]);
+        }
+        return sources;
+    }
+
 }
 
 /// <summary>

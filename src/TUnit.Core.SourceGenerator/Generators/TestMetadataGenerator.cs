@@ -475,7 +475,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Replace(".g.cs", "_TestSource");
 
         List<ConcreteInstantiation> concreteInstantiations;
-        List<string> classConstraintViolations = [];
+        List<ClassConstraintViolation> classConstraintViolations = [];
 
         if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
         {
@@ -651,10 +651,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// Emits the test method's class type arguments that break the class's generic constraints. A
     /// <c>TestEntry&lt;T&gt;</c> cannot be emitted for such a closed type, so the entry is registered
-    /// against the open generic type and the engine reports one failed test per message, the same
+    /// against the open generic type and the engine reports a failure per invalid type or actual external row, the same
     /// failures reflection mode reports (#7107).
     /// </summary>
-    private static void EmitClassConstraintViolationEntries(CodeWriter writer, TestMethodMetadata testMethod, List<string> messages)
+    private static void EmitClassConstraintViolationEntries(CodeWriter writer, TestMethodMetadata testMethod, List<ClassConstraintViolation> messages)
     {
         writer.AppendLine("public static readonly global::TUnit.Core.GenericConstraintViolationEntry[] ConstraintViolations = new global::TUnit.Core.GenericConstraintViolationEntry[]");
         writer.AppendLine("{");
@@ -666,7 +666,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"FilePath = {SymbolDisplay.FormatLiteral(testMethod.FilePath ?? "", quote: true)},");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber.ToString(CultureInfo.InvariantCulture)},");
         writer.AppendLine("MethodMetadata = __mm_0,");
-        writer.AppendLine($"Messages = new string[] {{ {string.Join(", ", messages.Select(m => $"\"{EscapeString(m)}\""))} }},");
+        writer.AppendLine($"Messages = new string[] {{ {string.Join(", ", messages.Select(m => $"\"{EscapeString(m.Message)}\""))} }},");
+        if (messages.Any(message => message.RowSource is not null))
+        {
+            writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            foreach (var message in messages)
+            {
+                writer.Append($"global::TUnit.Core.GenericConstraintViolationDataSource.Create(\"{EscapeString(message.Message)}\"");
+                if (message.RowSource is { } source)
+                {
+                    writer.Append(", ");
+                    var sourceWriter = new CodeWriter(includeHeader: false);
+                    GenerateDataSourceAttribute(sourceWriter, testMethod.CompilationContext, source, testMethod.MethodSymbol, testMethod.TypeSymbol, filterClassRows: true);
+                    writer.Append(sourceWriter.ToString().Trim().TrimEnd(','));
+                }
+                writer.AppendLine("),");
+            }
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
         writer.Unindent();
         writer.AppendLine("},");
         writer.Unindent();
@@ -846,6 +866,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// (<c>IInfersType&lt;T&gt;</c>), so every method data source's rows report the failure.</param>
     private sealed record MethodConstraintViolation(string Message, AttributeData? RowSource, bool AllMethodDataSources);
 
+    private sealed record ClassConstraintViolation(string Message, AttributeData? RowSource = null);
+
     /// <summary>
     /// Where the class type arguments of a constraint violation came from. The order matches the
     /// order in which reflection mode discovers them, so both modes report the failures in the same
@@ -861,7 +883,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// Collects all concrete type instantiations for this generic test method.
     /// </summary>
-    private static List<ConcreteInstantiation> CollectConcreteInstantiations(TestMethodMetadata testMethod, string className, out List<string> classConstraintViolations)
+    private static List<ConcreteInstantiation> CollectConcreteInstantiations(TestMethodMetadata testMethod, string className, out List<ClassConstraintViolation> classConstraintViolations)
     {
         var compilation = testMethod.CompilationContext.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
@@ -870,7 +892,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var classRowSources = new ClassRowSources(testMethod);
 
         // Class type arguments that break the class's constraints, one per row or type (#7107).
-        var classViolations = new List<(ClassViolationSource Source, int Order, string Message)>();
+        var classViolations = new List<(ClassViolationSource Source, int Order, ClassConstraintViolation Violation)>();
         var reportedClassViolations = new HashSet<string>();
 
         // Instantiations built from a specific data source row, keyed by type combination, so later
@@ -942,8 +964,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     && (violationSource ?? specificAttr) is { } source
                     && reportedClassViolations.Add(((int)classViolationSource).ToString(CultureInfo.InvariantCulture) + "|" + GetAttributeKey(source)))
                 {
-                    classViolations.Add((classViolationSource, classViolations.Count, DescribeConstraintViolation(
-                        testMethod.TypeSymbol.TypeParameters, classTypeArgs, $"type '{testMethod.TypeSymbol.MetadataName}'", testMethod.CompilationContext.Compilation)));
+                    classViolations.Add((classViolationSource, classViolations.Count, new ClassConstraintViolation(DescribeConstraintViolation(
+                        testMethod.TypeSymbol.TypeParameters, classTypeArgs, $"type '{testMethod.TypeSymbol.MetadataName}'", testMethod.CompilationContext.Compilation),
+                        source.AttributeClass?.Name == "MethodDataSourceAttribute" && (source.ConstructorArguments is [{ Value: INamedTypeSymbol }, ..] || source.AttributeClass.IsGenericType) ? source : null)));
                 }
 
                 return;
@@ -1750,10 +1773,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 continue;
             }
 
-            classViolations.Add((ClassViolationSource.ClassArguments, classViolations.Count,
+            classViolations.Add((ClassViolationSource.ClassArguments, classViolations.Count, new ClassConstraintViolation(
                 $"Could not infer the type arguments of generic class '{testMethod.TypeSymbol.MetadataName}' from class-level [MethodDataSource]. "
                 + "Its declared row type does not determine accessible constructor type arguments. Declare rows with concrete types, "
-                + "or list the class type arguments with [GenerateGenericTest]."));
+                + "or list the class type arguments with [GenerateGenericTest].")));
         }
 
         // Reflection mode (ReflectionGenericConstraintViolations in TUnit.Engine) reports class-level
@@ -1762,7 +1785,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         classConstraintViolations = classViolations
             .OrderBy(v => v.Source)
             .ThenBy(v => v.Order)
-            .Select(v => v.Message)
+            .Select(v => v.Violation)
             .ToList();
 
         if (testMethod is { IsGenericMethod: true, IsGenericType: false })

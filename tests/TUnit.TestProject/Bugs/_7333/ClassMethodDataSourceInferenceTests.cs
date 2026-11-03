@@ -713,3 +713,35 @@ public class FirstConstructorCannotInfer<T>
     [Test]
     public void Test() { }
 }
+
+// External declared types only violate constraints when an eligible row actually exists.
+[Arguments(1)]
+[MethodDataSource(typeof(ConstraintExternalRowsProvider), nameof(ConstraintExternalRowsProvider.Empty), SkipIfEmpty = true)]
+public class EmptyExternalConstraintRows<T>(T value) where T : struct
+{
+    [Test]
+    public async Task Test() => await Assert.That((object)value).IsEqualTo(1);
+}
+
+[Arguments(1)]
+[MethodDataSource(typeof(ConstraintExternalRowsProvider), nameof(ConstraintExternalRowsProvider.Nulls), SkipIfEmpty = true)]
+public class NullExternalConstraintRows<T>(T value) where T : struct
+{
+    [Test]
+    public async Task Test() => await Assert.That((object)value).IsEqualTo(1);
+}
+
+[Arguments(1)]
+[MethodDataSource(typeof(ConstraintExternalRowsProvider), nameof(ConstraintExternalRowsProvider.Values))]
+public class NonemptyExternalConstraintRows<T>(T value) where T : struct
+{
+    [Test]
+    public async Task Test() => await Assert.That((object)value).IsEqualTo(1);
+}
+
+public static class ConstraintExternalRowsProvider
+{
+    public static IEnumerable<string> Empty() => [];
+    public static IEnumerable<string?> Nulls() => [null];
+    public static IEnumerable<string> Values() => ["invalid"];
+}

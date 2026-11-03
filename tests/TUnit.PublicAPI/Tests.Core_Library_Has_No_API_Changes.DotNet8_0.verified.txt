@@ -815,6 +815,7 @@ namespace
     public sealed class GenericConstraintViolationEntry
     {
         public GenericConstraintViolationEntry() { }
+        public .IDataSourceAttribute[]? DataSources { get; init; }
         public required string FilePath { get; init; }
         public required int LineNumber { get; init; }
         public required string[] Messages { get; init; }
