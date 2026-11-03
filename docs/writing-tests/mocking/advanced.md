@@ -470,6 +470,12 @@ If the closed type is only known at runtime, for example `Mock.Of<IRepository<T>
 
 The built-in `DefaultValueProvider` uses reflection to build defaults for `Task<T>`, `ValueTask<T>`, and collection types, so it is not AOT-safe. A custom `IDefaultValueProvider` that does not use reflection works under Native AOT.
 
+### Generic Methods on Generic Interfaces[​](#generic-methods-on-generic-interfaces "Direct link to Generic Methods on Generic Interfaces")
+
+A generic method on a generic interface can be set up with explicit type arguments, such as `mock.Invoke<string>(Any())`, on both `IOutbox<int>.Mock()` and `Mock.Of<IOutbox<int>>()`. On `Mock<T>`, this works for closed types named in `Mock.Of<T>()`, `MockRepository.Of<T>()`, or `[assembly: GenerateMock(typeof(IOutbox<int>))]`.
+
+A few methods still need `IOutbox<int>.Mock()` for explicit type arguments: those with a constraint that names an interface type parameter, such as `TOther Select<TOther>() where TOther : T`, those that use an unconstrained interface type parameter as `T?`, and overloads whose setup signatures become identical after substituting the closed type arguments. Colliding closed copies are omitted so registering the mock still compiles. When C# can infer the type arguments from the call, as in `mock.RoundTrip(Arg.Any<Guid>())`, every form works.
+
 ## Reset[​](#reset "Direct link to Reset")
 
 Clear all setups, call history, state, and auto-tracked property values. Configuration such as `Behavior`, `DefaultValueProvider` and `PassThrough` is kept:
