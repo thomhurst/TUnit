@@ -3617,6 +3617,50 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return false;
     }
 
+    private static readonly ConcurrentDictionary<Type, (ConstructorInfo Constructor, Type[] Arguments)> TupleConstructors = new();
+
+    // Generic inference closes (T, object) to (int, object), but a preserved (int, string)
+    // row is still boxed as its original invariant ValueTuple type. Rebind only incompatible
+    // tuples; compatible rows must retain their original identity.
+    private static object? CastInvocationArgument(Type parameterType, object? value)
+    {
+        var targetType = Nullable.GetUnderlyingType(parameterType) ?? parameterType;
+        if (value == null || targetType.IsInstanceOfType(value))
+        {
+            return value;
+        }
+
+        if (GetTupleElementTypes(targetType) is { } targetElements
+            && GetTupleElementTypes(value.GetType()) is { } sourceElements
+            && targetElements.Length == sourceElements.Length)
+        {
+            var elements = DataSourceHelpers.UnwrapTupleAot(value);
+            var index = 0;
+            return ConstructInvocationTuple(targetType, elements, ref index);
+        }
+
+        return CastHelper.Cast(parameterType, value);
+    }
+
+    private static object ConstructInvocationTuple(Type tupleType, object?[] elements, ref int index)
+    {
+        var shape = TupleConstructors.GetOrAdd(tupleType, static type =>
+        {
+            var arguments = type.GetGenericArguments();
+            return (type.GetConstructor(arguments)!, arguments);
+        });
+        var arguments = new object?[shape.Arguments.Length];
+        for (var i = 0; i < arguments.Length; i++)
+        {
+            // Both Tuple and ValueTuple store elements beyond seven in a nested Rest tuple.
+            arguments[i] = i == 7
+                ? ConstructInvocationTuple(shape.Arguments[i], elements, ref index)
+                : CastInvocationArgument(shape.Arguments[i], elements[index++]);
+        }
+
+        return shape.Constructor.Invoke(arguments);
+    }
+
     /// <summary>
     /// Creates a reflection-based test invoker with proper AOT attribution
     /// </summary>
@@ -3779,7 +3823,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         else
                         {
                             // Otherwise use CastHelper for conversions
-                            castedArgs[i] = CastHelper.Cast(paramType, arg);
+                            castedArgs[i] = CastInvocationArgument(paramType, arg);
                         }
                     }
 
@@ -3914,7 +3958,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         else
                         {
                             // Otherwise use CastHelper for conversions
-                            castedArgs[i] = CastHelper.Cast(paramType, arg);
+                            castedArgs[i] = CastInvocationArgument(paramType, arg);
                         }
                     }
 
