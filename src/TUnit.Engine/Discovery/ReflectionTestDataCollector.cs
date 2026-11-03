@@ -2092,12 +2092,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 // The class is already closed here. This is declared method-source selection, not
                 // inference of class type arguments (which has a separate policy).
-                if (GenericMethodInferencePolicy.JoinsDuplicate(
-                    GenericMethodInferencePolicy.Source.TypedDataSource,
-                    isLiteralRow: IsTypedArgumentsRow(dataSource), hasExplicitTypes: false, isGenericClass: false))
-                {
-                    instantiations![index].Rows.Add(dataSource);
-                }
+                instantiations![index].Rows.Add(dataSource);
             }
             else
             {
@@ -2323,8 +2318,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // This collector is called only when explicit method types exist. Without them, reflection
         // uses ResolveDeclaredTypedSourceInstantiations and runtime inference instead.
-        void AddInstantiation(Type[]? typeArguments, IDataSourceAttribute? row, bool isMethodArgumentsRow = false,
-            GenericMethodInferencePolicy.Source source = GenericMethodInferencePolicy.Source.TypedDataSource)
+        void AddInstantiation(Type[]? typeArguments, IDataSourceAttribute? row, GenericMethodInferencePolicy.Source source,
+            bool isMethodArgumentsRow = false)
         {
             if (typeArguments is null)
             {
@@ -2347,9 +2342,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // order, as the generator emits them.
                 else if (row is not null
                     && GenericMethodInferencePolicy.JoinsDuplicate(
-                        GenericMethodInferencePolicy.Source.TypedDataSource,
-                        isLiteralRow: IsTypedArgumentsRow(row), hasExplicitTypes: true,
-                        isGenericClass: classGenericParameterCount > 0)
+                        isLiteralRow: IsTypedArgumentsRow(row), joinsInferredSources: false)
                     && instantiations[index].Rows is { } existingRows
                     && !existingRows.Exists(existing => ReferenceEquals(existing, row)))
                 {

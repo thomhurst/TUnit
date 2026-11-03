@@ -13,11 +13,10 @@ internal static class GenericMethodInferencePolicy
         GenerateGenericTest,
     }
 
-    internal readonly struct Rule(Source source, bool scopesRows, bool joinsDuplicate, bool fallsBackToExplicitTypes = false)
+    internal readonly struct Rule(Source source, bool scopesRows, bool fallsBackToExplicitTypes = false)
     {
         internal Source Source { get; } = source;
         internal bool ScopesRows { get; } = scopesRows;
-        internal bool JoinsDuplicate { get; } = joinsDuplicate;
         internal bool FallsBackToExplicitTypes { get; } = fallsBackToExplicitTypes;
     }
 
@@ -25,11 +24,11 @@ internal static class GenericMethodInferencePolicy
     // Parameter and explicit-type instantiations run all rows, other inferred sources run their own.
     internal static readonly Rule[] Rules =
     [
-        new(Source.Arguments, scopesRows: true, joinsDuplicate: true),
-        new(Source.TypedDataSource, scopesRows: true, joinsDuplicate: false, fallsBackToExplicitTypes: true),
-        new(Source.ParameterAttribute, scopesRows: false, joinsDuplicate: false),
-        new(Source.MethodDataSource, scopesRows: true, joinsDuplicate: false, fallsBackToExplicitTypes: true),
-        new(Source.GenerateGenericTest, scopesRows: false, joinsDuplicate: false),
+        new(Source.Arguments, scopesRows: true),
+        new(Source.TypedDataSource, scopesRows: true, fallsBackToExplicitTypes: true),
+        new(Source.ParameterAttribute, scopesRows: false),
+        new(Source.MethodDataSource, scopesRows: true, fallsBackToExplicitTypes: true),
+        new(Source.GenerateGenericTest, scopesRows: false),
     ];
 
     internal static Rule GetRule(Source source)
@@ -48,6 +47,6 @@ internal static class GenericMethodInferencePolicy
     internal static bool ReportsConstraintViolation(Source source, bool hasExplicitTypes)
         => !hasExplicitTypes || !GetRule(source).FallsBackToExplicitTypes;
 
-    internal static bool JoinsDuplicate(Source source, bool isLiteralRow, bool hasExplicitTypes, bool isGenericClass)
-        => isLiteralRow || GetRule(source).JoinsDuplicate || (!hasExplicitTypes && !isGenericClass);
+    internal static bool JoinsDuplicate(bool isLiteralRow, bool joinsInferredSources)
+        => isLiteralRow || joinsInferredSources;
 }

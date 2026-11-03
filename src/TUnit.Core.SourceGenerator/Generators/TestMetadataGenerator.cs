@@ -1026,10 +1026,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // such a source when the method has [GenerateGenericTest], so it is dropped here too.
                     // The name also matches [Arguments<T>], a literal row that joins as well (#7214).
                     if (specificAttr is not null && GenericMethodInferencePolicy.JoinsDuplicate(
-                        GenericMethodInferencePolicy.Source.TypedDataSource,
                         isLiteralRow: specificAttr.AttributeClass?.Name == "ArgumentsAttribute",
-                        hasExplicitTypes: !joinsDuplicateMethodSources,
-                        isGenericClass: isClassRow))
+                        joinsInferredSources: joinsDuplicateMethodSources && !isClassRow))
                     {
                         existing.AddRow(specificAttr, isClassRow);
                     }

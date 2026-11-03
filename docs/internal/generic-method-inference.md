@@ -1,6 +1,6 @@
 # Generic method inference policy
 
-`GenericMethodInferencePolicy` is compiled into the generator (including its Roslyn variants) and the reflection engine. Its ordered table controls declared-source precedence, row scope, duplicate joining, and fallback to explicit method types. The adapters still extract types using Roslyn symbols or reflection; they do not share representations of types or attributes.
+`GenericMethodInferencePolicy` is compiled into the generator (including its Roslyn variants) and the reflection engine. Its ordered table controls declared-source precedence, row scope, and fallback to explicit method types. A separate shared predicate controls duplicate joining from literal-row status and whether the adapter joins inferred sources. The adapters still extract types using Roslyn symbols or reflection; they do not share representations of types or attributes. Each adapter still switches on source kind, so adding a source requires updating both extraction switches.
 
 | Order | Source | Inferred instantiation runs | Duplicate type arguments | Constraint violation beside explicit types |
 | --- | --- | --- | --- | --- |
