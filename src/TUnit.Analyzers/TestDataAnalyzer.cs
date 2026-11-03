@@ -753,7 +753,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         IMethodSymbol? best = null;
         var bestScore = -1;
-        var argumentTypes = arguments.Select(a => a.IsNull ? null : a.Type).ToArray();
         foreach (var method in methods)
         {
             if (method.Name != name || method.IsGenericMethod
@@ -767,8 +766,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             var score = ScoreOptionalDataSource(context, arguments, method);
             var moreSpecific = best is not null && score == bestScore && score >= 0
-                && IsAtLeastAsSpecific(context.Compilation, method, best, argumentTypes)
-                && !IsAtLeastAsSpecific(context.Compilation, best, method, argumentTypes);
+                && IsMoreSpecificOptionalDataSource(context.Compilation, method, best, arguments.Length);
             if (score > bestScore || moreSpecific)
             {
                 best = method;
@@ -777,6 +775,32 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         return best;
+    }
+
+    // Specificity compares parameter conversions, including lifted nullable conversions, rather than
+    // boxed argument conversions. Mirrors IsMoreSpecificDataSourceOverload and reflection's IsMoreSpecific.
+    private static bool IsMoreSpecificOptionalDataSource(Compilation compilation, IMethodSymbol candidate,
+        IMethodSymbol other, int argumentCount)
+    {
+        var anyDifferent = false;
+        for (var i = 0; i < argumentCount; i++)
+        {
+            var candidateType = candidate.Parameters[i].Type;
+            var otherType = other.Parameters[i].Type;
+            if (SymbolEqualityComparer.Default.Equals(candidateType, otherType))
+            {
+                continue;
+            }
+
+            if (compilation.ClassifyCommonConversion(candidateType, otherType) is not { IsImplicit: true, IsUserDefined: false })
+            {
+                return false;
+            }
+
+            anyDifferent = true;
+        }
+
+        return anyDifferent;
     }
 
     private static bool HidesBaseSignature(IMethodSymbol derived, IMethodSymbol candidate)
@@ -826,7 +850,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             var parameter = method.Parameters[i];
             if (i >= arguments.Length)
             {
-                if (!parameter.HasExplicitDefaultValue && !parameter.IsOptional
+                if (!parameter.HasExplicitDefaultValue
                     && parameter.Type.ToDisplayString() != "System.Threading.CancellationToken")
                 {
                     return -1;

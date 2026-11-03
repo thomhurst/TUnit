@@ -5,6 +5,46 @@ namespace TUnit.Analyzers.Tests;
 public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 {
     [Test]
+    public async Task Optional_Metadata_Without_Default_Is_Rejected()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using System.Runtime.InteropServices;
+            using TUnit.Core;
+            public class Tests
+            {
+                public static IEnumerable<int> Rows([Optional] int value) => [value];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Missing(int value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(0).WithArguments("", "int"));
+    }
+
+    [Test]
+    public async Task Null_Optional_Overloads_Compare_Lifted_Parameter_Conversions()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public static IEnumerable<string> Rows(long? value, int count = 1) => ["broad"];
+                public static IEnumerable<int> Rows(int? value, int count = 1) => [count];
+                public static IEnumerable<int> Reversed(int? value, int count = 1) => [count];
+                public static IEnumerable<string> Reversed(long? value, int count = 1) => ["broad"];
+                [Test, MethodDataSource(nameof(Rows), Arguments = new object?[] { null })]
+                public void Specific(int value) { }
+                [Test, MethodDataSource(nameof(Reversed), Arguments = new object?[] { null })]
+                public void SpecificReversed(int value) { }
+            }
+            """);
+    }
+
+    [Test]
     public async Task Equally_Specific_Optional_Overloads_Keep_Declaration_Order()
     {
         await Verifier.VerifyAnalyzerAsync(
