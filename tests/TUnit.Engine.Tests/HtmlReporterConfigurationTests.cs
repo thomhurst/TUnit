@@ -93,6 +93,34 @@ public class HtmlReporterConfigurationTests
     }
 
     [Test]
+    public async Task Disabling_Html_Report_Preserves_Trace_Associations_Until_Sessions_Finish()
+    {
+        using var reporter = new HtmlReporter(new MockExtension());
+        var otherSession = new TestSessionContextStub("other-session");
+        var traceId = Guid.NewGuid().ToString("N");
+        await reporter.OnTestSessionStartingAsync(Session);
+        await reporter.OnTestSessionStartingAsync(otherSession);
+        TUnit.Core.TraceRegistry.Register(traceId, "test-node");
+
+        try
+        {
+            TUnitSettings.Default.Reporting.HtmlReportEnabled = false;
+            reporter.IsHtmlReportEnabledForRun().ShouldBeFalse();
+            TUnit.Core.TraceRegistry.IsRegistered(traceId).ShouldBeTrue();
+
+            await reporter.OnTestSessionFinishingAsync(Session);
+            TUnit.Core.TraceRegistry.IsRegistered(traceId).ShouldBeTrue();
+
+            await reporter.OnTestSessionFinishingAsync(otherSession);
+            TUnit.Core.TraceRegistry.IsRegistered(traceId).ShouldBeFalse();
+        }
+        finally
+        {
+            TUnit.Core.TraceRegistry.Clear();
+        }
+    }
+
+    [Test]
     public async Task Html_Report_Setting_Is_Resolved_Per_Session(CancellationToken cancellationToken)
     {
         using var reporter = new HtmlReporter(new MockExtension());

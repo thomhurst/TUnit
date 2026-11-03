@@ -586,7 +586,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             else
             {
                 DisposeActivityCollection();
-                TraceRegistry.Clear();
+                if (_reportsReadingTraceRegistry == 0 && _activeSessions.Count == 0)
+                {
+                    TraceRegistry.Clear();
+                }
             }
 #endif
 
@@ -700,10 +703,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         _resultsDirectory = path;
     }
 
-    #if NET
-    // Runs once per process over every test, so tier-0 code would do the whole job unoptimized.
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-#endif
     internal ReportData BuildReportData(string sessionUid)
     {
         // An unknown session reports no results; tests use that to read report metadata.
@@ -716,6 +715,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     }
 
 #if NET
+    // Runs once per report over every test, so tier-0 code would do the whole job unoptimized.
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
     private ReportData BuildReportData(SessionReportState sessionState, ActivityCollector? collector)
 #else
     private ReportData BuildReportData(SessionReportState sessionState)
