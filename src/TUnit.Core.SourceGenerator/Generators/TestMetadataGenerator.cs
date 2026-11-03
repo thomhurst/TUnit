@@ -22,6 +22,7 @@ namespace TUnit.Core.SourceGenerator.Generators;
 public sealed class TestMetadataGenerator : IIncrementalGenerator
 {
     private const string GeneratedNamespace = "TUnit.Generated";
+    private const string InstanceMethodDataSourceAttributeName = "global::TUnit.Core.InstanceMethodDataSourceAttribute";
 
     private static readonly DiagnosticDescriptor GenerationErrorDescriptor = new(
         "TUNIT0999",
@@ -3023,7 +3024,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var attrName = attrClass.GloballyQualifiedNonGeneric();
 
-        if (attrName == "global::TUnit.Core.MethodDataSourceAttribute")
+        // InstanceMethodDataSourceAttribute derives from MethodDataSourceAttribute and needs the
+        // same generated factory; without one, Native AOT falls back to a reflection lookup that
+        // finds no trimmed field or property metadata (#7225).
+        if (attrName is "global::TUnit.Core.MethodDataSourceAttribute" or InstanceMethodDataSourceAttributeName)
         {
             GenerateMethodDataSourceAttribute(writer, attr, typeSymbol, compilationContext.Compilation);
         }
@@ -3367,7 +3371,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (dataSourceMember == null
             || (dataSourceMethod == null && dataSourceProperty == null && dataSourceField == null)
-            || (dataSourceMethod == null && !CanReadDataSourceMember(dataSourceMember, compilation)))
+            || !CanReadDataSourceMember(dataSourceMember, compilation))
         {
             // Still generate the attribute even if method not found - it will fail at runtime with proper error
             // Use CodeGenerationHelpers to properly handle any generics on the attribute
@@ -3395,8 +3399,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return;
         }
 
-        var attrTypeName = usesTestClassInstance
-            ? "global::TUnit.Core.InstanceMethodDataSourceAttribute"
+        // Keep a declared [InstanceMethodDataSource] as one even when its member is static, so the
+        // engine still sees IAccessesInstanceData as it does in reflection mode.
+        var isDeclaredInstanceAttribute = attr.AttributeClass?.GloballyQualifiedNonGeneric() == InstanceMethodDataSourceAttributeName;
+        var attrTypeName = usesTestClassInstance || isDeclaredInstanceAttribute
+            ? InstanceMethodDataSourceAttributeName
             : "global::TUnit.Core.MethodDataSourceAttribute";
 
         if (attr.ConstructorArguments is
@@ -3456,7 +3463,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // a per-data-source compiler-generated state machine class (#6227). Only the per-test-unique
         // invocation is emitted, as a static lambda.
         writer.Append("Factory = static dataGeneratorMetadata => ");
-        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null, compilation);
+        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null, compilation, isDeclaredInstanceAttribute);
         writer.AppendLine(",");
 
         writer.Unindent();
@@ -3469,7 +3476,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// member's declared return type (mirroring the previous inline-iterator branch order)
     /// and whether the member is static or instance-based.
     /// </summary>
-    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, bool usesTestClassInstance, TypedConstant? arguments, Compilation compilation)
+    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, bool usesTestClassInstance, TypedConstant? arguments, Compilation compilation, bool decidesRowsFromRuntimeValue)
     {
         var dataSourceMethod = dataSourceMember as IMethodSymbol;
 
@@ -3482,8 +3489,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var isStatic = dataSourceMember.IsStatic;
         var fullyQualifiedType = targetType.GloballyQualified();
 
+        // Non-generic tasks have no T for the typed task helpers. Read them through the same
+        // runtime-value path as reflection mode, preserving its existing row semantics.
+        var isNonGenericTask = returnType is INamedTypeSymbol { Arity: 0 }
+            && (IsTask(returnType) || IsValueTask(returnType));
         string kind;
-        if (IsAsyncEnumerable(returnType))
+        if (isNonGenericTask)
+        {
+            kind = "Value";
+        }
+        else if (IsAsyncEnumerable(returnType))
         {
             kind = "AsyncEnumerable";
         }
@@ -3543,15 +3558,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     ? $"new {fullyQualifiedType}()"
                     : $"(({receiverType})new {fullyQualifiedType}())";
         var lambdaHeader = usesTestClassInstance ? "static instance =>" : "static () =>";
-        var metadataArgument = usesTestClassInstance ? "dataGeneratorMetadata, " : "";
+        // The instance helpers take the metadata anyway. [InstanceMethodDataSource] read its member by reflection before
+        // #7225, and that path keeps a tuple row whole when the test takes a single tuple, so its static helpers get the
+        // metadata too: without the parameter types, a one-element tuple holding null would reach the test as null.
+        var metadataArgument = usesTestClassInstance || decidesRowsFromRuntimeValue ? "dataGeneratorMetadata, " : "";
 
         // A declared type such as object does not say whether the value is one row or many. Reflection mode, and the
         // attribute's reflection fallback that read every field and every private or protected property before the
         // generator could, decide from the runtime value, so these factories hand the value to that same logic
-        // instead of FromValue. Accessible properties and methods keep FromValue, as their generated code always has
-        // (https://github.com/thomhurst/TUnit/issues/7178).
-        var isAccessibleMember = dataSourceMethod != null || IsAccessibleDataSourceMember(dataSourceMember, compilation);
-        if (kind == "Value" && (dataSourceMember is IFieldSymbol || !isAccessibleMember))
+        // instead of FromValue. Accessible properties and methods of [MethodDataSource] keep FromValue, as their
+        // generated code always has (https://github.com/thomhurst/TUnit/issues/7178). [InstanceMethodDataSource] had no
+        // generated factory before #7225, so every member it names keeps the runtime-value behavior it always had.
+        var isAccessibleMember = IsAccessibleDataSourceMember(dataSourceMember, compilation);
+        if (kind == "Value" && (isNonGenericTask || decidesRowsFromRuntimeValue || dataSourceMember is IFieldSymbol || !isAccessibleMember))
         {
             helper = isStatic || !usesTestClassInstance
                 ? "global::TUnit.Core.Helpers.DataSourceFactories.FromRuntimeValue"
@@ -3559,19 +3578,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             metadataArgument = "dataGeneratorMetadata, ";
         }
 
+        // [InstanceMethodDataSource] read its member by reflection before #7225, and that path, still used in
+        // reflection mode, treats a null value as a source with no rows, so SkipIfEmpty skips the test. The factory
+        // helpers would turn null into one row holding null, so a null value becomes an empty source here. A null Task or
+        // IAsyncEnumerable needs no guard: FromTask and FromAsyncEnumerable already read it as a source with no rows.
+        var nullAsEmpty = decidesRowsFromRuntimeValue && (kind is "Value" or "Enumerable")
+            ? " ?? global::System.Array.Empty<object>()"
+            : "";
+
         if (!isAccessibleMember)
         {
-            // The generated class cannot name a private or protected field or property, so the factory reads it by
-            // reflection. GetField/GetProperty on a typeof() with a constant name and binding flags is understood
-            // by the trimmer and the AOT compiler, which keep that member, so this works under native AOT
-            // without any trimming warning. The attribute's own reflection fallback finds the member from the
-            // test class type at run time, which neither of them can see.
-            var lookup = dataSourceMember is IFieldSymbol ? "GetField" : "GetProperty";
-            var bindingFlags = (isStatic ? "global::System.Reflection.BindingFlags.Static" : "global::System.Reflection.BindingFlags.Instance")
-                + " | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly";
             var target = isStatic ? "null" : usesTestClassInstance ? "instance" : $"new {fullyQualifiedType}()";
+            var read = BuildReflectionDataSourceRead(dataSourceMember, target);
             var cast = kind is "Value" or "Enumerable" ? "" : $"({returnType.GloballyQualified()})";
-            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {cast}typeof({dataSourceMember.ContainingType.GloballyQualified()}).{lookup}(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target}))");
+            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {cast}{read}{nullAsEmpty})");
             return;
         }
 
@@ -3611,14 +3631,41 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.Append("global::System.Array.Empty<object?>()");
             }
             writer.AppendLine(";");
-            writer.AppendLine($"return {call};");
+            writer.AppendLine(nullAsEmpty.Length == 0 ? $"return {call};" : $"return (object?){call}{nullAsEmpty};");
             writer.Unindent();
             writer.Append("})");
         }
         else
         {
-            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {call})");
+            writer.Append(nullAsEmpty.Length == 0
+                ? $"{helper}({metadataArgument}{lambdaHeader} {call})"
+                : $"{helper}({metadataArgument}{lambdaHeader} (object?){call}{nullAsEmpty})");
         }
+    }
+
+    /// <summary>
+    /// Builds the complete reflection read for an inaccessible data source member. Constant
+    /// declaring types, names and binding flags let trimming and Native AOT preserve the member.
+    /// </summary>
+    private static string BuildReflectionDataSourceRead(ISymbol dataSourceMember, string target)
+    {
+        var bindingFlags = (dataSourceMember.IsStatic ? "global::System.Reflection.BindingFlags.Static" : "global::System.Reflection.BindingFlags.Instance")
+            + " | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly";
+        // CanReadDataSourceMember only lets a parameterless, non-generic method through, so it is looked up with no
+        // parameter types, which also picks it out from any overloads. A parameterless generic overload of the same
+        // name would match that lookup too and make it ambiguous, so then the methods are filtered instead, without
+        // the genericParameterCount overload of GetMethod that .NET Framework and .NET Standard 2.0 lack.
+        var hasGenericParameterlessOverload = dataSourceMember is IMethodSymbol
+            && dataSourceMember.ContainingType.GetMembers(dataSourceMember.Name)
+                .Any(static m => m is IMethodSymbol { IsGenericMethod: true, Parameters.Length: 0 });
+        var declaringType = $"typeof({dataSourceMember.ContainingType.GloballyQualified()})";
+        return dataSourceMember switch
+        {
+            IFieldSymbol => $"{declaringType}.GetField(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target})",
+            IPropertySymbol => $"{declaringType}.GetProperty(\"{dataSourceMember.Name}\", {bindingFlags})!.GetValue({target})",
+            _ when hasGenericParameterlessOverload => $"global::System.Array.Find({declaringType}.GetMethods({bindingFlags}), static m => m.Name == \"{dataSourceMember.Name}\" && !m.IsGenericMethodDefinition && m.GetParameters().Length == 0)!.Invoke({target}, null)",
+            _ => $"{declaringType}.GetMethod(\"{dataSourceMember.Name}\", {bindingFlags}, null, global::System.Type.EmptyTypes, null)!.Invoke({target}, null)"
+        };
     }
 
     /// <summary>
@@ -3651,7 +3698,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Whether the generated class can read the data source field or property directly: the member and its getter
+    /// Whether the generated class can read the data source member directly: the member, and a property's getter,
     /// are accessible from the test assembly, so not private or protected.
     /// </summary>
     private static bool IsAccessibleDataSourceMember(ISymbol member, Compilation compilation)
@@ -3662,14 +3709,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Whether a generated factory can read the data source field or property, directly or, for a private or
-    /// protected member, by reflection on its declaring type. That needs a declaring type that the generated class
-    /// can name without type parameters, a getter for a property, and a member type it can name when the factory
-    /// casts the value. Otherwise the attribute keeps its reflection fallback.
+    /// Whether a generated factory can read the data source member, directly or, for a private or protected member,
+    /// by reflection on its declaring type. That needs a declaring type that the generated class can name without
+    /// type parameters, a getter for a property, a method that returns a value and has no parameters or type parameters, and a member type it
+    /// can name when the factory casts the value. Otherwise the attribute keeps its reflection fallback.
     /// </summary>
     private static bool CanReadDataSourceMember(ISymbol member, Compilation compilation)
     {
-        if (member is IPropertySymbol { GetMethod: null } or IPropertySymbol { IsIndexer: true })
+        // A void method has no value to read. TUnit0011 reports it only for [MethodDataSource], so for
+        // [InstanceMethodDataSource] the attribute's reflection fallback reports it rather than generated code that does not compile.
+        if (member is IPropertySymbol { GetMethod: null } or IPropertySymbol { IsIndexer: true } or IMethodSymbol { ReturnsVoid: true })
         {
             return false;
         }
@@ -3679,8 +3728,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return true;
         }
 
+        if (member is IMethodSymbol { Parameters.Length: > 0 } or IMethodSymbol { IsGenericMethod: true })
+        {
+            return false;
+        }
+
         // EmitDataSourceFactoryInvocation casts the value for the async helpers, which take a typed delegate
-        var memberType = member is IPropertySymbol property ? property.Type : ((IFieldSymbol)member).Type;
+        var memberType = member switch
+        {
+            IPropertySymbol property => property.Type,
+            IMethodSymbol method => method.ReturnType,
+            _ => ((IFieldSymbol)member).Type
+        };
         var castsValue = IsAsyncEnumerable(memberType) || IsValueTask(memberType) || IsTask(memberType);
         return compilation.IsSymbolAccessibleWithin(member.ContainingType, compilation.Assembly)
             && !CodeGenerationHelpers.ContainsTypeParameter(member.ContainingType)
@@ -4311,6 +4370,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
+    // System.Tuple<T1..T7>. An eight-element Tuple nests its rest in TRest, which DataSourceHelpers flattens, so it is left alone.
+    private static bool IsReferenceTuple(INamedTypeSymbol type)
+    {
+        return type is { Name: "Tuple", IsGenericType: true, TypeArguments.Length: >= 1 and <= 7, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } };
+    }
+
     /// <summary>
     /// Formats the argument list for a method with one data parameter, placing each
     /// CancellationToken at its declared position.
@@ -4391,6 +4456,34 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
+            // A generated data source factory unwraps a System.Tuple row into its elements, as it does a value tuple,
+            // so rebuild it here. Reflection mode keeps the row whole because it reads the parameter types.
+            // Any other argument shape (the whole tuple, null, or an omitted optional) falls through to the
+            // argument-count switch below, as it does for every other single parameter.
+            var singleReferenceTupleParam = parametersFromArgs is [{ Type: INamedTypeSymbol referenceTupleType }]
+                                            && IsReferenceTuple(referenceTupleType)
+                ? referenceTupleType
+                : null;
+            if (singleReferenceTupleParam is not null)
+            {
+                var arity = singleReferenceTupleParam.TypeArguments.Length;
+                writer.AppendLine("// Special handling for single reference tuple parameter");
+                // With one element, a lone argument is either that element or the whole tuple (or null), so check it.
+                var unwrappedCheck = arity == 1 ? $" && args[0] is not null && args[0] is not {singleReferenceTupleParam.GloballyQualified()}" : "";
+                writer.AppendLine($"if (args.Length == {arity.ToString(CultureInfo.InvariantCulture)}{unwrappedCheck})");
+                writer.AppendLine("{");
+                writer.Indent();
+                var tupleElements = singleReferenceTupleParam.TypeArguments.Select((elementType, i) =>
+                    $"global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
+                var tupleConstruction = $"new {singleReferenceTupleParam.GloballyQualified()}({string.Join(", ", tupleElements)})";
+                GenerateReturnHandling(writer, $"instance.{methodName}({FormatSingleArgumentCall(tupleConstruction, hasCancellationToken, parametersFromArgs)})", returnPattern);
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+            }
+
             // A trailing array parameter (params OR a plain `T[]`) binds like a params array:
             // it accepts any number of remaining arguments collected into the array (issue #6120).
             var lastIndex = parametersFromArgs.Length - 1;
@@ -4491,6 +4584,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             writer.Unindent();
             writer.AppendLine("}");
+
+            if (singleReferenceTupleParam is not null)
+            {
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
         }
 
         if (wrapInTryCatch)
