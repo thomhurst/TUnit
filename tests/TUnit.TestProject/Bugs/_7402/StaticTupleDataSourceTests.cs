@@ -65,6 +65,35 @@ public class StaticTupleDataSourceTests
         await Assert.That(value).IsEqualTo(Tuple.Create(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
     }
 
+    public static ((int, int), int) NestedNumericValue() => ((1, 2), 3);
+
+    [Test]
+    [MethodDataSource(nameof(NestedNumericValue))]
+    public async Task Nested_Tuple_Elements_Can_Be_Converted(((long, long), long) value)
+    {
+        await Assert.That(value).IsEqualTo(((1L, 2L), 3L));
+    }
+
+    public static ((int, int, int, int, int, int, int, int), int) NestedLongNumericValue()
+        => ((1, 2, 3, 4, 5, 6, 7, 8), 9);
+
+    [Test]
+    [MethodDataSource(nameof(NestedLongNumericValue))]
+    public async Task Nested_Long_Tuple_Elements_Can_Be_Converted(((long, long, long, long, long, long, long, long), long) value)
+    {
+        await Assert.That(value).IsEqualTo(((1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L), 9L));
+    }
+
+    [Test]
+#pragma warning disable TUnit0001 // Reference-tuple widening analyzer limitation: #7480.
+    [MethodDataSource(nameof(Value))]
+#pragma warning restore TUnit0001
+    public async Task Converted_Tuple_Holding_Null_Stays_A_Tuple(Tuple<object?> value)
+    {
+        await Assert.That(value).IsNotNull();
+        await Assert.That(value.Item1).IsNull();
+    }
+
     public static Tuple<string?> Value() => Tuple.Create<string?>(null);
     public static IEnumerable<Tuple<string?>> Rows() => [Value()];
     public static Task<Tuple<string?>> TaskRow() => Task.FromResult(Value());

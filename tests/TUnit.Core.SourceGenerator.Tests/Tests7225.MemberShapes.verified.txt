@@ -215,6 +215,11 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                 case 5:
                 {
                     // Special handling for single reference tuple parameter
+                    if (args.Length == 1 && args[0] is not global::System.Tuple<int> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]) is [null])
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.One_Element_Reference_Tuple_Single_Parameter(new global::System.Tuple<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(null))));
+                    }
+                    else
                     if (args.Length == 1 && args[0] is not null && args[0] is not global::System.Tuple<int>)
                     {
                         return new global::System.Threading.Tasks.ValueTask(instance.One_Element_Reference_Tuple_Single_Parameter(new global::System.Tuple<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]))));
@@ -235,6 +240,11 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                 case 6:
                 {
                     // Special handling for single reference tuple parameter
+                    if (args.Length == 1 && args[0] is not global::System.Tuple<string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]) is [null])
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple(new global::System.Tuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(null))));
+                    }
+                    else
                     if (args.Length == 1 && args[0] is not null && args[0] is not global::System.Tuple<string>)
                     {
                         return new global::System.Threading.Tasks.ValueTask(instance.One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple(new global::System.Tuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]))));
@@ -255,6 +265,11 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                 case 7:
                 {
                     // Special handling for single reference tuple parameter
+                    if (args.Length == 1 && args[0] is not global::System.Tuple<string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]) is [null])
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Static_One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple(new global::System.Tuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(null))));
+                    }
+                    else
                     if (args.Length == 1 && args[0] is not null && args[0] is not global::System.Tuple<string>)
                     {
                         return new global::System.Threading.Tasks.ValueTask(instance.Static_One_Element_Reference_Tuple_Holding_Null_Stays_A_Tuple(new global::System.Tuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]))));
@@ -275,6 +290,11 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                 case 8:
                 {
                     // Special handling for single reference tuple parameter
+                    if (args.Length == 1 && args[0] is not global::System.Tuple<string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]) is [null])
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.One_Element_Reference_Tuple_Null_Argument_Stays_Null(new global::System.Tuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(null))));
+                    }
+                    else
                     if (args.Length == 1 && args[0] is not null && args[0] is not global::System.Tuple<string>)
                     {
                         return new global::System.Threading.Tasks.ValueTask(instance.One_Element_Reference_Tuple_Null_Argument_Stays_Null(new global::System.Tuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]))));

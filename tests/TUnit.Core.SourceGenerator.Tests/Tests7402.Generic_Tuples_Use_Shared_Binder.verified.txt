@@ -32,6 +32,11 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
         try
         {
             // Special handling for single reference tuple parameter
+            if (args.Length == 1 && args[0] is not global::System.Tuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]) is [null])
+            {
+                return new global::System.Threading.Tasks.ValueTask(instance.Single_Tuple_Infers_Generic_Element<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(new global::System.Tuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(null))));
+            }
+            else
             if (args.Length == 1 && args[0] is not null && args[0] is not global::System.Tuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>)
             {
                 return new global::System.Threading.Tasks.ValueTask(instance.Single_Tuple_Infers_Generic_Element<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(new global::System.Tuple<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests.Fixture>(args[0]))));

@@ -4421,6 +4421,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
+    // Emit tuple element conversions statically so nested Item tuples remain AOT-safe.
+    private static string CastTupleElement(ITypeSymbol type, string value)
+    {
+        if (type is INamedTypeSymbol { IsTupleType: true } tuple)
+        {
+            var elements = tuple.TupleElements.Select((element, index) => CastTupleElement(element.Type,
+                $"global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot({value})[{index.ToString(CultureInfo.InvariantCulture)}]"));
+            return tuple.TupleElements.Length == 1
+                ? $"new {type.GloballyQualified()}({string.Join(", ", elements)})"
+                : $"({string.Join(", ", elements)})";
+        }
+
+        return $"global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({value})";
+    }
+
     // Rebuild flattened System.Tuple rows, recursively constructing Rest after the seventh element.
     private static string ConstructReferenceTuple(INamedTypeSymbol type, ref int elementIndex)
     {
@@ -4430,7 +4445,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var element = type.TypeArguments[i];
             arguments.Add(i == 7 && element is INamedTypeSymbol rest && IsReferenceTuple(rest)
                 ? ConstructReferenceTuple(rest, ref elementIndex)
-                : $"global::TUnit.Core.Helpers.CastHelper.Cast<{element.GloballyQualified()}>(args[{(elementIndex++).ToString(CultureInfo.InvariantCulture)}])");
+                : CastTupleElement(element, $"args[{(elementIndex++).ToString(CultureInfo.InvariantCulture)}]"));
         }
 
         return $"new {type.GloballyQualified()}({string.Join(", ", arguments)})";
@@ -4497,7 +4512,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Build tuple reconstruction with proper casting
             var tupleElements = singleTupleParam.TupleElements.Select((elem, i) =>
-                $"global::TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
+                CastTupleElement(elem.Type, $"args[{i.ToString(CultureInfo.InvariantCulture)}]"));
             var tupleConstruction = singleTupleParam.TupleElements.Length == 1
                 ? $"new {singleTupleParam.GloballyQualified()}({string.Join(", ", tupleElements)})"
                 : $"({string.Join(", ", tupleElements)})";
@@ -4541,6 +4556,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 var arity = GetTupleElementTypes(singleReferenceTupleParam)!.Length;
                 writer.AppendLine("// Special handling for single reference tuple parameter");
+                if (arity == 1)
+                {
+                    // Preserve the distinction between a null argument and a tuple containing null,
+                    // even when the source's invariant Tuple<T> needs an element conversion.
+                    writer.AppendLine($"if (args.Length == 1 && args[0] is not {singleReferenceTupleParam.GloballyQualified()} && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]) is [null])");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    var nullTuple = $"new {singleReferenceTupleParam.GloballyQualified()}(global::TUnit.Core.Helpers.CastHelper.Cast<{singleReferenceTupleParam.TypeArguments[0].GloballyQualified()}>(null))";
+                    GenerateReturnHandling(writer, $"instance.{methodName}({FormatSingleArgumentCall(nullTuple, hasCancellationToken, parametersFromArgs)})", returnPattern);
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.AppendLine("else");
+                }
+
                 // With one element, a lone argument is either that element or the whole tuple (or null), so check it.
                 var unwrappedCheck = arity == 1 ? $" && args[0] is not null && args[0] is not {singleReferenceTupleParam.GloballyQualified()}" : "";
                 writer.AppendLine($"if (args.Length == {arity.ToString(CultureInfo.InvariantCulture)}{unwrappedCheck})");

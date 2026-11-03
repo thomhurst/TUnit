@@ -141,10 +141,16 @@ internal class DataUnwrapper
         if (dataParameterCount == 1 && TupleHelper.IsTupleType(lastDataParameterType))
         {
             // Keep the runtime tuple intact until generic inference closes the parameter type.
-            return !DataSourceHelpers.RequiresFlattenedTupleBinding(values[0]!)
-                && (lastDataParameterType.ContainsGenericParameters || lastDataParameterType.IsInstanceOfType(values[0]))
-                ? values
-                : DataSourceHelpers.UnwrapTupleAot(values[0]);
+            if (!DataSourceHelpers.RequiresFlattenedTupleBinding(values[0]!)
+                && (lastDataParameterType.ContainsGenericParameters || lastDataParameterType.IsInstanceOfType(values[0])))
+            {
+                return values;
+            }
+
+            // A lone null element must retain its container: [null] also represents an actual
+            // null argument, which the invokers intentionally do not turn into a tuple.
+            var tupleElements = DataSourceHelpers.UnwrapTupleAot(values[0]);
+            return tupleElements is [null] ? values : tupleElements;
         }
 
         // A tuple that is already an instance of the first data parameter's tuple type binds to it

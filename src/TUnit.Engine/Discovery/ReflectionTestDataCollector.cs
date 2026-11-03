@@ -3848,13 +3848,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     && args.Length == tupleElements.Length + parameters.Length - 1
                     && (tupleElements.Length > 1
                         || args[singleDataIndex] is { } singleValue
+                            && !(DataSourceHelpers.IsTuple(singleValue) && DataSourceHelpers.UnwrapTupleAot(singleValue) is [null])
                             && !parameters[singleDataIndex].ParameterType.IsInstanceOfType(singleValue)))
                 {
                     // DataUnwrapper spreads an incompatible tuple so each element can be
                     // converted before constructing the target, as the generated invoker does.
                     var dataIndex = singleDataIndex;
                     var offset = dataIndex;
-                    castedArgs[dataIndex] = ReconstructTuple(parameters[dataIndex].ParameterType, args, ref offset);
+                    castedArgs[dataIndex] = ConstructInvocationTuple(parameters[dataIndex].ParameterType, args, ref offset);
                     for (var i = 0; i < parameters.Length; i++)
                     {
                         if (i != dataIndex)
@@ -4075,21 +4076,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return Task.FromException(ex);
             }
         };
-    }
-
-    private static object ReconstructTuple(Type tupleType, object?[] values, ref int offset)
-    {
-        var elementTypes = tupleType.GetGenericArguments();
-        var elements = new object?[elementTypes.Length];
-        for (var i = 0; i < elements.Length; i++)
-        {
-            // Both tuple families store elements beyond the seventh in a nested Rest tuple.
-            elements[i] = i == 7 && GetTupleElementTypes(elementTypes[i]) != null
-                ? ReconstructTuple(elementTypes[i], values, ref offset)
-                : CastHelper.Cast(elementTypes[i], values[offset++]);
-        }
-
-        return Activator.CreateInstance(tupleType, elements)!;
     }
 
     internal async Task<List<TestMetadata>> DiscoverDynamicTests(string testSessionId, Assembly[]? candidateAssemblies = null)
