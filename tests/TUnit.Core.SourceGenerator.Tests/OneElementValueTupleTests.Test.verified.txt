@@ -40,7 +40,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedElement<global::System.ValueTuple<object>>((args[0] is global::System.Runtime.CompilerServices.ITuple { Length: 1 } && args[0] is not global::System.ValueTuple<object> ? new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[0])) : global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(args[0]))));
+                return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedElement<global::System.ValueTuple<object>>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
             }
             else
             {
@@ -136,7 +136,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedElementFromInstance<global::System.ValueTuple<object>>((args[0] is global::System.Runtime.CompilerServices.ITuple { Length: 1 } && args[0] is not global::System.ValueTuple<object> ? new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[0])) : global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(args[0]))));
+                return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedElementFromInstance<global::System.ValueTuple<object>>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
             }
             else
             {
@@ -232,7 +232,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                     else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
                         // Rare case: tuple is wrapped as a single argument
-                        return new global::System.Threading.Tasks.ValueTask(instance.SingleElementFromInstance((args[0] is global::System.Runtime.CompilerServices.ITuple { Length: 1 } && args[0] is not global::System.ValueTuple<string> ? new global::System.ValueTuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[0])) : global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<string>>(args[0]))));
+                        return new global::System.Threading.Tasks.ValueTask(instance.SingleElementFromInstance((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<string> => (global::System.ValueTuple<string>)new global::System.ValueTuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<string>>(__tupleFallback0) })));
                     }
                     else
                     {
@@ -250,7 +250,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                     else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
                         // Rare case: tuple is wrapped as a single argument
-                        return new global::System.Threading.Tasks.ValueTask(instance.SingleElement((args[0] is global::System.Runtime.CompilerServices.ITuple { Length: 1 } && args[0] is not global::System.ValueTuple<string> ? new global::System.ValueTuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[0])) : global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<string>>(args[0]))));
+                        return new global::System.Threading.Tasks.ValueTask(instance.SingleElement((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<string> => (global::System.ValueTuple<string>)new global::System.ValueTuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<string>>(__tupleFallback0) })));
                     }
                     else
                     {
@@ -268,7 +268,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                     else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
                         // Rare case: tuple is wrapped as a single argument
-                        return new global::System.Threading.Tasks.ValueTask(instance.NestedElement((args[0] is global::System.Runtime.CompilerServices.ITuple { Length: 1 } && args[0] is not global::System.ValueTuple<object> ? new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[0])) : global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(args[0]))));
+                        return new global::System.Threading.Tasks.ValueTask(instance.NestedElement((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
                     }
                     else
                     {
@@ -286,7 +286,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                     else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
                         // Rare case: tuple is wrapped as a single argument
-                        return new global::System.Threading.Tasks.ValueTask(instance.NestedElementFromInstance((args[0] is global::System.Runtime.CompilerServices.ITuple { Length: 1 } && args[0] is not global::System.ValueTuple<object> ? new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[0])) : global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(args[0]))));
+                        return new global::System.Threading.Tasks.ValueTask(instance.NestedElementFromInstance((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
                     }
                     else
                     {
@@ -304,7 +304,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                     else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
                         // Rare case: tuple is wrapped as a single argument
-                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedNestedElement((args[0] is global::System.Runtime.CompilerServices.ITuple { Length: 1 } && args[0] is not global::System.ValueTuple<object> ? new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[0])) : global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(args[0]))));
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedNestedElement((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
                     }
                     else
                     {
@@ -322,7 +322,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                     else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
                         // Rare case: tuple is wrapped as a single argument
-                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedNestedElementFromInstance((args[0] is global::System.Runtime.CompilerServices.ITuple { Length: 1 } && args[0] is not global::System.ValueTuple<object> ? new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[0])) : global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(args[0]))));
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedNestedElementFromInstance((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
                     }
                     else
                     {
@@ -340,7 +340,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                     else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
                         // Rare case: tuple is wrapped as a single argument
-                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedPairExpandsOuterTuple((args[0] is global::System.Runtime.CompilerServices.ITuple { Length: 2 } && args[0] is not global::System.ValueTuple<int, int> ? (global::TUnit.Core.Helpers.CastHelper.Cast<int>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[1])) : global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, int>>(args[0]))));
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedPairExpandsOuterTuple((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 2 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<int, int> => (global::System.ValueTuple<int, int>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, int>>(__tupleFallback0) })));
                     }
                     else
                     {
@@ -358,7 +358,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                     else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
                         // Rare case: tuple is wrapped as a single argument
-                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedPairExpandsOuterTupleFromInstance((args[0] is global::System.Runtime.CompilerServices.ITuple { Length: 2 } && args[0] is not global::System.ValueTuple<int, int> ? (global::TUnit.Core.Helpers.CastHelper.Cast<int>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[1])) : global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, int>>(args[0]))));
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedPairExpandsOuterTupleFromInstance((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 2 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<int, int> => (global::System.ValueTuple<int, int>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, int>>(__tupleFallback0) })));
                     }
                     else
                     {

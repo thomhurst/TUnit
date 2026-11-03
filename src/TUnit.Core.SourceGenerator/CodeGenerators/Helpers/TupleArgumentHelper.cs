@@ -20,20 +20,30 @@ public static class TupleArgumentHelper
 {
     // ValueTuple is invariant: a boxed (int, string) cannot be cast to (int, object).
     // Reconstruct mismatched tuples from their elements, recursively, without reflection.
-    public static string GenerateCastExpression(ITypeSymbol type, string expression)
+    internal static string GenerateCastExpression(ITypeSymbol type, string expression)
+        => GenerateCastExpression(type, expression, 0);
+
+    private static string GenerateCastExpression(ITypeSymbol type, string expression, int depth)
     {
-        var cast = $"global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({expression})";
-        if (type is not INamedTypeSymbol { IsTupleType: true } tuple)
+        var tupleType = type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable
+            ? nullable.TypeArguments[0]
+            : type;
+        if (tupleType is not INamedTypeSymbol { IsTupleType: true } tuple)
         {
-            return cast;
+            return $"global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({expression})";
         }
 
+        // Bind each input once. Repeating a parent's expression in its children makes output
+        // repeat its indexing chain at every level; switch inputs avoid that duplication.
+        var input = $"__tupleInput{depth.ToString(CultureInfo.InvariantCulture)}";
+        var fallback = $"__tupleFallback{depth.ToString(CultureInfo.InvariantCulture)}";
         var elements = tuple.TupleElements.Select((element, index) => GenerateCastExpression(element.Type,
-            $"((global::System.Runtime.CompilerServices.ITuple){expression}!)[{index.ToString(CultureInfo.InvariantCulture)}]"));
+            $"{input}[{index.ToString(CultureInfo.InvariantCulture)}]", depth + 1));
         var construction = tuple.TupleElements.Length == 1
             ? $"new {tuple.GloballyQualified()}({string.Join(", ", elements)})"
             : $"({string.Join(", ", elements)})";
-        return $"({expression} is global::System.Runtime.CompilerServices.ITuple {{ Length: {tuple.TupleElements.Length.ToString(CultureInfo.InvariantCulture)} }} && {expression} is not {type.GloballyQualified()} ? {construction} : {cast})";
+        // Nullable tuples box as their underlying tuple, or null. The fallback preserves null.
+        return $"({expression} switch {{ global::System.Runtime.CompilerServices.ITuple {{ Length: {tuple.TupleElements.Length.ToString(CultureInfo.InvariantCulture)} }} {input} when {input} is not {tuple.GloballyQualified()} => ({type.GloballyQualified()}){construction}, var {fallback} => global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({fallback}) }})";
     }
 
     /// <summary>

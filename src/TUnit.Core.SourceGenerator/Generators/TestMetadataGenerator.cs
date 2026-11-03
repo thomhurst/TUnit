@@ -2256,9 +2256,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     var paramType = SubstituteTypeParameters(param.Type, testMethod, entry.ClassTypeArgs, entry.MethodTypeArgs);
                     var argument = $"args[{dataArgIndex++.ToString(CultureInfo.InvariantCulture)}]";
-                    parameterCasts.Add(paramType is INamedTypeSymbol { IsTupleType: true }
-                        ? TupleArgumentHelper.GenerateCastExpression(paramType, argument)
-                        : $"global::TUnit.Core.Helpers.CastHelper.Cast<{paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argument})");
+                    parameterCasts.Add(TupleArgumentHelper.GenerateCastExpression(paramType, argument));
                 }
             }
 

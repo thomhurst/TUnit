@@ -38,4 +38,30 @@ public class NestedTupleBindingTests
     {
         await Assert.That(row).IsEqualTo(((T)(object)1, (2, ((object)"three", 4, 5, 6, 7, 8, 9, (object)"ten"))));
     }
+
+    public static IEnumerable<(int, (int, string)?)> NullableRows()
+    {
+        yield return (1, (2, "nullable"));
+        yield return (0, null);
+    }
+
+    [Test, MethodDataSource(nameof(NullableRows))]
+    public async Task NullableNested<T>((T, (int, object)?) row)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(row.Item2.HasValue).IsEqualTo(EqualityComparer<T>.Default.Equals(row.Item1, (T)(object)1));
+        if (row.Item2.HasValue)
+        {
+            await Assert.That(row.Item2.Value).IsEqualTo((2, (object)"nullable"));
+        }
+    }
+
+    public static (int, (int, (int, (int, (int, string))))) VeryDeepRow()
+        => (1, (2, (3, (4, (5, "six")))));
+
+    [Test, MethodDataSource(nameof(VeryDeepRow))]
+    public async Task VeryDeep<T>((T, (int, (int, (int, (int, object))))) row)
+    {
+        await Assert.That(row).IsEqualTo(((T)(object)1, (2, (3, (4, (5, (object)"six"))))));
+    }
 }
