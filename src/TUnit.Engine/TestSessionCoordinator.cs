@@ -236,7 +236,6 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             {
                 var children = await _deferredTestExpander.ExpandAsync(placeholder, cancellationToken);
                 testList.AddRange(children);
-                _dependencyResolver.ReplaceDeferredTest(placeholder, children);
                 if (children.Count == 0)
                 {
                     placeholder.State = TestState.Passed;
@@ -256,7 +255,9 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             }
         }
 
+        _dependencyResolver.ReplaceDeferredTests(expanded);
         _dependencyResolver.ResolveAllDependencies();
+        _serviceProvider.TestBuilderPipeline.PopulateAllDependencies(_dependencyResolver.RegisteredTests, refresh: true);
         return expanded;
     }
 

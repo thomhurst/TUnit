@@ -342,10 +342,17 @@ internal sealed class TestBuilderPipeline
     /// can access dependency information on any TestContext.
     /// </summary>
     /// <param name="tests">All tests that have had their dependencies resolved</param>
-    public void PopulateAllDependencies(IEnumerable<AbstractExecutableTest> tests)
+    /// <param name="refresh">Rebuild context lists after deferred dependency edges change</param>
+    public void PopulateAllDependencies(IEnumerable<AbstractExecutableTest> tests, bool refresh = false)
     {
         foreach (var test in tests)
         {
+            if (refresh)
+            {
+                test.Context._dependencies?.Clear();
+                test.Context._dependenciesPopulated = false;
+            }
+
             _testBuilder.PopulateDependenciesOnly(test);
         }
     }

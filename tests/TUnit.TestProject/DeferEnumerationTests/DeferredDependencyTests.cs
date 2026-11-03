@@ -1,9 +1,17 @@
+using System.Runtime.CompilerServices;
+
 namespace TUnit.TestProject.DeferEnumerationTests;
 
 public class DeferredDependencyTests
 {
-    private static int _completed;
-    private static int _dependentCompleted;
+    private sealed class SessionCounters
+    {
+        public int Completed;
+        public int DependentCompleted;
+    }
+
+    private static readonly ConditionalWeakTable<TestSessionContext, SessionCounters> Counters = new();
+    private static SessionCounters CurrentCounters => Counters.GetValue(TestSessionContext.Current!, static _ => new());
 
     public static IEnumerable<int> Rows() => Enumerable.Range(1, 3);
     public static IEnumerable<int> DependentRows() => Enumerable.Range(1, 2);
@@ -13,7 +21,7 @@ public class DeferredDependencyTests
     public async Task Deferred(int row)
     {
         await Task.Yield();
-        Interlocked.Increment(ref _completed);
+        Interlocked.Increment(ref CurrentCounters.Completed);
     }
 
     [Test]
@@ -21,15 +29,20 @@ public class DeferredDependencyTests
     [MethodDataSource(nameof(DependentRows), DeferEnumeration = true)]
     public async Task Depends_On_Deferred(int row)
     {
-        await Assert.That(_completed).IsEqualTo(3);
-        Interlocked.Increment(ref _dependentCompleted);
+        await Assert.That(CurrentCounters.Completed).IsEqualTo(3);
+        await Assert.That(TestContext.Current!.Dependencies.DependsOn.Count).IsEqualTo(3);
+        await Assert.That(TestContext.Current.Dependencies.DependsOn.All(test => test.TestMethodArguments.Length == 1)).IsTrue();
+        Interlocked.Increment(ref CurrentCounters.DependentCompleted);
     }
 
     [Test]
     [DependsOn(nameof(Depends_On_Deferred))]
     public async Task Waits_For_All_Rows()
     {
-        await Assert.That(_completed).IsEqualTo(3);
-        await Assert.That(_dependentCompleted).IsEqualTo(2);
+        await Assert.That(CurrentCounters.Completed).IsEqualTo(3);
+        await Assert.That(CurrentCounters.DependentCompleted).IsEqualTo(2);
+        // DependsOn includes the two direct rows and their three transitive dependencies.
+        await Assert.That(TestContext.Current!.Dependencies.DependsOn.Count).IsEqualTo(5);
+        await Assert.That(TestContext.Current.Dependencies.DependsOn.All(test => test.TestMethodArguments.Length == 1)).IsTrue();
     }
 }
