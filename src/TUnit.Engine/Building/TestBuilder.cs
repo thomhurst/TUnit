@@ -548,7 +548,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 // The test built below holds classData, which may be the unclaimed first fetch,
                                 // and tracks any objects that a temporary instance used.
                                 var lentClassRowObjects = unclaimedClassRow.TakeLentObjects();
-                                var rowCleanup = unclaimedClassRow.TakeCleanup();
+                                var skippedRowContext = unclaimedClassRow.CreateEnumerationFailureContext(contextAccessor.Current);
                                 unclaimedClassRow.Clear();
 
                                 Type[] resolvedClassGenericArgs;
@@ -568,11 +568,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 // If generic type inference failed, create a failed test instead of skipped
                                 if (genericResolutionException != null)
                                 {
-                                    if (rowCleanup is not null)
-                                    {
-                                        contextAccessor.Current.Events.OnDataRowDispose = rowCleanup.Clone();
-                                    }
-                                    var failedTest = CreateFailedTestForDataGenerationError(metadata, genericResolutionException, new TestDataCombination(), classData, lentClassRowObjects, contextAccessor.Current);
+                                    var failedTest = CreateFailedTestForDataGenerationError(metadata, genericResolutionException, new TestDataCombination(), classData, lentClassRowObjects, skippedRowContext);
                                     tests.Add(failedTest);
                                 }
                                 else
@@ -602,11 +598,8 @@ internal sealed class TestBuilder : ITestBuilder
                                         InitializedAttributes = attributes
                                     };
 
-                                    testBuilderContext.CopyStateBagTo(testSpecificContext);
-                                    if (rowCleanup is { } cleanup)
-                                    {
-                                        testSpecificContext.Events.OnDataRowDispose = cleanup.Clone();
-                                    }
+                                    skippedRowContext.CopyStateBagTo(testSpecificContext);
+                                    testSpecificContext.Events = skippedRowContext.EventsIfCreated?.Clone() ?? new();
 
                                     var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken: cancellationToken);
                                     test.Context.SkipReason = skipReason;
@@ -1140,34 +1133,7 @@ internal sealed class TestBuilder : ITestBuilder
         {
             if (_data is { } data)
             {
-                // Keep method-enumeration state, but replay constructor-factory updates
-                // and removals of inherited keys as well as newly added constructor state.
-                if (_rowContext.HasStateBag)
-                {
-                    if (_constructorBaseline is not null && context.HasStateBag)
-                    {
-                        foreach (var key in _constructorBaseline.Keys)
-                        {
-                            if (!_rowContext.StateBag.ContainsKey(key))
-                            {
-                                context.StateBag.TryRemove(key, out _);
-                            }
-                        }
-                    }
-                    foreach (var entry in _rowContext.StateBag)
-                    {
-                        if (_constructorBaseline is null
-                            || !_constructorBaseline.TryGetValue(entry.Key, out var inherited)
-                            || !ReferenceEquals(inherited, entry.Value))
-                        {
-                            context.StateBag[entry.Key] = entry.Value;
-                        }
-                    }
-                }
-                if (_events is { } savedEvents)
-                {
-                    context.Events = savedEvents.Clone();
-                }
+                ApplySavedContextTo(context);
                 var row = (data, _metadata);
                 Clear();
                 return new ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)>(row);
@@ -1185,6 +1151,38 @@ internal sealed class TestBuilder : ITestBuilder
             }
         }
 
+        private void ApplySavedContextTo(TestBuilderContext context)
+        {
+            // Keep method-enumeration state, but replay constructor-factory updates
+            // and removals of inherited keys as well as newly added constructor state.
+            if (_rowContext.HasStateBag)
+            {
+                if (_constructorBaseline is not null && context.HasStateBag)
+                {
+                    foreach (var key in _constructorBaseline.Keys)
+                    {
+                        if (!_rowContext.StateBag.ContainsKey(key))
+                        {
+                            context.StateBag.TryRemove(key, out _);
+                        }
+                    }
+                }
+                foreach (var entry in _rowContext.StateBag)
+                {
+                    if (_constructorBaseline is null
+                        || !_constructorBaseline.TryGetValue(entry.Key, out var inherited)
+                        || !ReferenceEquals(inherited, entry.Value))
+                    {
+                        context.StateBag[entry.Key] = entry.Value;
+                    }
+                }
+            }
+            if (_events is { } savedEvents)
+            {
+                context.Events = savedEvents.Clone();
+            }
+        }
+
         /// <summary>
         /// Hands back objects that were taken but that no test ended up holding, so the next test takes them.
         /// </summary>
@@ -1195,17 +1193,14 @@ internal sealed class TestBuilder : ITestBuilder
         }
 
         /// <summary>
-        /// Preserves scope cleanup when a skipped or failed test takes ownership of the row.
+        /// Preserves row callbacks and state when a skipped or failed test takes ownership of the row.
         /// </summary>
         public void TransferCleanupTo(TestBuilderContext target)
         {
-            var cleanup = TakeCleanup();
-            if (cleanup is null)
+            if (_data is not null)
             {
-                return;
+                ApplySavedContextTo(target);
             }
-
-            target.Events.OnDataRowDispose = cleanup.Clone();
         }
 
         internal TestBuilderContext CreateFailureContext(TestBuilderContext currentContext)
@@ -1222,16 +1217,9 @@ internal sealed class TestBuilder : ITestBuilder
             var failureContext = enumerationContext with { };
             enumerationContext.CopyStateBagTo(failureContext);
             failureContext.Events = enumerationContext.EventsIfCreated?.Clone() ?? new();
-            failureContext.Events.OnDataRowDispose = TakeCleanup()?.Clone();
+            failureContext.Events.OnDataRowDispose = null;
+            TransferCleanupTo(failureContext);
             return failureContext;
-        }
-
-        public AsyncEvent<(TestContext? Context, object? Object)>? TakeCleanup()
-        {
-            // A claimed row already belongs to a runnable test. Never copy its cleanup
-            // to a later empty source, which may finish before that test.
-            var cleanup = _data is not null ? _events?.OnDataRowDispose : null;
-            return cleanup;
         }
 
         /// <summary>Marks the unclaimed objects as held by a test.</summary>
@@ -1254,9 +1242,14 @@ internal sealed class TestBuilder : ITestBuilder
             if (_events?.OnDataRowDispose is { } cleanup)
             {
                 lifetimeContext ??= TestSessionContext.GlobalStaticPropertyContext;
-                foreach (var handler in cleanup.InvocationList)
+                var lifetimeEvents = lifetimeContext.Events;
+                // Builders run concurrently. Protect both initial event creation and insertion.
+                lock (lifetimeEvents)
                 {
-                    lifetimeContext.Events.OnDataRowDispose += handler.InvokeAsync;
+                    foreach (var handler in cleanup.InvocationList)
+                    {
+                        lifetimeEvents.OnDataRowDispose += handler.InvokeAsync;
+                    }
                 }
             }
             _events = null;
@@ -1925,9 +1918,10 @@ internal sealed class TestBuilder : ITestBuilder
     private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, TestBuilderContext? rowContext)
     {
         var builderContext = new TestBuilderContext { TestMetadata = metadata.MethodMetadata };
-        if (rowContext?.EventsIfCreated?.OnDataRowDispose is { } cleanup)
+        if (rowContext is not null)
         {
-            builderContext.Events.OnDataRowDispose = cleanup.Clone();
+            rowContext.CopyStateBagTo(builderContext);
+            builderContext.Events = rowContext.EventsIfCreated?.Clone() ?? new();
         }
 
         var context = _contextProvider.CreateTestContext(

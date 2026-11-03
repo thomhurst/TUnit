@@ -167,6 +167,110 @@ public class ClassRowCleanupTests
         }
     }
 
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task NonRunnableRowsPreservePublicCallbacksAndState(bool factoryThrows)
+    {
+        var current = TestContext.Current!;
+        var builder = (ITestBuilder)current.ServiceProvider.GetService(typeof(ITestBuilder))!;
+        var source = new PublicCleanupSource { FactoryThrows = factoryThrows };
+        var metadata = new TestMetadata<ClassRowCleanupTests>
+        {
+            TestClassType = typeof(ClassRowCleanupTests),
+            TestMethodName = nameof(NonRunnableRowsPreservePublicCallbacksAndState),
+            TestName = "Non-runnable row callbacks regression",
+            FilePath = "Unknown",
+            LineNumber = 0,
+            AttributeFactory = () => [],
+            MethodMetadata = current.TestDetails.MethodMetadata,
+            DataSources = factoryThrows ? [] : [new EmptySource { SkipIfEmpty = true }],
+            ClassDataSources = [source],
+            PropertyDataSources = [],
+            InstanceFactory = (_, _) => new ClassRowCleanupTests(),
+            InvokeTypedTest = (_, _, _) => ValueTask.CompletedTask
+        };
+        var tests = (await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null))).ToArray();
+        try
+        {
+            await Assert.That(tests.Length).IsEqualTo(1);
+            var context = tests[0].Context;
+            await Assert.That(context.StateBag["resource"]).IsSameReferenceAs(source.Resource);
+            var events = context.InternalEvents;
+            foreach (var callback in new[] { events.OnTestRegistered, events.OnTestSkipped, events.OnTestEnd, events.OnDispose })
+            {
+                await Assert.That(callback).IsNotNull();
+                foreach (var handler in callback!.InvocationList)
+                {
+                    await handler.InvokeAsync(context, context);
+                }
+            }
+            await Assert.That(source.Callbacks).IsEqualTo(4);
+        }
+        finally
+        {
+            foreach (var test in tests)
+            {
+                test.Context.RemoveFromRegistry();
+                test.Context.Dispose();
+            }
+        }
+    }
+
+    private sealed class PublicCleanupSource : Attribute, IDataSourceAttribute
+    {
+        public readonly object Resource = new();
+        public int Callbacks;
+        public bool FactoryThrows;
+        public bool SkipIfEmpty { get; set; }
+        public bool DeferEnumeration { get; set; }
+        public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata metadata)
+        {
+            await Task.CompletedTask;
+            yield return () =>
+            {
+                var context = metadata.TestBuilderContext.Current;
+                context.StateBag["resource"] = Resource;
+                ValueTask Callback(object sender, TestContext testContext)
+                {
+                    if (!ReferenceEquals(testContext.StateBag["resource"], Resource))
+                    {
+                        throw new InvalidOperationException("Cleanup lost its owning state");
+                    }
+                    Callbacks++;
+                    return default;
+                }
+                context.Events.OnTestRegistered += Callback;
+                context.Events.OnTestSkipped += Callback;
+                context.Events.OnTestEnd += Callback;
+                context.Events.OnDispose += Callback;
+                if (FactoryThrows) throw new InvalidOperationException("Factory failure");
+                return Task.FromResult<object?[]?>([Resource]);
+            };
+        }
+    }
+
+    [Test]
+    public async Task ConcurrentTemporaryRowsKeepEverySessionCleanup()
+    {
+        var session = CreateContext();
+        session.Events = new(); // Match the eagerly initialized global session context.
+        var contexts = Enumerable.Range(0, 512).Select(_ => CreateContext()).ToArray();
+        var disposals = 0;
+        foreach (var context in contexts)
+        {
+            context.Events.OnDataRowDispose += (_, _) =>
+            {
+                Interlocked.Increment(ref disposals);
+                return default;
+            };
+        }
+        Parallel.ForEach(contexts, context =>
+            new TestBuilder.UnclaimedClassRow([new object()], null, context).LendToTemporaryInstance(session));
+        await DisposeRow(session);
+        await Assert.That(disposals).IsEqualTo(contexts.Length);
+    }
+
     private sealed class EmptySource : Attribute, IDataSourceAttribute
     {
         public bool SkipIfEmpty { get; set; }

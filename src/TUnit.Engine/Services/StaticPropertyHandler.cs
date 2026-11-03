@@ -111,9 +111,18 @@ internal sealed class StaticPropertyHandler
         ObjectTracker objectTracker,
         List<Exception> cleanupExceptions)
     {
+        AsyncEvent<(TestContext? Context, object? Object)>? cleanup;
+        lock (events)
+        {
+            // Detach this session's handlers before awaiting disposal. A reused host must
+            // neither retain disposed scopes nor scan their callbacks in later sessions.
+            cleanup = events.OnDataRowDispose;
+            events.OnDataRowDispose = null;
+        }
+
         async ValueTask DisposeScopesAsync(object? instance)
         {
-            if (events.OnDataRowDispose is not { } cleanup)
+            if (cleanup is null)
             {
                 return;
             }

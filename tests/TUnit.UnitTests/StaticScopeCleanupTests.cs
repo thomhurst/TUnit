@@ -22,6 +22,14 @@ public class StaticScopeCleanupTests
         // Matching-object notification and the final sweep must not dispose the same scope twice.
         await Assert.That(source.Scope.DisposeCount).IsEqualTo(1);
         await Assert.That(service.DisposeCount).IsEqualTo(1);
+        await Assert.That(events.OnDataRowDispose).IsNull();
+
+        var laterSource = new ScopeSource();
+        var laterService = laterSource.Resolve(events);
+        await StaticPropertyHandler.DisposeStaticPropertiesAsync([laterService], events, tracker, []);
+        await Assert.That(laterSource.Scope.DisposeCount).IsEqualTo(1);
+        await Assert.That(source.Scope.DisposeCount).IsEqualTo(1);
+        await Assert.That(events.OnDataRowDispose).IsNull();
     }
 
     [Test]
@@ -52,6 +60,7 @@ public class StaticScopeCleanupTests
         await Assert.That(failed.Scope.DisposeCount).IsEqualTo(1);
         await Assert.That(successful.Scope.DisposeCount).IsEqualTo(1);
         await Assert.That(service.DisposeCount).IsEqualTo(1);
+        await Assert.That(events.OnDataRowDispose).IsNull();
         await Assert.That(exceptions.Count).IsEqualTo(1);
         await Assert.That(exceptions[0].Message).IsEqualTo("Scope cleanup failure");
     }
