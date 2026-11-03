@@ -30,6 +30,64 @@ internal class StaticPropertyAccessibilityTests
                 }
             }
             """;
+        await Check(source, inaccessible, enabled, accessibility);
+    }
+
+    [Test]
+    [Arguments(false, true)]
+    [Arguments(true, true)]
+    [Arguments(false, false)]
+    [Arguments(true, false)]
+    public async Task File_local_container(bool nested, bool enabled)
+    {
+        var property = "[TUnit.Core.Arguments(\"value\")] public static string Value { get; set; }";
+        var source = "file class Helper { " + (nested ? "public class Nested { " + property + " }" : property) + " }";
+        await Check(source, true, enabled);
+    }
+
+    [Test]
+    [Arguments("class Helper<T>")]
+    [Arguments("struct Helper")]
+    [Arguments("record Helper")]
+    [Arguments("record struct Helper")]
+    public async Task Skipped_helper_has_no_diagnostic(string declaration)
+    {
+        var source = $$"""
+            public class Outer
+            {
+                private {{declaration}}
+                {
+                    [TUnit.Core.Arguments("value")]
+                    public static string Value { get; set; }
+                }
+            }
+            """;
+        await Check(source, true, true, expectDiagnostic: false);
+    }
+
+    [Test]
+    public async Task Internal_leaf_in_private_container_reports_once_when_inherited()
+    {
+        const string source = """
+            public class Outer
+            {
+                private class Helper
+                {
+                    internal class Nested
+                    {
+                        [TUnit.Core.Arguments("value")]
+                        public static string Value { get; set; }
+                    }
+                    private class Derived : Nested { }
+                }
+            }
+            """;
+        await Check(source, true, true);
+    }
+
+    private static async Task Check(string source, bool inaccessible, bool enabled,
+        string? snapshotParameter = null, bool expectDiagnostic = true)
+    {
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
         var compilation = CSharpCompilation.Create("StaticPropertyAccessibility",
             [CSharpSyntaxTree.ParseText(source, parseOptions)], ReferencesHelper.References,
@@ -44,13 +102,16 @@ internal class StaticPropertyAccessibilityTests
             .IsEmpty();
         await Assert.That(driver.GetRunResult().Results[0].Exception).IsNull();
         await Assert.That(driver.GetRunResult().Results[0].GeneratedSources.Length).IsEqualTo(!enabled || inaccessible ? 0 : 1);
-        await Assert.That(diagnostics.Length).IsEqualTo(enabled && inaccessible ? 1 : 0);
-        if (enabled && inaccessible)
+        await Assert.That(diagnostics.Length).IsEqualTo(enabled && inaccessible && expectDiagnostic ? 1 : 0);
+        if (enabled && inaccessible && expectDiagnostic)
         {
             await Assert.That(diagnostics[0].Id).IsEqualTo("TUNITGEN005");
-            await Assert.That(diagnostics[0].Location.SourceTree!.GetText().ToString(diagnostics[0].Location.SourceSpan))
+            await Assert.That(source.Substring(diagnostics[0].Location.SourceSpan.Start, diagnostics[0].Location.SourceSpan.Length))
                 .IsEqualTo("Value");
-            await Verify(diagnostics[0].GetMessage()).UseParameters(accessibility);
+            if (snapshotParameter is not null)
+            {
+                await Verify(diagnostics[0].GetMessage()).UseParameters(snapshotParameter);
+            }
         }
     }
 }
