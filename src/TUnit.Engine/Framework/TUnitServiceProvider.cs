@@ -335,6 +335,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(ContextProvider.TestSessionContext, Logger).ConfigureAwait(false);
+
         foreach (var service in _services.Values)
         {
             if (service is IAsyncDisposable asyncDisposable)

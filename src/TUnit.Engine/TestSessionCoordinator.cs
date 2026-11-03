@@ -13,6 +13,7 @@ using TUnit.Engine.Framework;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
+using TUnit.Engine.Services.TestExecution;
 using ITestExecutor = TUnit.Engine.Interfaces.ITestExecutor;
 
 namespace TUnit.Engine;
@@ -83,6 +84,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             // process (IDE server mode) creates fresh fixtures instead of reusing disposed ones.
             // Runs after After(TestSession) hooks and static property disposal (both inside
             // ExecuteTestsCore via the scheduler), preserving existing disposal ordering.
+            await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(_contextProvider.TestSessionContext, _logger).ConfigureAwait(false);
+
             var sweepExceptions = await _objectTracker.DisposeAndClearStaticTrackingAsync();
 
             if (sweepExceptions is { Count: > 0 })

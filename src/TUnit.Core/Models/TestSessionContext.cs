@@ -69,6 +69,74 @@ public class TestSessionContext : Context
     /// </remarks>
     public CancellationToken SessionCancellationToken { get; internal set; }
 
+    /// <summary>
+    /// OnDispose callbacks that data sources subscribed while a generic class's rows were evaluated to infer
+    /// its type arguments (by reflection discovery, or by a source-generated row partition), raised once when
+    /// this session ends (#7205). They belong to this session, not the process, so a concurrent session in
+    /// server mode never raises them.
+    /// </summary>
+    internal AsyncEvent<TestContext>? DeferredDiscoveryOnDispose { get; private set; }
+
+    // Guards DeferredDiscoveryOnDispose and the static property context's OnDispose: builds add to them in parallel.
+    private static readonly object s_deferredOnDisposeLock = new();
+
+    /// <summary>
+    /// Moves the OnDispose callbacks subscribed on <paramref name="context"/> to the current session's
+    /// <see cref="DeferredDiscoveryOnDispose"/>, so they are raised once when that session ends. Rows evaluated
+    /// to infer a generic class's type arguments are not owned by one test (reflection discovery shares them
+    /// across the partition's tests), so a dependency injection scope created while they were read lives for
+    /// the session (#7205). Without a current session they go to <see cref="GlobalStaticPropertyContext"/>,
+    /// which the session's static property cleanup raises.
+    /// </summary>
+    internal static void DeferOnDisposeToSessionEnd(TestBuilderContext context)
+        => DeferOnDisposeToSessionEnd(context.EventsIfCreated);
+
+    /// <summary>
+    /// Moves the OnDispose callbacks subscribed on <paramref name="events"/> to the current session's
+    /// <see cref="DeferredDiscoveryOnDispose"/>, as <see cref="DeferOnDisposeToSessionEnd(TestBuilderContext)"/> does.
+    /// </summary>
+    internal static void DeferOnDisposeToSessionEnd(TestContextEvents? events)
+    {
+        if (events is not { OnDispose: { } onDispose })
+        {
+            return;
+        }
+
+        events.OnDispose = null;
+
+        lock (s_deferredOnDisposeLock)
+        {
+            AsyncEvent<TestContext> target;
+            if (Current is { } session)
+            {
+                target = session.DeferredDiscoveryOnDispose ??= new AsyncEvent<TestContext>();
+            }
+            else
+            {
+                var globalEvents = GlobalStaticPropertyContext.Events;
+                target = globalEvents.OnDispose ??= new AsyncEvent<TestContext>();
+            }
+
+            foreach (var invocation in onDispose.InvocationList)
+            {
+                target.Add(invocation.InvokeAsync, invocation.Order);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Takes the callbacks <see cref="DeferOnDisposeToSessionEnd"/> moved to this session, so they are raised once.
+    /// </summary>
+    internal AsyncEvent<TestContext>? TakeDeferredDiscoveryOnDispose()
+    {
+        lock (s_deferredOnDisposeLock)
+        {
+            var onDispose = DeferredDiscoveryOnDispose;
+            DeferredDiscoveryOnDispose = null;
+            return onDispose;
+        }
+    }
+
     private readonly Lock _lock = new();
     private readonly List<AssemblyHookContext> _assemblies = [];
     private ClassHookContext[]? _cachedTestClasses;

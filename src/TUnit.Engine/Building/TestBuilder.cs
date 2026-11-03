@@ -13,6 +13,7 @@ using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
+using TUnit.Engine.Services.TestExecution;
 using TUnit.Engine.Utilities;
 
 namespace TUnit.Engine.Building;
@@ -1184,10 +1185,9 @@ internal sealed class TestBuilder : ITestBuilder
             _data = null;
             _metadata = null;
 
-            // The temporary instance also returns the later method rows, which can hold services the lent
-            // objects' scope resolved, so no single test may raise the lent row's events: the first test's
-            // OnDispose would dispose that scope under the later tests. Their session-lifetime disposal is
-            // tracked by #7383; until then they stay unraised, as they were before #7205.
+            // Method rows may share services from the constructor row. Keep its scope alive until
+            // every test has finished, rather than attaching cleanup to the first method row.
+            TestSessionContext.DeferOnDisposeToSessionEnd(_events);
             _events = null;
         }
 
@@ -2386,10 +2386,10 @@ internal sealed class TestBuilder : ITestBuilder
             return instanceResult;
         }
 
+        var tempEvents = new TestContextEvents();
         try
         {
             var tempObjectBag = new ConcurrentDictionary<string, object?>();
-            var tempEvents = new TestContextEvents();
 
             await _objectLifecycleService.RegisterObjectAsync(
                 instanceResult.Instance,
@@ -2405,6 +2405,10 @@ internal sealed class TestBuilder : ITestBuilder
         {
             await DisposeInstanceForMethodDataSourcesAsync(instanceResult.Instance);
             throw;
+        }
+        finally
+        {
+            TestOnDisposeRaiser.DeferToSessionEnd(tempEvents);
         }
 
         return instanceResult;

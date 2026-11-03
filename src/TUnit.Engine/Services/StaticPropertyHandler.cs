@@ -4,6 +4,7 @@ using TUnit.Core.Helpers;
 using TUnit.Core.StaticProperties;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.Engine.Services;
 
@@ -62,7 +63,7 @@ internal sealed class StaticPropertyHandler
                         value,
                         _sessionObjectBag,
                         methodMetadata: null,
-                        new TestContextEvents());
+                        TestSessionContext.GlobalStaticPropertyContext.Events);
 
                     // Initialize nested objects depth-first BEFORE initializing the main value
                     // This ensures containers (IAsyncInitializer) are started before the factory
@@ -83,6 +84,17 @@ internal sealed class StaticPropertyHandler
         }
     }
 
+    /// <summary>Release subscriptions when initialization fails before normal session cleanup.</summary>
+    public async ValueTask ReleaseSessionCallbacksAfterFailedInitializationAsync()
+    {
+        var exceptions = new List<Exception>();
+        await TestOnDisposeRaiser.RaiseForSessionAsync(TestSessionContext.GlobalStaticPropertyContext, exceptions).ConfigureAwait(false);
+        foreach (var exception in exceptions)
+        {
+            await _logger.LogErrorAsync($"Error during static property cleanup after failed initialization: {exception}").ConfigureAwait(false);
+        }
+    }
+
     /// <summary>
     /// Track all initialized static properties
     /// This should be called once all static properties are initialized and before tests begin
@@ -100,6 +112,8 @@ internal sealed class StaticPropertyHandler
     /// </summary>
     public async Task DisposeStaticPropertiesAsync(List<Exception> cleanupExceptions)
     {
+        await TestOnDisposeRaiser.RaiseForSessionAsync(TestSessionContext.GlobalStaticPropertyContext, cleanupExceptions).ConfigureAwait(false);
+
         var staticProperties = _trackableObjectGraphProvider.GetStaticPropertyTrackableObjects();
 
         foreach (var staticProperty in staticProperties)
