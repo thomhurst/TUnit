@@ -5,6 +5,230 @@ namespace TUnit.Analyzers.Tests;
 public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 {
     [Test]
+    public async Task Private_Intermediate_Source_Does_Not_Hide_Public_Base_Overload()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Base
+            {
+                public static IEnumerable<int> Rows(int value, int count = 1) => [value];
+            }
+            public class Middle : Base
+            {
+                private new static IEnumerable<int> Rows(int value, int count = 1) => [value];
+            }
+            public class Tests : Middle
+            {
+                public static IEnumerable<string> Rows(object value, int count = 1) => ["broad"];
+                [Test, MethodDataSource(nameof(Rows), Arguments = new object[] { 1 })]
+                public void Specific(int value) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Optional_Metadata_Without_Default_Is_Rejected()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using System.Runtime.InteropServices;
+            using TUnit.Core;
+            public class Tests
+            {
+                public static IEnumerable<int> Rows([Optional] int value) => [value];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Missing(int value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(0).WithArguments("", "int"));
+    }
+
+    [Test]
+    public async Task Null_Optional_Overloads_Compare_Lifted_Parameter_Conversions()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public static IEnumerable<string> Rows(long? value, int count = 1) => ["broad"];
+                public static IEnumerable<int> Rows(int? value, int count = 1) => [count];
+                public static IEnumerable<int> Reversed(int? value, int count = 1) => [count];
+                public static IEnumerable<string> Reversed(long? value, int count = 1) => ["broad"];
+                [Test, MethodDataSource(nameof(Rows), Arguments = new object?[] { null })]
+                public void Specific(int value) { }
+                [Test, MethodDataSource(nameof(Reversed), Arguments = new object?[] { null })]
+                public void SpecificReversed(int value) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Equally_Specific_Optional_Overloads_Keep_Declaration_Order()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public static IEnumerable<string> Rows(int value, int count = 1) => ["first"];
+                public static IEnumerable<int> Rows(int value, string suffix = "") => [value];
+                [Test, MethodDataSource(nameof(Rows), Arguments = new object[] { 1 })]
+                public void First(string value) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Optional_Overloads_Use_Invocation_Conversions()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public static IEnumerable<string> Decimal(object value, int count = 1) => ["ok"];
+                public static IEnumerable<int> Decimal(decimal value, int count = 1) => [count];
+                public static IEnumerable<string> Nullable(object value, int count = 1) => ["ok"];
+                public static IEnumerable<int> Nullable(long? value, int count = 1) => [count];
+                public static IEnumerable<string> UserDefined(object value, int count = 1) => ["ok"];
+                public static IEnumerable<int> UserDefined(Converted value, int count = 1) => [count];
+                [Test, MethodDataSource(nameof(Decimal), Arguments = new object[] { 1 })]
+                public void DecimalTest(string value) { }
+                [Test, MethodDataSource(nameof(Nullable), Arguments = new object[] { 1 })]
+                public void NullableTest(string value) { }
+                [Test, MethodDataSource(nameof(UserDefined), Arguments = new object[] { 1 })]
+                public void UserDefinedTest(string value) { }
+            }
+            public class Converted
+            {
+                public static implicit operator Converted(int value) => new();
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Optional_Overloads_Exclude_Unavailable_Base_Methods()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Base
+            {
+                private static IEnumerable<int> Private(int value, int count = 1) => [count];
+                public static IEnumerable<int> Hidden(int value, int count = 1) => [count];
+            }
+            public class Tests : Base
+            {
+                public static IEnumerable<string> Private(object value, int count = 1) => ["ok"];
+                public new static IEnumerable<int> Hidden(int value, int count) => [count];
+                public static IEnumerable<string> Hidden(object value, int count = 1) => ["ok"];
+                [Test, MethodDataSource(nameof(Private), Arguments = new object[] { 1 })]
+                public void PrivateTest(string value) { }
+                [Test, MethodDataSource(nameof(Hidden), Arguments = new object[] { 1 })]
+                public void HiddenTest(string value) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Null_Argument_Selects_More_Specific_Optional_Overload()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public static IEnumerable<string> Rows(object value, int count = 1) => ["broad"];
+                public static IEnumerable<int> Rows(string value, int count = 1) => [count];
+                public static IEnumerable<int> Reversed(string value, int count = 1) => [count];
+                public static IEnumerable<string> Reversed(object value, int count = 1) => ["broad"];
+
+                [Test, MethodDataSource(nameof(Rows), Arguments = new object?[] { null })]
+                public void Specific(int value) { }
+                [Test, MethodDataSource(nameof(Reversed), Arguments = new object?[] { null })]
+                public void SpecificReversed(int value) { }
+                [Test, {|#0:MethodDataSource(nameof(Rows), Arguments = new object?[] { null })|}]
+                public void Incompatible(string value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(0)
+                .WithArguments("int", "string"));
+    }
+
+    [Test]
+    public async Task Override_Does_Not_Inherit_Optional_Default()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Base
+            {
+                public virtual IEnumerable<int> Rows(int value = 1) => [value];
+            }
+            public class Tests : Base
+            {
+                public override IEnumerable<int> Rows(int value) => [value];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Required(int value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(0)
+                .WithArguments("", "int"));
+    }
+
+    [Test]
+    public async Task Omitted_Optional_Data_Method_Parameters_Are_Accepted()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using System.Threading;
+            using TUnit.Core;
+
+            public class Base
+            {
+                public virtual IEnumerable<int> Inherited(int value = 1) => [value];
+            }
+
+            public class Tests : Base
+            {
+                public override IEnumerable<int> Inherited(int value = 2) => [value];
+                public static IEnumerable<string> Rows(string value) => [value];
+                public static IEnumerable<int> Rows(int value, int count = 1) => [value];
+                public static IEnumerable<string> Specific(object value, int count = 1) => ["broad"];
+                public static IEnumerable<int> Specific(long value, int count = 1) => [1];
+                public static IEnumerable<string> Exact(int value, int count = 1) => ["optional"];
+                public static IEnumerable<int> Exact(int value) => [value];
+                public static IEnumerable<int> Tokens(int value, int count = 1, CancellationToken token = default) => [value];
+
+                [Test, MethodDataSource(nameof(Rows), Arguments = new object[] { 1 })]
+                public void Optional(int value) { }
+                [Test, MethodDataSource(nameof(Specific), Arguments = new object[] { 1 })]
+                public void MoreSpecific(int value) { }
+                [Test, MethodDataSource(nameof(Exact), Arguments = new object[] { 1 })]
+                public void ExactMatch(int value) { }
+                [Test, MethodDataSource(nameof(Inherited))]
+                public void OverrideDefault(int value) { }
+                [Test, MethodDataSource(nameof(Tokens), Arguments = new object[] { 1 })]
+                public void InjectedToken(int value) { }
+            }
+            """);
+    }
+
+    [Test]
     public async Task DataSourceDriven_Argument_Is_Flagged_When_Does_Not_Match_Parameter_Type()
     {
         await Verifier

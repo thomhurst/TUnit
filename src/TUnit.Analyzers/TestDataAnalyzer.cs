@@ -446,6 +446,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                                                    methodSymbol.Name == methodName &&
                                                    !methodSymbol.IsGenericMethod &&
                                                    ArgumentsMatchParameterTypes(context, argumentsForMethodCall, methodSymbol.Parameters.WithoutCancellationTokenParameter().Select(p => p.Type)))
+                                           ?? FindOptionalDataSource(context, argumentsForMethodCall, methodSymbols, methodName!, type!)
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName && !x.IsGenericMethod)
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
 
@@ -669,7 +670,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            if (!ArgumentsMatchParameterTypes(context, argumentsForMethodCall, dataSourceMethodParameterTypes))
+            if (!(argumentsForMethodCall.Length == dataSourceMethod.Parameters.Length
+                    ? ArgumentsMatchParameterTypes(context, argumentsForMethodCall, dataSourceMethod.Parameters.Select(p => p.Type))
+                    : ScoreOptionalDataSource(context, argumentsForMethodCall, dataSourceMethod) >= 0))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(
@@ -745,6 +748,134 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
+    private static IMethodSymbol? FindOptionalDataSource(SymbolAnalysisContext context, TypedConstant[] arguments,
+        IMethodSymbol[] methods, string name, ITypeSymbol targetType)
+    {
+        // Inaccessible declarations cannot hide an otherwise available base source.
+        var availableMethods = methods.Where(method => method.Name == name && !method.IsGenericMethod
+            && (SymbolEqualityComparer.Default.Equals(method.ContainingType, targetType)
+                || (method.DeclaredAccessibility != Accessibility.Private
+                    && context.Compilation.IsSymbolAccessibleWithin(method, context.Compilation.Assembly))))
+            .ToArray();
+        IMethodSymbol? best = null;
+        var bestScore = -1;
+        foreach (var method in availableMethods)
+        {
+            if (availableMethods.Any(derived => HidesBaseSignature(derived, method)))
+            {
+                continue;
+            }
+
+            var score = ScoreOptionalDataSource(context, arguments, method);
+            var moreSpecific = best is not null && score == bestScore && score >= 0
+                && IsMoreSpecificOptionalDataSource(context.Compilation, method, best, arguments.Length);
+            if (score > bestScore || moreSpecific)
+            {
+                best = method;
+                bestScore = score;
+            }
+        }
+
+        return best;
+    }
+
+    // Specificity compares parameter conversions, including lifted nullable conversions, rather than
+    // boxed argument conversions. Mirrors IsMoreSpecificDataSourceOverload and reflection's IsMoreSpecific.
+    private static bool IsMoreSpecificOptionalDataSource(Compilation compilation, IMethodSymbol candidate,
+        IMethodSymbol other, int argumentCount)
+    {
+        var anyDifferent = false;
+        for (var i = 0; i < argumentCount; i++)
+        {
+            var candidateType = candidate.Parameters[i].Type;
+            var otherType = other.Parameters[i].Type;
+            if (SymbolEqualityComparer.Default.Equals(candidateType, otherType))
+            {
+                continue;
+            }
+
+            if (compilation.ClassifyCommonConversion(candidateType, otherType) is not { IsImplicit: true, IsUserDefined: false })
+            {
+                return false;
+            }
+
+            anyDifferent = true;
+        }
+
+        return anyDifferent;
+    }
+
+    private static bool HidesBaseSignature(IMethodSymbol derived, IMethodSymbol candidate)
+    {
+        if (derived.Name != candidate.Name || derived.Arity != candidate.Arity
+            || derived.Parameters.Length != candidate.Parameters.Length)
+        {
+            return false;
+        }
+
+        var isDerived = derived.ContainingType.BaseType?.GetSelfAndBaseTypes()
+            .Any(type => SymbolEqualityComparer.Default.Equals(type, candidate.ContainingType)) == true;
+        return isDerived && derived.Parameters.Zip(candidate.Parameters, (left, right) =>
+            left.RefKind == right.RefKind && SymbolEqualityComparer.Default.Equals(left.Type, right.Type)).All(equal => equal);
+    }
+
+    // Mirrors the invocation conversions accepted by both MethodDataSource execution paths.
+    private static bool IsOptionalInvocationConversion(Compilation compilation, ITypeSymbol? argumentType, ITypeSymbol parameterType)
+    {
+        var conversion = compilation.ClassifyCommonConversion(argumentType!, parameterType);
+        if (conversion is not { IsImplicit: true, IsUserDefined: false })
+        {
+            return false;
+        }
+
+        if (conversion.IsNullable)
+        {
+            return parameterType is INamedTypeSymbol { TypeArguments: [var underlying] }
+                && SymbolEqualityComparer.Default.Equals(underlying, argumentType);
+        }
+
+        return !conversion.IsNumeric || parameterType.SpecialType != SpecialType.System_Decimal;
+    }
+
+    // Defaults belong to the selected declaration: an override does not inherit its base method's defaults.
+    // Supplied arguments bind positionally; only omitted token parameters are injected.
+    private static int ScoreOptionalDataSource(SymbolAnalysisContext context, TypedConstant[] arguments, IMethodSymbol method)
+    {
+        if (arguments.Length > method.Parameters.Length)
+        {
+            return -1;
+        }
+
+        var score = 0;
+        for (var i = 0; i < method.Parameters.Length; i++)
+        {
+            var parameter = method.Parameters[i];
+            if (i >= arguments.Length)
+            {
+                if (!parameter.HasExplicitDefaultValue
+                    && parameter.Type.ToDisplayString() != "System.Threading.CancellationToken")
+                {
+                    return -1;
+                }
+
+                continue;
+            }
+
+            var argument = arguments[i];
+            if (!DataSourceArgumentMatches(context.Compilation, argument, parameter.Type, invocationOnly: true))
+            {
+                return -1;
+            }
+
+            if (!argument.IsNull)
+            {
+                score += SymbolEqualityComparer.Default.Equals(argument.Type, parameter.Type) ? 2 : 1;
+            }
+        }
+
+        return score;
+    }
+
     private static bool ArgumentsMatchParameterTypes(SymbolAnalysisContext context, TypedConstant[] argumentsForMethodCall,
         IEnumerable<ITypeSymbol> parameterTypes)
     {
@@ -760,9 +891,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         for (var i = 0; i < argumentsForMethodCall.Length; i++)
         {
             var argument = argumentsForMethodCall[i];
-            var matches = argument.IsNull
-                ? CanAcceptNull(parameterTypeArray[i])
-                : context.Compilation.HasImplicitConversionOrGenericParameter(argument.Type, parameterTypeArray[i]);
+            var matches = DataSourceArgumentMatches(context.Compilation, argument, parameterTypeArray[i], invocationOnly: false);
 
             if (!matches)
             {
@@ -771,6 +900,18 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         return true;
+    }
+
+    // Exact-count matching retains its existing generic/conversion behavior; optional overload selection
+    // is restricted to conversions supported by invocation in both execution modes.
+    private static bool DataSourceArgumentMatches(Compilation compilation, TypedConstant argument,
+        ITypeSymbol parameterType, bool invocationOnly)
+    {
+        return argument.IsNull
+            ? CanAcceptNull(parameterType)
+            : invocationOnly
+                ? IsOptionalInvocationConversion(compilation, argument.Type, parameterType)
+                : compilation.HasImplicitConversionOrGenericParameter(argument.Type, parameterType);
     }
 
     // Mirrors the null-argument overload selection in both execution modes (added in #7143): a null argument binds to
@@ -1531,7 +1672,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     // Mirrors DefaultBinder.FindMostSpecificMethod: an overload wins when it is more specific for at least one
     // parameter and less specific for none. Overloads with the same parameter types (a member hidden with `new`)
     // are resolved by the binder in favour of the most derived declaration, so they never tie.
-    private static bool IsAtLeastAsSpecific(Compilation compilation, IMethodSymbol candidate, IMethodSymbol other, ITypeSymbol[] argumentTypes)
+    private static bool IsAtLeastAsSpecific(Compilation compilation, IMethodSymbol candidate, IMethodSymbol other, ITypeSymbol?[] argumentTypes)
     {
         var otherWins = false;
 
@@ -1561,7 +1702,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     }
 
     // Mirrors DefaultBinder.FindMostSpecificType: 1 when the first type is more specific, 2 when the second is, 0 for a tie.
-    private static int FindMostSpecificType(Compilation compilation, ITypeSymbol first, ITypeSymbol second, ITypeSymbol argumentType)
+    private static int FindMostSpecificType(Compilation compilation, ITypeSymbol first, ITypeSymbol second, ITypeSymbol? argumentType)
     {
         if (SymbolEqualityComparer.Default.Equals(first, argumentType))
         {
