@@ -129,7 +129,15 @@ public static class CompilationExtensions
             {
                 var argumentType = argumentNamed.TypeArguments[i];
                 var parameterType = parameterNamed.TypeArguments[i];
+                // Infer an open target before reversing contravariant conversion direction.
+                // Otherwise IConsumer<string> to IConsumer<T> would compare T to string.
+                if (parameterType is ITypeParameterSymbol)
+                {
+                    continue;
+                }
+
                 // Variance permits reference conversions only; value types still require identity.
+                // IEnumerable<string> can become IEnumerable<object>, but IEnumerable<int> cannot.
                 var allowVariance = allowReferenceConversions && argumentType.IsReferenceType
                     && (parameterType.IsReferenceType || parameterType is ITypeParameterSymbol);
                 var variance = allowVariance ? parameterNamed.TypeParameters[i].Variance : VarianceKind.None;

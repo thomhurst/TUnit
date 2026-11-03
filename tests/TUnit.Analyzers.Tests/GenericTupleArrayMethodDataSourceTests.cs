@@ -51,6 +51,24 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("string")]
+    [Arguments("int")]
+    public async Task ContravariantArrayPreservesOpenTypeArgument(string inferredType)
+    {
+        await Verifier.VerifyAnalyzerAsync($$"""
+            #pragma warning disable TUnit0046
+            using TUnit.Core;
+            public interface IConsumer<in A> { }
+            public class C
+            {
+                public static ({{inferredType}}, IConsumer<{{inferredType}}>[], int) Row() => default;
+                [Test, MethodDataSource(nameof(Row))]
+                public void Test<T>(T seed, IConsumer<T>[] values, int end) { }
+            }
+            """);
+    }
+
+    [Test]
     [Arguments("Outer<string>.Inner<int>[]", "Outer<object>.Inner<T>[]", true)]
     [Arguments("Outer<string>.Inner<int>[]", "Outer<string>.Inner<T>[]", false)]
     [Arguments("IPair<int, string[][]>[]", "IPair<T, object[][]>[]", false)]
