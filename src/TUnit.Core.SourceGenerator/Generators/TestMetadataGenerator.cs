@@ -7779,11 +7779,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var isExternal = attribute.ConstructorArguments is [{ Value: INamedTypeSymbol }, ..]
             || attribute.AttributeClass is { IsGenericType: true };
         return types is not null
-            && (!isExternal || types.All(type => type.IsValueType || type is INamedTypeSymbol { IsSealed: true }))
+            && (!isExternal || types.All(HasFixedRuntimeType))
             && FindInaccessibleType(types, testMethod.CompilationContext.Compilation) is null
             ? types
             : null;
     }
+
+    // Arrays are sealed, but reference-element covariance can still change their runtime
+    // type. Only fix an array's type when its element type is fixed too (recursively).
+    private static bool HasFixedRuntimeType(ITypeSymbol type) => type switch
+    {
+        IArrayTypeSymbol array => array.ElementType.IsValueType || HasFixedRuntimeType(array.ElementType),
+        // A non-null Nullable<T> boxes as T, so reflection infers T from the row.
+        INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } => false,
+        _ => type.IsValueType || type is INamedTypeSymbol { IsSealed: true }
+    };
 
     private static ITypeSymbol? GetDeclaredMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {

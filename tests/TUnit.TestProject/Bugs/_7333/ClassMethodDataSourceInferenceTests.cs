@@ -105,6 +105,7 @@ public class ClassAndMethodSources<T>(T value)
 public static class PolymorphicRows
 {
     public static IEnumerable<IComparable> Integers() => [2];
+    public static IEnumerable<int?> NullableIntegers() => [2];
 }
 
 // The declared interface must not replace inference from the integer row value.
@@ -117,5 +118,88 @@ public class PolymorphicExternalRows<T>(T value)
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
         await Assert.That((object?)value).IsNotNull();
+    }
+}
+
+public static class ArrayRows
+{
+    public static IEnumerable<int[]> Integers() => [new[] { 3 }];
+    public static IEnumerable<string[]> Strings() => [new[] { "three" }];
+    public static IEnumerable<int?[]> NullableIntegers() => [new int?[] { 3, null }];
+    public static IEnumerable<int[][]> NestedIntegers() => [new[] { new[] { 3 } }];
+    public static IEnumerable<object[]> CovariantStrings() => [new[] { "source" }];
+}
+
+[MethodDataSource(typeof(ArrayRows), nameof(ArrayRows.Integers))]
+public class ExternalArrayRows<T>(T value)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int[]));
+        await Assert.That(((int[])(object)value!)[0]).IsEqualTo(3);
+    }
+}
+
+[MethodDataSource(typeof(ArrayRows), nameof(ArrayRows.Strings))]
+public class ExternalSealedArrayRows<T>(T value)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string[]));
+        await Assert.That(((string[])(object)value!)[0]).IsEqualTo("three");
+    }
+}
+
+[MethodDataSource(typeof(ArrayRows), nameof(ArrayRows.NestedIntegers))]
+public class ExternalNestedArrayRows<T>(T value)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int[][]));
+        await Assert.That(((int[][])(object)value!)[0][0]).IsEqualTo(3);
+    }
+}
+
+// object[] can hold a string[] row, so retain runtime partitioning for covariant arrays.
+[MethodDataSource(nameof(Strings))]
+[MethodDataSource(typeof(ArrayRows), nameof(ArrayRows.CovariantStrings))]
+public class CovariantExternalArrayRows<T>(T value)
+{
+    public static IEnumerable<string[]> Strings() => [new[] { "seed" }];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string[]));
+        await Assert.That(((string[])(object)value!)[0]).IsNotNull();
+    }
+}
+
+// A nullable value boxes as its underlying type when reflection infers the class types.
+[Arguments(1)]
+[MethodDataSource(typeof(PolymorphicRows), nameof(PolymorphicRows.NullableIntegers))]
+public class NullableExternalRows<T>(T value)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value).IsNotNull();
+    }
+}
+
+// Nullable array elements stay inside the array rather than being boxed as class rows.
+[MethodDataSource(typeof(ArrayRows), nameof(ArrayRows.NullableIntegers))]
+public class ExternalNullableArrayRows<T>(T value)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int?[]));
+        await Assert.That(((int?[])(object)value!)[0]).IsEqualTo(3);
+        await Assert.That(((int?[])(object)value!)[1]).IsNull();
     }
 }
