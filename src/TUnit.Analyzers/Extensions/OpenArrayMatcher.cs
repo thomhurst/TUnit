@@ -200,6 +200,14 @@ internal static class OpenArrayMatcher
                 && CanShareReferenceSubtype(compilation, leftArray.ElementType, rightArray.ElementType);
         }
 
+        // Arrays cannot derive from an arbitrary class. Their actual base classes
+        // (object and Array) were already accepted by the conversions above.
+        if ((left is IArrayTypeSymbol && right.TypeKind == TypeKind.Class)
+            || (right is IArrayTypeSymbol && left.TypeKind == TypeKind.Class))
+        {
+            return false;
+        }
+
         var leftSealedClass = left.IsSealed && left.TypeKind is not (TypeKind.Array or TypeKind.Delegate);
         var rightSealedClass = right.IsSealed && right.TypeKind is not (TypeKind.Array or TypeKind.Delegate);
         return !leftSealedClass && !rightSealedClass

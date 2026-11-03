@@ -105,6 +105,14 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("(Box<int>[], Box<string>[])", "(Box<T>[], T[])", true)]
+    [Arguments("(Box<string>[], Box<int>[])", "(T[], Box<T>[])", true)]
+    [Arguments("(Box<int>[], int[])", "(Box<T>[], T[])", false)]
+    [Arguments("(string[], Box<object>[])", "(T[], Box<T>[])", false)]
+    [Arguments("IContravariant<string[], Base>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Base, string[]>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<string[], Array>[]", "IContravariant<T, T>[]", false)]
+    [Arguments("IContravariant<object, string[]>[]", "IContravariant<T, T>[]", false)]
     [Arguments("(Box<int>[], Box<string>[])", "(Box<T>[], Box<T>[])", true)]
     [Arguments("(Box<string>[], Box<int>[])", "(Box<T>[], Box<T>[])", true)]
     [Arguments("(Box<int>[], Box<int>[])", "(Box<T>[], Box<T>[])", false)]

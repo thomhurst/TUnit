@@ -43,9 +43,9 @@ public static class CompilationExtensions
         {
             return parameterArray.Rank == argumentArray.Rank
                 && parameterArray.IsSZArray == argumentArray.IsSZArray
-                && (parameterArray.ElementType is ITypeParameterSymbol
-                    ? next(bindings)
-                    : OpenArrayMatcher.MatchesArrayElement(compilation, argumentArray.ElementType, parameterArray.ElementType, bindings, next));
+                && OpenArrayMatcher.MatchesArrayElement(compilation, argumentArray.ElementType,
+                    parameterArray.ElementType, bindings, next,
+                    allowReferenceConversions: argumentArray.ElementType.IsReferenceType);
         }
 
         // Tuples already recognized as generic definitions retain the existing conversion path below.
