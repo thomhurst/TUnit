@@ -485,3 +485,51 @@ public static class ExplicitMethodRowsProvider
 {
     public static IEnumerable<string?> Rows() => ["seed", null];
 }
+
+// Without a non-null class row, reflection uses the explicit instantiation's raw source.
+[GenerateGenericTest(typeof(string))]
+[MethodDataSource(typeof(GenericExternalProvider), nameof(GenericExternalProvider.NullRows))]
+public class ExplicitExternalOnlyNullRowsWithMethodRows<T>(T value)
+{
+    [Test]
+    [Arguments("method")]
+    public async Task Test(T argument)
+    {
+        await Assert.That((object?)value).IsNull();
+        await Assert.That((object?)argument).IsEqualTo("method");
+    }
+}
+
+[GenerateGenericTest(typeof(string))]
+[MethodDataSource(nameof(Rows))]
+public class ExplicitOwnNullRowsWithMethodRows<T>(T value)
+{
+    public static IEnumerable<string?> Rows() => ["seed", null];
+
+    [Test]
+    [Arguments("method")]
+    public async Task Test(T argument)
+    {
+        await Assert.That((object?)value is null or "seed").IsTrue();
+        await Assert.That((object?)argument).IsEqualTo("method");
+    }
+}
+
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(typeof(ExplicitArrayRowsProvider), nameof(ExplicitArrayRowsProvider.Rows))]
+public class ExplicitArrayRowsWithMethodRows<T>(T[] values)
+{
+    [Test]
+    [Arguments(3)]
+    public async Task Test(T argument)
+    {
+        await Assert.That(values.Length).IsEqualTo(1);
+        await Assert.That((object?)values[0]).IsEqualTo(1);
+        await Assert.That((object?)argument).IsEqualTo(3);
+    }
+}
+
+public static class ExplicitArrayRowsProvider
+{
+    public static IEnumerable<int[]?> Rows() => [new[] { 1 }, null];
+}

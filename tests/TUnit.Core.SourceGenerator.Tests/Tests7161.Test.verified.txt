@@ -64,11 +64,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7161.Issue7161Sources), "Five")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7161.Issue7161Sources), "Five")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7161.Issue7161Sources.Five()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -255,10 +254,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 {
     new global::TUnit.Core.ArgumentsAttribute("a"),
 },
-            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(string) }, global::TUnit.Core.GenericClassRowFallback.AllRows, new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(5),
-},
+}, 0),
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_1,
             invokeBody: __Invoke_1,

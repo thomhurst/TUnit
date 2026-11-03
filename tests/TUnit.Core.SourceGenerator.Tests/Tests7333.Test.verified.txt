@@ -56,11 +56,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalRows_T_Test_TestSourc
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.Rows.Integers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -136,11 +135,10 @@ internal static class TUnit_TestProject_Bugs__7333_OwnRows_T_Test_TestSource
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute("Integers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Integers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.OwnRows<int>.Integers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -216,11 +214,10 @@ internal static class TUnit_TestProject_Bugs__7333_AsyncFactoryRows_T_Test_TestS
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Strings")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Strings")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromTask(static () => global::TUnit.TestProject.Bugs._7333.Rows.Strings()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -297,16 +294,14 @@ internal static class TUnit_TestProject_Bugs__7333_MultipleSources_T_Test_TestSo
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.Rows.Integers()),
-    },
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "MoreIntegers")
+    }, true),
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "MoreIntegers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.Rows.MoreIntegers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -425,11 +420,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "methodValue"
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.Rows.Integers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -450,11 +444,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "methodValue"
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.Rows.Integers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -538,11 +531,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "methodValue"
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.Rows.Integers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -761,11 +753,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "methodValue"
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute("Integers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Integers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ClassAndMethodSources<int>.Integers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -922,11 +913,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalArrayRows_T_Test_Test
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "Integers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "Integers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ArrayRows.Integers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -1002,11 +992,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalSealedArrayRows_T_Tes
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "Strings")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "Strings")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ArrayRows.Strings()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -1082,11 +1071,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalNestedArrayRows_T_Tes
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "NestedIntegers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "NestedIntegers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ArrayRows.NestedIntegers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -1163,11 +1151,10 @@ internal static class TUnit_TestProject_Bugs__7333_CovariantExternalArrayRows_T_
             hasDataSource: true,
             classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(string[]) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute("Strings")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Strings")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.CovariantExternalArrayRows<string[]>.Strings()),
-    },
+    }, true),
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "CovariantStrings")
     {
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ArrayRows.CovariantStrings()),
@@ -1328,11 +1315,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalNullableArrayRows_T_T
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "NullableIntegers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "NullableIntegers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ArrayRows.NullableIntegers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -1408,11 +1394,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalNullableArrayParamete
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "NullableIntegers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ArrayRows), "NullableIntegers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ArrayRows.NullableIntegers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -1533,11 +1518,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalConstructorPositionRo
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows), "PositionalRows")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows), "PositionalRows")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows.PositionalRows()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_1,
@@ -1619,11 +1603,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalNullRows_T_Test_TestS
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute("seed"),
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows), "NullRows")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows), "NullRows")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows.NullRows()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -1701,11 +1684,10 @@ internal static class TUnit_TestProject_Bugs__7333_GenericProviderNullRows_T_Tes
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute("seed"),
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.GenericExternalProvider), "NullRows")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.GenericExternalProvider), "NullRows")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.GenericExternalProvider.NullRows()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -1782,11 +1764,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalUnrelatedColumnRows_T
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows), "UnrelatedColumns")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows), "UnrelatedColumns")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.AdditionalExternalRows.UnrelatedColumns()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -1872,11 +1853,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "methodRow", new
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ReviewRows), "Resources")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ReviewRows), "Resources")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ReviewRows.Resources()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -1954,11 +1934,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalEmptyValueRows_T_Test
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1),
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ReviewRows), "EmptyIntegers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ReviewRows), "EmptyIntegers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ReviewRows.EmptyIntegers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -2034,11 +2013,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalOverloadedConstructor
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.Rows.Integers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -2116,11 +2094,10 @@ internal static class TUnit_TestProject_Bugs__7333_OwnEmptyValueRows_T_Test_Test
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1),
-    new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Rows")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.OwnEmptyValueRows<int>.Rows()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -2196,11 +2173,10 @@ internal static class TUnit_TestProject_Bugs__7333_OwnNullRows_T_Test_TestSource
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Rows")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.OwnNullRows<string>.Rows()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -2277,11 +2253,10 @@ internal static class TUnit_TestProject_Bugs__7333_UnsealedExternalRows_T_Test_T
             hasDataSource: true,
             classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._7333.DerivedRow) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute("Seeds")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Seeds")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.UnsealedExternalRows<global::TUnit.TestProject.Bugs._7333.DerivedRow>.Seeds()),
-    },
+    }, true),
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.UnsealedRows), "Rows")
     {
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.UnsealedRows.Rows()),
@@ -2358,11 +2333,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalParameterlessConstruc
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.Rows.Integers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -2435,11 +2409,10 @@ internal static class TUnit_TestProject_Bugs__7333_OwnParameterlessConstructorRo
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Rows")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.OwnParameterlessConstructorRows<int>.Rows()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -2515,11 +2488,10 @@ internal static class TUnit_TestProject_Bugs__7333_ExplicitConstructorRows_T_Tes
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.Rows), "Integers")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.Rows.Integers()),
-    },
+    }, true),
 },
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -2769,14 +2741,13 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "argument", n
 {
     new global::TUnit.Core.ArgumentsAttribute("method"),
 },
-            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(string) }, global::TUnit.Core.GenericClassRowFallback.AllRows, new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitMethodRowsProvider), "Rows")
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitMethodRowsProvider), "Rows")
     {
-        FilterClassRows = true,
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ExplicitMethodRowsProvider.Rows()),
-    },
-},
+    }, false, typeof(string)),
+}, 0),
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
@@ -2788,4 +2759,265 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "argument", n
 internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_Bugs__7333_ExplicitExternalNullRowsWithMethodRows_T_Test__T_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7333.ExplicitExternalNullRowsWithMethodRows<string>>(static () => TUnit_TestProject_Bugs__7333_ExplicitExternalNullRowsWithMethodRows_T_Test__T_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7333_ExplicitExternalOnlyNullRowsWithMethodRows_T_Test__T_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "ExplicitExternalOnlyNullRowsWithMethodRows",
+        Namespace = "TUnit.TestProject.Bugs._7333",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<>), "Test", false, 0, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "argument", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Test(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string)),
+            new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.GenericExternalProvider), "NullRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<string>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<string>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<string>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<string?>.Test",
+            filePath: "",
+            lineNumber: 494,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute("method"),
+},
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(string) }, global::TUnit.Core.GenericClassRowFallback.AllRows, new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.GenericExternalProvider), "NullRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.GenericExternalProvider.NullRows()),
+    }, false, typeof(string)),
+}, 0),
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7333_ExplicitExternalOnlyNullRowsWithMethodRows_T_Test__T_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7333.ExplicitExternalOnlyNullRowsWithMethodRows<string>>(static () => TUnit_TestProject_Bugs__7333_ExplicitExternalOnlyNullRowsWithMethodRows_T_Test__T_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7333_ExplicitOwnNullRowsWithMethodRows_T_Test__T_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "ExplicitOwnNullRowsWithMethodRows",
+        Namespace = "TUnit.TestProject.Bugs._7333",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<>), "Test", false, 0, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "argument", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Test(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string)),
+            new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<string>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<string>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<string>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<string?>.Test",
+            filePath: "",
+            lineNumber: 509,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute("method"),
+},
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(string) }, global::TUnit.Core.GenericClassRowFallback.AllRows, new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<string>.Rows()),
+    }, false, typeof(string)),
+}, 0),
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7333_ExplicitOwnNullRowsWithMethodRows_T_Test__T_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7333.ExplicitOwnNullRowsWithMethodRows<string>>(static () => TUnit_TestProject_Bugs__7333_ExplicitOwnNullRowsWithMethodRows_T_Test__T_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7333_ExplicitArrayRowsWithMethodRows_T_Test__T_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "ExplicitArrayRowsWithMethodRows",
+        Namespace = "TUnit.TestProject.Bugs._7333",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<>), "Test", false, 0, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "argument", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int[]>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Test(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
+            new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsProvider), "Rows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<int>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<int>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<int>.Test",
+            filePath: "",
+            lineNumber: 522,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(3),
+},
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(int) }, global::TUnit.Core.GenericClassRowFallback.AllRows, new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsProvider), "Rows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsProvider.Rows()),
+    }, false, typeof(int)),
+}, 0),
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7333_ExplicitArrayRowsWithMethodRows_T_Test__T_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7333.ExplicitArrayRowsWithMethodRows<int>>(static () => TUnit_TestProject_Bugs__7333_ExplicitArrayRowsWithMethodRows_T_Test__T_TestSource.Entries_0);
 }

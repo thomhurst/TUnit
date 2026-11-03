@@ -95,30 +95,10 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// </remarks>
     public Func<DataGeneratorMetadata, IAsyncEnumerable<Func<Task<object?[]?>>>>? Factory { get; set; }
 
-    /// <summary>Suppresses empty inferred generic class sources and filters all-null external rows in generated code.</summary>
-    /// <remarks>
-    /// <para>
-    /// Reserved for generated consumer code, which lives in another assembly. The default is
-    /// <see langword="false"/>. This property affects only rows supplied through <see cref="Factory"/>;
-    /// it does not change reflection-based source enumeration.
-    /// </para>
-    /// <para>
-    /// When enabled, an empty factory source produces no rows, regardless of <see cref="SkipIfEmpty"/>.
-    /// Each row factory is evaluated during enumeration, and null row arrays are discarded.
-    /// For external sources (<see cref="ClassProvidingDataSource"/> is non-null), rows whose
-    /// unwrapped constructor values are all null are also discarded. Own-class sources retain
-    /// valid null values because their declared member types supply the class type arguments.
-    /// Standalone explicit generic instantiations leave this property disabled to preserve their null rows.
-    /// When method rows merge explicit types into an inferred class-row group, filtering still applies.
-    /// </para>
-    /// <para>
-    /// For each retained row, the value evaluated during filtering is returned on the first fetch.
-    /// Subsequent fetches invoke the original row factory again, preserving fresh constructor data
-    /// for additional method rows and repetitions. Consumers should not set this property manually.
-    /// </para>
-    /// </remarks>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public bool FilterClassRows { get; set; }
+    // Configured only by GenericClassRowPartition.ConfigureInferredSource for generated code.
+    internal bool FilterClassRows { get; set; }
+
+    internal Type[]? InferredClassTypeArguments { get; set; }
 
     /// <summary>
     /// Gets or sets the arguments to pass to the data source method.

@@ -11,8 +11,8 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/*/*",
         [
             result => result.ResultSummary.Outcome.ShouldBe("Failed"),
-            result => result.ResultSummary.Counters.Total.ShouldBe(45),
-            result => result.ResultSummary.Counters.Passed.ShouldBe(43),
+            result => result.ResultSummary.Counters.Total.ShouldBe(49),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(47),
             result => result.ResultSummary.Counters.Failed.ShouldBe(2),
             result => result.Results.Where(test => test.Outcome == "Failed" && !test.TestName!.StartsWith("ReportsMissingConstructorValue", StringComparison.Ordinal))
                 .ShouldAllBe(test => test.Output!.ErrorInfo!.Message!.Contains("type arguments"))
@@ -23,6 +23,17 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
     public async Task Explicit_Instantiation_With_Method_Rows_Filters_Null_Class_Rows()
     {
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/ExplicitExternalNullRowsWithMethodRows*/*",
+        [
+            result => result.ResultSummary.Outcome.ShouldBe("Passed"),
+            result => result.ResultSummary.Counters.Total.ShouldBe(1),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(1)
+        ]);
+    }
+
+    [Test]
+    public async Task Explicit_Instantiation_With_Only_Null_Class_Rows_Retains_Test()
+    {
+        await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/ExplicitExternalOnlyNullRowsWithMethodRows*/*",
         [
             result => result.ResultSummary.Outcome.ShouldBe("Passed"),
             result => result.ResultSummary.Counters.Total.ShouldBe(1),

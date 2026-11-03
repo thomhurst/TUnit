@@ -80,6 +80,22 @@ public static class GenericClassRowPartition
         return result;
     }
 
+    /// <summary>
+    /// Configures a generated class source with its declared inference and optional inferred-row filtering.
+    /// Own-class null values are retained because their declared types supply the class type arguments.
+    /// </summary>
+    /// <remarks>Used only by generated code. Explicit instantiations retain raw rows for partition fallback.</remarks>
+    /// <param name="source">The generated source, including its factory.</param>
+    /// <param name="filterRows">Whether to suppress empty fallback rows and all-null external rows immediately.</param>
+    /// <param name="classTypeArguments">Declared class type arguments, when needed for runtime partitioning.</param>
+    /// <returns>The configured source. Evaluated row values are reused on the first fetch only.</returns>
+    public static MethodDataSourceAttribute ConfigureInferredSource(MethodDataSourceAttribute source, bool filterRows, params Type[] classTypeArguments)
+    {
+        source.FilterClassRows = filterRows;
+        source.InferredClassTypeArguments = classTypeArguments.Length == 0 ? null : classTypeArguments;
+        return source;
+    }
+
     // External class rows need a runtime value to infer their type arguments in either mode.
     internal static bool HasNonNullValues(object?[] row) =>
         TestDataRowUnwrapper.UnwrapArray(row).Data.Any(value => value is not null);
@@ -231,7 +247,12 @@ public static class GenericClassRowPartition
                 await foreach (var rowFactory in dataSources[index].GetDataRowsAsync(dataGeneratorMetadata).ConfigureAwait(false))
                 {
                     var row = await rowFactory().ConfigureAwait(false) is { } fetched ? EvaluateWrappedFactory(fetched) : null;
-                    var infers = InfersTypeArguments(row, ClassTypeArguments);
+                    // Fixed declared row types infer through constructor positions, not necessarily
+                    // the first runtime value. Own-class sources can also infer from null values.
+                    var infers = dataSources[index] is MethodDataSourceAttribute { InferredClassTypeArguments: { } declared } source
+                        ? row is { Length: > 0 } && declared.SequenceEqual(ClassTypeArguments)
+                            && (source.ClassProvidingDataSource is null || HasNonNullValues(row))
+                        : InfersTypeArguments(row, ClassTypeArguments);
                     anyRowInfers |= infers;
                     rows.Add(new EvaluatedRow(rowFactory, row, infers));
                 }

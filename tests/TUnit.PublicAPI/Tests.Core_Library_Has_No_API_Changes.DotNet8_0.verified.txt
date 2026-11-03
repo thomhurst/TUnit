@@ -798,6 +798,7 @@ namespace
     }
     public static class GenericClassRowPartition
     {
+        public static .MethodDataSourceAttribute ConfigureInferredSource(.MethodDataSourceAttribute source, bool filterRows, params [] classTypeArguments) { }
         public static .IDataSourceAttribute[] Create([] classTypeArguments, .GenericClassRowFallback fallback, .IDataSourceAttribute[] dataSources, params int[] partitionedIndices) { }
     }
     public class GenericConstraintViolationDataSource : , .IDataSourceAttribute
@@ -1046,14 +1047,13 @@ namespace
         public ? ClassProvidingDataSource { get; }
         public bool DeferEnumeration { get; set; }
         public <.DataGeneratorMetadata, .<<.<object?[]?>>>>? Factory { get; set; }
-        public bool FilterClassRows { get; set; }
         public string MethodNameProvidingDataSource { get; }
         public bool SkipIfEmpty { get; set; }
         [.("Trimming", "IL2072", Justification="Method data sources require runtime discovery. AOT users should use Factory prope" +
             "rty.")]
         [.("Trimming", "IL2075", Justification="Method data sources require runtime discovery. AOT users should use Factory prope" +
             "rty.")]
-        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__30))]
+        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__34))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]

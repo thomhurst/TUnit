@@ -2512,18 +2512,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.AppendLine("new global::TUnit.Core.IDataSourceAttribute[]");
             dsWriter.AppendLine("{");
             dsWriter.Indent();
-            // Explicit types use raw rows only outside reflection's grouped method-row path.
-            var usesGroupedMethodRows = !testMethod.IsGenericMethod
-                && MethodParametersReferenceTypeParameters(testMethod)
-                && testMethod.MethodAttributes.Any(attribute => attribute.AttributeClass?.Name == "ArgumentsAttribute");
             var hasExplicitClassTypes = entry.HasExplicitClassTypes;
             foreach (var attr in classDataSources)
             {
                 // Filter only sources that supply this entry's inferred class rows. Method-only
                 // fallback entries retain raw rows, including the empty-source fallback (#7161).
-                var filterClassRows = (!hasExplicitClassTypes || usesGroupedMethodRows) && entry.IsSpecificClassDataSource(attr)
+                var filterClassRows = !hasExplicitClassTypes && entry.IsSpecificClassDataSource(attr)
                     && entry.FindClassMethodDataSource(attr)?.TypeArguments is not null;
-                GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol, filterClassRows);
+                var declaredClassTypes = hasExplicitClassTypes && classDataSourcePartition is not null
+                    ? entry.FindClassMethodDataSource(attr)?.TypeArguments : null;
+                GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol, filterClassRows, declaredClassTypes);
             }
             dsWriter.Unindent();
             dsWriter.Append("}");
@@ -2573,6 +2571,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var allClassDataSources = typeSymbol.GetAttributesIncludingBaseTypes()
             .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
             .ToArray();
+
+        // Explicit instantiations use grouped rows only when actual values create a group.
+        // Declared row types alone cannot establish that: an external source may contain only nulls.
+        if (entry.HasExplicitClassTypes && !testMethod.IsGenericMethod
+            && MethodParametersReferenceTypeParameters(testMethod)
+            && testMethod.MethodAttributes.Any(attribute => attribute.AttributeClass?.Name == "ArgumentsAttribute"))
+        {
+            return new ClassDataSourcePartition(allClassDataSources,
+                Enumerable.Range(0, allClassDataSources.Length).ToArray(), ClassRowFallback.AllRows);
+        }
 
         // A class-level [Arguments] row is typed by its values; other sources by their declared type arguments
         var hasClassArgumentsRows = false;
@@ -2864,7 +2872,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GeneratePropertyDataSources(writer, testMethod);
     }
 
-    private static void GenerateDataSourceAttribute(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol, bool filterClassRows = false)
+    private static void GenerateDataSourceAttribute(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol, bool filterClassRows = false, ITypeSymbol[]? declaredClassTypes = null)
     {
         var attrClass = attr.AttributeClass;
         if (attrClass == null)
@@ -2876,7 +2884,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (attrName == "global::TUnit.Core.MethodDataSourceAttribute")
         {
-            GenerateMethodDataSourceAttribute(writer, attr, typeSymbol, compilationContext.Compilation, filterClassRows);
+            GenerateMethodDataSourceAttribute(writer, attr, typeSymbol, compilationContext.Compilation, filterClassRows, declaredClassTypes);
         }
         else if (attrName == "global::TUnit.Core.ArgumentsAttribute")
         {
@@ -3165,7 +3173,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return true;
     }
 
-    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol, Compilation compilation, bool filterClassRows = false)
+    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol, Compilation compilation, bool filterClassRows = false, ITypeSymbol[]? declaredClassTypes = null)
     {
         // Extract method name and target type
         string? methodName = null;
@@ -3250,6 +3258,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? "global::TUnit.Core.InstanceMethodDataSourceAttribute"
             : "global::TUnit.Core.MethodDataSourceAttribute";
 
+        var configureInferredSource = filterClassRows || declaredClassTypes is not null;
+        if (configureInferredSource)
+        {
+            writer.Append("global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(");
+        }
+
         if (attr.ConstructorArguments is
             [
                 { Value: ITypeSymbol typeArg } _, _, ..
@@ -3301,11 +3315,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("SkipIfEmpty = true,");
         }
 
-        if (filterClassRows)
-        {
-            writer.AppendLine("FilterClassRows = true,");
-        }
-
         // Set the Factory property as a single expression calling a shared TUnit.Core helper.
         // The helper holds the (previously inlined) async iterator body, so each call site avoids
         // a per-data-source compiler-generated state machine class (#6227). Only the per-test-unique
@@ -3315,7 +3324,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine(",");
 
         writer.Unindent();
-        writer.AppendLine("},");
+        if (configureInferredSource)
+        {
+            var declaredTypes = declaredClassTypes is null ? ""
+                : ", " + string.Join(", ", declaredClassTypes.Select(type => $"typeof({type.GloballyQualified()})"));
+            writer.AppendLine($"}}, {(filterClassRows ? "true" : "false")}{declaredTypes}),");
+        }
+        else
+        {
+            writer.AppendLine("},");
+        }
     }
 
     /// <summary>
