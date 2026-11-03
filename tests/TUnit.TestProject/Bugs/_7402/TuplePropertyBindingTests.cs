@@ -8,6 +8,8 @@ public class TuplePropertyBindingTests
 {
     public static Tuple<Fixture> ReferenceRow() => Tuple.Create(new Fixture(42));
     public static ValueTuple<Fixture> ValueRow() => new(new Fixture(43));
+    public static Func<Tuple<Fixture>> ReferenceFactory() => () => Tuple.Create(new Fixture(44));
+    public static Func<ValueTuple<Fixture>> ValueFactory() => () => new(new Fixture(45));
 
     [MethodDataSource(nameof(ReferenceRow))]
     public required Tuple<Fixture> ReferenceProperty { get; init; }
@@ -15,11 +17,19 @@ public class TuplePropertyBindingTests
     [MethodDataSource(nameof(ValueRow))]
     public required ValueTuple<Fixture> ValueProperty { get; init; }
 
+    [MethodDataSource(nameof(ReferenceFactory))]
+    public required Tuple<Fixture> ReferenceFactoryProperty { get; init; }
+
+    [MethodDataSource(nameof(ValueFactory))]
+    public required ValueTuple<Fixture> ValueFactoryProperty { get; init; }
+
     [Test]
     public async Task Struct_Initializer_Tuples_Keep_Property_Shape()
     {
         await Assert.That(ReferenceProperty.Item1.Value).IsEqualTo(42);
         await Assert.That(ValueProperty.Item1.Value).IsEqualTo(43);
+        await Assert.That(ReferenceFactoryProperty.Item1.Value).IsEqualTo(44);
+        await Assert.That(ValueFactoryProperty.Item1.Value).IsEqualTo(45);
     }
 
     public readonly record struct Fixture(int Value) : IAsyncInitializer

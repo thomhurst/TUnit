@@ -352,9 +352,13 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         {
             // Property injection consumes a value, not the invoker's flattened argument boxes.
             if (dataGeneratorMetadata.MembersToGenerate is [PropertyMetadata property]
-                && TupleHelper.IsTupleType(property.Type) && DataSourceHelpers.IsTuple(item))
+                && TupleHelper.IsTupleType(property.Type))
             {
-                return [item];
+                item = DataSourceHelpers.InvokeIfFunc(item);
+                if (DataSourceHelpers.IsTuple(item))
+                {
+                    return [item];
+                }
             }
             return item.ToObjectArrayWithTypes(paramTypes);
         }
