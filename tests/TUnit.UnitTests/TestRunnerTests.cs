@@ -166,9 +166,10 @@ public class TestRunnerTests
 
     internal static AbstractExecutableTest CreateTest(
         string testId,
-        AbstractExecutableTest[]? dependencies = null)
+        AbstractExecutableTest[]? dependencies = null,
+        TestDependency[]? dependencyMetadata = null)
     {
-        var metadata = CreateMetadata(testId);
+        var metadata = CreateMetadata(testId, dependencyMetadata);
         var beforeDiscoveryContext = new BeforeTestDiscoveryContext { TestFilter = null };
         var discoveryContext = new TestDiscoveryContext(beforeDiscoveryContext) { TestFilter = null };
         var sessionContext = new TestSessionContext(discoveryContext)
@@ -208,7 +209,7 @@ public class TestRunnerTests
         Metadata = TestDependency.FromMethodName(dependency.Metadata.TestMethodName)
     };
 
-    private static TestMetadata<TestRunnerTests> CreateMetadata(string testId)
+    private static TestMetadata<TestRunnerTests> CreateMetadata(string testId, TestDependency[]? dependencies)
     {
         var classMetadata = new ClassMetadata
         {
@@ -230,6 +231,7 @@ public class TestRunnerTests
             TestClassType = typeof(TestRunnerTests),
             TestMethodName = testId,
             TestName = testId,
+            Dependencies = dependencies ?? [],
             FilePath = "Unknown",
             LineNumber = 0,
             AttributeFactory = () => [],

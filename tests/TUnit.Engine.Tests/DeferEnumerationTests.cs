@@ -13,6 +13,18 @@ namespace TUnit.Engine.Tests;
 public class DeferEnumerationTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
+    public async Task Dependency_Waits_For_All_Deferred_Cases()
+    {
+        await RunTestsWithFilter(
+            "/*/*/DeferredDependencyTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(8),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(8),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
     public async Task Single_Deferred_Test_Expands_To_All_Cases_At_Runtime()
     {
         await RunTestsWithFilter(

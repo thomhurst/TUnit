@@ -38,6 +38,70 @@ internal sealed class TestDependencyResolver
         }
     }
 
+    public IReadOnlyList<AbstractExecutableTest> RegisteredTests => _allTests;
+
+    // Expansion happens before scheduling. Replace all discovery identities in one pass,
+    // then invalidate affected edges once rather than scanning the growing list per placeholder.
+    public void ReplaceDeferredTests(
+        IReadOnlyList<(AbstractExecutableTest Placeholder, IReadOnlyList<AbstractExecutableTest> Children)> expansions)
+    {
+        lock (_resolutionLock)
+        {
+            var replaced = new HashSet<AbstractExecutableTest>();
+            foreach (var (placeholder, children) in expansions)
+            {
+                // Keep empty placeholders as completed dependency outcomes.
+                if (children.Count > 0)
+                {
+                    replaced.Add(placeholder);
+                }
+            }
+
+            // Completed placeholders are terminal outcomes, so their old outgoing edges must
+            // not participate in scheduling or circular-dependency detection.
+            foreach (var test in _allTests)
+            {
+                if (test is DeferredEnumerationExecutableTest { ExpansionCompletedWithoutChildren: true })
+                {
+                    test.Dependencies = [];
+                }
+            }
+
+            // Empty and failed expansions must retain their outcome, not be resolved again.
+            _testsWithPendingDependencies.RemoveWhere(static test =>
+                test is DeferredEnumerationExecutableTest { ExpansionCompletedWithoutChildren: true });
+
+            if (replaced.Count == 0)
+            {
+                return;
+            }
+
+            _allTests.RemoveAll(replaced.Contains);
+            foreach (var (placeholder, children) in expansions)
+            {
+                _allTests.AddRange(children);
+                _testsWithPendingDependencies.Remove(placeholder);
+            }
+
+            _testsByType.Clear();
+            _testsByMethodName.Clear();
+            _testLookupCache.Clear();
+            _indexedCount = 0;
+
+            foreach (var test in _allTests)
+            {
+                foreach (var dependency in test.Dependencies)
+                {
+                    if (replaced.Contains(dependency.Test))
+                    {
+                        test.Dependencies = [];
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     // Must be called under _resolutionLock (or before a lock-free batch starts).
     private void EnsureIndexed()
     {
@@ -279,6 +343,11 @@ internal sealed class TestDependencyResolver
         {
             foreach (var test in _allTests)
             {
+                if (test is DeferredEnumerationExecutableTest { ExpansionCompletedWithoutChildren: true })
+                {
+                    continue;
+                }
+
                 if (test.Dependencies.Length == 0 && test.Metadata.Dependencies.Length > 0)
                 {
                     ResolveDependenciesForTest(test);

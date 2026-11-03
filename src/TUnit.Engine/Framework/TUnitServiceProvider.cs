@@ -216,7 +216,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 ContextProvider,
                 EventReceiverOrchestrator));
 
-        DiscoveryService = Register(new TestDiscoveryService(TestExecutor, TestBuilderPipeline, TestFilterService, dependencyExpander));
+        var dependencyResolver = Register(new TestDependencyResolver());
+        DiscoveryService = Register(new TestDiscoveryService(TestExecutor, TestBuilderPipeline, TestFilterService, dependencyExpander, dependencyResolver));
 
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
@@ -298,7 +299,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             MessageBus,
             staticPropertyInitializer,
             objectTracker,
-            deferredTestExpander));
+            deferredTestExpander,
+            dependencyResolver));
 
         Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, dynamicTestQueue, TestFilterService, objectTracker, TestSessionId, CancellationToken.Token));
 

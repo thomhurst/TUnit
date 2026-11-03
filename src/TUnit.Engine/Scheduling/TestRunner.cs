@@ -53,6 +53,11 @@ public sealed class TestRunner
 
     public ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
+        if (test is DeferredEnumerationExecutableTest { ExpansionCompletedWithoutChildren: true })
+        {
+            return default;
+        }
+
         if (!test.RequiresExecutionDedup)
         {
             if (test.ExecutionTask is { } executionTask)

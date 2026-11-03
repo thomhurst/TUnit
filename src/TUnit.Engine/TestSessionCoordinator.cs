@@ -30,6 +30,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     private readonly IStaticPropertyInitializer _staticPropertyInitializer;
     private readonly ObjectTracker _objectTracker;
     private readonly DeferredTestExpander _deferredTestExpander;
+    private readonly TestDependencyResolver _dependencyResolver;
 
     public TestSessionCoordinator(EventReceiverOrchestrator eventReceiverOrchestrator,
         TUnitFrameworkLogger logger,
@@ -40,7 +41,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         ITUnitMessageBus messageBus,
         IStaticPropertyInitializer staticPropertyInitializer,
         ObjectTracker objectTracker,
-        DeferredTestExpander deferredTestExpander)
+        DeferredTestExpander deferredTestExpander,
+        TestDependencyResolver dependencyResolver)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _logger = logger;
@@ -52,6 +54,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _staticPropertyInitializer = staticPropertyInitializer;
         _objectTracker = objectTracker;
         _deferredTestExpander = deferredTestExpander;
+        _dependencyResolver = dependencyResolver;
     }
 
     public async Task ExecuteTests(
@@ -233,6 +236,10 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             {
                 var children = await _deferredTestExpander.ExpandAsync(placeholder, cancellationToken);
                 testList.AddRange(children);
+                if (children.Count == 0)
+                {
+                    placeholder.CompleteExpansionWithoutChildren();
+                }
                 expanded.Add((placeholder, children));
             }
             catch (Exception ex)
@@ -240,12 +247,15 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
                 // Expansion itself failed (as opposed to a per-row data error, which becomes a failed
                 // child). Surface it on the placeholder node so the failure is visible.
                 await _logger.LogErrorAsync($"Failed to expand deferred test '{placeholder.TestId}': {ex}");
-                placeholder.EndTime = DateTimeOffset.UtcNow;
-                placeholder.SetResult(TestState.Failed, ex);
+                placeholder.CompleteExpansionWithoutChildren(ex);
                 await _messageBus.Failed(placeholder.Context, ex, placeholder.StartTime.GetValueOrDefault());
             }
         }
 
+        _serviceProvider.DiscoveryService.ReplaceDeferredTests(expanded);
+        _dependencyResolver.ReplaceDeferredTests(expanded);
+        _dependencyResolver.ResolveAllDependencies();
+        _serviceProvider.TestBuilderPipeline.PopulateAllDependencies(_dependencyResolver.RegisteredTests, refresh: true);
         return expanded;
     }
 
