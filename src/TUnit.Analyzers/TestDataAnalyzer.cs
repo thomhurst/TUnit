@@ -1650,7 +1650,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         ITypeParameterSymbol typeParameter => typeParameter.TypeParameterKind == TypeParameterKind.Method,
         IArrayTypeSymbol array => ReferencesMethodTypeParameter(array.ElementType),
         IPointerTypeSymbol pointer => ReferencesMethodTypeParameter(pointer.PointedAtType),
-        INamedTypeSymbol named => named.TypeArguments.Any(ReferencesMethodTypeParameter),
+        INamedTypeSymbol named => named.TypeArguments.Any(ReferencesMethodTypeParameter)
+            || (named.ContainingType is { } containingType && ReferencesMethodTypeParameter(containingType)),
         _ => false,
     };
 

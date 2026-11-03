@@ -12,6 +12,9 @@ internal class AssignableTypedRowAnalyzerTests
     [Arguments("IEnumerable<T>", "List<int>", false)]
     [Arguments("RowBase<T>", "DerivedRow", false)]
     [Arguments("IMarker<T>", "DiamondRow", false)]
+    [Arguments("Outer<T>.Base", "NestedDerived", false)]
+    [Arguments("Outer<T>.GenericBase<T>", "NestedGenericDerived", false)]
+    [Arguments("Outer<T>.Base", "NestedDerived", true)]
     [Arguments("IEnumerable<T>", "int[]", true)]
     public async Task Analyzer_validates_inferred_closed_signature(string parameter, string row, bool invalid)
     {
@@ -22,6 +25,13 @@ internal class AssignableTypedRowAnalyzerTests
             using TUnit.Core;
             public class RowBase<T> { }
             public class DerivedRow : RowBase<int> { }
+            public class Outer<T>
+            {
+                public class Base { }
+                public class GenericBase<U> { }
+            }
+            public class NestedDerived : Outer<int>.Base { }
+            public class NestedGenericDerived : Outer<int>.GenericBase<int> { }
             public interface IMarker<T> { }
             public interface ILeft : IMarker<int> { }
             public interface IRight : IMarker<int> { }
