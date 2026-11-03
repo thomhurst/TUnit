@@ -24,7 +24,8 @@ public static class NuGetDownloader
             var sourceRepositoryProvider = new SourceRepositoryProvider(new PackageSourceProvider(settings), Repository.Provider.GetCoreV3());
             var repository = sourceRepositoryProvider.CreateRepository(new PackageSource("https://api.nuget.org/v3/index.json"));
 
-            var resource = await repository.GetResourceAsync<FindPackageByIdResource>();
+            var resource = await repository.GetResourceAsync<FindPackageByIdResource>()
+                ?? throw new InvalidOperationException("The NuGet source does not provide a package download resource.");
 
             Directory.CreateDirectory(OutputPath);
 

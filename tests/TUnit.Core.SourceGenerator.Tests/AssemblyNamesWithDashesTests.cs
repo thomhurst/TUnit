@@ -1,25 +1,38 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Core.SourceGenerator.Generators;
+using TUnit.Tests.Shared;
+
 namespace TUnit.Core.SourceGenerator.Tests;
 
-/// <summary>
-/// Test to verify that assembly names with dashes are properly handled in Before(Assembly) hooks.
-/// This addresses the issue where assembly names like "test-assembly" would generate invalid C# variable names.
-/// </summary>
-internal class AssemblyNamesWithDashesTests : TestsBase
+internal class AssemblyNamesWithDashesTests
 {
     [Test]
     public async Task AssemblyNameWithDashes_ShouldGenerateValidVariableNames()
     {
-        // This test verifies that the fix for issue #2919 works correctly.
-        // Previously, assembly names with dashes would generate invalid C# code like:
-        // var tunit50-test_assembly = typeof(SomeType).Assembly;
-        // 
-        // After the fix, it should generate valid C# code like:
-        // var tunit50_test_assembly = typeof(SomeType).Assembly;
+        const string source = """
+            using TUnit.Core;
 
-        // Since this is a minimal test to document the fix, we just verify that
-        // a test project with dashes in the assembly name can be built successfully.
-        // The actual integration testing is done via manual verification with test projects.
-        
-        await Assert.That(true).IsTrue();
+            public class AssemblyHooks
+            {
+                [Before(HookType.Assembly)]
+                public static void BeforeAssembly() { }
+            }
+            """;
+
+        var compilation = CSharpCompilation.Create(
+            "test-assembly",
+            [GeneratorTestInput.Parse(source)],
+            ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new HookMetadataGenerator().AsSourceGenerator()],
+            parseOptions: GeneratorTestInput.ParseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+
+        await Assert.That(driver.GetRunResult().GeneratedTrees).IsNotEmpty();
+        await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
     }
 }
