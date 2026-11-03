@@ -3684,6 +3684,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // GetParameters() call out of the hot lambda. Generic method definitions are resolved
         // to a concrete MethodInfo per invocation, so they must still call GetParameters() inline.
         var staticParameters = testMethod.IsGenericMethodDefinition ? null : testMethod.GetParameters();
+        var staticTupleElements = staticParameters is [{ ParameterType: var tupleType }]
+            ? GetTupleElementTypes(tupleType)
+            : null;
 
         return (instance, args) =>
         {
@@ -3788,7 +3791,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         || lastParam.IsDefined(typeof(ParamArrayAttribute), false)
                         || IsParamCollection(lastParam));
 
-                if (isParamsArray && lastParam != null)
+                var tupleElements = staticParameters != null
+                    ? staticTupleElements
+                    : parameters is [{ ParameterType: var singleType }] ? GetTupleElementTypes(singleType) : null;
+                if (tupleElements is { Length: > 1 }
+                    && args.Length == tupleElements.Length)
+                {
+                    // DataUnwrapper spreads an incompatible tuple so each element can be
+                    // converted before constructing the target, as the generated invoker does.
+                    var offset = 0;
+                    castedArgs[0] = ReconstructTuple(parameters[0].ParameterType, args, ref offset);
+                }
+                else if (isParamsArray && lastParam != null)
                 {
                     // Handle params array / params collection parameter
                     var regularParamsCount = dataParameterCount - 1;
@@ -4000,6 +4014,21 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return Task.FromException(ex);
             }
         };
+    }
+
+    private static object ReconstructTuple(Type tupleType, object?[] values, ref int offset)
+    {
+        var elementTypes = tupleType.GetGenericArguments();
+        var elements = new object?[elementTypes.Length];
+        for (var i = 0; i < elements.Length; i++)
+        {
+            // Both tuple families store elements beyond the seventh in a nested Rest tuple.
+            elements[i] = i == 7 && GetTupleElementTypes(elementTypes[i]) != null
+                ? ReconstructTuple(elementTypes[i], values, ref offset)
+                : CastHelper.Cast(elementTypes[i], values[offset++]);
+        }
+
+        return Activator.CreateInstance(tupleType, elements)!;
     }
 
     internal async Task<List<TestMetadata>> DiscoverDynamicTests(string testSessionId, Assembly[]? candidateAssemblies = null)

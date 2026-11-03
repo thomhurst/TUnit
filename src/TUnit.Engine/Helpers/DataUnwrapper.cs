@@ -135,10 +135,14 @@ internal class DataUnwrapper
 
         var lastDataParameterType = expectedParameters[lastDataParameterIndex].Type;
 
-        // A single data parameter that expects a tuple receives the tuple itself
+        // Keep compatible tuples whole (including one-element tuples holding null).
+        // Otherwise the invoker needs every element to reconstruct the target tuple
+        // with per-element conversions, rather than casting incompatible tuple types.
         if (dataParameterCount == 1 && TupleHelper.IsTupleType(lastDataParameterType))
         {
-            return values;
+            return lastDataParameterType.IsInstanceOfType(values[0])
+                ? values
+                : DataSourceHelpers.UnwrapTupleAot(values[0]);
         }
 
         // A tuple that is already an instance of the first data parameter's tuple type binds to it

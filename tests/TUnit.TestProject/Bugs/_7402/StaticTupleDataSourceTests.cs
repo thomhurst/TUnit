@@ -5,6 +5,37 @@ namespace TUnit.TestProject.Bugs._7402;
 [EngineTest(ExpectedResult.Pass)]
 public class StaticTupleDataSourceTests
 {
+    public static (int, int) NumericValue() => (1, 2);
+    public static IEnumerable<(int, int)> NumericRows() => [NumericValue()];
+    public static Task<(int, int)> NumericTask() => Task.FromResult(NumericValue());
+    public static ValueTask<(int, int)> NumericValueTask() => new(NumericValue());
+    public static async IAsyncEnumerable<(int, int)> NumericAsyncRows()
+    {
+        await Task.Yield();
+        yield return NumericValue();
+    }
+
+    public static (int, int, int, int, int, int, int, int) LongNumericValue() => (1, 2, 3, 4, 5, 6, 7, 8);
+
+    [Test]
+    [MethodDataSource(nameof(LongNumericValue))]
+    public async Task Long_Tuple_Elements_Can_Be_Converted((long, long, long, long, long, long, long, long) value)
+    {
+        await Assert.That(value).IsEqualTo((1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
+    }
+
+    [Test]
+    [MethodDataSource(nameof(NumericValue))]
+    [MethodDataSource(nameof(NumericRows))]
+    [MethodDataSource(nameof(NumericTask))]
+    [MethodDataSource(nameof(NumericValueTask))]
+    [MethodDataSource(nameof(NumericAsyncRows))]
+    public async Task Tuple_Elements_Can_Be_Converted((long, long) value)
+    {
+        await Assert.That(value.Item1).IsEqualTo(1L);
+        await Assert.That(value.Item2).IsEqualTo(2L);
+    }
+
     public static Tuple<string?> Value() => Tuple.Create<string?>(null);
     public static IEnumerable<Tuple<string?>> Rows() => [Value()];
     public static Task<Tuple<string?>> TaskRow() => Task.FromResult(Value());
