@@ -14,9 +14,14 @@ public class TestSessionContext : Context
     /// <summary>
     /// Builder context for static property initialization in the current session.
     /// Falls back to a process context before a session exists. Both generated and reflection
-    /// data sources use this accessor so overlapping sessions keep separate disposal callbacks.
+    /// data sources use this accessor. Generated initialization can select the shared value's
+    /// context so overlapping sessions retain its callbacks until the last owner finishes.
     /// </summary>
-    public static TestBuilderContext GlobalStaticPropertyContext => Current?.StaticPropertyContext ?? s_globalStaticPropertyContext;
+    public static TestBuilderContext GlobalStaticPropertyContext => StaticInitializationContext.Value ?? Current?.StaticPropertyContext ?? s_globalStaticPropertyContext;
+
+    // Generated initializers keep their existing accessor, but their callbacks belong to
+    // the shared value rather than whichever session initialized it first.
+    internal static readonly AsyncLocal<TestBuilderContext?> StaticInitializationContext = new();
 
     internal TestBuilderContext StaticPropertyContext { get; } = new()
     {

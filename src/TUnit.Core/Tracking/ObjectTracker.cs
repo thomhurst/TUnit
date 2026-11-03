@@ -49,16 +49,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         foreach (var kvp in s_trackedObjects)
         {
-            // TryRemove guards against racing disposals (e.g. a late UntrackObject call)
-            if (!s_trackedObjects.TryRemove(kvp.Key, out _) || IsExternallyOwned(kvp.Key))
-            {
-                // An object marked after it was counted belongs to its external owner, which disposes it.
-                continue;
-            }
-
             try
             {
-                await disposer.DisposeAsync(kvp.Key).ConfigureAwait(false);
+                await DisposeUnleasedTrackedObjectAsync(kvp.Key).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -69,6 +62,18 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         s_asyncCallbackErrors.Clear();
 
         return exceptions;
+    }
+
+    internal async ValueTask DisposeUnleasedTrackedObjectAsync(object obj)
+    {
+        lock (s_staticLeaseLock)
+        {
+            // Static leases can outlive this session. Retiring a counter and acquiring a
+            // lease must be atomic so a sweep cannot remove a newly protected counter.
+            if (s_staticLeaseObjects.TryGetValue(obj, out var leases) && leases.CurrentCount > 0) return;
+            if (!s_trackedObjects.TryRemove(obj, out _) || IsExternallyOwned(obj)) return;
+        }
+        await disposer.DisposeAsync(obj).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -294,6 +299,36 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         }
 
         return cleanupExceptions;
+    }
+
+    private static readonly ConditionalWeakTable<object, Counter> s_staticLeaseObjects = new();
+    private static readonly object s_staticLeaseLock = new();
+
+    internal void TrackStaticLeaseObject(object obj)
+    {
+        if (ShouldSkipTracking(obj)) return;
+        lock (s_staticLeaseLock)
+        {
+            s_staticLeaseObjects.GetValue(obj, static _ => new()).Increment();
+            TrackObject(obj);
+        }
+    }
+
+    internal async ValueTask ReleaseStaticLeaseObjectAsync(object obj)
+    {
+        if (ShouldSkipTracking(obj)) return;
+        try
+        {
+            // Keep sweep protection while asynchronous fixture teardown is in progress.
+            await UntrackObjectAsync(obj).ConfigureAwait(false);
+        }
+        finally
+        {
+            lock (s_staticLeaseLock)
+            {
+                s_staticLeaseObjects.GetValue(obj, static _ => new()).Decrement();
+            }
+        }
     }
 
     /// <summary>

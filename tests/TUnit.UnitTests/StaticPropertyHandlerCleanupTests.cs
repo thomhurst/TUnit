@@ -1,6 +1,7 @@
 using TUnit.Core.Discovery;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Tracking;
+using TUnit.Core.StaticProperties;
 using TUnit.Engine.Services;
 
 namespace TUnit.UnitTests;
@@ -192,6 +193,199 @@ public class StaticPropertyHandlerCleanupTests
             .Throws<AggregateException>();
         await Assert.That(ThrowingReflectionFixture.Resource!.DisposeCount).IsEqualTo(1);
     }
+
+    [Test]
+    [NotInParallel]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Overlapping_Generated_Sessions_Keep_Fixtures_And_Scopes_Alive(bool finishFirstSessionFirst)
+    {
+        LeaseFixture? value = null;
+        var initializations = 0;
+        var metadata = new StaticPropertyMetadata
+        {
+            DeclaringType = typeof(LeaseFixture), PropertyName = "GeneratedLease", PropertyType = typeof(LeaseFixture),
+            InitializerAsync = () =>
+            {
+                initializations++;
+                var resource = value = new LeaseFixture();
+                TestSessionContext.GlobalStaticPropertyContext.Events.OnDispose += (_, _) =>
+                {
+                    resource.ScopeDisposed = true;
+                    resource.ScopeDisposeCount++;
+                    return default;
+                };
+                return Task.FromResult<object?>(resource);
+            }
+        };
+        var first = CreateSession();
+        var firstHandler = CreateInitializingHandler(first);
+        await firstHandler.InitializeStaticPropertiesAsync([metadata], default);
+        var resource = value!;
+        await Assert.That(ObjectTracker.IsExternallyOwned(resource)).IsFalse();
+        var second = CreateSession();
+        var secondHandler = CreateInitializingHandler(second);
+        await secondHandler.InitializeStaticPropertiesAsync([metadata], default);
+        await secondHandler.InitializeStaticPropertiesAsync([metadata], default);
+        await Assert.That(initializations).IsEqualTo(1);
+        await Assert.That(ReferenceEquals(resource, value)).IsTrue();
+
+        // A session's global tracker sweep must not dispose a fixture leased by another session.
+        var provider = new TrackableObjectGraphProvider(new FixtureDiscoverer(resource));
+        var tracker = new ObjectTracker(provider, GlobalContext.Current.Disposer);
+        var current = TestContext.Current!;
+        var context = new TestContext(nameof(StaticPropertyHandlerCleanupTests), current.ServiceProvider, current.ClassContext,
+            new TestBuilderContext { TestMetadata = current.TestDetails.MethodMetadata }, CancellationToken.None);
+        tracker.TrackObjects(context);
+        var earlier = finishFirstSessionFirst ? firstHandler : secondHandler;
+        var later = finishFirstSessionFirst ? secondHandler : firstHandler;
+        await earlier.DisposeStaticPropertiesAsync([], []);
+        await tracker.UntrackObjects(context);
+        // Exercise the same sweep operation on these fixtures without touching other tests' trackers.
+        await tracker.DisposeUnleasedTrackedObjectAsync(resource);
+        await tracker.DisposeUnleasedTrackedObjectAsync(resource.Child);
+        await Assert.That(resource.Child.DisposeCount).IsEqualTo(0);
+        await Assert.That(resource.Child.InitializeCount).IsEqualTo(1);
+        await Assert.That(resource.DisposeCount).IsEqualTo(0);
+        await Assert.That(resource.ScopeDisposeCount).IsEqualTo(0);
+        await later.DisposeStaticPropertiesAsync([], []);
+        await Assert.That(resource.DisposeCount).IsEqualTo(1);
+        await Assert.That(resource.DisposedWithLiveScope).IsTrue();
+        await Assert.That(resource.DisposedWithLiveChild).IsTrue();
+        await Assert.That(resource.Child.DisposeCount).IsEqualTo(1);
+        await Assert.That(resource.ScopeDisposeCount).IsEqualTo(1);
+        await Assert.That(StaticPropertyRegistry.TryGetInitializedValue(typeof(LeaseFixture), "GeneratedLease", out _)).IsFalse();
+        await later.ReleaseSessionCallbacksAfterFailedInitializationAsync();
+        await Assert.That(resource.DisposeCount).IsEqualTo(1);
+
+        var next = CreateInitializingHandler(CreateSession());
+        await next.InitializeStaticPropertiesAsync([metadata], default);
+        await Assert.That(initializations).IsEqualTo(2);
+        await Assert.That(ReferenceEquals(resource, value)).IsFalse();
+        await next.ReleaseSessionCallbacksAfterFailedInitializationAsync();
+        await Assert.That(value!.DisposeCount).IsEqualTo(1);
+        await Assert.That(value.ScopeDisposeCount).IsEqualTo(1);
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Generated_Initialization_Failure_And_External_Ownership_Cleanup(bool externallyOwned)
+    {
+        var resource = new LeaseFixture();
+        if (externallyOwned) ObjectTracker.MarkExternallyOwned(resource);
+        var scopeDisposals = 0;
+        var metadata = new StaticPropertyMetadata
+        {
+            DeclaringType = typeof(LeaseFixture), PropertyName = "FailedLease", PropertyType = typeof(LeaseFixture),
+            InitializerAsync = () =>
+            {
+                TestSessionContext.GlobalStaticPropertyContext.Events.OnDispose += (_, _) =>
+                {
+                    scopeDisposals++;
+                    if (externallyOwned) resource.Dispose();
+                    return default;
+                };
+                return Task.FromResult<object?>(resource);
+            }
+        };
+        // Failure after the generated initializer returned must release both fixture and scope.
+        var handler = new StaticPropertyHandler(null!, new ObjectTracker(new(), GlobalContext.Current.Disposer), null!,
+            new Lazy<PropertyInjector>(() => throw new InvalidOperationException("property injection failed")), null!, CreateSession());
+        await Assert.That(() => handler.InitializeStaticPropertiesAsync([metadata], default)).Throws<InvalidOperationException>();
+        await handler.ReleaseSessionCallbacksAfterFailedInitializationAsync();
+        await handler.ReleaseSessionCallbacksAfterFailedInitializationAsync();
+        await Assert.That(resource.DisposeCount).IsEqualTo(1);
+        await Assert.That(scopeDisposals).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task Concurrent_Static_Lease_Acquisition_And_Sweeps_Keep_The_Value_Alive()
+    {
+        var resource = new LeaseFixture();
+        var tracker = new ObjectTracker(new(), GlobalContext.Current.Disposer);
+        tracker.TrackStaticLeaseObject(resource);
+        await Task.WhenAll(Enumerable.Range(0, 512).Select(_ => Task.Run(async () =>
+        {
+            tracker.TrackStaticLeaseObject(resource);
+            await tracker.DisposeUnleasedTrackedObjectAsync(resource);
+            await tracker.ReleaseStaticLeaseObjectAsync(resource);
+        })));
+        await Assert.That(resource.DisposeCount).IsEqualTo(0);
+        await tracker.ReleaseStaticLeaseObjectAsync(resource);
+        await Assert.That(resource.DisposeCount).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task Sweep_Cannot_Dispose_Nested_Fixture_During_Async_Static_Teardown()
+    {
+        var resource = new AsyncLeaseFixture();
+        var metadata = new StaticPropertyMetadata
+        {
+            DeclaringType = typeof(AsyncLeaseFixture), PropertyName = "AsyncLease", PropertyType = typeof(AsyncLeaseFixture),
+            InitializerAsync = () => Task.FromResult<object?>(resource)
+        };
+        var handler = CreateInitializingHandler(CreateSession());
+        await handler.InitializeStaticPropertiesAsync([metadata], default);
+        var release = handler.ReleaseSessionCallbacksAfterFailedInitializationAsync().AsTask();
+        await resource.DisposalStarted.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        try
+        {
+            var tracker = new ObjectTracker(new(), GlobalContext.Current.Disposer);
+            await tracker.DisposeUnleasedTrackedObjectAsync(resource);
+            await tracker.DisposeUnleasedTrackedObjectAsync(resource.Child);
+            await Assert.That(resource.Child.DisposeCount).IsEqualTo(0);
+        }
+        finally
+        {
+            resource.FinishDisposal.SetResult();
+            await release;
+        }
+        await Assert.That(resource.DisposedWithLiveChild).IsTrue();
+        await Assert.That(resource.Child.DisposeCount).IsEqualTo(1);
+    }
+
+    private sealed class AsyncLeaseFixture : IAsyncDisposable
+    {
+        public NestedLeaseFixture Child { get; } = new();
+        public readonly TaskCompletionSource DisposalStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public readonly TaskCompletionSource FinishDisposal = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public bool DisposedWithLiveChild;
+        public async ValueTask DisposeAsync()
+        {
+            DisposalStarted.SetResult();
+            await FinishDisposal.Task;
+            DisposedWithLiveChild = Child.DisposeCount == 0;
+        }
+    }
+
+    private sealed class LeaseFixture : IDisposable
+    {
+        public NestedLeaseFixture Child { get; } = new();
+        public bool ScopeDisposed;
+        public int ScopeDisposeCount;
+        public int DisposeCount;
+        public bool DisposedWithLiveScope;
+        public bool DisposedWithLiveChild;
+        public void Dispose()
+        {
+            DisposedWithLiveScope = !ScopeDisposed;
+            DisposedWithLiveChild = Child.DisposeCount == 0;
+            DisposeCount++;
+        }
+    }
+
+    private sealed class NestedLeaseFixture : IDisposable, IAsyncInitializer
+    {
+        public int DisposeCount;
+        public int InitializeCount;
+        public Task InitializeAsync() { InitializeCount++; return Task.CompletedTask; }
+        public void Dispose() { DisposeCount++; }
+    }
+
+    private static StaticPropertyHandler CreateInitializingHandler(TestSessionContext session)
+        => new(null!, new ObjectTracker(new(), GlobalContext.Current.Disposer), null!, new Lazy<PropertyInjector>(() => new PropertyInjector(null!, session.Id)),
+            new ObjectGraphDiscoveryService(), session);
 
     internal sealed class ThrowingReflectionFixture
     {

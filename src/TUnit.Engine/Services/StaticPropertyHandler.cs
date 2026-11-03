@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using TUnit.Core;
+using TUnit.Core.Discovery;
 using TUnit.Core.Helpers;
 using TUnit.Core.StaticProperties;
 using TUnit.Core.Tracking;
@@ -21,6 +23,112 @@ internal sealed class StaticPropertyHandler
     private readonly ConcurrentDictionary<string, object?> _sessionObjectBag = new();
     private readonly TestBuilderContext _staticPropertyContext;
     private bool _initialized;
+    private static readonly ConditionalWeakTable<StaticPropertyMetadata, SharedInitialization> s_sharedInitializations = new();
+
+    private sealed class SharedInitialization
+    {
+        private readonly SemaphoreSlim _gate = new(1, 1);
+        private int _owners;
+        private TestBuilderContext? _context;
+        private readonly List<object> _trackedObjects = new();
+        private Exception? _error;
+        private ObjectTracker? _tracker;
+        private StaticPropertyMetadata? _property;
+
+        public async ValueTask AcquireAsync(StaticPropertyHandler handler, StaticPropertyMetadata property, CancellationToken cancellationToken)
+        {
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                var first = _owners++ == 0;
+                // Subscribe before initialization so provider disposal also releases partial failures.
+                handler._staticPropertyContext.Events.OnDispose += (_, _) => ReleaseAsync();
+                if (!first)
+                {
+                    if (_error is { } error)
+                    {
+                        throw new InvalidOperationException("Shared static property initialization failed", error);
+                    }
+                    return;
+                }
+
+                _context = new TestBuilderContext { TestMetadata = handler._staticPropertyContext.TestMetadata };
+                _tracker = handler._objectTracker;
+                _property = property;
+                var previous = TestSessionContext.StaticInitializationContext.Value;
+                TestSessionContext.StaticInitializationContext.Value = _context;
+                try
+                {
+                    var value = await property.InitializerAsync().ConfigureAwait(false);
+                    if (value is not null)
+                    {
+                        _tracker.TrackStaticLeaseObject(value);
+                        _trackedObjects.Add(value);
+                        await handler._propertyInjector.Value.InjectPropertiesAsync(value, handler._sessionObjectBag,
+                            methodMetadata: null, _context.Events).ConfigureAwait(false);
+                        // Use execution's ownership-aware traversal: DI-owned children stay with
+                        // their scope, while TUnit-injected fixtures retain independent ownership.
+                        var graph = new ObjectGraphDiscoverer().DiscoverStaticPropertyTrackableObjects(value, cancellationToken);
+                        foreach (var level in graph)
+                        {
+                            foreach (var obj in level.Value)
+                            {
+                                if (ReferenceEquals(obj, value)) continue;
+                                _tracker.TrackStaticLeaseObject(obj);
+                                _trackedObjects.Add(obj);
+                            }
+                        }
+                        await handler.InitializeNestedObjectsAsync(value, cancellationToken).ConfigureAwait(false);
+                        await ObjectInitializer.InitializeAsync(value, cancellationToken).ConfigureAwait(false);
+                        StaticPropertyRegistry.StoreInitializedValue(property.DeclaringType, property.PropertyName, value);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _error = ex;
+                    throw;
+                }
+                finally
+                {
+                    TestSessionContext.StaticInitializationContext.Value = previous;
+                }
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
+
+        private async ValueTask ReleaseAsync()
+        {
+            await _gate.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                if (--_owners != 0) return;
+                var context = _context!;
+                var tracker = _tracker!;
+                StaticPropertyRegistry.RemoveInitializedValue(_property!.DeclaringType, _property.PropertyName);
+                _property = null;
+                _context = null;
+                _error = null;
+                _tracker = null;
+                var errors = new List<Exception>();
+                foreach (var obj in _trackedObjects)
+                {
+                    try { await tracker.ReleaseStaticLeaseObjectAsync(obj).ConfigureAwait(false); }
+                    catch (Exception ex) { errors.Add(ex); }
+                }
+                _trackedObjects.Clear();
+                // Fixture teardown precedes disposal of its injected services, including on errors.
+                await TestOnDisposeRaiser.RaiseForSessionAsync(context, errors).ConfigureAwait(false);
+                if (errors.Count > 0) throw new AggregateException("Errors occurred while disposing shared static property", errors);
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
+    }
 
     public StaticPropertyHandler(TUnitFrameworkLogger logger,
         ObjectTracker objectTracker,
@@ -40,45 +148,20 @@ internal sealed class StaticPropertyHandler
     /// <summary>
     /// Initialize all registered static properties before tests run
     /// </summary>
-    public async Task InitializeStaticPropertiesAsync(CancellationToken cancellationToken)
+    public Task InitializeStaticPropertiesAsync(CancellationToken cancellationToken)
+        => InitializeStaticPropertiesAsync(StaticPropertyRegistry.GetRegisteredProperties(), cancellationToken);
+
+    internal async Task InitializeStaticPropertiesAsync(IEnumerable<StaticPropertyMetadata> properties, CancellationToken cancellationToken)
     {
-        if (_initialized)
-        {
-            return;
-        }
-
+        if (_initialized) return;
         _initialized = true;
-
-        var properties = StaticPropertyRegistry.GetRegisteredProperties();
 
         foreach (var property in properties)
         {
             try
             {
-                var value = await property.InitializerAsync();
-
-                if (value != null)
-                {
-                    // Inject instance properties on the value before initialization
-                    // This handles cases where the static property's type has instance properties
-                    // with data source attributes (e.g., [ClassDataSource] with Shared = PerTestSession)
-                    await _propertyInjector.Value.InjectPropertiesAsync(
-                        value,
-                        _sessionObjectBag,
-                        methodMetadata: null,
-                        _staticPropertyContext.Events);
-
-                    // Initialize nested objects depth-first BEFORE initializing the main value
-                    // This ensures containers (IAsyncInitializer) are started before the factory
-                    // that depends on them calls methods like GetConnectionString()
-                    await InitializeNestedObjectsAsync(value, cancellationToken);
-
-                    // Initialize the value (IAsyncInitializer, etc.)
-                    await ObjectInitializer.InitializeAsync(value, cancellationToken);
-
-                    // Store for tracking
-                    StaticPropertyRegistry.StoreInitializedValue(property.DeclaringType, property.PropertyName, value);
-                }
+                await s_sharedInitializations.GetValue(property, static _ => new())
+                    .AcquireAsync(this, property, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

@@ -184,6 +184,13 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         // No nested traversal: reading the roots' properties is what failed.
         => TrackObjectsCore(testContext, discoverNested: false, CancellationToken.None);
 
+    internal SortedList<int, HashSet<object>> DiscoverStaticPropertyTrackableObjects(object root, CancellationToken cancellationToken)
+    {
+        var objects = new SortedList<int, HashSet<object>> { [0] = new(ReferenceComparer) { root } };
+        DiscoverNestedObjectsForTracking(root, objects, 1, heldByExternalOwner: false, injectedValues: null, cancellationToken);
+        return objects;
+    }
+
     private SortedList<int, HashSet<object>> TrackObjectsCore(TestContext testContext, bool discoverNested, CancellationToken cancellationToken)
     {
         var visitedObjects = testContext.TrackedObjects;
