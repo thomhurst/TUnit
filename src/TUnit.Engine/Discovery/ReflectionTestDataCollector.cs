@@ -809,15 +809,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 sourceClassMetadata = CreateDummyMethodMetadata(closedType, "Discovery");
                 sourceConstructorParameters = GetClosedConstructorParameters(closedType, inferenceConstructor!);
             }
-            else if (dataSource is MethodDataSourceAttribute externalSource
-                && externalSource.GetDeclaredMemberType(externalSource.ClassProvidingDataSource ?? genericTypeDefinition) is { } memberType
-                && MethodDataSourceAttribute.GetDeclaredRowType(memberType) is { } rowType
-                && (GetTupleElementTypes(rowType) ?? [rowType]).All(HasFixedRuntimeRowType))
+            else if (dataSource is MethodDataSourceAttribute externalSource)
             {
                 // Match fixed external rows through the constructor just like source-generated
                 // discovery. For T[] parameters, the array's element type supplies T; the array
                 // itself is the row value, so nullable elements are never boxed separately.
-                memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, externalSource, out var inferenceConstructor);
+                memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, externalSource, out var inferenceConstructor, requireFixedRuntimeTypes: true);
                 if (memberTypeArguments is not null)
                 {
                     if (constraintViolations.TryAddClassViolation(memberTypeArguments))
@@ -2755,7 +2752,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// types, whose parameters the rows are read against.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
-    private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource, out ConstructorInfo? constructor)
+    private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource, out ConstructorInfo? constructor, bool requireFixedRuntimeTypes = false)
     {
         constructor = null;
         if (methodDataSource.GetDeclaredMemberType(methodDataSource.ClassProvidingDataSource ?? genericTypeDefinition) is not { } memberType
@@ -2773,7 +2770,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             if (candidate.IsDefined(typeof(TestConstructorAttribute), inherit: false))
             {
                 constructor = candidate;
-                return InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters);
+                return InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters, requireFixedRuntimeTypes);
             }
         }
 
@@ -2781,12 +2778,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         if (constructors.Length > 0 && !HasParameterlessConstructor(constructors))
         {
             constructor = constructors[0];
-            return InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowType, typeParameters);
+            return InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowType, typeParameters, requireFixedRuntimeTypes);
         }
 
         foreach (var candidate in constructors)
         {
-            if (InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters) is { } typeArguments)
+            if (InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters, requireFixedRuntimeTypes) is { } typeArguments)
             {
                 constructor = candidate;
                 return typeArguments;
@@ -2841,7 +2838,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return false;
     }
 
-    private static Type[]? InferTypeArgumentsFromConstructorRow(ParameterInfo[] parameters, Type rowType, Type[] typeParameters)
+    private static Type[]? InferTypeArgumentsFromConstructorRow(ParameterInfo[] parameters, Type rowType, Type[] typeParameters, bool requireFixedRuntimeTypes = false)
     {
         // A tuple row fills one tuple parameter whole, as DataSourceHelpers.ToObjectArrayWithTypes passes it, and
         // otherwise spreads one column per parameter. Like that reader, which unwraps any ITuple, this treats a
@@ -2859,6 +2856,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     && ReflectionGenericTypeResolver.MatchTypeParameter(parameters[j].ParameterType, rowElements[j], typeParameters[i]) is { ContainsGenericParameters: false } typeArgument
                     && typeArgument != typeof(object))
                 {
+                    if (requireFixedRuntimeTypes && !HasFixedRuntimeRowType(rowElements[j]))
+                    {
+                        return null;
+                    }
+
                     typeArguments[i] = typeArgument;
                 }
             }

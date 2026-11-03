@@ -7691,7 +7691,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// constructor's single tuple parameter whole. Null when a type argument stays unknown or would be
     /// <c>object</c>. Mirrors reflection mode's <c>InferClassTypeArgumentsFromOwnMemberRowType</c> (#7208).
     /// </summary>
-    private static ITypeSymbol[]? InferClassTypesFromOwnMemberRowType(INamedTypeSymbol classSymbol, ITypeSymbol rowType)
+    private static ITypeSymbol[]? InferClassTypesFromOwnMemberRowType(INamedTypeSymbol classSymbol, ITypeSymbol rowType, bool requireFixedRuntimeTypes = false)
     {
         var constructors = classSymbol.InstanceConstructors
             .Where(constructor => constructor.DeclaredAccessibility == Accessibility.Public)
@@ -7702,17 +7702,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix));
         if (testConstructor != null)
         {
-            return InferClassTypesFromConstructorRow(testConstructor, rowType, classSymbol.TypeParameters);
+            return InferClassTypesFromConstructorRow(testConstructor, rowType, classSymbol.TypeParameters, requireFixedRuntimeTypes);
         }
 
         if (constructors.Length > 0 && !constructors.Any(constructor => constructor.Parameters.Length == 0))
         {
-            return InferClassTypesFromConstructorRow(constructors[0], rowType, classSymbol.TypeParameters);
+            return InferClassTypesFromConstructorRow(constructors[0], rowType, classSymbol.TypeParameters, requireFixedRuntimeTypes);
         }
 
         foreach (var constructor in constructors)
         {
-            if (InferClassTypesFromConstructorRow(constructor, rowType, classSymbol.TypeParameters) is { } typeArguments)
+            if (InferClassTypesFromConstructorRow(constructor, rowType, classSymbol.TypeParameters, requireFixedRuntimeTypes) is { } typeArguments)
             {
                 return typeArguments;
             }
@@ -7721,7 +7721,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return null;
     }
 
-    private static ITypeSymbol[]? InferClassTypesFromConstructorRow(IMethodSymbol constructor, ITypeSymbol rowType, ImmutableArray<ITypeParameterSymbol> typeParameters)
+    private static ITypeSymbol[]? InferClassTypesFromConstructorRow(IMethodSymbol constructor, ITypeSymbol rowType, ImmutableArray<ITypeParameterSymbol> typeParameters, bool requireFixedRuntimeTypes = false)
     {
         // A tuple row fills one tuple parameter whole, as the runtime passes it, and otherwise spreads one column
         // per parameter. Like the runtime, which unwraps any ITuple, this treats a System.Tuple row as a value tuple one.
@@ -7740,6 +7740,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     && !CodeGenerationHelpers.ContainsTypeParameter(typeArgument)
                     && typeArgument.SpecialType != SpecialType.System_Object)
                 {
+                    if (requireFixedRuntimeTypes && !HasFixedRuntimeType(rowElements[j]))
+                    {
+                        return null;
+                    }
+
                     typeArguments[i] = typeArgument;
                 }
             }
@@ -7788,15 +7793,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static ITypeSymbol[]? InferClassTypesFromClassMethodDataSource(TestMethodMetadata testMethod, AttributeData attribute)
     {
         var rowType = GetDeclaredMethodDataSourceRowType(testMethod, attribute);
-        var types = rowType is null ? null : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType);
         // External members infer from runtime values in reflection mode. An interface or
         // unsealed reference type cannot fix those values' types; retain runtime partitioning.
-        // Check supplied row values, not inferred arguments: a nullable inside T[] is
-        // never boxed separately, whereas a nullable tuple column is.
+        // Check the supplied values that infer class parameters, not unrelated tuple columns
+        // or extracted arguments: nullable elements inside T[] are never boxed separately.
         var isExternal = attribute.ConstructorArguments is [{ Value: INamedTypeSymbol }, ..]
             || attribute.AttributeClass is { IsGenericType: true };
+        var types = rowType is null ? null : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType, isExternal);
         return types is not null
-            && (!isExternal || (GetTupleElementTypes(rowType!) ?? [rowType!]).All(HasFixedRuntimeType))
             && FindInaccessibleType(types, testMethod.CompilationContext.Compilation) is null
             ? types
             : null;

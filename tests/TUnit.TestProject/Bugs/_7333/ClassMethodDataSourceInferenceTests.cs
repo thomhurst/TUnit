@@ -222,6 +222,7 @@ public static class AdditionalExternalRows
 {
     public static IEnumerable<(int, string)> PositionalRows() => [(2, "3")];
     public static IEnumerable<string?> NullRows() => [null];
+    public static IEnumerable<(int, object)> UnrelatedColumns() => [(3, "other")];
 }
 
 // Fixed external row types match constructor positions, not unrelated leading columns.
@@ -253,4 +254,17 @@ public class ExternalNullRows<T>(T value)
 {
     [Test]
     public async Task Test() => await Assert.That((object?)value).IsEqualTo("seed");
+}
+
+// An unrelated polymorphic column does not determine any class type argument.
+[MethodDataSource(typeof(AdditionalExternalRows), nameof(AdditionalExternalRows.UnrelatedColumns))]
+public class ExternalUnrelatedColumnRows<T>(T value, object other)
+{
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value).IsEqualTo(3);
+        await Assert.That(other).IsEqualTo("other");
+    }
 }
