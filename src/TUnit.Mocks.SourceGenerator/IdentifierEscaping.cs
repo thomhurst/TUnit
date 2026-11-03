@@ -69,6 +69,27 @@ internal static class IdentifierEscaping
     {
         name = StripAliasQualifier(name).Replace("global::", "");
 
+        // Qualifiers can occur at every nesting level, including generic arguments.
+        // Remove only the alias token immediately before each ::, preserving namespaces
+        // and literal underscores for the collision-safe encoding below.
+        var separator = name.IndexOf("::", StringComparison.Ordinal);
+        while (separator >= 0)
+        {
+            var start = separator;
+            while (start > 0 && SyntaxFacts.IsIdentifierPartCharacter(name[start - 1]))
+            {
+                start--;
+            }
+
+            if (start > 0 && name[start - 1] == '@')
+            {
+                start--;
+            }
+
+            name = name.Remove(start, separator + 2 - start);
+            separator = name.IndexOf("::", start, StringComparison.Ordinal);
+        }
+
         var sb = new StringBuilder(name.Length);
         var lastWasSeparator = false;
 

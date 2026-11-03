@@ -89,6 +89,22 @@ public class Issue7300Tests : SnapshotTestBase
     }
 
     [Test]
+    [Arguments("LibAlias")]
+    [Arguments("@class")]
+    [Arguments("Alias_With_Underscores")]
+    [Arguments("別名")]
+    public async Task Generic_Argument_Aliases_Do_Not_Change_Generated_Names(string alias)
+    {
+        var globalName = "global::Local.IExtra<global::Lib.X, global::Local.INested<global::Lib.Y_Value>>";
+        var aliasedName = globalName.Replace("global::Lib", alias + "::Lib");
+
+        await Assert.That(IdentifierEscaping.SanitizeIdentifier(aliasedName))
+            .IsEqualTo(IdentifierEscaping.SanitizeIdentifier(globalName));
+        await Assert.That(IdentifierEscaping.SanitizeIdentifier(aliasedName.Replace("Y_Value", "Y.Value")))
+            .IsNotEqualTo(IdentifierEscaping.SanitizeIdentifier(aliasedName));
+    }
+
+    [Test]
     public async Task Extern_Aliased_Types_Resolve_In_Generated_Code()
     {
         var errors = GetGeneratedCompilationErrors(Source, AliasedLibrary());
