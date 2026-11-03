@@ -108,7 +108,47 @@ public class StaticPropertyHandlerCleanupTests
         await Assert.That(secondResource.Disposed).IsTrue();
     }
 
-    public sealed class ReflectionFixture
+    [Test]
+    [NotInParallel]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Overlapping_Reflection_Sessions_Keep_Static_Resources_Alive(bool finishFirstSessionFirst)
+    {
+        var first = CreateSession();
+        await StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(OverlappingReflectionFixture));
+        var resource = OverlappingReflectionFixture.Resource!;
+
+        var second = CreateSession();
+        await StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(OverlappingReflectionFixture));
+        await Assert.That(ReferenceEquals(resource, OverlappingReflectionFixture.Resource)).IsTrue();
+        // Repeated discovery in one session must not acquire another claim.
+        await StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(OverlappingReflectionFixture));
+
+        var earlier = finishFirstSessionFirst ? first : second;
+        var later = finishFirstSessionFirst ? second : first;
+        await CreateHandler(earlier).DisposeStaticPropertiesAsync([], []);
+        await Assert.That(resource.Disposed).IsFalse();
+        await Assert.That(ReferenceEquals(resource, OverlappingReflectionFixture.Resource)).IsTrue();
+        await CreateHandler(later).DisposeStaticPropertiesAsync([], []);
+        await Assert.That(resource.Disposed).IsTrue();
+        await Assert.That(resource.DisposeCount).IsEqualTo(1);
+
+        var next = CreateSession();
+        await StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(OverlappingReflectionFixture));
+        var nextResource = OverlappingReflectionFixture.Resource!;
+        await Assert.That(ReferenceEquals(resource, nextResource)).IsFalse();
+        await Assert.That(nextResource.Disposed).IsFalse();
+        await CreateHandler(next).DisposeStaticPropertiesAsync([], []);
+        await Assert.That(nextResource.Disposed).IsTrue();
+    }
+
+    internal sealed class OverlappingReflectionFixture
+    {
+        [ResourceSource]
+        public static Resource? Resource { get; set; }
+    }
+
+    internal sealed class ReflectionFixture
     {
         [ResourceSource]
         public static Resource? Resource { get; set; }
@@ -117,6 +157,7 @@ public class StaticPropertyHandlerCleanupTests
     public sealed class Resource
     {
         public bool Disposed { get; set; }
+        public int DisposeCount { get; set; }
     }
 
     public sealed class ResourceSourceAttribute : Attribute, IDataSourceAttribute
@@ -129,6 +170,7 @@ public class StaticPropertyHandlerCleanupTests
             metadata.TestBuilderContext.Current.Events.OnDispose += (_, _) =>
             {
                 resource.Disposed = true;
+                resource.DisposeCount++;
                 return default;
             };
             yield return () => Task.FromResult<object?[]?>([resource]);

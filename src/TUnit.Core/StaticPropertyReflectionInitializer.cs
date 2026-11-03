@@ -14,8 +14,19 @@ namespace TUnit.Core;
 #endif
 public static class StaticPropertyReflectionInitializer
 {
-    // Match initialization lifetime to the context that owns the property cleanup callbacks.
+    // A static property is shared by every session in the process. Keep one value until
+    // all sessions that discovered it have released their claim.
     private static readonly ConditionalWeakTable<TestBuilderContext, ConcurrentDictionary<Type, bool>> _initializedTypes = new();
+
+    private static readonly ConditionalWeakTable<Type, SharedInitialization> _sharedInitializations = new();
+
+    private sealed class SharedInitialization
+    {
+        public readonly SemaphoreSlim Gate = new(1, 1);
+        public int Owners;
+        public TestBuilderContext? Context;
+        public Exception? Error;
+    }
 
     /// <summary>
     /// Initializes static properties with data sources for all loaded types
@@ -59,14 +70,108 @@ public static class StaticPropertyReflectionInitializer
         var context = TestSessionContext.GlobalStaticPropertyContext;
         var initializedTypes = _initializedTypes.GetValue(context, static _ => new());
 
-        // Skip repeated discovery within this session, but initialize again for a new session.
-        if (!initializedTypes.TryAdd(type, true))
+        var staticProperties = type.GetProperties(BindingFlags.Public | BindingFlags.Static);
+        if (staticProperties.Length == 0)
         {
+            initializedTypes.TryAdd(type, true);
             return;
         }
 
-        var staticProperties = type.GetProperties(BindingFlags.Public | BindingFlags.Static);
+        var shared = _sharedInitializations.GetValue(type, static _ => new());
+        await shared.Gate.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            if (!initializedTypes.TryAdd(type, true))
+            {
+                return;
+            }
 
+            var initialize = shared.Owners++ == 0;
+            if (initialize)
+            {
+                shared.Context = new TestBuilderContext { TestMetadata = context.TestMetadata };
+                shared.Error = null;
+            }
+
+            // Register before initialization so partial initialization also gets cleaned up.
+            // Different types can be initialized concurrently against the same session.
+            lock (context)
+            {
+                context.Events.OnDispose += (_, _) => ReleaseAsync(shared);
+            }
+
+            if (initialize)
+            {
+                try
+                {
+                    await InitializeTypeAsync(type, staticProperties, shared.Context!).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    shared.Error = ex;
+                    throw;
+                }
+            }
+            else if (shared.Error is { } error)
+            {
+                throw new InvalidOperationException($"Static property initialization failed for {type.FullName}", error);
+            }
+        }
+        finally
+        {
+            shared.Gate.Release();
+        }
+    }
+
+    private static async ValueTask ReleaseAsync(SharedInitialization shared)
+    {
+        await shared.Gate.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            if (--shared.Owners != 0)
+            {
+                return;
+            }
+
+            var context = shared.Context!;
+            var onDispose = context.EventsIfCreated?.OnDispose;
+            shared.Context = null;
+            shared.Error = null;
+            if (onDispose is null)
+            {
+                return;
+            }
+
+            context.Events.OnDispose = null;
+            var exceptions = new List<Exception>();
+            foreach (var invocation in onDispose.InvocationList)
+            {
+                try
+                {
+                    await invocation.InvokeAsync(context, null!).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
+            }
+
+            if (exceptions.Count > 0)
+            {
+                throw new AggregateException("Errors occurred while disposing reflection static properties", exceptions);
+            }
+        }
+        finally
+        {
+            shared.Gate.Release();
+        }
+    }
+
+#if NET8_0_OR_GREATER
+    [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
+#endif
+    private static async Task InitializeTypeAsync(Type type, PropertyInfo[] staticProperties, TestBuilderContext context)
+    {
         foreach (var property in staticProperties)
         {
             if (!property.CanWrite)
