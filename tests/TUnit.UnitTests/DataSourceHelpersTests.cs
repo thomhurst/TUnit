@@ -9,6 +9,27 @@ namespace TUnit.UnitTests;
 public class DataSourceHelpersTests
 {
     [Test]
+    public async Task UnwrapTuple_LongValueTuple_FlattensMultipleRestLevels()
+    {
+        object value = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, (15, 16));
+        var elements = TupleHelper.UnwrapTupleUsingReflection(value);
+
+        await Assert.That(elements.Length).IsEqualTo(15);
+        await Assert.That(elements[7]).IsEqualTo((object)8);
+        await Assert.That(elements[14]).IsEqualTo((object)(15, 16));
+    }
+
+    [Test]
+    public async Task UnwrapTuple_LongReferenceTuple_FlattensRest()
+    {
+        object value = Tuple.Create(1, 2, 3, 4, 5, 6, 7, "eight");
+        var elements = TupleHelper.UnwrapTupleUsingReflection(value);
+
+        await Assert.That(elements.Length).IsEqualTo(8);
+        await Assert.That(elements[7]).IsEqualTo((object)"eight");
+    }
+
+    [Test]
     public async Task HandleTupleValue_Tuple_ReturnsFactoryPerElement()
     {
         var factories = DataSourceHelpers.HandleTupleValue((1, "two", 3.0), shouldUnwrap: true);

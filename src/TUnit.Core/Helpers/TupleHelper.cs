@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -74,6 +75,46 @@ public static class TupleHelper
     }
 #endif
 
+    private static readonly ConcurrentDictionary<Type, MemberInfo[]> TupleMembers = new();
+
+#if NET
+    [RequiresUnreferencedCode("Tuple fallback reads tuple fields and properties through reflection.")]
+#endif
+    private static void AppendTupleElements(object value, List<object?> elements)
+    {
+        var members = TupleMembers.GetOrAdd(value.GetType(), static type =>
+        {
+            var count = type.GetGenericArguments().Length;
+            var isValueTuple = type.FullName!.StartsWith("System.ValueTuple`");
+            var result = new MemberInfo[count];
+            for (var i = 0; i < count; i++)
+            {
+                var name = i == 7 ? "Rest" : $"Item{i + 1}";
+                result[i] = isValueTuple
+                    ? type.GetField(name)!
+                    : (MemberInfo)type.GetProperty(name)!;
+            }
+
+            return result;
+        });
+
+        for (var i = 0; i < members.Length; i++)
+        {
+            var element = members[i] is FieldInfo field
+                ? field.GetValue(value)
+                : ((PropertyInfo)members[i]).GetValue(value);
+            if (i == 7)
+            {
+                // Flatten only the storage Rest; a tuple in an Item slot is one element.
+                AppendTupleElements(element!, elements);
+            }
+            else
+            {
+                elements.Add(element);
+            }
+        }
+    }
+
     /// <summary>
     /// Unwraps a tuple into an array of its elements
     /// </summary>
@@ -82,6 +123,16 @@ public static class TupleHelper
 #if NET
         return UnwrapTuple(value as ITuple);
 #else
+        return UnwrapTupleUsingReflection(value);
+#endif
+    }
+
+    // Kept callable in modern builds so tests exercise the netstandard2.0 fallback directly.
+#if NET
+    [RequiresUnreferencedCode("Tuple fallback reads tuple fields and properties through reflection.")]
+#endif
+    internal static object?[] UnwrapTupleUsingReflection(object? value)
+    {
         if (value == null)
         {
             return [null];
@@ -98,30 +149,9 @@ public static class TupleHelper
         // The AOT analyzer will warn about incompatibility at compile time
         var elements = new List<object?>();
 
-        if (type.FullName?.StartsWith("System.ValueTuple`") == true)
-        {
-            // Handle ValueTuple - access via fields
-            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
-            foreach (var field in fields.OrderBy(f => f.Name))
-            {
-                elements.Add(field.GetValue(value));
-            }
-        }
-        else if (type.FullName?.StartsWith("System.Tuple`") == true)
-        {
-            // Handle Tuple - access via properties
-            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.Name.StartsWith("Item"))
-                .OrderBy(p => p.Name);
-
-            foreach (var property in properties)
-            {
-                elements.Add(property.GetValue(value));
-            }
-        }
+        AppendTupleElements(value, elements);
 
         return elements.ToArray();
-#endif
     }
 
     /// <summary>
