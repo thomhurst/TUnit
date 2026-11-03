@@ -1110,6 +1110,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         var unwrappedTarget = target is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableTarget
             ? nullableTarget.TypeArguments[0] : target;
         if (!SymbolEqualityComparer.Default.Equals(target, unwrappedTarget)
+            && !conversion.IsUserDefined
             && unwrappedTarget is INamedTypeSymbol { IsTupleType: true }
             && !SymbolEqualityComparer.Default.Equals(unwrappedSource, unwrappedTarget))
         {

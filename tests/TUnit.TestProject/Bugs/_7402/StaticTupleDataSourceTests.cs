@@ -93,6 +93,26 @@ public class StaticTupleDataSourceTests
         return (new(), 3);
     }
 
+    public static Tuple<ImplicitTupleValue> NullableTupleOperatorRow()
+    {
+        if (!System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported)
+        {
+            TUnit.Core.Converters.AotConverterRegistry.Register<ImplicitTupleValue, (int, int)>(value => value);
+        }
+
+        return Tuple.Create(new ImplicitTupleValue());
+    }
+
+    public static IEnumerable<Tuple<ImplicitTupleValue>> NullableTupleOperatorRows() => [NullableTupleOperatorRow()];
+
+    [Test]
+    [MethodDataSource(nameof(NullableTupleOperatorRow))]
+    [MethodDataSource(nameof(NullableTupleOperatorRows))]
+    public async Task Reference_Tuple_Uses_Implicit_Conversion_To_Nullable_Tuple(Tuple<(int, int)?> value)
+    {
+        await Assert.That(value.Item1).IsEqualTo(((int, int)?)(1, 2));
+    }
+
     public static (ExplicitTupleValue, int) ExplicitNestedValue()
     {
         if (!System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported)

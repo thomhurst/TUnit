@@ -107,6 +107,7 @@ public static class CastHelper
                 : null;
         }
 
+        // TestDataAnalyzer.CanConvertReferenceTupleElement mirrors these element conversion limits.
         var targetType = Nullable.GetUnderlyingType(type) ?? type;
         var sourceType = value.GetType();
 

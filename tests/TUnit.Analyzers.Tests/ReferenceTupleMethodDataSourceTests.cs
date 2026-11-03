@@ -193,6 +193,25 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    public async Task ExactUserDefinedConversionToNullableTuple()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Source { public static implicit operator (int, int)(Source value) => (1, 2); }
+            public class C
+            {
+                [Test] [MethodDataSource(nameof(Row))] public void Direct(Tuple<(int, int)?> row) {}
+                [Test] [MethodDataSource(nameof(Rows))] public void Enumerable(Tuple<(int, int)?> row) {}
+                public static Tuple<Source> Row() => Tuple.Create(new Source());
+                public static IEnumerable<Tuple<Source>> Rows() => [Row()];
+            }
+            """);
+    }
+
+    [Test]
     public async Task ComposedUserDefinedConversionIsReported()
     {
         await Verifier.VerifyAnalyzerAsync(
