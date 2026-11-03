@@ -5,6 +5,198 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_OneElementValueTupleTests_GenericNestedElement__T_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.OneElementValueTupleTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.OneElementValueTupleTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.OneElementValueTupleTests)),
+        Name = "OneElementValueTupleTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.OneElementValueTupleTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("GenericNestedElement", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.OneElementValueTupleTests), "GenericNestedElement", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, true, "T"), false)
+}));
+    private static global::TUnit.TestProject.OneElementValueTupleTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.OneElementValueTupleTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.OneElementValueTupleTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single tuple parameter
+            if (args.Length == 1 && args[0] is not global::System.ValueTuple<object>)
+            {
+                // Arguments are unwrapped tuple elements, reconstruct the tuple
+                return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedElement<global::System.ValueTuple<object>>(new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]))));
+            }
+            else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+            {
+                // Rare case: tuple is wrapped as a single argument
+                return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedElement<global::System.ValueTuple<object>>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(args[0])));
+            }
+            else
+            {
+                throw new global::System.ArgumentException($"Expected 1 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.ValueTuple<object>)),
+            new global::TUnit.Core.MethodDataSourceAttribute("GenericNestedRow"),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.OneElementValueTupleTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.OneElementValueTupleTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.OneElementValueTupleTests>(
+            methodName: "GenericNestedElement<ValueTuple<object>>",
+            fullyQualifiedName: "TUnit.TestProject.OneElementValueTupleTests.GenericNestedElement<ValueTuple<object>>",
+            methodTypeArgumentsIdentity: "<global::System.ValueTuple<object>>",
+            filePath: "",
+            lineNumber: 65,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("GenericNestedRow")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.OneElementValueTupleTests.GenericNestedRow()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<object>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<object>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_OneElementValueTupleTests_GenericNestedElement__T_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.OneElementValueTupleTests>(static () => TUnit_TestProject_OneElementValueTupleTests_GenericNestedElement__T_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_OneElementValueTupleTests_GenericNestedElementFromInstance__T_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.OneElementValueTupleTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.OneElementValueTupleTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.OneElementValueTupleTests)),
+        Name = "OneElementValueTupleTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.OneElementValueTupleTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("GenericNestedElementFromInstance", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.OneElementValueTupleTests), "GenericNestedElementFromInstance", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, true, "T"), false)
+}));
+    private static global::TUnit.TestProject.OneElementValueTupleTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.OneElementValueTupleTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.OneElementValueTupleTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single tuple parameter
+            if (args.Length == 1 && args[0] is not global::System.ValueTuple<object>)
+            {
+                // Arguments are unwrapped tuple elements, reconstruct the tuple
+                return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedElementFromInstance<global::System.ValueTuple<object>>(new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]))));
+            }
+            else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+            {
+                // Rare case: tuple is wrapped as a single argument
+                return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedElementFromInstance<global::System.ValueTuple<object>>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(args[0])));
+            }
+            else
+            {
+                throw new global::System.ArgumentException($"Expected 1 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.ValueTuple<object>)),
+            new global::TUnit.Core.InstanceMethodDataSourceAttribute("InstanceGenericNestedRow"),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.OneElementValueTupleTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.OneElementValueTupleTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.OneElementValueTupleTests>(
+            methodName: "GenericNestedElementFromInstance<ValueTuple<object>>",
+            fullyQualifiedName: "TUnit.TestProject.OneElementValueTupleTests.GenericNestedElementFromInstance<ValueTuple<object>>",
+            methodTypeArgumentsIdentity: "<global::System.ValueTuple<object>>",
+            filePath: "",
+            lineNumber: 70,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("InstanceGenericNestedRow")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.OneElementValueTupleTests)instance).InstanceGenericNestedRow() ?? global::System.Array.Empty<object>()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<object>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<object>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_OneElementValueTupleTests_GenericNestedElementFromInstance__T_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.OneElementValueTupleTests>(static () => TUnit_TestProject_OneElementValueTupleTests_GenericNestedElementFromInstance__T_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.OneElementValueTupleTests", new global::TUnit.Core.ClassMetadata
@@ -95,6 +287,42 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                     {
                         // Rare case: tuple is wrapped as a single argument
                         return new global::System.Threading.Tasks.ValueTask(instance.NestedElementFromInstance(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(args[0])));
+                    }
+                    else
+                    {
+                        throw new global::System.ArgumentException($"Expected 1 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+                    }
+                }
+                case 4:
+                {
+                    // Special handling for single tuple parameter
+                    if (args.Length == 1 && args[0] is not global::System.ValueTuple<object>)
+                    {
+                        // Arguments are unwrapped tuple elements, reconstruct the tuple
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedNestedElement(new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]))));
+                    }
+                    else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+                    {
+                        // Rare case: tuple is wrapped as a single argument
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedNestedElement(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(args[0])));
+                    }
+                    else
+                    {
+                        throw new global::System.ArgumentException($"Expected 1 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+                    }
+                }
+                case 5:
+                {
+                    // Special handling for single tuple parameter
+                    if (args.Length == 1 && args[0] is not global::System.ValueTuple<object>)
+                    {
+                        // Arguments are unwrapped tuple elements, reconstruct the tuple
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedNestedElementFromInstance(new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]))));
+                    }
+                    else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+                    {
+                        // Rare case: tuple is wrapped as a single argument
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedNestedElementFromInstance(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(args[0])));
                     }
                     else
                     {
@@ -225,6 +453,54 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
             createInstance: __createInstance,
             invokeBody: __invoke,
             methodIndex: 3,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.OneElementValueTupleTests>(
+            methodName: "WrappedNestedElement",
+            fullyQualifiedName: "TUnit.TestProject.OneElementValueTupleTests.WrappedNestedElement",
+            filePath: "",
+            lineNumber: 53,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("WrappedNestedRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.OneElementValueTupleTests.WrappedNestedRows()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.OneElementValueTupleTests), "WrappedNestedElement", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.ValueTuple<object>), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<object>)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 4,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.OneElementValueTupleTests>(
+            methodName: "WrappedNestedElementFromInstance",
+            fullyQualifiedName: "TUnit.TestProject.OneElementValueTupleTests.WrappedNestedElementFromInstance",
+            filePath: "",
+            lineNumber: 57,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("InstanceWrappedNestedRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceEnumerable(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.OneElementValueTupleTests)instance).InstanceWrappedNestedRows() ?? global::System.Array.Empty<object>()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.OneElementValueTupleTests), "WrappedNestedElementFromInstance", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.ValueTuple<object>), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<object>)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 5,
             createAttributes: __attributes,
             attributeGroupIndex: 0),
     };

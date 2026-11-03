@@ -44,4 +44,31 @@ public class OneElementValueTupleTests
         await Assert.That(value.Item1).IsTypeOf<ValueTuple<object>>();
         await Assert.That(((ValueTuple<object>)value.Item1).Item1).IsEqualTo("x");
     }
+
+    public static IEnumerable<TestDataRow<ValueTuple<object>>> WrappedNestedRows() =>
+        [new(new ValueTuple<object>(new ValueTuple<object>("x")))];
+
+    public IEnumerable<TestDataRow<ValueTuple<object>>> InstanceWrappedNestedRows() => WrappedNestedRows();
+
+    [Test]
+    [MethodDataSource(nameof(WrappedNestedRows))]
+    public Task WrappedNestedElement(ValueTuple<object> value) => NestedElement(value);
+
+    [Test]
+    [InstanceMethodDataSource(nameof(InstanceWrappedNestedRows))]
+    public Task WrappedNestedElementFromInstance(ValueTuple<object> value) => NestedElement(value);
+
+    public static object GenericNestedRow() => new ValueTuple<object>(new ValueTuple<object>("x"));
+
+    public object InstanceGenericNestedRow() => GenericNestedRow();
+
+    [Test]
+    [GenerateGenericTest(typeof(ValueTuple<object>))]
+    [MethodDataSource(nameof(GenericNestedRow))]
+    public Task GenericNestedElement<T>(T value) => NestedElement((ValueTuple<object>)(object)value!);
+
+    [Test]
+    [GenerateGenericTest(typeof(ValueTuple<object>))]
+    [InstanceMethodDataSource(nameof(InstanceGenericNestedRow))]
+    public Task GenericNestedElementFromInstance<T>(T value) => NestedElement((ValueTuple<object>)(object)value!);
 }
