@@ -420,7 +420,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 }));
     private static global::TUnit.TestProject.Bugs._7118.MixedRowsSeveralRowsPerType<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7118.MixedRowsSeveralRowsPerType<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7118.MixedRowsSeveralRowsPerType<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7118.MixedRowsSeveralRowsPerType<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7118.MixedRowsSeveralRowsPerType<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -1236,7 +1236,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
     };
     private static global::TUnit.TestProject.Bugs._7118.MethodRowMatchedByTypedClassSource<string> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7118.MethodRowMatchedByTypedClassSource<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7118.MethodRowMatchedByTypedClassSource<string>), args)!;
+        return new global::TUnit.TestProject.Bugs._7118.MethodRowMatchedByTypedClassSource<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7118.MethodRowMatchedByTypedClassSource<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -1520,7 +1520,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
     };
     private static global::TUnit.TestProject.Bugs._7118.UninferredMethodRowWithTypedClassSource<string> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7118.UninferredMethodRowWithTypedClassSource<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7118.UninferredMethodRowWithTypedClassSource<string>), args)!;
+        return new global::TUnit.TestProject.Bugs._7118.UninferredMethodRowWithTypedClassSource<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7118.UninferredMethodRowWithTypedClassSource<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -1610,7 +1610,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 }));
     private static global::TUnit.TestProject.Bugs._7118.NullTypedClassRow<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7118.NullTypedClassRow<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7118.NullTypedClassRow<string>), args)!;
+        return new global::TUnit.TestProject.Bugs._7118.NullTypedClassRow<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7118.NullTypedClassRow<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -1694,7 +1694,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 }));
     private static global::TUnit.TestProject.Bugs._7118.ArrayParameterNullTypedClassRow<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7118.ArrayParameterNullTypedClassRow<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7118.ArrayParameterNullTypedClassRow<string>), args)!;
+        return new global::TUnit.TestProject.Bugs._7118.ArrayParameterNullTypedClassRow<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7118.ArrayParameterNullTypedClassRow<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {

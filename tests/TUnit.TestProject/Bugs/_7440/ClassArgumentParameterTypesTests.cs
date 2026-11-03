@@ -72,3 +72,26 @@ public class DecimalStringConstantConstructorArgumentTests(decimal value)
         await Assert.That(number).IsEqualTo(3m);
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(3L, 1)]
+[Arguments(4L, 2)]
+[Arguments(DecimalArgumentConstants.DoubleRate, 3)]
+[Arguments(DecimalArgumentConstants.FloatRate, 4)]
+[Arguments(DecimalArgumentConstants.Amount, 5)]
+public class GenericDecimalConstructorArgumentTests<T>(decimal amount, T value)
+{
+    [Test]
+    public async Task Run()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        var row = (int)(object)value!;
+        await Assert.That(amount).IsEqualTo(row switch
+        {
+            1 => 3m,
+            2 => 4m,
+            3 or 4 => 0.1m,
+            _ => 3m
+        });
+    }
+}

@@ -28,7 +28,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 }));
     private static global::TUnit.TestProject.Bugs._7335.ClassRowsSharingInstantiation<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7335.ClassRowsSharingInstantiation<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7335.ClassRowsSharingInstantiation<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7335.ClassRowsSharingInstantiation<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7335.ClassRowsSharingInstantiation<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -111,7 +111,7 @@ internal static class TUnit_TestProject_Bugs__7335_ClassRowsSharingInstantiation
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7335.ClassRowsSharingInstantiationParameterless<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7335.ClassRowsSharingInstantiationParameterless<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7335.ClassRowsSharingInstantiationParameterless<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7335.ClassRowsSharingInstantiationParameterless<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7335.ClassRowsSharingInstantiationParameterless<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {

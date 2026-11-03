@@ -2161,7 +2161,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             else
             {
-                writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
+                var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
+                writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType)));
             }
         }
         // Bake the row's values in only when it is the instantiation's only class row. When several
@@ -2187,7 +2188,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else if (entry.HasParameterizedConstructor)
         {
-            writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
+            // Multiple rows can carry boxed numeric or string values that the default binder cannot
+            // convert (notably to decimal). Use the same CastHelper conversions as ordinary factories,
+            // with the constructor used to bind and infer the class rows.
+            var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType)));
         }
         else if (!testMethod.IsGenericType)
         {

@@ -199,7 +199,7 @@ public static class InstanceFactoryGenerator
     /// Used by the per-class helper pipeline where ISymbol is available during the transform step
     /// but not during source output.
     /// </summary>
-    public static string GenerateInstanceFactoryBody(ITypeSymbol typeSymbol)
+    public static string GenerateInstanceFactoryBody(ITypeSymbol typeSymbol, IMethodSymbol? constructor = null)
     {
         var bodyWriter = new CodeWriter(includeHeader: false);
         var className = typeSymbol.GloballyQualified();
@@ -210,7 +210,7 @@ public static class InstanceFactoryGenerator
         }
         else if (typeSymbol.HasParameterizedConstructor())
         {
-            var constructor = GetPrimaryConstructor(typeSymbol);
+            constructor ??= GetPrimaryConstructor(typeSymbol);
             if (constructor != null)
             {
                 GenerateTypedConstructorCallBody(bodyWriter, className, constructor);

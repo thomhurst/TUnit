@@ -795,7 +795,7 @@ internal static class TUnit_TestProject_Bugs__7222_ClassRowsGenerateGenericTestA
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("MixedArity", __classType, typeof(void), __classMetadata, genericTypeCount: 1);
     private static global::TUnit.TestProject.Bugs._7222.ClassRowsGenerateGenericTestArityTests<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7222.ClassRowsGenerateGenericTestArityTests<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7222.ClassRowsGenerateGenericTestArityTests<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7222.ClassRowsGenerateGenericTestArityTests<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7222.ClassRowsGenerateGenericTestArityTests<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
