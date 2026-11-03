@@ -496,10 +496,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else
         {
             // Collect all concrete type instantiations for this generic test method
-            concreteInstantiations = CollectConcreteInstantiations(testMethod, className, out classConstraintViolations);
+            concreteInstantiations = CollectConcreteInstantiations(testMethod, className, out classConstraintViolations, out var hadConcreteInstantiations);
 
             if (concreteInstantiations.Count == 0 && classConstraintViolations.Count == 0)
             {
+                // Successfully inferred types may have no matching method rows after filtering.
+                if (hadConcreteInstantiations)
+                {
+                    return;
+                }
+
                 // An open generic template without data is not a runnable test. A class with data,
                 // however, must not silently disappear when only its runtime rows reveal the types.
                 if (!testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
@@ -825,7 +831,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// Collects all concrete type instantiations for this generic test method.
     /// </summary>
-    private static List<ConcreteInstantiation> CollectConcreteInstantiations(TestMethodMetadata testMethod, string className, out List<string> classConstraintViolations)
+    private static List<ConcreteInstantiation> CollectConcreteInstantiations(TestMethodMetadata testMethod, string className, out List<string> classConstraintViolations, out bool hadConcreteInstantiations)
     {
         var compilation = testMethod.CompilationContext.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
@@ -1562,6 +1568,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
         }
+
+        hadConcreteInstantiations = results.Count > 0;
 
         // A method row runs only on the class instantiation its values infer, and reflection mode applies the
         // same rules (#7118). When the class has class-level [Arguments] rows:

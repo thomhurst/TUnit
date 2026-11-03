@@ -45,3 +45,11 @@ public class InheritedUntypedClassSource<T>(T value) : InheritedClassSourceBase
     [Test]
     public void Test() { }
 }
+
+[Arguments(1)]
+public class FilteredClassSource<T>(T value) where T : struct
+{
+    [Test]
+    [Arguments("a")]
+    public void Test(T arg) { }
+}
