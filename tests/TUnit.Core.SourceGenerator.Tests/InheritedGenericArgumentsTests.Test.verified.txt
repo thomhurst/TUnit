@@ -25,7 +25,7 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedArguments_T_Test_Tes
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7490.InheritedArguments<bool> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7490.InheritedArguments<bool>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7490.InheritedArguments<bool>), new object[] { true })!;
+        return new global::TUnit.TestProject.Bugs._7490.InheritedArguments<bool>(global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7490.InheritedArguments<bool> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -70,7 +70,7 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedArguments_T_Test_Tes
     };
     private static global::TUnit.TestProject.Bugs._7490.InheritedArguments<int> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7490.InheritedArguments<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7490.InheritedArguments<int>), new object[] { 42 })!;
+        return new global::TUnit.TestProject.Bugs._7490.InheritedArguments<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7490.InheritedArguments<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -115,7 +115,7 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedArguments_T_Test_Tes
     };
     private static global::TUnit.TestProject.Bugs._7490.InheritedArguments<string> __CreateInstance_2(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7490.InheritedArguments<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7490.InheritedArguments<string>), new object[] { "base" })!;
+        return new global::TUnit.TestProject.Bugs._7490.InheritedArguments<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_2(global::TUnit.TestProject.Bugs._7490.InheritedArguments<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -205,7 +205,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "methodValue"
 }));
     private static global::TUnit.TestProject.Bugs._7490.InheritedArguments<bool> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7490.InheritedArguments<bool>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7490.InheritedArguments<bool>), new object[] { true })!;
+        return new global::TUnit.TestProject.Bugs._7490.InheritedArguments<bool>(global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7490.InheritedArguments<bool> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -314,7 +314,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "methodValue"
     };
     private static global::TUnit.TestProject.Bugs._7490.InheritedArguments<int> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7490.InheritedArguments<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7490.InheritedArguments<int>), new object[] { 42 })!;
+        return new global::TUnit.TestProject.Bugs._7490.InheritedArguments<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7490.InheritedArguments<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -423,7 +423,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "methodValue"
     };
     private static global::TUnit.TestProject.Bugs._7490.InheritedArguments<string> __CreateInstance_2(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7490.InheritedArguments<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7490.InheritedArguments<string>), new object[] { "base" })!;
+        return new global::TUnit.TestProject.Bugs._7490.InheritedArguments<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_2(global::TUnit.TestProject.Bugs._7490.InheritedArguments<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -574,7 +574,7 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedOnlyArguments_T_Test
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7490.InheritedOnlyArguments<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7490.InheritedOnlyArguments<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7490.InheritedOnlyArguments<int>), new object[] { 42 })!;
+        return new global::TUnit.TestProject.Bugs._7490.InheritedOnlyArguments<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7490.InheritedOnlyArguments<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -617,7 +617,7 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedOnlyArguments_T_Test
     };
     private static global::TUnit.TestProject.Bugs._7490.InheritedOnlyArguments<string> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7490.InheritedOnlyArguments<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7490.InheritedOnlyArguments<string>), new object[] { "base" })!;
+        return new global::TUnit.TestProject.Bugs._7490.InheritedOnlyArguments<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7490.InheritedOnlyArguments<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -701,7 +701,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "methodValue"
 }));
     private static global::TUnit.TestProject.Bugs._7490.InheritedNullMethodArguments<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7490.InheritedNullMethodArguments<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7490.InheritedNullMethodArguments<string>), new object[] { "base" })!;
+        return new global::TUnit.TestProject.Bugs._7490.InheritedNullMethodArguments<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7490.InheritedNullMethodArguments<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -864,7 +864,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "methodValue"
     private static global::TUnit.TestProject.Bugs._7490.InheritedMixedSources<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         if (args.Length == 0) throw new global::System.InvalidOperationException("This method-level [Arguments] row infers class type arguments that none of the class-level data rows infer, so no class row supplies the constructor arguments for this instantiation. Add a class-level row with matching types, or change the method row to match an existing class row.");
-        return (global::TUnit.TestProject.Bugs._7490.InheritedMixedSources<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7490.InheritedMixedSources<string>), args)!;
+        return new global::TUnit.TestProject.Bugs._7490.InheritedMixedSources<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7490.InheritedMixedSources<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -903,7 +903,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "methodValue"
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7490.InheritedMixedSourcesBase), "StringRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7490.InheritedMixedSourcesBase.StringRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7490.InheritedMixedSourcesBase.StringRows()),
     },
 }, 0),
             methodMetadata: __mm_0,
