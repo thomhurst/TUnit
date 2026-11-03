@@ -26,7 +26,9 @@ using TUnit.Engine.Reporters.Aggregation;
 
 namespace TUnit.Engine.Reporters.Html;
 
-internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataProducer, ITestHostApplicationLifetime, ITestSessionLifetimeHandler, IFilterReceiver, IDisposable
+// Consume updates inline so session finishing sees every published result and exception.
+// A queued IDataConsumer can otherwise receive them only after its session state is removed.
+internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IBlockingDataConsumer, IDataProducer, ITestHostApplicationLifetime, ITestSessionLifetimeHandler, IFilterReceiver, IDisposable
 {
     private const int HtmlReportEnabledUnresolved = -1;
 
@@ -37,7 +39,16 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     private string? _outputPath;
     private IMessageBus? _messageBus;
     private string _resultsDirectory = "TestResults";
-    private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _updates = [];
+    // Report state is keyed by SessionUid: MTP server mode can run sessions that overlap in one
+    // process, and each session's report must contain only its own results. Process-wide state
+    // (activity collection, TraceRegistry, the GitHub reporter, the enabled setting) is reset when
+    // the first overlapping session starts and released when the last one finishes.
+    private readonly ConcurrentDictionary<string, SessionReportState> _sessions = new();
+    // Sessions between OnTestSessionStartingAsync and OnTestSessionFinishingAsync; guarded by _htmlReportStateLock.
+    private readonly HashSet<string> _activeSessions = [];
+    // Finishing sessions that have not yet read TraceRegistry for their report; guarded by _htmlReportStateLock.
+    // TraceRegistry is cleared only when no session is active and no report still needs it.
+    private int _reportsReadingTraceRegistry;
     private readonly object _htmlReportStateLock = new();
     private GitHubReporter? _githubReporter;
     private int _htmlReportEnabledAfterDiscovery = HtmlReportEnabledUnresolved;
@@ -71,21 +82,33 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             return Task.CompletedTask;
         }
 
+        // Messages for a session that has not started or has already finished have no report to
+        // go into; creating state for them would leak an entry that nothing ever removes.
         if (value is UnobservedTaskExceptionsData unobserved)
         {
+            if (!_sessions.TryGetValue(unobserved.SessionUid.Value, out var unobservedState))
+            {
+                return Task.CompletedTask;
+            }
+
             foreach (var exception in unobserved.Exceptions)
             {
-                _unobservedTaskExceptions.Enqueue(exception);
+                unobservedState.UnobservedTaskExceptions.Enqueue(exception);
             }
 
             return Task.CompletedTask;
         }
 
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
+        if (!_sessions.TryGetValue(testNodeUpdateMessage.SessionUid.Value, out var sessionState))
+        {
+            return Task.CompletedTask;
+        }
+
         // Keep only the update we'll report per test: a final-state update always wins over a
         // non-final one, otherwise the latest wins. The engine emits a single final update per
         // test, so storing the whole stream (the old ConcurrentQueue) just wasted memory.
-        _updates.AddOrUpdate(
+        sessionState.Updates.AddOrUpdate(
             testNodeUpdateMessage.TestNode.Uid.Value,
             testNodeUpdateMessage,
             (_, existing) => PreferForReport(existing, testNodeUpdateMessage));
@@ -105,8 +128,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage), typeof(UnobservedTaskExceptionsData)];
 
-    private readonly ConcurrentQueue<Exception> _unobservedTaskExceptions = new();
-
     public Type[] DataTypesProduced { get; } = [typeof(SessionFileArtifact)];
 
     public Task BeforeRunAsync(CancellationToken cancellationToken)
@@ -119,10 +140,21 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public Task OnTestSessionStartingAsync(ITestSessionContext testSessionContext)
     {
+        var sessionUid = testSessionContext.SessionUid.Value;
+
         lock (_htmlReportStateLock)
         {
-            _updates.Clear();
-            _unobservedTaskExceptions.Clear();
+            // A fresh state object, so a restarted session never sees its previous results.
+            _sessions[sessionUid] = new SessionReportState();
+
+            _activeSessions.Add(sessionUid);
+            if (_activeSessions.Count > 1)
+            {
+                // Another session is still running and owns the process-wide state; resetting it
+                // here would discard that session's spans, trace IDs and GitHub summary state.
+                return Task.CompletedTask;
+            }
+
             _githubReporter?.ResetSessionState();
             Volatile.Write(ref _htmlReportEnabledAfterDiscovery, HtmlReportEnabledUnresolved);
 #if NET
@@ -139,18 +171,45 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public async Task OnTestSessionFinishingAsync(ITestSessionContext testSessionContext)
     {
-        try
-        {
+        var sessionUid = testSessionContext.SessionUid.Value;
+        _sessions.TryRemove(sessionUid, out var sessionState);
+        var updates = sessionState?.Updates;
+        bool lastActiveSession;
+        var traceRegistryReleased = false;
 #if NET
-            StopActivityCollection();
+        ActivityCollector? ownedCollector = null;
+        ActivityCollector? reportCollector;
 #endif
 
+        lock (_htmlReportStateLock)
+        {
+            _activeSessions.Remove(sessionUid);
+            _reportsReadingTraceRegistry++;
+            lastActiveSession = _activeSessions.Count == 0;
+#if NET
+            if (lastActiveSession)
+            {
+                // Detach the collector so a session starting during report generation creates
+                // its own instead of disposing the one this report still reads. Stop it under the
+                // lock too: that frees the process-wide ActivityCollector.Current and
+                // ExternalSpanSink slots before the next session's collector claims them (both are
+                // first-wins). Stopping keeps the spans already collected.
+                ownedCollector = _activityCollector;
+                _activityCollector = null;
+                ownedCollector?.Stop();
+            }
+
+            // An overlapping session keeps the shared collector running; its spans can then
+            // appear in this report's trace view as well, but test results stay per session.
+            reportCollector = ownedCollector ?? _activityCollector;
+#endif
+        }
+
+        try
+        {
             if (!IsHtmlReportEnabledForRun())
             {
-#if NET
-                TraceRegistry.Clear();
-#endif
-                _updates.Clear();
+                ReleaseTraceRegistry(ref traceRegistryReleased);
                 var disabledOutputPath = _outputPath ?? GetDefaultOutputPath();
                 var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
                 await DeleteSidecarsAndRefreshAggregateAsync(
@@ -160,11 +219,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 return;
             }
 
-            if (_updates.Count == 0)
+            if (updates is null || updates.IsEmpty)
             {
-#if NET
-                TraceRegistry.Clear();
-#endif
+                ReleaseTraceRegistry(ref traceRegistryReleased);
                 if (!IsJsonReportEnabled())
                 {
                     var emptyOutputPath = _outputPath ?? GetDefaultOutputPath();
@@ -181,13 +238,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             ReportData reportData;
             try
             {
-                reportData = BuildReportData();
+#if NET
+                reportData = BuildReportData(sessionState!, reportCollector);
+#else
+                reportData = BuildReportData(sessionState!);
+#endif
             }
             finally
             {
-#if NET
-                TraceRegistry.Clear();
-#endif
+                ReleaseTraceRegistry(ref traceRegistryReleased);
             }
 
             // The sidecar JSON doesn't depend on the HTML, and on large suites each takes a
@@ -272,8 +331,38 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
         finally
         {
+            // Covers a failure before any branch above released it.
+            ReleaseTraceRegistry(ref traceRegistryReleased);
 #if NET
-            DisposeActivityCollection();
+            ownedCollector?.Dispose();
+            if (lastActiveSession)
+            {
+                // Resolving the enabled setting during finishing may have started a collector.
+                DisposeActivityCollectionIfNoActiveSession();
+            }
+#endif
+        }
+    }
+
+    // TraceRegistry is process-wide; clearing it while another session runs, or while another
+    // finishing session has yet to read its trace IDs, would drop that report's linked traces.
+    // The last finishing session to release it clears it, unless a session is running.
+    private void ReleaseTraceRegistry(ref bool released)
+    {
+        if (released)
+        {
+            return;
+        }
+
+        released = true;
+        lock (_htmlReportStateLock)
+        {
+            _reportsReadingTraceRegistry--;
+#if NET
+            if (_reportsReadingTraceRegistry == 0 && _activeSessions.Count == 0)
+            {
+                TraceRegistry.Clear();
+            }
 #endif
         }
     }
@@ -499,7 +588,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             else
             {
                 DisposeActivityCollection();
-                TraceRegistry.Clear();
+                if (_reportsReadingTraceRegistry == 0 && _activeSessions.Count == 0)
+                {
+                    TraceRegistry.Clear();
+                }
             }
 #endif
 
@@ -544,6 +636,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 #endif
     }
 
+    internal int SessionStateCount => _sessions.Count;
+
 #if NET
     internal bool HasActivityCollector => _activityCollector is not null;
 
@@ -565,6 +659,18 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     {
         _activityCollector?.Dispose();
         _activityCollector = null;
+    }
+
+    // A session that started while this one was generating its report owns the collector now.
+    private void DisposeActivityCollectionIfNoActiveSession()
+    {
+        lock (_htmlReportStateLock)
+        {
+            if (_activeSessions.Count == 0)
+            {
+                DisposeActivityCollection();
+            }
+        }
     }
 #endif
 
@@ -599,11 +705,24 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         _resultsDirectory = path;
     }
 
-    #if NET
-    // Runs once per process over every test, so tier-0 code would do the whole job unoptimized.
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
+    internal ReportData BuildReportData(string sessionUid)
+    {
+        // An unknown session reports no results; tests use that to read report metadata.
+        var state = _sessions.TryGetValue(sessionUid, out var existing) ? existing : new SessionReportState();
+#if NET
+        return BuildReportData(state, _activityCollector);
+#else
+        return BuildReportData(state);
 #endif
-    internal ReportData BuildReportData()
+    }
+
+#if NET
+    // Runs once per report over every test, so tier-0 code would do the whole job unoptimized.
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
+    private ReportData BuildReportData(SessionReportState sessionState, ActivityCollector? collector)
+#else
+    private ReportData BuildReportData(SessionReportState sessionState)
+#endif
     {
         var assemblyName = GetAssemblyName();
         var tunitVersion = typeof(HtmlReporter).Assembly.GetName().Version?.ToString() ?? "unknown";
@@ -611,7 +730,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         // Get the last update with a final state for each test
         // Each test's update was already reduced to the one we report (final-state preferred) in
         // ConsumeAsync, so _updates maps directly to the nodes to render.
-        var lastUpdates = _updates;
+        var lastUpdates = sessionState.Updates;
 
         var summary = new ReportSummary();
         var groupsByClass = new Dictionary<string, List<ReportTestResult>>();
@@ -621,7 +740,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         // Build span lookup to correlate traces with test results
 #if NET
-        var spanLookup = _activityCollector?.GetTestSpanLookup();
+        var spanLookup = collector?.GetTestSpanLookup();
 #else
         var spanLookup = (Dictionary<string, (string TraceId, string SpanId)>?)null;
 #endif
@@ -779,9 +898,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         // Collect spans
         SpanData[]? spans = null;
 #if NET
-        if (_activityCollector != null)
+        if (collector != null)
         {
-            spans = _activityCollector.GetAllSpans();
+            spans = collector.GetAllSpans();
 
             // Use the session span duration as the header duration when available,
             // since it captures the full wall-clock time including initialization.
@@ -807,7 +926,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             Summary = summary,
             Groups = groups,
             Spans = spans,
-            UnobservedTaskExceptions = MapUnobservedTaskExceptions(),
+            UnobservedTaskExceptions = MapUnobservedTaskExceptions(sessionState.UnobservedTaskExceptions),
             CommitSha = ci.CommitSha,
             Branch = ci.Branch,
             PullRequestNumber = ci.PullRequestNumber,
@@ -1032,15 +1151,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         _ => "error",
     };
 
-    private ReportExceptionData[]? MapUnobservedTaskExceptions()
+    private static ReportExceptionData[]? MapUnobservedTaskExceptions(ConcurrentQueue<Exception> unobservedTaskExceptions)
     {
-        if (_unobservedTaskExceptions.IsEmpty)
+        if (unobservedTaskExceptions.IsEmpty)
         {
             return null;
         }
 
-        var mapped = new List<ReportExceptionData>(_unobservedTaskExceptions.Count);
-        foreach (var exception in _unobservedTaskExceptions)
+        var mapped = new List<ReportExceptionData>(unobservedTaskExceptions.Count);
+        foreach (var exception in unobservedTaskExceptions)
         {
             mapped.Add(MapException(exception)!);
         }
@@ -1241,5 +1360,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         Console.WriteLine($"Warning: Ignoring invalid {EnvironmentConstants.ArtifactRetentionDays} value '{raw}' (expected a positive integer number of days).");
         return null;
+    }
+
+    private sealed class SessionReportState
+    {
+        // One update per test: the one the report renders (see PreferForReport).
+        public ConcurrentDictionary<string, TestNodeUpdateMessage> Updates { get; } = new();
+
+        public ConcurrentQueue<Exception> UnobservedTaskExceptions { get; } = new();
     }
 }
