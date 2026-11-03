@@ -644,7 +644,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     {
                         return true;
                     }
-                    return context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments);
+                    return CanConvertReferenceTuple(argument, parameter, context.Compilation)
+                        || context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments);
                 });
 
             if (!conversions.All(x => x))
@@ -687,8 +688,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (testParameterTypes.Length == 1
                 && unwrappedTypes.Length == 1
-                && context.Compilation.CanBindToTestParameter(unwrappedTypes[0],
-                    testParameterTypes[0]))
+                && (CanConvertReferenceTuple(unwrappedTypes[0], testParameterTypes[0], context.Compilation)
+                    || context.Compilation.CanBindToTestParameter(unwrappedTypes[0], testParameterTypes[0])))
             {
                 return;
             }
@@ -1027,7 +1028,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (TryGetTupleElementTypes(type, context.Compilation, out var tupleElements))
         {
             if (testParameterTypes.Length == 1
-                && SymbolEqualityComparer.Default.Equals(type, testParameterTypes[0]))
+                && (SymbolEqualityComparer.Default.Equals(type, testParameterTypes[0])
+                    || CanConvertReferenceTuple(type, testParameterTypes[0], context.Compilation)))
             {
                 return ImmutableArray.Create(type);
             }
@@ -1054,6 +1056,39 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         return ImmutableArray.Create(type);
     }
+
+    private static bool CanConvertReferenceTuple(ITypeSymbol? source, ITypeSymbol? target,
+        Compilation compilation)
+    {
+        // Reference tuples have no language-level element conversions. The runtime reconstructs
+        // them, so validate the logical elements, including the recursively flattened Rest.
+        if (source is not INamedTypeSymbol sourceTuple
+            || target is not INamedTypeSymbol targetTuple
+            || !IsReferenceTuple(sourceTuple, compilation)
+            || !IsReferenceTuple(targetTuple, compilation)
+            || !TryGetTupleElementTypes(source, compilation, out var sourceElements)
+            || !TryGetTupleElementTypes(target, compilation, out var targetElements)
+            || sourceElements.Length != targetElements.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < sourceElements.Length; i++)
+        {
+            if (!compilation.ClassifyConversion(sourceElements[i], targetElements[i]).IsImplicit
+                && !CanConvertReferenceTuple(sourceElements[i], targetElements[i], compilation))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool IsReferenceTuple(INamedTypeSymbol type, Compilation compilation)
+        => type.Arity is >= 1 and <= 8
+            && SymbolEqualityComparer.Default.Equals(type.OriginalDefinition,
+                compilation.GetTypeByMetadataName(FormattableString.Invariant($"System.Tuple`{type.Arity}")));
 
     private static bool TryGetTupleElementTypes(ITypeSymbol type, Compilation compilation,
         out ImmutableArray<ITypeSymbol> elements)
