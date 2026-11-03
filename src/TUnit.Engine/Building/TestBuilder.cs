@@ -1086,7 +1086,12 @@ internal sealed class TestBuilder : ITestBuilder
                 _constructorBaseline = target.HasStateBag ? new(target.StateBag) : null;
                 var row = DataUnwrapper.UnwrapWithMetadata(await factory() ?? []);
                 _rowContext = target with { };
-                target.CopyStateBagTo(_rowContext);
+                // Record cloning shares the bag, so even a materialized empty bag must
+                // be detached before a rejected method factory can mutate the target.
+                if (target.HasStateBag)
+                {
+                    _rowContext.StateBag = new ConcurrentDictionary<string, object?>(target.StateBag);
+                }
                 _events = target.EventsIfCreated?.Clone();
                 return row;
             }

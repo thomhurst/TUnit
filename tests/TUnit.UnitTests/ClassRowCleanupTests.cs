@@ -9,6 +9,36 @@ public class ClassRowCleanupTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
+    public async Task EmptyRefetchedConstructorStateDoesNotCaptureRejectedMethodState(bool removesInheritedKey)
+    {
+        var data = new object?[] { new object() };
+        var row = new TestBuilder.UnclaimedClassRow(data, null, CreateContext());
+        await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse first row"), CreateContext());
+
+        var rejected = CreateContext();
+        if (removesInheritedKey)
+            rejected.StateBag["removed-by-constructor"] = new object();
+        await row.TakeOrFetchAsync(() =>
+        {
+            // Materialize an empty bag, including the case where the constructor removes its last key.
+            rejected.StateBag.TryRemove("removed-by-constructor", out _);
+            return Task.FromResult<object?[]?>(data);
+        }, rejected);
+        rejected.StateBag["method-row"] = new object();
+        row.Return(data, null, rejected);
+
+        var compatible = CreateContext();
+        var methodValue = new object();
+        compatible.StateBag["method-row"] = methodValue;
+        compatible.StateBag["removed-by-constructor"] = new object();
+        await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse rejected constructor"), compatible);
+        await Assert.That(compatible.StateBag["method-row"]).IsSameReferenceAs(methodValue);
+        await Assert.That(compatible.StateBag.ContainsKey("removed-by-constructor")).IsEqualTo(!removesInheritedKey);
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
     public async Task RefetchedRejectedConstructorReplaysOnlyItsOwnStateChanges(bool initialState)
     {
         var enumeration = CreateContext();
