@@ -1999,6 +1999,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                  && entry.SpecificArgumentsAttribute?.AttributeClass?.Name == "MethodDataSourceAttribute")
         {
             var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
+            // Class-source entries are created only after this source's cached inference succeeds.
+            // InferClassTypesFromOwnMemberRowType always selects a public constructor from
+            // testMethod.TypeSymbol.InstanceConstructors when it returns type arguments, so both
+            // the cached source and its constructor exist here. Construct preserves that constructor's
+            // OriginalDefinition and public accessibility; the final First below must find its
+            // closed counterpart, even when no explicit or parameterless constructor takes precedence.
             var inferredConstructor = entry.FindClassMethodDataSource(entry.SpecificArgumentsAttribute)!.Constructor!;
 
             // Inference can use a value overload only to determine the class types. Match reflection's
