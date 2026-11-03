@@ -87,6 +87,55 @@ public class StaticPropertyHandlerCleanupTests
         await Assert.That(ReferenceEquals(metadata.TestBuilderContext.Current.StateBag, bag)).IsTrue();
     }
 
+    [Test]
+    public async Task Reflection_Static_Properties_Reinitialize_For_The_Next_Session()
+    {
+        var first = CreateSession();
+        await StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(ReflectionFixture));
+        var firstResource = ReflectionFixture.Resource!;
+        await StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(ReflectionFixture));
+        await Assert.That(ReferenceEquals(firstResource, ReflectionFixture.Resource)).IsTrue();
+
+        await CreateHandler(first).DisposeStaticPropertiesAsync([], []);
+        await Assert.That(firstResource.Disposed).IsTrue();
+
+        var second = CreateSession();
+        await StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(ReflectionFixture));
+        var secondResource = ReflectionFixture.Resource!;
+        await Assert.That(ReferenceEquals(firstResource, secondResource)).IsFalse();
+        await Assert.That(secondResource.Disposed).IsFalse();
+        await CreateHandler(second).DisposeStaticPropertiesAsync([], []);
+        await Assert.That(secondResource.Disposed).IsTrue();
+    }
+
+    public sealed class ReflectionFixture
+    {
+        [ResourceSource]
+        public static Resource? Resource { get; set; }
+    }
+
+    public sealed class Resource
+    {
+        public bool Disposed { get; set; }
+    }
+
+    public sealed class ResourceSourceAttribute : Attribute, IDataSourceAttribute
+    {
+        public bool SkipIfEmpty { get; set; }
+        public bool DeferEnumeration { get; set; }
+        public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata metadata)
+        {
+            var resource = new Resource();
+            metadata.TestBuilderContext.Current.Events.OnDispose += (_, _) =>
+            {
+                resource.Disposed = true;
+                return default;
+            };
+            yield return () => Task.FromResult<object?[]?>([resource]);
+            await Task.CompletedTask;
+        }
+    }
+
     private static StaticPropertyHandler CreateHandler(TestSessionContext session) => new(null!, null!, null!, null!, null!, session);
 
     private static TestSessionContext CreateSession() => new(new TestDiscoveryContext(new BeforeTestDiscoveryContext { TestFilter = null }) { TestFilter = null })

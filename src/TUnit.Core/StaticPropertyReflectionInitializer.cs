@@ -1,6 +1,7 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core.Enums;
 
 namespace TUnit.Core;
@@ -13,7 +14,8 @@ namespace TUnit.Core;
 #endif
 public static class StaticPropertyReflectionInitializer
 {
-    private static readonly ConcurrentDictionary<Type, bool> _initializedTypes = new();
+    // Match initialization lifetime to the context that owns the property cleanup callbacks.
+    private static readonly ConditionalWeakTable<TestBuilderContext, ConcurrentDictionary<Type, bool>> _initializedTypes = new();
 
     /// <summary>
     /// Initializes static properties with data sources for all loaded types
@@ -54,8 +56,11 @@ public static class StaticPropertyReflectionInitializer
 #endif
     public static async Task InitializeStaticPropertiesForType(Type type)
     {
-        // Skip if already initialized
-        if (!_initializedTypes.TryAdd(type, true))
+        var context = TestSessionContext.GlobalStaticPropertyContext;
+        var initializedTypes = _initializedTypes.GetValue(context, static _ => new());
+
+        // Skip repeated discovery within this session, but initialize again for a new session.
+        if (!initializedTypes.TryAdd(type, true))
         {
             return;
         }
@@ -79,7 +84,7 @@ public static class StaticPropertyReflectionInitializer
 
             try
             {
-                await InitializeStaticProperty(property, dataSourceAttr);
+                await InitializeStaticProperty(property, dataSourceAttr, context);
             }
             catch (Exception ex)
             {
@@ -105,12 +110,12 @@ public static class StaticPropertyReflectionInitializer
 #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
 #endif
-    private static async Task InitializeStaticProperty(PropertyInfo property, IDataSourceAttribute dataSourceAttr)
+    private static async Task InitializeStaticProperty(PropertyInfo property, IDataSourceAttribute dataSourceAttr, TestBuilderContext context)
     {
         // Create metadata for the data source
         var metadata = new DataGeneratorMetadata
         {
-            TestBuilderContext = new TestBuilderContextAccessor(TestSessionContext.GlobalStaticPropertyContext),
+            TestBuilderContext = new TestBuilderContextAccessor(context),
             MembersToGenerate = [],
             TestInformation = null!,
             Type = DataGeneratorType.Property,
