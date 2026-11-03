@@ -116,10 +116,27 @@ public static class CompilationExtensions
         if (argument is INamedTypeSymbol argumentNamed && parameter is INamedTypeSymbol parameterNamed
             && SymbolEqualityComparer.Default.Equals(argumentNamed.OriginalDefinition, parameterNamed.OriginalDefinition))
         {
+            // A nested type's own TypeArguments omit its containing type's construction.
+            if (parameterNamed.ContainingType is { } containingType
+                && (argumentNamed.ContainingType is not { } argumentContainingType
+                    || !MatchesArrayElement(compilation, argumentContainingType, containingType,
+                        allowReferenceConversions: false)))
+            {
+                return false;
+            }
+
             for (var i = 0; i < parameterNamed.TypeArguments.Length; i++)
             {
-                if (!MatchesArrayElement(compilation, argumentNamed.TypeArguments[i], parameterNamed.TypeArguments[i],
-                        allowReferenceConversions: false))
+                var argumentType = argumentNamed.TypeArguments[i];
+                var parameterType = parameterNamed.TypeArguments[i];
+                // Variance permits reference conversions only; value types still require identity.
+                var allowVariance = allowReferenceConversions && argumentType.IsReferenceType
+                    && (parameterType.IsReferenceType || parameterType is ITypeParameterSymbol);
+                var variance = allowVariance ? parameterNamed.TypeParameters[i].Variance : VarianceKind.None;
+                if (!MatchesArrayElement(compilation,
+                        variance == VarianceKind.In ? parameterType : argumentType,
+                        variance == VarianceKind.In ? argumentType : parameterType,
+                        allowReferenceConversions: variance != VarianceKind.None))
                 {
                     return false;
                 }

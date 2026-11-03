@@ -51,6 +51,12 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("Outer<string>.Inner<int>[]", "Outer<object>.Inner<T>[]", true)]
+    [Arguments("Outer<string>.Inner<int>[]", "Outer<string>.Inner<T>[]", false)]
+    [Arguments("IPair<int, string[][]>[]", "IPair<T, object[][]>[]", false)]
+    [Arguments("IConsumer<int, object[][]>[]", "IConsumer<T, string[][]>[]", false)]
+    [Arguments("IConsumer<int, string[][]>[]", "IConsumer<T, object[][]>[]", true)]
+    [Arguments("IPair<int, int>[]", "IPair<T, object>[]", true)]
     [Arguments("int[]", "T[]", false)]
     [Arguments("int[][]", "T[][]", false)]
     [Arguments("int[,]", "T[,]", false)]
@@ -72,6 +78,9 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
             using System.Threading.Tasks;
             using TUnit.Core;
             using TUnit.Core.Interfaces;
+            public interface IPair<out A, out B> { }
+            public interface IConsumer<A, in B> { }
+            public class Outer<A> { public class Inner<B> { } }
             public class C
             {
                 public static (Fixture, CancellationToken, {{sourceElement}}) Row() => default;
@@ -86,9 +95,12 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
 
         if (expectDiagnostic)
         {
+            // Diagnostics display the nested type name without its containing construction.
+            var displayedSource = sourceElement.Replace("Outer<string>.", "");
+            var displayedTarget = targetElement.Replace("Outer<object>.", "").Replace("Outer<string>.", "");
             await Verifier.VerifyAnalyzerAsync(source,
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
-                    .WithArguments($"Fixture, CancellationToken, {sourceElement}", $"(Fixture, CancellationToken, {targetElement})"));
+                    .WithArguments($"Fixture, CancellationToken, {displayedSource}", $"(Fixture, CancellationToken, {displayedTarget})"));
         }
         else
         {
