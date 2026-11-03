@@ -128,7 +128,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var parameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ??
+        var parameters = namedTypeSymbol.GetTestConstructor()?.Parameters ??
                          ImmutableArray<IParameterSymbol>.Empty;
 
         Analyze(context, attributes, parameters, null, namedTypeSymbol);

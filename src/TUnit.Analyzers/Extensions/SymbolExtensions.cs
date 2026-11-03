@@ -5,6 +5,13 @@ namespace TUnit.Analyzers.Extensions;
 
 public static class SymbolExtensions
 {
+    public static IMethodSymbol? GetTestConstructor(this INamedTypeSymbol type)
+    {
+        return type.InstanceConstructors.FirstOrDefault(c => c.GetAttributes().Any(a =>
+                   a.AttributeClass?.ToDisplayString() == "TUnit.Core.TestConstructorAttribute"))
+               ?? type.InstanceConstructors.FirstOrDefault();
+    }
+
     public static bool HasDataDrivenAttributes(this ISymbol symbol)
     {
         var attributes = symbol.GetAttributes();
@@ -18,7 +25,7 @@ public static class SymbolExtensions
     {
         var parameters = symbol switch
         {
-            INamedTypeSymbol namedTypeSymbol => namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters,
+            INamedTypeSymbol namedTypeSymbol => namedTypeSymbol.GetTestConstructor()?.Parameters,
             IMethodSymbol methodSymbol => methodSymbol.Parameters,
             _ => null
         };
