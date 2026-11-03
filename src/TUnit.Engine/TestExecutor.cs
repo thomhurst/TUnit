@@ -631,7 +631,10 @@ internal class TestExecutor
     // on every call — even when the branch that creates the lambda never runs. Building them in
     // small helpers keeps that closure off the per-test hot path.
     private static Func<CancellationToken, Task> CreateTimeoutTestInvoker(AbstractExecutableTest executableTest)
-        => ct => ExecuteTestAsync(executableTest, ct).AsTask();
+        // A test can block before returning its task. Schedule the invocation so TimeoutHelper
+        // can race cancellation even in that case. Task.Run flows ExecutionContext (including
+        // TestContext and hook AsyncLocals); custom executors still control body execution.
+        => ct => Task.Run(() => ExecuteTestAsync(executableTest, ct).AsTask(), ct);
 
     private static ValueTask ExecuteWithTestExecutorAsync(ITestExecutor testExecutor, AbstractExecutableTest executableTest)
         => testExecutor.ExecuteTest(executableTest.Context,

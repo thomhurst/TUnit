@@ -40,6 +40,14 @@ public class DefaultTimeoutClassificationHooks
 
 public class DefaultTimeoutClassificationTests
 {
+    [Test]
+    [EngineTest(ExpectedResult.Failure)]
+    public void Synchronously_Blocking_Test_With_DefaultTestTimeout_Should_Timeout()
+    {
+        using var blocker = new ManualResetEventSlim();
+        blocker.Wait(TimeSpan.FromSeconds(10));
+    }
+
     /// <summary>
     /// No <c>[Timeout]</c> attribute — timeout is inherited from <c>DefaultTestTimeout</c>.
     /// Uses a non-cancellable delay so the timeout path (not cooperative cancellation)

@@ -6,6 +6,25 @@ namespace TUnit.Engine.Tests;
 public class TimeoutTests1(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
+    public async Task Synchronously_Blocking_Bodies_Are_Reported_As_Timeouts()
+    {
+        await RunTestsWithFilter(
+            "/*/*/SynchronousTimeoutTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(2),
+                result =>
+                {
+                    foreach (var test in result.Results)
+                    {
+                        TimeSpan.Parse(test.Duration).ShouldBeLessThan(TimeSpan.FromSeconds(5));
+                        test.Output!.ErrorInfo!.Message.ToLowerInvariant().ShouldContain("timed out");
+                    }
+                }
+            ]);
+    }
+
+    [Test]
     public async Task LinkedTokensAreReportedAsTimeouts()
     {
         await RunTestsWithFilter(
