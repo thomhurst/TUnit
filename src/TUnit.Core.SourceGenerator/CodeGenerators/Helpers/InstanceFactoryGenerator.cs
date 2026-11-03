@@ -199,7 +199,7 @@ public static class InstanceFactoryGenerator
     /// Used by the per-class helper pipeline where ISymbol is available during the transform step
     /// but not during source output.
     /// </summary>
-    public static string GenerateInstanceFactoryBody(ITypeSymbol typeSymbol, IMethodSymbol? constructor = null)
+    public static string GenerateInstanceFactoryBody(ITypeSymbol typeSymbol, IMethodSymbol? constructor = null, string? requiredConstructorCache = null)
     {
         var bodyWriter = new CodeWriter(includeHeader: false);
         var className = typeSymbol.GloballyQualified();
@@ -213,7 +213,7 @@ public static class InstanceFactoryGenerator
             constructor ??= GetPrimaryConstructor(typeSymbol);
             if (constructor != null)
             {
-                GenerateTypedConstructorCallBody(bodyWriter, className, constructor);
+                GenerateTypedConstructorCallBody(bodyWriter, className, constructor, requiredConstructorCache);
             }
             else
             {
@@ -278,6 +278,22 @@ public static class InstanceFactoryGenerator
         return publicConstructors.Length == 1 ? publicConstructors[0] : publicConstructors.FirstOrDefault();
     }
 
+    public static void GenerateRequiredConstructorCache(CodeWriter writer, ITypeSymbol type, IMethodSymbol? constructor, string cacheName)
+    {
+        if (constructor == null || constructor.Parameters.Length == 0 ||
+            constructor.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute") ||
+            (!RequiredPropertyHelper.GetAllRequiredProperties(type).Any() && !RequiredPropertyHelper.GetAllRequiredFields(type).Any()))
+        {
+            return;
+        }
+
+        // A direct C# new expression must assign every required member, which overwrites values
+        // initialized by the class. Cache the exact selected constructor instead, preserving those
+        // values and retaining the same argument conversions as the ordinary typed factory.
+        var parameterTypes = string.Join(", ", constructor.Parameters.Select(p => $"typeof({p.Type.GloballyQualified()})"));
+        writer.AppendLine($"private static readonly global::System.Reflection.ConstructorInfo? {cacheName} = typeof({type.GloballyQualified()}).GetConstructor(new global::System.Type[] {{ {parameterTypes} }});");
+    }
+
     private static void GenerateTypedConstructorCall(CodeWriter writer, string className, IMethodSymbol constructor)
     {
         writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
@@ -288,7 +304,7 @@ public static class InstanceFactoryGenerator
         writer.AppendLine("},");
     }
 
-    private static void GenerateTypedConstructorCallBody(CodeWriter writer, string className, IMethodSymbol constructor)
+    private static void GenerateTypedConstructorCallBody(CodeWriter writer, string className, IMethodSymbol constructor, string? requiredConstructorCache = null)
     {
         // Constructors that promise to initialize required members must retain their values.
         var setsRequiredMembers = constructor.GetAttributes().Any(attribute =>
@@ -307,7 +323,10 @@ public static class InstanceFactoryGenerator
         }
         else
         {
-            writer.Append($"return new {className}(");
+            var useCachedConstructor = requiredConstructorCache != null && (requiredProperties.Any() || requiredFields.Any());
+            writer.Append(useCachedConstructor
+                ? $"return ({className}){requiredConstructorCache}!.Invoke(new object?[] {{ "
+                : $"return new {className}(");
 
             // Preserve an explicitly supplied trailing array, while packing loose row values.
             var parameters = constructor.Parameters.ToArray();
@@ -327,10 +346,10 @@ public static class InstanceFactoryGenerator
             }
             writer.Append(string.Join(", ", arguments));
 
-            writer.Append(")");
+            writer.Append(useCachedConstructor ? " })" : ")");
 
             // Satisfy required properties and fields unless the constructor initializes them.
-            if (requiredProperties.Any() || requiredFields.Any())
+            if (!useCachedConstructor && (requiredProperties.Any() || requiredFields.Any()))
             {
                 writer.AppendLine();
                 writer.AppendLine("{");
@@ -345,7 +364,7 @@ public static class InstanceFactoryGenerator
                 foreach (var field in requiredFields)
                 {
                     var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(field.Type);
-                    writer.AppendLine($"{field.Name} = {defaultValue},");
+                    writer.AppendLine($"@{field.Name} = {defaultValue},");
                 }
 
                 writer.Unindent();

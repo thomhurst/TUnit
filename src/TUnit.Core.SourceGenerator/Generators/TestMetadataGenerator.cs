@@ -551,11 +551,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var entries = group.ToList();
             var groupIndex = registrationIndex;
 
+            // Required members must keep their constructor/initializer values. Cache reflection once
+            // per concrete class, rather than overwriting members in a C# object initializer.
+            var constructedType = entries[0].ClassTypeArgs.Length > 0
+                ? testMethod.TypeSymbol.Construct(entries[0].ClassTypeArgs)
+                : testMethod.TypeSymbol;
+            var requiredConstructorCache = $"__requiredConstructor_{groupIndex.ToString(CultureInfo.InvariantCulture)}";
+            if (testMethod.IsGenericType && entries[0].HasParameterizedConstructor &&
+                !InstanceFactoryGenerator.HasClassConstructorAttribute(testMethod.TypeSymbol))
+            {
+                InstanceFactoryGenerator.GenerateRequiredConstructorCache(writer, constructedType,
+                    GetClassRowConstructor(constructedType), requiredConstructorCache);
+            }
+
             // CreateInstance for this concrete type
             writer.AppendLine($"private static {concreteClassName} __CreateInstance_{groupIndex.ToString(CultureInfo.InvariantCulture)}(global::System.Type[] typeArgs, object?[] args)");
             writer.AppendLine("{");
             writer.Indent();
-            EmitConcreteInstanceCreation(writer, testMethod, concreteClassName, entries[0]);
+            EmitConcreteInstanceCreation(writer, testMethod, concreteClassName, entries[0], requiredConstructorCache);
             writer.Unindent();
             writer.AppendLine("}");
 
@@ -2134,7 +2147,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// Emits instance creation code for a concrete type.
     /// </summary>
-    private static void EmitConcreteInstanceCreation(CodeWriter writer, TestMethodMetadata testMethod, string concreteClassName, ConcreteInstantiation entry)
+    private static void EmitConcreteInstanceCreation(CodeWriter writer, TestMethodMetadata testMethod, string concreteClassName, ConcreteInstantiation entry, string requiredConstructorCache)
     {
         if (InstanceFactoryGenerator.HasClassConstructorAttribute(testMethod.TypeSymbol))
         {
@@ -2158,12 +2171,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 // Rows of other types may build the instance, converted to the parameter types (#7161)
                 var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
-                writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType)));
+                writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType), requiredConstructorCache));
             }
             else
             {
                 var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
-                writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType)));
+                writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType), requiredConstructorCache));
             }
         }
         else if (entry.HasParameterizedConstructor && !entry.HasClassRows && entry.ClassTypeArgs.Length > 0)
@@ -2172,7 +2185,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // sources of any type, such as a [MethodDataSource] or a class row of another type under a
             // [GenerateGenericTest]. Convert them to the parameter types, as reflection mode does (#7161).
             var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
-            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType)));
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType), requiredConstructorCache));
         }
         else if (entry.HasParameterizedConstructor)
         {
@@ -2180,7 +2193,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // convert (notably to decimal). Use the same CastHelper conversions as ordinary factories,
             // with the constructor used to bind and infer the class rows.
             var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
-            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType)));
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType), requiredConstructorCache));
         }
         else if (!testMethod.IsGenericType)
         {

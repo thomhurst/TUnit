@@ -294,21 +294,25 @@ public class SingleGenericDecimalConstructorTests<T>(decimal amount, T value)
 
 public abstract class RequiredFieldBase
 {
-    public required string? Inherited;
+    public required string? Inherited = "base";
 }
 
 [EngineTest(ExpectedResult.Pass)]
 [Arguments(1)]
 public class SingleGenericRequiredFieldTests<T>(T value) : RequiredFieldBase
 {
-    public required int Number;
+    public required int Number = 3;
+    public required int @class = 5;
+    public required int Property { get; init; } = 7;
 
     [Test]
     public async Task Run()
     {
         await Assert.That((int)(object)value!).IsEqualTo(1);
-        await Assert.That(Number).IsEqualTo(0);
-        await Assert.That(Inherited).IsNull();
+        await Assert.That(Number).IsEqualTo(3);
+        await Assert.That(@class).IsEqualTo(5);
+        await Assert.That(Property).IsEqualTo(7);
+        await Assert.That(Inherited).IsEqualTo("base");
     }
 }
 
@@ -326,4 +330,42 @@ public class SingleGenericSetsRequiredFieldTests<T>
 
     [Test]
     public async Task Run() => await Assert.That(Number).IsEqualTo(4);
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1, 42)]
+public class GenericRequiredConstructorAssignmentTests<T>
+{
+    public required decimal Number = 3m;
+    private readonly T _value;
+
+    [TestConstructor]
+    public GenericRequiredConstructorAssignmentTests(decimal amount, T value)
+    {
+        Number += amount;
+        _value = value;
+    }
+
+    public GenericRequiredConstructorAssignmentTests(T value) => throw new Exception("Wrong constructor");
+
+    [Test]
+    public async Task Run()
+    {
+        await Assert.That(Number).IsEqualTo(4m);
+        await Assert.That((int)(object)_value!).IsEqualTo(42);
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+public class KeywordRequiredFieldTests(int value)
+{
+    public required int @class;
+
+    [Test]
+    public async Task Run()
+    {
+        await Assert.That(value).IsEqualTo(1);
+        await Assert.That(@class).IsEqualTo(0);
+    }
 }
