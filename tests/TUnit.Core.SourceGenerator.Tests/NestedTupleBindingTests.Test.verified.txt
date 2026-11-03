@@ -74,7 +74,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute("Row")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.Bugs._7485.NestedTupleBindingTests.Row()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7485.NestedTupleBindingTests.Row()),
     },
 },
             methodMetadata: __mm_0,
@@ -156,7 +156,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.ValueTu
 {
     new global::TUnit.Core.MethodDataSourceAttribute("Row")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.Bugs._7485.NestedTupleBindingTests.Row()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7485.NestedTupleBindingTests.Row()),
     },
 },
             methodMetadata: __mm_0,
@@ -251,7 +251,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DeepRow")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.Bugs._7485.NestedTupleBindingTests.DeepRow()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7485.NestedTupleBindingTests.DeepRow()),
     },
 },
             methodMetadata: __mm_0,
@@ -346,7 +346,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute("NullableRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7485.NestedTupleBindingTests.NullableRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7485.NestedTupleBindingTests.NullableRows()),
     },
 },
             methodMetadata: __mm_0,
@@ -441,7 +441,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute("VeryDeepRow")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.Bugs._7485.NestedTupleBindingTests.VeryDeepRow()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7485.NestedTupleBindingTests.VeryDeepRow()),
     },
 },
             methodMetadata: __mm_0,
