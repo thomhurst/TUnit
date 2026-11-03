@@ -203,7 +203,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                     }
                     if (value is string s)
                     {
-                        return $"global::TUnit.Core.Helpers.DecimalParsingHelper.ParseDecimalWithCultureFallback(\"{s.ToInvariantString()}\")";
+                        return $"global::TUnit.Core.Helpers.DecimalParsingHelper.ParseDecimalWithCultureFallback({SymbolDisplay.FormatLiteral(s, quote: true)})";
                     }
                     if (value is double d)
                     {

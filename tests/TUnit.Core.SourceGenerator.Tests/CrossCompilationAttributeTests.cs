@@ -43,6 +43,7 @@ public class CrossCompilationAttributeTests
             [Arguments(100U)]
             [Arguments(0x1F)]
             [Arguments(0b1010)]
+            [Arguments("3\n")]
             public void InheritedDecimal(decimal value)
             {
             }
@@ -53,11 +54,37 @@ public class CrossCompilationAttributeTests
             {
             }
         }
+
+        [Arguments(0.1)]
+        [Arguments("3\n")]
+        public abstract class DecimalRows;
+
+        [Arguments(1.5)]
+        public abstract class IntegerRows;
+
+        [Arguments<int>(3)]
+        public abstract class GenericRows;
         """;
 
     private const string DerivedSource =
         """
         using TUnit.Core;
+
+        [InheritsTests]
+        public class DecimalDerived(decimal value) : DecimalRows
+        {
+            [Test] public void Run() { }
+        }
+
+        public class IntegerDerived(int value) : IntegerRows
+        {
+            [Test] public void Run() { }
+        }
+
+        public class GenericDerived(decimal value) : GenericRows
+        {
+            [Test] public void Run() { }
+        }
 
         [InheritsTests]
         public class DerivedTests : BaseTests
@@ -98,15 +125,24 @@ public class CrossCompilationAttributeTests
     }
 
     [Test]
-    public async Task TestMetadataGenerator_DoesNotThrow_ForAttributesFromReferencedCompilation()
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task TestMetadataGenerator_DoesNotThrow_ForAttributesFromReferencedCompilation(bool useMetadataReference)
     {
         var references = CreateIsolatedReferences();
         var baseCompilation = CreateCompilation("CrossCompilationBase", BaseSource, references);
+        using var assembly = new MemoryStream();
+        MetadataReference reference = baseCompilation.ToMetadataReference();
+        if (useMetadataReference)
+        {
+            await Assert.That(baseCompilation.Emit(assembly).Success).IsTrue();
+            reference = MetadataReference.CreateFromImage(assembly.ToArray());
+        }
         var derivedCompilation = CreateCompilation(
             "CrossCompilationDerived",
             DerivedSource,
             references,
-            baseCompilation.ToMetadataReference())
+            reference)
             .AddSyntaxTrees(
                 Parse(
                     """
@@ -141,18 +177,21 @@ public class CrossCompilationAttributeTests
         await Assert.That(generated).Contains("new global::TUnit.Core.DisplayNameAttribute(\"Inherited $a $b\")");
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(1, 2)");
 
-        // [Arguments] from the referenced project: numeric literals for decimal parameters keep their
-        // source text (a double TypedConstant would round 123_999.00000000000000001), named arguments
-        // are preserved, and a non-literal argument such as the array form uses the typed constant.
-        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(123_999.00000000000000001m)");
-        await Assert.That(generated).Contains("Skip = \"from base\"");
-        await Assert.That(generated).Contains("Categories = ");
-        await Assert.That(generated).Contains("\"slow\"");
-        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(-1.5m)");
-        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(0.5m)");
-        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(1.5m)");
-        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(2e1m)");
-        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(2.5m)");
+        if (!useMetadataReference)
+        {
+            // [Arguments] from the referenced project: numeric literals for decimal parameters keep their
+            // source text (a double TypedConstant would round 123_999.00000000000000001), named arguments
+            // are preserved, and a non-literal argument such as the array form uses the typed constant.
+            await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(123_999.00000000000000001m)");
+            await Assert.That(generated).Contains("Skip = \"from base\"");
+            await Assert.That(generated).Contains("Categories = ");
+            await Assert.That(generated).Contains("\"slow\"");
+            await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(-1.5m)");
+            await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(0.5m)");
+            await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(1.5m)");
+            await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(2e1m)");
+            await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(2.5m)");
+        }
 
         // Hex/binary prefixes and integral suffixes have no decimal literal form: appending "m" to the
         // source text would not compile, so these come from the typed constants.
@@ -161,6 +200,12 @@ public class CrossCompilationAttributeTests
         await Assert.That(generated).DoesNotContain("0x1Fm");
         await Assert.That(generated).DoesNotContain("0x1m");
         await Assert.That(generated).DoesNotContain("0b1010m");
+
+        // Referenced class rows retain boxed values for runtime constructor conversion.
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(0.10000000000000001d)");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(1.5d)");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute<int>(3)");
+        await Assert.That(generated).Contains("ParseDecimalWithCultureFallback(\"3\\n\")");
 
         // [Arguments(null)] binds null to the params array itself.
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(null)");

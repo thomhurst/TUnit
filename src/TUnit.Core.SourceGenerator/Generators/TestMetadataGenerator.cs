@@ -3099,7 +3099,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         var attrTypeName = attr.AttributeClass.GloballyQualified();
-        var targetParameters = methodSymbol?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
+        // Generic Arguments attributes must retain their own constructor argument types.
+        var targetParameters = attr.AttributeClass.IsGenericType
+            ? ImmutableArray<IParameterSymbol>.Empty
+            : methodSymbol?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
 
         // The application syntax is null for metadata references. For CompilationReferences to other
         // projects (IDE workspaces) it exists but lives in a tree this compilation does not own: its source
@@ -3260,7 +3263,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
                 else
                 {
-                    writer.Append(formatter.FormatForCode(values[i], targetType));
+                    // Class row conversions belong to CastHelper at binding time. Formatting
+                    // against the constructor type can truncate floating values or alter rounding.
+                    var isConstructorArgument = i < testMethodParameters.Length
+                        && testMethodParameters[i].ContainingSymbol is IMethodSymbol { MethodKind: MethodKind.Constructor };
+                    writer.Append(formatter.FormatForCode(values[i], isConstructorArgument ? null : targetType));
                 }
 
                 if (i < values.Length - 1)

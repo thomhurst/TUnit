@@ -271,3 +271,11 @@ public class InferredRowOverloadedConstructorTests<T>
     public async Task Run(T argument) => await Assert.That(_value!.ToString()).IsEqualTo("5");
 }
 #pragma warning restore TUnit0052
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments<int>(3)]
+public class GenericAttributeDecimalConstructorTests(decimal value)
+{
+    [Test]
+    public async Task Run() => await Assert.That(value).IsEqualTo(3m);
+}
