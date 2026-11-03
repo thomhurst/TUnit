@@ -173,7 +173,7 @@ TUnit's source generation creates strongly-typed delegates for all test operatio
 
 ## Publishing with Native AOT
 
-To use TUnit with Native AOT:
+Native AOT is only supported for C# test projects. To use TUnit with Native AOT:
 
 ```xml
 <PropertyGroup>
@@ -208,5 +208,7 @@ tunit.enable_verbose_diagnostics = true
 **C# Projects**: Full support with source generation
 **F# Projects**: Falls back to reflection mode (source generation not supported)
 **VB.NET Projects**: Falls back to reflection mode (source generation not supported)
+
+Native AOT publishing is only supported for C# test projects.
 
 For F# and VB.NET projects, TUnit automatically uses reflection mode since source generation is only available for C# projects. For better performance with F# or VB.NET code, create a separate C# test project that references your F#/VB.NET libraries and write tests there.
