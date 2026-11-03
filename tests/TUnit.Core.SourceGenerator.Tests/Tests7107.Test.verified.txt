@@ -900,7 +900,7 @@ internal static class TUnit_TestProject_Bugs__7107_ClassAndMethodRowsConstraintT
                 Name = "Value",
                 IsStatic = false,
                 IsNullable = false,
-                Getter = o => ((dynamic)o).Value,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7107.ClassAndMethodRowsConstraintTests<>), "Value"),
                 ClassMetadata = null!,
                 ContainingTypeMetadata = null!
             }

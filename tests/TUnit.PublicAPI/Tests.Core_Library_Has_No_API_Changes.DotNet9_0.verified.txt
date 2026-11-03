@@ -1241,6 +1241,10 @@ namespace
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]
         public required  Type { get; init; }
     }
+    public static class PropertyMetadataFactory
+    {
+        public static <object?, object?> CreateGenericGetter([.(..PublicProperties)]  declaringType, string propertyName) { }
+    }
     public static class PropertySourceRegistry
     {
         [.("Reflection discovery is used when source-generated metadata is not available")]

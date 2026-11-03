@@ -784,7 +784,7 @@ internal static class TUnit_TestProject_Bugs__7222_ClassRowsGenerateGenericTestA
                 Name = "Value",
                 IsStatic = false,
                 IsNullable = false,
-                Getter = o => ((dynamic)o).Value,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7222.ClassRowsGenerateGenericTestArityTests<>), "Value"),
                 ClassMetadata = null!,
                 ContainingTypeMetadata = null!
             }
@@ -1181,7 +1181,7 @@ internal static class TUnit_TestProject_Bugs__7222_BroadSourceOnGenericClassRowT
                 Name = "Value",
                 IsStatic = false,
                 IsNullable = false,
-                Getter = o => ((dynamic)o).Value,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7222.BroadSourceOnGenericClassRowTests<>), "Value"),
                 ClassMetadata = null!,
                 ContainingTypeMetadata = null!
             }
@@ -1339,7 +1339,7 @@ internal static class TUnit_TestProject_Bugs__7222_BroadSourceJoinsClassRowTests
                 Name = "Value",
                 IsStatic = false,
                 IsNullable = false,
-                Getter = o => ((dynamic)o).Value,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7222.BroadSourceJoinsClassRowTests<>), "Value"),
                 ClassMetadata = null!,
                 ContainingTypeMetadata = null!
             }
