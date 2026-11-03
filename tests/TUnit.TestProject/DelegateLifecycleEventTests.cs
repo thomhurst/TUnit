@@ -224,3 +224,70 @@ public class NonDisposableDataScopeLifecycleTests
         }
     }
 }
+
+[ScopeOwnedConstructorLifecycleTests.ScopeData]
+public class ScopeOwnedConstructorLifecycleTests(ScopeOwnedConstructorLifecycleTests.Service service)
+{
+    public sealed class Scope : IDisposable
+    {
+        public Service? Service;
+        public int DisposeCount;
+        public void Dispose()
+        {
+            if (++DisposeCount != 1) throw new InvalidOperationException("Scope disposed twice");
+            Service?.Dispose();
+        }
+    }
+
+    public sealed class Service(Scope scope) : IDisposable
+    {
+        public Scope Scope => scope;
+        [ClassDataSource<InjectedDependency>]
+        public required InjectedDependency Dependency { get; init; }
+        public void Dispose()
+        {
+            if (Dependency is { Disposed: true })
+                throw new InvalidOperationException("Injected dependency disposed before its parent");
+        }
+    }
+
+    public sealed class InjectedDependency : IDisposable
+    {
+        public bool Disposed;
+        public void Dispose() => Disposed = true;
+    }
+
+    public sealed class ScopeDataAttribute : DependencyInjectionDataSourceAttribute<Scope>
+    {
+        public static readonly System.Collections.Concurrent.ConcurrentBag<Scope> Scopes = [];
+        public override Scope CreateScope(DataGeneratorMetadata metadata)
+        {
+            var scope = new Scope();
+            Scopes.Add(scope);
+            return scope;
+        }
+        public override object Create(Scope scope, Type type)
+            => scope.Service = new Service(scope) { Dependency = null! };
+    }
+
+    public IEnumerable<int> Rows() => [1, 2];
+
+    [Test, InstanceMethodDataSource(nameof(Rows)), EngineTest(ExpectedResult.Pass)]
+    public async Task ScopeAndDependencyAreAlive(int row)
+    {
+        await Assert.That(service.Scope.DisposeCount).IsEqualTo(0);
+        await Assert.That(service.Dependency.Disposed).IsFalse();
+    }
+
+    [After(Class)]
+    public static async Task Verify()
+    {
+        foreach (var scope in ScopeDataAttribute.Scopes)
+        {
+            await Assert.That(scope.DisposeCount).IsEqualTo(1);
+            // The initial instance is used only for discovery, so its properties may not be injected.
+            if (scope.Service?.Dependency is { } dependency)
+                await Assert.That(dependency.Disposed).IsTrue();
+        }
+    }
+}

@@ -525,8 +525,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// </summary>
     private static bool ShouldSkipTracking(object? obj)
     {
-        return obj is not IDisposable and not IAsyncDisposable
-            || IsExternallyOwned(obj);
+        return obj is not IDisposable and not IAsyncDisposable;
     }
 
     /// <summary>
@@ -536,7 +535,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         => s_hasExternallyOwned && s_externallyOwned.TryGetValue(obj, out _);
 
     // Objects whose lifetime another owner controls (a dependency injection scope, for example).
-    // The tracker never counts or disposes them, so their owner is the only thing that disposes them.
+    // The tracker balances references but never disposes them; their owner controls disposal.
     private static readonly ConditionalWeakTable<object, object> s_externallyOwned = new();
     private static readonly object s_externallyOwnedMarker = new();
 
@@ -544,7 +543,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     private static volatile bool s_hasExternallyOwned;
 
     /// <summary>
-    /// Marks <paramref name="obj"/> as disposed by another owner, so the tracker never counts or disposes it.
+    /// Marks <paramref name="obj"/> as disposed by another owner, so the tracker never disposes it.
     /// Dependency injection data sources mark the services they resolve, because the scope that created
     /// them disposes them when the test ends (#7205). Existing tracker references are released
     /// without disposing the object, regardless of which data source supplied it first.

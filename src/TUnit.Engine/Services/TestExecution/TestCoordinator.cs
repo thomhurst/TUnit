@@ -225,7 +225,7 @@ internal sealed class TestCoordinator : ITestCoordinator
             // Stay null on the success path — materializing the list only when something actually fails
             // saves ~56 bytes per passing test (and passing is the overwhelming majority).
             test.Context.StopHoldingSharedReferences();
-            var cleanupExceptions = await _objectTracker.UntrackObjects(test.Context).ConfigureAwait(false);
+            List<Exception>? cleanupExceptions = null;
 
             if (test.Context.InternalEventsIfCreated?.OnDataRowDispose is { } onDataRowDispose)
             {
@@ -240,6 +240,14 @@ internal sealed class TestCoordinator : ITestCoordinator
                         (cleanupExceptions ??= []).Add(ex);
                     }
                 }
+            }
+
+            // Scope-owned parents can use TUnit-injected dependencies during disposal.
+            // Release those dependencies only after their parents' scope cleanup has completed.
+            var trackingExceptions = await _objectTracker.UntrackObjects(test.Context).ConfigureAwait(false);
+            if (trackingExceptions is { Count: > 0 })
+            {
+                (cleanupExceptions ??= []).AddRange(trackingExceptions);
             }
 
 #if NET

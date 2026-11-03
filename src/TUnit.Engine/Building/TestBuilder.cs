@@ -1062,6 +1062,7 @@ internal sealed class TestBuilder : ITestBuilder
         private object?[]? _data = data;
         private TestDataRowMetadata? _metadata = metadata;
         private object?[]? _lent;
+        private AsyncEvent<TestContext>? _lentCleanup;
         private TestBuilderContext _rowContext = rowContext;
         // Snapshot before any method factory can mutate the class subscriptions.
         private TestContextEvents? _events = rowContext.EventsIfCreated?.Clone();
@@ -1089,6 +1090,16 @@ internal sealed class TestBuilder : ITestBuilder
             async ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> FetchAsync(Func<Task<object?[]?>> factory, TestBuilderContext target)
             {
                 var row = DataUnwrapper.UnwrapWithMetadata(await factory() ?? []);
+                // The temporary instance used a different scope. Keep its cleanup even when
+                // this fetch replaces the original class row's event snapshot.
+                if (_lentCleanup is { } lentCleanup)
+                {
+                    foreach (var handler in lentCleanup.InvocationList)
+                    {
+                        target.Events.OnDataRowDispose += handler.InvokeAsync;
+                    }
+                    _lentCleanup = null;
+                }
                 _rowContext = target with { };
                 target.CopyStateBagTo(_rowContext);
                 _events = target.EventsIfCreated?.Clone();
@@ -1122,6 +1133,7 @@ internal sealed class TestBuilder : ITestBuilder
         public void LendToTemporaryInstance()
         {
             _lent = _data;
+            _lentCleanup = _events?.OnDataRowDispose?.Clone();
             _data = null;
             _metadata = null;
         }
