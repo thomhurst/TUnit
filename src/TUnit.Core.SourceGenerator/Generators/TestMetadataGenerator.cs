@@ -2479,7 +2479,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"dependencies: {depsExpr},");
         }
 
-        writer.AppendLine($"methodMetadata: __mm_0,");
+        if (TryGetClosedParametersForSharedBinder(testMethod, entry) is { } closedParameters
+            && HasSingleElementTupleParameter(closedParameters))
+        {
+            // The factories and engine bind using ParameterMetadata.Type, so close that metadata
+            // as well as the invoker. Keep attributes and lazy reflection access from the original.
+            var parameters = testMethod.MethodSymbol.Parameters.Select(parameter =>
+            {
+                var closed = closedParameters.FirstOrDefault(p => p.Ordinal == parameter.Ordinal);
+                var original = $"__mm_0.Parameters[{parameter.Ordinal.ToString(CultureInfo.InvariantCulture)}]";
+                return closed is null ? original
+                    : $"{original} with {{ Type = typeof({closed.Type.GloballyQualified()}), TypeInfo = new global::TUnit.Core.ConcreteType(typeof({closed.Type.GloballyQualified()})) }}";
+            });
+            writer.AppendLine($"methodMetadata: __mm_0 with {{ Parameters = new global::TUnit.Core.ParameterMetadata[] {{ {string.Join(", ", parameters)} }} }},");
+        }
+        else
+        {
+            writer.AppendLine($"methodMetadata: __mm_0,");
+        }
         writer.AppendLine($"createInstance: __CreateInstance_{groupIndex.ToString(CultureInfo.InvariantCulture)},");
         writer.AppendLine($"invokeBody: __Invoke_{groupIndex.ToString(CultureInfo.InvariantCulture)},");
         writer.AppendLine($"methodIndex: {entryIndex.ToString(CultureInfo.InvariantCulture)},");
@@ -2541,6 +2558,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 concreteTypeSymbol = typeSymbol.Construct(entry.ClassTypeArgs);
             }
         }
+
+        // Match the concrete invoker: an open T may close to a one-element tuple.
+        var keepSingleElementTupleWhole = TryGetClosedParametersForSharedBinder(testMethod, entry) is { } closedParameters
+            ? HasSingleElementTupleParameter(closedParameters)
+            : HasSingleElementTupleParameter(methodSymbol.Parameters);
 
         // Method data sources
         List<AttributeData> methodDataSources;
@@ -2631,7 +2653,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 foreach (var rowSourceAttribute in rowSources)
                 {
                     var rowWriter = new CodeWriter(includeHeader: false);
-                    GenerateDataSourceAttribute(rowWriter, testMethod.CompilationContext, rowSourceAttribute, methodSymbol, concreteTypeSymbol);
+                    GenerateDataSourceAttribute(rowWriter, testMethod.CompilationContext, rowSourceAttribute, methodSymbol, concreteTypeSymbol, keepSingleElementTupleWhole);
                     dsWriter.AppendLine($"global::TUnit.Core.GenericConstraintViolationDataSource.Create({message}, {rowWriter.ToString().Trim().TrimEnd(',')}),");
                 }
             }
@@ -2661,7 +2683,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.Indent();
             foreach (var attr in methodDataSources)
             {
-                GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol);
+                GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol, keepSingleElementTupleWhole);
             }
             dsWriter.Unindent();
             dsWriter.Append("}");
@@ -3022,7 +3044,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GeneratePropertyDataSources(writer, testMethod);
     }
 
-    private static void GenerateDataSourceAttribute(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    private static void GenerateDataSourceAttribute(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol, bool? keepSingleElementTupleWhole = null)
     {
         var attrClass = attr.AttributeClass;
         if (attrClass == null)
@@ -3037,7 +3059,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // finds no trimmed field or property metadata (#7225).
         if (attrName is "global::TUnit.Core.MethodDataSourceAttribute" or InstanceMethodDataSourceAttributeName)
         {
-            GenerateMethodDataSourceAttribute(writer, attr, typeSymbol, compilationContext.Compilation);
+            GenerateMethodDataSourceAttribute(writer, attr, typeSymbol, methodSymbol, compilationContext.Compilation, keepSingleElementTupleWhole);
         }
         else if (attrName == "global::TUnit.Core.ArgumentsAttribute")
         {
@@ -3326,7 +3348,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return true;
     }
 
-    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol, Compilation compilation)
+    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol, Compilation compilation, bool? keepSingleElementTupleWhole)
     {
         // Extract method name and target type
         string? methodName = null;
@@ -3471,11 +3493,33 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // a per-data-source compiler-generated state machine class (#6227). Only the per-test-unique
         // invocation is emitted, as a static lambda.
         writer.Append("Factory = static dataGeneratorMetadata => ");
-        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null, compilation, isDeclaredInstanceAttribute);
+        keepSingleElementTupleWhole ??= HasSingleElementTupleParameter(methodSymbol.Parameters);
+        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null, compilation, isDeclaredInstanceAttribute, keepSingleElementTupleWhole.Value);
         writer.AppendLine(",");
 
         writer.Unindent();
         writer.AppendLine("},");
+    }
+
+    private static bool HasSingleElementTupleParameter(IEnumerable<IParameterSymbol> parameters)
+    {
+        ITypeSymbol? dataType = null;
+        foreach (var parameter in parameters)
+        {
+            if (parameter.Type.IsCancellationToken())
+            {
+                continue;
+            }
+
+            if (dataType is not null)
+            {
+                return false;
+            }
+
+            dataType = parameter.Type;
+        }
+
+        return dataType is INamedTypeSymbol { IsTupleType: true, TupleElements.Length: 1 };
     }
 
     /// <summary>
@@ -3484,7 +3528,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// member's declared return type (mirroring the previous inline-iterator branch order)
     /// and whether the member is static or instance-based.
     /// </summary>
-    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, bool usesTestClassInstance, TypedConstant? arguments, Compilation compilation, bool decidesRowsFromRuntimeValue)
+    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, bool usesTestClassInstance, TypedConstant? arguments, Compilation compilation, bool decidesRowsFromRuntimeValue, bool keepSingleElementTupleWhole)
     {
         var dataSourceMethod = dataSourceMember as IMethodSymbol;
 
@@ -3569,7 +3613,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // The instance helpers take the metadata anyway. [InstanceMethodDataSource] read its member by reflection before
         // #7225, and that path keeps a tuple row whole when the test takes a single tuple, so its static helpers get the
         // metadata too: without the parameter types, a one-element tuple holding null would reach the test as null.
-        var metadataArgument = usesTestClassInstance || decidesRowsFromRuntimeValue ? "dataGeneratorMetadata, " : "";
+        // Preserve one-element rows before unwrapping: their element can itself have the expected tuple type.
+        var metadataArgument = usesTestClassInstance || decidesRowsFromRuntimeValue || keepSingleElementTupleWhole ? "dataGeneratorMetadata, " : "";
 
         // A declared type such as object does not say whether the value is one row or many. Reflection mode, and the
         // attribute's reflection fallback that read every field and every private or protected property before the
@@ -4421,14 +4466,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Special case: Single tuple parameter (same as in TestInvoker)
         // If we have exactly one parameter that's a tuple type, we need to handle it specially
-        // In source-generated mode, tuples are always unwrapped into their elements
+        // Generated factories unwrap tuples; instance sources can preserve the whole tuple.
         if (parametersFromArgs is
             [
                 { Type: INamedTypeSymbol { IsTupleType: true } singleTupleParam }
             ])
         {
             writer.AppendLine("// Special handling for single tuple parameter");
-            writer.AppendLine($"if (args.Length == {singleTupleParam.TupleElements.Length.ToString(CultureInfo.InvariantCulture)})");
+            // Factories preserve one-element tuple rows, so a matching tuple is the whole row,
+            // even when its element is another tuple of the same type.
+            var unwrappedCheck = singleTupleParam.TupleElements.Length == 1
+                ? $" && args[0] is not {singleTupleParam.GloballyQualified()}"
+                : "";
+            writer.AppendLine($"if (args.Length == {singleTupleParam.TupleElements.Length.ToString(CultureInfo.InvariantCulture)}{unwrappedCheck})");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("// Arguments are unwrapped tuple elements, reconstruct the tuple");
@@ -4436,7 +4486,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Build tuple reconstruction with proper casting
             var tupleElements = singleTupleParam.TupleElements.Select((elem, i) =>
                 $"global::TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i.ToString(CultureInfo.InvariantCulture)}])");
-            var tupleConstruction = $"({string.Join(", ", tupleElements)})";
+            var tupleConstruction = singleTupleParam.TupleElements.Length == 1
+                ? $"new {singleTupleParam.GloballyQualified()}({string.Join(", ", tupleElements)})"
+                : $"({string.Join(", ", tupleElements)})";
 
             var methodCallReconstructed = $"instance.{methodName}({FormatSingleArgumentCall(tupleConstruction, hasCancellationToken, parametersFromArgs)})";
             GenerateReturnHandling(writer, methodCallReconstructed, returnPattern);

@@ -63,8 +63,9 @@ internal static class TestDataRowUnwrapper
     /// Unwraps an array of values, extracting TestDataRow metadata from single-element arrays.
     /// </summary>
     /// <param name="values">The array of values to unwrap.</param>
+    /// <param name="expectedTupleType">Preserve tuple payloads assignable to this parameter type.</param>
     /// <returns>A tuple of the unwrapped data array and any extracted metadata.</returns>
-    public static (object?[] Data, TestDataRowMetadata? Metadata) UnwrapArray(object?[] values)
+    public static (object?[] Data, TestDataRowMetadata? Metadata) UnwrapArray(object?[] values, Type? expectedTupleType = null)
     {
         if (values.Length == 1 && TryUnwrap(values[0], out var data, out var metadata))
         {
@@ -82,7 +83,7 @@ internal static class TestDataRowUnwrapper
             }
 
             // Check if the data is a tuple that should be expanded
-            if (DataSourceHelpers.IsTuple(data))
+            if (DataSourceHelpers.IsTuple(data) && (expectedTupleType is null || !expectedTupleType.IsInstanceOfType(data)))
             {
                 return (data.ToObjectArray(), metadata);
             }
