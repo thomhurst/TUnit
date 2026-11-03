@@ -606,8 +606,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
         {
             new global::TUnit.Core.TestAttribute(),
             new global::TUnit.Core.ArgumentsAttribute("invalid"),
-            new global::TUnit.Core.SkipAttribute("Skip does not hide a generic constraint violation"),
-            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Failure)
+            new global::TUnit.Core.SkipAttribute("A skipped row stays skipped even when its inferred type violates a constraint")
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintValidationTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericConstraintValidationTests>[]
@@ -617,7 +616,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintValidationTests.GenericMethodWithStructConstraint_SkippedInvalidType",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 130,
+            lineNumber: 129,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -691,7 +690,7 @@ internal static class TUnit_TestProject_GenericClassWithComparableConstraint_T_T
             methodName: "TestComparable",
             fullyQualifiedName: "TUnit.TestProject.GenericClassWithComparableConstraint<int>.TestComparable",
             filePath: "",
-            lineNumber: 145,
+            lineNumber: 143,
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
@@ -760,7 +759,7 @@ internal static class TUnit_TestProject_GenericClassWithComparableConstraintStri
             methodName: "TestComparable",
             fullyQualifiedName: "TUnit.TestProject.GenericClassWithComparableConstraintString<string>.TestComparable",
             filePath: "",
-            lineNumber: 162,
+            lineNumber: 160,
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
@@ -829,7 +828,7 @@ internal static class TUnit_TestProject_GenericClassWithStructConstraint_T_TestS
             methodName: "TestStruct",
             fullyQualifiedName: "TUnit.TestProject.GenericClassWithStructConstraint<int>.TestStruct",
             filePath: "",
-            lineNumber: 178,
+            lineNumber: 176,
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
@@ -898,7 +897,7 @@ internal static class TUnit_TestProject_GenericClassWithStructConstraintDouble_T
             methodName: "TestStruct",
             fullyQualifiedName: "TUnit.TestProject.GenericClassWithStructConstraintDouble<double>.TestStruct",
             filePath: "",
-            lineNumber: 194,
+            lineNumber: 192,
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
@@ -967,7 +966,7 @@ internal static class TUnit_TestProject_GenericClassWithClassConstraint_T_TestCl
             methodName: "TestClass",
             fullyQualifiedName: "TUnit.TestProject.GenericClassWithClassConstraint<string>.TestClass",
             filePath: "",
-            lineNumber: 210,
+            lineNumber: 208,
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
@@ -1036,7 +1035,7 @@ internal static class TUnit_TestProject_GenericClassWithInterfaceConstraint_T_Te
             methodName: "TestInterface",
             fullyQualifiedName: "TUnit.TestProject.GenericClassWithInterfaceConstraint<TestClass>.TestInterface",
             filePath: "",
-            lineNumber: 224,
+            lineNumber: 222,
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
@@ -1102,7 +1101,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.TwoInvalidArgumentsRows",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 296,
+            lineNumber: 294,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1174,7 +1173,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.TwoInvalidDataSourceRows",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 306,
+            lineNumber: 304,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1244,7 +1243,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.EmptyInvalidDataSource",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 315,
+            lineNumber: 313,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1322,7 +1321,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.ExactBaseTypeConstraintMatch<ConstraintBaseClass>",
             methodTypeArgumentsIdentity: "<global::TUnit.TestProject.ConstraintBaseClass>",
             filePath: "",
-            lineNumber: 322,
+            lineNumber: 320,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1400,7 +1399,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.ExactInterfaceConstraintMatch<ITestInterface>",
             methodTypeArgumentsIdentity: "<global::TUnit.TestProject.ITestInterface>",
             filePath: "",
-            lineNumber: 330,
+            lineNumber: 328,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1478,7 +1477,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.VariantInterfaceConstraintMatch<List<string>>",
             methodTypeArgumentsIdentity: "<global::System.Collections.Generic.List<string>>",
             filePath: "",
-            lineNumber: 340,
+            lineNumber: 338,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1556,7 +1555,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.ArrayCovariantInterfaceConstraintMatch<List<string[]>>",
             methodTypeArgumentsIdentity: "<global::System.Collections.Generic.List<string[]>>",
             filePath: "",
-            lineNumber: 349,
+            lineNumber: 347,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1635,7 +1634,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "element", ne
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.ArrayOfTypeParameterConstraintMatch<List<string[]>, string>",
             methodTypeArgumentsIdentity: "<global::System.Collections.Generic.List<string[]>, string>",
             filePath: "",
-            lineNumber: 358,
+            lineNumber: 356,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1713,7 +1712,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.DelegateVariantInterfaceConstraintMatch<List<Func<string>>>",
             methodTypeArgumentsIdentity: "<global::System.Collections.Generic.List<global::System.Func<string>>>",
             filePath: "",
-            lineNumber: 367,
+            lineNumber: 365,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1791,7 +1790,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.NestedVariantInterfaceConstraintMatch<MatchingOuterPayload>",
             methodTypeArgumentsIdentity: "<global::TUnit.TestProject.MatchingOuterPayload>",
             filePath: "",
-            lineNumber: 377,
+            lineNumber: 375,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1862,7 +1861,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.NestedInterfaceWithOtherContainingTypeArgument",
             methodTypeArgumentsIdentity: "<global::TUnit.TestProject.MismatchedOuterPayload>",
             filePath: "",
-            lineNumber: 388,
+            lineNumber: 386,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1933,7 +1932,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.TwoInvalidInstanceDataSourceRows",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 399,
+            lineNumber: 397,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2004,7 +2003,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintRowParityTests.InvalidRowWhoseFactoryThrows",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 408,
+            lineNumber: 406,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2112,7 +2111,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintClassAndMethodArgumentsTests<int>.MixedMethodRows<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 506,
+            lineNumber: 504,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2133,7 +2132,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintClassAndMethodArgumentsTests<int>.MixedMethodRows",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 506,
+            lineNumber: 504,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2245,7 +2244,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>.ClassTypeParameterConstraintRows<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 521,
+            lineNumber: 519,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2266,7 +2265,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>.ClassTypeParameterConstraintRows",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 521,
+            lineNumber: 519,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

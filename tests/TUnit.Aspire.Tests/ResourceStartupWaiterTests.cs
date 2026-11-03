@@ -114,6 +114,29 @@ public class ResourceStartupWaiterTests
         }
     }
 
+    [Test]
+    public async Task CallerCancellation_TakesPrecedenceOverAnAlreadyFaultedWait()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var cleanupFailure = new InvalidOperationException("losing wait failed during cleanup");
+
+        // Cancel during setup so the fault has already won WhenAny before the waiter resumes.
+        Task Failure(string name, CancellationToken token)
+        {
+            cancellation.Cancel();
+            return Task.FromException(cleanupFailure);
+        }
+
+        var wait = ResourceStartupWaiter.WaitAsync(
+            ["resource"],
+            (_, _) => Task.FromException(cleanupFailure),
+            Failure,
+            cancellation.Token);
+
+        var failure = await Assert.That(async () => await wait).Throws<OperationCanceledException>();
+        await Assert.That(failure!.CancellationToken).IsEqualTo(cancellation.Token);
+    }
+
     private sealed class PendingWait(bool faultOnCleanup)
     {
         public TaskCompletionSource CancellationRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);

@@ -29,6 +29,31 @@ internal static class IdentifierEscaping
         SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
 
     /// <summary>
+    /// Drops the leading alias qualifier of a fully qualified name: <c>global::</c>, or an extern
+    /// alias such as <c>LibAlias::</c> (#7300), so generated names do not depend on how the mocked
+    /// type's reference is aliased.
+    /// </summary>
+    internal static string StripAliasQualifier(string name)
+    {
+        var separator = name.IndexOf("::", StringComparison.Ordinal);
+        if (separator <= 0)
+        {
+            return name;
+        }
+
+        for (var i = name[0] == '@' ? 1 : 0; i < separator; i++)
+        {
+            if (!char.IsLetterOrDigit(name[i]) && name[i] != '_')
+            {
+                // The first '::' belongs to a type argument, not to this name.
+                return name;
+            }
+        }
+
+        return name.Substring(separator + 2);
+    }
+
+    /// <summary>
     /// Turns a type name (fully qualified, or a bare name with generic arguments) into a single
     /// C# identifier, used for generated type names and <c>AddSource</c> hint names.
     /// <para>
@@ -42,7 +67,28 @@ internal static class IdentifierEscaping
     /// </summary>
     internal static string SanitizeIdentifier(string name)
     {
-        name = name.Replace("global::", "");
+        name = StripAliasQualifier(name);
+
+        // Qualifiers can occur at every nesting level, including generic arguments.
+        // Remove only the alias token immediately before each ::, preserving namespaces
+        // and literal underscores for the collision-safe encoding below.
+        var separator = name.IndexOf("::", StringComparison.Ordinal);
+        while (separator >= 0)
+        {
+            var start = separator;
+            while (start > 0 && SyntaxFacts.IsIdentifierPartCharacter(name[start - 1]))
+            {
+                start--;
+            }
+
+            if (start > 0 && name[start - 1] == '@')
+            {
+                start--;
+            }
+
+            name = name.Remove(start, separator + 2 - start);
+            separator = name.IndexOf("::", start, StringComparison.Ordinal);
+        }
 
         var sb = new StringBuilder(name.Length);
         var lastWasSeparator = false;

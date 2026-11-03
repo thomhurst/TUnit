@@ -44,11 +44,16 @@ internal class Tests7116 : TestsBase
             await Assert.That(exactAndObject).Contains("DeclaredTypeInferenceTests.ExactStreams()");
             await Assert.That(exactAndObject).Contains("DeclaredTypeInferenceTests.Streams()");
 
-            // An empty or wrongly sized [GenerateGenericTest] does not suppress the violation, so the rows are not lost.
+            // An empty or wrongly sized [GenerateGenericTest] fails on its own, so the rows are not silently lost.
+            // As in reflection mode, the object-declared rows are not reported as well (#7222).
+            await Assert.That(SourceFor("EmptyGenerateGenericTestWithObjectRows"))
+                .Contains(violation + "\"[GenerateGenericTest] on method 'EmptyGenerateGenericTestWithObjectRows' has no type arguments\")");
+            await Assert.That(SourceFor("WrongArityGenerateGenericTestWithObjectRows"))
+                .Contains(violation + "\"[GenerateGenericTest] on method 'WrongArityGenerateGenericTestWithObjectRows' provides 2 type argument(s) but method requires 1. Provided: [MemoryStream, Int32]\")");
             foreach (var methodName in new[] { "EmptyGenerateGenericTestWithObjectRows", "WrongArityGenerateGenericTestWithObjectRows" })
             {
                 await Assert.That(SourceFor(methodName))
-                    .Contains("'T' was inferred from the declared type 'object' of the data source");
+                    .DoesNotContain("'T' was inferred from the declared type 'object' of the data source");
             }
         });
 }

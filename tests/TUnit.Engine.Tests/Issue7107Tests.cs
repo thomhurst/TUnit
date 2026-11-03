@@ -36,7 +36,8 @@ public class Issue7107Tests(TestMode testMode) : InvokableTestBase(testMode)
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(9),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(4),
-                result => result.ResultSummary.Counters.Failed.ShouldBe(5)
+                result => result.ResultSummary.Counters.Failed.ShouldBe(4),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(1)
             ]);
     }
 

@@ -108,9 +108,9 @@ namespace TUnit.Mocks.Generated
             return new IParamsSink_Sum_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Sum", matchers);
         }
 
-        public static IParamsSink_Sum_M0_MockCall Sum(this global::TUnit.Mocks.Mock<global::IParamsSink> mock, global::System.Func<int[], bool> values)
+        public static IParamsSink_Sum_M0_MockCall Sum(this global::TUnit.Mocks.Mock<global::IParamsSink> mock, global::System.Func<int[], bool>? values)
         {
-            global::TUnit.Mocks.Arguments.Arg<int[]> __fa_values = values;
+            global::TUnit.Mocks.Arguments.Arg<int[]> __fa_values = values is null ? global::TUnit.Mocks.Arguments.Arg.Is<int[]>(default(int[])!) : (global::TUnit.Mocks.Arguments.Arg<int[]>)values;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_values.Matcher };
             return new IParamsSink_Sum_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Sum", matchers);
         }
@@ -138,9 +138,9 @@ namespace TUnit.Mocks.Generated
             return new IParamsSink_Render_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Render", matchers);
         }
 
-        public static IParamsSink_Render_M1_MockCall Render(this global::TUnit.Mocks.Mock<global::IParamsSink> mock, global::System.Func<object[], bool> args)
+        public static IParamsSink_Render_M1_MockCall Render(this global::TUnit.Mocks.Mock<global::IParamsSink> mock, global::System.Func<object[], bool>? args)
         {
-            global::TUnit.Mocks.Arguments.Arg<object[]> __fa_args = args;
+            global::TUnit.Mocks.Arguments.Arg<object[]> __fa_args = args is null ? global::TUnit.Mocks.Arguments.Arg.Is<object[]>(default(object[])!) : (global::TUnit.Mocks.Arguments.Arg<object[]>)args;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_args.Matcher };
             return new IParamsSink_Render_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Render", matchers);
         }
@@ -168,24 +168,24 @@ namespace TUnit.Mocks.Generated
             return new IParamsSink_Combine_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Combine", matchers);
         }
 
-        public static IParamsSink_Combine_M2_MockCall Combine(this global::TUnit.Mocks.Mock<global::IParamsSink> mock, global::System.Func<string, bool> prefix, global::TUnit.Mocks.Arguments.Arg<string[]> parts)
+        public static IParamsSink_Combine_M2_MockCall Combine(this global::TUnit.Mocks.Mock<global::IParamsSink> mock, global::System.Func<string, bool>? prefix, global::TUnit.Mocks.Arguments.Arg<string[]> parts)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_prefix = prefix;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_prefix = prefix is null ? global::TUnit.Mocks.Arguments.Arg.Is<string>(default(string)!) : (global::TUnit.Mocks.Arguments.Arg<string>)prefix;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_prefix.Matcher, parts.Matcher };
             return new IParamsSink_Combine_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Combine", matchers);
         }
 
-        public static IParamsSink_Combine_M2_MockCall Combine(this global::TUnit.Mocks.Mock<global::IParamsSink> mock, global::TUnit.Mocks.Arguments.Arg<string> prefix, global::System.Func<string[], bool> parts)
+        public static IParamsSink_Combine_M2_MockCall Combine(this global::TUnit.Mocks.Mock<global::IParamsSink> mock, global::TUnit.Mocks.Arguments.Arg<string> prefix, global::System.Func<string[], bool>? parts)
         {
-            global::TUnit.Mocks.Arguments.Arg<string[]> __fa_parts = parts;
+            global::TUnit.Mocks.Arguments.Arg<string[]> __fa_parts = parts is null ? global::TUnit.Mocks.Arguments.Arg.Is<string[]>(default(string[])!) : (global::TUnit.Mocks.Arguments.Arg<string[]>)parts;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { prefix.Matcher, __fa_parts.Matcher };
             return new IParamsSink_Combine_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Combine", matchers);
         }
 
-        public static IParamsSink_Combine_M2_MockCall Combine(this global::TUnit.Mocks.Mock<global::IParamsSink> mock, global::System.Func<string, bool> prefix, global::System.Func<string[], bool> parts)
+        public static IParamsSink_Combine_M2_MockCall Combine(this global::TUnit.Mocks.Mock<global::IParamsSink> mock, global::System.Func<string, bool>? prefix, global::System.Func<string[], bool>? parts)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_prefix = prefix;
-            global::TUnit.Mocks.Arguments.Arg<string[]> __fa_parts = parts;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_prefix = prefix is null ? global::TUnit.Mocks.Arguments.Arg.Is<string>(default(string)!) : (global::TUnit.Mocks.Arguments.Arg<string>)prefix;
+            global::TUnit.Mocks.Arguments.Arg<string[]> __fa_parts = parts is null ? global::TUnit.Mocks.Arguments.Arg.Is<string[]>(default(string[])!) : (global::TUnit.Mocks.Arguments.Arg<string[]>)parts;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_prefix.Matcher, __fa_parts.Matcher };
             return new IParamsSink_Combine_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Combine", matchers);
         }
@@ -220,9 +220,9 @@ namespace TUnit.Mocks.Generated
             return new IParamsSink_First_M3_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "First", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
         }
 
-        public static IParamsSink_First_M3_MockCall<T> First<T>(this global::TUnit.Mocks.Mock<global::IParamsSink> mock, global::System.Func<T[], bool> items)
+        public static IParamsSink_First_M3_MockCall<T> First<T>(this global::TUnit.Mocks.Mock<global::IParamsSink> mock, global::System.Func<T[], bool>? items)
         {
-            global::TUnit.Mocks.Arguments.Arg<T[]> __fa_items = items;
+            global::TUnit.Mocks.Arguments.Arg<T[]> __fa_items = items is null ? global::TUnit.Mocks.Arguments.Arg.Is<T[]>(default(T[])!) : (global::TUnit.Mocks.Arguments.Arg<T[]>)items;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_items.Matcher };
             return new IParamsSink_First_M3_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "First", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
         }

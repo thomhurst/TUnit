@@ -9,8 +9,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- Enforce null-literal and generated event nullability regression coverage. -->
+    <WarningsAsErrors>$(WarningsAsErrors);CS8625;CS8604;CS8612;CS8613;CS8614;CS8615;CS8634</WarningsAsErrors>
     <SignAssembly>true</SignAssembly>
-    <WarningsAsErrors>$(WarningsAsErrors);CS8604;CS8612;CS8613;CS8614;CS8615;CS8634</WarningsAsErrors>
     <AssemblyOriginatorKeyFile>..\..\eng\strongname.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 

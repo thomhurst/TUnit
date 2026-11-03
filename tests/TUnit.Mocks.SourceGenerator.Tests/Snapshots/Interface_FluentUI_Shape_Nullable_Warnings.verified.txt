@@ -404,24 +404,24 @@ namespace TUnit.Mocks.Generated
             return new IDialogService_UpdateDialogAsync_M0_MockCall<TData>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TData>.Value);
         }
 
-        public static IDialogService_UpdateDialogAsync_M0_MockCall<TData> UpdateDialogAsync<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<string, bool> id, global::TUnit.Mocks.Arguments.Arg<global::DialogParameters<TData>> parameters) where TData : class
+        public static IDialogService_UpdateDialogAsync_M0_MockCall<TData> UpdateDialogAsync<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<string, bool>? id, global::TUnit.Mocks.Arguments.Arg<global::DialogParameters<TData>> parameters) where TData : class
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_id = id;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_id = id is null ? global::TUnit.Mocks.Arguments.Arg.Is<string>(default(string)!) : (global::TUnit.Mocks.Arguments.Arg<string>)id;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher, parameters.Matcher };
             return new IDialogService_UpdateDialogAsync_M0_MockCall<TData>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TData>.Value);
         }
 
-        public static IDialogService_UpdateDialogAsync_M0_MockCall<TData> UpdateDialogAsync<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.Arg<string> id, global::System.Func<global::DialogParameters<TData>, bool> parameters) where TData : class
+        public static IDialogService_UpdateDialogAsync_M0_MockCall<TData> UpdateDialogAsync<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.Arg<string> id, global::System.Func<global::DialogParameters<TData>, bool>? parameters) where TData : class
         {
-            global::TUnit.Mocks.Arguments.Arg<global::DialogParameters<TData>> __fa_parameters = parameters;
+            global::TUnit.Mocks.Arguments.Arg<global::DialogParameters<TData>> __fa_parameters = parameters is null ? global::TUnit.Mocks.Arguments.Arg.Is<global::DialogParameters<TData>>(default(global::DialogParameters<TData>)!) : (global::TUnit.Mocks.Arguments.Arg<global::DialogParameters<TData>>)parameters;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { id.Matcher, __fa_parameters.Matcher };
             return new IDialogService_UpdateDialogAsync_M0_MockCall<TData>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TData>.Value);
         }
 
-        public static IDialogService_UpdateDialogAsync_M0_MockCall<TData> UpdateDialogAsync<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<string, bool> id, global::System.Func<global::DialogParameters<TData>, bool> parameters) where TData : class
+        public static IDialogService_UpdateDialogAsync_M0_MockCall<TData> UpdateDialogAsync<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<string, bool>? id, global::System.Func<global::DialogParameters<TData>, bool>? parameters) where TData : class
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_id = id;
-            global::TUnit.Mocks.Arguments.Arg<global::DialogParameters<TData>> __fa_parameters = parameters;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_id = id is null ? global::TUnit.Mocks.Arguments.Arg.Is<string>(default(string)!) : (global::TUnit.Mocks.Arguments.Arg<string>)id;
+            global::TUnit.Mocks.Arguments.Arg<global::DialogParameters<TData>> __fa_parameters = parameters is null ? global::TUnit.Mocks.Arguments.Arg.Is<global::DialogParameters<TData>>(default(global::DialogParameters<TData>)!) : (global::TUnit.Mocks.Arguments.Arg<global::DialogParameters<TData>>)parameters;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher, __fa_parameters.Matcher };
             return new IDialogService_UpdateDialogAsync_M0_MockCall<TData>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TData>.Value);
         }
@@ -432,24 +432,24 @@ namespace TUnit.Mocks.Generated
             return new IDialogService_ShowDialogAsync_M1_MockCall<TDialog>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TDialog>.Value);
         }
 
-        public static IDialogService_ShowDialogAsync_M1_MockCall<TDialog> ShowDialogAsync<TDialog>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<object, bool> data, global::TUnit.Mocks.Arguments.Arg<global::DialogParameters> parameters) where TDialog : global::IDialogContentComponent
+        public static IDialogService_ShowDialogAsync_M1_MockCall<TDialog> ShowDialogAsync<TDialog>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<object, bool>? data, global::TUnit.Mocks.Arguments.Arg<global::DialogParameters> parameters) where TDialog : global::IDialogContentComponent
         {
-            global::TUnit.Mocks.Arguments.Arg<object> __fa_data = data;
+            global::TUnit.Mocks.Arguments.Arg<object> __fa_data = data is null ? global::TUnit.Mocks.Arguments.Arg.Is<object>(default(object)!) : (global::TUnit.Mocks.Arguments.Arg<object>)data;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_data.Matcher, parameters.Matcher };
             return new IDialogService_ShowDialogAsync_M1_MockCall<TDialog>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TDialog>.Value);
         }
 
-        public static IDialogService_ShowDialogAsync_M1_MockCall<TDialog> ShowDialogAsync<TDialog>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.Arg<object> data, global::System.Func<global::DialogParameters, bool> parameters) where TDialog : global::IDialogContentComponent
+        public static IDialogService_ShowDialogAsync_M1_MockCall<TDialog> ShowDialogAsync<TDialog>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.Arg<object> data, global::System.Func<global::DialogParameters, bool>? parameters) where TDialog : global::IDialogContentComponent
         {
-            global::TUnit.Mocks.Arguments.Arg<global::DialogParameters> __fa_parameters = parameters;
+            global::TUnit.Mocks.Arguments.Arg<global::DialogParameters> __fa_parameters = parameters is null ? global::TUnit.Mocks.Arguments.Arg.Is<global::DialogParameters>(default(global::DialogParameters)!) : (global::TUnit.Mocks.Arguments.Arg<global::DialogParameters>)parameters;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { data.Matcher, __fa_parameters.Matcher };
             return new IDialogService_ShowDialogAsync_M1_MockCall<TDialog>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TDialog>.Value);
         }
 
-        public static IDialogService_ShowDialogAsync_M1_MockCall<TDialog> ShowDialogAsync<TDialog>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<object, bool> data, global::System.Func<global::DialogParameters, bool> parameters) where TDialog : global::IDialogContentComponent
+        public static IDialogService_ShowDialogAsync_M1_MockCall<TDialog> ShowDialogAsync<TDialog>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<object, bool>? data, global::System.Func<global::DialogParameters, bool>? parameters) where TDialog : global::IDialogContentComponent
         {
-            global::TUnit.Mocks.Arguments.Arg<object> __fa_data = data;
-            global::TUnit.Mocks.Arguments.Arg<global::DialogParameters> __fa_parameters = parameters;
+            global::TUnit.Mocks.Arguments.Arg<object> __fa_data = data is null ? global::TUnit.Mocks.Arguments.Arg.Is<object>(default(object)!) : (global::TUnit.Mocks.Arguments.Arg<object>)data;
+            global::TUnit.Mocks.Arguments.Arg<global::DialogParameters> __fa_parameters = parameters is null ? global::TUnit.Mocks.Arguments.Arg.Is<global::DialogParameters>(default(global::DialogParameters)!) : (global::TUnit.Mocks.Arguments.Arg<global::DialogParameters>)parameters;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_data.Matcher, __fa_parameters.Matcher };
             return new IDialogService_ShowDialogAsync_M1_MockCall<TDialog>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TDialog>.Value);
         }

@@ -15,14 +15,14 @@ internal static class EventRaiserBuilder
 
     public static string GetInterfaceName(MockTypeModel model, MockEventModel evt)
     {
-        var surfaceName = model.FullyQualifiedName;
+        var surfaceName = IdentifierEscaping.StripAliasQualifier(model.FullyQualifiedName);
         if (model.IsSecondaryMemberSurface)
         {
-            surfaceName += "_" + model.AdditionalInterfaceNames[0];
+            surfaceName += "_" + IdentifierEscaping.StripAliasQualifier(model.AdditionalInterfaceNames[0]);
         }
         else if (evt.OwnerTypeIndex > 0)
         {
-            surfaceName += "_" + model.AdditionalInterfaceNames[evt.OwnerTypeIndex - 1];
+            surfaceName += "_" + IdentifierEscaping.StripAliasQualifier(model.AdditionalInterfaceNames[evt.OwnerTypeIndex - 1]);
         }
 
         return $"{MockImplBuilder.GetSafeName(surfaceName)}_{evt.Name}_Raiser{MockImplBuilder.GetTypeParameterList(model)}";

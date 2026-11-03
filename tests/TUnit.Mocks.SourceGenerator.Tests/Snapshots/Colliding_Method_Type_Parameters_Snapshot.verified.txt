@@ -69,9 +69,9 @@ namespace TUnit.Mocks.Generated.ClosedGenericMethodSetups_0
                 return new TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Select", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod, TOther>.Value);
             }
 
-            public TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T> Select<TMethod, TOther>(global::System.Func<TMethod, bool> value) where TOther : TMethod
+            public TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T> Select<TMethod, TOther>(global::System.Func<TMethod, bool>? value) where TOther : TMethod
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
                 return new TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Select", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod, TOther>.Value);
             }
@@ -93,9 +93,9 @@ namespace TUnit.Mocks.Generated.ClosedGenericMethodSetups_1
                 return new TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TMethod", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
 
-            public TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T> TMethod<TMethod2>(global::System.Func<TMethod2, bool> value)
+            public TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T> TMethod<TMethod2>(global::System.Func<TMethod2, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
                 return new TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TMethod", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
@@ -117,9 +117,9 @@ namespace TUnit.Mocks.Generated.ClosedGenericMethodSetups_2
                 return new TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
             }
 
-            public TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T> Invoke<TMethod>(global::System.Func<object, bool> message)
+            public TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T> Invoke<TMethod>(global::System.Func<object, bool>? message)
             {
-                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message;
+                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<object>(default(object)!) : (global::TUnit.Mocks.Arguments.Arg<object>)message;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
                 return new TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
             }
@@ -141,24 +141,24 @@ namespace TUnit.Mocks.Generated.ClosedGenericMethodSetups_3
                 return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
 
-            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool> TMethod, global::TUnit.Mocks.Arguments.Arg<TMethod2> value)
+            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool>? TMethod, global::TUnit.Mocks.Arguments.Arg<TMethod2> value)
             {
-                global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod;
+                global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod is null ? global::TUnit.Mocks.Arguments.Arg.Is<int>(default(int)!) : (global::TUnit.Mocks.Arguments.Arg<int>)TMethod;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_TMethod.Matcher, value.Matcher };
                 return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
 
-            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::TUnit.Mocks.Arguments.Arg<int> TMethod, global::System.Func<TMethod2, bool> value)
+            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::TUnit.Mocks.Arguments.Arg<int> TMethod, global::System.Func<TMethod2, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { TMethod.Matcher, __fa_value.Matcher };
                 return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
 
-            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool> TMethod, global::System.Func<TMethod2, bool> value)
+            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool>? TMethod, global::System.Func<TMethod2, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod;
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod is null ? global::TUnit.Mocks.Arguments.Arg.Is<int>(default(int)!) : (global::TUnit.Mocks.Arguments.Arg<int>)TMethod;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_TMethod.Matcher, __fa_value.Matcher };
                 return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
@@ -180,24 +180,24 @@ namespace TUnit.Mocks.Generated.ClosedGenericMethodSetups_4
                 return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
             }
 
-            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool> key, global::TUnit.Mocks.Arguments.Arg<T> value) where TKey : notnull
+            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool>? key, global::TUnit.Mocks.Arguments.Arg<T> value) where TKey : notnull
             {
-                global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key;
+                global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.Is<TKey>(default(TKey)!) : (global::TUnit.Mocks.Arguments.Arg<TKey>)key;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher, value.Matcher };
                 return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
             }
 
-            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::TUnit.Mocks.Arguments.Arg<TKey> key, global::System.Func<T, bool> value) where TKey : notnull
+            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::TUnit.Mocks.Arguments.Arg<TKey> key, global::System.Func<T, bool>? value) where TKey : notnull
             {
-                global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<T>(default(T)!) : (global::TUnit.Mocks.Arguments.Arg<T>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { key.Matcher, __fa_value.Matcher };
                 return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
             }
 
-            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool> key, global::System.Func<T, bool> value) where TKey : notnull
+            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool>? key, global::System.Func<T, bool>? value) where TKey : notnull
             {
-                global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key;
-                global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.Is<TKey>(default(TKey)!) : (global::TUnit.Mocks.Arguments.Arg<TKey>)key;
+                global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<T>(default(T)!) : (global::TUnit.Mocks.Arguments.Arg<T>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher, __fa_value.Matcher };
                 return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
             }
@@ -208,9 +208,9 @@ namespace TUnit.Mocks.Generated.ClosedGenericMethodSetups_4
                 return new TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Convert", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
             }
 
-            public TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T> Convert<TMethod>(global::System.Func<TMethod, bool> value)
+            public TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T> Convert<TMethod>(global::System.Func<TMethod, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
                 return new TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Convert", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
             }
@@ -232,24 +232,24 @@ namespace TUnit.Mocks.Generated.ClosedGenericMethodSetups_5
                 return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
             }
 
-            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool> first, global::TUnit.Mocks.Arguments.Arg<TMethod> second)
+            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool>? first, global::TUnit.Mocks.Arguments.Arg<TMethod> second)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)first;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_first.Matcher, second.Matcher };
                 return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
             }
 
-            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::TUnit.Mocks.Arguments.Arg<TMethod2> first, global::System.Func<TMethod, bool> second)
+            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::TUnit.Mocks.Arguments.Arg<TMethod2> first, global::System.Func<TMethod, bool>? second)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second;
+                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)second;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { first.Matcher, __fa_second.Matcher };
                 return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
             }
 
-            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool> first, global::System.Func<TMethod, bool> second)
+            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool>? first, global::System.Func<TMethod, bool>? second)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first;
-                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)first;
+                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)second;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_first.Matcher, __fa_second.Matcher };
                 return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
             }
@@ -289,10 +289,10 @@ namespace TestNamespace
             return new TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Select", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod, TOther>.Value);
         }
 
-        public TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T> Select<TMethod, TOther>(global::System.Func<TMethod, bool> value) where TOther : TMethod
+        public TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T> Select<TMethod, TOther>(global::System.Func<TMethod, bool>? value) where TOther : TMethod
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value;
+            global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)value;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
             return new TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Select", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod, TOther>.Value);
         }
@@ -374,9 +374,9 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Select", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod, TOther>.Value);
             }
 
-            public TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T> Select<TMethod, TOther>(global::System.Func<TMethod, bool> value) where TOther : TMethod
+            public TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T> Select<TMethod, TOther>(global::System.Func<TMethod, bool>? value) where TOther : TMethod
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
                 return new TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Select", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod, TOther>.Value);
             }
@@ -389,9 +389,9 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Select", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod, TOther>.Value);
             }
 
-            public TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T> Select<TMethod, TOther>(global::System.Func<TMethod, bool> value) where TOther : TMethod
+            public TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T> Select<TMethod, TOther>(global::System.Func<TMethod, bool>? value) where TOther : TMethod
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
                 return new TestNamespace_IConstrained_T__Select_M0_MockCall<TMethod, TOther, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Select", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod, TOther>.Value);
             }
@@ -527,10 +527,10 @@ namespace TestNamespace
             return new TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TMethod", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
         }
 
-        public TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T> TMethod<TMethod2>(global::System.Func<TMethod2, bool> value)
+        public TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T> TMethod<TMethod2>(global::System.Func<TMethod2, bool>? value)
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value;
+            global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)value;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
             return new TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TMethod", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
         }
@@ -612,9 +612,9 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TMethod", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
 
-            public TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T> TMethod<TMethod2>(global::System.Func<TMethod2, bool> value)
+            public TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T> TMethod<TMethod2>(global::System.Func<TMethod2, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
                 return new TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TMethod", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
@@ -627,9 +627,9 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TMethod", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
 
-            public TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T> TMethod<TMethod2>(global::System.Func<TMethod2, bool> value)
+            public TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T> TMethod<TMethod2>(global::System.Func<TMethod2, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
                 return new TestNamespace_IMethodNamed_T__TMethod_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TMethod", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
@@ -755,10 +755,10 @@ namespace TestNamespace
             return new TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
         }
 
-        public TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T> Invoke<TMethod>(global::System.Func<object, bool> message)
+        public TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T> Invoke<TMethod>(global::System.Func<object, bool>? message)
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message;
+            global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<object>(default(object)!) : (global::TUnit.Mocks.Arguments.Arg<object>)message;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
             return new TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
         }
@@ -847,9 +847,9 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
             }
 
-            public TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T> Invoke<TMethod>(global::System.Func<object, bool> message)
+            public TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T> Invoke<TMethod>(global::System.Func<object, bool>? message)
             {
-                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message;
+                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<object>(default(object)!) : (global::TUnit.Mocks.Arguments.Arg<object>)message;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
                 return new TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
             }
@@ -862,9 +862,9 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
             }
 
-            public TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T> Invoke<TMethod>(global::System.Func<object, bool> message)
+            public TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T> Invoke<TMethod>(global::System.Func<object, bool>? message)
             {
-                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message;
+                global::TUnit.Mocks.Arguments.Arg<object> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<object>(default(object)!) : (global::TUnit.Mocks.Arguments.Arg<object>)message;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
                 return new TestNamespace_IOutbox_T__Invoke_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
             }
@@ -1006,27 +1006,27 @@ namespace TestNamespace
             return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
         }
 
-        public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool> TMethod, global::TUnit.Mocks.Arguments.Arg<TMethod2> value)
+        public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool>? TMethod, global::TUnit.Mocks.Arguments.Arg<TMethod2> value)
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod is null ? global::TUnit.Mocks.Arguments.Arg.Is<int>(default(int)!) : (global::TUnit.Mocks.Arguments.Arg<int>)TMethod;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_TMethod.Matcher, value.Matcher };
             return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
         }
 
-        public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::TUnit.Mocks.Arguments.Arg<int> TMethod, global::System.Func<TMethod2, bool> value)
+        public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::TUnit.Mocks.Arguments.Arg<int> TMethod, global::System.Func<TMethod2, bool>? value)
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value;
+            global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)value;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { TMethod.Matcher, __fa_value.Matcher };
             return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
         }
 
-        public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool> TMethod, global::System.Func<TMethod2, bool> value)
+        public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool>? TMethod, global::System.Func<TMethod2, bool>? value)
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod;
-            global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod is null ? global::TUnit.Mocks.Arguments.Arg.Is<int>(default(int)!) : (global::TUnit.Mocks.Arguments.Arg<int>)TMethod;
+            global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)value;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_TMethod.Matcher, __fa_value.Matcher };
             return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
         }
@@ -1108,24 +1108,24 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
 
-            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool> TMethod, global::TUnit.Mocks.Arguments.Arg<TMethod2> value)
+            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool>? TMethod, global::TUnit.Mocks.Arguments.Arg<TMethod2> value)
             {
-                global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod;
+                global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod is null ? global::TUnit.Mocks.Arguments.Arg.Is<int>(default(int)!) : (global::TUnit.Mocks.Arguments.Arg<int>)TMethod;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_TMethod.Matcher, value.Matcher };
                 return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
 
-            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::TUnit.Mocks.Arguments.Arg<int> TMethod, global::System.Func<TMethod2, bool> value)
+            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::TUnit.Mocks.Arguments.Arg<int> TMethod, global::System.Func<TMethod2, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { TMethod.Matcher, __fa_value.Matcher };
                 return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
 
-            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool> TMethod, global::System.Func<TMethod2, bool> value)
+            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool>? TMethod, global::System.Func<TMethod2, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod;
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod is null ? global::TUnit.Mocks.Arguments.Arg.Is<int>(default(int)!) : (global::TUnit.Mocks.Arguments.Arg<int>)TMethod;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_TMethod.Matcher, __fa_value.Matcher };
                 return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
@@ -1138,24 +1138,24 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
 
-            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool> TMethod, global::TUnit.Mocks.Arguments.Arg<TMethod2> value)
+            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool>? TMethod, global::TUnit.Mocks.Arguments.Arg<TMethod2> value)
             {
-                global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod;
+                global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod is null ? global::TUnit.Mocks.Arguments.Arg.Is<int>(default(int)!) : (global::TUnit.Mocks.Arguments.Arg<int>)TMethod;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_TMethod.Matcher, value.Matcher };
                 return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
 
-            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::TUnit.Mocks.Arguments.Arg<int> TMethod, global::System.Func<TMethod2, bool> value)
+            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::TUnit.Mocks.Arguments.Arg<int> TMethod, global::System.Func<TMethod2, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { TMethod.Matcher, __fa_value.Matcher };
                 return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
 
-            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool> TMethod, global::System.Func<TMethod2, bool> value)
+            public TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T> Invoke<TMethod2>(global::System.Func<int, bool>? TMethod, global::System.Func<TMethod2, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod;
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<int> __fa_TMethod = TMethod is null ? global::TUnit.Mocks.Arguments.Arg.Is<int>(default(int)!) : (global::TUnit.Mocks.Arguments.Arg<int>)TMethod;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_TMethod.Matcher, __fa_value.Matcher };
                 return new TestNamespace_IParameterNamed_T__Invoke_M0_MockCall<TMethod2, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Invoke", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2>.Value);
             }
@@ -1284,27 +1284,27 @@ namespace TestNamespace
             return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
         }
 
-        public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool> key, global::TUnit.Mocks.Arguments.Arg<T> value) where TKey : notnull
+        public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool>? key, global::TUnit.Mocks.Arguments.Arg<T> value) where TKey : notnull
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key;
+            global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.Is<TKey>(default(TKey)!) : (global::TUnit.Mocks.Arguments.Arg<TKey>)key;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher, value.Matcher };
             return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
         }
 
-        public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::TUnit.Mocks.Arguments.Arg<TKey> key, global::System.Func<T, bool> value) where TKey : notnull
+        public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::TUnit.Mocks.Arguments.Arg<TKey> key, global::System.Func<T, bool>? value) where TKey : notnull
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value;
+            global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<T>(default(T)!) : (global::TUnit.Mocks.Arguments.Arg<T>)value;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { key.Matcher, __fa_value.Matcher };
             return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
         }
 
-        public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool> key, global::System.Func<T, bool> value) where TKey : notnull
+        public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool>? key, global::System.Func<T, bool>? value) where TKey : notnull
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key;
-            global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value;
+            global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.Is<TKey>(default(TKey)!) : (global::TUnit.Mocks.Arguments.Arg<TKey>)key;
+            global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<T>(default(T)!) : (global::TUnit.Mocks.Arguments.Arg<T>)value;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher, __fa_value.Matcher };
             return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
         }
@@ -1318,10 +1318,10 @@ namespace TestNamespace
             return new TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Convert", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
         }
 
-        public TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T> Convert<TMethod>(global::System.Func<TMethod, bool> value)
+        public TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T> Convert<TMethod>(global::System.Func<TMethod, bool>? value)
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value;
+            global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)value;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
             return new TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Convert", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
         }
@@ -1408,24 +1408,24 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
             }
 
-            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool> key, global::TUnit.Mocks.Arguments.Arg<T> value) where TKey : notnull
+            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool>? key, global::TUnit.Mocks.Arguments.Arg<T> value) where TKey : notnull
             {
-                global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key;
+                global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.Is<TKey>(default(TKey)!) : (global::TUnit.Mocks.Arguments.Arg<TKey>)key;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher, value.Matcher };
                 return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
             }
 
-            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::TUnit.Mocks.Arguments.Arg<TKey> key, global::System.Func<T, bool> value) where TKey : notnull
+            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::TUnit.Mocks.Arguments.Arg<TKey> key, global::System.Func<T, bool>? value) where TKey : notnull
             {
-                global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<T>(default(T)!) : (global::TUnit.Mocks.Arguments.Arg<T>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { key.Matcher, __fa_value.Matcher };
                 return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
             }
 
-            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool> key, global::System.Func<T, bool> value) where TKey : notnull
+            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool>? key, global::System.Func<T, bool>? value) where TKey : notnull
             {
-                global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key;
-                global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.Is<TKey>(default(TKey)!) : (global::TUnit.Mocks.Arguments.Arg<TKey>)key;
+                global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<T>(default(T)!) : (global::TUnit.Mocks.Arguments.Arg<T>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher, __fa_value.Matcher };
                 return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
             }
@@ -1438,24 +1438,24 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
             }
 
-            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool> key, global::TUnit.Mocks.Arguments.Arg<T> value) where TKey : notnull
+            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool>? key, global::TUnit.Mocks.Arguments.Arg<T> value) where TKey : notnull
             {
-                global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key;
+                global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.Is<TKey>(default(TKey)!) : (global::TUnit.Mocks.Arguments.Arg<TKey>)key;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher, value.Matcher };
                 return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
             }
 
-            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::TUnit.Mocks.Arguments.Arg<TKey> key, global::System.Func<T, bool> value) where TKey : notnull
+            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::TUnit.Mocks.Arguments.Arg<TKey> key, global::System.Func<T, bool>? value) where TKey : notnull
             {
-                global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<T>(default(T)!) : (global::TUnit.Mocks.Arguments.Arg<T>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { key.Matcher, __fa_value.Matcher };
                 return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
             }
 
-            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool> key, global::System.Func<T, bool> value) where TKey : notnull
+            public TestNamespace_IStore_T__Put_M0_MockCall<TKey, T> Put<TKey>(global::System.Func<TKey, bool>? key, global::System.Func<T, bool>? value) where TKey : notnull
             {
-                global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key;
-                global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.Is<TKey>(default(TKey)!) : (global::TUnit.Mocks.Arguments.Arg<TKey>)key;
+                global::TUnit.Mocks.Arguments.Arg<T> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<T>(default(T)!) : (global::TUnit.Mocks.Arguments.Arg<T>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher, __fa_value.Matcher };
                 return new TestNamespace_IStore_T__Put_M0_MockCall<TKey, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Put", matchers, global::TUnit.Mocks.TypeArguments.Of<TKey>.Value);
             }
@@ -1469,9 +1469,9 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Convert", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
             }
 
-            public TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T> Convert<TMethod>(global::System.Func<TMethod, bool> value)
+            public TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T> Convert<TMethod>(global::System.Func<TMethod, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
                 return new TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Convert", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
             }
@@ -1484,9 +1484,9 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Convert", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
             }
 
-            public TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T> Convert<TMethod>(global::System.Func<TMethod, bool> value)
+            public TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T> Convert<TMethod>(global::System.Func<TMethod, bool>? value)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value;
+                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_value = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)value;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value.Matcher };
                 return new TestNamespace_IStore_T__Convert_M1_MockCall<TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Convert", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod>.Value);
             }
@@ -1643,27 +1643,27 @@ namespace TestNamespace
             return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
         }
 
-        public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool> first, global::TUnit.Mocks.Arguments.Arg<TMethod> second)
+        public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool>? first, global::TUnit.Mocks.Arguments.Arg<TMethod> second)
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first;
+            global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)first;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_first.Matcher, second.Matcher };
             return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
         }
 
-        public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::TUnit.Mocks.Arguments.Arg<TMethod2> first, global::System.Func<TMethod, bool> second)
+        public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::TUnit.Mocks.Arguments.Arg<TMethod2> first, global::System.Func<TMethod, bool>? second)
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second;
+            global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)second;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { first.Matcher, __fa_second.Matcher };
             return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
         }
 
-        public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool> first, global::System.Func<TMethod, bool> second)
+        public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool>? first, global::System.Func<TMethod, bool>? second)
         {
             var mock = this;
-            global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first;
-            global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second;
+            global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)first;
+            global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)second;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_first.Matcher, __fa_second.Matcher };
             return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
         }
@@ -1745,24 +1745,24 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
             }
 
-            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool> first, global::TUnit.Mocks.Arguments.Arg<TMethod> second)
+            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool>? first, global::TUnit.Mocks.Arguments.Arg<TMethod> second)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)first;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_first.Matcher, second.Matcher };
                 return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
             }
 
-            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::TUnit.Mocks.Arguments.Arg<TMethod2> first, global::System.Func<TMethod, bool> second)
+            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::TUnit.Mocks.Arguments.Arg<TMethod2> first, global::System.Func<TMethod, bool>? second)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second;
+                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)second;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { first.Matcher, __fa_second.Matcher };
                 return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
             }
 
-            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool> first, global::System.Func<TMethod, bool> second)
+            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool>? first, global::System.Func<TMethod, bool>? second)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first;
-                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)first;
+                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)second;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_first.Matcher, __fa_second.Matcher };
                 return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
             }
@@ -1775,24 +1775,24 @@ namespace TUnit.Mocks.Generated
                 return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
             }
 
-            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool> first, global::TUnit.Mocks.Arguments.Arg<TMethod> second)
+            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool>? first, global::TUnit.Mocks.Arguments.Arg<TMethod> second)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)first;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_first.Matcher, second.Matcher };
                 return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
             }
 
-            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::TUnit.Mocks.Arguments.Arg<TMethod2> first, global::System.Func<TMethod, bool> second)
+            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::TUnit.Mocks.Arguments.Arg<TMethod2> first, global::System.Func<TMethod, bool>? second)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second;
+                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)second;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { first.Matcher, __fa_second.Matcher };
                 return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
             }
 
-            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool> first, global::System.Func<TMethod, bool> second)
+            public TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T> Use<TMethod2, TMethod>(global::System.Func<TMethod2, bool>? first, global::System.Func<TMethod, bool>? second)
             {
-                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first;
-                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second;
+                global::TUnit.Mocks.Arguments.Arg<TMethod2> __fa_first = first is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod2>(default(TMethod2)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod2>)first;
+                global::TUnit.Mocks.Arguments.Arg<TMethod> __fa_second = second is null ? global::TUnit.Mocks.Arguments.Arg.Is<TMethod>(default(TMethod)!) : (global::TUnit.Mocks.Arguments.Arg<TMethod>)second;
                 var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_first.Matcher, __fa_second.Matcher };
                 return new TestNamespace_ITaken_T__Use_M0_MockCall<TMethod2, TMethod, T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Use", matchers, global::TUnit.Mocks.TypeArguments.Of<TMethod2, TMethod>.Value);
             }

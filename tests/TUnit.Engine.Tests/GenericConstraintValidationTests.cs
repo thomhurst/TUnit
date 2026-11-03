@@ -15,14 +15,14 @@ public class GenericConstraintValidationTests(TestMode testMode) : InvokableTest
     [Test]
     public async Task Whole_Class_Has_Same_Shape_In_Both_Modes()
     {
-        // 4 valid rows pass; 5 rows whose inferred type breaks a constraint fail.
+        // 4 valid rows pass; 4 invalid rows fail; the explicitly skipped invalid row stays skipped.
         await RunTestsWithFilter(
             $"{ClassFilter}/*",
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(9),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(4),
-                result => result.ResultSummary.Counters.Failed.ShouldBe(5),
-                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
+                result => result.ResultSummary.Counters.Failed.ShouldBe(4),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(1)
             ]);
     }
 
@@ -30,7 +30,6 @@ public class GenericConstraintValidationTests(TestMode testMode) : InvokableTest
     [Arguments("GenericMethodWithClassConstraint_InvalidType", "Type 'Int32' does not satisfy the 'class' constraint for generic parameter 'T'")]
     [Arguments("GenericMethodWithInterfaceConstraint_InvalidType", "Type 'NonImplementingClass' does not implement interface 'ITestInterface' required for generic parameter 'T'")]
     [Arguments("GenericMethodWithStructConstraint_InvalidType", "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'")]
-    [Arguments("GenericMethodWithStructConstraint_SkippedInvalidType", "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'")]
     public async Task Invalid_Row_Fails_With_Constraint_Message(string methodName, string expectedMessage)
     {
         await RunTestsWithFilter(
@@ -41,6 +40,18 @@ public class GenericConstraintValidationTests(TestMode testMode) : InvokableTest
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0),
                 result => result.Results.Single().Output?.ErrorInfo?.Message.ShouldContain(expectedMessage)
+            ]);
+    }
+
+    [Test]
+    public async Task Skipped_Invalid_Row_Remains_Skipped()
+    {
+        await RunTestsWithFilter(
+            $"{ClassFilter}/GenericMethodWithStructConstraint_SkippedInvalidType*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(1)
             ]);
     }
 

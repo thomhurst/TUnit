@@ -139,21 +139,24 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     public async Task Uninferable_Own_Class_Member_Fails_Only_Its_Class()
     {
-        // Source-gen emits no test for this class or the classes that only reflection discovers (#7333). Reflection
-        // reports one failed test for this class, and the rest of the namespace still runs.
+        // Source-gen reports inference failures for the four classes whose class arguments cannot be inferred
+        // at compile time (#7355). Reflection resolves three at runtime and fails only the self-referencing
+        // source. In both modes the remaining classes in the namespace still run.
         var reflection = testMode == TestMode.Reflection;
 
         await RunTestsWithFilter(
             "/*/TUnit.TestProject.Bugs._7208/*/*",
             [
-                result => result.ResultSummary.Outcome.ShouldBe(reflection ? "Failed" : "Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(reflection ? 43 : 39),
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(43),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(reflection ? 42 : 39),
-                result => result.ResultSummary.Counters.Failed.ShouldBe(reflection ? 1 : 0),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(reflection ? 1 : 4),
                 result => result.Results
                     .Where(x => x.Outcome == "Failed")
                     .Select(x => x.Output?.ErrorInfo?.Message)
-                    .ShouldAllBe(message => message != null && message.Contains("names a member of the class itself"))
+                    .ShouldAllBe(message => message != null && message.Contains(reflection
+                        ? "names a member of the class itself"
+                        : "class type arguments cannot be inferred at compile time"))
             ]);
     }
 }
