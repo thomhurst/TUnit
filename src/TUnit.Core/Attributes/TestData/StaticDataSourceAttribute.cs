@@ -25,12 +25,17 @@ internal sealed class StaticDataSourceAttribute : Attribute, IDataSourceAttribut
 
     /// <summary>
     /// The values to return from the first fetch of each row instead of that row, or null at an index to always
-    /// return the row. Discovery sets it to the values it evaluated from a wrapped factory row to infer a generic
+    /// return the row. Discovery sets it to the values it evaluated from a factory row to infer a generic
     /// class's type arguments, so the first test gets those values, and later tests, such as other method rows or
-    /// repeats, invoke the factory for their own objects (#7210). Each box is handed out once, including when several
+    /// repeats, invoke the factory for their own objects (#7210). RowFactories retains eagerly evaluated factories.
+    /// Each box is handed out once, including when several
     /// sources share it.
     /// </summary>
     public StrongBox<object?[]?>?[]? FirstFetchRows { get; init; }
+
+    // Reflection discovery retains the original row factories so raw Func<T> rows, which
+    // ToObjectArrayWithTypes evaluates eagerly, can supply fresh values after the first fetch.
+    public Func<Task<object?[]?>>[]? RowFactories { get; init; }
 
     public StaticDataSourceAttribute(params object?[][] data)
     {
@@ -45,7 +50,13 @@ internal sealed class StaticDataSourceAttribute : Attribute, IDataSourceAttribut
 
             if (FirstFetchRows?[i] is { } firstFetch)
             {
-                yield return () => Task.FromResult<object?[]?>(Interlocked.Exchange(ref firstFetch.Value, null) ?? clonedRow);
+                var factory = RowFactories?[i];
+                yield return () =>
+                {
+                    var evaluated = Interlocked.Exchange(ref firstFetch.Value, null);
+                    return evaluated is not null ? Task.FromResult<object?[]?>(evaluated)
+                        : factory is not null ? factory() : Task.FromResult<object?[]?>(clonedRow);
+                };
                 continue;
             }
 

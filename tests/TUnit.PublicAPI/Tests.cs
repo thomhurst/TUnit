@@ -103,7 +103,7 @@ public partial class Tests
     /// wrapped into "..." + "..." pieces, followed by the caller line number argument. See <see cref="ScrubSourcePaths"/>.
     /// </summary>
     private const string SourcePathPattern =
-        @"(?<=\b(?:Before|After)(?:Every)?\([^""\r\n]*)""(?:/|[A-Za-z]:(?:\\\\|/))[^""\r\n]*(?:""[ \t]*\+[ \t]*\r?\n[ \t]*""[^""\r\n]*)*\.cs""(?=,[ \t]*\d+[,)])";
+        @"(?<=\b(?:Before|After)(?:Every)?\([^""\r\n]*)""(?:/|[A-Za-z]:(?:\\\\|/))[^""\r\n]*(?:""[ \t]*\+[ \t]*\r?\n[ \t]*""[^""\r\n]*)*\.(?:""[ \t]*\+[ \t]*\r?\n[ \t]*"")?c(?:""[ \t]*\+[ \t]*\r?\n[ \t]*"")?s""(?=,[ \t]*\d+[,)])";
 
 #if NET
     [GeneratedRegex(SourcePathPattern)]

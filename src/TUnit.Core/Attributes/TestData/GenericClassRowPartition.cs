@@ -81,6 +81,45 @@ public static class GenericClassRowPartition
     }
 
     /// <summary>
+    /// Configures a generated class source with its declared inference and optional inferred-row filtering.
+    /// Own-class null values are retained because their declared types supply the class type arguments.
+    /// </summary>
+    /// <remarks>Used only by generated code. Explicit instantiations retain raw rows for partition fallback.</remarks>
+    /// <param name="source">The generated class data source.</param>
+    /// <param name="filterRows">Whether to suppress empty fallback rows and all-null external rows immediately.</param>
+    /// <param name="classTypeArguments">Declared class type arguments, when needed for runtime partitioning.</param>
+    /// <returns>The configured source. Evaluated row values are reused on the first fetch only.</returns>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static IDataSourceAttribute ConfigureInferredSource(IDataSourceAttribute source, bool filterRows, params Type[] classTypeArguments)
+    {
+        // Generated emission creates a fresh source instance for each closed instantiation.
+        if (source is MethodDataSourceAttribute methodSource)
+        {
+            methodSource.FilterClassRows = filterRows;
+            if (filterRows)
+            {
+                // Inferred sources contribute only eligible class rows, including when empty.
+                // Raw explicit/fallback sources retain their original empty-source behavior.
+                methodSource.SkipIfEmpty = false;
+            }
+            methodSource.InferredClassTypeArguments = classTypeArguments.Length == 0 ? null : classTypeArguments;
+        }
+        else if (classTypeArguments.Length > 0)
+        {
+            DeclaredRowTypes.Add(source, classTypeArguments);
+        }
+        return source;
+    }
+
+    // Arguments rows infer through constructor positions at generation time, rather than
+    // through the first non-null runtime value. Keep that mapping on the original attribute.
+    private static readonly ConditionalWeakTable<IDataSourceAttribute, Type[]> DeclaredRowTypes = new();
+
+    // External class rows need a runtime value to infer their type arguments in either mode.
+    internal static bool HasNonNullValues(object?[] row) =>
+        TestDataRowUnwrapper.UnwrapArray(row).Data.Any(value => value is not null);
+
+    /// <summary>
     /// Invokes the factory of a row holding a <see cref="TestDataRow{T}"/> of <see cref="Func{TResult}"/> once, and
     /// returns a row that wraps its values with the same settings. Inferring the row's type arguments and building its
     /// test then read the same values, instead of each invoking the factory (#7210). Other rows are returned as they are.
@@ -227,7 +266,15 @@ public static class GenericClassRowPartition
                 await foreach (var rowFactory in dataSources[index].GetDataRowsAsync(dataGeneratorMetadata).ConfigureAwait(false))
                 {
                     var row = await rowFactory().ConfigureAwait(false) is { } fetched ? EvaluateWrappedFactory(fetched) : null;
-                    var infers = InfersTypeArguments(row, ClassTypeArguments);
+                    // Fixed declared row types infer through constructor positions, not necessarily
+                    // the first runtime value. Own-class sources can also infer from null values.
+                    var source = dataSources[index];
+                    var infers = DeclaredRowTypes.TryGetValue(source, out var argumentTypes)
+                        ? argumentTypes.SequenceEqual(ClassTypeArguments)
+                        : source is MethodDataSourceAttribute { InferredClassTypeArguments: { } declared } methodSource
+                            ? row is { Length: > 0 } && declared.SequenceEqual(ClassTypeArguments)
+                                && (methodSource.ClassProvidingDataSource is null || HasNonNullValues(row))
+                            : InfersTypeArguments(row, ClassTypeArguments);
                     anyRowInfers |= infers;
                     rows.Add(new EvaluatedRow(rowFactory, row, infers));
                 }

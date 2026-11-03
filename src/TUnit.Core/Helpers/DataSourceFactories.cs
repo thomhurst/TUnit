@@ -100,6 +100,11 @@ public static class DataSourceFactories
     {
         var result = invoke();
 
+        if (result is null)
+        {
+            yield break;
+        }
+
         foreach (var row in RowsFromValue(result, keepTupleRowsWhole))
         {
             yield return row;
@@ -118,6 +123,11 @@ public static class DataSourceFactories
         }
 
         var taskResult = await result;
+        if (taskResult is null && IsDeclaredCollection<T>())
+        {
+            yield break;
+        }
+
         foreach (var row in RowsFromValue(taskResult, keepTupleRowsWhole))
         {
             yield return row;
@@ -127,6 +137,11 @@ public static class DataSourceFactories
     private static async IAsyncEnumerable<Func<Task<object?[]?>>> FromValueTaskCore<T>(Func<ValueTask<T>> invoke, bool keepTupleRowsWhole)
     {
         var taskResult = await invoke();
+        if (taskResult is null && IsDeclaredCollection<T>())
+        {
+            yield break;
+        }
+
         foreach (var row in RowsFromValue(taskResult, keepTupleRowsWhole))
         {
             yield return row;
@@ -165,6 +180,11 @@ public static class DataSourceFactories
         var result = invoke(GetRequiredInstance(dataGeneratorMetadata));
         var keepTupleRowsWhole = KeepsTupleRowsWhole(dataGeneratorMetadata);
 
+        if (result is null)
+        {
+            yield break;
+        }
+
         foreach (var row in RowsFromValue(result, keepTupleRowsWhole))
         {
             yield return row;
@@ -185,6 +205,11 @@ public static class DataSourceFactories
         }
 
         var taskResult = await result;
+        if (taskResult is null && IsDeclaredCollection<T>())
+        {
+            yield break;
+        }
+
         foreach (var row in RowsFromValue(taskResult, keepTupleRowsWhole))
         {
             yield return row;
@@ -198,6 +223,11 @@ public static class DataSourceFactories
         var keepTupleRowsWhole = KeepsTupleRowsWhole(dataGeneratorMetadata);
 
         var taskResult = await result;
+        if (taskResult is null && IsDeclaredCollection<T>())
+        {
+            yield break;
+        }
+
         foreach (var row in RowsFromValue(taskResult, keepTupleRowsWhole))
         {
             yield return row;
@@ -305,6 +335,9 @@ public static class DataSourceFactories
 
         return DataSourceHelpers.ToObjectArray(item);
     }
+
+    private static bool IsDeclaredCollection<T>() =>
+        typeof(T) != typeof(string) && typeof(IEnumerable).IsAssignableFrom(typeof(T));
 
     private static object GetRequiredInstance(DataGeneratorMetadata dataGeneratorMetadata)
     {
