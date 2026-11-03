@@ -11,8 +11,8 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/*/*",
         [
             result => result.ResultSummary.Outcome.ShouldBe("Failed"),
-            result => result.ResultSummary.Counters.Total.ShouldBe(41),
-            result => result.ResultSummary.Counters.Passed.ShouldBe(40),
+            result => result.ResultSummary.Counters.Total.ShouldBe(42),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(41),
             result => result.ResultSummary.Counters.Failed.ShouldBe(1),
             result => result.Results.Where(test => test.Outcome == "Failed")
                 .ShouldAllBe(test => test.Output!.ErrorInfo!.Message!.Contains("type arguments"))

@@ -256,6 +256,15 @@ public class ExternalNullRows<T>(T value)
     public async Task Test() => await Assert.That((object?)value).IsEqualTo("seed");
 }
 
+// Generic provider attributes retain external null-row filtering in generated code.
+[Arguments("seed")]
+[MethodDataSource<GenericExternalProvider>(nameof(GenericExternalProvider.NullRows))]
+public class GenericProviderNullRows<T>(T value)
+{
+    [Test]
+    public async Task Test() => await Assert.That((object?)value).IsEqualTo("seed");
+}
+
 // An unrelated polymorphic column does not determine any class type argument.
 [MethodDataSource(typeof(AdditionalExternalRows), nameof(AdditionalExternalRows.UnrelatedColumns))]
 public class ExternalUnrelatedColumnRows<T>(T value, object other)
@@ -425,3 +434,8 @@ public class ExplicitConstructorRows<T>
 }
 
 #pragma warning restore TUnit0001
+
+public sealed class GenericExternalProvider
+{
+    public static IEnumerable<string?> NullRows() => [null];
+}

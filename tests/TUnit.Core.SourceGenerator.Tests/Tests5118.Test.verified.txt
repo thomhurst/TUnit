@@ -78,7 +78,7 @@ internal static class TUnit_TestProject_Bugs__5118_AsyncClassMethodDataSourceTes
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute("GetAsyncTestData")
+    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._5118.AsyncTestDataSources), "GetAsyncTestData")
     {
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromAsyncEnumerable(static () => global::TUnit.TestProject.Bugs._5118.AsyncTestDataSources.GetAsyncTestData()),
     },

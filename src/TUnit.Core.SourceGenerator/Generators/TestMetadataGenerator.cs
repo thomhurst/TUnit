@@ -3232,15 +3232,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // For instance data sources, we still use the same constructor signature
             writer.AppendLine($"new {attrTypeName}(typeof({typeArg.GloballyQualified()}), \"{methodName}\")");
         }
-        else if (attr.AttributeClass is { IsGenericType: true } && !isStatic && !usesTestClassInstance)
+        else if (attr.AttributeClass is { IsGenericType: true } && !usesTestClassInstance)
         {
             writer.AppendLine($"new {attrTypeName}(typeof({targetType.GloballyQualified()}), \"{methodName}\")");
         }
         else
         {
-            // MethodDataSource(string) constructor — ClassProvidingDataSource is intentionally null here
-            // because the Factory delegate (set below) already encodes the correct target type directly.
-            // The runtime attribute only needs ClassProvidingDataSource for reflection-based lookup.
+            // Own-class sources keep ClassProvidingDataSource null. Explicit providers retain
+            // their identity above because class-row filtering also uses it at runtime.
             writer.AppendLine($"new {attrTypeName}(\"{methodName}\")");
         }
         writer.AppendLine("{");

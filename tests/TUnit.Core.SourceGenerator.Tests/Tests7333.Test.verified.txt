@@ -1649,6 +1649,88 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7333_GenericProviderNullRows_T_Test_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "GenericProviderNullRows",
+        Namespace = "TUnit.TestProject.Bugs._7333",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
+    private static global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return (global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<string>), args)!;
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Test());
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute("seed"),
+            new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.Bugs._7333.GenericExternalProvider>("NullRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<string>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<string>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<string>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7333.GenericProviderNullRows<string>.Test",
+            filePath: "",
+            lineNumber: 264,
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute("seed"),
+    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7333.GenericExternalProvider), "NullRows")
+    {
+        FilterClassRows = true,
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7333.GenericExternalProvider.NullRows()),
+    },
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7333_GenericProviderNullRows_T_Test_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7333.GenericProviderNullRows<string>>(static () => TUnit_TestProject_Bugs__7333_GenericProviderNullRows_T_Test_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7333_ExternalUnrelatedColumnRows_T_Test_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7333.ExternalUnrelatedColumnRows<>", new global::TUnit.Core.ClassMetadata
@@ -1697,7 +1779,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalUnrelatedColumnRows_T
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7333.ExternalUnrelatedColumnRows<int>.Test",
             filePath: "",
-            lineNumber: 263,
+            lineNumber: 272,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1782,7 +1864,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "methodRow", new
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7333.ExternalFreshFactoryRows<FreshResource>.Test",
             filePath: "",
-            lineNumber: 298,
+            lineNumber: 307,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1868,7 +1950,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalEmptyValueRows_T_Test
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7333.ExternalEmptyValueRows<int>.Test",
             filePath: "",
-            lineNumber: 316,
+            lineNumber: 325,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1949,7 +2031,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalOverloadedConstructor
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7333.ExternalOverloadedConstructorRows<int>.Test",
             filePath: "",
-            lineNumber: 332,
+            lineNumber: 341,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2030,7 +2112,7 @@ internal static class TUnit_TestProject_Bugs__7333_OwnEmptyValueRows_T_Test_Test
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7333.OwnEmptyValueRows<int>.Test",
             filePath: "",
-            lineNumber: 345,
+            lineNumber: 354,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2111,7 +2193,7 @@ internal static class TUnit_TestProject_Bugs__7333_OwnNullRows_T_Test_TestSource
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7333.OwnNullRows<string?>.Test",
             filePath: "",
-            lineNumber: 354,
+            lineNumber: 363,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2192,7 +2274,7 @@ internal static class TUnit_TestProject_Bugs__7333_UnsealedExternalRows_T_Test_T
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7333.UnsealedExternalRows<DerivedRow>.Test",
             filePath: "",
-            lineNumber: 373,
+            lineNumber: 382,
             hasDataSource: true,
             classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._7333.DerivedRow) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2273,7 +2355,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExternalParameterlessConstruc
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7333.ExternalParameterlessConstructorRows<int>.Test",
             filePath: "",
-            lineNumber: 392,
+            lineNumber: 401,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2350,7 +2432,7 @@ internal static class TUnit_TestProject_Bugs__7333_OwnParameterlessConstructorRo
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7333.OwnParameterlessConstructorRows<int>.Test",
             filePath: "",
-            lineNumber: 406,
+            lineNumber: 415,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2430,7 +2512,7 @@ internal static class TUnit_TestProject_Bugs__7333_ExplicitConstructorRows_T_Tes
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7333.ExplicitConstructorRows<int>.Test",
             filePath: "",
-            lineNumber: 423,
+            lineNumber: 432,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

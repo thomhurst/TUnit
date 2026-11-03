@@ -115,7 +115,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.MethodDataSourceAttribute("Foo")
+    new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.TestData), "Foo")
     {
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.TestData.Foo()),
     },
