@@ -18,6 +18,14 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators;
 [Generator]
 public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 {
+    private static readonly DiagnosticDescriptor InaccessibleContainingType = new(
+        "TUNITGEN005",
+        "Static data-source property has an inaccessible containing type",
+        "Static data-source property '{0}' cannot be initialized because its containing type is inaccessible. Make the type and all containing types internal or public.",
+        "TUnit",
+        DiagnosticSeverity.Error,
+        true);
+
     public const string ParseStaticProperties = "ParseStaticProperties";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -38,9 +46,41 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
                 predicate: static (node, _) => IsCandidateClass(node),
                 transform: static (ctx, ct) => GetStaticPropertyChain(ctx, ct))
             // Every chain contains the class itself, so drop chains without any static data-source
-            // property: they add nothing to the result, and keeping them out of the collected array
+            // property or diagnostic: they add nothing to the result, and keeping them out of the collected array
             // stops unrelated classes (any class with a base list) from re-running the parse step.
             .Where(static chain => HasAnyProperty(chain));
+
+        context.RegisterSourceOutput(classChains.Collect().Combine(enabledProvider).Combine(context.CompilationProvider), static (ctx, pair) =>
+        {
+            if (!pair.Left.Right)
+            {
+                return;
+            }
+
+            var reported = new HashSet<InaccessibleProperty>();
+            foreach (var chain in pair.Left.Left)
+            {
+                foreach (var segment in chain)
+                {
+                    foreach (var property in segment.InaccessibleProperties)
+                    {
+                        if (reported.Add(property))
+                        {
+                            // Reattach to the current tree so pragmas and per-file diagnostic options apply.
+                            // The compilation-relative ordinal distinguishes trees with identical paths,
+                            // while discovery models retain only equatable location data. The syntax provider's
+                            // semantic transform reruns when the compilation changes, and SegmentCaches is keyed
+                            // by that compilation, so insertion/reordering refreshes ordinals before this output.
+                            var tree = pair.Right.SyntaxTrees.ElementAtOrDefault(property.TreeOrdinal);
+                            var location = tree is null
+                                ? Location.Create(property.FilePath, property.Span, property.LineSpan)
+                                : Location.Create(tree, property.Span);
+                            ctx.ReportDiagnostic(Diagnostic.Create(InaccessibleContainingType, location, property.Name));
+                        }
+                    }
+                }
+            }
+        });
 
         var testClasses = classChains
             .Collect()
@@ -57,7 +97,11 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
     /// </summary>
     /// <param name="TypeKey">Identity of the type, matching <see cref="SymbolEqualityComparer.Default"/>.</param>
     /// <param name="Properties">The type's public static data-source properties, in member order.</param>
-    internal sealed record StaticPropertyTypeSegment(string TypeKey, EquatableArray<StaticPropertyEntry> Properties);
+    /// <param name="InaccessibleProperties">Source properties that cannot be referenced by generated initialization.</param>
+    internal sealed record StaticPropertyTypeSegment(string TypeKey, EquatableArray<StaticPropertyEntry> Properties,
+        EquatableArray<InaccessibleProperty> InaccessibleProperties);
+
+    internal sealed record InaccessibleProperty(string Name, string FilePath, TextSpan Span, LinePositionSpan LineSpan, int TreeOrdinal);
 
     internal sealed record StaticPropertyEntry(string Name, PropertyWithDataSourceModel Model);
 
@@ -94,7 +138,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         // Indexed loop: EquatableArray<T>.GetEnumerator() returns a boxed IEnumerator<T>.
         for (var i = 0; i < chain.Length; i++)
         {
-            if (chain[i].Properties.Length > 0)
+            if (chain[i].Properties.Length > 0 || chain[i].InaccessibleProperties.Length > 0)
             {
                 return true;
             }
@@ -128,7 +172,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 
             if (!cache.TryGetValue(currentType, out var segment))
             {
-                segment = cache.GetOrAdd(currentType, static type => CreateSegment(type));
+                segment = cache.GetOrAdd(currentType, type => CreateSegment(type, context.SemanticModel.Compilation));
             }
 
             segments.Add(segment);
@@ -137,9 +181,33 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         return segments.ToEquatableArray();
     }
 
-    private static StaticPropertyTypeSegment CreateSegment(INamedTypeSymbol type)
+    private static bool IsAccessibleContainingType(INamedTypeSymbol type, Compilation compilation)
+    {
+        if (!compilation.IsSymbolAccessibleWithin(type, compilation.Assembly))
+        {
+            return false;
+        }
+
+        for (var current = type; current is not null; current = current.ContainingType)
+        {
+            if (current.IsFileLocal)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static StaticPropertyTypeSegment CreateSegment(INamedTypeSymbol type, Compilation compilation)
     {
         List<StaticPropertyEntry>? properties = null;
+
+        List<InaccessibleProperty>? inaccessibleProperties = null;
+
+        // Generated initialization lives in an unrelated top-level type. Roslyn checks the
+        // entire containing-type chain; also exclude types local to a different source file.
+        var accessible = IsAccessibleContainingType(type, compilation);
 
         foreach (var member in type.GetMembers())
         {
@@ -150,6 +218,20 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 
                 if (dataSourceAttr != null)
                 {
+                    if (!accessible)
+                    {
+                        var location = property.Locations.FirstOrDefault(static location => location.IsInSource);
+                        if (location is not null)
+                        {
+                            inaccessibleProperties ??= [];
+                            inaccessibleProperties.Add(new InaccessibleProperty(property.Name,
+                                location.GetLineSpan().Path, location.SourceSpan, location.GetLineSpan().Span,
+                                compilation.SyntaxTrees.TakeWhile(tree => !ReferenceEquals(tree, location.SourceTree)).Count()));
+                        }
+
+                        continue;
+                    }
+
                     properties ??= [];
                     properties.Add(new StaticPropertyEntry(
                         property.Name,
@@ -164,7 +246,8 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 
         return new StaticPropertyTypeSegment(
             type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            properties is null ? EquatableArray<StaticPropertyEntry>.Empty : properties.ToEquatableArray());
+            properties is null ? EquatableArray<StaticPropertyEntry>.Empty : properties.ToEquatableArray(),
+            inaccessibleProperties is null ? EquatableArray<InaccessibleProperty>.Empty : inaccessibleProperties.ToEquatableArray());
     }
 
     private static EquatableArray<PropertyWithDataSourceModel> ParseStaticPropertyInitializers(ImmutableArray<EquatableArray<StaticPropertyTypeSegment>> classChains, bool enabledProvider)
