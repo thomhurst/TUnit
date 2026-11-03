@@ -916,7 +916,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // A source that supplies only one of them (a method row or [GenerateGenericTest] without a
             // class source) would emit an entry that names the open type parameters, which does not
             // compile (#7117). Those sources are paired with each class source further down instead.
-            if (classTypeArgCount > 0 && methodTypeArgCount > 0 && typeArguments.Length != classTypeArgCount + methodTypeArgCount)
+            if (!GenericClassInferencePolicy.IsCompletePair(classTypeArgCount, methodTypeArgCount, typeArguments.Length))
             {
                 return;
             }
@@ -1011,7 +1011,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // supplies the types of, and those whose declared rows infer these types, whether or not the
                     // method has rows. AddRow skips a source a repeated attribute already added. Reflection mode
                     // does the same in AddDeferredOwnSources and GroupClassRowsByTypeArgumentsAsync (#7208).
-                    if (fromGenerateGenericTest && existing.HasClassRows)
+                    if (fromGenerateGenericTest && existing.HasClassRows
+                        && GenericClassInferencePolicy.OwnsInstantiation(GenericClassInferencePolicy.Source.ClassRow, GenericClassInferencePolicy.Source.GenerateGenericTest))
                     {
                         foreach (var ownSource in GetOwnClassMethodDataSourcesForInstantiation(testMethod, classTypeArgs))
                         {
@@ -1168,8 +1169,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // type argument, as reflection mode reads the member on the closed class (#7117).
         ITypeSymbol[] CloseOverClass(ITypeSymbol[] classTypes, ITypeSymbol[] methodTypes)
         {
-            var combined = new ITypeSymbol[classTypes.Length + methodTypes.Length];
-            Array.Copy(classTypes, combined, classTypes.Length);
+            var combined = GenericClassInferencePolicy.Pair(classTypes, methodTypes);
             for (var i = 0; i < methodTypes.Length; i++)
             {
                 combined[classTypes.Length + i] = SubstituteTypeParameters(methodTypes[i], testMethod.TypeSymbol.TypeParameters, classTypes, compilation);
@@ -1319,7 +1319,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
                 var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation,
-                    nullArgumentsArrayInfersObject: !classTypeArgumentsSupplied);
+                    nullArgumentsArrayInfersObject: GenericClassInferencePolicy.NullMethodRowInfersObject(classTypeArgumentsSupplied, hasExplicitClassTypes: false));
                 if (inferredTypes is { Length: > 0 })
                 {
                     (inferringRows ??= []).Add(methodArgAttr);
@@ -1390,24 +1390,29 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // This class-only phase is mutually exclusive with the generic-method phases above.
-        // Process MethodDataSource attributes for generic classes (non-generic methods)
+        // Class-only sources have their own precedence: member sources precede parameter inference.
         if (testMethod is { IsGenericType: true, IsGenericMethod: false })
         {
-            foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+            foreach (var source in GenericClassInferencePolicy.Sources)
             {
-                var inferredTypes = InferClassTypesFromMethodDataSource(testMethod, mdsAttr);
-                if (inferredTypes is { Length: > 0 })
+                switch (source)
                 {
-                    TryAddInstantiation(inferredTypes);
+                    case GenericClassInferencePolicy.Source.MethodDataSource:
+                        foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+                        {
+                            if (InferClassTypesFromMethodDataSource(testMethod, mdsAttr) is { Length: > 0 } inferredTypes)
+                            {
+                                TryAddInstantiation(inferredTypes);
+                            }
+                        }
+                        break;
+                    case GenericClassInferencePolicy.Source.ParameterAttribute:
+                        if (InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol) is { Length: > 0 } parameterTypes)
+                        {
+                            TryAddInstantiation(parameterTypes);
+                        }
+                        break;
                 }
-            }
-
-            // Process typed data source attributes for generic classes
-            var typedDataSourceInferredTypes = InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol);
-            if (typedDataSourceInferredTypes is { Length: > 0 })
-            {
-                TryAddInstantiation(typedDataSourceInferredTypes);
             }
         }
 
@@ -1427,7 +1432,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             var methodInferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodArgAttr, compilation);
                             if (methodInferredTypes is { Length: > 0 })
                             {
-                                TryAddCombinedArgumentsInstantiation(classInferredTypes, classInferredTypes.Concat(methodInferredTypes).ToArray(), argAttr, methodArgAttr);
+                                TryAddCombinedArgumentsInstantiation(classInferredTypes, GenericClassInferencePolicy.Pair(classInferredTypes, methodInferredTypes), argAttr, methodArgAttr);
                             }
                         }
                     }
@@ -1493,35 +1498,41 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // infers runs only that source. Any other [GenerateGenericTest] type runs every method
                 // data source. A null source (IInfersType<T>) also runs every method data source.
                 var methodSources = new List<(ITypeSymbol[] Types, AttributeData? Source, GenericMethodInferencePolicy.Source PolicySource)>();
-                foreach (var methodArgAttr in methodArgumentsAttributes)
+                foreach (var rule in GenericClassInferencePolicy.MethodSources)
                 {
-                    if (InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodArgAttr, compilation) is { } types && types.Length == methodTypeArgCount)
+                    switch (rule.Source)
                     {
-                        methodSources.Add((types, methodArgAttr, GenericMethodInferencePolicy.Source.Arguments));
+                        case GenericMethodInferencePolicy.Source.Arguments:
+                            foreach (var methodArgAttr in methodArgumentsAttributes)
+                            {
+                                AddMethodSource(InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodArgAttr, compilation), methodArgAttr, rule);
+                            }
+                            break;
+                        case GenericMethodInferencePolicy.Source.TypedDataSource:
+                            foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+                            {
+                                AddMethodSource(InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr), dataSourceAttr, rule);
+                            }
+                            break;
+                        case GenericMethodInferencePolicy.Source.ParameterAttribute:
+                            AddMethodSource(InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol), null, rule);
+                            break;
+                        case GenericMethodInferencePolicy.Source.MethodDataSource:
+                            foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+                            {
+                                AddMethodSource(InferTypesFromMethodDataSource(testMethod, mdsAttr), mdsAttr, rule);
+                            }
+                            break;
                     }
                 }
 
-                // A typed data source (DataSourceGeneratorAttribute<T>) infers the method type arguments
-                // as on a non-generic class (#7164). One whose type arguments cover the class type
-                // parameters as well is not a method source: it closes the class and the method itself.
-                foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+                void AddMethodSource(ITypeSymbol[]? types, AttributeData? source, GenericMethodInferencePolicy.Rule rule)
                 {
-                    if (InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr) is { } types && types.Length == methodTypeArgCount)
+                    // A source that closes both class and method is already a full instantiation,
+                    // rather than a method source to pair once more with every class source.
+                    if (types is not null && types.Length == methodTypeArgCount)
                     {
-                        methodSources.Add((types, dataSourceAttr, GenericMethodInferencePolicy.Source.TypedDataSource));
-                    }
-                }
-
-                if (InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol) is { } inferringTypes && inferringTypes.Length == methodTypeArgCount)
-                {
-                    methodSources.Add((inferringTypes, null, GenericMethodInferencePolicy.Source.ParameterAttribute));
-                }
-
-                foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
-                {
-                    if (InferTypesFromMethodDataSource(testMethod, mdsAttr) is { } types && types.Length == methodTypeArgCount)
-                    {
-                        methodSources.Add((types, mdsAttr, GenericMethodInferencePolicy.Source.MethodDataSource));
+                        methodSources.Add((types, rule.ScopesRows ? source : null, rule.Source));
                     }
                 }
 
@@ -1566,7 +1577,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     foreach (var methodGenericTest in methodGenericTestAttrs)
                     {
-                        var combined = classTypes.Concat(methodGenericTest.TypeArgs!).ToArray();
+                        var combined = GenericClassInferencePolicy.Pair(classTypes, methodGenericTest.TypeArgs!);
                         TryAddClassRowInstantiationWithEveryMethodSource(classTypes, combined, classAttr, methodGenericTest.Attribute, typedDataSourceBucket);
 
                         // After the add, so the deferred sources also join an entry that a method row created
@@ -1580,7 +1591,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     foreach (var methodGenericTest in methodGenericTestAttrs)
                     {
-                        var combined = classGenericTest.TypeArgs!.Concat(methodGenericTest.TypeArgs!).ToArray();
+                        var combined = GenericClassInferencePolicy.Pair(classGenericTest.TypeArgs!, methodGenericTest.TypeArgs!);
                         JoinDeferredDataSources(combined);
                         TryAddInstantiation(combined,
                             reportMethodConstraintViolation: true,
@@ -1804,7 +1815,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     foreach (var (attribute, classTypes) in otherClassDataSources ?? [])
                     {
-                        if (classTypes is null || InferredTypesMatch(classTypes, instantiation.ClassTypeArgs))
+                        if (GenericClassInferencePolicy.IncludesRow(classTypes is not null, classTypes is not null && InferredTypesMatch(classTypes, instantiation.ClassTypeArgs), includeUninferred: true))
                         {
                             instantiation.AddRow(attribute, isClassRow: true);
                             hasClassDataSource = true;
@@ -2148,13 +2159,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // Some class rows come from data sources whose row types are known only at run time, so every
             // test's row reaches the constructor through args (#7210)
-            if (partition.Fallback == ClassRowFallback.NoClassRow)
+            if (partition.Fallback == GenericClassInferencePolicy.RowFallback.NoClassRow)
             {
                 // No row of any class data source inferred these types, so the partition yields one empty row
                 writer.AppendLine($"if (args.Length == 0) throw new global::System.InvalidOperationException(\"{EscapeString(NoClassRowForMethodRowMessage)}\");");
             }
 
-            if (partition.Fallback == ClassRowFallback.AllRows || !entry.HasClassRows)
+            if (partition.Fallback == GenericClassInferencePolicy.RowFallback.AllRows || !entry.HasClassRows)
             {
                 // Rows of other types may build the instance, converted to the parameter types (#7161)
                 writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol.Construct(entry.ClassTypeArgs)));
@@ -2696,21 +2707,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Mirrors <c>TUnit.Core.GenericClassRowFallback</c>: what an instantiation uses when no row of its partitioned
-    /// class data sources infers its class type arguments.
-    /// </summary>
-    private enum ClassRowFallback
-    {
-        None,
-        AllRows,
-        NoClassRow,
-    }
-
-    /// <summary>
     /// The class data sources of an instantiation whose rows are split at run time by the class type arguments they
     /// infer. <paramref name="PartitionedIndices"/> are the sources whose row types the generator cannot see.
     /// </summary>
-    private sealed record ClassDataSourcePartition(AttributeData[] DataSources, int[] PartitionedIndices, ClassRowFallback Fallback);
+    private sealed record ClassDataSourcePartition(AttributeData[] DataSources, int[] PartitionedIndices, GenericClassInferencePolicy.RowFallback Fallback);
 
     /// <summary>
     /// For an instantiation of a generic class whose class-level data sources include one whose row types the
@@ -2802,9 +2802,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        var fallback = hasCompileTimeClassRow ? ClassRowFallback.None
-            : hasClassArgumentsRows ? ClassRowFallback.NoClassRow
-            : ClassRowFallback.AllRows;
+        var fallback = GenericClassInferencePolicy.SelectRowFallback(hasCompileTimeClassRow, hasClassArgumentsRows);
 
         return new ClassDataSourcePartition(dataSources.ToArray(), partitionedIndices.ToArray(), fallback);
     }
@@ -6812,7 +6810,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             if (methodInferredTypes is { Length: > 0 })
                             {
                                 // Combine class types and method types
-                                var combinedTypes = classInferredTypes.Concat(methodInferredTypes).ToArray();
+                                var combinedTypes = GenericClassInferencePolicy.Pair(classInferredTypes, methodInferredTypes);
                                 var typeKey = BuildTypeKey(combinedTypes);
 
                                 // Skip if we've already processed this type combination
@@ -7244,22 +7242,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return false;
         }
 
-        // An empty row ([Arguments] on C<T>()) has no value to supply a type argument
         var boundCount = Math.Min(valueCount, primaryConstructor.Parameters.Length);
-        if (boundCount == 0)
-        {
-            return valueCount == 0;
-        }
-
+        var hasClassTypeParameter = false;
         for (var i = 0; i < boundCount; i++)
         {
-            if (ContainsClassTypeParameter(primaryConstructor.Parameters[i].Type, classSymbol))
-            {
-                return false;
-            }
+            hasClassTypeParameter |= ContainsClassTypeParameter(primaryConstructor.Parameters[i].Type, classSymbol);
         }
 
-        return true;
+        return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(valueCount, boundCount, hasClassTypeParameter);
     }
 
     /// <param name="nullArgumentsArrayInfersObject">
@@ -7990,7 +7980,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var inferred = rowType == null
                 ? null
                 : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType);
-            if (inferred == null ? includeUninferred : inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default))
+            if (GenericClassInferencePolicy.IncludesRow(inferred is not null, inferred is not null && inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default), includeUninferred))
             {
                 yield return attribute;
             }

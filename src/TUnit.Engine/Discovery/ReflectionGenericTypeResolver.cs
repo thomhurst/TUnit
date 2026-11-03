@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Engine.Helpers;
+using TUnit.Inference;
 
 namespace TUnit.Engine.Discovery;
 
@@ -346,8 +347,8 @@ internal static class ReflectionGenericTypeResolver
             var classTypeArguments = declaringType.GenericTypeArguments;
             if (classGenericParameters.Length == classTypeArguments.Length)
             {
-                substitutionParameters = classGenericParameters.Concat(genericParameters).ToArray();
-                substitutionArguments = classTypeArguments.Concat(typeArguments).ToArray();
+                substitutionParameters = GenericClassInferencePolicy.Pair(classGenericParameters, genericParameters);
+                substitutionArguments = GenericClassInferencePolicy.Pair(classTypeArguments, typeArguments);
             }
         }
 

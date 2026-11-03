@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <Compile Include="..\TUnit.Core.SourceGenerator\Helpers\GenericMethodInferencePolicy.cs" Link="Discovery\GenericMethodInferencePolicy.cs" />
+    <Compile Include="..\TUnit.Core.SourceGenerator\Helpers\GenericClassInferencePolicy.cs" Link="Discovery\GenericClassInferencePolicy.cs" />
   </ItemGroup>
 
   <Import Project="..\..\eng\Library.targets" />

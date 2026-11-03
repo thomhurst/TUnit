@@ -557,7 +557,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // infer (#7118)
         var methodRowClassTypeArguments = methodRowTests == null
             ? InferClassTypeArgumentsOfMethodRows(genericTypeDefinition, testMethods, classDataSources.Length + (typeFreeClassRows?.Length ?? 0),
-                nullValuesArrayInfersObject: classDataSources.Length == 0 && generateGenericTestAttributes.Length == 0)
+                nullValuesArrayInfersObject: GenericClassInferencePolicy.NullMethodRowInfersObject(classDataSources.Length > 0, generateGenericTestAttributes.Length > 0))
             : null;
 
         // [GenerateGenericTest] types' class constraint violations are reported before the class rows'
@@ -573,7 +573,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         foreach (var typeArguments in generateGenericTestTypeArguments)
         {
-            if (methodRowClassTypeArguments != null && IsInferredByClassRows(classRowGroups!, typeArguments))
+            if (methodRowClassTypeArguments != null && IsInferredByClassRows(classRowGroups!, typeArguments)
+                && GenericClassInferencePolicy.OwnsInstantiation(GenericClassInferencePolicy.Source.ClassRow, GenericClassInferencePolicy.Source.GenerateGenericTest))
             {
                 // The class rows' instantiation of these types stands for both, as in the source generator (#7118),
                 // so it also reads the own-class sources this instantiation would have read (#7208)
@@ -1041,7 +1042,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // With no [GenerateGenericTest] instantiation for it to run on, [Arguments(null)] infers object
         // like any other null value, rather than being dropped (#7141)
-        var nullValuesArrayInfersObject = generateGenericTestAttributes.Length == 0;
+        var nullValuesArrayInfersObject = GenericClassInferencePolicy.NullMethodRowInfersObject(hasClassTypeSource: false, hasExplicitClassTypes: generateGenericTestAttributes.Length > 0);
 
         foreach (var genericMethod in testMethods)
         {
@@ -1126,7 +1127,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     var rows = new List<IDataSourceAttribute>(concreteDataSources.Length);
                     for (var i = 0; i < concreteDataSources.Length; i++)
                     {
-                        if (groupOfSource[i] == groupIndex || isListedByGenerateGenericTest && groupOfSource[i] < 0)
+                        if (GenericClassInferencePolicy.IncludesRow(groupOfSource[i] >= 0, groupOfSource[i] == groupIndex, isListedByGenerateGenericTest))
                         {
                             rows.Add(concreteDataSources[i]);
                         }
@@ -1246,9 +1247,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         List<IDataSourceAttribute>? rows = null;
         for (var i = 0; i < dataSources.Length; i++)
         {
-            var keep = rowTypeArguments[i] is { } inferred
-                ? AreSameTypeArguments(inferred, classTypeArguments)
-                : !onlyInferringRows;
+            var inferred = rowTypeArguments[i];
+            var keep = GenericClassInferencePolicy.IncludesRow(inferred is not null,
+                inferred is not null && AreSameTypeArguments(inferred, classTypeArguments), !onlyInferringRows);
 
             if (keep)
             {
@@ -1292,7 +1293,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         GenerateGenericTestAttribute[] generateGenericTestAttributes)
     {
         List<TestMetadata>? tests = null;
-        var allClassRowSources = allClassRows?.ToArray() ?? typeFreeClassRows;
+        var fallback = GenericClassInferencePolicy.SelectRowFallback(hasMatchingClassRow: typeFreeClassRows is not null, hasClassArgumentsRows: allClassRows is null);
+        var allClassRowSources = fallback == GenericClassInferencePolicy.RowFallback.NoClassRow ? null : allClassRows?.ToArray() ?? typeFreeClassRows;
 
         for (var methodIndex = 0; methodIndex < testMethods.Length; methodIndex++)
         {
@@ -1442,23 +1444,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
-        // An empty row ([Arguments] on C<T>()) has no value to supply a type argument
         var parameters = constructor.GetParameters();
         var boundCount = Math.Min(valueCount, parameters.Length);
-        if (boundCount == 0)
-        {
-            return valueCount == 0;
-        }
-
+        var hasClassTypeParameter = false;
         for (var i = 0; i < boundCount; i++)
         {
-            if (parameters[i].ParameterType.ContainsGenericParameters)
-            {
-                return false;
-            }
+            hasClassTypeParameter |= parameters[i].ParameterType.ContainsGenericParameters;
         }
 
-        return true;
+        return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(valueCount, boundCount, hasClassTypeParameter);
     }
 
     /// <summary>
@@ -2256,7 +2250,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var classGenericParameterCount = method.DeclaringType is { IsGenericType: true } declaringType
             ? declaringType.GetGenericArguments().Length
             : 0;
-        foreach (var rule in GenericMethodInferencePolicy.Rules)
+        foreach (var rule in testClass.IsGenericType ? GenericClassInferencePolicy.MethodSources : GenericMethodInferencePolicy.Rules)
         {
             if (rule.Source == GenericMethodInferencePolicy.Source.ParameterAttribute)
             {
