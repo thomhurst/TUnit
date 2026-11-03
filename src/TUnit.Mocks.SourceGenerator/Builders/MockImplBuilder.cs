@@ -1709,10 +1709,10 @@ internal static class MockImplBuilder
     /// </summary>
     public static string GetCompositeSafeName(MockTypeModel model)
     {
-        var name = model.FullyQualifiedName;
+        var name = IdentifierEscaping.StripAliasQualifier(model.FullyQualifiedName);
         if (model.AdditionalInterfaceNames.Length > 0)
         {
-            name += "_" + string.Join('_', model.AdditionalInterfaceNames);
+            name += "_" + string.Join('_', model.AdditionalInterfaceNames.Select(IdentifierEscaping.StripAliasQualifier));
         }
         return GetSafeName(name);
     }
@@ -1791,7 +1791,7 @@ internal static class MockImplBuilder
     }
 
     private static string StripGlobalPrefix(string name)
-        => name.StartsWith("global::", StringComparison.Ordinal) ? name.Substring("global::".Length) : name;
+        => IdentifierEscaping.StripAliasQualifier(name);
 
     private static string SanitizeIdentifier(string name)
         => IdentifierEscaping.SanitizeIdentifier(name);

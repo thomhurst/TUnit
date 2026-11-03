@@ -41,7 +41,7 @@ internal static class TypeSymbolExtensions
 
     public static string GetOpenGenericTypeOfExpression(this INamedTypeSymbol type)
     {
-        var definitionDisplay = type.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var definitionDisplay = MethodTypeParameterRenames.ToDisplayString(type.OriginalDefinition, SymbolDisplayFormat.FullyQualifiedFormat);
         if (!type.OriginalDefinition.IsGenericType)
             return definitionDisplay;
 
@@ -307,7 +307,7 @@ internal static class TypeSymbolExtensions
     }
 
     private static string StripGlobalPrefix(string name)
-        => name.StartsWith("global::", StringComparison.Ordinal) ? name.Substring("global::".Length) : name;
+        => IdentifierEscaping.StripAliasQualifier(name);
 
     private static string SanitizeIdentifier(string name)
         => IdentifierEscaping.SanitizeIdentifier(name);

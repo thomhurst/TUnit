@@ -25,8 +25,13 @@ internal sealed record MockEmitResult(
 internal sealed class MockSourceSink
 {
     private readonly List<GeneratedMockSource> _sources = new();
+    private readonly EquatableArray<string> _externAliases;
 
-    public void AddSource(string hintName, string source) => _sources.Add(new GeneratedMockSource(hintName, source));
+    /// <param name="externAliases">Aliases to declare in each source that qualifies a name with one (#7300).</param>
+    public MockSourceSink(EquatableArray<string> externAliases) => _externAliases = externAliases;
+
+    public void AddSource(string hintName, string source)
+        => _sources.Add(new GeneratedMockSource(hintName, Extensions.ExternAliasQualification.AddExternAliasDirectives(source, _externAliases)));
 
     public EquatableArray<GeneratedMockSource> ToEquatableArray()
         => _sources.Count == 0
