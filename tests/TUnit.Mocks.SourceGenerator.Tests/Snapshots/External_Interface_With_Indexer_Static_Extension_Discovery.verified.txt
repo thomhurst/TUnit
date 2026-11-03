@@ -101,9 +101,9 @@ namespace TUnit.Mocks.Generated
             return new Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetSectionValue", matchers);
         }
 
-        public static Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall GetSectionValue(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock, global::System.Func<string, bool> key)
+        public static Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall GetSectionValue(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock, global::System.Func<string, bool>? key)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.Is<string>(default(string)!) : (global::TUnit.Mocks.Arguments.Arg<string>)key;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher };
             return new Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetSectionValue", matchers);
         }

@@ -1,6 +1,6 @@
 #nullable enable
 
-// The project file promotes the nullability warnings that #5424 / #5425 produced into errors so any
+// The project WarningsAsErrors setting promotes the nullability warnings that #5424 / #5425 produced into errors so any
 // regression in the source generator (where the generated mock loses nullability
 // information from the source event) breaks this project's build instead of
 // silently emitting warnings.
