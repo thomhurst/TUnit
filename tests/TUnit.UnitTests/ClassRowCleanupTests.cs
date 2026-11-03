@@ -7,6 +7,73 @@ namespace TUnit.UnitTests;
 public class ClassRowCleanupTests
 {
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task InstanceConstructorSubscriptionsReachExecutableRow(bool streaming)
+    {
+        var current = TestContext.Current!;
+        var builder = (ITestBuilder)current.ServiceProvider.GetService(typeof(ITestBuilder))!;
+        var metadata = new TestMetadata<ClassRowCleanupTests>
+        {
+            TestClassType = typeof(ClassRowCleanupTests),
+            TestMethodName = nameof(InstanceConstructorSubscriptionsReachExecutableRow),
+            TestName = "Lazy constructor event sharing regression",
+            FilePath = "Unknown",
+            LineNumber = 0,
+            AttributeFactory = () => [new ClassConstructorAttribute<LateEventConstructor>()],
+            MethodMetadata = current.TestDetails.MethodMetadata,
+            DataSources = [new ArgumentsAttribute(streaming)],
+            ClassDataSources = [],
+            PropertyDataSources = [],
+            InstanceFactory = (_, _) => new ClassRowCleanupTests(),
+            InvokeTypedTest = (_, _, _) => ValueTask.CompletedTask
+        };
+        var tests = new List<AbstractExecutableTest>();
+        try
+        {
+            if (streaming)
+            {
+                await foreach (var test in builder.BuildTestsStreamingAsync(metadata))
+                    tests.Add(test);
+            }
+            else
+            {
+                tests.AddRange(await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null)));
+            }
+            await Assert.That(tests.Count).IsEqualTo(1);
+            var executable = tests[0];
+            await executable.CreateInstanceAsync();
+            await Assert.That(executable.Context.InternalEventsIfCreated?.OnDispose).IsNotNull();
+            foreach (var invocation in executable.Context.InternalEvents.OnDispose!.InvocationList)
+                await invocation.InvokeAsync(this, executable.Context);
+            await Assert.That(executable.Context.StateBag.Items["constructor-disposals"]).IsEqualTo(1);
+        }
+        finally
+        {
+            foreach (var test in tests)
+            {
+                test.Context.RemoveFromRegistry();
+                test.Context.Dispose();
+            }
+        }
+    }
+
+    public sealed class LateEventConstructor : TUnit.Core.Interfaces.IClassConstructor
+    {
+        public Task<object> Create(
+            [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] Type type,
+            ClassConstructorMetadata metadata)
+        {
+            metadata.TestBuilderContext.Events.OnDispose += (_, context) =>
+            {
+                context.StateBag.Items["constructor-disposals"] = 1;
+                return default;
+            };
+            return Task.FromResult<object>(new ClassRowCleanupTests());
+        }
+    }
+
+    [Test]
     public async Task ClaimedRowDoesNotTransferCleanupToLaterSkippedTest()
     {
         var original = CreateContext();

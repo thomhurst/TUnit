@@ -7,7 +7,7 @@ namespace TUnit.Core;
 internal sealed class DataRowScopeCollection
 {
     private readonly List<ScopeOwner> _owners = [];
-    private readonly Dictionary<object, List<ScopeOwner>> _objects = new(ReferenceEqualityComparer.Instance);
+    private readonly Dictionary<object, List<ScopeOwner>> _objects = new(Helpers.ReferenceEqualityComparer.Instance);
 
     internal ScopeOwner Register(object? scope)
     {
