@@ -5,6 +5,68 @@ namespace TUnit.Analyzers.Tests;
 public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 {
     [Test]
+    public async Task Override_Does_Not_Inherit_Optional_Default()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Base
+            {
+                public virtual IEnumerable<int> Rows(int value = 1) => [value];
+            }
+            public class Tests : Base
+            {
+                public override IEnumerable<int> Rows(int value) => [value];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Required(int value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(0)
+                .WithArguments("", "int"));
+    }
+
+    [Test]
+    public async Task Omitted_Optional_Data_Method_Parameters_Are_Accepted()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using System.Threading;
+            using TUnit.Core;
+
+            public class Base
+            {
+                public virtual IEnumerable<int> Inherited(int value = 1) => [value];
+            }
+
+            public class Tests : Base
+            {
+                public override IEnumerable<int> Inherited(int value = 2) => [value];
+                public static IEnumerable<string> Rows(string value) => [value];
+                public static IEnumerable<int> Rows(int value, int count = 1) => [value];
+                public static IEnumerable<string> Specific(object value, int count = 1) => ["broad"];
+                public static IEnumerable<int> Specific(long value, int count = 1) => [1];
+                public static IEnumerable<string> Exact(int value, int count = 1) => ["optional"];
+                public static IEnumerable<int> Exact(int value) => [value];
+                public static IEnumerable<int> Tokens(int value, int count = 1, CancellationToken token = default) => [value];
+
+                [Test, MethodDataSource(nameof(Rows), Arguments = new object[] { 1 })]
+                public void Optional(int value) { }
+                [Test, MethodDataSource(nameof(Specific), Arguments = new object[] { 1 })]
+                public void MoreSpecific(int value) { }
+                [Test, MethodDataSource(nameof(Exact), Arguments = new object[] { 1 })]
+                public void ExactMatch(int value) { }
+                [Test, MethodDataSource(nameof(Inherited))]
+                public void OverrideDefault(int value) { }
+                [Test, MethodDataSource(nameof(Tokens), Arguments = new object[] { 1 })]
+                public void InjectedToken(int value) { }
+            }
+            """);
+    }
+
+    [Test]
     public async Task DataSourceDriven_Argument_Is_Flagged_When_Does_Not_Match_Parameter_Type()
     {
         await Verifier

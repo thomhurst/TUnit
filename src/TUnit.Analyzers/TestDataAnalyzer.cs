@@ -446,6 +446,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                                                    methodSymbol.Name == methodName &&
                                                    !methodSymbol.IsGenericMethod &&
                                                    ArgumentsMatchParameterTypes(context, argumentsForMethodCall, methodSymbol.Parameters.WithoutCancellationTokenParameter().Select(p => p.Type)))
+                                           ?? FindOptionalDataSource(context, argumentsForMethodCall, methodSymbols, methodName!)
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName && !x.IsGenericMethod)
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
 
@@ -669,7 +670,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            if (!ArgumentsMatchParameterTypes(context, argumentsForMethodCall, dataSourceMethodParameterTypes))
+            if (ScoreOptionalDataSource(context, argumentsForMethodCall, dataSourceMethod) < 0)
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(
@@ -743,6 +744,83 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
             );
         }
+    }
+
+    private static IMethodSymbol? FindOptionalDataSource(SymbolAnalysisContext context, TypedConstant[] arguments,
+        IMethodSymbol[] methods, string name)
+    {
+        IMethodSymbol? best = null;
+        var bestScore = -1;
+        foreach (var method in methods)
+        {
+            if (method.Name != name || method.IsGenericMethod || methods.Any(derived => OverridesMethod(derived, method)))
+            {
+                continue;
+            }
+
+            var score = ScoreOptionalDataSource(context, arguments, method);
+            var moreSpecific = best is not null && score == bestScore && score >= 0
+                && arguments.All(a => !a.IsNull && a.Type is not null)
+                && IsAtLeastAsSpecific(context.Compilation, method, best, arguments.Select(a => a.Type!).ToArray())
+                && !IsAtLeastAsSpecific(context.Compilation, best, method, arguments.Select(a => a.Type!).ToArray());
+            if (score > bestScore || moreSpecific)
+            {
+                best = method;
+                bestScore = score;
+            }
+        }
+
+        return best;
+    }
+
+    private static bool OverridesMethod(IMethodSymbol method, IMethodSymbol candidate)
+    {
+        for (var overridden = method.OverriddenMethod; overridden is not null; overridden = overridden.OverriddenMethod)
+        {
+            if (SymbolEqualityComparer.Default.Equals(overridden, candidate))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Defaults belong to the selected declaration: an override does not inherit its base method's defaults.
+    // Supplied arguments bind positionally; only omitted token parameters are injected.
+    private static int ScoreOptionalDataSource(SymbolAnalysisContext context, TypedConstant[] arguments, IMethodSymbol method)
+    {
+        if (arguments.Length > method.Parameters.Length)
+        {
+            return -1;
+        }
+
+        var score = 0;
+        for (var i = 0; i < method.Parameters.Length; i++)
+        {
+            var parameter = method.Parameters[i];
+            if (i >= arguments.Length)
+            {
+                if (!parameter.HasExplicitDefaultValue && !parameter.IsOptional
+                    && parameter.Type.ToDisplayString() != "System.Threading.CancellationToken")
+                {
+                    return -1;
+                }
+
+                continue;
+            }
+
+            var argument = arguments[i];
+            if (argument.IsNull ? !CanAcceptNull(parameter.Type)
+                : !context.Compilation.HasImplicitConversionOrGenericParameter(argument.Type, parameter.Type))
+            {
+                return -1;
+            }
+
+            score += SymbolEqualityComparer.Default.Equals(argument.Type, parameter.Type) ? 2 : 1;
+        }
+
+        return score;
     }
 
     private static bool ArgumentsMatchParameterTypes(SymbolAnalysisContext context, TypedConstant[] argumentsForMethodCall,
