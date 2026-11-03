@@ -8,8 +8,16 @@ namespace TUnit.Analyzers.Extensions;
 
 public static class CompilationExtensions
 {
+    private static readonly ArrayBindings EmptyArrayBindings = ImmutableDictionary.Create<ITypeParameterSymbol, ImmutableArray<(ITypeSymbol Type, VarianceKind Variance)>>(SymbolEqualityComparer.Default);
+
     public static bool HasImplicitConversionOrGenericParameter(this Compilation compilation, ITypeSymbol? argumentType,
         ITypeSymbol? parameterType)
+    {
+        return HasImplicitConversionOrGenericParameter(compilation, argumentType, parameterType, EmptyArrayBindings, _ => true);
+    }
+
+    private static bool HasImplicitConversionOrGenericParameter(Compilation compilation, ITypeSymbol? argumentType,
+        ITypeSymbol? parameterType, ArrayBindings bindings, Func<ArrayBindings, bool> next)
     {
         if (parameterType == null && argumentType != null)
         {
@@ -18,14 +26,14 @@ public static class CompilationExtensions
         if (argumentType != null && parameterType != null && 
             argumentType.ToDisplayString() == parameterType.ToDisplayString())
         {
-            return true;
+            return next(bindings);
         }
 
         // Preserve conversions Roslyn can already prove, including open array covariance.
         if (argumentType is not null && parameterType is not null
             && compilation.HasImplicitConversion(argumentType, parameterType))
         {
-            return true;
+            return next(bindings);
         }
 
         // Open arrays have no Roslyn conversion until their element type arguments are inferred.
@@ -36,7 +44,8 @@ public static class CompilationExtensions
             return parameterArray.Rank == argumentArray.Rank
                 && parameterArray.IsSZArray == argumentArray.IsSZArray
                 && (parameterArray.ElementType is ITypeParameterSymbol
-                    || MatchesArrayElement(compilation, argumentArray.ElementType, parameterArray.ElementType));
+                    ? next(bindings)
+                    : MatchesArrayElement(compilation, argumentArray.ElementType, parameterArray.ElementType, bindings, next));
         }
 
         // Tuples already recognized as generic definitions retain the existing conversion path below.
@@ -51,18 +60,22 @@ public static class CompilationExtensions
                 return false;
             }
 
-            for (var i = 0; i < parameterTuple.TupleElements.Length; i++)
+            bool MatchElements(int index, ArrayBindings candidateBindings)
             {
-                // Bare type parameters retain the existing generic path behavior; this shape check ignores constraints.
-                if (parameterTuple.TupleElements[i].Type is not ITypeParameterSymbol
-                    && !compilation.HasImplicitConversionOrGenericParameter(
-                        argumentTuple.TupleElements[i].Type, parameterTuple.TupleElements[i].Type))
+                if (index == parameterTuple.TupleElements.Length)
                 {
-                    return false;
+                    return next(candidateBindings);
                 }
+
+                // Bare type parameters retain the existing generic path behavior; this shape check ignores constraints.
+                return parameterTuple.TupleElements[index].Type is ITypeParameterSymbol
+                    ? MatchElements(index + 1, candidateBindings)
+                    : HasImplicitConversionOrGenericParameter(compilation,
+                        argumentTuple.TupleElements[index].Type, parameterTuple.TupleElements[index].Type,
+                        candidateBindings, candidate => MatchElements(index + 1, candidate));
             }
 
-            return true;
+            return MatchElements(0, bindings);
         }
 
         if (parameterType?.IsGenericDefinition() == false)
@@ -73,7 +86,7 @@ public static class CompilationExtensions
             }
 
             var conversion = compilation.ClassifyConversion(argumentType, parameterType);
-            return conversion.IsImplicit || conversion.IsNumeric;
+            return (conversion.IsImplicit || conversion.IsNumeric) && next(bindings);
         }
 
         if (parameterType is INamedTypeSymbol { IsGenericType: true, TypeArguments: [{ TypeKind: TypeKind.TypeParameter }] } namedType)
@@ -82,28 +95,21 @@ public static class CompilationExtensions
             if (argumentType is IArrayTypeSymbol { ElementType: { } elementType })
             {
                 var specializedSuper = namedType.OriginalDefinition.Construct(elementType);
-                return compilation.HasImplicitConversion(argumentType, specializedSuper);
+                return compilation.HasImplicitConversion(argumentType, specializedSuper) && next(bindings);
             }
 
             if (argumentType is INamedTypeSymbol { IsGenericType: true, TypeArguments: [{ } genericArgument] })
             {
                 var specializedSuper = namedType.OriginalDefinition.Construct(genericArgument);
-                return compilation.HasImplicitConversion(argumentType, specializedSuper);
+                return compilation.HasImplicitConversion(argumentType, specializedSuper) && next(bindings);
             }
         }
 
-        return compilation.HasImplicitConversion(argumentType?.OriginalDefinition, parameterType?.OriginalDefinition);
+        return compilation.HasImplicitConversion(argumentType?.OriginalDefinition, parameterType?.OriginalDefinition) && next(bindings);
     }
 
     // Array elements are not rebuilt as tuples by CastHelper. After inference, constructed
     // element types must agree rather than merely having element-wise numeric conversions.
-    private static bool MatchesArrayElement(Compilation compilation, ITypeSymbol argument, ITypeSymbol parameter,
-        bool allowReferenceConversions = true)
-    {
-        var bindings = ImmutableDictionary.Create<ITypeParameterSymbol, ImmutableArray<(ITypeSymbol Type, VarianceKind Variance)>>(SymbolEqualityComparer.Default);
-        return MatchesArrayElement(compilation, argument, parameter, bindings, _ => true, allowReferenceConversions);
-    }
-
     // A candidate succeeds only if the rest of the constructed type also matches. This
     // continuation lets interface/base alternatives retry after a later argument conflicts.
     private static bool MatchesArrayElement(Compilation compilation, ITypeSymbol argument, ITypeSymbol parameter,
@@ -192,7 +198,11 @@ public static class CompilationExtensions
                         continue;
                     }
 
-                    if (left.Type.IsSealed || right.Type.IsSealed
+                    // Arrays and delegates can share a subtype through covariance/variance
+                    // even though Roslyn marks them sealed (for example Action<object>).
+                    var leftSealedClass = left.Type.IsSealed && left.Type.TypeKind is not (TypeKind.Array or TypeKind.Delegate);
+                    var rightSealedClass = right.Type.IsSealed && right.Type.TypeKind is not (TypeKind.Array or TypeKind.Delegate);
+                    if (leftSealedClass || rightSealedClass
                         || (left.Type.TypeKind == TypeKind.Class && right.Type.TypeKind == TypeKind.Class))
                     {
                         return false;

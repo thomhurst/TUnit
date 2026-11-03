@@ -88,6 +88,30 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    public async Task ExplicitDelegateTypeSatisfiesBothContravariantBounds()
+    {
+        await Verifier.VerifyAnalyzerAsync("""
+            #pragma warning disable TUnit0046
+            using System;
+            using TUnit.Core;
+            public interface IContravariant<in A, in B> { }
+            public class C
+            {
+                public static (int, IContravariant<Action<string>, Action<Uri>>[]) Row() => default;
+                [Test, MethodDataSource(nameof(Row)), GenerateGenericTest(typeof(Action<object>))]
+                public void Test<T>((int, IContravariant<T, T>[]) row) { }
+            }
+            """);
+    }
+
+    [Test]
+    [Arguments("(Box<int>[], Box<string>[])", "(Box<T>[], Box<T>[])", true)]
+    [Arguments("(Box<string>[], Box<int>[])", "(Box<T>[], Box<T>[])", true)]
+    [Arguments("(Box<int>[], Box<int>[])", "(Box<T>[], Box<T>[])", false)]
+    [Arguments("(LaterAlternative[], Box<string>[])", "(IInvariant<T, T>[], Box<T>[])", false)]
+    [Arguments("(Box<string>[], LaterAlternative[])", "(Box<T>[], IInvariant<T, T>[])", false)]
+    [Arguments("IContravariant<Action<string>, Action<Uri>>[]", "IContravariant<T, T>[]", false)]
+    [Arguments("IContravariant<Action<string>[], Action<Uri>[]>[]", "IContravariant<T, T>[]", false)]
     [Arguments("IContravariant<string, Uri>[]", "IContravariant<T, T>[]", true)]
     [Arguments("IContravariant<Uri, string>[]", "IContravariant<T, T>[]", true)]
     [Arguments("IContravariant<Base, OtherBase>[]", "IContravariant<T, T>[]", true)]
