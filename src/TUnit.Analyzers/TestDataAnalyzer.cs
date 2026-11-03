@@ -644,7 +644,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     {
                         return true;
                     }
-                    return CanConvertReferenceTuple(argument, parameter, context.Compilation)
+                    return CanConvertReferenceTuple(argument, parameter, context)
                         || context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments);
                 });
 
@@ -688,7 +688,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (testParameterTypes.Length == 1
                 && unwrappedTypes.Length == 1
-                && (CanConvertReferenceTuple(unwrappedTypes[0], testParameterTypes[0], context.Compilation)
+                && (CanConvertReferenceTuple(unwrappedTypes[0], testParameterTypes[0], context)
                     || context.Compilation.CanBindToTestParameter(unwrappedTypes[0], testParameterTypes[0])))
             {
                 return;
@@ -1029,7 +1029,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             if (testParameterTypes.Length == 1
                 && (SymbolEqualityComparer.Default.Equals(type, testParameterTypes[0])
-                    || CanConvertReferenceTuple(type, testParameterTypes[0], context.Compilation)))
+                    || CanConvertReferenceTuple(type, testParameterTypes[0], context)))
             {
                 return ImmutableArray.Create(type);
             }
@@ -1058,8 +1058,17 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     }
 
     private static bool CanConvertReferenceTuple(ITypeSymbol? source, ITypeSymbol? target,
-        Compilation compilation)
+        SymbolAnalysisContext context)
     {
+        // Only test-method invocation reconstructs reference tuples. Constructor binding uses
+        // CastHelper directly and must retain the diagnostic for differing tuple types.
+        if (context.Symbol is not IMethodSymbol)
+        {
+            return false;
+        }
+
+        var compilation = context.Compilation;
+
         // Reference tuples have no language-level element conversions. The runtime reconstructs
         // them, so validate the logical elements, including the recursively flattened Rest.
         // Nested reference-tuple Items still use CastHelper rather than reconstruction.

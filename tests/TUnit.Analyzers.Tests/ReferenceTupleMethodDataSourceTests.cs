@@ -81,6 +81,58 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("Tuple<int, int>", "Tuple<long, long>", "int, int")]
+    [Arguments("Tuple<int>", "Tuple<long>", "int")]
+    public async Task ConstructorTupleWideningIsReported(string sourceType, string targetType, string sourceElements)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            [{|#0:MethodDataSource(nameof(Row))|}]
+            public class Direct({{targetType}} row)
+            {
+                [Test] public void Test() {}
+                public static {{sourceType}} Row() => default!;
+            }
+            [{|#1:MethodDataSource(nameof(Rows))|}]
+            public class Enumerable({{targetType}} row)
+            {
+                [Test] public void Test() {}
+                public static IEnumerable<{{sourceType}}> Rows() => [];
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(0).WithArguments(sourceElements, targetType),
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(1).WithArguments(sourceElements, targetType));
+    }
+
+    [Test]
+    public async Task ConstructorWholeTupleWithExactType()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            [MethodDataSource(nameof(Row))]
+            public class Direct(Tuple<int, int> row)
+            {
+                [Test] public void Test() {}
+                public static Tuple<int, int> Row() => default!;
+            }
+            [MethodDataSource(nameof(Rows))]
+            public class Enumerable(Tuple<int, int> row)
+            {
+                [Test] public void Test() {}
+                public static IEnumerable<Tuple<int, int>> Rows() => [];
+            }
+            """);
+    }
+
+    [Test]
     [Arguments("Tuple<string>", "Tuple<object>")]
     [Arguments("Tuple<int>", "Tuple<object>")]
     [Arguments("Tuple<int>", "Tuple<long>")]
