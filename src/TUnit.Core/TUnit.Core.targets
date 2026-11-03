@@ -23,14 +23,14 @@
         </ItemGroup>
     </Target>
 
-    <!-- Only root optional F# async support when the consuming application actually references it.
+    <!-- Only root optional F# async support when the consuming application actually publishes it.
          A string-based DynamicDependency warns about missing FSharp.Core in C# applications. -->
     <Target Name="_TUnitPreserveFSharpAsync"
             BeforeTargets="PrepareForILLink"
-            DependsOnTargets="ResolveReferences"
+            DependsOnTargets="_ComputeManagedAssemblyToLink"
             Condition="'$(PublishTrimmed)' == 'true' and '$(PublishAot)' != 'true'">
         <ItemGroup>
-            <_TUnitFSharpCoreReference Include="@(ReferencePath)" Condition="'%(Filename)' == 'FSharp.Core'" />
+            <_TUnitFSharpCoreReference Include="@(ManagedAssemblyToLink)" Condition="'%(Filename)' == 'FSharp.Core'" />
             <TrimmerRootDescriptor Include="$(MSBuildThisFileDirectory)TUnit.Core.FSharp.xml"
                                    Condition="'@(_TUnitFSharpCoreReference)' != ''" />
         </ItemGroup>
