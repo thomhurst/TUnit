@@ -15,7 +15,27 @@ public static class DataSourceHelpers
 
     // Initializing or invoking event callbacks on a struct extracted from a retained tuple
     // would mutate a detached copy. Reconstruct these tuples from the mutated boxes.
-    internal static bool RequiresFlattenedTupleBinding(Type tupleType)
+    internal static bool RequiresFlattenedTupleBinding(object tuple)
+    {
+        if (!HasMutableTupleElementShape(tuple.GetType()))
+        {
+            return false;
+        }
+
+        // Nullable struct elements box to null when empty. Only flatten when an actual
+        // mutable value needs reconstruction; otherwise retain the tuple container.
+        foreach (var element in UnwrapTupleAot(tuple))
+        {
+            if (element is (IAsyncInitializer or IEventReceiver) && element.GetType().IsValueType)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool HasMutableTupleElementShape(Type tupleType)
         => TupleMutableElementShapes.GetOrAdd(tupleType, static type =>
         {
             var elements = type.GetGenericArguments();
@@ -24,7 +44,7 @@ public static class DataSourceHelpers
                 var element = Nullable.GetUnderlyingType(elements[i]) ?? elements[i];
                 if (element.IsValueType && (typeof(IAsyncInitializer).IsAssignableFrom(element)
                     || typeof(IEventReceiver).IsAssignableFrom(element))
-                    || i == 7 && TupleHelper.IsTupleType(element) && RequiresFlattenedTupleBinding(element))
+                    || i == 7 && TupleHelper.IsTupleType(element) && HasMutableTupleElementShape(element))
                 {
                     return true;
                 }
@@ -426,7 +446,7 @@ public static class DataSourceHelpers
                 // and the item is a tuple, don't unwrap
                 if (expectedTypes.Length == 1 && TupleHelper.IsTupleType(expectedTypes[0]))
                 {
-                    return RequiresFlattenedTupleBinding(item.GetType())
+                    return RequiresFlattenedTupleBinding(item)
                         ? UnwrapTupleAot(item)
                         : [item];
                 }

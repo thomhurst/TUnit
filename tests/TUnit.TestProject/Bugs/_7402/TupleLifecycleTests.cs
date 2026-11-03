@@ -175,3 +175,24 @@ public class MutableTupleReceiverTests
         }
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+public class NullMutableTupleElementTests
+{
+    public static Tuple<MutableTupleInitializerTests.Fixture?> InitializerRow() => Tuple.Create<MutableTupleInitializerTests.Fixture?>(null);
+    public static Tuple<MutableTupleReceiverTests.Fixture?> ReceiverRow() => Tuple.Create<MutableTupleReceiverTests.Fixture?>(null);
+
+    [Test, MethodDataSource(nameof(InitializerRow))]
+    public async Task Null_Initializer_Preserves_Tuple(Tuple<MutableTupleInitializerTests.Fixture?> row)
+    {
+        await Assert.That(row).IsNotNull();
+        await Assert.That(row.Item1).IsNull();
+    }
+
+    [Test, MethodDataSource(nameof(ReceiverRow))]
+    public async Task Null_Receiver_Preserves_Tuple(Tuple<MutableTupleReceiverTests.Fixture?> row)
+    {
+        await Assert.That(row).IsNotNull();
+        await Assert.That(row.Item1).IsNull();
+    }
+}
