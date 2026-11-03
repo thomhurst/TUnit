@@ -877,6 +877,9 @@ internal static class MockMembersBuilder
         }
     }
 
+    // GetClosedReceiverGenericMethods(model, typeArguments) parses this output to detect
+    // closed-signature collisions. Keep its two framework configurations in sync with
+    // any conditional overloads emitted here.
     private static void GenerateGenericMethodMembersInCurrentBlock(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
     {
         if (method.HasRefStructParams)
