@@ -466,3 +466,22 @@ public class MethodOnlyEmptyClassRows<T>
     [Arguments("method")]
     public void ReportsMissingConstructorValue(T argument) => _ = argument;
 }
+
+// Method rows merge the explicit types into the filtered class-row group.
+[GenerateGenericTest(typeof(string))]
+[MethodDataSource(typeof(ExplicitMethodRowsProvider), nameof(ExplicitMethodRowsProvider.Rows))]
+public class ExplicitExternalNullRowsWithMethodRows<T>(T value)
+{
+    [Test]
+    [Arguments("method")]
+    public async Task Test(T argument)
+    {
+        await Assert.That((object?)value).IsEqualTo("seed");
+        await Assert.That((object?)argument).IsEqualTo("method");
+    }
+}
+
+public static class ExplicitMethodRowsProvider
+{
+    public static IEnumerable<string?> Rows() => ["seed", null];
+}

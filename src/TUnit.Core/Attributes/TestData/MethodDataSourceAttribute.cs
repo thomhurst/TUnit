@@ -108,7 +108,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// For external sources (<see cref="ClassProvidingDataSource"/> is non-null), rows whose
     /// unwrapped constructor values are all null are also discarded. Own-class sources retain
     /// valid null values because their declared member types supply the class type arguments.
-    /// Explicit generic instantiations must leave this property disabled to preserve their null rows.
+    /// Standalone explicit generic instantiations leave this property disabled to preserve their null rows.
+    /// When method rows merge explicit types into an inferred class-row group, filtering still applies.
     /// </para>
     /// <para>
     /// For each retained row, the value evaluated during filtering is returned on the first fetch.

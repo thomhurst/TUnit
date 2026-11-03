@@ -686,12 +686,39 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private sealed record ClassMethodDataSourceInference(
         AttributeData Source, ITypeSymbol[]? TypeArguments, IMethodSymbol? Constructor);
 
+    private sealed class ClassRowSources(TestMethodMetadata testMethod)
+    {
+        public ClassMethodDataSourceInference[] MethodSources { get; } = testMethod.IsGenericType
+            ? testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
+                .Where(attribute => attribute.AttributeClass?.Name == "MethodDataSourceAttribute")
+                .Select(attribute => InferClassMethodDataSource(testMethod, attribute)).ToArray()
+            : [];
+
+        private readonly ITypeSymbol[][] _explicitTypes = testMethod.TypeSymbol.GetAttributes()
+            .Where(attribute => attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
+            .Select(ExtractTypeArgsFromGenerateGenericTestAttribute)
+            .OfType<ITypeSymbol[]>().ToArray();
+
+        public ITypeSymbol[]? FindTypes(AttributeData source) =>
+            MethodSources.FirstOrDefault(inference => AreSameAttribute(inference.Source, source))?.TypeArguments;
+
+        public bool HasExplicitTypes(ITypeSymbol[] types) =>
+            _explicitTypes.Any(explicitTypes => explicitTypes.SequenceEqual(types, SymbolEqualityComparer.Default));
+
+        public bool IsCovered(AttributeData source, List<ConcreteInstantiation> entries) =>
+            FindTypes(source) is not null
+            || entries.Any(entry => entry.IsSpecificClassDataSource(source) || entry.SpecificArgumentsAttribute is null
+                || GetClassDataSourcePartition(testMethod, entry)?.DataSources.Any(attribute => AreSameAttribute(attribute, source)) is true)
+            || _explicitTypes.Length > 0;
+    }
+
     /// <summary>
     /// Represents a single concrete instantiation of a generic test.
     /// </summary>
     private sealed class ConcreteInstantiation
     {
         public required string ConcreteClassName { get; init; }
+        public bool HasExplicitClassTypes { get; init; }
         public required ITypeSymbol[] TypeArguments { get; init; }
         public required ITypeSymbol[] ClassTypeArgs { get; init; }
         public required ITypeSymbol[] MethodTypeArgs { get; init; }
@@ -832,15 +859,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodName = testMethod.MethodSymbol.Name;
         var results = new List<ConcreteInstantiation>();
         var processedTypeCombinations = new HashSet<string>();
-        var classMethodSourceInference = testMethod.IsGenericType
-            ? testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
-                .Where(attribute => attribute.AttributeClass?.Name == "MethodDataSourceAttribute")
-                .Select(attribute => InferClassMethodDataSource(testMethod, attribute))
-                .ToArray()
-            : [];
-
-        ITypeSymbol[]? InferClassMethodSourceTypes(AttributeData attribute) =>
-            classMethodSourceInference.FirstOrDefault(source => AreSameAttribute(source.Source, attribute))?.TypeArguments;
+        var classRowSources = new ClassRowSources(testMethod);
 
         // Class type arguments that break the class's constraints, one per row or type (#7107).
         var classViolations = new List<(ClassViolationSource Source, int Order, string Message)>();
@@ -1081,7 +1100,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 MethodTypeArgs = methodTypeArgs,
                 TestName = testName,
                 MethodName = methodName,
-                ClassMethodDataSources = classMethodSourceInference,
+                ClassMethodDataSources = classRowSources.MethodSources,
+                HasExplicitClassTypes = classRowSources.HasExplicitTypes(classTypeArgs),
                 SpecificArgumentsAttribute = specificAttr,
                 SpecificIsClassRow = specificAttr is not null && isClassRow,
                 HasParameterizedConstructor = hasParameterizedConstructor,
@@ -1233,7 +1253,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             : Array.Empty<AttributeData>();
 
         ITypeSymbol[]? InferClassRowTypes(AttributeData attribute) => attribute.AttributeClass?.Name == "MethodDataSourceAttribute"
-            ? InferClassMethodSourceTypes(attribute)
+            ? classRowSources.FindTypes(attribute)
             : InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, attribute, compilation);
 
         // Pair inferable class rows with method [Arguments] rows.
@@ -1629,7 +1649,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass))
                 {
                     (otherClassDataSources ??= []).Add((attribute, attributeClass.Name == "MethodDataSourceAttribute"
-                        ? InferClassMethodSourceTypes(attribute)
+                        ? classRowSources.FindTypes(attribute)
                         : InferClassTypesFromTypedClassDataSource(testMethod.TypeSymbol, attributeClass)));
                 }
             }
@@ -1715,16 +1735,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        bool IsClassMethodSourceCovered(AttributeData source) =>
-            InferClassMethodSourceTypes(source) is not null
-            || results.Any(entry => entry.IsSpecificClassDataSource(source) || entry.SpecificArgumentsAttribute is null
-                || GetClassDataSourcePartition(testMethod, entry)?.DataSources.Any(attribute => AreSameAttribute(attribute, source)) is true)
-            || testMethod.TypeSymbol.GetAttributes().Any(attribute =>
-                attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
-
         foreach (var source in classMethodDataSources)
         {
-            if (IsClassMethodSourceCovered(source))
+            if (classRowSources.IsCovered(source, results))
             {
                 continue;
             }
@@ -2009,13 +2022,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Inference can use a value overload only to determine the class types. Match reflection's
             // explicit/parameterless construction preference before falling back to that overload.
-            var publicConstructors = constructedType.InstanceConstructors
-                .Where(constructor => constructor.DeclaredAccessibility == Accessibility.Public).ToArray();
-            var closedConstructor = publicConstructors.FirstOrDefault(constructor => constructor.GetAttributes().Any(attribute =>
-                    attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
-                ?? publicConstructors.FirstOrDefault(constructor => constructor.Parameters.Length == 0)
-                ?? publicConstructors.FirstOrDefault(constructor =>
-                    inferredConstructor is not null && SymbolEqualityComparer.Default.Equals(constructor.OriginalDefinition, inferredConstructor.OriginalDefinition));
+            var closedConstructor = GetPreferredClassSourceConstructor(constructedType)
+                ?? constructedType.InstanceConstructors.FirstOrDefault(constructor =>
+                    constructor.DeclaredAccessibility == Accessibility.Public && inferredConstructor is not null
+                    && SymbolEqualityComparer.Default.Equals(constructor.OriginalDefinition, inferredConstructor.OriginalDefinition));
+            global::System.Diagnostics.Debug.Assert(closedConstructor is not null,
+                "The inferred class-source constructor must have a closed counterpart.");
             // Preserve the existing construction fallback if symbol mapping ever fails.
             writer.AppendRaw(closedConstructor is null
                 ? InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType)
@@ -2500,17 +2512,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.AppendLine("new global::TUnit.Core.IDataSourceAttribute[]");
             dsWriter.AppendLine("{");
             dsWriter.Indent();
-            // Explicit class types do not depend on the source row for inference, even when
-            // their entry was first created by an inferred source. Keep null and empty rows.
-            var hasExplicitClassTypes = testMethod.TypeSymbol.GetAttributes().Any(attribute =>
-                attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true
-                && ExtractTypeArgsFromGenerateGenericTestAttribute(attribute) is { } explicitTypes
-                && explicitTypes.SequenceEqual(entry.ClassTypeArgs, SymbolEqualityComparer.Default));
+            // Explicit types use raw rows only outside reflection's grouped method-row path.
+            var usesGroupedMethodRows = !testMethod.IsGenericMethod
+                && MethodParametersReferenceTypeParameters(testMethod)
+                && testMethod.MethodAttributes.Any(attribute => attribute.AttributeClass?.Name == "ArgumentsAttribute");
+            var hasExplicitClassTypes = entry.HasExplicitClassTypes;
             foreach (var attr in classDataSources)
             {
                 // Filter only sources that supply this entry's inferred class rows. Method-only
                 // fallback entries retain raw rows, including the empty-source fallback (#7161).
-                var filterClassRows = !hasExplicitClassTypes && entry.IsSpecificClassDataSource(attr)
+                var filterClassRows = (!hasExplicitClassTypes || usesGroupedMethodRows) && entry.IsSpecificClassDataSource(attr)
                     && entry.FindClassMethodDataSource(attr)?.TypeArguments is not null;
                 GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol, filterClassRows);
             }
@@ -7730,6 +7741,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
+    private static IMethodSymbol? GetPreferredClassSourceConstructor(INamedTypeSymbol classSymbol)
+        => GetPreferredClassSourceConstructor(classSymbol, out _);
+
+    private static IMethodSymbol? GetPreferredClassSourceConstructor(INamedTypeSymbol classSymbol, out bool isExplicit)
+    {
+        var explicitConstructor = classSymbol.InstanceConstructors.FirstOrDefault(constructor =>
+            constructor.DeclaredAccessibility == Accessibility.Public
+            && constructor.GetAttributes().Any(attribute => attribute.AttributeClass?.ToDisplayString()
+                == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix));
+        isExplicit = explicitConstructor is not null;
+        return explicitConstructor ?? classSymbol.InstanceConstructors.FirstOrDefault(constructor =>
+            constructor.DeclaredAccessibility == Accessibility.Public && constructor.Parameters.Length == 0);
+    }
+
     /// <summary>
     /// The class type arguments that the declared row type of an own-class [MethodDataSource] member infers, by
     /// matching the row's elements against the parameters of the constructor the instance is built with: the one
@@ -7748,16 +7773,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Where(constructor => constructor.DeclaredAccessibility == Accessibility.Public)
             .ToArray();
 
-        // A [TestConstructor] names the constructor the rows are for, as the instance factory reads it
-        var testConstructor = constructors.FirstOrDefault(constructor => constructor.GetAttributes().Any(attribute =>
-            attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix));
-        if (testConstructor != null)
+        // Construction prefers an explicit or parameterless constructor. A parameterless
+        // constructor supplies no type arguments, so inference may still need a value overload.
+        var preferredConstructor = GetPreferredClassSourceConstructor(classSymbol, out var isExplicit);
+        if (isExplicit && preferredConstructor is not null)
         {
-            selectedConstructor = testConstructor;
-            return InferClassTypesFromConstructorRow(testConstructor, rowType, classSymbol.TypeParameters, requireFixedRuntimeTypes);
+            selectedConstructor = preferredConstructor;
+            return InferClassTypesFromConstructorRow(preferredConstructor, rowType, classSymbol.TypeParameters, requireFixedRuntimeTypes);
         }
 
-        if (constructors.Length > 0 && !constructors.Any(constructor => constructor.Parameters.Length == 0))
+        if (preferredConstructor is null && constructors.Length > 0)
         {
             selectedConstructor = constructors[0];
             return InferClassTypesFromConstructorRow(constructors[0], rowType, classSymbol.TypeParameters, requireFixedRuntimeTypes);
