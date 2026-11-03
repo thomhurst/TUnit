@@ -602,3 +602,36 @@ public static class ExplicitUninferableProvider
 {
     public static IEnumerable<object> Rows() => [1];
 }
+
+// A runtime-partitioned sibling must not disable filtering on fixed sources.
+[MethodDataSource(typeof(MixedPartitionProvider), nameof(MixedPartitionProvider.NullRows))]
+[MethodDataSource(typeof(MixedPartitionProvider), nameof(MixedPartitionProvider.ObjectRows))]
+public class MixedPartitionNullRows<T>(T value)
+{
+    [Test]
+    public async Task Test() => await Assert.That((object?)value).IsEqualTo("seed");
+}
+
+[Arguments("seed")]
+[MethodDataSource(typeof(MixedPartitionProvider), nameof(MixedPartitionProvider.NullRows))]
+[MethodDataSource(typeof(MixedPartitionProvider), nameof(MixedPartitionProvider.ObjectRows))]
+public class MixedPartitionArgumentsRows<T>(T value)
+{
+    [Test]
+    public async Task Test() => await Assert.That((object?)value).IsEqualTo("seed");
+}
+
+[MethodDataSource(typeof(MixedPartitionProvider), nameof(MixedPartitionProvider.EmptyRows))]
+[MethodDataSource(typeof(MixedPartitionProvider), nameof(MixedPartitionProvider.ObjectRows))]
+public class MixedPartitionEmptyRows<T>(T value)
+{
+    [Test]
+    public async Task Test() => await Assert.That((object?)value).IsEqualTo("seed");
+}
+
+public static class MixedPartitionProvider
+{
+    public static IEnumerable<string?> NullRows() => [null];
+    public static IEnumerable<string> EmptyRows() => [];
+    public static IEnumerable<object> ObjectRows() => ["seed"];
+}

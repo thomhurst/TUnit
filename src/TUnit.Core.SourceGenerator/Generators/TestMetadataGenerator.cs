@@ -2519,7 +2519,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 // Filter only sources that supply this entry's inferred class rows. Method-only
                 // fallback entries retain raw rows, including the empty-source fallback (#7161).
-                var filterClassRows = classDataSourcePartition is null && !hasExplicitClassTypes && entry.IsSpecificClassDataSource(attr)
+                var isPartitionedSource = classDataSourcePartition is not null
+                    && classDataSourcePartition.PartitionedIndices.Any(index =>
+                        AreSameAttribute(classDataSourcePartition.DataSources[index], attr));
+                var filterClassRows = !isPartitionedSource && !hasExplicitClassTypes && entry.IsSpecificClassDataSource(attr)
                     && entry.FindClassMethodDataSource(attr)?.TypeArguments is not null;
                 var declaredClassTypes = classDataSourcePartition is not null
                     ? entry.FindClassMethodDataSource(attr)?.TypeArguments : null;
