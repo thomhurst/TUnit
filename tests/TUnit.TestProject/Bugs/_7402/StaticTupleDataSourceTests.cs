@@ -105,6 +105,15 @@ public class StaticTupleDataSourceTests
         await Assert.That(value.Item1).IsNull();
     }
 
+    public static ValueTuple<string?> NullValueTuple() => new((string?)null);
+
+    [Test]
+    [MethodDataSource(nameof(NullValueTuple))]
+    public async Task Converted_Value_Tuple_Holds_Null(ValueTuple<object?> value)
+    {
+        await Assert.That(value.Item1).IsNull();
+    }
+
     public static Tuple<string?> Value() => Tuple.Create<string?>(null);
     public static IEnumerable<Tuple<string?>> Rows() => [Value()];
     public static Task<Tuple<string?>> TaskRow() => Task.FromResult(Value());

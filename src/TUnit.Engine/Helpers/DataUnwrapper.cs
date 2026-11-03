@@ -147,10 +147,10 @@ internal class DataUnwrapper
                 return values;
             }
 
-            // A lone null element must retain its container: [null] also represents an actual
-            // null argument, which the invokers intentionally do not turn into a tuple.
+            // A reference tuple with a lone null must retain its container: [null] also
+            // represents an actual null argument. Value tuples always reconstruct from null.
             var tupleElements = DataSourceHelpers.UnwrapTupleAot(values[0]);
-            return tupleElements is [null] ? values : tupleElements;
+            return !lastDataParameterType.IsValueType && tupleElements is [null] ? values : tupleElements;
         }
 
         // A tuple that is already an instance of the first data parameter's tuple type binds to it
