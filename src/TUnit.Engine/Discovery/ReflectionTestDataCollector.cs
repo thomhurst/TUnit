@@ -3421,6 +3421,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// </summary>
     private static void InferGenericTypeMapping(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType, Dictionary<Type, Type> typeMapping, bool isTopLevel = false)
     {
+        // Match discovery inference when a nullable tuple element has been boxed as its value.
+        if (Nullable.GetUnderlyingType(paramType) is { } underlyingParameter
+            && argType.IsValueType && Nullable.GetUnderlyingType(argType) is null)
+        {
+            InferGenericTypeMapping(underlyingParameter, argType, typeMapping, isTopLevel);
+            return;
+        }
+
         // Direct generic parameter
         if (paramType.IsGenericParameter)
         {

@@ -620,6 +620,13 @@ internal sealed class TestGenericTypeResolver
         Type argumentType,
         Dictionary<Type, Type> typeMapping)
     {
+        // A populated Nullable<T> boxes as T, including flattened tuple elements.
+        if (Nullable.GetUnderlyingType(parameterType) is { } underlyingParameter
+            && argumentType.IsValueType && Nullable.GetUnderlyingType(argumentType) is null)
+        {
+            return TryInferTypeMapping(underlyingParameter, argumentType, typeMapping);
+        }
+
         // Direct generic parameter
         if (parameterType.IsGenericParameter)
         {
