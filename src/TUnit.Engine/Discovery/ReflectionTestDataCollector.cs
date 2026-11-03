@@ -563,7 +563,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // infer (#7118)
         var methodRowClassTypeArguments = methodRowTests == null
             ? InferClassTypeArgumentsOfMethodRows(genericTypeDefinition, testMethods, classDataSources.Length + (typeFreeClassRows?.Length ?? 0),
-                nullValuesArrayInfersObject: classDataSources.Length == 0 && generateGenericTestAttributes.Length == 0)
+                nullValuesArrayInfersObject: GenericClassInferencePolicy.NullMethodRowInfersObject(classDataSources.Length > 0, generateGenericTestAttributes.Length > 0))
             : null;
 
         // [GenerateGenericTest] types' class constraint violations are reported before the class rows'
@@ -1038,9 +1038,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         inferredTypeArguments = null;
         var classGenericParameters = genericTypeDefinition.GetGenericArguments();
 
+        // This helper is called only when the class has no data sources, so hasClassTypeSource is false.
         // With no [GenerateGenericTest] instantiation for it to run on, [Arguments(null)] infers object
         // like any other null value, rather than being dropped (#7141)
-        var nullValuesArrayInfersObject = generateGenericTestAttributes.Length == 0;
+        var nullValuesArrayInfersObject = GenericClassInferencePolicy.NullMethodRowInfersObject(hasClassTypeSource: false, hasExplicitClassTypes: generateGenericTestAttributes.Length > 0);
 
         foreach (var genericMethod in testMethods)
         {
@@ -1125,7 +1126,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     var rows = new List<IDataSourceAttribute>(concreteDataSources.Length);
                     for (var i = 0; i < concreteDataSources.Length; i++)
                     {
-                        if (groupOfSource[i] == groupIndex || isListedByGenerateGenericTest && groupOfSource[i] < 0)
+                        if (GenericClassInferencePolicy.IncludesRow(groupOfSource[i] < 0 ? null : groupOfSource[i] == groupIndex, isListedByGenerateGenericTest))
                         {
                             rows.Add(concreteDataSources[i]);
                         }
@@ -1245,9 +1246,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         List<IDataSourceAttribute>? rows = null;
         for (var i = 0; i < dataSources.Length; i++)
         {
-            var keep = rowTypeArguments[i] is { } inferred
-                ? AreSameTypeArguments(inferred, classTypeArguments)
-                : !onlyInferringRows;
+            var inferred = rowTypeArguments[i];
+            var keep = GenericClassInferencePolicy.IncludesRow(inferred is null ? null : AreSameTypeArguments(inferred, classTypeArguments),
+                includeUninferred: !onlyInferringRows);
 
             if (keep)
             {
@@ -1291,6 +1292,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         GenerateGenericTestAttribute[] generateGenericTestAttributes)
     {
         List<TestMetadata>? tests = null;
+        // Discovery has already selected these rows. A null allClassRows means literal class
+        // arguments exist; only type-free rows can then supply this unmatched instantiation.
         var allClassRowSources = allClassRows?.ToArray() ?? typeFreeClassRows;
 
         for (var methodIndex = 0; methodIndex < testMethods.Length; methodIndex++)
@@ -1441,23 +1444,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
-        // An empty row ([Arguments] on C<T>()) has no value to supply a type argument
         var parameters = constructor.GetParameters();
         var boundCount = Math.Min(valueCount, parameters.Length);
-        if (boundCount == 0)
-        {
-            return valueCount == 0;
-        }
-
+        var hasClassTypeParameter = false;
         for (var i = 0; i < boundCount; i++)
         {
-            if (parameters[i].ParameterType.ContainsGenericParameters)
-            {
-                return false;
-            }
+            hasClassTypeParameter |= parameters[i].ParameterType.ContainsGenericParameters;
         }
 
-        return true;
+        return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(
+            valueCount: valueCount, boundCount: boundCount, hasClassTypeParameter: hasClassTypeParameter);
     }
 
     /// <summary>
