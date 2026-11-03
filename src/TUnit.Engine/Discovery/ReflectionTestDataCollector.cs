@@ -374,11 +374,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
-    private static async Task<List<TestMetadata>> DiscoverTestsInAssembly(Assembly assembly)
+    internal static Type[] GetAssemblyTypes(Assembly assembly)
     {
-        var discoveredTests = new List<TestMetadata>(100);
-
-        var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
+        return _assemblyTypesCache.GetOrAdd(assembly, asm =>
         {
             try
             {
@@ -393,6 +391,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return [];
             }
         });
+    }
+
+    private static async Task<List<TestMetadata>> DiscoverTestsInAssembly(Assembly assembly)
+    {
+        var discoveredTests = new List<TestMetadata>(100);
+
+        var types = GetAssemblyTypes(assembly);
 
         if (types.Length == 0)
         {
@@ -3953,7 +3958,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         };
     }
 
-    private async Task<List<TestMetadata>> DiscoverDynamicTests(string testSessionId)
+    internal async Task<List<TestMetadata>> DiscoverDynamicTests(string testSessionId, Assembly[]? candidateAssemblies = null)
     {
         var dynamicTests = new List<TestMetadata>(50);
 
@@ -3979,7 +3984,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
 
-        var allAssemblies = Assemblies;
+        var allAssemblies = candidateAssemblies ?? Assemblies;
         var assembliesList = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
         {
@@ -3992,34 +3997,33 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         foreach (var assembly in assemblies)
         {
-            var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
-            {
-                try
-                {
-                    return asm.GetTypes();
-                }
-                catch
-                {
-                    return [];
-                }
-            });
+            var types = GetAssemblyTypes(assembly);
 
             foreach (var type in types)
             {
                 if (!type.IsClass || IsCompilerGenerated(type))
                     continue;
-                var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-                var methodsList = new List<MethodInfo>(4);
-                foreach (var method in declaredMethods)
+                MethodInfo[] methods;
+                try
                 {
-#pragma warning disable TUnitWIP0001
-                    if (method.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) && !method.IsAbstract)
-#pragma warning restore TUnitWIP0001
+                    var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                    var methodsList = new List<MethodInfo>(4);
+                    foreach (var method in declaredMethods)
                     {
-                        methodsList.Add(method);
+#pragma warning disable TUnitWIP0001
+                        if (method.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) && !method.IsAbstract)
+#pragma warning restore TUnitWIP0001
+                        {
+                            methodsList.Add(method);
+                        }
                     }
+                    methods = methodsList.ToArray();
                 }
-                var methods = methodsList.ToArray();
+                catch (Exception)
+                {
+                    // A retained type can still have method metadata that cannot be loaded.
+                    continue;
+                }
 
                 foreach (var method in methods)
                 {
