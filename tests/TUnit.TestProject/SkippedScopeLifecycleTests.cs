@@ -55,11 +55,16 @@ public class FailedScopeLifecycleTests
     public void FailedInstance(string value) => throw new InvalidOperationException("Must not execute");
 
     [After(TestSession)]
-    public static async Task VerifyScopeCleanup()
+    public static async Task VerifyScopeCleanup(TestSessionContext session)
     {
-        if (_service is { } service)
+        // Session hooks also run when a filter excludes this class entirely.
+        if (!session.TestClasses.Where(x => x.ClassType == typeof(FailedScopeLifecycleTests))
+                .SelectMany(x => x.Tests).Any(x => x.Execution.Result != null))
         {
-            await Assert.That(service.DisposeCount).IsEqualTo(1);
+            return;
         }
+
+        await Assert.That(_service).IsNotNull();
+        await Assert.That(_service!.DisposeCount).IsEqualTo(1);
     }
 }

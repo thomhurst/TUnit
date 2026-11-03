@@ -131,11 +131,25 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             await InvokeTestRegisteredReceivers(registeredReceivers, registeredContext, invokedReceivers).ConfigureAwait(false);
         }
 
-        if (test.Context.InternalEventsIfCreated?.OnTestRegistered is { } onRegistered)
+        HashSet<AsyncEvent<TestContext>.Invocation>? invokedDelegates = null;
+        await InvokeRegistrationDelegatesAsync().ConfigureAwait(false);
+
+        async Task InvokeRegistrationDelegatesAsync()
         {
-            foreach (var handler in onRegistered.InvocationList)
+            if (test.Context.InternalEventsIfCreated?.OnTestRegistered is not { } onRegistered)
             {
-                await handler.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
+                return;
+            }
+
+            // Snapshot because a handler can subscribe another handler while it runs.
+            // Invocation identity preserves duplicate subscriptions while skipping the earlier pass.
+            foreach (var handler in onRegistered.InvocationList.ToArray())
+            {
+                invokedDelegates ??= [];
+                if (invokedDelegates.Add(handler))
+                {
+                    await handler.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
+                }
             }
         }
 
@@ -198,6 +212,11 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
                 invokedReceivers ??= new HashSet<ITestRegisteredEventReceiver>(Core.Helpers.ReferenceEqualityComparer.Instance);
 
                 await InvokeTestRegisteredReceivers(test.Context.GetTestRegisteredReceivers(), registeredContext, invokedReceivers).ConfigureAwait(false);
+            }
+
+            if (argumentsRegistered)
+            {
+                await InvokeRegistrationDelegatesAsync().ConfigureAwait(false);
             }
         }
 

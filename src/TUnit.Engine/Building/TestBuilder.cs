@@ -1121,7 +1121,7 @@ internal sealed class TestBuilder : ITestBuilder
         private object?[]? _data = data;
         private TestDataRowMetadata? _metadata = metadata;
         private object?[]? _lent;
-        private AsyncEvent<(TestContext Context, object? Object)>? _lentCleanup;
+        private AsyncEvent<(TestContext? Context, object? Object)>? _lentCleanup;
         private readonly TestBuilderContext _enumerationContext = enumerationContext ?? rowContext;
         // Method enumeration mutates _enumerationContext after this row is saved.
         // Compare constructor changes against its original state, never that live context.
@@ -1236,7 +1236,7 @@ internal sealed class TestBuilder : ITestBuilder
             return failureContext;
         }
 
-        public AsyncEvent<(TestContext Context, object? Object)>? TakeCleanup()
+        public AsyncEvent<(TestContext? Context, object? Object)>? TakeCleanup()
         {
             // A claimed row already belongs to a runnable test. Never copy its cleanup
             // to a later empty source, which may finish before that test.

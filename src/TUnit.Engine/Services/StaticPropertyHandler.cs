@@ -62,7 +62,7 @@ internal sealed class StaticPropertyHandler
                         value,
                         _sessionObjectBag,
                         methodMetadata: null,
-                        new TestContextEvents());
+                        TestSessionContext.GlobalStaticPropertyContext.Events);
 
                     // Initialize nested objects depth-first BEFORE initializing the main value
                     // This ensures containers (IAsyncInitializer) are started before the factory
@@ -99,20 +99,54 @@ internal sealed class StaticPropertyHandler
     /// sweep in TestSessionCoordinator does not dispose the same object a second time.
     /// </summary>
     public async Task DisposeStaticPropertiesAsync(List<Exception> cleanupExceptions)
+        => await DisposeStaticPropertiesAsync(
+            _trackableObjectGraphProvider.GetStaticPropertyTrackableObjects(),
+            TestSessionContext.GlobalStaticPropertyContext.Events,
+            _objectTracker,
+            cleanupExceptions).ConfigureAwait(false);
+
+    internal static async Task DisposeStaticPropertiesAsync(
+        IEnumerable<object> staticProperties,
+        TestContextEvents events,
+        ObjectTracker objectTracker,
+        List<Exception> cleanupExceptions)
     {
-        var staticProperties = _trackableObjectGraphProvider.GetStaticPropertyTrackableObjects();
+        async ValueTask DisposeScopesAsync(object? instance)
+        {
+            if (events.OnDataRowDispose is not { } cleanup)
+            {
+                return;
+            }
+
+            foreach (var handler in cleanup.InvocationList)
+            {
+                try
+                {
+                    await handler.InvokeAsync(events, (null, instance)).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    cleanupExceptions.Add(e);
+                }
+            }
+        }
 
         foreach (var staticProperty in staticProperties)
         {
+            // Scope-owned values must be released by their scope before tracker disposal is skipped.
+            await DisposeScopesAsync(staticProperty).ConfigureAwait(false);
             try
             {
-                await _objectTracker.UntrackObjectAsync(staticProperty).ConfigureAwait(false);
+                await objectTracker.UntrackObjectAsync(staticProperty).ConfigureAwait(false);
             }
             catch (Exception e)
             {
                 cleanupExceptions.Add(e);
             }
         }
+
+        // Also release scopes whose factory failed or whose returned value was not trackable.
+        await DisposeScopesAsync(null).ConfigureAwait(false);
 
         if (cleanupExceptions.Count > 0)
         {
