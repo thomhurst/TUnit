@@ -141,7 +141,8 @@ internal class DataUnwrapper
         if (dataParameterCount == 1 && TupleHelper.IsTupleType(lastDataParameterType))
         {
             // Keep the runtime tuple intact until generic inference closes the parameter type.
-            return lastDataParameterType.ContainsGenericParameters || lastDataParameterType.IsInstanceOfType(values[0])
+            return !DataSourceHelpers.RequiresFlattenedTupleBinding(values[0]!.GetType())
+                && (lastDataParameterType.ContainsGenericParameters || lastDataParameterType.IsInstanceOfType(values[0]))
                 ? values
                 : DataSourceHelpers.UnwrapTupleAot(values[0]);
         }

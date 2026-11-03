@@ -85,3 +85,57 @@ public class TupleLifecycleTests
         }
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(ConstructorRow))]
+public class SharedTupleReceiverTests(TupleLifecycleTests.Fixture fixture)
+{
+    private static readonly TupleLifecycleTests.Fixture Shared = new();
+    public static TupleLifecycleTests.Fixture ConstructorRow() => Shared;
+    public static (TupleLifecycleTests.Fixture, int) MethodRow() => (Shared, 1);
+
+    [Test, MethodDataSource(nameof(MethodRow))]
+    public async Task Shared_Receiver_Runs_Once((TupleLifecycleTests.Fixture, int) row)
+    {
+        await Assert.That(ReferenceEquals(fixture, row.Item1)).IsTrue();
+        await Assert.That(fixture.Starts).IsEqualTo(1);
+    }
+
+    [After(Class)]
+    public static async Task VerifyEnd() => await Assert.That(Shared.Ends).IsEqualTo(1);
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class MutableTupleInitializerTests
+{
+    public static (Fixture, int) ValueRow() => (new Fixture(), 1);
+    public static Tuple<Fixture, int> ReferenceRow() => Tuple.Create(new Fixture(), 1);
+    public static Tuple<Fixture> SingleRow() => Tuple.Create(new Fixture());
+    public static (Fixture?, int) NullableRow() => (new Fixture(), 1);
+
+    [Test, MethodDataSource(nameof(NullableRow))]
+    public async Task Nullable_Element_Retains_Initializer_Mutations((Fixture?, int) row)
+        => await Assert.That(row.Item1!.Value.Initialized).IsTrue();
+
+    [Test, MethodDataSource(nameof(SingleRow))]
+    public async Task Single_Element_Tuple_Retains_Initializer_Mutations(Tuple<Fixture> row)
+        => await Assert.That(row.Item1.Initialized).IsTrue();
+
+    [Test, MethodDataSource(nameof(ValueRow))]
+    public async Task Value_Tuple_Retains_Initializer_Mutations((Fixture, int) row)
+        => await Assert.That(row.Item1.Initialized).IsTrue();
+
+    [Test, MethodDataSource(nameof(ReferenceRow))]
+    public async Task Reference_Tuple_Retains_Initializer_Mutations(Tuple<Fixture, int> row)
+        => await Assert.That(row.Item1.Initialized).IsTrue();
+
+    public struct Fixture : IAsyncInitializer
+    {
+        public bool Initialized;
+        public Task InitializeAsync()
+        {
+            Initialized = true;
+            return Task.CompletedTask;
+        }
+    }
+}

@@ -245,6 +245,21 @@ internal static class TestContextExtensions
             }
         }
 
+        // The same fixture can be supplied by constructor data, method data and injected
+        // properties. Receiver callbacks belong to the instance, not each argument occurrence.
+        var visited = new HashSet<object>(TUnit.Core.Helpers.ReferenceEqualityComparer.Instance);
+        var uniqueCount = 0;
+        foreach (var item in result)
+        {
+            if (visited.Add(item))
+            {
+                result[uniqueCount++] = item;
+            }
+        }
+        if (uniqueCount != result.Length)
+        {
+            Array.Resize(ref result, uniqueCount);
+        }
         return result;
     }
 

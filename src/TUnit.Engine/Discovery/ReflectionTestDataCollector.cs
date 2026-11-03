@@ -3820,12 +3820,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 var tupleElements = staticParameters != null
                     ? staticTupleElements
                     : GetSingleDataParameter(parameters) is { ParameterType: var singleType } ? GetTupleElementTypes(singleType) : null;
-                if (tupleElements is { Length: > 1 }
-                    && args.Length == tupleElements.Length + parameters.Length - 1)
+                var singleDataIndex = tupleElements is not null
+                    ? Array.FindIndex(parameters, static p => p.ParameterType != typeof(CancellationToken))
+                    : -1;
+                if (tupleElements is { Length: > 0 }
+                    && args.Length == tupleElements.Length + parameters.Length - 1
+                    && (tupleElements.Length > 1 || !parameters[singleDataIndex].ParameterType.IsInstanceOfType(args[singleDataIndex])))
                 {
                     // DataUnwrapper spreads an incompatible tuple so each element can be
                     // converted before constructing the target, as the generated invoker does.
-                    var dataIndex = Array.FindIndex(parameters, p => p.ParameterType != typeof(CancellationToken));
+                    var dataIndex = singleDataIndex;
                     var offset = dataIndex;
                     castedArgs[dataIndex] = ReconstructTuple(parameters[dataIndex].ParameterType, args, ref offset);
                     for (var i = 0; i < parameters.Length; i++)

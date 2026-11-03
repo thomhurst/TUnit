@@ -327,7 +327,8 @@ public static class DataSourceFactories
         if (keepTupleRowsWhole)
         {
             item = DataSourceHelpers.InvokeIfFunc(item);
-            if (DataSourceHelpers.IsTuple(item))
+            if (DataSourceHelpers.IsTuple(item)
+                && !DataSourceHelpers.RequiresFlattenedTupleBinding(item!.GetType()))
             {
                 return [item];
             }

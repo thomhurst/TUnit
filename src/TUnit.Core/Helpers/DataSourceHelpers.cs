@@ -11,6 +11,26 @@ namespace TUnit.Core.Helpers;
 /// </summary>
 public static class DataSourceHelpers
 {
+    private static readonly ConcurrentDictionary<Type, bool> TupleInitializerShapes = new();
+
+    // Initializing a boxed struct extracted from a retained tuple would mutate a detached copy.
+    // Keep those rows flattened so the invoker reconstructs the tuple from the initialized boxes.
+    internal static bool RequiresFlattenedTupleBinding(Type tupleType)
+        => TupleInitializerShapes.GetOrAdd(tupleType, static type =>
+        {
+            var elements = type.GetGenericArguments();
+            for (var i = 0; i < elements.Length; i++)
+            {
+                var element = Nullable.GetUnderlyingType(elements[i]) ?? elements[i];
+                if (element.IsValueType && typeof(IAsyncInitializer).IsAssignableFrom(element)
+                    || i == 7 && TupleHelper.IsTupleType(element) && RequiresFlattenedTupleBinding(element))
+                {
+                    return true;
+                }
+            }
+            return false;
+        });
+
     /// <summary>
     /// Invokes a Func&lt;T&gt; if the value is one, otherwise returns the value as-is.
     /// Note: Most Func invocation should be handled by the source generator at compile time for AOT compatibility.
@@ -405,7 +425,9 @@ public static class DataSourceHelpers
                 // and the item is a tuple, don't unwrap
                 if (expectedTypes.Length == 1 && TupleHelper.IsTupleType(expectedTypes[0]))
                 {
-                    return [item];
+                    return RequiresFlattenedTupleBinding(item.GetType())
+                        ? UnwrapTupleAot(item)
+                        : [item];
                 }
 
                 return UnwrapTupleWithTypes(item, expectedTypes);
