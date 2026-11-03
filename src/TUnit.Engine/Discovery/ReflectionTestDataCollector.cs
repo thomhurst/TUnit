@@ -815,17 +815,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             var rowFactories = dataSource is MethodDataSourceAttribute ? new List<Func<Task<object?[]?>>>() : null;
             var dataItems = await GetDataFromSourceAsync(dataSource, sourceClassMetadata!, sourceConstructorParameters, rowFactories).ConfigureAwait(false);
 
-            // Inference reads factory values, including raw Func<T> rows evaluated by ToObjectArrayWithTypes.
-            // The first test gets those values; later tests invoke the original row factory for fresh objects.
-            // Every source built from this one shares its row's box, so the values are handed out only once.
-            StrongBox<object?[]?>?[]? evaluatedItems = rowFactories is null ? null
-                : dataItems.Select(row => (StrongBox<object?[]?>?)new StrongBox<object?[]?>(row)).ToArray();
+            // Raw and grouped sources share each row's evaluated value and original factory.
+            EvaluatedDataRow?[]? evaluatedItems = null;
             for (var i = 0; i < dataItems.Count; i++)
             {
-                if (dataItems[i] is { } item && GenericClassRowPartition.EvaluateWrappedFactory(item) is var evaluated && !ReferenceEquals(evaluated, item))
+                var item = dataItems[i];
+                var evaluated = item is null ? null : GenericClassRowPartition.EvaluateWrappedFactory(item);
+                if (rowFactories is not null || !ReferenceEquals(evaluated, item))
                 {
-                    evaluatedItems ??= new StrongBox<object?[]?>?[dataItems.Count];
-                    evaluatedItems[i] = new StrongBox<object?[]?>(evaluated);
+                    evaluatedItems ??= new EvaluatedDataRow?[dataItems.Count];
+                    evaluatedItems[i] = new EvaluatedDataRow(evaluated,
+                        rowFactories is not null ? rowFactories[i] : () => Task.FromResult<object?[]?>(item?.ToArray()));
                 }
             }
 
@@ -834,8 +834,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 PartitionOf = dataSource,
                 DeferEnumeration = dataSource.DeferEnumeration,
                 SkipIfEmpty = dataSource.SkipIfEmpty,
-                FirstFetchRows = evaluatedItems,
-                RowFactories = rowFactories?.ToArray()
+                EvaluatedRows = evaluatedItems
             });
 
             // Indices of the rows from this source, per group index, in row order
@@ -843,7 +842,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             for (var rowIndex = 0; rowIndex < dataItems.Count; rowIndex++)
             {
-                var dataRow = evaluatedItems?[rowIndex]?.Value ?? dataItems[rowIndex];
+                var dataRow = evaluatedItems?[rowIndex]?.Row ?? dataItems[rowIndex];
                 if (dataRow == null || dataRow.Length == 0
                     || dataSource is MethodDataSourceAttribute { ClassProvidingDataSource: not null }
                     && !GenericClassRowPartition.HasNonNullValues(dataRow))
@@ -891,18 +890,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 var rowIndices = entry.Value;
                 var groupRows = new object?[rowIndices.Count][];
-                var groupFirstFetchRows = evaluatedItems is null ? null : new StrongBox<object?[]?>?[rowIndices.Count];
-                var groupFactories = rowFactories is null ? null : new Func<Task<object?[]?>>[rowIndices.Count];
+                var groupEvaluatedRows = evaluatedItems is null ? null : new EvaluatedDataRow?[rowIndices.Count];
                 for (var i = 0; i < rowIndices.Count; i++)
                 {
                     groupRows[i] = dataItems[rowIndices[i]];
-                    if (groupFactories is not null)
+                    if (groupEvaluatedRows is not null)
                     {
-                        groupFactories[i] = rowFactories![rowIndices[i]];
-                    }
-                    if (groupFirstFetchRows is not null)
-                    {
-                        groupFirstFetchRows[i] = evaluatedItems![rowIndices[i]];
+                        groupEvaluatedRows[i] = evaluatedItems![rowIndices[i]];
                     }
                 }
 
@@ -910,8 +904,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     PartitionOf = dataSource,
                     DeferEnumeration = dataSource.DeferEnumeration,
-                    FirstFetchRows = groupFirstFetchRows,
-                    RowFactories = groupFactories
+                    EvaluatedRows = groupEvaluatedRows
                 });
                 rowCounts[entry.Key] += entry.Value.Count;
             }

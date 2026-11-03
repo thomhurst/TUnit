@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace TUnit.Core;
 
 /// <summary>
@@ -23,19 +21,8 @@ internal sealed class StaticDataSourceAttribute : Attribute, IDataSourceAttribut
     /// </summary>
     public IDataSourceAttribute? PartitionOf { get; init; }
 
-    /// <summary>
-    /// The values to return from the first fetch of each row instead of that row, or null at an index to always
-    /// return the row. Discovery sets it to the values it evaluated from a factory row to infer a generic
-    /// class's type arguments, so the first test gets those values, and later tests, such as other method rows or
-    /// repeats, invoke the factory for their own objects (#7210). RowFactories retains eagerly evaluated factories.
-    /// Each box is handed out once, including when several
-    /// sources share it.
-    /// </summary>
-    public StrongBox<object?[]?>?[]? FirstFetchRows { get; init; }
-
-    // Reflection discovery retains the original row factories so raw Func<T> rows, which
-    // ToObjectArrayWithTypes evaluates eagerly, can supply fresh values after the first fetch.
-    public Func<Task<object?[]?>>[]? RowFactories { get; init; }
+    // Shared by the raw source and every generic partition of the same row.
+    public EvaluatedDataRow?[]? EvaluatedRows { get; init; }
 
     public StaticDataSourceAttribute(params object?[][] data)
     {
@@ -46,21 +33,15 @@ internal sealed class StaticDataSourceAttribute : Attribute, IDataSourceAttribut
     {
         for (var i = 0; i < _data.Length; i++)
         {
-            var clonedRow = CloneArguments(_data[i]);
-
-            if (FirstFetchRows?[i] is { } firstFetch)
+            if (EvaluatedRows?[i] is { } evaluated)
             {
-                var factory = RowFactories?[i];
-                yield return () =>
-                {
-                    var evaluated = Interlocked.Exchange(ref firstFetch.Value, null);
-                    return evaluated is not null ? Task.FromResult<object?[]?>(evaluated)
-                        : factory is not null ? factory() : Task.FromResult<object?[]?>(clonedRow);
-                };
-                continue;
+                yield return evaluated.FetchAsync;
             }
-
-            yield return () => Task.FromResult<object?[]?>(clonedRow);
+            else
+            {
+                var clonedRow = CloneArguments(_data[i]);
+                yield return () => Task.FromResult<object?[]?>(clonedRow);
+            }
         }
 
         await Task.CompletedTask; // Suppress CS1998
