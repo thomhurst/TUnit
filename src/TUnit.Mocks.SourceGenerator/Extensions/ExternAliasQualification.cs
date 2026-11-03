@@ -105,6 +105,30 @@ internal static class ExternAliasQualification
 
     private static AliasMap Build(Compilation compilation)
     {
+        // An alias can expose several assemblies. Prefer one owned only by the target
+        // assembly so duplicate metadata names in other references do not become ambiguous.
+        Dictionary<string, HashSet<IAssemblySymbol>>? aliasOwners = null;
+        foreach (var reference in compilation.References)
+        {
+            if (reference.Properties.Aliases.IsDefaultOrEmpty ||
+                compilation.GetAssemblyOrModuleSymbol(reference) is not IAssemblySymbol assembly)
+            {
+                continue;
+            }
+
+            aliasOwners ??= new Dictionary<string, HashSet<IAssemblySymbol>>(StringComparer.Ordinal);
+            foreach (var alias in reference.Properties.Aliases)
+            {
+                if (!aliasOwners.TryGetValue(alias, out var owners))
+                {
+                    owners = new HashSet<IAssemblySymbol>(SymbolEqualityComparer.Default);
+                    aliasOwners.Add(alias, owners);
+                }
+
+                owners.Add(assembly);
+            }
+        }
+
         Dictionary<IAssemblySymbol, string>? byAssembly = null;
         foreach (var reference in compilation.References)
         {
@@ -120,9 +144,18 @@ internal static class ExternAliasQualification
             }
 
             byAssembly ??= new Dictionary<IAssemblySymbol, string>(SymbolEqualityComparer.Default);
-            // Any one of the reference's aliases reaches the assembly. Store its C# spelling
-            // once so both qualified type names and extern directives escape reserved words.
-            byAssembly[assembly] = IdentifierEscaping.EscapeIdentifier(aliases[0]);
+            var selected = aliases[0];
+            foreach (var alias in aliases)
+            {
+                if (aliasOwners![alias].Count == 1)
+                {
+                    selected = alias;
+                    break;
+                }
+            }
+
+            // Store its C# spelling once for both qualified names and extern directives.
+            byAssembly[assembly] = IdentifierEscaping.EscapeIdentifier(selected);
         }
 
         if (byAssembly is null)

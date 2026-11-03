@@ -75,6 +75,24 @@ public class Issue7300Tests : SnapshotTestBase
         => VerifyGeneratorOutput(Source, AliasedLibrary());
 
     [Test]
+    [Arguments("LibAlias")]
+    [Arguments("@class")]
+    public async Task Shared_Alias_Prefers_Assembly_Specific_Alias(string alias)
+    {
+        MetadataReference[] references =
+        [
+            CreateExternalAssemblyReference(LibrarySource, "LibA").WithAliases(["Common", alias.TrimStart('@')]),
+            CreateExternalAssemblyReference(LibrarySource, "LibB").WithAliases(["Common", "OtherAlias"])
+        ];
+        var source = Source.Replace("LibAlias", alias);
+        var generated = RunGenerator(source, references);
+        await Assert.That(generated.Any(text => text.Contains("Common::"))).IsFalse();
+        await Assert.That(generated.Any(text => text.Contains(alias + "::Lib.Services.IPublisher"))).IsTrue();
+        await Assert.That(GetGeneratedCompilationErrors(source, references)
+            .Where(error => error.Id == "CS0433").Select(error => error.ToString()).ToArray()).IsEmpty();
+    }
+
+    [Test]
     public async Task Keyword_Alias_Produces_Equivalent_Generated_Code()
     {
         var expected = RunGenerator(Source, AliasedLibrary());
