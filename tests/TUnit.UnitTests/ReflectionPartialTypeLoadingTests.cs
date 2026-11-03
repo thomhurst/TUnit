@@ -15,6 +15,7 @@ public class ReflectionPartialTypeLoadingTests
 
         var types = ReflectionTestDataCollector.GetAssemblyTypes(assembly);
 
+        // Ordinary non-builder types must survive partial loading too.
         await Assert.That(types).IsEquivalentTo(new[] { typeof(LoadableBuilder), typeof(ReflectionPartialTypeLoadingTests) });
         await Assert.That(ReflectionTestDataCollector.GetAssemblyTypes(assembly)).IsSameReferenceAs(types);
         await Assert.That(assembly.GetTypesCalls).IsEqualTo(1);
@@ -22,6 +23,22 @@ public class ReflectionPartialTypeLoadingTests
         await Assert.That(types.SelectMany(type => type.GetMethods())
             .Count(method => method.IsDefined(typeof(DynamicTestBuilderAttribute), false))).IsEqualTo(1);
 #pragma warning restore TUnitWIP0001
+    }
+
+    [Test]
+    public async Task Dynamic_Discovery_Preserves_Tests_From_Partially_Loaded_Assembly()
+    {
+        // A fresh assembly ensures ordinary discovery has not already primed the type cache.
+        var assembly = new FailingAssembly(new ReflectionTypeLoadException(
+            [null, typeof(LoadableBuilder)], [new FileNotFoundException("Dependency unavailable")]));
+
+        var tests = await new ReflectionTestDataCollector().DiscoverDynamicTests(
+            Guid.NewGuid().ToString(), [assembly]);
+
+        var matchingTests = tests.Where(test => test.TestClassType == typeof(LoadableBuilder)
+            && test.TestMethodName == nameof(LoadableBuilder.ContributedTest)).ToArray();
+        await Assert.That(matchingTests).HasCount().EqualTo(1);
+        await Assert.That(assembly.GetTypesCalls).IsEqualTo(1);
     }
 
     [Test]
@@ -37,6 +54,10 @@ public class ReflectionPartialTypeLoadingTests
     {
         public int GetTypesCalls { get; private set; }
 
+        public override AssemblyName GetName() => new("PartialLoadingTestAssembly");
+
+        public override AssemblyName[] GetReferencedAssemblies() => [typeof(TestAttribute).Assembly.GetName()];
+
         public override Type[] GetTypes()
         {
             GetTypesCalls++;
@@ -50,6 +71,16 @@ public class ReflectionPartialTypeLoadingTests
         [DynamicTestBuilder]
 #pragma warning restore TUnitWIP0001
         public static void Build(DynamicTestBuilderContext context)
+        {
+            context.AddTest(new DynamicTest<LoadableBuilder>
+            {
+                TestMethod = test => test.ContributedTest(),
+                TestMethodArguments = [],
+                Attributes = []
+            });
+        }
+
+        public void ContributedTest()
         {
         }
     }

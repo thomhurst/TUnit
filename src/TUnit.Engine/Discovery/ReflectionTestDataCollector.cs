@@ -3950,7 +3950,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         };
     }
 
-    private async Task<List<TestMetadata>> DiscoverDynamicTests(string testSessionId)
+    internal async Task<List<TestMetadata>> DiscoverDynamicTests(string testSessionId, Assembly[]? candidateAssemblies = null)
     {
         var dynamicTests = new List<TestMetadata>(50);
 
@@ -3976,7 +3976,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
 
-        var allAssemblies = Assemblies;
+        var allAssemblies = candidateAssemblies ?? Assemblies;
         var assembliesList = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
         {
