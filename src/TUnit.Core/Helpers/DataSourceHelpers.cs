@@ -11,18 +11,19 @@ namespace TUnit.Core.Helpers;
 /// </summary>
 public static class DataSourceHelpers
 {
-    private static readonly ConcurrentDictionary<Type, bool> TupleInitializerShapes = new();
+    private static readonly ConcurrentDictionary<Type, bool> TupleMutableElementShapes = new();
 
-    // Initializing a boxed struct extracted from a retained tuple would mutate a detached copy.
-    // Keep those rows flattened so the invoker reconstructs the tuple from the initialized boxes.
+    // Initializing or invoking event callbacks on a struct extracted from a retained tuple
+    // would mutate a detached copy. Reconstruct these tuples from the mutated boxes.
     internal static bool RequiresFlattenedTupleBinding(Type tupleType)
-        => TupleInitializerShapes.GetOrAdd(tupleType, static type =>
+        => TupleMutableElementShapes.GetOrAdd(tupleType, static type =>
         {
             var elements = type.GetGenericArguments();
             for (var i = 0; i < elements.Length; i++)
             {
                 var element = Nullable.GetUnderlyingType(elements[i]) ?? elements[i];
-                if (element.IsValueType && typeof(IAsyncInitializer).IsAssignableFrom(element)
+                if (element.IsValueType && (typeof(IAsyncInitializer).IsAssignableFrom(element)
+                    || typeof(IEventReceiver).IsAssignableFrom(element))
                     || i == 7 && TupleHelper.IsTupleType(element) && RequiresFlattenedTupleBinding(element))
                 {
                     return true;

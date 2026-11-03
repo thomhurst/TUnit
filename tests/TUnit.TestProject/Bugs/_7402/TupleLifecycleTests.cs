@@ -139,3 +139,39 @@ public class MutableTupleInitializerTests
         }
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+public class MutableTupleReceiverTests
+{
+    public static (Fixture, int) ValueRow() => (new Fixture(), 1);
+    public static Tuple<Fixture, int> ReferenceRow() => Tuple.Create(new Fixture(), 1);
+    public static Tuple<Fixture> SingleRow() => Tuple.Create(new Fixture());
+    public static (Fixture?, int) NullableRow() => (new Fixture(), 1);
+
+    [Test, MethodDataSource(nameof(NullableRow))]
+    public async Task Nullable_Element_Retains_Receiver_Mutations((Fixture?, int) row)
+        => await Assert.That(row.Item1!.Value.Initialized).IsTrue();
+
+    [Test, MethodDataSource(nameof(SingleRow))]
+    public async Task Single_Element_Tuple_Retains_Receiver_Mutations(Tuple<Fixture> row)
+        => await Assert.That(row.Item1.Initialized).IsTrue();
+
+    [Test, MethodDataSource(nameof(ValueRow))]
+    public async Task Value_Tuple_Retains_Receiver_Mutations((Fixture, int) row)
+        => await Assert.That(row.Item1.Initialized).IsTrue();
+
+    [Test, MethodDataSource(nameof(ReferenceRow))]
+    public async Task Reference_Tuple_Retains_Receiver_Mutations(Tuple<Fixture, int> row)
+        => await Assert.That(row.Item1.Initialized).IsTrue();
+
+    public struct Fixture : ITestStartEventReceiver
+    {
+        public bool Initialized;
+        public int Order => 0;
+        public ValueTask OnTestStart(TestContext context)
+        {
+            Initialized = true;
+            return default;
+        }
+    }
+}
