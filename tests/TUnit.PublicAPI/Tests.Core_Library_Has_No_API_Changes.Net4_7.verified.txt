@@ -775,7 +775,7 @@ namespace
     }
     public static class GenericClassRowPartition
     {
-        public static .MethodDataSourceAttribute ConfigureInferredSource(.MethodDataSourceAttribute source, bool filterRows, params [] classTypeArguments) { }
+        public static .IDataSourceAttribute ConfigureInferredSource(.IDataSourceAttribute source, bool filterRows, params [] classTypeArguments) { }
         public static .IDataSourceAttribute[] Create([] classTypeArguments, .GenericClassRowFallback fallback, .IDataSourceAttribute[] dataSources, params int[] partitionedIndices) { }
     }
     public class GenericConstraintViolationDataSource : , .IDataSourceAttribute

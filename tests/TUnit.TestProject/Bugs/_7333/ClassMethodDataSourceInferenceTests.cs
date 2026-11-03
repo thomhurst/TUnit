@@ -533,3 +533,72 @@ public static class ExplicitArrayRowsProvider
 {
     public static IEnumerable<int[]?> Rows() => [new[] { 1 }, null];
 }
+
+[GenerateGenericTest(typeof(int))]
+[Arguments("tag", 1)]
+[Arguments(2, 3)]
+public class ExplicitConstructorMappedArguments<T>(object tag, T value)
+{
+    [Test]
+    [Arguments(4)]
+    public async Task Test(T argument)
+    {
+        await Assert.That((object?)value is 1 or 3).IsTrue();
+        await Assert.That(tag is "tag" or 2).IsTrue();
+        await Assert.That((object?)argument).IsEqualTo(4);
+    }
+}
+
+[GenerateGenericTest(typeof(string))]
+[Arguments("seed")]
+[MethodDataSource(nameof(Rows))]
+public class ExplicitDeferredOwnNullRows<T>(T value)
+{
+    public static IEnumerable<T?> Rows() => [default];
+
+    [Test]
+    [Arguments("method")]
+    public async Task Test(T argument)
+    {
+        await Assert.That((object?)value is null or "seed").IsTrue();
+        await Assert.That((object?)argument).IsEqualTo("method");
+    }
+}
+
+[GenerateGenericTest(typeof(string))]
+[MethodDataSource(typeof(ExplicitMethodRowsProvider), nameof(ExplicitMethodRowsProvider.Rows))]
+public class ExplicitExternalNullRowsWithGenericMethod<T>(T value)
+{
+    [Test]
+    [Arguments(1)]
+    public async Task Test<U>(U argument)
+    {
+        await Assert.That((object?)value).IsEqualTo("seed");
+        await Assert.That((object?)argument).IsEqualTo(1);
+    }
+}
+
+[MethodDataSource(typeof(ReviewRows), nameof(ReviewRows.EmptyIntegers))]
+public class MatchingMethodOnlyEmptyClassRows<T>
+{
+    public MatchingMethodOnlyEmptyClassRows(T value)
+        => throw new InvalidOperationException("Missing constructor value must be reported.");
+
+    [Test]
+    [Arguments(1)]
+    public void ReportsMissingConstructorValue(T argument) => _ = argument;
+}
+
+// Explicit types cover sources whose object declaration cannot infer a closed class.
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(typeof(ExplicitUninferableProvider), nameof(ExplicitUninferableProvider.Rows))]
+public class ExplicitUninferableRows<T>(T value)
+{
+    [Test]
+    public async Task Test() => await Assert.That((object?)value).IsEqualTo(1);
+}
+
+public static class ExplicitUninferableProvider
+{
+    public static IEnumerable<object> Rows() => [1];
+}

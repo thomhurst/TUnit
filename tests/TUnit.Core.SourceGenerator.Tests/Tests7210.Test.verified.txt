@@ -566,7 +566,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 },
             classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(int) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.ArgumentsAttribute(1),
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.ArgumentsAttribute(1), false, typeof(int)),
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "Mixed")
     {
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
@@ -1007,7 +1007,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 },
             classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(int) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.Core.ArgumentsAttribute(1),
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.ArgumentsAttribute(1), false, typeof(int)),
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "Mixed")
     {
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
