@@ -55,8 +55,9 @@ internal sealed class TestBuilder : ITestBuilder
             return;
         }
 
-        foreach (var data in classData)
+        foreach (var data in TupleArguments.Expand(classData))
         {
+            // Retained tuple elements need the same discovery lifecycle as flattened rows.
             // Discovery: only IAsyncDiscoveryInitializer objects are initialized.
             // Regular IAsyncInitializer objects are deferred to execution phase.
             await ObjectInitializer.InitializeForDiscoveryAsync(data);
