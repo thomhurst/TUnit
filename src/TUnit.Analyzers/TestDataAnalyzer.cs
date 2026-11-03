@@ -1035,8 +1035,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             // Check constraints while the original method type parameters are still available.
             CheckInferredTypeArgumentConstraints(context, attribute, typeArguments, testDataTypes);
 
-            var closedParameters = method.Construct(inferred).Parameters
-                .WithoutTestMethodCancellationTokens().ToArray();
+            // Injection follows the declared signature: a T inferred as CancellationToken still takes data.
+            var constructedMethod = method.Construct(inferred);
+            var closedParameters = method.Parameters.WithoutTestMethodCancellationTokens()
+                .Select(p => constructedMethod.Parameters[p.Ordinal]).ToArray();
             // A shorter row leaves trailing optional parameters at their defaults.
             var suppliedParameterCount = typeArguments.Length;
             if (suppliedParameterCount < closedParameters.Length
@@ -1046,9 +1048,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
 
             testDataTypes = closedParameters.Select((p, i) =>
-                p.IsParams && p.Type is IArrayTypeSymbol array && i < typeArguments.Length
+                p.IsParams && GetParamsElementType(p.Type) is { } elementType && i < typeArguments.Length
                     && !context.Compilation.HasImplicitConversionOrGenericParameter(typeArguments[i], p.Type)
-                    ? array.ElementType
+                    ? elementType
                     : p.Type).ToImmutableArray();
         }
 
@@ -1094,6 +1096,19 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 attribute.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
                 string.Join(", ", typeArguments), string.Join(", ", testDataTypes)));
     }
+
+    // Match the array-assignable params collections supported by TupleArgumentHelper in discovery.
+    private static ITypeSymbol? GetParamsElementType(ITypeSymbol type) => type switch
+    {
+        IArrayTypeSymbol { IsSZArray: true } array => array.ElementType,
+        INamedTypeSymbol { IsGenericType: true } named when named.OriginalDefinition.SpecialType is
+            SpecialType.System_Collections_Generic_IEnumerable_T
+            or SpecialType.System_Collections_Generic_ICollection_T
+            or SpecialType.System_Collections_Generic_IList_T
+            or SpecialType.System_Collections_Generic_IReadOnlyCollection_T
+            or SpecialType.System_Collections_Generic_IReadOnlyList_T => named.TypeArguments[0],
+        _ => null
+    };
 
     /// <summary>
     /// The constructor parameter types with the class's type parameters replaced by the types a class row infers for

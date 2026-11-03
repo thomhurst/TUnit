@@ -113,6 +113,8 @@ public class ArgumentsAnalyzerTests
     [Arguments("(int[], int, string)", "T[] values, T value, params string[] rest")]
     [Arguments("(int[], int, string[])", "T[] values, T value, params string[] rest")]
     [Arguments("(int[], int, int)", "T[] values, T value, params string[] rest", true)]
+    [Arguments("(System.Threading.CancellationToken, System.Threading.CancellationToken[])", "T value, T[] values")]
+    [Arguments("(System.Threading.CancellationToken, System.Threading.CancellationToken[])", "T value, System.Threading.CancellationToken token, T[] values")]
     public async Task Typed_Array_Source_Validates_Injected_Tokens_And_Params(string rowType, string parameters, bool invalid = false)
     {
         await Verifier.VerifyAnalyzerAsync(
