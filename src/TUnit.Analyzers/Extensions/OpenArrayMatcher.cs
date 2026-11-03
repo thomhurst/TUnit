@@ -208,10 +208,38 @@ internal static class OpenArrayMatcher
             return false;
         }
 
+        if (left is IArrayTypeSymbol array && right is INamedTypeSymbol { TypeKind: TypeKind.Interface } arrayInterface)
+        {
+            return CanArraySubtypeImplement(compilation, array, arrayInterface);
+        }
+
+        if (right is IArrayTypeSymbol otherArray && left is INamedTypeSymbol { TypeKind: TypeKind.Interface } otherInterface)
+        {
+            return CanArraySubtypeImplement(compilation, otherArray, otherInterface);
+        }
+
         var leftSealedClass = left.IsSealed && left.TypeKind is not (TypeKind.Array or TypeKind.Delegate);
         var rightSealedClass = right.IsSealed && right.TypeKind is not (TypeKind.Array or TypeKind.Delegate);
         return !leftSealedClass && !rightSealedClass
             && !(left.TypeKind == TypeKind.Class && right.TypeKind == TypeKind.Class);
+    }
+
+    private static bool CanArraySubtypeImplement(Compilation compilation, IArrayTypeSymbol array, INamedTypeSymbol target)
+    {
+        // An array subtype can change its reference element type, but cannot acquire
+        // arbitrary interfaces. Non-generic interfaces were handled by conversion above.
+        foreach (var implemented in array.AllInterfaces)
+        {
+            if (implemented.TypeArguments.Length == 1 && target.TypeArguments.Length == 1
+                && SymbolEqualityComparer.Default.Equals(implemented.OriginalDefinition, target.OriginalDefinition)
+                && array.ElementType.IsReferenceType && target.TypeArguments[0].IsReferenceType
+                && CanShareReferenceSubtype(compilation, array.ElementType, target.TypeArguments[0]))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }
