@@ -18,7 +18,7 @@ Without `[GenerateGenericTest]`, reflection closes declared typed sources first 
 
 The parity matrix in `GenericMethodInferencePolicyTests` executes the same fixtures in both test modes. It covers each source kind, duplicate literal rows, duplicate non-literal sources, inferred types beside explicit types, and constraint fallback. The fixtures assert their inferred types and values; the matrix checks row counts so accidentally running a dropped source is observable.
 
-`GenericClassInferencePolicy` is also compiled into both adapters. It owns class-source priority, row fallback and membership, type-free literal row classification, and the completeness requirement for combined class/method types. Class rows include literal `[Arguments]`, typed data sources and `[MethodDataSource]`; adapters extract their types and keep source declaration order. Equal class types share an instantiation while retaining their constructor rows.
+`GenericClassInferencePolicy` is also compiled into both adapters. It owns row fallback and membership, type-free literal row classification, and the completeness requirement for combined class/method types. Class rows include literal `[Arguments]`, typed data sources and `[MethodDataSource]`; adapters extract their types and keep source declaration order. Equal class types share an instantiation while retaining their constructor rows.
 
 | Order | Class source | Ownership and scope |
 | --- | --- | --- |
@@ -28,7 +28,7 @@ The parity matrix in `GenericMethodInferencePolicyTests` executes the same fixtu
 | 4 | Parameter inference | Supplies remaining class types without owning one literal row |
 | 5 | Class `[GenerateGenericTest]` | Supplies explicit class types; an existing class-row instantiation owns matching types |
 
-Literal and explicit class phases remain boundary phases, as with method inference. The shared order controls the intervening class inference phases and precedence comparisons. It describes selection priority, not the order in which reflection evaluates runtime sources or emits metadata.
+Class-source traversal and duplicate ownership remain adapter responsibilities: the table above documents their existing selection priority rather than a shared executable ordering. The generator extracts method data sources before parameter inference in its class-only phase; reflection evaluates runtime sources while closing class instantiations. Literal and explicit class phases remain boundary phases, as with method inference. Both adapters retain constructor rows when explicit class types duplicate an inferred class instantiation.
 
 A literal constructor row is type-free when its bound data parameters contain no class type parameter (an empty row with no bound parameters is also type-free). It supplies constructor values to a class inferred from method rows. A null method row infers `object` only when neither class sources nor explicit class types supply a type. Row membership includes rows matching the instantiation and, where requested, uninferred rows. If no class row matches, literal class rows produce a missing-constructor-row failure; runtime sources fall back to all rows. A matching class row takes precedence over both fallbacks.
 

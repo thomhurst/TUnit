@@ -67,8 +67,14 @@ public class GenericMethodInferencePolicyTests(TestMode testMode) : InvokableTes
                 result => result.ResultSummary.Counters.Total.ShouldBe(expectedTests),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(expectedTests - 1),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1),
-                result => result.Results.Single(x => x.Outcome == "Failed")
-                    .Output?.ErrorInfo?.Message.ShouldContain(error),
+                result =>
+                {
+                    var failed = result.Results.Single(x => x.Outcome == "Failed");
+                    failed.Output.ShouldNotBeNull();
+                    failed.Output.ErrorInfo.ShouldNotBeNull();
+                    failed.Output.ErrorInfo.Message.ShouldNotBeNull();
+                    failed.Output.ErrorInfo.Message.ShouldContain(error);
+                },
             ]);
     }
 

@@ -573,8 +573,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         foreach (var typeArguments in generateGenericTestTypeArguments)
         {
-            if (methodRowClassTypeArguments != null && IsInferredByClassRows(classRowGroups!, typeArguments)
-                && GenericClassInferencePolicy.OwnsInstantiation(GenericClassInferencePolicy.Source.ClassRow, GenericClassInferencePolicy.Source.GenerateGenericTest))
+            if (methodRowClassTypeArguments != null && IsInferredByClassRows(classRowGroups!, typeArguments))
             {
                 // The class rows' instantiation of these types stands for both, as in the source generator (#7118),
                 // so it also reads the own-class sources this instantiation would have read (#7208)
@@ -2250,7 +2249,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var classGenericParameterCount = method.DeclaringType is { IsGenericType: true } declaringType
             ? declaringType.GetGenericArguments().Length
             : 0;
-        foreach (var rule in testClass.IsGenericType ? GenericClassInferencePolicy.MethodSources : GenericMethodInferencePolicy.Rules)
+        foreach (var rule in GenericMethodInferencePolicy.Rules)
         {
             if (rule.Source == GenericMethodInferencePolicy.Source.ParameterAttribute)
             {

@@ -1,39 +1,15 @@
 namespace TUnit.Inference;
 
 // Compiled into the engine and every generator variant. Adapters extract types and row identities;
-// this policy decides ownership and row scope without depending on either type system.
+// this policy decides row scope and type pairing without depending on either type system.
 internal static class GenericClassInferencePolicy
 {
-    internal enum Source
-    {
-        ClassRow,
-        MethodArguments,
-        MethodDataSource,
-        ParameterAttribute,
-        GenerateGenericTest,
-    }
-
-    // Class rows include literal, typed and member sources: equal inferred types join the same
-    // class instantiation, rather than dropping a later source as generic method inference can.
-    // Runtime-only row types are extracted by the reflection/partition adapters, not this table.
-    internal static readonly Source[] Sources =
-    [
-        Source.ClassRow,
-        Source.MethodArguments,
-        Source.MethodDataSource,
-        Source.ParameterAttribute,
-        Source.GenerateGenericTest,
-    ];
-
     internal enum RowFallback
     {
         None,
         AllRows,
         NoClassRow,
     }
-
-    internal static bool OwnsInstantiation(Source candidate, Source existing)
-        => System.Array.IndexOf(Sources, candidate) <= System.Array.IndexOf(Sources, existing);
 
     internal static RowFallback SelectRowFallback(bool hasMatchingClassRow, bool hasClassArgumentsRows)
         => hasMatchingClassRow ? RowFallback.None
@@ -61,8 +37,4 @@ internal static class GenericClassInferencePolicy
         System.Array.Copy(methodTypes, 0, combined, classTypes.Length, methodTypes.Length);
         return combined;
     }
-
-    // Closing a generic class establishes the outer scope. Within it method source selection has
-    // exactly the same precedence and duplicate/fallback policy as on a non-generic class.
-    internal static GenericMethodInferencePolicy.Rule[] MethodSources => GenericMethodInferencePolicy.Rules;
 }

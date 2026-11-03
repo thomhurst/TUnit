@@ -1011,8 +1011,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // supplies the types of, and those whose declared rows infer these types, whether or not the
                     // method has rows. AddRow skips a source a repeated attribute already added. Reflection mode
                     // does the same in AddDeferredOwnSources and GroupClassRowsByTypeArgumentsAsync (#7208).
-                    if (fromGenerateGenericTest && existing.HasClassRows
-                        && GenericClassInferencePolicy.OwnsInstantiation(GenericClassInferencePolicy.Source.ClassRow, GenericClassInferencePolicy.Source.GenerateGenericTest))
+                    if (fromGenerateGenericTest && existing.HasClassRows)
                     {
                         foreach (var ownSource in GetOwnClassMethodDataSourcesForInstantiation(testMethod, classTypeArgs))
                         {
@@ -1393,26 +1392,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Class-only sources have their own precedence: member sources precede parameter inference.
         if (testMethod is { IsGenericType: true, IsGenericMethod: false })
         {
-            foreach (var source in GenericClassInferencePolicy.Sources)
+            foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
             {
-                switch (source)
+                if (InferClassTypesFromMethodDataSource(testMethod, mdsAttr) is { Length: > 0 } inferredTypes)
                 {
-                    case GenericClassInferencePolicy.Source.MethodDataSource:
-                        foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
-                        {
-                            if (InferClassTypesFromMethodDataSource(testMethod, mdsAttr) is { Length: > 0 } inferredTypes)
-                            {
-                                TryAddInstantiation(inferredTypes);
-                            }
-                        }
-                        break;
-                    case GenericClassInferencePolicy.Source.ParameterAttribute:
-                        if (InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol) is { Length: > 0 } parameterTypes)
-                        {
-                            TryAddInstantiation(parameterTypes);
-                        }
-                        break;
+                    TryAddInstantiation(inferredTypes);
                 }
+            }
+
+            if (InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol) is { Length: > 0 } parameterTypes)
+            {
+                TryAddInstantiation(parameterTypes);
             }
         }
 
@@ -1498,7 +1488,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // infers runs only that source. Any other [GenerateGenericTest] type runs every method
                 // data source. A null source (IInfersType<T>) also runs every method data source.
                 var methodSources = new List<(ITypeSymbol[] Types, AttributeData? Source, GenericMethodInferencePolicy.Source PolicySource)>();
-                foreach (var rule in GenericClassInferencePolicy.MethodSources)
+                foreach (var rule in GenericMethodInferencePolicy.Rules)
                 {
                     switch (rule.Source)
                     {
