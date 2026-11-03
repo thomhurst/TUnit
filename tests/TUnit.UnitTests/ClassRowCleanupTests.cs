@@ -24,22 +24,43 @@ public class ClassRowCleanupTests
         {
             var rejected = CreateContext();
             await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse constructor"), rejected);
-            rejected.Events.OnDispose += (_, _) => { rejectedDisposals++; return default; };
+            var resource = new object();
+            rejected.StateBag["rejected-resource"] = resource;
+            rejected.Events.OnDispose += async (_, context) =>
+            {
+                await Assert.That(context.StateBag.Items["rejected-resource"]).IsSameReferenceAs(resource);
+                rejectedDisposals++;
+            };
             rejected.Events.OnTestStart += (_, _) => { rejectedStarts++; return default; };
             (rejected.Events.DataRowScopes ??= new()).Register(new CallbackScope(() => { scopeDisposals++; return default; }));
-            row.Return(data, null, rejected.Events);
+            row.Return(data, null, rejected);
         }
         var owner = CreateContext();
+        var ownerResource = new object();
+        owner.StateBag["rejected-resource"] = ownerResource;
         if (failedRow)
             row.TransferCleanupTo(owner);
         else
             await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse constructor"), owner);
-        foreach (var handler in owner.Events.OnDispose!.InvocationList)
-            await handler.InvokeAsync(this, TestContext.Current!);
-        if (owner.Events.OnTestStart is { } starts)
-            foreach (var handler in starts.InvocationList)
-                await handler.InvokeAsync(this, TestContext.Current!);
-        await DisposeRow(owner);
+        var current = TestContext.Current!;
+        var executableContext = new TestContext("Cleanup owner", current.ServiceProvider, current.ClassContext,
+            owner, CancellationToken.None);
+        executableContext.Metadata.TestDetails = current.TestDetails;
+        try
+        {
+            foreach (var handler in owner.Events.OnDispose!.InvocationList)
+                await handler.InvokeAsync(executableContext, executableContext);
+            if (owner.Events.OnTestStart is { } starts)
+                foreach (var handler in starts.InvocationList)
+                    await handler.InvokeAsync(executableContext, executableContext);
+            await DisposeRow(owner);
+            await Assert.That(executableContext.StateBag.Items["rejected-resource"]).IsSameReferenceAs(ownerResource);
+        }
+        finally
+        {
+            executableContext.RemoveFromRegistry();
+            executableContext.Dispose();
+        }
         await Assert.That(constructorDisposals).IsEqualTo(1);
         await Assert.That(rejectedDisposals).IsEqualTo(2);
         await Assert.That(scopeDisposals).IsEqualTo(2);

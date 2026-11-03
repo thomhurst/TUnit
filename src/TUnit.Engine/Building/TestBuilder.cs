@@ -361,7 +361,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         {
                                             // Skip this data source as it's not compatible with the expected types.
                                             // No test holds the class row's objects, so the next test takes them.
-                                            unclaimedClassRow.Return(classData, classRowMetadata, contextAccessor.Current.EventsIfCreated);
+                                            unclaimedClassRow.Return(classData, classRowMetadata, contextAccessor.Current);
                                             continue;
                                         }
                                     }
@@ -1130,15 +1130,48 @@ internal sealed class TestBuilder : ITestBuilder
         /// <summary>
         /// Hands back objects that were taken but that no test ended up holding, so the next test takes them.
         /// </summary>
-        public void Return(object?[] data, TestDataRowMetadata? metadata, TestContextEvents? rejectedEvents)
+        public void Return(object?[] data, TestDataRowMetadata? metadata, TestBuilderContext rejectedContext)
         {
             _data = data;
             _metadata = metadata;
             // Only cleanup follows a rejected method row. Its other lifecycle handlers must
             // never become constructor subscriptions on later compatible rows.
-            if (rejectedEvents is not null)
+            if (rejectedContext.EventsIfCreated is { } rejectedEvents)
             {
-                (_rejectedCleanup ??= new()).AddCleanupFrom(rejectedEvents);
+                var cleanup = _rejectedCleanup ??= new();
+                if (rejectedEvents.DataRowScopes is { } scopes)
+                    cleanup.AddDataRowScopes(scopes);
+
+                // Constructor callbacks already belong to the saved class row. Bind only
+                // method-row callbacks to their own state, rather than the next test's bag.
+                var callbacks = rejectedEvents.OnDispose?.InvocationList
+                    .Where(invocation => _events?.OnDispose?.InvocationList.Contains(invocation) != true
+                        && cleanup.OnDispose?.InvocationList.Contains(invocation) != true)
+                    .ToArray();
+                if (callbacks is { Length: > 0 })
+                {
+                    var saved = rejectedContext with { StateBag = new(rejectedContext.StateBag) };
+                    foreach (var callback in callbacks)
+                    {
+                        (cleanup.OnDispose ??= new()).Add(async (_, owner) =>
+                        {
+                            // Rejected rows have no executable test. Give their cleanup a
+                            // context with the owning state and the final test's metadata.
+                            var context = new TestContext(owner.TestDetails.TestName, owner.ServiceProvider,
+                                owner.ClassContext, saved, owner.CancellationToken);
+                            context.Metadata.TestDetails = owner.TestDetails;
+                            try
+                            {
+                                await callback.InvokeAsync(context, context);
+                            }
+                            finally
+                            {
+                                context.RemoveFromRegistry();
+                                context.Dispose();
+                            }
+                        }, callback.Order);
+                    }
+                }
             }
         }
 
@@ -2523,7 +2556,7 @@ internal sealed class TestBuilder : ITestBuilder
                 if (!IsDataCompatibleWithExpectedTypes(metadata, methodData))
                 {
                     // Skip incompatible data. No test holds the class row's objects, so the next test takes them.
-                    unclaimedClassRow.Return(classData, classRowMetadata, contextAccessor.Current.EventsIfCreated);
+                    unclaimedClassRow.Return(classData, classRowMetadata, contextAccessor.Current);
                     return null;
                 }
             }
