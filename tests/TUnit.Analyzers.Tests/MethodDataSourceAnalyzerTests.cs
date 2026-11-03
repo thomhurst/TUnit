@@ -5,6 +5,33 @@ namespace TUnit.Analyzers.Tests;
 public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 {
     [Test]
+    public async Task Null_Argument_Selects_More_Specific_Optional_Overload()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public static IEnumerable<string> Rows(object value, int count = 1) => ["broad"];
+                public static IEnumerable<int> Rows(string value, int count = 1) => [count];
+                public static IEnumerable<int> Reversed(string value, int count = 1) => [count];
+                public static IEnumerable<string> Reversed(object value, int count = 1) => ["broad"];
+
+                [Test, MethodDataSource(nameof(Rows), Arguments = new object?[] { null })]
+                public void Specific(int value) { }
+                [Test, MethodDataSource(nameof(Reversed), Arguments = new object?[] { null })]
+                public void SpecificReversed(int value) { }
+                [Test, {|#0:MethodDataSource(nameof(Rows), Arguments = new object?[] { null })|}]
+                public void Incompatible(string value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(0)
+                .WithArguments("int", "string"));
+    }
+
+    [Test]
     public async Task Override_Does_Not_Inherit_Optional_Default()
     {
         await Verifier.VerifyAnalyzerAsync(

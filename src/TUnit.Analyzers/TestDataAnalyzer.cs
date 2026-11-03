@@ -751,6 +751,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         IMethodSymbol? best = null;
         var bestScore = -1;
+        var argumentTypes = arguments.Select(a => a.IsNull ? null : a.Type).ToArray();
         foreach (var method in methods)
         {
             if (method.Name != name || method.IsGenericMethod || methods.Any(derived => OverridesMethod(derived, method)))
@@ -760,9 +761,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             var score = ScoreOptionalDataSource(context, arguments, method);
             var moreSpecific = best is not null && score == bestScore && score >= 0
-                && arguments.All(a => !a.IsNull && a.Type is not null)
-                && IsAtLeastAsSpecific(context.Compilation, method, best, arguments.Select(a => a.Type!).ToArray())
-                && !IsAtLeastAsSpecific(context.Compilation, best, method, arguments.Select(a => a.Type!).ToArray());
+                && IsAtLeastAsSpecific(context.Compilation, method, best, argumentTypes)
+                && !IsAtLeastAsSpecific(context.Compilation, best, method, argumentTypes);
             if (score > bestScore || moreSpecific)
             {
                 best = method;
@@ -817,7 +817,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return -1;
             }
 
-            score += SymbolEqualityComparer.Default.Equals(argument.Type, parameter.Type) ? 2 : 1;
+            if (!argument.IsNull)
+            {
+                score += SymbolEqualityComparer.Default.Equals(argument.Type, parameter.Type) ? 2 : 1;
+            }
         }
 
         return score;
@@ -1670,7 +1673,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     // Mirrors DefaultBinder.FindMostSpecificMethod: an overload wins when it is more specific for at least one
     // parameter and less specific for none. Overloads with the same parameter types (a member hidden with `new`)
     // are resolved by the binder in favour of the most derived declaration, so they never tie.
-    private static bool IsAtLeastAsSpecific(Compilation compilation, IMethodSymbol candidate, IMethodSymbol other, ITypeSymbol[] argumentTypes)
+    private static bool IsAtLeastAsSpecific(Compilation compilation, IMethodSymbol candidate, IMethodSymbol other, ITypeSymbol?[] argumentTypes)
     {
         var otherWins = false;
 
@@ -1700,7 +1703,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     }
 
     // Mirrors DefaultBinder.FindMostSpecificType: 1 when the first type is more specific, 2 when the second is, 0 for a tie.
-    private static int FindMostSpecificType(Compilation compilation, ITypeSymbol first, ITypeSymbol second, ITypeSymbol argumentType)
+    private static int FindMostSpecificType(Compilation compilation, ITypeSymbol first, ITypeSymbol second, ITypeSymbol? argumentType)
     {
         if (SymbolEqualityComparer.Default.Equals(first, argumentType))
         {
