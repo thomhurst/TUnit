@@ -1162,10 +1162,6 @@ internal sealed class TestBuilder : ITestBuilder
                         {
                             context.StateBag[entry.Key] = entry.Value;
                         }
-                        else
-                        {
-                            context.StateBag.TryAdd(entry.Key, entry.Value);
-                        }
                     }
                 }
                 if (_events is { } savedEvents)
