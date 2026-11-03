@@ -82,11 +82,11 @@ internal static class TUnit_TestProject_EnumerableTupleDataSourceDrivenTests__Te
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.TupleMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.TupleMethod()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.NamedTupleMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.NamedTupleMethod()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", false, new global::TUnit.Core.ParameterMetadata[]

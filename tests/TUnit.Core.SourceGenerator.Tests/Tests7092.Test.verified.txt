@@ -83,7 +83,7 @@ internal static class TUnit_TestProject_Bugs__7092_SkipIfEmptyMethodDataSourceTe
     new global::TUnit.Core.MethodDataSourceAttribute("NoRows")
     {
         SkipIfEmpty = true,
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7092.SkipIfEmptyMethodDataSourceTests.NoRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7092.SkipIfEmptyMethodDataSourceTests.NoRows()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7092.SkipIfEmptyMethodDataSourceTests), "Empty_Source_With_SkipIfEmpty_Is_Skipped", false, new global::TUnit.Core.ParameterMetadata[]

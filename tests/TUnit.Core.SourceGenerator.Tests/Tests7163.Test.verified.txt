@@ -51,7 +51,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     global::TUnit.Core.GenericConstraintViolationDataSource.Create("Could not infer the type arguments of generic test method 'Generic' from data source [MethodDataSource(nameof(Rows))]. Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].", new global::TUnit.Core.MethodDataSourceAttribute("Rows")
 {
-    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7163.ObjectRowsTests.Rows()),
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7163.ObjectRowsTests.Rows()),
 }),
 },
             methodMetadata: __mm_0,
@@ -124,7 +124,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "second", new
 {
     global::TUnit.Core.GenericConstraintViolationDataSource.Create("Could not infer the type arguments of generic test method 'Generic' from data source [MethodDataSource(nameof(Rows))]. Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].", new global::TUnit.Core.MethodDataSourceAttribute("Rows")
 {
-    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7163.ObjectArrayRowsTests.Rows()),
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7163.ObjectArrayRowsTests.Rows()),
 }),
 },
             methodMetadata: __mm_0,
@@ -250,7 +250,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     global::TUnit.Core.GenericConstraintViolationDataSource.Create("Could not infer the type arguments of generic test method 'Generic' from data source [MethodDataSource(nameof(Rows))]. Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].", new global::TUnit.Core.MethodDataSourceAttribute("Rows")
 {
-    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7163.PartlyInferableTests.Rows()),
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7163.PartlyInferableTests.Rows()),
 }),
 },
             methodMetadata: __mm_0,
@@ -331,7 +331,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("Rows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7163.GenerateGenericTestWithObjectRowsTests.Rows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7163.GenerateGenericTestWithObjectRowsTests.Rows()),
     },
 },
             methodMetadata: __mm_0,
@@ -477,7 +477,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "label", new 
     new global::TUnit.Core.ArgumentsAttribute(1, "a"),
     new global::TUnit.Core.MethodDataSourceAttribute("Rows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7163.ArgumentsAndDataSourceWithSameTypesTests.Rows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7163.ArgumentsAndDataSourceWithSameTypesTests.Rows()),
     },
 },
             methodMetadata: __mm_0,
@@ -559,11 +559,11 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "label", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("First")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7163.TwoDataSourcesWithSameTypesTests.First()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7163.TwoDataSourcesWithSameTypesTests.First()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("Second")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7163.TwoDataSourcesWithSameTypesTests.Second()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7163.TwoDataSourcesWithSameTypesTests.Second()),
     },
 },
             methodMetadata: __mm_0,

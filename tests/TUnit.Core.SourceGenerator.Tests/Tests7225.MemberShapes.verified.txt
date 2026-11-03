@@ -571,7 +571,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
 {
     new global::TUnit.Core.MethodDataSourceAttribute("StaticReferenceTupleRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.StaticReferenceTupleRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7225.InstanceMethodDataSourceMemberShapeTests.StaticReferenceTupleRows()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),

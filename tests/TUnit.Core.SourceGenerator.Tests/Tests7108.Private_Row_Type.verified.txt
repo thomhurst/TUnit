@@ -51,7 +51,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     global::TUnit.Core.GenericConstraintViolationDataSource.Create("Could not infer the type arguments of generic test method 'Private_Row_Type_From_Property' from data source [MethodDataSource(nameof(PropertyRows))]. Its rows give the type argument 'TUnit.TestProject.Bugs._7108.PrivateRowTypeDataSourceTests.Row', which source-generated code cannot name because it is private or protected. Make that type internal or public, or list accessible type arguments with [GenerateGenericTest].", new global::TUnit.Core.MethodDataSourceAttribute("PropertyRows")
 {
-    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => typeof(global::TUnit.TestProject.Bugs._7108.PrivateRowTypeDataSourceTests).GetProperty("PropertyRows", global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly)!.GetValue(null)),
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => typeof(global::TUnit.TestProject.Bugs._7108.PrivateRowTypeDataSourceTests).GetProperty("PropertyRows", global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly)!.GetValue(null)),
 }),
 },
             methodMetadata: __mm_0,
@@ -123,7 +123,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     global::TUnit.Core.GenericConstraintViolationDataSource.Create("Could not infer the type arguments of generic test method 'Private_Row_Type_From_Field' from data source [MethodDataSource(nameof(FieldRows))]. Its rows give the type argument 'TUnit.TestProject.Bugs._7108.PrivateRowTypeDataSourceTests.Row', which source-generated code cannot name because it is private or protected. Make that type internal or public, or list accessible type arguments with [GenerateGenericTest].", new global::TUnit.Core.MethodDataSourceAttribute("FieldRows")
 {
-    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => typeof(global::TUnit.TestProject.Bugs._7108.PrivateRowTypeDataSourceTests).GetField("FieldRows", global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly)!.GetValue(null)),
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => typeof(global::TUnit.TestProject.Bugs._7108.PrivateRowTypeDataSourceTests).GetField("FieldRows", global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.DeclaredOnly)!.GetValue(null)),
 }),
 },
             methodMetadata: __mm_0,

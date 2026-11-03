@@ -101,7 +101,7 @@ internal static class TUnit_TestProject_DeferEnumerationTests_DeferEnumerationTe
     new global::TUnit.Core.MethodDataSourceAttribute("TenValues")
     {
         DeferEnumeration = true,
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests.TenValues()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests.TenValues()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -127,7 +127,7 @@ internal static class TUnit_TestProject_DeferEnumerationTests_DeferEnumerationTe
     new global::TUnit.Core.MethodDataSourceAttribute("TenValues")
     {
         DeferEnumeration = true,
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests.TenValues()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests.TenValues()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),

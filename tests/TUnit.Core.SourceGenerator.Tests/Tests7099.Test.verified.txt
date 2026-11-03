@@ -2444,7 +2444,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
 {
     new global::TUnit.Core.MethodDataSourceAttribute("Grids")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Grids()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.Grids()),
     },
 },
             methodMetadata: __mm_0,
@@ -2902,7 +2902,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[][,]), "values", n
 {
     new global::TUnit.Core.MethodDataSourceAttribute("GridRows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.GridRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests.GridRows()),
     },
 },
             methodMetadata: __mm_0,

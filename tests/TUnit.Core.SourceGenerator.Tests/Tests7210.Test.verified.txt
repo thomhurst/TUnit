@@ -67,7 +67,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "SevenAndWrappedEight")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.SevenAndWrappedEight()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.SevenAndWrappedEight()),
     },
 }, 0),
             methodMetadata: __mm_0,
@@ -155,7 +155,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "WrappedFactory")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.WrappedFactory()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.WrappedFactory()),
     },
 }, 0),
             methodMetadata: __mm_0,
@@ -239,14 +239,14 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute("Counters")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.WrappedFactoryFreshPerTest<global::TUnit.TestProject.Bugs._7210.Issue7210Counter>.Counters()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.WrappedFactoryFreshPerTest<global::TUnit.TestProject.Bugs._7210.Issue7210Counter>.Counters()),
     },
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "WrappedCounterFactory")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.WrappedCounterFactory()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.WrappedCounterFactory()),
     },
 },
             methodMetadata: __mm_0,
@@ -337,7 +337,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "NoRows")
     {
         SkipIfEmpty = true,
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.NoRows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.NoRows()),
     },
 }, 0),
             methodMetadata: __mm_0,
@@ -569,7 +569,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
     new global::TUnit.Core.ArgumentsAttribute(1),
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "Mixed")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
     },
 }, 1),
             methodMetadata: __mm_0,
@@ -621,7 +621,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "Mixed")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
     },
 }, 0),
             methodMetadata: __mm_0,
@@ -713,7 +713,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "Mixed")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
     },
 }, 0),
             methodMetadata: __mm_0,
@@ -764,7 +764,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "Mixed")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
     },
 }, 0),
             methodMetadata: __mm_0,
@@ -857,11 +857,11 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "Seven")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Seven()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Seven()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "Text")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Text()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Text()),
     },
 }, 0, 1),
             methodMetadata: __mm_0,
@@ -913,11 +913,11 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "Seven")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Seven()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Seven()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "Text")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Text()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Text()),
     },
 }, 0, 1),
             methodMetadata: __mm_0,
@@ -1010,7 +1010,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
     new global::TUnit.Core.ArgumentsAttribute(1),
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "Mixed")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
     },
 }, 1),
             methodMetadata: __mm_0,
@@ -1062,7 +1062,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7210.Issue7210Sources), "Mixed")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7210.Issue7210Sources.Mixed()),
     },
 }, 0),
             methodMetadata: __mm_0,

@@ -183,7 +183,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method", false, new global::TUnit.Core.ParameterMetadata[]
@@ -206,7 +206,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method2", false, new global::TUnit.Core.ParameterMetadata[]
@@ -229,7 +229,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute("SomeAction")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeAction()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeAction()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method_WithAction", false, new global::TUnit.Core.ParameterMetadata[]
@@ -253,7 +253,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
         Arguments = new object[] { 5 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 5 };
             return global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(((int)arguments[0]));
@@ -262,7 +262,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
         Arguments = new object[] { 5 },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { 5 };
             return global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(((int)arguments[0]));
@@ -290,7 +290,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
         Arguments = new object[] { "Hello World!", 5, true },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { "Hello World!", 5, true };
             return global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(((string)arguments[0]), ((int)arguments[1]), ((bool)arguments[2]));
@@ -299,7 +299,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
         Arguments = new object[] { "Hello World!", 6, true },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { "Hello World!", 6, true };
             return global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(((string)arguments[0]), ((int)arguments[1]), ((bool)arguments[2]));
@@ -308,7 +308,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
         Arguments = new object[] { "Hello World!", 7, true },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { "Hello World!", 7, true };
             return global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(((string)arguments[0]), ((int)arguments[1]), ((bool)arguments[2]));
@@ -317,7 +317,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
         Arguments = new object[] { "Hello World!", 8, true },
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () =>
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () =>
         {
             var arguments = new object[] { "Hello World!", 8, true };
             return global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(((string)arguments[0]), ((int)arguments[1]), ((bool)arguments[2]));
@@ -344,7 +344,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute("MethodWithBaseReturn")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.MethodWithBaseReturn()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.MethodWithBaseReturn()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_WithBaseReturn", false, new global::TUnit.Core.ParameterMetadata[]
@@ -367,7 +367,7 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncArrayTestData")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.EnumerableFuncArrayTestData()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.MethodDataSourceDrivenTests.EnumerableFuncArrayTestData()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),

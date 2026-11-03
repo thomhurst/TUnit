@@ -1362,7 +1362,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
     new global::TUnit.Core.ArgumentsAttribute(1),
     new global::TUnit.Core.MethodDataSourceAttribute("Rows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7118.ClassRowWithUninferredMethodSource<int>.Rows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7118.ClassRowWithUninferredMethodSource<int>.Rows()),
     },
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
@@ -1414,7 +1414,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute("Rows")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7118.ClassRowWithUninferredMethodSource<string>.Rows()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7118.ClassRowWithUninferredMethodSource<string>.Rows()),
     },
 },
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]

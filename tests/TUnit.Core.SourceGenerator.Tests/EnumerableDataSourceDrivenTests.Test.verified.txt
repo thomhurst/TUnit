@@ -106,7 +106,7 @@ internal static class TUnit_TestProject_EnumerableDataSourceDrivenTests__TestSou
 {
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -130,7 +130,7 @@ internal static class TUnit_TestProject_EnumerableDataSourceDrivenTests__TestSou
 {
     new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -154,7 +154,7 @@ internal static class TUnit_TestProject_EnumerableDataSourceDrivenTests__TestSou
 {
     new global::TUnit.Core.MethodDataSourceAttribute("MethodWithBaseReturn")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.EnumerableDataSourceDrivenTests.MethodWithBaseReturn()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.EnumerableDataSourceDrivenTests.MethodWithBaseReturn()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), "DataSource_WithBaseReturn", false, new global::TUnit.Core.ParameterMetadata[]

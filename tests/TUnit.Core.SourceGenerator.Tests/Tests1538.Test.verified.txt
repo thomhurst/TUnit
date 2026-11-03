@@ -95,7 +95,7 @@ internal static class TUnit_TestProject_Bugs__1538_Tests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute("EightItems")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._1538.Tests.EightItems()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._1538.Tests.EightItems()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._1538.Tests), "Eight_Args", false, new global::TUnit.Core.ParameterMetadata[]
@@ -125,7 +125,7 @@ internal static class TUnit_TestProject_Bugs__1538_Tests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute("SixteenItems")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._1538.Tests.SixteenItems()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._1538.Tests.SixteenItems()),
     },
 },
             parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._1538.Tests), "SixteenArgs", false, new global::TUnit.Core.ParameterMetadata[]

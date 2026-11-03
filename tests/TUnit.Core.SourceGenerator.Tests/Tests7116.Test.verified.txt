@@ -53,7 +53,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
 {
     global::TUnit.Core.GenericConstraintViolationDataSource.Create("Type 'Object' does not implement interface 'IDisposable' required for generic parameter 'T'. 'T' was inferred from the declared type 'object' of the data source, not from the run-time type of its values: source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].", new global::TUnit.Core.MethodDataSourceAttribute("Streams")
 {
-    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
 }),
 },
             methodMetadata: __mm_0,
@@ -127,7 +127,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
 {
     global::TUnit.Core.GenericConstraintViolationDataSource.Create("Type 'Nullable`1' does not implement interface 'IComparable' required for generic parameter 'T'. 'T' was inferred from the declared type 'int?' of the data source, not from the run-time type of its values: source-generated mode creates generic tests at compile time so that they stay Native AOT compatible. Declare the data source with a type that satisfies the constraint, or list the type argument with [GenerateGenericTest].", new global::TUnit.Core.MethodDataSourceAttribute("NullableNumbers")
 {
-    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.NullableNumbers()),
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.NullableNumbers()),
 }),
 },
             methodMetadata: __mm_0,
@@ -279,7 +279,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute("Streams")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
     },
 },
             methodMetadata: __mm_0,
@@ -360,7 +360,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("SingleStreams")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.SingleStreams()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.SingleStreams()),
     },
 },
             methodMetadata: __mm_0,
@@ -443,11 +443,11 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute("ExactStreams")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.ExactStreams()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.ExactStreams()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("Streams")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
     },
 },
             methodMetadata: __mm_0,
@@ -530,11 +530,11 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute("Streams")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("ExactStreams")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.ExactStreams()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.ExactStreams()),
     },
 },
             methodMetadata: __mm_0,
@@ -647,7 +647,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "marker", new gl
 {
     new global::TUnit.Core.MethodDataSourceAttribute("Streams")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Streams()),
     },
 },
             methodMetadata: __mm_0,
@@ -744,7 +744,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 {
     new global::TUnit.Core.MethodDataSourceAttribute("Readers")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Readers()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7116.DeclaredTypeInferenceTests.Readers()),
     },
 },
             methodMetadata: __mm_0,

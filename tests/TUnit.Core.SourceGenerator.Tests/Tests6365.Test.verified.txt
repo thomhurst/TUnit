@@ -81,7 +81,7 @@ internal static class TUnit_TestProject_Bugs__6365_Tests__TestSource
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._6365.Tests.Provider), "GetTestCases")
     {
-        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => new global::TUnit.TestProject.Bugs._6365.Tests.Provider().GetTestCases()),
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => new global::TUnit.TestProject.Bugs._6365.Tests.Provider().GetTestCases()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),

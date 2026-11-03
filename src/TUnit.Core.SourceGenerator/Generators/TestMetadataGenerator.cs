@@ -3610,11 +3610,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     ? $"new {fullyQualifiedType}()"
                     : $"(({receiverType})new {fullyQualifiedType}())";
         var lambdaHeader = usesTestClassInstance ? "static instance =>" : "static () =>";
-        // The instance helpers take the metadata anyway. [InstanceMethodDataSource] read its member by reflection before
-        // #7225, and that path keeps a tuple row whole when the test takes a single tuple, so its static helpers get the
-        // metadata too: without the parameter types, a one-element tuple holding null would reach the test as null.
-        // Preserve one-element rows before unwrapping: their element can itself have the expected tuple type.
-        var metadataArgument = usesTestClassInstance || decidesRowsFromRuntimeValue || keepSingleElementTupleWhole ? "dataGeneratorMetadata, " : "";
+        // All helpers need parameter types to keep a tuple row whole when the test takes a single tuple.
+        // Otherwise a one-element tuple holding null becomes indistinguishable from a null argument.
+        const string metadataArgument = "dataGeneratorMetadata, ";
 
         // A declared type such as object does not say whether the value is one row or many. Reflection mode, and the
         // attribute's reflection fallback that read every field and every private or protected property before the
@@ -3628,7 +3626,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             helper = isStatic || !usesTestClassInstance
                 ? "global::TUnit.Core.Helpers.DataSourceFactories.FromRuntimeValue"
                 : "global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue";
-            metadataArgument = "dataGeneratorMetadata, ";
         }
 
         // [InstanceMethodDataSource] read its member by reflection before #7225, and that path, still used in
