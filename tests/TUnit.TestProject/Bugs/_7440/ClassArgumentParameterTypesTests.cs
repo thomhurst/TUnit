@@ -95,3 +95,50 @@ public class GenericDecimalConstructorArgumentTests<T>(decimal amount, T value)
         });
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments("first", 1)]
+[Arguments("second", 2)]
+public class RequiredConstructorArgumentTests<T>
+{
+    public required T Value { get; init; }
+    public required int Number { get; init; }
+
+    [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+    public RequiredConstructorArgumentTests(T value, int number)
+    {
+        Value = value;
+        Number = number;
+    }
+
+    [Test]
+    public async Task Run()
+    {
+        await Assert.That(Value is not null).IsTrue();
+        await Assert.That(Number).IsEqualTo((string)(object)Value! == "first" ? 1 : 2);
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments("empty")]
+[Arguments("single", 1)]
+[Arguments("multiple", 1, 2)]
+[Arguments("array", new int[] { 1, 2 })]
+public class ParamsConstructorArgumentTests<T>(T value, params int[] rest)
+{
+    [Test]
+    public async Task Run()
+    {
+        var expectedLength = (string)(object)value! switch
+        {
+            "empty" => 0,
+            "single" => 1,
+            _ => 2
+        };
+        await Assert.That(rest.Length).IsEqualTo(expectedLength);
+        for (var i = 0; i < rest.Length; i++)
+        {
+            await Assert.That(rest[i]).IsEqualTo(i + 1);
+        }
+    }
+}

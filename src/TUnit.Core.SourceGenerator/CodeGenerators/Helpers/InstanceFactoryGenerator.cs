@@ -290,8 +290,12 @@ public static class InstanceFactoryGenerator
 
     private static void GenerateTypedConstructorCallBody(CodeWriter writer, string className, IMethodSymbol constructor)
     {
-        // Check for required properties
-        var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(constructor.ContainingType);
+        // Constructors that promise to initialize required members must retain their values.
+        var setsRequiredMembers = constructor.GetAttributes().Any(attribute =>
+            attribute.AttributeClass?.ToDisplayString() == "System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute");
+        var requiredProperties = setsRequiredMembers
+            ? []
+            : RequiredPropertyHelper.GetAllRequiredProperties(constructor.ContainingType).ToArray();
 
         if (constructor.Parameters.Length == 0 && !requiredProperties.Any())
         {
@@ -301,22 +305,17 @@ public static class InstanceFactoryGenerator
         {
             writer.Append($"return new {className}(");
 
-            // Generate constructor arguments
-            var parameterTypes = constructor.Parameters.Select(p => p.Type).ToList();
-
-            for (var i = 0; i < parameterTypes.Count; i++)
+            // Preserve an explicitly supplied trailing array, while packing loose row values.
+            var parameters = constructor.Parameters.ToArray();
+            var arguments = TupleArgumentHelper.GenerateArgumentAccessWithParams(parameters, "args", "args.Length");
+            if (parameters.Length > 0 && parameters[parameters.Length - 1].CollectsTrailingArguments())
             {
-                if (i > 0)
-                {
-                    writer.Append(", ");
-                }
-
-                var parameterType = parameterTypes[i];
-                var argAccess = $"args[{i.ToString(CultureInfo.InvariantCulture)}]";
-
-                // Use CastHelper which now has AOT converter registry support
-                writer.Append($"global::TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");
+                var singleValueArguments = TupleArgumentHelper.GenerateArgumentAccessWithParams(parameters, "args", parameters.Length);
+                var trailingArgument = arguments[arguments.Count - 1];
+                arguments[arguments.Count - 1] = new InvocationArgument(
+                    $"(args.Length == {parameters.Length.ToString(CultureInfo.InvariantCulture)} ? {singleValueArguments[singleValueArguments.Count - 1].Expression} : {trailingArgument.Expression})");
             }
+            writer.Append(string.Join(", ", arguments));
 
             writer.Append(")");
 

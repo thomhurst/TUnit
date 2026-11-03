@@ -3380,6 +3380,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var isPrepared = false;
         var parameters = ctor.GetParameters();
+        var lastParameter = parameters.LastOrDefault();
+        var trailingElementType = lastParameter != null
+            && (lastParameter.ParameterType is { IsArray: true } arrayType && arrayType.GetArrayRank() == 1
+                || IsParamCollection(lastParameter))
+            ? GetTrailingElementType(lastParameter)
+            : null;
+        var regularParameterCount = parameters.Length - (trailingElementType != null ? 1 : 0);
 
         return args =>
         {
@@ -3395,7 +3402,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // Cast arguments to the expected parameter types
                 var castedArgs = new object?[parameters.Length];
 
-                for (var i = 0; i < parameters.Length && i < args.Length; i++)
+                for (var i = 0; i < regularParameterCount && i < args.Length; i++)
                 {
                     var paramType = parameters[i].ParameterType;
                     var arg = args[i];
@@ -3423,6 +3430,44 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     {
                         // Otherwise use CastHelper for conversions
                         castedArgs[i] = CastHelper.Cast(paramType, arg);
+                    }
+                }
+
+                if (trailingElementType != null)
+                {
+                    var trailingCount = Math.Max(0, args.Length - regularParameterCount);
+                    if (trailingCount == 1)
+                    {
+                        // Preserve explicit arrays and null, matching the generated row binder.
+                        var value = args[regularParameterCount];
+                        if (value == null || lastParameter!.ParameterType.IsInstanceOfType(value))
+                        {
+                            castedArgs[regularParameterCount] = value;
+                        }
+                        else if (!trailingElementType.IsInstanceOfType(value) && value is Array { Rank: 1 } source)
+                        {
+                            var array = Array.CreateInstance(trailingElementType, source.Length);
+                            for (var i = 0; i < source.Length; i++)
+                            {
+                                array.SetValue(CastHelper.Cast(trailingElementType, source.GetValue(source.GetLowerBound(0) + i)), i);
+                            }
+                            castedArgs[regularParameterCount] = array;
+                        }
+                        else
+                        {
+                            var array = Array.CreateInstance(trailingElementType, 1);
+                            array.SetValue(CastHelper.Cast(trailingElementType, value), 0);
+                            castedArgs[regularParameterCount] = array;
+                        }
+                    }
+                    else
+                    {
+                        var array = Array.CreateInstance(trailingElementType, trailingCount);
+                        for (var i = 0; i < trailingCount; i++)
+                        {
+                            array.SetValue(CastHelper.Cast(trailingElementType, args[regularParameterCount + i]), i);
+                        }
+                        castedArgs[regularParameterCount] = array;
                     }
                 }
 
