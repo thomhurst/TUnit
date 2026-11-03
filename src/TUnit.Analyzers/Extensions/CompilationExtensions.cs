@@ -19,6 +19,27 @@ public static class CompilationExtensions
             return true;
         }
 
+        // Open arrays have no Roslyn conversion until their element type arguments are inferred.
+        // Recurse through tuple elements so a single tuple parameter keeps its row container.
+        if (parameterType is IArrayTypeSymbol parameterArray && ContainsTypeParameter(parameterArray)
+            && argumentType is IArrayTypeSymbol argumentArray)
+        {
+            return parameterArray.Rank == argumentArray.Rank
+                && parameterArray.IsSZArray == argumentArray.IsSZArray
+                && (parameterArray.ElementType is ITypeParameterSymbol
+                    || compilation.HasImplicitConversionOrGenericParameter(argumentArray.ElementType, parameterArray.ElementType));
+        }
+
+        if (parameterType is INamedTypeSymbol { IsTupleType: true } parameterTuple
+            && ContainsTypeParameter(parameterTuple)
+            && argumentType is INamedTypeSymbol { IsTupleType: true } argumentTuple)
+        {
+            return parameterTuple.TupleElements.Length == argumentTuple.TupleElements.Length
+                && parameterTuple.TupleElements.Zip(argumentTuple.TupleElements, (parameter, argument) =>
+                    parameter.Type is ITypeParameterSymbol
+                    || compilation.HasImplicitConversionOrGenericParameter(argument.Type, parameter.Type)).All(matches => matches);
+        }
+
         if (parameterType?.IsGenericDefinition() == false)
         {
             if (argumentType is null)
