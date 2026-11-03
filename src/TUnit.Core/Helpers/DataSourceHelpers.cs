@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces;
+using TUnit.Core.PropertyInjection;
 
 namespace TUnit.Core.Helpers;
 
@@ -13,8 +14,9 @@ public static class DataSourceHelpers
 {
     private static readonly ConcurrentDictionary<Type, bool> TupleMutableElementShapes = new();
 
-    // Initializing or invoking event callbacks on a struct extracted from a retained tuple
-    // would mutate a detached copy. Reconstruct these tuples from the mutated boxes.
+    // Property injection, initialization, and event callbacks mutate boxed structs.
+    // Keep populated mutable elements in the flattened row so invocation reconstructs
+    // the tuple from those same boxes. Empty nullable elements still preserve the tuple.
     internal static bool RequiresFlattenedTupleBinding(object tuple)
     {
         if (!HasMutableTupleElementShape(tuple.GetType()))
@@ -26,7 +28,9 @@ public static class DataSourceHelpers
         // mutable value needs reconstruction; otherwise retain the tuple container.
         foreach (var element in UnwrapTupleAot(tuple))
         {
-            if (element is (IAsyncInitializer or IEventReceiver) && element.GetType().IsValueType)
+            if (element is not null && element.GetType().IsValueType
+                && (element is IAsyncInitializer or IEventReceiver
+                    || PropertyInjectionCache.HasInjectableProperties(element.GetType())))
             {
                 return true;
             }
@@ -42,8 +46,7 @@ public static class DataSourceHelpers
             for (var i = 0; i < elements.Length; i++)
             {
                 var element = Nullable.GetUnderlyingType(elements[i]) ?? elements[i];
-                if (element.IsValueType && (typeof(IAsyncInitializer).IsAssignableFrom(element)
-                    || typeof(IEventReceiver).IsAssignableFrom(element))
+                if (IsMutableTupleElementType(element)
                     || i == 7 && TupleHelper.IsTupleType(element) && HasMutableTupleElementShape(element))
                 {
                     return true;
@@ -51,6 +54,11 @@ public static class DataSourceHelpers
             }
             return false;
         });
+
+    private static bool IsMutableTupleElementType(Type type)
+        => type.IsValueType && (typeof(IAsyncInitializer).IsAssignableFrom(type)
+            || typeof(IEventReceiver).IsAssignableFrom(type)
+            || PropertyInjectionCache.HasInjectableProperties(type));
 
     /// <summary>
     /// Invokes a Func&lt;T&gt; if the value is one, otherwise returns the value as-is.
