@@ -291,3 +291,90 @@ public class ScopeOwnedConstructorLifecycleTests(ScopeOwnedConstructorLifecycleT
         }
     }
 }
+
+public class InjectedScopeDisposalOrderTests
+{
+    public sealed class Parent : IAsyncDisposable
+    {
+        public static readonly System.Collections.Concurrent.ConcurrentBag<Parent> Instances = [];
+        public Parent() => Instances.Add(this);
+
+        [ScopeData]
+        public required Service Service { get; init; }
+        public int DisposeCount;
+
+        public async ValueTask DisposeAsync()
+        {
+            await Task.Yield();
+            if (++DisposeCount != 1 || Service.DisposeCount != 0)
+                throw new InvalidOperationException("Injected service must remain alive until its parent is disposed");
+        }
+    }
+
+    public sealed class Service : IDisposable
+    {
+        [ClassDataSource<Dependency>]
+        public required Dependency Dependency { get; init; }
+        public int DisposeCount;
+        public void Dispose()
+        {
+            if (++DisposeCount != 1 || Dependency.DisposeCount != 0)
+                throw new InvalidOperationException("Nested dependency must remain alive until its scope-owned parent is disposed");
+        }
+    }
+
+    public sealed class Dependency : IDisposable
+    {
+        public int DisposeCount;
+        public void Dispose()
+        {
+            if (++DisposeCount != 1) throw new InvalidOperationException("Dependency disposed twice");
+        }
+    }
+
+    public sealed class Scope : IDisposable
+    {
+        public Service? Service;
+        public int DisposeCount;
+        public void Dispose()
+        {
+            if (++DisposeCount != 1) throw new InvalidOperationException("Scope disposed twice");
+            Service?.Dispose();
+        }
+    }
+
+    public sealed class ScopeDataAttribute : DependencyInjectionDataSourceAttribute<Scope>
+    {
+        public static readonly System.Collections.Concurrent.ConcurrentBag<Scope> Scopes = [];
+        public override Scope CreateScope(DataGeneratorMetadata metadata)
+        {
+            var scope = new Scope();
+            Scopes.Add(scope);
+            return scope;
+        }
+        public override object Create(Scope scope, Type type)
+            => scope.Service = new Service { Dependency = null! };
+    }
+
+    [Test, ClassDataSource<Parent>, Repeat(1), EngineTest(ExpectedResult.Pass)]
+    public async Task ParentAndDependenciesAreAlive(Parent parent)
+    {
+        await Assert.That(parent.DisposeCount).IsEqualTo(0);
+        await Assert.That(parent.Service.DisposeCount).IsEqualTo(0);
+        await Assert.That(parent.Service.Dependency.DisposeCount).IsEqualTo(0);
+    }
+
+    [After(Class)]
+    public static async Task Verify()
+    {
+        await Assert.That(Parent.Instances.Count).IsEqualTo(2);
+        foreach (var parent in Parent.Instances)
+        {
+            await Assert.That(parent.DisposeCount).IsEqualTo(1);
+            await Assert.That(parent.Service.DisposeCount).IsEqualTo(1);
+            await Assert.That(parent.Service.Dependency.DisposeCount).IsEqualTo(1);
+        }
+        foreach (var scope in ScopeDataAttribute.Scopes)
+            await Assert.That(scope.DisposeCount).IsEqualTo(1);
+    }
+}

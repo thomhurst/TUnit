@@ -227,27 +227,27 @@ internal sealed class TestCoordinator : ITestCoordinator
             test.Context.StopHoldingSharedReferences();
             List<Exception>? cleanupExceptions = null;
 
+            // Release roots before their dependencies. Scope cleanup is invoked at the resolved
+            // object's graph depth by the tracker; the final notification catches untracked scopes.
+            var trackingExceptions = await _objectTracker.UntrackObjects(test.Context).ConfigureAwait(false);
+            if (trackingExceptions is { Count: > 0 })
+            {
+                (cleanupExceptions ??= []).AddRange(trackingExceptions);
+            }
+
             if (test.Context.InternalEventsIfCreated?.OnDataRowDispose is { } onDataRowDispose)
             {
                 foreach (var handler in onDataRowDispose.InvocationList)
                 {
                     try
                     {
-                        await handler.InvokeAsync(this, test.Context).ConfigureAwait(false);
+                        await handler.InvokeAsync(this, (test.Context, null)).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
                         (cleanupExceptions ??= []).Add(ex);
                     }
                 }
-            }
-
-            // Scope-owned parents can use TUnit-injected dependencies during disposal.
-            // Release those dependencies only after their parents' scope cleanup has completed.
-            var trackingExceptions = await _objectTracker.UntrackObjects(test.Context).ConfigureAwait(false);
-            if (trackingExceptions is { Count: > 0 })
-            {
-                (cleanupExceptions ??= []).AddRange(trackingExceptions);
             }
 
 #if NET

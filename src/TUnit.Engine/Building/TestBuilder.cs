@@ -1062,7 +1062,7 @@ internal sealed class TestBuilder : ITestBuilder
         private object?[]? _data = data;
         private TestDataRowMetadata? _metadata = metadata;
         private object?[]? _lent;
-        private AsyncEvent<TestContext>? _lentCleanup;
+        private AsyncEvent<(TestContext Context, object? Object)>? _lentCleanup;
         private TestBuilderContext _rowContext = rowContext;
         // Snapshot before any method factory can mutate the class subscriptions.
         private TestContextEvents? _events = rowContext.EventsIfCreated?.Clone();

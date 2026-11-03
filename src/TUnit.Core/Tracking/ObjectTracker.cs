@@ -263,6 +263,21 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         foreach (var obj in bucket)
         {
+            if (testContext.InternalEventsIfCreated?.OnDataRowDispose is { } scopeCleanup)
+            {
+                foreach (var handler in scopeCleanup.InvocationList)
+                {
+                    try
+                    {
+                        await handler.InvokeAsync(this, (testContext, obj)).ConfigureAwait(false);
+                    }
+                    catch (Exception e)
+                    {
+                        (cleanupExceptions ??= []).Add(e);
+                    }
+                }
+            }
+
             try
             {
                 var task = UntrackObject(obj, testContext);

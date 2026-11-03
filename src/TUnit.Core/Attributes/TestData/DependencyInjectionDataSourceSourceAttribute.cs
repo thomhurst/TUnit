@@ -16,9 +16,38 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
             // disposing the returned objects, as it does for any other data source.
             var scopeOwnsCreatedObjects = scope is IDisposable or IAsyncDisposable;
 
-            // Set up disposal for this specific scope in the current test context
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDataRowDispose += async (_, _) =>
+            // Dispose at the depth of the resolved objects, before their nested dependencies.
+            // The final null notification also cleans up scopes whose objects were not tracked.
+            object?[]? createdObjects = null;
+            var disposed = 0;
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDataRowDispose += async (_, args) =>
             {
+                if (args.Object is not null)
+                {
+                    var ownsObject = false;
+                    if (createdObjects is not null)
+                    {
+                        foreach (var created in createdObjects)
+                        {
+                            if (ReferenceEquals(created, args.Object))
+                            {
+                                ownsObject = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!ownsObject)
+                    {
+                        return;
+                    }
+                }
+
+                if (Interlocked.Exchange(ref disposed, 1) != 0)
+                {
+                    return;
+                }
+
                 if (scope is IAsyncDisposable asyncDisposable)
                 {
                     await asyncDisposable.DisposeAsync().ConfigureAwait(false);
@@ -29,7 +58,7 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                 }
             };
 
-            return dataGeneratorMetadata.MembersToGenerate
+            return createdObjects = dataGeneratorMetadata.MembersToGenerate
                 .Select(m => m switch
                 {
                     PropertyMetadata prop => prop.Type,

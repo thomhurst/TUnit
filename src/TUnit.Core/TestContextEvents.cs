@@ -19,7 +19,9 @@ public class TestContextEvents : ITestEvents
         OnTestRetry = OnTestRetry?.Clone()
     };
 
-    internal AsyncEvent<TestContext>? OnDataRowDispose { get; set; }
+    // Notified before each tracked object is released, then with null for any untracked scopes.
+    // Scope handlers match their resolved objects and dispose at most once.
+    internal AsyncEvent<(TestContext Context, object? Object)>? OnDataRowDispose { get; set; }
 
     public AsyncEvent<TestContext>? OnDispose { get; set; }
     public AsyncEvent<TestContext>? OnTestRegistered { get; set; }
