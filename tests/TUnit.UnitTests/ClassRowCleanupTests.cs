@@ -70,6 +70,33 @@ public class ClassRowCleanupTests
         await Assert.That(disposals).IsEqualTo(1);
     }
 
+    [Test]
+    [Arguments(true)]
+    [Arguments(false)]
+    public async Task EnumerationFailureOnlyDisposesUnclaimedClassScope(bool claimed)
+    {
+        var enumeration = CreateContext();
+        var disposals = 0;
+        enumeration.Events.OnDataRowDispose += (_, _) =>
+        {
+            disposals++;
+            return default;
+        };
+        var row = new TestBuilder.UnclaimedClassRow([new object()], null, enumeration);
+        var runnable = CreateContext();
+        if (claimed)
+        {
+            await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must use saved row"), runnable);
+        }
+
+        // MoveNext throws after yielding a row (or before yielding any rows).
+        var failed = row.CreateEnumerationFailureContext(enumeration);
+        await DisposeRow(failed);
+        await Assert.That(disposals).IsEqualTo(claimed ? 0 : 1);
+        await DisposeRow(runnable);
+        await Assert.That(disposals).IsEqualTo(1);
+    }
+
     private static TestBuilderContext CreateContext() => new()
     {
         TestMetadata = TestContext.Current!.TestDetails.MethodMetadata

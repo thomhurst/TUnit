@@ -256,6 +256,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                     var needsInstanceForMethodDataSources = HasInstanceDataAccessor(metadata.DataSources);
 
+                    var classEnumerationContext = contextAccessor.Current;
                     object? instanceForMethodDataSources = null;
                     try
                     {
@@ -589,6 +590,20 @@ internal sealed class TestBuilder : ITestBuilder
                                 }
                             }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Enumeration may resume on a context whose class cleanup already belongs
+                        // to a runnable row. Only the unclaimed row may lend cleanup to this failure.
+                        var failureContext = ReferenceEquals(contextAccessor.Current, classEnumerationContext)
+                            ? unclaimedClassRow.CreateEnumerationFailureContext(classEnumerationContext)
+                            : contextAccessor.Current;
+                        contextAccessor.Current = failureContext;
+                        var failedTest = CreateFailedTestForDataGenerationError(metadata, ex,
+                            new TestDataCombination(), methodData: unclaimedClassRow.TakeLentObjects(),
+                            rowContext: failureContext);
+                        tests.Add(failedTest);
+                        return tests;
                     }
                     finally
                     {
@@ -1139,6 +1154,15 @@ internal sealed class TestBuilder : ITestBuilder
             }
 
             target.Events.OnDataRowDispose = cleanup.Clone();
+        }
+
+        internal TestBuilderContext CreateEnumerationFailureContext(TestBuilderContext enumerationContext)
+        {
+            var failureContext = enumerationContext with { };
+            enumerationContext.CopyStateBagTo(failureContext);
+            failureContext.Events = enumerationContext.EventsIfCreated?.Clone() ?? new();
+            failureContext.Events.OnDataRowDispose = TakeCleanup()?.Clone();
+            return failureContext;
         }
 
         public AsyncEvent<(TestContext Context, object? Object)>? TakeCleanup()
