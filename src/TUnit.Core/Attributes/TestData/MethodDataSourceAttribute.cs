@@ -152,6 +152,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         converted.Arguments = Arguments;
         converted.SkipIfEmpty = SkipIfEmpty;
         converted.DeferEnumeration = DeferEnumeration;
+        converted.FilterClassRows = FilterClassRows;
+        converted.InferredClassTypeArguments = InferredClassTypeArguments;
 
         return converted;
     }

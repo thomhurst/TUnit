@@ -268,13 +268,7 @@ public static class GenericClassRowPartition
                     var row = await rowFactory().ConfigureAwait(false) is { } fetched ? EvaluateWrappedFactory(fetched) : null;
                     // Fixed declared row types infer through constructor positions, not necessarily
                     // the first runtime value. Own-class sources can also infer from null values.
-                    var source = dataSources[index];
-                    var infers = DeclaredRowTypes.TryGetValue(source, out var argumentTypes)
-                        ? argumentTypes.SequenceEqual(ClassTypeArguments)
-                        : source is MethodDataSourceAttribute { InferredClassTypeArguments: { } declared } methodSource
-                            ? row is { Length: > 0 } && declared.SequenceEqual(ClassTypeArguments)
-                                && (methodSource.ClassProvidingDataSource is null || HasNonNullValues(row))
-                            : InfersTypeArguments(row, ClassTypeArguments);
+                    var infers = RowInfers(dataSources[index], row, ClassTypeArguments);
                     anyRowInfers |= infers;
                     rows.Add(new EvaluatedRow(rowFactory, row, infers));
                 }
@@ -284,6 +278,22 @@ public static class GenericClassRowPartition
 
             return new Evaluation(rowsByIndex, anyRowInfers);
         }
+    }
+
+    private static bool RowInfers(IDataSourceAttribute source, object?[]? row, Type[] classTypeArguments)
+    {
+        if (DeclaredRowTypes.TryGetValue(source, out var argumentTypes))
+        {
+            return argumentTypes.SequenceEqual(classTypeArguments);
+        }
+
+        if (source is MethodDataSourceAttribute { InferredClassTypeArguments: { } declared } methodSource)
+        {
+            return row is { Length: > 0 } && declared.SequenceEqual(classTypeArguments)
+                && (methodSource.ClassProvidingDataSource is null || HasNonNullValues(row));
+        }
+
+        return InfersTypeArguments(row, classTypeArguments);
     }
 
     /// <summary>

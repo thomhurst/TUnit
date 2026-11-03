@@ -5,6 +5,22 @@ namespace TUnit.UnitTests;
 public class GenericClassSourceRuntimeTests
 {
     [Test]
+    public async Task Instance_Conversion_Preserves_Inferred_Source_Settings()
+    {
+        var source = new MethodDataSourceAttribute(typeof(GenericClassSourceRuntimeTests), "Rows");
+        GenericClassRowPartition.ConfigureInferredSource(source, true, typeof(string));
+
+        var converted = source.ToInstanceVariant();
+        await Assert.That(converted.FilterClassRows).IsTrue();
+        await Assert.That(converted.InferredClassTypeArguments).IsEquivalentTo(new[] { typeof(string) });
+        await Assert.That(converted.SkipIfEmpty).IsFalse();
+
+        // The converted external source must still discard an all-null inferred row.
+        converted.Factory = _ => OneRow(() => Task.FromResult<object?[]?>([null]));
+        await Assert.That((await ReadFactories(converted)).Count).IsEqualTo(0);
+    }
+
+    [Test]
     [Arguments(false, 1)]
     [Arguments(true, 0)]
     public async Task Inferred_Null_Row_Is_Retained_Only_For_Own_Class(bool external, int expectedCount)
