@@ -59,7 +59,7 @@ public class AsyncEvent<TEventArgs>
     internal void AddMissingFrom(AsyncEvent<TEventArgs> source)
     {
         var sourceHandlers = source.InvocationList;
-        lock (LazyInitializer.EnsureInitialized(ref _handlerLock))
+        lock (LazyInitializer.EnsureInitialized(ref _handlerLock)!)
         {
             var handlers = _handlers is null ? [] : new List<Invocation>(_handlers);
             foreach (var invocation in sourceHandlers)
@@ -116,7 +116,7 @@ public class AsyncEvent<TEventArgs>
         }
 
         var invocation = new Invocation(callback, order);
-        lock (LazyInitializer.EnsureInitialized(ref _handlerLock))
+        lock (LazyInitializer.EnsureInitialized(ref _handlerLock)!)
         {
             var handlers = _handlers is null ? [] : new List<Invocation>(_handlers);
             handlers.Insert(FindInsertionIndex(handlers, order), invocation);
@@ -143,7 +143,7 @@ public class AsyncEvent<TEventArgs>
         }
 
         var invocation = new Invocation(callback, order);
-        lock (LazyInitializer.EnsureInitialized(ref _handlerLock))
+        lock (LazyInitializer.EnsureInitialized(ref _handlerLock)!)
         {
             var handlers = _handlers is null ? [] : new List<Invocation>(_handlers);
             var clampedIndex = index < 0 ? 0 : (index > handlers.Count ? handlers.Count : index);
