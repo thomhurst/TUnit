@@ -1064,8 +1064,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         // them, so validate the logical elements, including the recursively flattened Rest.
         if (source is not INamedTypeSymbol sourceTuple
             || target is not INamedTypeSymbol targetTuple
-            || !IsReferenceTuple(sourceTuple, compilation)
-            || !IsReferenceTuple(targetTuple, compilation)
+            || !IsReferenceTuple(sourceTuple)
+            || !IsReferenceTuple(targetTuple)
             || !TryGetTupleElementTypes(source, compilation, out var sourceElements)
             || !TryGetTupleElementTypes(target, compilation, out var targetElements)
             || sourceElements.Length != targetElements.Length)
@@ -1085,10 +1085,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         return true;
     }
 
-    private static bool IsReferenceTuple(INamedTypeSymbol type, Compilation compilation)
+    private static bool IsReferenceTuple(INamedTypeSymbol type)
         => type.Arity is >= 1 and <= 8
-            && SymbolEqualityComparer.Default.Equals(type.OriginalDefinition,
-                compilation.GetTypeByMetadataName(FormattableString.Invariant($"System.Tuple`{type.Arity}")));
+            && type.OriginalDefinition is { Name: "Tuple", ContainingType: null } definition
+            && definition.ContainingNamespace is { Name: "System", ContainingNamespace.IsGlobalNamespace: true };
 
     private static bool TryGetTupleElementTypes(ITypeSymbol type, Compilation compilation,
         out ImmutableArray<ITypeSymbol> elements)
@@ -1099,9 +1099,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return true;
         }
 
-        if (type is INamedTypeSymbol { Arity: >= 1 and <= 8 } tuple
-            && SymbolEqualityComparer.Default.Equals(tuple.OriginalDefinition,
-                compilation.GetTypeByMetadataName(FormattableString.Invariant($"System.Tuple`{tuple.Arity}"))))
+        if (type is INamedTypeSymbol tuple && IsReferenceTuple(tuple))
         {
             // ITuple exposes Rest's elements as part of the same row for arities above seven.
             if (tuple.Arity == 8)

@@ -79,7 +79,10 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
             Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                 .WithLocation(0).WithArguments("int, string", "int, int"));
     }
+
     [Test]
+    [Arguments("Tuple<string>", "Tuple<object>")]
+    [Arguments("Tuple<int>", "Tuple<object>")]
     [Arguments("Tuple<int>", "Tuple<long>")]
     [Arguments("Tuple<int, int>", "Tuple<long, long>")]
     [Arguments("Tuple<Tuple<int>, int>", "Tuple<Tuple<long>, long>")]
@@ -123,5 +126,4 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
             Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                 .WithLocation(0).WithArguments(sourceElements, targetType));
     }
-
 }
