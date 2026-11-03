@@ -34,15 +34,37 @@ public class PredicateNullabilityTests
     }
 
     [Test]
-    public async Task Null_Argument_Does_Not_Match_Dereferencing_Predicate()
+    public async Task Null_Argument_Dereference_Propagates_Exception()
     {
         var mock = IPredicateUserRepo.Mock();
         mock.Save(Is<PredicateUser>(u => u.Name == "Alice")).Returns("alice");
 
         IPredicateUserRepo repo = mock.Object;
 
-        await Assert.That(repo.Save(null!)).IsNotEqualTo("alice");
-        mock.Save(Is<PredicateUser>(u => u.Name == "Alice")).WasNeverCalled();
+        await Assert.That(() => repo.Save(null!)).Throws<NullReferenceException>();
+    }
+
+    [Test]
+    public async Task Null_Argument_Does_Not_Match_Explicit_Null_Guard()
+    {
+        var mock = INullablePredicateUserRepo.Mock();
+        mock.Save(Is<PredicateUser?>(u => u is not null && u.Name == "Alice")).Returns("alice");
+
+        INullablePredicateUserRepo repo = mock.Object;
+
+        await Assert.That(repo.Save(null)).IsEqualTo(string.Empty);
+    }
+
+    [Test]
+    public async Task Null_Argument_Preserves_Unrelated_Predicate_Exception()
+    {
+        var mock = INullablePredicateUserRepo.Mock();
+        var failure = new InvalidOperationException("from predicate");
+        mock.Save(Is<PredicateUser?>(u => throw failure)).Returns("never");
+
+        INullablePredicateUserRepo repo = mock.Object;
+
+        await Assert.That(() => repo.Save(null)).Throws<InvalidOperationException>();
     }
 
     [Test]

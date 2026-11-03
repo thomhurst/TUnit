@@ -30,9 +30,8 @@ public static class Arg
     /// For a non-nullable reference type, the predicate receives <typeparamref name="T"/>, so it can
     /// dereference its argument without a null guard. Use <c>Is&lt;T?&gt;(...)</c> when the predicate
     /// should handle a null argument itself. Both forms pass null to the predicate at runtime.
-    /// A <see cref="NullReferenceException"/> thrown while the argument is null is treated as a
-    /// non-match, including exceptions from unrelated predicate logic. Other exceptions propagate,
-    /// as do all exceptions for non-null arguments. An explicit null guard avoids the exception cost.
+    /// Predicate exceptions propagate, including when the argument is null. Use an explicit null
+    /// guard if null should be a non-match.
     /// </remarks>
     public static Arg<T> Is<T>(Func<T, bool> predicate) => new(new PredicateMatcher<T>(predicate));
 
