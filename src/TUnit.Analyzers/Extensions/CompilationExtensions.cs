@@ -164,6 +164,42 @@ public static class CompilationExtensions
                 }
             }
 
+            // Upper bounds need a common subtype. Unrelated classes cannot share one,
+            // and a sealed class cannot gain an interface through a derived class.
+            // Unsealed class/interface and interface/interface pairs may have a common
+            // implementation, so leave those open rather than reporting a false mismatch.
+            for (var i = 0; i < occurrences.Length; i++)
+            {
+                var left = occurrences[i];
+                if (left.Variance != VarianceKind.In || ContainsTypeParameter(left.Type))
+                {
+                    continue;
+                }
+
+                for (var j = i + 1; j < occurrences.Length; j++)
+                {
+                    var right = occurrences[j];
+                    if (right.Variance != VarianceKind.In || ContainsTypeParameter(right.Type))
+                    {
+                        continue;
+                    }
+
+                    var forward = compilation.ClassifyConversion(left.Type, right.Type);
+                    var reverse = compilation.ClassifyConversion(right.Type, left.Type);
+                    if (forward.IsIdentity || (forward.IsImplicit && forward.IsReference)
+                        || (reverse.IsImplicit && reverse.IsReference))
+                    {
+                        continue;
+                    }
+
+                    if (left.Type.IsSealed || right.Type.IsSealed
+                        || (left.Type.TypeKind == TypeKind.Class && right.Type.TypeKind == TypeKind.Class))
+                    {
+                        return false;
+                    }
+                }
+            }
+
             return next(bindings.SetItem(typeParameter, occurrences));
         }
 

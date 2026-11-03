@@ -88,6 +88,15 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("IContravariant<string, Uri>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Uri, string>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Base, OtherBase>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Base, Derived>[]", "IContravariant<T, T>[]", false)]
+    [Arguments("IContravariant<string, string>[]", "IContravariant<T, T>[]", false)]
+    [Arguments("IContravariant<string, ICloneable>[]", "IContravariant<T, T>[]", false)]
+    [Arguments("IContravariant<string, IDisposable>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Base, IDisposable>[]", "IContravariant<T, T>[]", false)]
+    [Arguments("IContravariant<ICloneable, IDisposable>[]", "IContravariant<T, T>[]", false)]
     [Arguments("IMixed<object, string>[]", "IMixed<T, T>[]", true)]
     [Arguments("IMixed<string, object>[]", "IMixed<T, T>[]", false)]
     [Arguments("IMixed<string, string>[]", "IMixed<T, T>[]", false)]
@@ -134,11 +143,16 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
         var attribute = expectDiagnostic ? "{|#0:MethodDataSource(nameof(Row))|}" : "MethodDataSource(nameof(Row))";
         var source = $$"""
             #pragma warning disable TUnit0046 // Mutable array rows are intentional in these binding tests.
+            using System;
             using System.Collections.Generic;
             using System.Threading;
             using System.Threading.Tasks;
             using TUnit.Core;
             using TUnit.Core.Interfaces;
+            public interface IContravariant<in A, in B> { }
+            public class Base { }
+            public class Derived : Base { }
+            public class OtherBase { }
             public interface IMixed<out A, in B> { }
             public interface IReverse<in A, out B> { }
             public class LaterAlternative : IInvariant<int, int>, IInvariant<string, string> { }
