@@ -128,9 +128,9 @@ namespace TUnit.Mocks.Generated
             return new IService_Get_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Get", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
         }
 
-        public static IService_Get_M0_MockCall<T> Get<T>(this global::TUnit.Mocks.Mock<global::IService> mock, global::System.Func<string, bool> key) where T : class?
+        public static IService_Get_M0_MockCall<T> Get<T>(this global::TUnit.Mocks.Mock<global::IService> mock, global::System.Func<string, bool>? key) where T : class?
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)key;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher };
             return new IService_Get_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Get", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
         }
