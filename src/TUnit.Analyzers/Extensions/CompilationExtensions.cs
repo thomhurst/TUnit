@@ -27,11 +27,14 @@ public static class CompilationExtensions
             return parameterArray.Rank == argumentArray.Rank
                 && parameterArray.IsSZArray == argumentArray.IsSZArray
                 && (parameterArray.ElementType is ITypeParameterSymbol
-                    || compilation.HasImplicitConversionOrGenericParameter(argumentArray.ElementType, parameterArray.ElementType));
+                    || MatchesArrayElement(argumentArray.ElementType, parameterArray.ElementType));
         }
 
+        // Tuples already recognized as generic definitions retain the existing conversion path below.
+        // This branch only fills the gap where type parameters are hidden inside arrays.
         if (parameterType is INamedTypeSymbol { IsTupleType: true } parameterTuple
             && ContainsTypeParameter(parameterTuple)
+            && !parameterTuple.IsGenericDefinition()
             && argumentType is INamedTypeSymbol { IsTupleType: true } argumentTuple)
         {
             return parameterTuple.TupleElements.Length == argumentTuple.TupleElements.Length
@@ -68,6 +71,39 @@ public static class CompilationExtensions
         }
 
         return compilation.HasImplicitConversion(argumentType?.OriginalDefinition, parameterType?.OriginalDefinition);
+    }
+
+    // Array elements are not rebuilt as tuples by CastHelper. After inference, constructed
+    // element types must agree rather than merely having element-wise numeric conversions.
+    private static bool MatchesArrayElement(ITypeSymbol argument, ITypeSymbol parameter)
+    {
+        if (parameter is ITypeParameterSymbol || SymbolEqualityComparer.Default.Equals(argument, parameter))
+        {
+            return true;
+        }
+
+        if (argument is IArrayTypeSymbol argumentArray && parameter is IArrayTypeSymbol parameterArray)
+        {
+            return argumentArray.Rank == parameterArray.Rank
+                && argumentArray.IsSZArray == parameterArray.IsSZArray
+                && MatchesArrayElement(argumentArray.ElementType, parameterArray.ElementType);
+        }
+
+        if (argument is INamedTypeSymbol argumentNamed && parameter is INamedTypeSymbol parameterNamed
+            && SymbolEqualityComparer.Default.Equals(argumentNamed.OriginalDefinition, parameterNamed.OriginalDefinition))
+        {
+            for (var i = 0; i < parameterNamed.TypeArguments.Length; i++)
+            {
+                if (!MatchesArrayElement(argumentNamed.TypeArguments[i], parameterNamed.TypeArguments[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>

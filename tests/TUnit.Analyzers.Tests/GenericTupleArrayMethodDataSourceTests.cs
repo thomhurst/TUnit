@@ -5,12 +5,28 @@ namespace TUnit.Analyzers.Tests;
 public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
 {
     [Test]
+    public async Task ExistingGenericTupleKeepsRuntimeConversions()
+    {
+        await Verifier.VerifyAnalyzerAsync("""
+            using TUnit.Core;
+            public class C
+            {
+                public static (int, string) Row() => (1, "2");
+                [Test, MethodDataSource(nameof(Row))]
+                public void Test<T>((T, int) row) { }
+            }
+            """);
+    }
+
+    [Test]
     [Arguments("int[]", "T[]", false)]
     [Arguments("int[][]", "T[][]", false)]
     [Arguments("int[,]", "T[,]", false)]
     [Arguments("int[]", "T[,]", true)]
     [Arguments("int", "T[]", true)]
     [Arguments("int[]", "string[]", true)]
+    [Arguments("(int, int)[]", "(T, long)[]", true)]
+    [Arguments("(int, int)[]", "(T, int)[]", false)]
     public async Task TupleArrayElements(string sourceElement, string targetElement, bool expectDiagnostic)
     {
         var attribute = expectDiagnostic ? "{|#0:MethodDataSource(nameof(Row))|}" : "MethodDataSource(nameof(Row))";
