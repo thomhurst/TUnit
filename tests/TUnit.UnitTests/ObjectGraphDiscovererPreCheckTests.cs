@@ -1,6 +1,7 @@
 using System.Reflection;
 using TUnit.Core.Discovery;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Tracking;
 
 namespace TUnit.UnitTests;
 
@@ -75,6 +76,70 @@ public class ObjectGraphDiscovererPreCheckTests
         // IAsyncInitializer runtime value behind a plain interface is still discovered.
         var holder = new InjectedMarkerInterfaceHolder { Value = new MarkerInitializer() };
         await AssertParity(holder, expectedMayHaveNested: true, expectedNested: [holder.Value]);
+    }
+
+    [Test]
+    public async Task ScopeOwnedParentDoesNotClaimTUnitInjectedSharedInitializer()
+    {
+        var shared = new DisposableInitializer();
+        var holder = new InjectedDisposableHolder { Value = shared };
+        ObjectTracker.MarkExternallyOwned(holder);
+        var tracked = new SortedList<int, HashSet<object>>();
+        var traversal = typeof(ObjectGraphDiscoverer).GetMethod("DiscoverNestedObjectsForTracking",
+            BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+        traversal.Invoke(new ObjectGraphDiscoverer(), [holder, tracked, 1, true, CancellationToken.None]);
+
+        await Assert.That(tracked.Values.SelectMany(x => x).Contains(shared)).IsTrue();
+        await Assert.That(ObjectTracker.IsExternallyOwned(shared)).IsFalse();
+
+        var current = TestContext.Current!;
+        var context = new TestContext(nameof(ScopeOwnedParentDoesNotClaimTUnitInjectedSharedInitializer),
+            current.ServiceProvider, current.ClassContext,
+            new TestBuilderContext { TestMetadata = current.TestDetails.MethodMetadata }, CancellationToken.None);
+        try
+        {
+            var tracker = new ObjectTracker(new TrackableObjectGraphProvider(new AlreadyDiscoveredGraph(tracked)),
+                GlobalContext.Current.Disposer);
+            tracker.TrackObjects(context);
+            await tracker.UntrackObjects(context);
+            await Assert.That(shared.DisposeCount).IsEqualTo(1);
+        }
+        finally
+        {
+            context.RemoveFromRegistry();
+            context.Dispose();
+        }
+    }
+
+    private sealed class AlreadyDiscoveredGraph(SortedList<int, HashSet<object>> tracked) : IObjectGraphDiscoverer
+    {
+        public SortedList<int, HashSet<object>> DiscoverAndTrackObjects(TestContext context, CancellationToken cancellationToken = default)
+        {
+            foreach (var bucket in tracked)
+            {
+                context.TrackedObjects.Add(bucket.Key, bucket.Value);
+            }
+            return context.TrackedObjects;
+        }
+        public SortedList<int, HashSet<object>> TrackRootObjects(TestContext context) => context.TrackedObjects;
+        public ObjectGraph DiscoverObjectGraph(TestContext context, CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
+        public ObjectGraph DiscoverNestedObjectGraph(object rootObject, CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
+    }
+
+    public class DisposableInitializer : IAsyncInitializer, IDisposable
+    {
+        public Task InitializeAsync() => Task.CompletedTask;
+        public int DisposeCount { get; private set; }
+        public void Dispose() => DisposeCount++;
+    }
+
+    public class InjectedDisposableHolder
+    {
+        [ClassDataSource<DisposableInitializer>]
+        public required DisposableInitializer Value { get; init; }
     }
 
     private static async Task AssertParity(object root, bool expectedMayHaveNested, object[] expectedNested)

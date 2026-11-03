@@ -30,6 +30,10 @@ public class TestContextEvents : ITestEvents
     public AsyncEvent<TestContext>? OnTestStart { get; set; }
     public AsyncEvent<TestContext>? OnTestEnd { get; set; }
     public AsyncEvent<TestContext>? OnTestSkipped { get; set; }
-    // A handler failure aborts retry processing, as a failure in retry policy does.
+    /// <summary>
+    /// Gets or sets handlers invoked before a retry, after backoff and cancellation checks.
+    /// The retry attempt is one-based. A handler failure aborts retry processing;
+    /// an accepted cancellation is preserved as a cancelled result.
+    /// </summary>
     public AsyncEvent<(TestContext TestContext, int RetryAttempt)>? OnTestRetry { get; set; }
 }

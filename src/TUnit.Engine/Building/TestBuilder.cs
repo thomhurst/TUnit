@@ -1123,6 +1123,11 @@ internal sealed class TestBuilder : ITestBuilder
         private object?[]? _lent;
         private AsyncEvent<(TestContext Context, object? Object)>? _lentCleanup;
         private readonly TestBuilderContext _enumerationContext = enumerationContext ?? rowContext;
+        // Method enumeration mutates _enumerationContext after this row is saved.
+        // Compare constructor changes against its original state, never that live context.
+        private readonly Dictionary<string, object?>? _constructorBaseline = enumerationContext?.HasStateBag == true
+            ? new(enumerationContext.StateBag)
+            : null;
         private TestBuilderContext _rowContext = rowContext;
         // Snapshot before any method factory can mutate the class subscriptions.
         private TestContextEvents? _events = rowContext.EventsIfCreated?.Clone();
@@ -1141,8 +1146,8 @@ internal sealed class TestBuilder : ITestBuilder
                 {
                     foreach (var entry in _rowContext.StateBag)
                     {
-                        if (!_enumerationContext.HasStateBag
-                            || !_enumerationContext.StateBag.TryGetValue(entry.Key, out var inherited)
+                        if (_constructorBaseline is null
+                            || !_constructorBaseline.TryGetValue(entry.Key, out var inherited)
                             || !ReferenceEquals(inherited, entry.Value))
                         {
                             context.StateBag[entry.Key] = entry.Value;

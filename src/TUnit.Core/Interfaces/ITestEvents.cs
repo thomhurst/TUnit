@@ -37,7 +37,9 @@ public interface ITestEvents
     AsyncEvent<TestContext>? OnTestSkipped { get; }
 
     /// <summary>
-    /// Gets the event that is raised before a test is retried.
+    /// Gets the event raised before a retry, after backoff and cancellation checks.
+    /// The retry attempt is one-based. A handler failure aborts retry processing;
+    /// an accepted cancellation is preserved as a cancelled result.
     /// </summary>
     AsyncEvent<(TestContext TestContext, int RetryAttempt)>? OnTestRetry { get; }
 }

@@ -540,7 +540,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// </summary>
     private static bool ShouldSkipTracking(object? obj)
     {
-        return obj is not IDisposable and not IAsyncDisposable;
+        return obj is null || obj is not IDisposable and not IAsyncDisposable;
     }
 
     /// <summary>
@@ -554,6 +554,10 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     private static readonly ConditionalWeakTable<object, object> s_externallyOwned = new();
     private static readonly object s_externallyOwnedMarker = new();
 
+    // Ownership cannot live only on a row or counted entry: a container singleton can be
+    // supplied by another source before or after its DI row, including after its count reaches zero.
+    // A weak identity mark preserves that ownership without retaining the singleton.
+    // The flag deliberately stays set: live marks can outlast any individual row or test session.
     // Skips the table lookup for every tracked object until something is marked.
     private static volatile bool s_hasExternallyOwned;
 
