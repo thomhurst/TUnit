@@ -134,6 +134,48 @@ internal class StaticPropertyAccessibilityTests
         await Assert.That(second.GetText().ToString(diagnostics[0].Location.SourceSpan)).IsEqualTo("Value");
     }
 
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Tree_order_changes_refresh_diagnostic_identity(bool reorder)
+    {
+        const string source = """
+            public class Outer
+            {
+                private class Helper
+                {
+                    [TUnit.Core.Arguments("value")]
+                    public static string Value { get; set; }
+                }
+            }
+            """;
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+        var offending = CSharpSyntaxTree.ParseText(source, parseOptions, "shared.cs");
+        var unrelated = CSharpSyntaxTree.ParseText("public class Unrelated { }", parseOptions, "shared.cs");
+        var compilation = CSharpCompilation.Create("TreeOrder", [offending, unrelated], ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                .WithSyntaxTreeOptionsProvider(new SuppressDiagnosticOptionsProvider(unrelated)));
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new StaticPropertyInitializationGenerator().AsSourceGenerator()], parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out var initialDiagnostics);
+        await Assert.That(initialDiagnostics.Length).IsEqualTo(1);
+        await Assert.That(initialDiagnostics[0].Location.SourceTree).IsEqualTo(offending);
+
+        // Keep the offending tree unchanged and reuse the driver so incremental caches participate.
+        var inserted = CSharpSyntaxTree.ParseText("public class Inserted { }", parseOptions, "shared.cs");
+        compilation = compilation.RemoveAllSyntaxTrees().AddSyntaxTrees(reorder
+            ? [unrelated, offending]
+            : [inserted, offending, unrelated]);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+
+        await Assert.That(driver.GetRunResult().Results[0].Exception).IsNull();
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToArray()).IsEmpty();
+        await Assert.That(diagnostics.Length).IsEqualTo(1);
+        await Assert.That(diagnostics[0].Id).IsEqualTo("TUNITGEN005");
+        await Assert.That(diagnostics[0].Location.SourceTree).IsEqualTo(offending);
+        await Assert.That(offending.GetText().ToString(diagnostics[0].Location.SourceSpan)).IsEqualTo("Value");
+    }
+
     private static async Task Check(string source, bool inaccessible, bool enabled,
         string? snapshotParameter = null, bool expectDiagnostic = true, bool suppressDiagnostic = false)
     {

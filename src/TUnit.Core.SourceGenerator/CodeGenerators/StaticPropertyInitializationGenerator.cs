@@ -68,7 +68,9 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
                         {
                             // Reattach to the current tree so pragmas and per-file diagnostic options apply.
                             // The compilation-relative ordinal distinguishes trees with identical paths,
-                            // while discovery models retain only equatable location data.
+                            // while discovery models retain only equatable location data. The syntax provider's
+                            // semantic transform reruns when the compilation changes, and SegmentCaches is keyed
+                            // by that compilation, so insertion/reordering refreshes ordinals before this output.
                             var tree = pair.Right.SyntaxTrees.ElementAtOrDefault(property.TreeOrdinal);
                             var location = tree is null
                                 ? Location.Create(property.FilePath, property.Span, property.LineSpan)
