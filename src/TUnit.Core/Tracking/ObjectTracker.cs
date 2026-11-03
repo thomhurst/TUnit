@@ -542,6 +542,16 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         internal HashSet<object> Instances => holds.Instances;
 
         public ValueTask DisposeAsync() => tracker.ReleaseRegistrationHoldsAsync(holds);
+
+        // Keep await using configuration on the value type: the IAsyncDisposable extension boxes it.
+        public ConfiguredRegistrationScope ConfigureAwait(bool continueOnCapturedContext) =>
+            new(this, continueOnCapturedContext);
+    }
+
+    internal readonly struct ConfiguredRegistrationScope(RegistrationScope scope, bool continueOnCapturedContext)
+    {
+        public ConfiguredValueTaskAwaitable DisposeAsync() =>
+            scope.DisposeAsync().ConfigureAwait(continueOnCapturedContext);
     }
 
     /// <summary>

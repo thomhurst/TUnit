@@ -411,7 +411,7 @@ public class SharedInstanceLifetimeTests
 
         try
         {
-            await using var scope = tracker.BeginRegistrationScope();
+            await using var scope = tracker.BeginRegistrationScope().ConfigureAwait(false);
             fetched = Fetch(key);
             throw expected;
         }
