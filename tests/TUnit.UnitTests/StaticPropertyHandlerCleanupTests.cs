@@ -142,6 +142,53 @@ public class StaticPropertyHandlerCleanupTests
         await Assert.That(nextResource.Disposed).IsTrue();
     }
 
+    [Test]
+    [NotInParallel]
+    public async Task Failed_Reflection_Initialization_Releases_Its_Claim_And_Allows_A_Fresh_Session()
+    {
+        FailingReflectionFixture.FailNextAssignment = true;
+        var first = CreateSession();
+        await Assert.That(() => StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(FailingReflectionFixture)))
+            .Throws<InvalidOperationException>();
+        var failedResource = FailingReflectionFixture.Resource!;
+        await Assert.That(failedResource.Disposed).IsFalse();
+
+        // Provider disposal uses this path when initialization fails before scheduling.
+        await CreateHandler(first).ReleaseSessionCallbacksAfterFailedInitializationAsync();
+        await Assert.That(failedResource.DisposeCount).IsEqualTo(1);
+        await CreateHandler(first).ReleaseSessionCallbacksAfterFailedInitializationAsync();
+        await Assert.That(failedResource.DisposeCount).IsEqualTo(1);
+
+        var next = CreateSession();
+        await StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(FailingReflectionFixture));
+        var nextResource = FailingReflectionFixture.Resource!;
+        await Assert.That(ReferenceEquals(failedResource, nextResource)).IsFalse();
+        await Assert.That(nextResource.Disposed).IsFalse();
+        await CreateHandler(next).DisposeStaticPropertiesAsync([], []);
+        await Assert.That(nextResource.DisposeCount).IsEqualTo(1);
+    }
+
+    internal sealed class FailingReflectionFixture
+    {
+        public static bool FailNextAssignment;
+        private static Resource? _resource;
+
+        [ResourceSource]
+        public static Resource? Resource
+        {
+            get => _resource;
+            set
+            {
+                _resource = value;
+                if (FailNextAssignment)
+                {
+                    FailNextAssignment = false;
+                    throw new InvalidOperationException("static initialization failed");
+                }
+            }
+        }
+    }
+
     internal sealed class OverlappingReflectionFixture
     {
         [ResourceSource]
