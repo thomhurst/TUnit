@@ -14,6 +14,13 @@ internal sealed class DeferredEnumerationExecutableTest : AbstractExecutableTest
 {
     internal bool ExpansionCompletedWithoutChildren { get; set; }
 
+    internal void CompleteExpansionWithoutChildren(Exception? exception = null)
+    {
+        EndTime = DateTimeOffset.UtcNow;
+        SetResult(exception is null ? TestState.Passed : TestState.Failed, exception);
+        ExpansionCompletedWithoutChildren = true;
+    }
+
     public override Task<object> CreateInstanceAsync() =>
         throw new InvalidOperationException(
             $"Deferred enumeration placeholder '{TestId}' was scheduled directly. It must be expanded by DeferredTestExpander before execution.");

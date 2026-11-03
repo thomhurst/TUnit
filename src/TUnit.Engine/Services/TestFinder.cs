@@ -9,9 +9,13 @@ namespace TUnit.Engine.Services;
 internal class TestFinder : ITestFinder
 {
     private readonly TestDiscoveryService _discoveryService;
-    private int _cachedTestsVersion = -1;
-    private Dictionary<Type, List<TestContext>>? _testsByType;
-    private Dictionary<(Type ClassType, string TestName), List<TestContext>>? _testsByTypeAndName;
+    private readonly Lock _indexLock = new();
+    private IndexSnapshot? _indexes;
+
+    private sealed record IndexSnapshot(
+        int Version,
+        Dictionary<Type, List<TestContext>> ByType,
+        Dictionary<(Type ClassType, string TestName), List<TestContext>> ByTypeAndName);
 
     public TestFinder(TestDiscoveryService discoveryService)
     {
@@ -21,37 +25,40 @@ internal class TestFinder : ITestFinder
     /// <summary>
     /// Builds index dictionaries from cached tests for O(1) lookups
     /// </summary>
-    private void EnsureIndexesBuilt()
+    private IndexSnapshot EnsureIndexesBuilt()
     {
-        if (_testsByType != null && _cachedTestsVersion == _discoveryService.CachedTestsVersion)
+        lock (_indexLock)
         {
-            return; // Already built
-        }
-
-        var allTests = _discoveryService.GetCachedTestContexts();
-        var testsByType = new Dictionary<Type, List<TestContext>>();
-        var testsByTypeAndName = new Dictionary<(Type, string), List<TestContext>>();
-
-        foreach (var test in allTests)
-        {
-            if (test.TestDetails?.ClassType == null)
+            if (_indexes is { } indexes && indexes.Version == _discoveryService.CachedTestsVersion)
             {
-                continue;
+                return indexes;
             }
 
-            var classType = test.Metadata.TestDetails.ClassType;
-            var testName = test.Metadata.TestDetails.TestName;
+            // Capture the version before reading contexts; a concurrent update must invalidate this snapshot.
+            var version = _discoveryService.CachedTestsVersion;
+            var allTests = _discoveryService.GetCachedTestContexts();
+            var testsByType = new Dictionary<Type, List<TestContext>>();
+            var testsByTypeAndName = new Dictionary<(Type, string), List<TestContext>>();
 
-            // Index by type
-            testsByType.AddToList(classType, test);
+            foreach (var test in allTests)
+            {
+                if (test.TestDetails?.ClassType == null)
+                {
+                    continue;
+                }
 
-            // Index by (type, name)
-            testsByTypeAndName.AddToList((classType, testName), test);
+                var classType = test.Metadata.TestDetails.ClassType;
+                var testName = test.Metadata.TestDetails.TestName;
+
+                // Index by type
+                testsByType.AddToList(classType, test);
+
+                // Index by (type, name)
+                testsByTypeAndName.AddToList((classType, testName), test);
+            }
+
+            return _indexes = new IndexSnapshot(version, testsByType, testsByTypeAndName);
         }
-
-        _cachedTestsVersion = _discoveryService.CachedTestsVersion;
-        _testsByType = testsByType;
-        _testsByTypeAndName = testsByTypeAndName;
     }
 
     /// <summary>
@@ -59,9 +66,9 @@ internal class TestFinder : ITestFinder
     /// </summary>
     public IEnumerable<TestContext> GetTests(Type classType)
     {
-        EnsureIndexesBuilt();
+        var indexes = EnsureIndexesBuilt();
 
-        if (_testsByType!.TryGetValue(classType, out var tests))
+        if (indexes.ByType.TryGetValue(classType, out var tests))
         {
             return tests;
         }
@@ -75,14 +82,14 @@ internal class TestFinder : ITestFinder
     public TestContext[] GetTestsByNameAndParameters(string testName, IEnumerable<Type>? methodParameterTypes,
         Type classType, IEnumerable<Type>? classParameterTypes, IEnumerable<object?>? classArguments)
     {
-        EnsureIndexesBuilt();
+        var indexes = EnsureIndexesBuilt();
 
         var paramTypes = methodParameterTypes as Type[] ?? methodParameterTypes?.ToArray() ?? [];
         var classParamTypes = classParameterTypes as Type[] ?? classParameterTypes?.ToArray() ?? [];
 
         // Use the (type, name) index for O(1) lookup instead of O(n) scan
         var key = (classType, testName);
-        if (!_testsByTypeAndName!.TryGetValue(key, out var candidateTests))
+        if (!indexes.ByTypeAndName.TryGetValue(key, out var candidateTests))
         {
             return [];
         }

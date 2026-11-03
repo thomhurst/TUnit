@@ -24,8 +24,9 @@ public class TestDependencyResolverTests
         // Queue an unresolved dependency before expansion completes without children.
         await Assert.That(resolver.TryResolveDependencies(placeholder)).IsFalse();
         var state = failed ? TestState.Failed : TestState.Passed;
-        placeholder.SetResult(state, failed ? new InvalidOperationException("expansion failed") : null);
-        placeholder.ExpansionCompletedWithoutChildren = true;
+        placeholder.CompleteExpansionWithoutChildren(failed ? new InvalidOperationException("expansion failed") : null);
+        await Assert.That(placeholder.Context.Result).IsNotNull();
+        await Assert.That(placeholder.ExpansionCompletedWithoutChildren).IsTrue();
         var result = placeholder.Result;
         var other = TestRunnerTests.CreateTest("other", dependencies: [placeholder]);
         placeholder.Dependencies = [new ResolvedDependency

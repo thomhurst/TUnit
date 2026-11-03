@@ -238,8 +238,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
                 testList.AddRange(children);
                 if (children.Count == 0)
                 {
-                    placeholder.State = TestState.Passed;
-                    placeholder.ExpansionCompletedWithoutChildren = true;
+                    placeholder.CompleteExpansionWithoutChildren();
                 }
                 expanded.Add((placeholder, children));
             }
@@ -248,9 +247,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
                 // Expansion itself failed (as opposed to a per-row data error, which becomes a failed
                 // child). Surface it on the placeholder node so the failure is visible.
                 await _logger.LogErrorAsync($"Failed to expand deferred test '{placeholder.TestId}': {ex}");
-                placeholder.EndTime = DateTimeOffset.UtcNow;
-                placeholder.SetResult(TestState.Failed, ex);
-                placeholder.ExpansionCompletedWithoutChildren = true;
+                placeholder.CompleteExpansionWithoutChildren(ex);
                 await _messageBus.Failed(placeholder.Context, ex, placeholder.StartTime.GetValueOrDefault());
             }
         }

@@ -34,8 +34,13 @@ public class DeferredDependencyTests
         await Assert.That(CurrentCounters.Completed).IsEqualTo(3);
         await Assert.That(TestContext.Current!.Dependencies.DependsOn.Count).IsEqualTo(3);
         await Assert.That(TestContext.Current.Dependencies.DependsOn.All(test => test.TestMethodArguments.Length == 1)).IsTrue();
-        var results = TestContext.Current.Dependencies.GetTests(nameof(Deferred));
-        await Assert.That(results.Count()).IsEqualTo(3);
+        var context = TestContext.Current;
+        // Concurrent readers must all observe the rebuilt concrete-case indexes.
+        await Task.WhenAll(Enumerable.Range(0, 32).Select(_ => Task.Run(async () =>
+        {
+            var results = context.Dependencies.GetTests(nameof(Deferred));
+            await Assert.That(results.Count()).IsEqualTo(3);
+        })));
         Interlocked.Increment(ref CurrentCounters.DependentCompleted);
     }
 
