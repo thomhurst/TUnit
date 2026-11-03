@@ -1,6 +1,8 @@
-﻿namespace TUnit.TestProject.Attributes;
+﻿using System.Diagnostics.CodeAnalysis;
 
-public class AutoFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<T>
+namespace TUnit.TestProject.Attributes;
+
+public class AutoFixtureGeneratorAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T> : DataSourceGeneratorAttribute<T>
 {
     protected override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata metadata)
     {
@@ -8,7 +10,10 @@ public class AutoFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<T>
     }
 }
 
-public class AutoFixtureGeneratorAttribute<T1, T2, T3> : DataSourceGeneratorAttribute<T1, T2, T3>
+public class AutoFixtureGeneratorAttribute<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T1,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T2,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T3> : DataSourceGeneratorAttribute<T1, T2, T3>
 {
     protected override IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata metadata)
     {
