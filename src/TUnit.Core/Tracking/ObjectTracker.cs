@@ -512,7 +512,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     /// <summary>
     /// Shared instances fetched while tests that run alongside other tests are built and registered.
-    /// Each holds one reference until <see cref="ReleaseRegistrationHoldsAsync"/>.
+    /// Each holds one reference until its registration scope is disposed.
     /// </summary>
     internal sealed class RegistrationHolds
     {
@@ -523,26 +523,43 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     /// <summary>
     /// Starts holding every cached shared instance fetched in the current async flow, until
-    /// <see cref="ReleaseRegistrationHoldsAsync"/>. Use around building and registering tests while
+    /// the returned scope is disposed. Use around building and registering tests while
     /// other tests run: otherwise the last running holder of an instance can end between the new test
     /// receiving it and registration counting it, and the new test would run with a disposed
     /// instance (#7263). Call from an async method, so the holds do not flow back to its caller, and
-    /// call <see cref="ReleaseRegistrationHoldsAsync"/> in a finally block.
+    /// dispose the scope with await using.
     /// </summary>
-    internal static RegistrationHolds BeginRegistrationHolds()
+    internal RegistrationScope BeginRegistrationScope()
     {
         var holds = new RegistrationHolds();
         Interlocked.Increment(ref s_activeRegistrationHolds);
         s_registrationHolds.Value = holds;
-        return holds;
+        return new RegistrationScope(this, holds);
+    }
+
+    internal readonly struct RegistrationScope(ObjectTracker tracker, RegistrationHolds holds) : IAsyncDisposable
+    {
+        internal HashSet<object> Instances => holds.Instances;
+
+        public ValueTask DisposeAsync() => tracker.ReleaseRegistrationHoldsAsync(holds);
+
+        // Keep await using configuration on the value type: the IAsyncDisposable extension boxes it.
+        public ConfiguredRegistrationScope ConfigureAwait(bool continueOnCapturedContext) =>
+            new(this, continueOnCapturedContext);
+    }
+
+    internal readonly struct ConfiguredRegistrationScope(RegistrationScope scope, bool continueOnCapturedContext)
+    {
+        public ConfiguredValueTaskAwaitable DisposeAsync() =>
+            scope.DisposeAsync().ConfigureAwait(continueOnCapturedContext);
     }
 
     /// <summary>
-    /// Releases the references taken since <see cref="BeginRegistrationHolds"/>. Registration has
+    /// Releases the references taken since <see cref="BeginRegistrationScope"/>. Registration has
     /// counted the references its tests keep by now, so this disposes only instances that no test holds.
     /// Disposal errors are logged by the <see cref="Disposer"/> and not rethrown: no test owns them.
     /// </summary>
-    internal async ValueTask ReleaseRegistrationHoldsAsync(RegistrationHolds holds)
+    private async ValueTask ReleaseRegistrationHoldsAsync(RegistrationHolds holds)
     {
         // The async flow keeps the holds until the method that began them returns; Released makes
         // later fetches in that flow skip them.
@@ -567,7 +584,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     /// <summary>
     /// Holds a cached shared instance that was just fetched, when tests are being registered in this
-    /// async flow (<see cref="BeginRegistrationHolds"/>).
+    /// async flow (<see cref="BeginRegistrationScope"/>).
     /// </summary>
     /// <returns>
     /// False only when the instance has already been retired, in which case the caller must fetch it

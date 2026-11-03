@@ -108,18 +108,13 @@ internal sealed class TestRegistry : ITestRegistry
         // Other tests are running, so hold the shared instances these tests fetch until
         // registration has counted them (#7263).
         IEnumerable<AbstractExecutableTest> builtTests;
-        var holds = ObjectTracker.BeginRegistrationHolds();
-        try
+        await using (var holds = _objectTracker.BeginRegistrationScope())
         {
             builtTests = await _testBuilderPipeline!.BuildTestsFromMetadataAsync(testMetadataList, buildingContext);
 
             // Dynamic tests bypass the discovery pipeline's post-filter registration, so register them
             // here (event receivers + argument registration/reference counting) before they execute.
             await _testFilterService.RegisterTestsAsync(builtTests, isForExecution: true);
-        }
-        finally
-        {
-            await _objectTracker.ReleaseRegistrationHoldsAsync(holds);
         }
 
         foreach (var test in builtTests)
@@ -287,8 +282,7 @@ internal sealed class TestRegistry : ITestRegistry
         // Other tests are running, so hold the shared instances the variant fetches until
         // registration has counted them (#7263).
         AbstractExecutableTest builtTest;
-        var holds = ObjectTracker.BeginRegistrationHolds();
-        try
+        await using (var holds = _objectTracker.BeginRegistrationScope())
         {
             var builtTests = await _testBuilderPipeline.BuildTestsFromMetadataAsync([metadata], buildingContext);
 
@@ -298,10 +292,6 @@ internal sealed class TestRegistry : ITestRegistry
             // Variants bypass the discovery pipeline's post-filter registration, so register here
             // (event receivers + argument registration/reference counting) before execution.
             await _testFilterService.RegisterTestsAsync([builtTest], isForExecution: true);
-        }
-        finally
-        {
-            await _objectTracker.ReleaseRegistrationHoldsAsync(holds);
         }
 
         _dynamicTestQueue.Enqueue(builtTest);

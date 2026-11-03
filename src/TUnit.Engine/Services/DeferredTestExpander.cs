@@ -48,8 +48,7 @@ internal sealed class DeferredTestExpander
 
         // Other tests may be running, so hold the shared instances the children fetch until
         // registration has counted them (#7263).
-        var holds = ObjectTracker.BeginRegistrationHolds();
-        try
+        await using (_objectTracker.BeginRegistrationScope().ConfigureAwait(false))
         {
             var built = await _testBuilderPipeline
                 .BuildTestsFromMetadataAsync([placeholder.Metadata], buildingContext, cancellationToken)
@@ -68,10 +67,6 @@ internal sealed class DeferredTestExpander
             await _testFilterService.RegisterTestsAsync(children, isForExecution: true).ConfigureAwait(false);
 
             return children;
-        }
-        finally
-        {
-            await _objectTracker.ReleaseRegistrationHoldsAsync(holds).ConfigureAwait(false);
         }
     }
 }

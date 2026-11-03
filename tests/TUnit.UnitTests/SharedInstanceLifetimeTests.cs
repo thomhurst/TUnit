@@ -274,8 +274,7 @@ public class SharedInstanceLifetimeTests
         discoverer.Discover = context => Add(context, instance);
         tracker.TrackObjects(holder);
 
-        var holds = ObjectTracker.BeginRegistrationHolds();
-        try
+        await using (var holds = tracker.BeginRegistrationScope())
         {
             await Assert.That(Fetch(key)).IsSameReferenceAs(instance);
 
@@ -283,10 +282,6 @@ public class SharedInstanceLifetimeTests
             await Assert.That(instance.IsDisposed).IsFalse();
 
             tracker.TrackObjects(registering);
-        }
-        finally
-        {
-            await tracker.ReleaseRegistrationHoldsAsync(holds);
         }
 
         await Assert.That(instance.IsDisposed).IsFalse();
@@ -309,8 +304,7 @@ public class SharedInstanceLifetimeTests
         discoverer.Discover = context => Add(context, instance);
         tracker.TrackObjects(holder);
 
-        var holds = ObjectTracker.BeginRegistrationHolds();
-        try
+        await using (var holds = tracker.BeginRegistrationScope())
         {
             SharedDisposable? fetched = null;
 
@@ -323,10 +317,6 @@ public class SharedInstanceLifetimeTests
             await Assert.That(instance.IsDisposed).IsFalse();
 
             tracker.TrackObjects(registering);
-        }
-        finally
-        {
-            await tracker.ReleaseRegistrationHoldsAsync(holds);
         }
 
         await Assert.That(instance.IsDisposed).IsFalse();
@@ -348,15 +338,10 @@ public class SharedInstanceLifetimeTests
         tracker.TrackObjects(holder);
         await tracker.UntrackObjects(holder);
 
-        var holds = ObjectTracker.BeginRegistrationHolds();
         SharedDisposable fetched;
-        try
+        await using (var holds = tracker.BeginRegistrationScope())
         {
             fetched = Fetch(key);
-        }
-        finally
-        {
-            await tracker.ReleaseRegistrationHoldsAsync(holds);
         }
 
         await Assert.That(fetched).IsNotSameReferenceAs(disposed);
@@ -378,9 +363,8 @@ public class SharedInstanceLifetimeTests
         discoverer.Discover = context => Add(context, retired);
         tracker.TrackObjects(holder);
 
-        var holds = ObjectTracker.BeginRegistrationHolds();
         SharedDisposable refetched;
-        try
+        await using (var holds = tracker.BeginRegistrationScope())
         {
             await tracker.UntrackObjects(holder);
             await Assert.That(retired.IsDisposed).IsTrue();
@@ -393,10 +377,6 @@ public class SharedInstanceLifetimeTests
             await Assert.That(holds.Instances.Contains(refetched)).IsTrue();
             await Assert.That(refetched.IsDisposed).IsFalse();
         }
-        finally
-        {
-            await tracker.ReleaseRegistrationHoldsAsync(holds);
-        }
 
         await Assert.That(refetched.DisposeCount).IsEqualTo(1);
     }
@@ -407,8 +387,8 @@ public class SharedInstanceLifetimeTests
         var key = NewKey();
         var (tracker, _) = CreateTracker();
 
-        var holds = ObjectTracker.BeginRegistrationHolds();
-        await tracker.ReleaseRegistrationHoldsAsync(holds);
+        var holds = tracker.BeginRegistrationScope();
+        await holds.DisposeAsync();
 
         var instance = Fetch(key);
 
@@ -419,6 +399,27 @@ public class SharedInstanceLifetimeTests
         await Assert.That(holds.Instances.Count).IsEqualTo(0);
         await Assert.That(untracked).IsTrue();
         await Assert.That(instance.IsDisposed).IsFalse();
+    }
+
+    [Test]
+    public async Task Registration_Scope_Releases_Unregistered_Instance_When_Building_Throws()
+    {
+        var key = NewKey();
+        var (tracker, _) = CreateTracker();
+        SharedDisposable? fetched = null;
+        var expected = new InvalidOperationException("Registration failed");
+
+        try
+        {
+            await using var scope = tracker.BeginRegistrationScope().ConfigureAwait(false);
+            fetched = Fetch(key);
+            throw expected;
+        }
+        catch (InvalidOperationException exception) when (ReferenceEquals(exception, expected))
+        {
+        }
+
+        await Assert.That(fetched!.DisposeCount).IsEqualTo(1);
     }
 
     private static string NewKey() => $"{nameof(SharedInstanceLifetimeTests)}-{Guid.NewGuid():N}";
