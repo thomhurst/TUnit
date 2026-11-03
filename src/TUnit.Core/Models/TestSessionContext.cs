@@ -135,6 +135,26 @@ public class TestSessionContext : Context
         }
     }
 
+    // All engine-owned registration and detachment of static cleanup uses the same lock
+    // as the no-session fallback transfer above. Never invoke callbacks under this lock.
+    internal static void RegisterStaticOnDispose(TestBuilderContext context, Func<object, TestContext, ValueTask> callback)
+    {
+        lock (s_deferredOnDisposeLock)
+        {
+            context.Events.OnDispose += callback;
+        }
+    }
+
+    internal static AsyncEvent<TestContext>? TakeStaticOnDispose(TestBuilderContext context)
+    {
+        lock (s_deferredOnDisposeLock)
+        {
+            var onDispose = context.EventsIfCreated?.OnDispose;
+            if (onDispose is not null) context.Events.OnDispose = null;
+            return onDispose;
+        }
+    }
+
     /// <summary>
     /// Takes the callbacks <see cref="DeferOnDisposeToSessionEnd"/> moved to this session, so they are raised once.
     /// </summary>

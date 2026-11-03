@@ -70,7 +70,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         {
             // Static leases can outlive this session. Retiring a counter and acquiring a
             // lease must be atomic so a sweep cannot remove a newly protected counter.
-            if (s_staticLeaseObjects.TryGetValue(obj, out var leases) && leases.CurrentCount > 0) return;
+            if (s_staticLeaseObjects.TryGetValue(obj, out var leases) && leases.Count > 0) return;
             if (!s_trackedObjects.TryRemove(obj, out _) || IsExternallyOwned(obj)) return;
         }
         await disposer.DisposeAsync(obj).ConfigureAwait(false);
@@ -301,34 +301,61 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         return cleanupExceptions;
     }
 
-    private static readonly ConditionalWeakTable<object, Counter> s_staticLeaseObjects = new();
+    private static readonly ConditionalWeakTable<object, StaticLease> s_staticLeaseObjects = new();
     private static readonly object s_staticLeaseLock = new();
+
+    private sealed class StaticLease
+    {
+        public int Count;
+        public List<Func<ValueTask>>? OnReleased;
+    }
 
     internal void TrackStaticLeaseObject(object obj)
     {
-        if (ShouldSkipTracking(obj)) return;
         lock (s_staticLeaseLock)
         {
-            s_staticLeaseObjects.GetValue(obj, static _ => new()).Increment();
+            s_staticLeaseObjects.GetValue(obj, static _ => new()).Count++;
             TrackObject(obj);
         }
     }
 
-    internal async ValueTask ReleaseStaticLeaseObjectAsync(object obj)
+    internal async ValueTask ReleaseStaticLeaseObjectAsync(object obj, Func<ValueTask>? onFinalRelease = null)
     {
-        if (ShouldSkipTracking(obj)) return;
+        List<Exception>? errors = null;
         try
         {
             // Keep sweep protection while asynchronous fixture teardown is in progress.
             await UntrackObjectAsync(obj).ConfigureAwait(false);
         }
-        finally
+        catch (Exception ex)
         {
-            lock (s_staticLeaseLock)
+            (errors ??= []).Add(ex);
+        }
+
+        List<Func<ValueTask>>? callbacks = null;
+        lock (s_staticLeaseLock)
+        {
+            if (!s_staticLeaseObjects.TryGetValue(obj, out var lease) || lease.Count <= 0)
             {
-                s_staticLeaseObjects.GetValue(obj, static _ => new()).Decrement();
+                throw new InvalidOperationException("Static lease release has no matching acquisition.");
+            }
+            if (onFinalRelease is not null) (lease.OnReleased ??= []).Add(onFinalRelease);
+            if (--lease.Count == 0)
+            {
+                callbacks = lease.OnReleased;
+                lease.OnReleased = null;
             }
         }
+
+        if (callbacks is not null)
+        {
+            foreach (var callback in callbacks)
+            {
+                try { await callback().ConfigureAwait(false); }
+                catch (Exception ex) { (errors ??= []).Add(ex); }
+            }
+        }
+        if (errors is { Count: > 0 }) throw new AggregateException("Errors occurred while releasing a static fixture", errors);
     }
 
     /// <summary>

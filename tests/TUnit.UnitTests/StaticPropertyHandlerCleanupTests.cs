@@ -153,6 +153,9 @@ public class StaticPropertyHandlerCleanupTests
             .Throws<InvalidOperationException>();
         var failedResource = FailingReflectionFixture.Resource!;
         await Assert.That(failedResource.Disposed).IsFalse();
+        // A repeated discovery in this same session must still report the original failure.
+        await Assert.That(() => StaticPropertyReflectionInitializer.InitializeStaticPropertiesForType(typeof(FailingReflectionFixture)))
+            .Throws<InvalidOperationException>();
 
         // Provider disposal uses this path when initialization fails before scheduling.
         await CreateHandler(first).ReleaseSessionCallbacksAfterFailedInitializationAsync();
@@ -293,6 +296,7 @@ public class StaticPropertyHandlerCleanupTests
         var handler = new StaticPropertyHandler(null!, new ObjectTracker(new(), GlobalContext.Current.Disposer), null!,
             new Lazy<PropertyInjector>(() => throw new InvalidOperationException("property injection failed")), null!, CreateSession());
         await Assert.That(() => handler.InitializeStaticPropertiesAsync([metadata], default)).Throws<InvalidOperationException>();
+        await Assert.That(() => handler.InitializeStaticPropertiesAsync([metadata], default)).Throws<InvalidOperationException>();
         await handler.ReleaseSessionCallbacksAfterFailedInitializationAsync();
         await handler.ReleaseSessionCallbacksAfterFailedInitializationAsync();
         await Assert.That(resource.DisposeCount).IsEqualTo(1);
@@ -345,6 +349,116 @@ public class StaticPropertyHandlerCleanupTests
         await Assert.That(resource.Child.DisposeCount).IsEqualTo(1);
     }
 
+    [Test]
+    [NotInParallel]
+    [Arguments(false, false)]
+    [Arguments(false, true)]
+    [Arguments(true, false)]
+    [Arguments(true, true)]
+    public async Task Static_Properties_Sharing_A_Fixture_Retain_Its_Injected_Scope(bool shareNestedFixture, bool teardownThrows)
+    {
+        var shared = new SharedScopeFixture { TeardownThrows = teardownThrows };
+        object firstValue = shareNestedFixture ? new SharedScopeRoot(shared) : shared;
+        object secondValue = shareNestedFixture ? new SharedScopeRoot(shared) : shared;
+        StaticPropertyMetadata Metadata(string name, object value) => new()
+        {
+            DeclaringType = typeof(SharedScopeFixture), PropertyName = name, PropertyType = value.GetType(),
+            InitializerAsync = () => Task.FromResult<object?>(value)
+        };
+        var first = CreateInitializingHandler(CreateSession());
+        await InitializeWithoutAmbientTestAsync(first, Metadata("SharedFirst", firstValue));
+        var service = shared.Service;
+        var second = CreateInitializingHandler(CreateSession());
+        await InitializeWithoutAmbientTestAsync(second, Metadata("SharedSecond", secondValue));
+        await Assert.That(ReferenceEquals(service, shared.Service)).IsTrue();
+
+        await first.DisposeStaticPropertiesAsync([], []);
+        await Assert.That(shared.DisposeCount).IsEqualTo(0);
+        await Assert.That(service.DisposeCount).IsEqualTo(0);
+        if (teardownThrows)
+        {
+            await Assert.That(() => second.DisposeStaticPropertiesAsync([], [])).Throws<AggregateException>();
+        }
+        else
+        {
+            await second.DisposeStaticPropertiesAsync([], []);
+        }
+        await Assert.That(shared.DisposeCount).IsEqualTo(1);
+        await Assert.That(shared.DisposedWithLiveService).IsTrue();
+        await Assert.That(service.DisposeCount).IsEqualTo(1);
+        await first.ReleaseSessionCallbacksAfterFailedInitializationAsync();
+        await second.ReleaseSessionCallbacksAfterFailedInitializationAsync();
+        await Assert.That(service.DisposeCount).IsEqualTo(1);
+    }
+
+    [Test]
+    [NotInParallel]
+    public async Task Static_Callback_Registration_And_Fallback_Transfers_Share_Synchronization()
+    {
+        var previous = TestSessionContext.Current;
+        TestSessionContext.Current = null;
+        var context = TestSessionContext.GlobalStaticPropertyContext;
+        var count = 0;
+        try
+        {
+            await Task.WhenAll(Enumerable.Range(0, 512).Select(i => Task.Run(() =>
+            {
+                if (i % 2 == 0)
+                {
+                    TestSessionContext.RegisterStaticOnDispose(context, (_, _) => { Interlocked.Increment(ref count); return default; });
+                }
+                else
+                {
+                    var source = new TestContextEvents();
+                    source.OnDispose += (_, _) => { Interlocked.Increment(ref count); return default; };
+                    TestSessionContext.DeferOnDisposeToSessionEnd(source);
+                }
+            })));
+            var errors = new List<Exception>();
+            await TUnit.Engine.Services.TestExecution.TestOnDisposeRaiser.RaiseForSessionAsync(context, errors);
+            await Assert.That(errors).IsEmpty();
+            await Assert.That(count).IsEqualTo(512);
+        }
+        finally
+        {
+            TestSessionContext.Current = previous;
+        }
+    }
+
+    internal sealed class SharedScopeRoot(SharedScopeFixture child) : IDisposable
+    {
+        [ClassDataSource<SharedScopeFixture>]
+        public SharedScopeFixture Child { get; set; } = child;
+        public void Dispose() { }
+    }
+
+    internal sealed class SharedScopeFixture : IDisposable
+    {
+        [SharedScope]
+        public SharedScopeService Service { get; set; } = null!;
+        public int DisposeCount;
+        public bool DisposedWithLiveService;
+        public bool TeardownThrows;
+        public void Dispose()
+        {
+            DisposedWithLiveService = Service.DisposeCount == 0;
+            DisposeCount++;
+            if (TeardownThrows) throw new InvalidOperationException("shared fixture teardown failed");
+        }
+    }
+
+    public sealed class SharedScopeService : IDisposable
+    {
+        public int DisposeCount;
+        public void Dispose() => DisposeCount++;
+    }
+
+    public sealed class SharedScopeAttribute : DependencyInjectionDataSourceAttribute<SharedScopeService>
+    {
+        public override SharedScopeService CreateScope(DataGeneratorMetadata metadata) => new();
+        public override object Create(SharedScopeService scope, Type type) => scope;
+    }
+
     private sealed class AsyncLeaseFixture : IAsyncDisposable
     {
         public NestedLeaseFixture Child { get; } = new();
@@ -383,8 +497,32 @@ public class StaticPropertyHandlerCleanupTests
         public void Dispose() { DisposeCount++; }
     }
 
+    private static async Task InitializeWithoutAmbientTestAsync(StaticPropertyHandler handler, StaticPropertyMetadata metadata)
+    {
+        // Engine static initialization runs before any test is current. Avoid attaching the
+        // injected scope to this unit test's OnDispose instead of the static value's context.
+        var previous = TestContext.Current;
+        var activity = System.Diagnostics.Activity.Current;
+        AmbientContexts.SetTestOnly(null);
+        System.Diagnostics.Activity.Current = null;
+        try { await handler.InitializeStaticPropertiesAsync([metadata], default); }
+        finally
+        {
+            AmbientContexts.SetTestOnly(previous);
+            System.Diagnostics.Activity.Current = activity;
+        }
+    }
+
+    private sealed class PassthroughInitializationCallback : IInitializationCallback
+    {
+        public ValueTask<T> EnsureInitializedAsync<T>(T obj,
+            System.Collections.Concurrent.ConcurrentDictionary<string, object?>? objectBag = null,
+            MethodMetadata? methodMetadata = null, TestContextEvents? events = null,
+            CancellationToken cancellationToken = default) where T : notnull => new(obj);
+    }
+
     private static StaticPropertyHandler CreateInitializingHandler(TestSessionContext session)
-        => new(null!, new ObjectTracker(new(), GlobalContext.Current.Disposer), null!, new Lazy<PropertyInjector>(() => new PropertyInjector(null!, session.Id)),
+        => new(null!, new ObjectTracker(new(), GlobalContext.Current.Disposer), null!, new Lazy<PropertyInjector>(() => new PropertyInjector(new Lazy<IInitializationCallback>(() => new PassthroughInitializationCallback()), session.Id)),
             new ObjectGraphDiscoveryService(), session);
 
     internal sealed class ThrowingReflectionFixture

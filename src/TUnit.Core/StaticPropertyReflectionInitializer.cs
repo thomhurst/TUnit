@@ -23,7 +23,6 @@ public static class StaticPropertyReflectionInitializer
     private sealed class SessionInitialization
     {
         public readonly ConcurrentDictionary<Type, bool> Types = new();
-        public readonly object CallbackLock = new();
     }
 
     // Encapsulates the shared value's lease: acquisition and final release use the same gate.
@@ -46,6 +45,10 @@ public static class StaticPropertyReflectionInitializer
             {
                 if (!session.Types.TryAdd(type, true))
                 {
+                    if (_error is { } priorError)
+                    {
+                        throw new InvalidOperationException($"Static property initialization failed for {type.FullName}", priorError);
+                    }
                     return;
                 }
 
@@ -57,10 +60,7 @@ public static class StaticPropertyReflectionInitializer
                 }
 
                 // Register before initialization so partial initialization also gets cleaned up.
-                lock (session.CallbackLock)
-                {
-                    sessionContext.Events.OnDispose += (_, _) => ReleaseAsync();
-                }
+                TestSessionContext.RegisterStaticOnDispose(sessionContext, (_, _) => ReleaseAsync());
 
                 if (first)
                 {
@@ -96,7 +96,7 @@ public static class StaticPropertyReflectionInitializer
                 }
 
                 var context = _context!;
-                var onDispose = context.EventsIfCreated?.OnDispose;
+                var onDispose = TestSessionContext.TakeStaticOnDispose(context);
                 _context = null;
                 _error = null;
                 if (onDispose is null)
@@ -104,7 +104,6 @@ public static class StaticPropertyReflectionInitializer
                     return;
                 }
 
-                context.Events.OnDispose = null;
                 var exceptions = new List<Exception>();
                 foreach (var invocation in onDispose.InvocationList)
                 {

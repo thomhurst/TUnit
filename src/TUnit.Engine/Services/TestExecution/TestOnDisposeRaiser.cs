@@ -53,13 +53,10 @@ internal static class TestOnDisposeRaiser
     /// </summary>
     public static async ValueTask RaiseForSessionAsync(TestBuilderContext context, List<Exception> exceptions)
     {
-        if (context.EventsIfCreated is not { OnDispose: { } onDispose } events)
+        if (TestSessionContext.TakeStaticOnDispose(context) is not { } onDispose)
         {
             return;
         }
-
-        // Detach first so the callbacks run once even if this is reached again.
-        events.OnDispose = null;
 
         await RaiseDetachedAsync(context, onDispose.InvocationList, exceptions).ConfigureAwait(false);
     }

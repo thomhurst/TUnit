@@ -23,6 +23,7 @@ internal sealed class StaticPropertyHandler
     private readonly ConcurrentDictionary<string, object?> _sessionObjectBag = new();
     private readonly TestBuilderContext _staticPropertyContext;
     private bool _initialized;
+    private Exception? _initializationError;
     private static readonly ConditionalWeakTable<StaticPropertyMetadata, SharedInitialization> s_sharedInitializations = new();
 
     private sealed class SharedInitialization
@@ -42,7 +43,7 @@ internal sealed class StaticPropertyHandler
             {
                 var first = _owners++ == 0;
                 // Subscribe before initialization so provider disposal also releases partial failures.
-                handler._staticPropertyContext.Events.OnDispose += (_, _) => ReleaseAsync();
+                TestSessionContext.RegisterStaticOnDispose(handler._staticPropertyContext, (_, _) => ReleaseAsync());
                 if (!first)
                 {
                     if (_error is { } error)
@@ -113,14 +114,26 @@ internal sealed class StaticPropertyHandler
                 _error = null;
                 _tracker = null;
                 var errors = new List<Exception>();
+                // A fixture (including a nested fixture) can also belong to another static
+                // property. Keep this graph's scopes until every fixture's final lease ends.
+                var remaining = _trackedObjects.Count;
+                async ValueTask ReleaseScopesAsync()
+                {
+                    if (Interlocked.Decrement(ref remaining) != 0) return;
+                    var scopeErrors = new List<Exception>();
+                    await TestOnDisposeRaiser.RaiseForSessionAsync(context, scopeErrors).ConfigureAwait(false);
+                    if (scopeErrors.Count > 0) throw new AggregateException("Errors occurred while disposing static scopes", scopeErrors);
+                }
                 foreach (var obj in _trackedObjects)
                 {
-                    try { await tracker.ReleaseStaticLeaseObjectAsync(obj).ConfigureAwait(false); }
+                    try { await tracker.ReleaseStaticLeaseObjectAsync(obj, ReleaseScopesAsync).ConfigureAwait(false); }
                     catch (Exception ex) { errors.Add(ex); }
                 }
+                if (_trackedObjects.Count == 0)
+                {
+                    await TestOnDisposeRaiser.RaiseForSessionAsync(context, errors).ConfigureAwait(false);
+                }
                 _trackedObjects.Clear();
-                // Fixture teardown precedes disposal of its injected services, including on errors.
-                await TestOnDisposeRaiser.RaiseForSessionAsync(context, errors).ConfigureAwait(false);
                 if (errors.Count > 0) throw new AggregateException("Errors occurred while disposing shared static property", errors);
             }
             finally
@@ -153,7 +166,11 @@ internal sealed class StaticPropertyHandler
 
     internal async Task InitializeStaticPropertiesAsync(IEnumerable<StaticPropertyMetadata> properties, CancellationToken cancellationToken)
     {
-        if (_initialized) return;
+        if (_initialized)
+        {
+            if (_initializationError is { } error) throw new InvalidOperationException("Static property initialization previously failed", error);
+            return;
+        }
         _initialized = true;
 
         foreach (var property in properties)
@@ -165,7 +182,8 @@ internal sealed class StaticPropertyHandler
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"Failed to initialize static property {property.DeclaringType.Name}.{property.PropertyName}", ex);
+                _initializationError = new InvalidOperationException($"Failed to initialize static property {property.DeclaringType.Name}.{property.PropertyName}", ex);
+                throw _initializationError;
             }
         }
     }
