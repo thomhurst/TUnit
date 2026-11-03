@@ -5,9 +5,8 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject.Bugs._7205;
 
-// DependencyInjectionDataSourceAttribute<TScope> disposes each scope it creates through an OnDispose
-// handler that it subscribes on TestBuilderContext.Current.Events while its row is fetched. Those
-// events never reached the test built from the row, so no scope was ever disposed. Every scope must be
+// DependencyInjectionDataSourceAttribute<TScope> registers cleanup on the builder context while
+// fetching its row. Originally that cleanup never reached the executable test. Every scope must be
 // disposed once, when its test ends, in both engine modes: including the scope of the class row's first
 // fetch that the first test takes, a retried test's scope (which every attempt reuses), and the scopes
 // of tests that never run (skipped, skipped because a dependency failed, or removed by circular-dependency
@@ -422,7 +421,7 @@ public class DependencyInjectionScopeDisposalObserverTests
         await AssertScopes(nameof(ClassRowScopeWithMethodRowsTests), 4);
 
         // One scope for the temporary instance that reads the method rows, then one per test. Only the
-        // tests' scopes are disposed when they end; the temporary instance's scope is left to #7383.
+        // tests' scopes are disposed when they end; the temporary instance's scope lives until session cleanup.
         await AssertScopes(nameof(ClassRowScopeWithInstanceMethodDataSourceTests), 3, expectedDisposed: 2);
 
         // A method parameter scope per test run.

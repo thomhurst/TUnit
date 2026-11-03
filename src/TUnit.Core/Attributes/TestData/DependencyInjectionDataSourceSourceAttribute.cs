@@ -16,18 +16,9 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
             // disposing the returned objects, as it does for any other data source.
             var scopeOwnsCreatedObjects = scope is IDisposable or IAsyncDisposable;
 
-            // Set up disposal for this specific scope in the current test context
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, _) =>
-            {
-                if (scope is IAsyncDisposable asyncDisposable)
-                {
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                }
-                else if (scope is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
-            };
+            // Register before resolving so a failed factory still releases its scope.
+            var cleanup = dataGeneratorMetadata.TestBuilderContext.Current.Events.GetOrCreateDataRowScopes();
+            var owner = cleanup.Register(scope);
 
             return dataGeneratorMetadata.MembersToGenerate
                 .Select(m => m switch
@@ -41,6 +32,7 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                 .Select(x =>
                 {
                     var created = Create(scope, x);
+                    cleanup.RegisterObject(owner, created);
 
                     if (scopeOwnsCreatedObjects)
                     {

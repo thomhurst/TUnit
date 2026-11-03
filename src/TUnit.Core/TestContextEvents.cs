@@ -7,6 +7,63 @@ namespace TUnit.Core;
 /// </summary>
 public class TestContextEvents : ITestEvents
 {
+    internal TestContextEvents Clone() => new()
+    {
+        DataRowScopes = DataRowScopes?.Clone(),
+        OnDispose = OnDispose?.Clone(),
+        OnTestRegistered = OnTestRegistered?.Clone(),
+        OnInitialize = OnInitialize?.Clone(),
+        OnTestStart = OnTestStart?.Clone(),
+        OnTestEnd = OnTestEnd?.Clone(),
+        OnTestSkipped = OnTestSkipped?.Clone(),
+        OnTestRetry = OnTestRetry?.Clone()
+    };
+
+    private object? _scopeLock;
+
+    internal void AddDataRowScopes(DataRowScopeCollection scopes)
+    {
+        lock (LazyInitializer.EnsureInitialized(ref _scopeLock)!)
+        {
+            GetOrCreateDataRowScopes().AddRange(scopes);
+        }
+    }
+
+    internal DataRowScopeCollection? DetachDataRowScopes()
+    {
+        lock (LazyInitializer.EnsureInitialized(ref _scopeLock)!)
+        {
+            var scopes = DataRowScopes;
+            DataRowScopes = null;
+            return scopes;
+        }
+    }
+
+    internal void AddCleanupFrom(TestContextEvents source)
+    {
+        if (source.DataRowScopes is { } scopes)
+            AddDataRowScopes(scopes);
+        if (source.OnDispose is { } onDispose)
+            (OnDispose ??= new()).AddMissingFrom(onDispose);
+    }
+
+    private DataRowScopeCollection? _dataRowScopes;
+
+    internal DataRowScopeCollection GetOrCreateDataRowScopes()
+    {
+        lock (LazyInitializer.EnsureInitialized(ref _scopeLock)!)
+        {
+            return _dataRowScopes ??= new();
+        }
+    }
+
+    // Clones share once-only scope owners while keeping row ownership collections isolated.
+    internal DataRowScopeCollection? DataRowScopes
+    {
+        get => Volatile.Read(ref _dataRowScopes);
+        set => Volatile.Write(ref _dataRowScopes, value);
+    }
+
     public AsyncEvent<TestContext>? OnDispose { get; set; }
     public AsyncEvent<TestContext>? OnTestRegistered { get; set; }
     public AsyncEvent<TestContext>? OnInitialize { get; set; }

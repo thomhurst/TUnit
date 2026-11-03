@@ -241,6 +241,44 @@ internal sealed class StaticPropertyHandler
         }
     }
 
+    internal static async Task DisposeStaticPropertiesAsync(
+        IEnumerable<object> staticProperties,
+        TestContextEvents events,
+        ObjectTracker objectTracker,
+        List<Exception> cleanupExceptions)
+    {
+        // Detach before awaiting so a reused host cannot retain scopes from earlier sessions.
+        var scopes = events.DetachDataRowScopes();
+
+        foreach (var staticProperty in staticProperties)
+        {
+            // Scope-owned values must be released by their scope before tracker disposal is skipped.
+            if (scopes is not null)
+            {
+                await scopes.ReleaseAsync(staticProperty, cleanupExceptions).ConfigureAwait(false);
+            }
+            try
+            {
+                await objectTracker.UntrackObjectAsync(staticProperty).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                cleanupExceptions.Add(e);
+            }
+        }
+
+        // Also release scopes whose factory failed or whose returned value was not trackable.
+        if (scopes is not null)
+        {
+            await scopes.CompleteAsync(cleanupExceptions).ConfigureAwait(false);
+        }
+
+        if (cleanupExceptions.Count > 0)
+        {
+            throw new AggregateException("Errors occurred while disposing static properties", cleanupExceptions);
+        }
+    }
+
     /// <summary>
     /// Initializes nested objects depth-first (deepest first) before the parent object.
     /// This ensures that containers/resources are fully initialized before the parent

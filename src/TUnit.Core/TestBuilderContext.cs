@@ -91,7 +91,7 @@ public record TestBuilderContext
     {
         // A sharing context resolves the source's container on every read rather than caching it, so a
         // later assignment to the source's Events reaches this context too.
-        get => _events ?? _eventsSource?.Events ?? (_events = new TestContextEvents());
+        get => _events ?? _eventsSource?.Events ?? LazyInitializer.EnsureInitialized(ref _events)!;
         set
         {
             _eventsSource = null;
@@ -140,6 +140,30 @@ public record TestBuilderContext
     /// Cached and initialized attributes for the test
     /// </summary>
     internal Attribute[]? InitializedAttributes { get; set; }
+
+    // Child rows start with isolated state and no event subscriptions. Callers that build an
+    // executable view can explicitly share the state/events with their factory context instead.
+    internal TestBuilderContext CreateChild(IDataSourceAttribute? classDataSource, IDataSourceAttribute? dataSource = null, bool shareFactoryContext = false)
+    {
+        var child = new TestBuilderContext
+        {
+            TestMetadata = TestMetadata,
+            InitializedAttributes = InitializedAttributes,
+            ClassConstructor = ClassConstructor,
+            ClassDataSourceAttribute = classDataSource,
+            DataSourceAttribute = dataSource
+        };
+        if (shareFactoryContext)
+        {
+            child.ShareStateBagWith(this);
+            child.ShareEventsWith(this);
+        }
+        else
+        {
+            CopyStateBagTo(child);
+        }
+        return child;
+    }
 
     public void RegisterForInitialization(object? obj)
     {
