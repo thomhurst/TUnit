@@ -1119,6 +1119,14 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return false;
         }
 
+        // Boxed native integers are not IConvertible and have no float/double operators.
+        // CastHelper therefore cannot execute these implicit C# numeric conversions.
+        if (unwrappedSource.SpecialType is SpecialType.System_IntPtr or SpecialType.System_UIntPtr
+            && unwrappedTarget.SpecialType is SpecialType.System_Single or SpecialType.System_Double)
+        {
+            return false;
+        }
+
         if (!SymbolEqualityComparer.Default.Equals(target, unwrappedTarget)
             && !conversion.IsUserDefined
             && unwrappedTarget is INamedTypeSymbol { IsTupleType: true }
