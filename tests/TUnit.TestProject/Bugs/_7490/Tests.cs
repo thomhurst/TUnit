@@ -77,3 +77,23 @@ public class InheritedGenericTestNullArguments<T> : GenericTestBase<T>
         }
     }
 }
+
+[Arguments(42)]
+[MethodDataSource(typeof(InheritedMixedSourcesBase), nameof(StringRows))]
+public abstract class InheritedMixedSourcesBase
+{
+    public static IEnumerable<string> StringRows() => ["constructor"];
+}
+
+public class InheritedMixedSources<T>(T value) : InheritedMixedSourcesBase
+{
+    [Test]
+    [Arguments("method")]
+    public void Test(T methodValue)
+    {
+        if (value is not "constructor" || methodValue is not "method")
+        {
+            throw new InvalidOperationException("Expected the inherited method source to supply the constructor row.");
+        }
+    }
+}

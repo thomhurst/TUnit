@@ -1785,7 +1785,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // its constructor arguments. The generator reads those types from a typed source's declared type
             // arguments. It cannot see the row types of any other source, so such a source is kept as well.
             List<(AttributeData Attribute, ITypeSymbol[]? ClassTypes)>? otherClassDataSources = null;
-            foreach (var attribute in testMethod.TypeSymbol.GetAttributes())
+            foreach (var attribute in testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
             {
                 if (attribute.AttributeClass is { } attributeClass
                     && attributeClass.Name != "ArgumentsAttribute"
