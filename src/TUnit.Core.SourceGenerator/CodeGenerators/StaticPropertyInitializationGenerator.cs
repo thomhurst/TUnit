@@ -18,6 +18,14 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators;
 [Generator]
 public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 {
+    private static readonly DiagnosticDescriptor InaccessibleContainingType = new(
+        "TUNITGEN005",
+        "Static data-source property has an inaccessible containing type",
+        "Static data-source property '{0}' cannot be initialized because its containing type is inaccessible. Make the type and all containing types internal or public.",
+        "TUnit",
+        DiagnosticSeverity.Error,
+        true);
+
     public const string ParseStaticProperties = "ParseStaticProperties";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -41,6 +49,32 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             // property: they add nothing to the result, and keeping them out of the collected array
             // stops unrelated classes (any class with a base list) from re-running the parse step.
             .Where(static chain => HasAnyProperty(chain));
+
+        var inaccessibleProperties = context.SyntaxProvider.CreateSyntaxProvider(
+            predicate: static (node, _) => node is PropertyDeclarationSyntax { AttributeLists.Count: > 0 } property
+                && property.Modifiers.Any(SyntaxKind.StaticKeyword),
+            transform: static (ctx, ct) =>
+            {
+                if (ctx.SemanticModel.GetDeclaredSymbol(ctx.Node, ct) is IPropertySymbol
+                    { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public } property
+                    && property.GetAttributes().Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+                    && !IsAccessibleContainingType(property.ContainingType, ctx.SemanticModel.Compilation))
+                {
+                    return Diagnostic.Create(InaccessibleContainingType, property.Locations.FirstOrDefault(), property.Name);
+                }
+
+                return null;
+            })
+            .Where(static diagnostic => diagnostic is not null)
+            .Combine(enabledProvider);
+
+        context.RegisterSourceOutput(inaccessibleProperties, static (ctx, pair) =>
+        {
+            if (pair.Right)
+            {
+                ctx.ReportDiagnostic(pair.Left!);
+            }
+        });
 
         var testClasses = classChains
             .Collect()
@@ -128,7 +162,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 
             if (!cache.TryGetValue(currentType, out var segment))
             {
-                segment = cache.GetOrAdd(currentType, static type => CreateSegment(type));
+                segment = cache.GetOrAdd(currentType, CreateSegment(currentType, context.SemanticModel.Compilation));
             }
 
             segments.Add(segment);
@@ -137,9 +171,35 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         return segments.ToEquatableArray();
     }
 
-    private static StaticPropertyTypeSegment CreateSegment(INamedTypeSymbol type)
+    private static bool IsAccessibleContainingType(INamedTypeSymbol type, Compilation compilation)
+    {
+        if (!compilation.IsSymbolAccessibleWithin(type, compilation.Assembly))
+        {
+            return false;
+        }
+
+        for (var current = type; current is not null; current = current.ContainingType)
+        {
+            if (current.IsFileLocal)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static StaticPropertyTypeSegment CreateSegment(INamedTypeSymbol type, Compilation compilation)
     {
         List<StaticPropertyEntry>? properties = null;
+
+        // Generated initialization lives in an unrelated top-level type. Roslyn checks the
+        // entire containing-type chain; also exclude types local to a different source file.
+        if (!IsAccessibleContainingType(type, compilation))
+        {
+            return new StaticPropertyTypeSegment(type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                EquatableArray<StaticPropertyEntry>.Empty);
+        }
 
         foreach (var member in type.GetMembers())
         {

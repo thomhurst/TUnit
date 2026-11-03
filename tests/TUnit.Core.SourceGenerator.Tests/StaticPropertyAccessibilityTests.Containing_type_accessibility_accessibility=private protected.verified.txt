@@ -1,0 +1,1 @@
+﻿Static data-source property 'Value' cannot be initialized because its containing type is inaccessible. Make the type and all containing types internal or public.
