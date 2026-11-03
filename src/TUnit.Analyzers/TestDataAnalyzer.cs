@@ -1026,6 +1026,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
         }
 
+        // Decide whole-row binding before marking the row as spread. A nested tuple Item
+        // is not reconstructed: CanConvertReferenceTuple checks only the outer row here.
         if (TryGetTupleElementTypes(type, context.Compilation, out var tupleElements))
         {
             if (testParameterTypes.Length == 1
@@ -1109,6 +1111,14 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             ? nullableSource.TypeArguments[0] : source;
         var unwrappedTarget = target is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableTarget
             ? nullableTarget.TypeArguments[0] : target;
+        // CastHelper uses Convert.ChangeType for primitive targets, which rejects boxed
+        // char values for float/double (including nullable targets).
+        if (unwrappedSource.SpecialType == SpecialType.System_Char
+            && unwrappedTarget.SpecialType is SpecialType.System_Single or SpecialType.System_Double)
+        {
+            return false;
+        }
+
         if (!SymbolEqualityComparer.Default.Equals(target, unwrappedTarget)
             && !conversion.IsUserDefined
             && unwrappedTarget is INamedTypeSymbol { IsTupleType: true }

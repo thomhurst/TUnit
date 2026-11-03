@@ -4,6 +4,8 @@ namespace TUnit.Analyzers.Tests;
 
 public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
 {
+    // Runtime binding coverage: StaticTupleDataSourceTests in TUnit.TestProject,
+    // executed in both generated and reflection modes.
     [Test]
     public async Task Method()
     {
@@ -161,6 +163,12 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("Tuple<char>", "Tuple<float>", "char")]
+    [Arguments("Tuple<char>", "Tuple<double>", "char")]
+    [Arguments("Tuple<char?>", "Tuple<float?>", "char?")]
+    [Arguments("Tuple<char>", "Tuple<double?>", "char")]
+    [Arguments("Tuple<(char, int)>", "Tuple<(float, long)>", "(char, int)")]
+    [Arguments("Tuple<(char, int)>", "Tuple<(double, long)>", "(char, int)")]
     [Arguments("Tuple<((int, int), int)>", "Tuple<((long, long)?, long)>", "((int, int), int)")]
     [Arguments("Tuple<(int, int)>", "Tuple<(long, long)?>", "(int, int)")]
     [Arguments("Tuple<Tuple<int, int>>", "Tuple<long, long>", "Tuple<int, int>")]
