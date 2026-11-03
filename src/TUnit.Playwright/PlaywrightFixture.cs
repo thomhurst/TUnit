@@ -5,7 +5,7 @@ namespace TUnit.Playwright;
 
 public class PlaywrightFixture : IAsyncInitializer, IAsyncDisposable
 {
-    public IPlaywright Playwright { get; private set; } = null!;
+    public IPlaywright Playwright { get; internal set; } = null!;
 
     protected virtual string TestIdAttribute => "data-testid";
 

@@ -61,7 +61,7 @@ public class LoginPageTests : PageTest
 
 Override the `BrowserName` property to control which browser is launched. The possible values are:
 
-- `chromium` (default)
+- `chromium` (default, unless the `BROWSER` environment variable names another; see [Headed Runs and Browser Selection](#headed-runs-and-browser-selection))
 - `firefox`
 - `webkit`
 
@@ -91,6 +91,30 @@ public class HeadlessChromeTests : PageTest
     }
 }
 ```
+
+## Headed Runs and Browser Selection
+
+Switch to a visible browser or a different browser for a whole run with environment variables, without changing code. Like the Microsoft Playwright test adapters, TUnit reads:
+
+- `HEADED=1` (or `true`): launch visible browsers instead of headless ones.
+- `BROWSER=chromium|firefox|webkit`: the default `BrowserName`. An unknown value fails the test with an error naming the variable.
+
+```bash
+HEADED=1 dotnet run --project Tests
+BROWSER=firefox dotnet run --project Tests
+```
+
+Both apply to every `BrowserTest`, `ContextTest`, `PageTest`, `BrowserFixture`, `ContextFixture` and `PageFixture` consumer. CI runs without the variables stay headless on Chromium. Make sure the selected browser is installed, for example with `pwsh bin/Debug/netX/playwright.ps1 install firefox`, replacing `netX` with your test project's target framework.
+
+`HEADED` only affects browsers launched locally. When `PLAYWRIGHT_SERVICE_ACCESS_TOKEN` and `PLAYWRIGHT_SERVICE_URL` are set, TUnit connects to the remote Playwright service instead, which ignores launch options, so `HEADED=1` has no effect. `BROWSER` still selects the remote browser.
+
+Headless mode is decided in this order:
+
+1. An explicit `BrowserTypeLaunchOptions.Headless`, whether passed to the base constructor, returned from `BrowserFixture.GetLaunchOptions()`, or set in `PlaywrightSettings.DefaultBrowserTypeLaunchOptions`.
+2. `HEADED=1`.
+3. Playwright's default: headless.
+
+`PWDEBUG=1` is applied by Playwright itself and always opens a visible browser, even when `Headless` is `true`. Leave `Headless` unset to let `HEADED` decide. Overriding `BrowserName` likewise pins the browser regardless of `BROWSER`. The variables are read when a browser launches, so a `[Before(TestSession)]` hook can still set them.
 
 ## Limiting Parallel Browser Tests
 

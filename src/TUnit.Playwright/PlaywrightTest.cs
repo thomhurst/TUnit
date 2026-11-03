@@ -5,7 +5,12 @@ namespace TUnit.Playwright;
 
 public class PlaywrightTest : WorkerAwareTest
 {
-    public virtual string BrowserName { get; } = Microsoft.Playwright.BrowserType.Chromium;
+    /// <summary>
+    /// The browser to launch. Defaults to the <c>BROWSER</c> environment variable
+    /// (<c>chromium</c>, <c>firefox</c> or <c>webkit</c>), or <c>chromium</c> when it is unset.
+    /// Override to pin a browser regardless of the environment.
+    /// </summary>
+    public virtual string BrowserName => PlaywrightEnvironment.DefaultBrowserName;
     public IBrowserType BrowserType => Playwright[BrowserName];
 
     private static readonly Task<IPlaywright> PlaywrightTask = Microsoft.Playwright.Playwright.CreateAsync();

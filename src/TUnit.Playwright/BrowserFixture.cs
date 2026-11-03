@@ -28,17 +28,27 @@ public class BrowserFixture : IAsyncInitializer, IAsyncDisposable
     /// </remarks>
     public DateTimeOffset? DisconnectedAt => Browser is { } browser ? PlaywrightBrowserMonitor.For(browser).DisconnectedAt : null;
 
-    public virtual string BrowserName => Microsoft.Playwright.BrowserType.Chromium;
+    /// <summary>
+    /// The browser to launch. Defaults to the <c>BROWSER</c> environment variable
+    /// (<c>chromium</c>, <c>firefox</c> or <c>webkit</c>), or <c>chromium</c> when it is unset.
+    /// Override to pin a browser regardless of the environment.
+    /// </summary>
+    public virtual string BrowserName => PlaywrightEnvironment.DefaultBrowserName;
 
+    /// <summary>
+    /// Options for launching <see cref="Browser"/>. When the returned options leave
+    /// <see cref="BrowserTypeLaunchOptions.Headless"/> unset, <c>HEADED=1</c> launches a visible browser.
+    /// </summary>
     protected virtual BrowserTypeLaunchOptions GetLaunchOptions() =>
         TUnitPlaywrightSettings.Default.DefaultBrowserTypeLaunchOptions ?? new BrowserTypeLaunchOptions();
 
     public virtual async Task InitializeAsync()
     {
-        var browserType = PlaywrightFixture.Playwright[BrowserName]
-            ?? throw new InvalidOperationException($"Unknown BrowserName '{BrowserName}'.");
+        var browserName = BrowserName;
+        var browserType = PlaywrightFixture.Playwright[browserName]
+            ?? throw new InvalidOperationException($"Unknown BrowserName '{browserName}'.");
 
-        Browser = await PlaywrightServiceConnector.LaunchAsync(browserType, GetLaunchOptions()).ConfigureAwait(false);
+        Browser = await PlaywrightServiceConnector.LaunchAsync(browserType, PlaywrightEnvironment.ApplyHeaded(GetLaunchOptions())).ConfigureAwait(false);
         // Watch from launch, so a crash before the first context is created is still reported.
         PlaywrightBrowserMonitor.For(Browser);
     }
