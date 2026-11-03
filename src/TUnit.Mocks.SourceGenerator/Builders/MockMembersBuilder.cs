@@ -939,6 +939,11 @@ internal static class MockMembersBuilder
     // Compare the actual emitted signatures, including predicate and params-expanded overloads.
     // A closed substitution can collapse distinct open overloads; omit both rather than choosing
     // which underlying member an identical setup should configure.
+    // Model parameter types alone do not describe the generated matcher, predicate, expanded
+    // params and framework-specific ref-struct overloads. Parse the emitter's output so this
+    // check shares that signature definition instead of maintaining a second overload model.
+    // Only same-name, same-arity overload groups need parsing; resolution stores the filtered
+    // methods in the emission model so BuildMethodSetups does not repeat this analysis.
     internal static List<MockMemberModel> GetClosedReceiverGenericMethods(MockTypeModel model, EquatableArray<string> typeArguments)
     {
         var methods = GetClosedReceiverGenericMethods(model);
