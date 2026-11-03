@@ -109,7 +109,8 @@ public static class CompilationExtensions
         {
             return argumentArray.Rank == parameterArray.Rank
                 && argumentArray.IsSZArray == parameterArray.IsSZArray
-                && MatchesArrayElement(compilation, argumentArray.ElementType, parameterArray.ElementType);
+                && MatchesArrayElement(compilation, argumentArray.ElementType, parameterArray.ElementType,
+                    allowReferenceConversions);
         }
 
         if (argument is INamedTypeSymbol argumentNamed && parameter is INamedTypeSymbol parameterNamed

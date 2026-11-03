@@ -59,6 +59,10 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     [Arguments("int[]", "string[]", true)]
     [Arguments("(int, int)[]", "(T, long)[]", true)]
     [Arguments("(int, int)[]", "(T, int)[]", false)]
+    [Arguments("(int, string[])[]", "(T, object[])[]", true)]
+    [Arguments("(int, string[][])[]", "(T, object[][])[]", true)]
+    [Arguments("(int, string[][])[]", "(T, string[][])[]", false)]
+    [Arguments("(int, string[][])", "(T, object[][])", false)]
     public async Task TupleArrayElements(string sourceElement, string targetElement, bool expectDiagnostic)
     {
         var attribute = expectDiagnostic ? "{|#0:MethodDataSource(nameof(Row))|}" : "MethodDataSource(nameof(Row))";
