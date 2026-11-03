@@ -4413,14 +4413,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Special case: Single tuple parameter (same as in TestInvoker)
         // If we have exactly one parameter that's a tuple type, we need to handle it specially
-        // In source-generated mode, tuples are always unwrapped into their elements
+        // Generated factories unwrap tuples; instance sources can preserve the whole tuple.
         if (parametersFromArgs is
             [
                 { Type: INamedTypeSymbol { IsTupleType: true } singleTupleParam }
             ])
         {
             writer.AppendLine("// Special handling for single tuple parameter");
-            writer.AppendLine($"if (args.Length == {singleTupleParam.TupleElements.Length.ToString(CultureInfo.InvariantCulture)})");
+            // A one-element row can be either its element or the whole expected tuple.
+            var unwrappedCheck = singleTupleParam.TupleElements.Length == 1
+                ? $" && args[0] is not {singleTupleParam.GloballyQualified()}"
+                : "";
+            writer.AppendLine($"if (args.Length == {singleTupleParam.TupleElements.Length.ToString(CultureInfo.InvariantCulture)}{unwrappedCheck})");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("// Arguments are unwrapped tuple elements, reconstruct the tuple");
