@@ -2255,7 +2255,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 else
                 {
                     var paramType = SubstituteTypeParameters(param.Type, testMethod, entry.ClassTypeArgs, entry.MethodTypeArgs);
-                    parameterCasts.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>(args[{dataArgIndex++.ToString(CultureInfo.InvariantCulture)}])");
+                    var argument = $"args[{dataArgIndex++.ToString(CultureInfo.InvariantCulture)}]";
+                    parameterCasts.Add(paramType is INamedTypeSymbol { IsTupleType: true }
+                        ? TupleArgumentHelper.GenerateCastExpression(paramType, argument)
+                        : $"global::TUnit.Core.Helpers.CastHelper.Cast<{paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argument})");
                 }
             }
 
@@ -4515,7 +4518,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Build tuple reconstruction with proper casting
             var tupleElements = singleTupleParam.TupleElements.Select((elem, i) =>
-                CastTupleElement(elem.Type, $"args[{i.ToString(CultureInfo.InvariantCulture)}]"));
+                TupleArgumentHelper.GenerateCastExpression(elem.Type, $"args[{i.ToString(CultureInfo.InvariantCulture)}]"));
             var tupleConstruction = singleTupleParam.TupleElements.Length == 1
                 ? $"new {singleTupleParam.GloballyQualified()}({string.Join(", ", tupleElements)})"
                 : $"({string.Join(", ", tupleElements)})";
@@ -4528,7 +4531,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("// Rare case: tuple is wrapped as a single argument");
-            var methodCallDirect = $"instance.{methodName}({FormatSingleArgumentCall($"global::TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0])", hasCancellationToken, parametersFromArgs)})";
+            var methodCallDirect = $"instance.{methodName}({FormatSingleArgumentCall(TupleArgumentHelper.GenerateCastExpression(singleTupleParam, "args[0]"), hasCancellationToken, parametersFromArgs)})";
             GenerateReturnHandling(writer, methodCallDirect, returnPattern);
             writer.Unindent();
             writer.AppendLine("}");

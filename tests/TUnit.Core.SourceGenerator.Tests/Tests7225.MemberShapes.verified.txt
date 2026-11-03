@@ -165,7 +165,7 @@ internal static class TUnit_TestProject_Bugs__7225_InstanceMethodDataSourceMembe
                     else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
                         // Rare case: tuple is wrapped as a single argument
-                        return new global::System.Threading.Tasks.ValueTask(instance.Tuple_Single_Parameter(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, int>>(args[0])));
+                        return new global::System.Threading.Tasks.ValueTask(instance.Tuple_Single_Parameter((args[0] is global::System.Runtime.CompilerServices.ITuple { Length: 2 } && args[0] is not global::System.ValueTuple<int, int> ? (global::TUnit.Core.Helpers.CastHelper.Cast<int>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(((global::System.Runtime.CompilerServices.ITuple)args[0]!)[1])) : global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, int>>(args[0]))));
                     }
                     else
                     {
