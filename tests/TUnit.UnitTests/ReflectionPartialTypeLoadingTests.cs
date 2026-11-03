@@ -1,4 +1,6 @@
 using System.Reflection;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using TUnit.Engine.Discovery;
 
 namespace TUnit.UnitTests;
@@ -37,8 +39,45 @@ public class ReflectionPartialTypeLoadingTests
 
         var matchingTests = tests.Where(test => test.TestClassType == typeof(LoadableBuilder)
             && test.TestMethodName == nameof(LoadableBuilder.ContributedTest)).ToArray();
-        await Assert.That(matchingTests).HasCount().EqualTo(1);
+        await Assert.That(matchingTests).Count().IsEqualTo(1);
         await Assert.That(assembly.GetTypesCalls).IsEqualTo(1);
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Dynamic_Discovery_Skips_Types_With_Unresolvable_Method_Metadata(bool attributeInspectionFails)
+    {
+        var brokenType = new UnresolvableMethodsType(attributeInspectionFails);
+        var assembly = new FailingAssembly(new ReflectionTypeLoadException(
+            [null, brokenType, typeof(LoadableBuilder)], [new FileNotFoundException("Dependency unavailable")]));
+
+        var tests = await new ReflectionTestDataCollector().DiscoverDynamicTests(
+            Guid.NewGuid().ToString(), [assembly]);
+
+        var matchingTests = tests.Where(test => test.TestClassType == typeof(LoadableBuilder)
+            && test.TestMethodName == nameof(LoadableBuilder.ContributedTest)).ToArray();
+        await Assert.That(matchingTests).Count().IsEqualTo(1);
+        await Assert.That(brokenType.GetMethodsCalls).IsEqualTo(1);
+    }
+
+    private sealed class UnresolvableMethodsType(bool attributeInspectionFails) : TypeDelegator(typeof(LoadableBuilder))
+    {
+        public int GetMethodsCalls { get; private set; }
+
+        public override MethodInfo[] GetMethods(BindingFlags bindingAttr)
+        {
+            GetMethodsCalls++;
+            if (!attributeInspectionFails)
+            {
+                throw new TypeLoadException("Method signature dependency unavailable");
+            }
+
+            var method = Substitute.For<MethodInfo>();
+            method.IsDefined(Arg.Any<Type>(), Arg.Any<bool>())
+                .Throws(new FileNotFoundException("Method attribute dependency unavailable"));
+            return [method];
+        }
     }
 
     [Test]

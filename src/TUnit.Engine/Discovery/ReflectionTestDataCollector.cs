@@ -3995,18 +3995,27 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 if (!type.IsClass || IsCompilerGenerated(type))
                     continue;
-                var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-                var methodsList = new List<MethodInfo>(4);
-                foreach (var method in declaredMethods)
+                MethodInfo[] methods;
+                try
                 {
-#pragma warning disable TUnitWIP0001
-                    if (method.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) && !method.IsAbstract)
-#pragma warning restore TUnitWIP0001
+                    var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                    var methodsList = new List<MethodInfo>(4);
+                    foreach (var method in declaredMethods)
                     {
-                        methodsList.Add(method);
+#pragma warning disable TUnitWIP0001
+                        if (method.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) && !method.IsAbstract)
+#pragma warning restore TUnitWIP0001
+                        {
+                            methodsList.Add(method);
+                        }
                     }
+                    methods = methodsList.ToArray();
                 }
-                var methods = methodsList.ToArray();
+                catch (Exception)
+                {
+                    // A retained type can still have method metadata that cannot be loaded.
+                    continue;
+                }
 
                 foreach (var method in methods)
                 {
