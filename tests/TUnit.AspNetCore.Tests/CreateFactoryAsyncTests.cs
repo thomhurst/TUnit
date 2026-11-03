@@ -147,8 +147,14 @@ public class PerTestWebApplicationTestDisposalFailureTests : PerTestWebApplicati
         var stopFailure = new ThrowingOnStopService();
         await CreateFactoryAsync(builder =>
             builder.ConfigureTestServices(services => services.AddHostedService(_ => stopFailure)));
+        var checkpoint = new FactoryStopCheckpoint();
         var healthy = await CreateFactoryAsync(builder =>
-            builder.ConfigureTestServices(services => services.AddSingleton<BlockingDisposalProbe>()));
+            builder.ConfigureTestServices(services =>
+            {
+                services.AddSingleton<BlockingDisposalProbe>();
+                services.AddSingleton(checkpoint);
+            }));
+        await Assert.That(healthy.Services.GetRequiredService<IHost>()).IsTypeOf<DisposalCoordinatingHost>();
         var probe = healthy.Services.GetRequiredService<BlockingDisposalProbe>();
         var lifetime = healthy.Services.GetRequiredService<IHostApplicationLifetime>();
         Task? disposal = null;
@@ -160,6 +166,10 @@ public class PerTestWebApplicationTestDisposalFailureTests : PerTestWebApplicati
             await probe.Entered.Task.WaitAsync(TimeSpan.FromSeconds(30));
 
             disposal = DisposeFactoryAsync();
+            await checkpoint.Entered.Task.WaitAsync(TimeSpan.FromSeconds(30));
+            // The healthy host's StopAsync has been invoked, past the failing factory.
+            // It must still be waiting for the blocked application disposal.
+            await Assert.That(checkpoint.StopTask!.IsCompleted).IsFalse();
             await Assert.That(disposal.IsCompleted).IsFalse();
             probe.Release.Set();
 
@@ -212,6 +222,34 @@ public class PerTestWebApplicationTestDisposalFailureTests : PerTestWebApplicati
 public class StopFailureWebAppFactory : TestWebApplicationFactory<Program>
 {
     protected override bool SuppressHostedServiceExecutionContextFlow => false;
+
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        var host = base.CreateHost(builder);
+        return host.Services.GetService<FactoryStopCheckpoint>() is { } checkpoint
+            ? new CheckpointHost(host, checkpoint)
+            : host;
+    }
+
+    private sealed class CheckpointHost(IHost inner, FactoryStopCheckpoint checkpoint) : IHost
+    {
+        public IServiceProvider Services => inner.Services;
+        public Task StartAsync(CancellationToken cancellationToken = default) => inner.StartAsync(cancellationToken);
+        public void Dispose() => inner.Dispose();
+        public Task StopAsync(CancellationToken cancellationToken = default)
+        {
+            var task = inner.StopAsync(cancellationToken);
+            checkpoint.StopTask = task;
+            checkpoint.Entered.TrySetResult();
+            return task;
+        }
+    }
+}
+
+internal sealed class FactoryStopCheckpoint
+{
+    public TaskCompletionSource Entered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public Task? StopTask { get; set; }
 }
 
 /// <summary>

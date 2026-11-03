@@ -83,11 +83,53 @@ public class DisposalCoordinatingHostTests
         }
     }
 
-    private sealed class CallbackHost(Func<Task> disposeAsync, Action? dispose = null) : IHost, IAsyncDisposable
+    [Test]
+    [Arguments(false, false)]
+    [Arguments(false, true)]
+    [Arguments(true, false)]
+    [Arguments(true, true)]
+    public async Task Stop_Preserves_Stop_And_Disposal_Failures(bool failStop, bool failDisposal)
+    {
+        var stopFailure = new InvalidOperationException("Stop failed");
+        var disposalFailure = new InvalidOperationException("Dispose failed");
+        var disposed = false;
+        var application = new DisposalCoordinatingHost(new CallbackHost(() =>
+        {
+            disposed = true;
+            return failDisposal ? Task.FromException(disposalFailure) : Task.CompletedTask;
+        }));
+        var host = new DisposalAwaitingHost(new CallbackHost(() => Task.CompletedTask,
+            stop: () => failStop ? Task.FromException(stopFailure) : Task.CompletedTask), application);
+
+        Exception? actual = null;
+        try
+        {
+            await host.StopAsync();
+        }
+        catch (Exception exception)
+        {
+            actual = exception;
+        }
+
+        await Assert.That(disposed).IsTrue();
+        if (failStop && failDisposal)
+        {
+            await Assert.That(actual).IsTypeOf<AggregateException>();
+            var failures = ((AggregateException)actual!).InnerExceptions;
+            await Assert.That(failures[0]).IsSameReferenceAs(stopFailure);
+            await Assert.That(failures[1]).IsSameReferenceAs(disposalFailure);
+        }
+        else
+        {
+            await Assert.That(actual).IsSameReferenceAs(failStop ? stopFailure : failDisposal ? disposalFailure : null);
+        }
+    }
+
+    private sealed class CallbackHost(Func<Task> disposeAsync, Action? dispose = null, Func<Task>? stop = null) : IHost, IAsyncDisposable
     {
         public IServiceProvider Services => throw new NotSupportedException();
         public Task StartAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
-        public Task StopAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task StopAsync(CancellationToken cancellationToken = default) => stop?.Invoke() ?? Task.CompletedTask;
         public void Dispose() => dispose?.Invoke();
         public ValueTask DisposeAsync() => new(disposeAsync());
     }

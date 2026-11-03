@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.Hosting;
 
 namespace TUnit.AspNetCore;
@@ -19,6 +20,8 @@ internal sealed class DisposalCoordinatingHost(IHost inner) : IHost, IAsyncDispo
 
     public void Dispose()
     {
+        // Concurrent synchronous callers do not block on asynchronous disposal.
+        // Factory teardown uses StopAsync to await the shared completion instead.
         if (Interlocked.Exchange(ref _disposalStarted, 1) != 0)
         {
             return;
@@ -91,15 +94,31 @@ internal sealed class DisposalAwaitingHost(IHost inner, DisposalCoordinatingHost
     public Task StartAsync(CancellationToken cancellationToken = default) => inner.StartAsync(cancellationToken);
     public void Dispose() => inner.Dispose();
 
+    // This wrapper is used by factory teardown: stopping also finishes application disposal.
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
+        Exception? stopException = null;
         try
         {
             await inner.StopAsync(cancellationToken).ConfigureAwait(false);
         }
-        finally
+        catch (Exception exception)
+        {
+            stopException = exception;
+        }
+
+        try
         {
             await applicationHost.DisposeAsync().ConfigureAwait(false);
+        }
+        catch (Exception disposalException) when (stopException is not null)
+        {
+            throw new AggregateException(stopException, disposalException);
+        }
+
+        if (stopException is not null)
+        {
+            ExceptionDispatchInfo.Capture(stopException).Throw();
         }
     }
 }
