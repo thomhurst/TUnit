@@ -110,6 +110,9 @@ public class ArgumentsAnalyzerTests
 
     [Test]
     [Arguments("(int[], int)", "T[] values, System.Threading.CancellationToken token, T value")]
+    [Arguments("(int[], int, string)", "T[] values, T value, string[] rest")]
+    [Arguments("(int[], int, string[])", "T[] values, T value, string[] rest")]
+    [Arguments("(int[], int, int)", "T[] values, T value, string[] rest", true)]
     [Arguments("(int[], int, string)", "T[] values, T value, params string[] rest")]
     [Arguments("(int[], int, string[])", "T[] values, T value, params string[] rest")]
     [Arguments("(int[], int, int)", "T[] values, T value, params string[] rest", true)]

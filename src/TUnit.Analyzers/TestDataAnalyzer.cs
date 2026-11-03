@@ -1047,7 +1047,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
 
             testDataTypes = closedParameters.Select((p, i) =>
-                p.IsParams && GetParamsElementType(p.Type) is { } elementType && i < typeArguments.Length
+                (p.IsParams || (i == closedParameters.Length - 1 && p.Type is IArrayTypeSymbol { IsSZArray: true }))
+                    && GetParamsElementType(p.Type) is { } elementType && i < typeArguments.Length
                     && !context.Compilation.HasImplicitConversionOrGenericParameter(typeArguments[i], p.Type)
                     ? elementType
                     : p.Type).ToImmutableArray();
