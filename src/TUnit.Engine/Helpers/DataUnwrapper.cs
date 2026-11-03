@@ -140,7 +140,8 @@ internal class DataUnwrapper
         // with per-element conversions, rather than casting incompatible tuple types.
         if (dataParameterCount == 1 && TupleHelper.IsTupleType(lastDataParameterType))
         {
-            return lastDataParameterType.IsInstanceOfType(values[0])
+            // Keep the runtime tuple intact until generic inference closes the parameter type.
+            return lastDataParameterType.ContainsGenericParameters || lastDataParameterType.IsInstanceOfType(values[0])
                 ? values
                 : DataSourceHelpers.UnwrapTupleAot(values[0]);
         }
