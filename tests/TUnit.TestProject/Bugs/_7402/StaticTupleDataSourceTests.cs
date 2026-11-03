@@ -65,6 +65,17 @@ public class StaticTupleDataSourceTests
         await Assert.That(value).IsEqualTo(Tuple.Create(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
     }
 
+    public static (object?, int) NullNestedValue() => (null, 3);
+
+    [Test]
+#pragma warning disable TUnit0001 // Exercise runtime null-to-default conversion for a nested tuple.
+    [MethodDataSource(nameof(NullNestedValue))]
+#pragma warning restore TUnit0001
+    public async Task Null_Nested_Tuple_Uses_Default(((int, int), int) value)
+    {
+        await Assert.That(value).IsEqualTo(((0, 0), 3));
+    }
+
     public static ((int, int), int) NestedNumericValue() => ((1, 2), 3);
 
     [Test]

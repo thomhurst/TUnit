@@ -4428,9 +4428,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             var elements = tuple.TupleElements.Select((element, index) => CastTupleElement(element.Type,
                 $"global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot({value})[{index.ToString(CultureInfo.InvariantCulture)}]"));
-            return tuple.TupleElements.Length == 1
+            var construction = tuple.TupleElements.Length == 1
                 ? $"new {type.GloballyQualified()}({string.Join(", ", elements)})"
                 : $"({string.Join(", ", elements)})";
+            // Match CastHelper's null-to-default behavior before reading nested elements.
+            return $"({value} is null ? default({type.GloballyQualified()}) : {construction})";
         }
 
         return $"global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({value})";
