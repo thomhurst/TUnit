@@ -42,6 +42,10 @@
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\TUnit.Core.SourceGenerator\Helpers\GenericMethodInferencePolicy.cs" Link="Discovery\GenericMethodInferencePolicy.cs" />
+  </ItemGroup>
+
   <Import Project="..\..\eng\Library.targets" />
 
 </Project>
