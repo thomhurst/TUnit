@@ -11,8 +11,8 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/*/*",
         [
             result => result.ResultSummary.Outcome.ShouldBe("Failed"),
-            result => result.ResultSummary.Counters.Total.ShouldBe(74),
-            result => result.ResultSummary.Counters.Passed.ShouldBe(66),
+            result => result.ResultSummary.Counters.Total.ShouldBe(75),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(67),
             result => result.ResultSummary.Counters.Failed.ShouldBe(8),
             result => result.Results.Where(test => test.Outcome == "Failed" && !test.TestName!.StartsWith("ReportsMissingConstructorValue", StringComparison.Ordinal))
                 .ShouldAllBe(test => test.Output!.ErrorInfo!.Message!.Contains("type arguments")
@@ -86,6 +86,7 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    [Arguments("EmptyInferredRowsWithSeed", 1, 0)]
     [Arguments("EmptyExternalConstraintRows", 1, 0)]
     [Arguments("NullExternalConstraintRows", 1, 0)]
     [Arguments("NonemptyExternalConstraintRows", 2, 1)]

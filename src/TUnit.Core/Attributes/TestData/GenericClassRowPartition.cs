@@ -95,6 +95,12 @@ public static class GenericClassRowPartition
         if (source is MethodDataSourceAttribute methodSource)
         {
             methodSource.FilterClassRows = filterRows;
+            if (filterRows)
+            {
+                // Inferred sources contribute only eligible class rows, including when empty.
+                // Raw explicit/fallback sources retain their original empty-source behavior.
+                methodSource.SkipIfEmpty = false;
+            }
             methodSource.InferredClassTypeArguments = classTypeArguments.Length == 0 ? null : classTypeArguments;
         }
         else if (classTypeArguments.Length > 0)

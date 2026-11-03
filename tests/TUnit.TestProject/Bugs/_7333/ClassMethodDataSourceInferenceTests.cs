@@ -763,3 +763,17 @@ public class ObjectTupleExternalConstraintRows<T>(object? label, T value) where 
     [Test]
     public async Task Test() => await Assert.That((object)value).IsEqualTo(1);
 }
+
+// Inferred empty sources contribute no skipped placeholder alongside the seed row.
+[Arguments(1)]
+[MethodDataSource(typeof(EmptyInferredRowsProvider), nameof(EmptyInferredRowsProvider.Rows), SkipIfEmpty = true)]
+public class EmptyInferredRowsWithSeed<T>(T value)
+{
+    [Test]
+    public async Task Test() => await Assert.That((object?)value).IsEqualTo(1);
+}
+
+public static class EmptyInferredRowsProvider
+{
+    public static IEnumerable<int> Rows() => [];
+}
